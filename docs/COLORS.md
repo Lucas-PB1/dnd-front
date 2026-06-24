@@ -1,6 +1,6 @@
 # Cores — tema Taverna / Masmorra
 
-Tokens em `app/globals.css` (shadcn + Tailwind 4). **Light = Taverna** (pergaminho). **Dark = Masmorra** (classe `.dark` no `<html>`).
+Tokens em `src/app/globals.css` (shadcn + Tailwind 4). **Light = Taverna** (pergaminho). **Dark = Masmorra** (classe `.dark` no `<html>`).
 
 ## Papéis semânticos
 

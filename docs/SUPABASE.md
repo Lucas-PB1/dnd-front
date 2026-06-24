@@ -27,7 +27,7 @@ pnpm dev
 
 ```bash
 pnpm dlx supabase login
-pnpm dlx supabase gen types typescript --project-id <id> > infrastructure/supabase/database.ts
+pnpm dlx supabase gen types typescript --project-id <id> > src/infrastructure/supabase/database.ts
 ```
 
 ## Clientes no código
@@ -37,4 +37,4 @@ pnpm dlx supabase gen types typescript --project-id <id> > infrastructure/supaba
 | Route Handler / Server Action | `createSupabaseServerClient()`  |
 | Client Component              | `createSupabaseBrowserClient()` |
 
-Sessão auth é renovada via `proxy.ts` (convenção Next.js 16+).
+Sessão auth é renovada via `src/proxy.ts` (convenção Next.js 16+).

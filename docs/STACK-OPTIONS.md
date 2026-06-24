@@ -28,13 +28,20 @@ Next.js 16 fullstack. Backend no próprio Next (sem .NET).
 
 ## O que está no repo
 
-| Item               | Onde                                                   |
-| ------------------ | ------------------------------------------------------ |
-| Providers          | `presentation/providers/` (Theme + Query)              |
-| TanStack Query     | `useHealth`, `lib/query-client.ts`                     |
-| Tema escuro        | `ThemeToggle`, `next-themes` + tokens em `globals.css` |
-| Clean Architecture | `domain/`, `application/`, `infrastructure/`           |
-| Supabase           | `infrastructure/supabase/`, `proxy.ts`                 |
+```text
+src/          → app, domain, application, infrastructure, presentation, components, lib, proxy.ts
+cypress/      → E2E
+docs/         → documentação
+public/       → assets estáticos
+```
+
+| Item               | Onde                                                     |
+| ------------------ | -------------------------------------------------------- |
+| Providers          | `src/presentation/providers/`                            |
+| TanStack Query     | `src/presentation/hooks/`, `src/lib/query-client.ts`     |
+| Forms              | RHF + Zod + shadcn `field`, `input`, `label`             |
+| Clean Architecture | `src/domain/`, `src/application/`, `src/infrastructure/` |
+| Supabase           | `src/infrastructure/supabase/`, `src/proxy.ts`           |
 
 Docs: [ARCHITECTURE.md](./ARCHITECTURE.md) · [SUPABASE.md](./SUPABASE.md) · [COLORS.md](./COLORS.md)
 
@@ -42,14 +49,13 @@ Docs: [ARCHITECTURE.md](./ARCHITECTURE.md) · [SUPABASE.md](./SUPABASE.md) · [C
 
 ## Recomendado depois (não instalado)
 
-| Lib                                  | Para quê                         | Prioridade           |
-| ------------------------------------ | -------------------------------- | -------------------- |
-| **React Hook Form + Zod**            | Formulários de ficha/campanha    | Alta                 |
-| **shadcn `form`, `input`, `dialog`** | UI dos forms                     | Alta                 |
-| **TanStack Table**                   | Listas (personagens, inventário) | Média                |
-| **nuqs**                             | Filtros/tabs na URL              | Média                |
-| **Sentry**                           | Erros em produção                | Baixa (pré-deploy)   |
-| **next-intl**                        | i18n                             | Só se precisar PT/EN |
+| Lib                 | Para quê                         | Prioridade           |
+| ------------------- | -------------------------------- | -------------------- |
+| **TanStack Table**  | Listas (personagens, inventário) | Média                |
+| **nuqs**            | Filtros/tabs na URL              | Média                |
+| **shadcn `dialog`** | Modais                           | Média                |
+| **Sentry**          | Erros em produção                | Baixa (pré-deploy)   |
+| **next-intl**       | i18n                             | Só se precisar PT/EN |
 
 Já incluso indiretamente: `cn()` (`clsx` + `tailwind-merge` em `lib/utils.ts`).
 
