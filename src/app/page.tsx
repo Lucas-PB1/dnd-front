@@ -1,3 +1,7 @@
+import Link from "next/link";
+
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { HealthStatus } from "@/presentation/components/health-status";
 import { ThemeToggle } from "@/presentation/components/theme-toggle";
 
@@ -17,6 +21,12 @@ export default function Home() {
           Stack pronta: Clean Architecture, Supabase, TanStack Query e tema
           Taverna / Masmorra.
         </p>
+        <Link
+          href="/character-sheet"
+          className={cn(buttonVariants({ size: "lg" }))}
+        >
+          Nova ficha em branco
+        </Link>
         <HealthStatus />
       </main>
     </div>
