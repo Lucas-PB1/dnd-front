@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useForm, useWatch } from "react-hook-form";
 
 import { mergeCharacterSheet } from "@/application/character-sheet/merge-character-sheet";
@@ -9,21 +8,22 @@ import {
   createEmptyCharacterSheet,
   type CharacterSheet,
 } from "@/application/character-sheet/character-sheet.schema";
-import { CharacterSheetPageOne } from "@/presentation/components/character-sheet/character-sheet-page-one";
-import { CharacterSheetPageTwo } from "@/presentation/components/character-sheet/character-sheet-page-two";
-import { PAGE_ONE_SECTIONS } from "@/presentation/components/character-sheet/character-sheet-sections";
+import {
+  CHARACTER_WIZARD_STEPS,
+  REVIEW_STEP_INDEX,
+} from "@/domain/character-sheet/wizard-steps";
+import { CharacterSheetStepContent } from "@/presentation/components/character-sheet/character-sheet-step-content";
 import { CharacterSheetToolbar } from "@/presentation/components/character-sheet/character-sheet-toolbar";
 import {
   clearCharacterSheetDraft,
   useCharacterSheetDraft,
   useIsClient,
 } from "@/presentation/hooks/use-character-sheet-draft";
-
-type SheetPage = 1 | 2;
+import { Button } from "@/components/ui/button";
 
 export function CharacterSheetForm() {
-  const [page, setPage] = useState<SheetPage>(1);
-  const reduceMotion = useReducedMotion();
+  const [stepIndex, setStepIndex] = useState(0);
+  const [finalized, setFinalized] = useState(false);
   const isClient = useIsClient();
   const emptySheet = useMemo(() => createEmptyCharacterSheet(), []);
 
@@ -37,6 +37,10 @@ export function CharacterSheetForm() {
   const sheet = mergeCharacterSheet(watchedSheet);
   const { lastSavedAt } = useCharacterSheetDraft(reset, sheet, isClient);
 
+  const currentStep = CHARACTER_WIZARD_STEPS[stepIndex];
+  const isReviewStep = stepIndex === REVIEW_STEP_INDEX;
+  const isLastEditableStep = stepIndex === REVIEW_STEP_INDEX - 1;
+
   function handleClear() {
     if (
       typeof window !== "undefined" &&
@@ -49,7 +53,17 @@ export function CharacterSheetForm() {
 
     clearCharacterSheetDraft();
     reset(createEmptyCharacterSheet());
-    setPage(1);
+    setStepIndex(0);
+    setFinalized(false);
+  }
+
+  function handleFinalize() {
+    setFinalized(true);
+  }
+
+  function handleEditFromReview() {
+    setFinalized(false);
+    setStepIndex(0);
   }
 
   if (!isClient) {
@@ -66,38 +80,44 @@ export function CharacterSheetForm() {
       onSubmit={(event) => event.preventDefault()}
     >
       <CharacterSheetToolbar
-        page={page}
-        onPageChange={setPage}
+        stepIndex={stepIndex}
+        onStepChange={setStepIndex}
         characterName={sheet.characterName}
         sheet={sheet}
         lastSavedAt={lastSavedAt}
+        finalized={finalized}
         onClear={handleClear}
-        sectionLinks={page === 1 ? [...PAGE_ONE_SECTIONS] : undefined}
       />
 
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={page}
-          initial={reduceMotion ? false : { opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={reduceMotion ? undefined : { opacity: 0, y: -8 }}
-          transition={{ duration: reduceMotion ? 0 : 0.2 }}
-        >
-          {page === 1 ? (
-            <CharacterSheetPageOne
-              register={register}
-              watch={watch}
-              setValue={setValue}
-            />
-          ) : (
-            <CharacterSheetPageTwo
-              register={register}
-              watch={watch}
-              setValue={setValue}
-            />
-          )}
-        </motion.div>
-      </AnimatePresence>
+      <CharacterSheetStepContent
+        stepId={currentStep.id}
+        register={register}
+        watch={watch}
+        setValue={setValue}
+        sheet={sheet}
+        finalized={finalized}
+        onFinalize={handleFinalize}
+        onEdit={handleEditFromReview}
+      />
+
+      {!isReviewStep ? (
+        <div className="flex justify-end gap-2 border-t border-border pt-4">
+          <Button
+            type="button"
+            variant="outline"
+            disabled={stepIndex === 0}
+            onClick={() => setStepIndex((index) => index - 1)}
+          >
+            Anterior
+          </Button>
+          <Button
+            type="button"
+            onClick={() => setStepIndex((index) => index + 1)}
+          >
+            {isLastEditableStep ? "Ir para revisão" : "Próximo"}
+          </Button>
+        </div>
+      ) : null}
 
       <p className="text-center text-xs text-muted-foreground">
         Rascunho salvo automaticamente neste navegador. Nada vai para o

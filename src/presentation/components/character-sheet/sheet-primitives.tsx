@@ -6,7 +6,6 @@ import {
   type TextareaHTMLAttributes,
 } from "react";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -88,6 +87,51 @@ export function SheetTextarea({
   );
 }
 
+type SheetSelectProps = {
+  label: string;
+  value?: string;
+  onChange?: (value: string) => void;
+  options: Array<{ value: string; label: string }>;
+  placeholder?: string;
+  disabled?: boolean;
+};
+
+export function SheetSelect({
+  label,
+  value,
+  onChange,
+  options,
+  placeholder = "Selecione…",
+  disabled,
+}: SheetSelectProps) {
+  const selectId = label.toLowerCase().replace(/\s+/g, "-");
+
+  return (
+    <div className="flex flex-col gap-1">
+      <Label
+        htmlFor={selectId}
+        className="text-xs font-medium uppercase tracking-wide text-muted-foreground"
+      >
+        {label}
+      </Label>
+      <select
+        id={selectId}
+        value={value ?? ""}
+        disabled={disabled}
+        onChange={(event) => onChange?.(event.target.value)}
+        className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none transition-[box-shadow,border-color] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/30"
+      >
+        <option value="">{placeholder}</option>
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
 type SheetCheckboxProps = {
   label: string;
   checked?: boolean;
@@ -132,8 +176,6 @@ export function SheetProficiencyRow({
   label,
   abilityAbbrev,
 }: SheetProficiencyProps) {
-  const reduceMotion = useReducedMotion();
-
   return (
     <div
       className={cn(
@@ -148,16 +190,9 @@ export function SheetProficiencyRow({
         onClick={() => onProficientChange?.(!proficient)}
         className="flex size-5 items-center justify-center justify-self-center rounded-full border-2 border-primary/50"
       >
-        <AnimatePresence>
-          {proficient ? (
-            <motion.span
-              initial={reduceMotion ? false : { scale: 0 }}
-              animate={{ scale: 1 }}
-              exit={reduceMotion ? undefined : { scale: 0 }}
-              className="size-2.5 rounded-full bg-primary"
-            />
-          ) : null}
-        </AnimatePresence>
+        {proficient ? (
+          <span className="size-2.5 rounded-full bg-primary" />
+        ) : null}
       </button>
       <Input
         className="h-7 text-center text-xs"
@@ -192,7 +227,6 @@ export function SheetSection({
   defaultOpen?: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
-  const reduceMotion = useReducedMotion();
 
   const header = (
     <div className="flex items-center justify-between gap-2">
@@ -230,19 +264,7 @@ export function SheetSection({
         <div className="mb-3 border-b border-border pb-2">{header}</div>
       )}
 
-      <AnimatePresence initial={false}>
-        {open ? (
-          <motion.div
-            initial={reduceMotion ? false : { height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={reduceMotion ? undefined : { height: 0, opacity: 0 }}
-            transition={{ duration: reduceMotion ? 0 : 0.2 }}
-            className="overflow-hidden"
-          >
-            {children}
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
+      {open ? children : null}
     </section>
   );
 }
@@ -258,8 +280,6 @@ export function DeathSaveTracker({
   onSuccessesChange: (value: number) => void;
   onFailuresChange: (value: number) => void;
 }) {
-  const reduceMotion = useReducedMotion();
-
   return (
     <div className="grid grid-cols-2 gap-4">
       <div>
@@ -277,17 +297,9 @@ export function DeathSaveTracker({
               }
               className="relative size-6 rounded-full border-2 border-emerald-600/60"
             >
-              <AnimatePresence>
-                {successes > index ? (
-                  <motion.span
-                    layoutId={`death-success-${index}`}
-                    initial={reduceMotion ? false : { scale: 0 }}
-                    animate={{ scale: 1 }}
-                    exit={reduceMotion ? undefined : { scale: 0 }}
-                    className="absolute inset-0.5 rounded-full bg-emerald-600"
-                  />
-                ) : null}
-              </AnimatePresence>
+              {successes > index ? (
+                <span className="absolute inset-0.5 rounded-full bg-emerald-600" />
+              ) : null}
             </button>
           ))}
         </div>
@@ -307,17 +319,9 @@ export function DeathSaveTracker({
               }
               className="relative size-6 rounded-full border-2 border-destructive/60"
             >
-              <AnimatePresence>
-                {failures > index ? (
-                  <motion.span
-                    layoutId={`death-failure-${index}`}
-                    initial={reduceMotion ? false : { scale: 0 }}
-                    animate={{ scale: 1 }}
-                    exit={reduceMotion ? undefined : { scale: 0 }}
-                    className="absolute inset-0.5 rounded-full bg-destructive"
-                  />
-                ) : null}
-              </AnimatePresence>
+              {failures > index ? (
+                <span className="absolute inset-0.5 rounded-full bg-destructive" />
+              ) : null}
             </button>
           ))}
         </div>

@@ -28,6 +28,21 @@ export function clearCharacterSheetDraft() {
   }
 }
 
+function migrateDraft(raw: unknown): CharacterSheet {
+  if (raw && typeof raw === "object" && "classLevel" in raw) {
+    const rest = { ...(raw as Record<string, unknown>) };
+    delete rest.classLevel;
+
+    return characterSheetSchema.parse({
+      ...rest,
+      characterClass: "",
+      characterLevel: "",
+    });
+  }
+
+  return characterSheetSchema.parse(raw);
+}
+
 function readDraftFromStorage(): CharacterSheet | null {
   if (typeof window === "undefined") {
     return null;
@@ -40,7 +55,7 @@ function readDraftFromStorage(): CharacterSheet | null {
   }
 
   try {
-    return characterSheetSchema.parse(JSON.parse(raw));
+    return migrateDraft(JSON.parse(raw));
   } catch {
     localStorage.removeItem(STORAGE_KEY);
     return null;

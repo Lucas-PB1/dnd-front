@@ -99,7 +99,8 @@ const spellSlotsSchema = z.object({
 export const characterSheetSchema = z.object({
   characterName: z.string(),
   species: z.string(),
-  classLevel: z.string(),
+  characterClass: z.string(),
+  characterLevel: z.string(),
   subclass: z.string(),
   experiencePoints: z.string(),
   background: z.string(),
@@ -187,7 +188,8 @@ const emptyMagicItem = { name: "", attuned: false };
 export const EMPTY_CHARACTER_SHEET: CharacterSheet = {
   characterName: "",
   species: "",
-  classLevel: "",
+  characterClass: "",
+  characterLevel: "",
   subclass: "",
   experiencePoints: "",
   background: "",
