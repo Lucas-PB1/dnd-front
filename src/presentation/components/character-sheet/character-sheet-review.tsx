@@ -4,6 +4,11 @@ import {
   formatCharacterClassLevel,
 } from "@/domain/character-sheet/classes";
 import {
+  findAlignmentName,
+  findBackgroundName,
+  findSpeciesName,
+} from "@/domain/character-sheet/origins";
+import {
   ABILITIES,
   ABILITY_ABBREV,
   ABILITY_LABELS,
@@ -95,9 +100,18 @@ export function CharacterSheetReview({
       <ReviewBlock title="Identidade">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <ReviewField label="Nome" value={display(sheet.characterName)} />
-          <ReviewField label="Espécie" value={display(sheet.species)} />
-          <ReviewField label="Antecedente" value={display(sheet.background)} />
-          <ReviewField label="Alinhamento" value={display(sheet.alignment)} />
+          <ReviewField
+            label="Espécie"
+            value={display(findSpeciesName(sheet.species))}
+          />
+          <ReviewField
+            label="Antecedente"
+            value={display(findBackgroundName(sheet.background))}
+          />
+          <ReviewField
+            label="Alinhamento"
+            value={display(findAlignmentName(sheet.alignment))}
+          />
           <ReviewField
             label="Classe & Nível"
             value={display(
