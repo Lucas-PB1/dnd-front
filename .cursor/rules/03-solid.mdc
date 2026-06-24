@@ -1,0 +1,16 @@
+---
+description: SOLID aplicado à Clean Architecture do dnd
+alwaysApply: true
+---
+
+# SOLID (dnd)
+
+| Princípio | Regra |
+|-----------|-------|
+| **SRP** | Route orquestra; use case em `application/`; repo em `infrastructure/` |
+| **OCP** | Novos adapters em `infrastructure/`; não alterar `domain/` para estender |
+| **LSP** | Repos substituíveis (`StaticHealthRepository` ↔ `SupabaseHealthRepository`) |
+| **ISP** | Ports pequenos (`check()`, não interfaces gigantes) |
+| **DIP** | `application` → `domain` (abstração); nunca importar Supabase em `application/` |
+
+Detalhes: `.cursor/skills/solid/SKILL.md`

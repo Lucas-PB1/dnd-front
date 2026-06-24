@@ -1,0 +1,16 @@
+---
+description: Clean Code — legibilidade e funções focadas
+alwaysApply: true
+---
+
+# Clean Code
+
+- Nomes revelam intenção (`getHealthStatus`, não `handle`)
+- Uma função = uma responsabilidade; preferir &lt; ~30 linhas
+- Early return; evitar nesting profundo (&gt; 3 níveis)
+- Sem comentários que repetem o código
+- Código autoexplicativo antes de criar abstração
+
+## Refactor
+
+Se função cresce ou nome fica vago → ler `.cursor/skills/clean-code/SKILL.md`

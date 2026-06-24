@@ -1,0 +1,17 @@
+---
+description: DRY — uma fonte de verdade para schemas e lógica
+alwaysApply: true
+---
+
+# DRY
+
+- **Zod**: uma fonte em `application/*/schema.ts` ou `lib/validators/`
+- Não repetir validação em route + form + use case
+- **Query keys**: centralizar (ex.: `healthKeys` em `presentation/hooks/`)
+- Extrair para `lib/` ou hook só na **3ª** repetição real — evitar DRY prematuro
+
+## Exemplo
+
+`toHealthResponse` + `healthResponseSchema` em `application/health/` — route só chama ambos.
+
+Detalhes: `.cursor/skills/dry/SKILL.md`

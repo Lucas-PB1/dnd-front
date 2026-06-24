@@ -1,0 +1,20 @@
+---
+description: TypeScript strict — tipos obrigatórios em todo o código
+alwaysApply: true
+---
+
+# TypeScript strict
+
+- `strict: true` em `tsconfig.json` — não desativar sem pedido explícito
+- Proibido: `any`, `@ts-ignore`, `as` sem justificativa clara
+- Alias `@/*` → `src/*`
+
+## Camadas
+
+- **Ports** em `src/domain/`: `interface` (ex.: `HealthRepository`)
+- **DTOs / responses**: `type` ou `z.infer<typeof schema>`
+- `src/domain/` e `src/application/`: **sem** importar React ou Supabase
+
+## Zod
+
+Schema único; inferir tipos com `z.infer`. Ver skill `typescript` para detalhes.

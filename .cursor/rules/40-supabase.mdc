@@ -1,0 +1,15 @@
+---
+description: Supabase — client, server, publishable key
+globs: src/infrastructure/supabase/**
+alwaysApply: false
+---
+
+# Supabase
+
+- Key: `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (`sb_publishable_...`)
+- **Server** (Route Handler, Actions): `createSupabaseServerClient()` em `server.ts`
+- **Browser**: `createSupabaseBrowserClient()` em `client.ts`
+- Repos implementam ports em `domain/` — não expor Supabase em `application/`
+- Tipos: `src/infrastructure/supabase/database.ts`
+
+Docs: [docs/SUPABASE.md](docs/SUPABASE.md)

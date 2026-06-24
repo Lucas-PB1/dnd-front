@@ -1,0 +1,14 @@
+---
+description: Next.js 16 proxy — sessão Supabase
+globs: src/proxy.ts
+alwaysApply: false
+---
+
+# Proxy (não middleware)
+
+- Arquivo: `src/proxy.ts` com `export async function proxy()`
+- **Não** usar `middleware.ts` (deprecado no Next 16)
+- Renova sessão via `createServerClient` + `supabase.auth.getUser()`
+- Env: `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (não `anon`)
+
+Skill: `.cursor/skills/next-proxy/SKILL.md`

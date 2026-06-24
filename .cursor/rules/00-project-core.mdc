@@ -1,0 +1,19 @@
+---
+description: Convenções gerais do projeto dnd
+alwaysApply: true
+---
+
+# Projeto dnd
+
+- Responder em **português**; código e identificadores em **inglês**
+- Código da aplicação em `src/`; configs e testes E2E na raiz
+- Stack: [docs/STACK-OPTIONS.md](docs/STACK-OPTIONS.md)
+- Arquitetura: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+
+## Antes de implementar
+
+Tarefas não triviais: ler `.cursor/skills/dnd-router/SKILL.md` e carregar a skill indicada.
+
+## Scripts
+
+`pnpm lint` · `pnpm format:check` · `pnpm test:run` · `pnpm build`
