@@ -1,4 +1,4 @@
-# Stack dnd — decisões
+# Stack dnd — decisões e status
 
 Next.js 16 fullstack. Backend no próprio Next (sem .NET).
 
@@ -6,68 +6,62 @@ Next.js 16 fullstack. Backend no próprio Next (sem .NET).
 
 ## Decisões
 
-| Área              | Escolha                                                    |
-| ----------------- | ---------------------------------------------------------- |
-| **Arquitetura**   | Clean Architecture                                         |
-| **Backend**       | Híbrido — Route Handlers + Server Actions                  |
-| **Data client**   | TanStack Query                                             |
-| **Validação**     | Zod                                                        |
-| **Banco**         | Supabase                                                   |
-| **UI**            | **shadcn/ui** (`components/ui/`)                           |
-| **Ícones**        | **Heroicons** (`@heroicons/react`)                         |
-| **Cores**         | Tema **Taverna / Masmorra** — ver [COLORS.md](./COLORS.md) |
-| **Testes unit.**  | Vitest + Testing Library                                   |
-| **E2E**           | Cypress                                                    |
-| **Lint / format** | ESLint + Prettier                                          |
+| Área              | Escolha                                   | Status                         |
+| ----------------- | ----------------------------------------- | ------------------------------ |
+| **Arquitetura**   | Clean Architecture                        | ✅                             |
+| **Backend**       | Híbrido — Route Handlers + Server Actions | ✅ base (`/api/health`)        |
+| **Data client**   | TanStack Query                            | ✅                             |
+| **Tema**          | next-themes (claro / escuro / sistema)    | ✅                             |
+| **Validação**     | Zod                                       | ✅                             |
+| **Banco**         | Supabase (publishable key)                | ✅ código — falta `.env.local` |
+| **UI**            | shadcn/ui                                 | ✅ init + `button`             |
+| **Ícones**        | Heroicons                                 | ✅                             |
+| **Cores**         | Tema Taverna / Masmorra                   | ✅ [COLORS.md](./COLORS.md)    |
+| **Proxy**         | `proxy.ts` (Next 16)                      | ✅ sessão Supabase             |
+| **Testes unit.**  | Vitest + Testing Library                  | ✅                             |
+| **E2E**           | Cypress                                   | ✅                             |
+| **Lint / format** | ESLint + Prettier + Husky                 | ✅                             |
 
-**Já configurado:** Next 16, React 19, Tailwind 4, shadcn, Heroicons, Clean Architecture, Zod, Supabase, **ESLint + Prettier**, **Vitest**, **Cypress**, Husky + lint-staged, pnpm.
-
-**A configurar:** `.env.local` com keys do Supabase, TanStack Query.
-
----
-
-## Pastas (Clean Architecture) ✅
-
-```text
-app/                    # presentation — rotas + app/api (finas)
-presentation/           # componentes de tela por feature
-domain/                 # entidades, regras, ports (interfaces)
-application/            # casos de uso
-infrastructure/         # Supabase, repos, di.ts
-components/ui/          # shadcn
-lib/                    # utils (cn)
-```
+**Falta só no seu ambiente:** `.env.local` com publishable key do Supabase.
 
 ---
 
-## Design
+## O que está no repo
 
-| Item        | Regra                                              |
-| ----------- | -------------------------------------------------- |
-| Componentes | shadcn — `pnpm dlx shadcn@latest add <nome>`       |
-| Ícones      | Heroicons outline (24) no app; solid para ênfase   |
-| Cores       | Tokens `bg-primary`, `text-muted-foreground`, etc. |
-| Radius      | `0.5rem` — cantos moderados (ficha, cards)         |
-| Dark        | Classe `.dark` — tema Masmorra                     |
+| Item               | Onde                                                   |
+| ------------------ | ------------------------------------------------------ |
+| Providers          | `presentation/providers/` (Theme + Query)              |
+| TanStack Query     | `useHealth`, `lib/query-client.ts`                     |
+| Tema escuro        | `ThemeToggle`, `next-themes` + tokens em `globals.css` |
+| Clean Architecture | `domain/`, `application/`, `infrastructure/`           |
+| Supabase           | `infrastructure/supabase/`, `proxy.ts`                 |
+
+Docs: [ARCHITECTURE.md](./ARCHITECTURE.md) · [SUPABASE.md](./SUPABASE.md) · [COLORS.md](./COLORS.md)
 
 ---
 
-## Próximos passos
+## Recomendado depois (não instalado)
 
-1. Copiar `.env.example` → `.env.local` e preencher Supabase ([SUPABASE.md](./SUPABASE.md))
-2. TanStack Query
-3. `next-themes` (toggle claro/escuro)
+| Lib                                  | Para quê                         | Prioridade           |
+| ------------------------------------ | -------------------------------- | -------------------- |
+| **React Hook Form + Zod**            | Formulários de ficha/campanha    | Alta                 |
+| **shadcn `form`, `input`, `dialog`** | UI dos forms                     | Alta                 |
+| **TanStack Table**                   | Listas (personagens, inventário) | Média                |
+| **nuqs**                             | Filtros/tabs na URL              | Média                |
+| **Sentry**                           | Erros em produção                | Baixa (pré-deploy)   |
+| **next-intl**                        | i18n                             | Só se precisar PT/EN |
+
+Já incluso indiretamente: `cn()` (`clsx` + `tailwind-merge` em `lib/utils.ts`).
+
+---
 
 ## Scripts
 
-| Comando              | Função                 |
-| -------------------- | ---------------------- |
-| `pnpm lint`          | ESLint                 |
-| `pnpm format`        | Prettier (escreve)     |
-| `pnpm format:check`  | Prettier (só verifica) |
-| `pnpm test`          | Vitest (watch)         |
-| `pnpm test:run`      | Vitest (CI)            |
-| `pnpm test:e2e`      | Cypress headless       |
-| `pnpm test:e2e:open` | Cypress UI             |
+| Comando                        | Função    |
+| ------------------------------ | --------- |
+| `pnpm dev` / `build` / `start` | Next.js   |
+| `pnpm lint` / `format:check`   | Qualidade |
+| `pnpm test:run`                | Vitest    |
+| `pnpm test:e2e`                | Cypress   |
 
-Pre-commit (Husky): ESLint fix + Prettier nos arquivos staged.
+Pre-commit: ESLint fix + Prettier nos arquivos staged.

@@ -40,7 +40,7 @@ Tokens em `app/globals.css` (shadcn + Tailwind 4). **Light = Taverna** (pergamin
 
 ## Modo escuro
 
-Adicionar `className="dark"` no `<html>` ou instalar `next-themes` depois para toggle automático.
+Adicionar `className="dark"` no `<html>` ou usar o **ThemeToggle** (`next-themes`).
 
 ## Ícones
 

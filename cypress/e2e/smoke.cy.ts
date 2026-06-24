@@ -1,7 +1,8 @@
 describe("home", () => {
   it("carrega a página inicial", () => {
     cy.visit("/");
-    cy.contains("To get started").should("be.visible");
+    cy.contains("Campanhas & fichas").should("be.visible");
+    cy.contains("dnd").should("be.visible");
   });
 });
 
