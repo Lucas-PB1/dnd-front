@@ -1,32 +1,23 @@
 "use client";
 
-import {
-  buildOriginFeatsText,
-  resetBackgroundOriginOnChange,
-  syncAbilityScoresWithOriginBonuses,
-  syncBackgroundSkillProficiencies,
-} from "@/application/character-sheet/apply-origin-benefits";
-import {
-  clearSpeciesSkillProficiency,
-  resetSpeciesSelection,
-  syncAllSpeciesBenefits,
-} from "@/application/character-sheet/apply-species-benefits";
 import { useEffect, useRef } from "react";
 
+import type { BackgroundAbilityMode } from "@/domain/character-sheet/background-details";
+import {
+  findBackgroundDetails,
+  findSpeciesDetails,
+} from "@/domain/character-sheet/background-details";
+import { findSpeciesDetails as findSpecies } from "@/domain/character-sheet/species-details";
 import {
   CHARACTER_ALIGNMENTS,
   findSpeciesName,
   PHB_2024_BACKGROUNDS,
   PHB_2024_SPECIES,
 } from "@/domain/character-sheet/origins";
-import {
-  findBackgroundDetails,
-  type BackgroundAbilityMode,
-} from "@/domain/character-sheet/background-details";
-import { findSpeciesDetails } from "@/domain/character-sheet/species-details";
-import { SKILL_LABELS_PT } from "@/domain/character-sheet/skill-labels-pt";
+import { SKILL_LABELS_PT } from "@/shared/labels/pt-br";
 import { BackgroundAbilityPanel } from "@/presentation/components/character-sheet/background-ability-panel";
 import type { CharacterSheetFormProps } from "@/presentation/components/character-sheet/character-sheet-form-props";
+import { useIdentitySync } from "@/presentation/components/character-sheet/hooks/use-identity-sync";
 import {
   SpeciesHeritagePanel,
   SpeciesMetaStrip,
@@ -50,88 +41,23 @@ export function StepIdentity({
   const backgroundPlus1 = watch("backgroundAbilityPlus1");
   const speciesSkillChoice = watch("speciesSkillChoice");
   const speciesOriginFeat = watch("speciesOriginFeat");
-  const speciesDetails = speciesId ? findSpeciesDetails(speciesId) : undefined;
+  const speciesDetails = speciesId ? findSpecies(speciesId) : undefined;
   const backgroundDetails = backgroundId
     ? findBackgroundDetails(backgroundId)
     : undefined;
-  const previousBackgroundRef = useRef(backgroundId);
-  const previousSpeciesRef = useRef({
-    id: speciesId,
-    skill: speciesSkillChoice,
-  });
 
-  useEffect(() => {
-    if (previousBackgroundRef.current !== backgroundId) {
-      resetBackgroundOriginOnChange(
-        setValue,
-        previousBackgroundRef.current,
-        backgroundId,
-        speciesId,
-        speciesOriginFeat,
-        characterClass,
-      );
-      previousBackgroundRef.current = backgroundId;
-    } else if (backgroundId) {
-      syncBackgroundSkillProficiencies(setValue, backgroundId);
-      setValue(
-        "feats",
-        buildOriginFeatsText(backgroundId, speciesId, speciesOriginFeat),
-      );
-    }
-  }, [backgroundId, characterClass, setValue, speciesId, speciesOriginFeat]);
-
-  useEffect(() => {
-    syncAbilityScoresWithOriginBonuses(
-      setValue,
-      watch,
-      backgroundId,
-      backgroundMode,
-      backgroundPlus2,
-      backgroundPlus1,
-    );
-  }, [
-    backgroundId,
-    backgroundMode,
-    backgroundPlus1,
-    backgroundPlus2,
-    setValue,
+  useIdentitySync({
     watch,
-  ]);
-
-  useEffect(() => {
-    const previous = previousSpeciesRef.current;
-
-    if (previous.id !== speciesId) {
-      resetSpeciesSelection(
-        setValue,
-        previous.id,
-        previous.skill,
-        speciesId,
-        backgroundId,
-      );
-      previousSpeciesRef.current = { id: speciesId, skill: "" };
-      return;
-    }
-
-    if (previous.skill && previous.skill !== speciesSkillChoice) {
-      clearSpeciesSkillProficiency(setValue, speciesId, previous.skill);
-    }
-
-    syncAllSpeciesBenefits(
-      setValue,
-      speciesId,
-      speciesSkillChoice,
-      speciesOriginFeat,
-      backgroundId,
-    );
-    previousSpeciesRef.current = { id: speciesId, skill: speciesSkillChoice };
-  }, [
-    backgroundId,
     setValue,
     speciesId,
-    speciesOriginFeat,
+    backgroundId,
+    characterClass,
+    backgroundMode,
+    backgroundPlus2,
+    backgroundPlus1,
     speciesSkillChoice,
-  ]);
+    speciesOriginFeat,
+  });
 
   function handleBackgroundModeChange(mode: BackgroundAbilityMode) {
     setValue("backgroundAbilityMode", mode);

@@ -23,7 +23,7 @@ import {
   getClassSkillPool,
 } from "@/domain/character-sheet/class-proficiencies";
 import { findCharacterClass } from "@/domain/character-sheet/classes";
-import { SKILL_LABELS_PT } from "@/domain/character-sheet/skill-labels-pt";
+import { ABILITY_LABELS_PT, SKILL_LABELS_PT } from "@/shared/labels/pt-br";
 import type { CharacterSheetFormProps } from "@/presentation/components/character-sheet/character-sheet-form-props";
 import { ToggleButtonGroup } from "@/presentation/components/character-sheet/toggle-button-group";
 import {
@@ -32,15 +32,6 @@ import {
   SheetSection,
   SheetTextarea,
 } from "@/presentation/components/character-sheet/sheet-primitives";
-
-const ABILITY_LABELS_PT = {
-  strength: "Força",
-  dexterity: "Destreza",
-  constitution: "Constituição",
-  intelligence: "Inteligência",
-  wisdom: "Sabedoria",
-  charisma: "Carisma",
-} as const;
 
 export function StepProficiencies({
   register,

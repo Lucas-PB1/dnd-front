@@ -6,7 +6,7 @@ import {
   findSpeciesDetails,
   formatSpeciesTrait,
 } from "@/domain/character-sheet/species-details";
-import { SKILL_LABELS_PT } from "@/domain/character-sheet/skill-labels-pt";
+import { SKILL_LABELS_PT } from "@/shared/labels/pt-br";
 
 export type SpeciesSkillChoiceDefinition = {
   traitTitle: string;

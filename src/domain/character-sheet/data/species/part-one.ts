@@ -1,0 +1,169 @@
+import type { SpeciesDefinition } from "@/domain/character-sheet/types/species";
+
+export const PHB_2024_SPECIES_DETAILS_PART_ONE: SpeciesDefinition[] = [
+  {
+    id: "aasimar",
+    creatureType: "Humanoide",
+    speedFeet: 30,
+    speedLabel: "9 metros",
+    sizeLabel: "Médio ou Pequeno (escolhido ao selecionar esta espécie)",
+    traits: [
+      {
+        title: "Resistência Celestial",
+        summary: "Resistência a dano Necrótico e Radiante.",
+      },
+      {
+        title: "Visão no Escuro",
+        summary: "Alcance de 18 metros.",
+      },
+      {
+        title: "Mãos Curativas",
+        summary:
+          "Ação Usar Magia: restaura d4s = bônus de proficiência (1/descanso longo).",
+      },
+      {
+        title: "Portador da Luz",
+        summary: "Truque Luz (Carisma).",
+      },
+      {
+        title: "Revelação Celestial",
+        summary:
+          "Nível 3: Asas Celestiais, Manto Necrótico ou Transfiguração Radiante (1/descanso longo).",
+      },
+    ],
+  },
+  {
+    id: "dwarf",
+    creatureType: "Humanoide",
+    speedFeet: 30,
+    speedLabel: "9 metros",
+    sizeLabel: "Médio",
+    traits: [
+      {
+        title: "Visão no Escuro",
+        summary: "Alcance de 36 metros.",
+      },
+      {
+        title: "Resistência a Toxinas",
+        summary: "Resistência a dano Venenoso; vantagem contra Envenenado.",
+      },
+      {
+        title: "Tenacidade Anã",
+        summary: "PV máximo +1 por nível.",
+      },
+      {
+        title: "Conhecimento de Pedras",
+        summary:
+          "Sismiconsciência 18 m por 10 min em pedra (usos = proficiência/descanso longo).",
+      },
+    ],
+  },
+  {
+    id: "dragonborn",
+    creatureType: "Humanoide",
+    speedFeet: 30,
+    speedLabel: "9 metros",
+    sizeLabel: "Médio",
+    traits: [
+      {
+        title: "Herança Dracônica",
+        summary: "Escolha o dragão (define sopro, resistência e aparência).",
+      },
+      {
+        title: "Ataque de Sopro",
+        summary:
+          "Cone 4,5 m ou linha 9 m; d10 do tipo dracônico (escala nos níveis 5, 11 e 17).",
+      },
+      {
+        title: "Resistência a Dano",
+        summary: "Conforme a Herança Dracônica.",
+      },
+      {
+        title: "Visão no Escuro",
+        summary: "Alcance de 18 metros.",
+      },
+      {
+        title: "Voo Dracônico",
+        summary:
+          "Nível 5: asas espectrais e deslocamento de voo por 10 min (1/descanso longo).",
+      },
+    ],
+  },
+  {
+    id: "elf",
+    creatureType: "Humanoide",
+    speedFeet: 30,
+    speedLabel: "9 metros",
+    sizeLabel: "Médio",
+    traits: [
+      {
+        title: "Visão no Escuro",
+        summary: "Alcance de 18 metros.",
+      },
+      {
+        title: "Linhagem Élfica",
+        summary:
+          "Alto Elfo, Drow ou Elfo Silvestre (magias nos níveis 1, 3 e 5).",
+      },
+      {
+        title: "Ancestralidade Feérica",
+        summary: "Vantagem em salvaguardas contra Enfeitiçado.",
+      },
+      {
+        title: "Sentidos Aguçados",
+        summary: "Proficiência em Intuição, Percepção ou Sobrevivência.",
+      },
+      {
+        title: "Transe",
+        summary:
+          "Descanso longo em 4 h de meditação; magia não pode forçá-lo a dormir.",
+      },
+    ],
+  },
+  {
+    id: "gnome",
+    creatureType: "Humanoide",
+    speedFeet: 30,
+    speedLabel: "9 metros",
+    sizeLabel: "Pequeno",
+    traits: [
+      {
+        title: "Visão no Escuro",
+        summary: "Alcance de 18 metros.",
+      },
+      {
+        title: "Astúcia de Gnomo",
+        summary:
+          "Vantagem em salvaguardas de Inteligência, Sabedoria e Carisma.",
+      },
+      {
+        title: "Linhagem Gnômica",
+        summary: "Gnomo do Bosque ou Gnomo das Rochas (truques e magias).",
+      },
+    ],
+  },
+  {
+    id: "goliath",
+    creatureType: "Humanoide",
+    speedFeet: 35,
+    speedLabel: "10,5 metros",
+    sizeLabel: "Médio",
+    traits: [
+      {
+        title: "Ancestralidade Gigante",
+        summary:
+          "Salto da Nuvem, Queimadura de Fogo, Arrepio do Gelo, Tombo da Colina, Resistência da Pedra ou Trovão da Tempestade.",
+      },
+      {
+        title: "Forma Grande",
+        summary:
+          "Nível 5: tamanho Grande por 10 min; vantagem em Força e +3 m de deslocamento.",
+      },
+      {
+        title: "Porte Poderoso",
+        summary:
+          "Vantagem para encerrar Imobilizado; conta como um tamanho maior na carga.",
+      },
+    ],
+  },
+];

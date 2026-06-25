@@ -1,6 +1,15 @@
-import type { SkillKey } from "@/domain/character-sheet/constants";
+import type { Ability } from "@/domain/character-sheet/constants/abilities";
+import type { SkillKey } from "@/domain/character-sheet/constants/skills";
 
-/** Nomes PT-BR — Livro do Jogador 2024, Cap. 1 */
+export const ABILITY_LABELS_PT: Record<Ability, string> = {
+  strength: "Força",
+  dexterity: "Destreza",
+  constitution: "Constituição",
+  intelligence: "Inteligência",
+  wisdom: "Sabedoria",
+  charisma: "Carisma",
+};
+
 export const SKILL_LABELS_PT: Record<SkillKey, string> = {
   acrobatics: "Acrobacia",
   animalHandling: "Lidar com Animais",

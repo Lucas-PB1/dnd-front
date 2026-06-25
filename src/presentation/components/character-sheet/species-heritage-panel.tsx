@@ -11,7 +11,7 @@ import {
   speciesHasSkillChoice,
 } from "@/domain/character-sheet/species-trait-choices";
 import type { SkillKey } from "@/domain/character-sheet/constants";
-import { SKILL_LABELS_PT } from "@/domain/character-sheet/skill-labels-pt";
+import { SKILL_LABELS_PT } from "@/shared/labels/pt-br";
 import { SheetSelect } from "@/presentation/components/character-sheet/sheet-primitives";
 
 type SpeciesHeritagePanelProps = {
