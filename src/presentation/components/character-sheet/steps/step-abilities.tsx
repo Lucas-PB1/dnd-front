@@ -6,6 +6,14 @@ import type { Ability } from "@/domain/character-sheet/constants";
 import { ABILITIES, ABILITY_ABBREV } from "@/domain/character-sheet/constants";
 import { formatAbilityModifier } from "@/domain/character-sheet/ability-modifier";
 import {
+  getBackgroundAbilityBonuses,
+  ABILITY_LABELS_PT,
+} from "@/domain/character-sheet/background-details";
+import {
+  setAbilityBaseScores,
+  syncAbilityScoresWithOriginBonuses,
+} from "@/application/character-sheet/apply-origin-benefits";
+import {
   assignmentToScores,
   type AbilityScores,
   type AbilityScoreMethod,
@@ -24,15 +32,17 @@ const METHODS: AbilityScoreMethod[] = ["pointBuy", "roll", "standardArray"];
 function applyScoresToSheet(
   scores: AbilityScores,
   setValue: CharacterSheetFormProps["setValue"],
+  watch: CharacterSheetFormProps["watch"],
 ) {
-  for (const ability of ABILITIES) {
-    const score = String(scores[ability]);
-    setValue(`abilities.${ability}.score`, score);
-    setValue(
-      `abilities.${ability}.modifier`,
-      formatAbilityModifier(score) ?? "",
-    );
-  }
+  setAbilityBaseScores(setValue, scores);
+  syncAbilityScoresWithOriginBonuses(
+    setValue,
+    watch,
+    watch("background"),
+    watch("backgroundAbilityMode"),
+    watch("backgroundAbilityPlus2"),
+    watch("backgroundAbilityPlus1"),
+  );
 }
 
 export function StepAbilities({
@@ -43,14 +53,24 @@ export function StepAbilities({
   const [method, setMethod] = useState<AbilityScoreMethod>("pointBuy");
   const [generationComplete, setGenerationComplete] = useState(false);
   const [appliedMessage, setAppliedMessage] = useState(false);
+  const backgroundId = watch("background");
+  const backgroundMode = watch("backgroundAbilityMode");
+  const backgroundPlus2 = watch("backgroundAbilityPlus2");
+  const backgroundPlus1 = watch("backgroundAbilityPlus1");
+  const originBonuses = getBackgroundAbilityBonuses(
+    backgroundId,
+    backgroundMode,
+    backgroundPlus2,
+    backgroundPlus1,
+  );
 
   const applyScores = useCallback(
     (scores: AbilityScores) => {
-      applyScoresToSheet(scores, setValue);
+      applyScoresToSheet(scores, setValue, watch);
       setGenerationComplete(true);
       setAppliedMessage(true);
     },
-    [setValue],
+    [setValue, watch],
   );
 
   const handlePointBuyChange = useCallback(
@@ -79,11 +99,18 @@ export function StepAbilities({
   );
 
   function handleAbilityScoreBlur(ability: (typeof ABILITIES)[number]) {
-    const score = watch(`abilities.${ability}.score`);
-    const modifier = formatAbilityModifier(score);
+    const bonus = originBonuses[ability];
+    const final = Number.parseInt(
+      watch(`abilities.${ability}.score`).trim(),
+      10,
+    );
 
-    if (modifier !== null) {
-      setValue(`abilities.${ability}.modifier`, modifier);
+    if (Number.isFinite(final)) {
+      setValue(`abilityBaseScores.${ability}`, String(final - bonus));
+      setValue(
+        `abilities.${ability}.modifier`,
+        formatAbilityModifier(String(final)) ?? "",
+      );
     }
   }
 
@@ -136,32 +163,42 @@ export function StepAbilities({
         className={cn(!generationComplete && "opacity-80")}
       >
         <p className="mb-4 text-sm text-muted-foreground">
-          Você pode ajustar manualmente depois de gerar. O modificador é
-          recalculado ao sair do campo de score.
+          Você pode ajustar manualmente depois de gerar. Bônus do antecedente
+          são somados automaticamente. O modificador é recalculado ao sair do
+          campo de score.
         </p>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-          {ABILITIES.map((ability) => (
-            <div
-              key={ability}
-              className="flex flex-col items-center gap-2 rounded-lg border border-border bg-muted/30 p-3"
-            >
-              <span className="text-xs font-semibold uppercase tracking-wide">
-                {ABILITY_ABBREV[ability]}
-              </span>
-              <input
-                className="h-10 w-full rounded-lg border border-input bg-transparent px-2 text-center text-lg font-semibold outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                placeholder="10"
-                inputMode="numeric"
-                {...register(`abilities.${ability}.score`)}
-                onBlur={() => handleAbilityScoreBlur(ability)}
-              />
-              <input
-                className="h-8 w-full rounded-lg border border-input bg-transparent px-2 text-center text-sm outline-none focus-visible:border-ring"
-                placeholder="+0"
-                {...register(`abilities.${ability}.modifier`)}
-              />
-            </div>
-          ))}
+          {ABILITIES.map((ability) => {
+            const bonus = originBonuses[ability];
+
+            return (
+              <div
+                key={ability}
+                className="flex flex-col items-center gap-2 rounded-lg border border-border bg-muted/30 p-3"
+              >
+                <span className="text-xs font-semibold uppercase tracking-wide">
+                  {ABILITY_ABBREV[ability]}
+                </span>
+                {bonus > 0 ? (
+                  <span className="text-[10px] font-medium text-primary">
+                    {ABILITY_LABELS_PT[ability]} +{bonus}
+                  </span>
+                ) : null}
+                <input
+                  className="h-10 w-full rounded-lg border border-input bg-transparent px-2 text-center text-lg font-semibold outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                  placeholder="10"
+                  inputMode="numeric"
+                  {...register(`abilities.${ability}.score`)}
+                  onBlur={() => handleAbilityScoreBlur(ability)}
+                />
+                <input
+                  className="h-8 w-full rounded-lg border border-input bg-transparent px-2 text-center text-sm outline-none focus-visible:border-ring"
+                  placeholder="+0"
+                  {...register(`abilities.${ability}.modifier`)}
+                />
+              </div>
+            );
+          })}
         </div>
       </SheetSection>
     </div>

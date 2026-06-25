@@ -1,12 +1,31 @@
 "use client";
 
-import type { CharacterSheetFormProps } from "@/presentation/components/character-sheet/character-sheet-form-props";
+import { useEffect, useRef } from "react";
+
+import {
+  applyClassProficiencyBaseWithOrigin,
+  resetClassProficienciesOnClassChange,
+  syncClassSkillProficiencies,
+  updateClassSkillChoices,
+} from "@/application/character-sheet/apply-class-proficiencies";
+import {
+  syncBackgroundSkillProficiencies,
+  syncSpeciesSkillProficiency,
+} from "@/application/character-sheet/apply-origin-benefits";
+import { findBackgroundDetails } from "@/domain/character-sheet/background-details";
 import {
   ABILITIES,
   ABILITY_ABBREV,
-  ABILITY_LABELS,
   SKILL_DEFINITIONS,
 } from "@/domain/character-sheet/constants";
+import {
+  findClassProficiencies,
+  getClassSkillPool,
+} from "@/domain/character-sheet/class-proficiencies";
+import { findCharacterClass } from "@/domain/character-sheet/classes";
+import { SKILL_LABELS_PT } from "@/domain/character-sheet/skill-labels-pt";
+import type { CharacterSheetFormProps } from "@/presentation/components/character-sheet/character-sheet-form-props";
+import { ToggleButtonGroup } from "@/presentation/components/character-sheet/toggle-button-group";
 import {
   SheetCheckbox,
   SheetProficiencyRow,
@@ -14,19 +33,130 @@ import {
   SheetTextarea,
 } from "@/presentation/components/character-sheet/sheet-primitives";
 
+const ABILITY_LABELS_PT = {
+  strength: "Força",
+  dexterity: "Destreza",
+  constitution: "Constituição",
+  intelligence: "Inteligência",
+  wisdom: "Sabedoria",
+  charisma: "Carisma",
+} as const;
+
 export function StepProficiencies({
   register,
   watch,
   setValue,
 }: CharacterSheetFormProps) {
+  const characterClass = watch("characterClass");
+  const characterLevel = watch("characterLevel");
+  const backgroundId = watch("background");
+  const speciesId = watch("species");
+  const speciesSkillChoice = watch("speciesSkillChoice");
+  const classSkillChoices = watch("classSkillChoices");
+  const classDefinition = findCharacterClass(characterClass);
+  const proficiencies = characterClass
+    ? findClassProficiencies(characterClass)
+    : undefined;
+  const backgroundDetails = backgroundId
+    ? findBackgroundDetails(backgroundId)
+    : undefined;
+  const previousClassRef = useRef(characterClass);
+
+  useEffect(() => {
+    if (previousClassRef.current !== characterClass) {
+      resetClassProficienciesOnClassChange(
+        setValue,
+        previousClassRef.current,
+        characterClass,
+        characterLevel,
+        backgroundId,
+      );
+      previousClassRef.current = characterClass;
+    } else {
+      applyClassProficiencyBaseWithOrigin(
+        setValue,
+        characterClass,
+        characterLevel,
+        backgroundId,
+      );
+    }
+
+    if (characterClass && classSkillChoices.length > 0) {
+      syncClassSkillProficiencies(setValue, characterClass, classSkillChoices);
+    }
+
+    if (backgroundId) {
+      syncBackgroundSkillProficiencies(setValue, backgroundId);
+    }
+
+    syncSpeciesSkillProficiency(setValue, speciesId, speciesSkillChoice);
+  }, [
+    backgroundId,
+    characterClass,
+    characterLevel,
+    classSkillChoices,
+    setValue,
+    speciesId,
+    speciesSkillChoice,
+  ]);
+
+  const skillOptions = proficiencies
+    ? getClassSkillPool(proficiencies).map((skill) => ({
+        id: skill,
+        label: SKILL_LABELS_PT[skill],
+      }))
+    : [];
+
   return (
     <div className="flex flex-col gap-4">
-      <SheetSection title="Saving Throws">
+      {!characterClass ? (
+        <p className="text-sm text-muted-foreground">
+          Escolha uma classe na etapa anterior para preencher salvaguardas e
+          perícias automaticamente.
+        </p>
+      ) : null}
+
+      {backgroundDetails ? (
+        <SheetSection title="Proficiências do antecedente">
+          <p className="mb-2 text-sm text-muted-foreground">
+            Perícias e ferramentas do antecedente já aplicadas na ficha.
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {backgroundDetails.skills
+              .map((skill) => SKILL_LABELS_PT[skill])
+              .join(" · ")}{" "}
+            · {backgroundDetails.toolsLabel}
+          </p>
+        </SheetSection>
+      ) : null}
+
+      {proficiencies && classDefinition ? (
+        <SheetSection title="Proficiências da classe">
+          <p className="mb-4 text-sm text-muted-foreground">
+            {classDefinition.name}: salvaguardas, treinamento e bônus de
+            proficiência aplicados pelo PHB 2024. Escolha{" "}
+            {proficiencies.skillChoiceCount}{" "}
+            {proficiencies.skillChoiceCount === 1 ? "perícia" : "perícias"}.
+          </p>
+
+          <ToggleButtonGroup
+            label="Perícias da classe"
+            options={skillOptions}
+            selected={classSkillChoices}
+            max={proficiencies.skillChoiceCount}
+            onChange={(choices) =>
+              updateClassSkillChoices(setValue, characterClass, choices)
+            }
+          />
+        </SheetSection>
+      ) : null}
+
+      <SheetSection title="Salvaguardas">
         <div className="flex flex-col gap-2">
           {ABILITIES.map((ability) => (
             <SheetProficiencyRow
               key={ability}
-              label={ABILITY_LABELS[ability]}
+              label={ABILITY_LABELS_PT[ability]}
               proficient={watch(`savingThrows.${ability}.proficient`)}
               onProficientChange={(value) =>
                 setValue(`savingThrows.${ability}.proficient`, value)
@@ -37,12 +167,12 @@ export function StepProficiencies({
         </div>
       </SheetSection>
 
-      <SheetSection title="Skills">
+      <SheetSection title="Perícias">
         <div className="flex flex-col gap-2">
           {SKILL_DEFINITIONS.map((skill) => (
             <SheetProficiencyRow
               key={skill.key}
-              label={skill.label}
+              label={SKILL_LABELS_PT[skill.key]}
               abilityAbbrev={ABILITY_ABBREV[skill.ability]}
               proficient={watch(`skills.${skill.key}.proficient`)}
               onProficientChange={(value) =>
@@ -54,46 +184,46 @@ export function StepProficiencies({
         </div>
       </SheetSection>
 
-      <SheetSection title="Equipment Training & Proficiencies">
+      <SheetSection title="Treinamento e proficiências">
         <div className="flex flex-col gap-3">
           <SheetTextarea
-            label="Tools"
+            label="Ferramentas"
             {...register("tools")}
             className="min-h-16"
           />
           <SheetTextarea
-            label="Weapons"
+            label="Armas"
             {...register("weaponsProficiency")}
             className="min-h-16"
           />
           <SheetTextarea
-            label="Armor"
+            label="Armaduras"
             {...register("armorProficiency")}
             className="min-h-16"
           />
           <SheetTextarea
-            label="Training"
+            label="Treinamento"
             {...register("training")}
             className="min-h-16"
           />
           <div className="flex flex-wrap gap-4 pt-1">
             <SheetCheckbox
-              label="Light"
+              label="Leve"
               checked={watch("armorTrainingLight")}
               onChange={(value) => setValue("armorTrainingLight", value)}
             />
             <SheetCheckbox
-              label="Medium"
+              label="Média"
               checked={watch("armorTrainingMedium")}
               onChange={(value) => setValue("armorTrainingMedium", value)}
             />
             <SheetCheckbox
-              label="Heavy"
+              label="Pesada"
               checked={watch("armorTrainingHeavy")}
               onChange={(value) => setValue("armorTrainingHeavy", value)}
             />
             <SheetCheckbox
-              label="Shields"
+              label="Escudos"
               checked={watch("armorTrainingShields")}
               onChange={(value) => setValue("armorTrainingShields", value)}
             />

@@ -54,6 +54,15 @@ const abilitiesSchema = z.object({
   charisma: abilityScoreSchema,
 });
 
+const abilityBaseScoresSchema = z.object({
+  strength: z.string(),
+  dexterity: z.string(),
+  constitution: z.string(),
+  intelligence: z.string(),
+  wisdom: z.string(),
+  charisma: z.string(),
+});
+
 const savingThrowsSchema = z.object({
   strength: proficientModifierSchema,
   dexterity: proficientModifierSchema,
@@ -105,6 +114,12 @@ export const characterSheetSchema = z.object({
   experiencePoints: z.string(),
   background: z.string(),
   alignment: z.string(),
+  classSkillChoices: z.array(z.string()),
+  backgroundAbilityMode: z.enum(["split", "even"]),
+  backgroundAbilityPlus2: z.string(),
+  backgroundAbilityPlus1: z.string(),
+  speciesSkillChoice: z.string(),
+  speciesOriginFeat: z.string(),
 
   armorClass: z.string(),
   initiative: z.string(),
@@ -125,6 +140,7 @@ export const characterSheetSchema = z.object({
   deathSaveFailures: z.number().int().min(0).max(3),
 
   abilities: abilitiesSchema,
+  abilityBaseScores: abilityBaseScoresSchema,
   savingThrows: savingThrowsSchema,
   skills: skillsSchema,
 
@@ -194,6 +210,12 @@ export const EMPTY_CHARACTER_SHEET: CharacterSheet = {
   experiencePoints: "",
   background: "",
   alignment: "",
+  classSkillChoices: [],
+  backgroundAbilityMode: "split",
+  backgroundAbilityPlus2: "",
+  backgroundAbilityPlus1: "",
+  speciesSkillChoice: "",
+  speciesOriginFeat: "",
   armorClass: "",
   initiative: "",
   speed: "",
@@ -216,6 +238,14 @@ export const EMPTY_CHARACTER_SHEET: CharacterSheet = {
     intelligence: emptyAbility,
     wisdom: emptyAbility,
     charisma: emptyAbility,
+  },
+  abilityBaseScores: {
+    strength: "",
+    dexterity: "",
+    constitution: "",
+    intelligence: "",
+    wisdom: "",
+    charisma: "",
   },
   savingThrows: {
     strength: emptyProficiency,
