@@ -21,20 +21,23 @@ export default function Home() {
           <strong className="font-medium">dnd-api</strong>.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3">
-          <Link href="/classes" className={cn(buttonVariants({ size: "lg" }))}>
-            Compêndio — classes
-          </Link>
           <Link
-            href="/character-sheet"
-            className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
+            href="/compendium"
+            className={cn(buttonVariants({ size: "lg" }))}
           >
-            Nova ficha em branco
+            Compêndio PHB
           </Link>
           <Link
             href="/characters"
             className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
           >
             Minhas fichas
+          </Link>
+          <Link
+            href="/character-sheet"
+            className={cn(buttonVariants({ variant: "ghost", size: "lg" }))}
+          >
+            Wizard local
           </Link>
         </div>
         <HealthStatus />

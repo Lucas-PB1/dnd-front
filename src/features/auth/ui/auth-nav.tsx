@@ -43,6 +43,12 @@ export function AuthNav() {
         {user.email}
       </span>
       <Link
+        href="/compendium"
+        className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
+      >
+        Compêndio
+      </Link>
+      <Link
         href="/characters"
         className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
       >

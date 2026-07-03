@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { useCharacters } from "@/features/characters/api/use-characters";
 
 export function CharactersList() {
@@ -20,7 +22,13 @@ export function CharactersList() {
   if (!data?.length) {
     return (
       <p className="text-sm text-muted-foreground">
-        Nenhuma ficha ainda. Crie uma pela API ou pelo wizard local.
+        Nenhuma ficha ainda.{" "}
+        <Link
+          href="/characters/new"
+          className="text-primary underline-offset-4 hover:underline"
+        >
+          Criar primeira ficha
+        </Link>
       </p>
     );
   }
@@ -28,20 +36,22 @@ export function CharactersList() {
   return (
     <ul className="divide-y divide-border rounded-lg border border-border">
       {data.map((character) => (
-        <li
-          key={character.id}
-          className="flex items-center justify-between gap-4 px-4 py-3"
-        >
-          <div className="min-w-0 text-left">
-            <p className="font-medium">{character.name}</p>
-            <p className="text-sm text-muted-foreground">
-              Nv. {character.level} · {character.speciesSlug} ·{" "}
-              {character.classSlug}
-            </p>
-          </div>
-          <span className="shrink-0 font-mono text-xs text-muted-foreground">
-            {character.id.slice(0, 8)}
-          </span>
+        <li key={character.id}>
+          <Link
+            href={`/characters/${character.id}`}
+            className="flex items-center justify-between gap-4 px-4 py-3 transition-colors hover:bg-muted/30"
+          >
+            <div className="min-w-0 text-left">
+              <p className="font-medium">{character.name}</p>
+              <p className="text-sm text-muted-foreground">
+                Nv. {character.level} · {character.speciesSlug} ·{" "}
+                {character.classSlug}
+              </p>
+            </div>
+            <span className="shrink-0 text-xs text-muted-foreground">
+              Ver →
+            </span>
+          </Link>
         </li>
       ))}
     </ul>
