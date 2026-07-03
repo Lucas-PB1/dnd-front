@@ -34,10 +34,10 @@ export default function Home() {
             Minhas fichas
           </Link>
           <Link
-            href="/character-sheet"
-            className={cn(buttonVariants({ variant: "ghost", size: "lg" }))}
+            href="/characters/new"
+            className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
           >
-            Wizard local
+            Criar ficha
           </Link>
         </div>
         <HealthStatus />

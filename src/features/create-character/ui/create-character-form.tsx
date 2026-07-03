@@ -1,25 +1,37 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { useBackgrounds } from "@/features/background-catalog/api/use-backgrounds";
-import { useClasses } from "@/features/class-catalog/api/use-classes";
+import {
+  useClasses,
+  useClassSubclasses,
+} from "@/features/class-catalog/api/use-classes";
 import { useCreateCharacter } from "@/features/create-character/api/use-create-character";
 import {
   createCharacterSchema,
+  LEVEL_OPTIONS,
+  SUBCLASS_REQUIRED_FROM_LEVEL,
   type CreateCharacterInput,
 } from "@/features/create-character/model/create-character.schema";
 import { useSpecies } from "@/features/species-catalog/api/use-species";
 import { Button } from "@/shared/ui/button";
-import { Field, FieldError, FieldGroup, FieldLabel } from "@/shared/ui/field";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/shared/ui/field";
 import { Input } from "@/shared/ui/input";
 import { cn } from "@/shared/lib/utils";
 
 function CatalogSelect({
   id,
   label,
+  description,
   options,
   isLoading,
   error,
@@ -27,6 +39,7 @@ function CatalogSelect({
 }: {
   id: string;
   label: string;
+  description?: string;
   options: { value: string; label: string }[];
   isLoading?: boolean;
   error?: { message?: string };
@@ -34,6 +47,7 @@ function CatalogSelect({
   return (
     <Field>
       <FieldLabel htmlFor={id}>{label}</FieldLabel>
+      {description ? <FieldDescription>{description}</FieldDescription> : null}
       <select
         id={id}
         disabled={isLoading}
@@ -67,16 +81,27 @@ export function CreateCharacterForm() {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<CreateCharacterInput>({
     resolver: zodResolver(createCharacterSchema),
     defaultValues: {
       name: "",
+      level: 1,
       classSlug: "",
       speciesSlug: "",
       backgroundSlug: "",
+      subclassSlug: "",
     },
   });
+
+  const level = useWatch({ control, name: "level", defaultValue: 1 });
+  const classSlug = useWatch({ control, name: "classSlug", defaultValue: "" });
+  const needsSubclass = level >= SUBCLASS_REQUIRED_FROM_LEVEL;
+  const subclasses = useClassSubclasses(
+    classSlug,
+    needsSubclass && !!classSlug,
+  );
 
   const catalogLoading =
     classes.isPending || species.isPending || backgrounds.isPending;
@@ -84,7 +109,20 @@ export function CreateCharacterForm() {
   return (
     <form
       className="flex max-w-md flex-col gap-5"
-      onSubmit={handleSubmit((values) => create.mutate(values))}
+      onSubmit={handleSubmit((values) => {
+        const includeSubclass = values.level >= SUBCLASS_REQUIRED_FROM_LEVEL;
+        const payload = {
+          name: values.name,
+          level: values.level,
+          classSlug: values.classSlug,
+          speciesSlug: values.speciesSlug,
+          backgroundSlug: values.backgroundSlug,
+          ...(includeSubclass && values.subclassSlug?.trim()
+            ? { subclassSlug: values.subclassSlug }
+            : {}),
+        };
+        create.mutate(payload);
+      })}
     >
       <FieldGroup>
         <Field>
@@ -99,6 +137,18 @@ export function CreateCharacterForm() {
         </Field>
 
         <CatalogSelect
+          id="level"
+          label="Nível inicial"
+          description="1 para personagem novo; 5+ para entrar em campanha já em andamento."
+          options={LEVEL_OPTIONS.map((lv) => ({
+            value: String(lv),
+            label: `Nível ${lv}`,
+          }))}
+          error={errors.level}
+          {...register("level", { valueAsNumber: true })}
+        />
+
+        <CatalogSelect
           id="classSlug"
           label="Classe"
           isLoading={classes.isPending}
@@ -109,6 +159,21 @@ export function CreateCharacterForm() {
           error={errors.classSlug}
           {...register("classSlug")}
         />
+
+        {needsSubclass ? (
+          <CatalogSelect
+            id="subclassSlug"
+            label="Subclasse"
+            description={`Obrigatória a partir do nível ${SUBCLASS_REQUIRED_FROM_LEVEL}.`}
+            isLoading={subclasses.isPending}
+            options={(subclasses.data?.data ?? []).map((s) => ({
+              value: s.slug,
+              label: s.name,
+            }))}
+            error={errors.subclassSlug}
+            {...register("subclassSlug")}
+          />
+        ) : null}
 
         <CatalogSelect
           id="speciesSlug"
@@ -162,8 +227,8 @@ export function CreateCharacterForm() {
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Atributos, HP e perícias são calculados pela dnd-api com defaults do
-        PHB.
+        A dnd-api calcula PV, bônus de proficiência e perícias de antecedente
+        conforme o nível escolhido.
       </p>
     </form>
   );

@@ -19,7 +19,7 @@ export default function NewCharacterPage() {
           </Link>
           <h1 className="text-2xl font-semibold tracking-tight">Nova ficha</h1>
           <p className="text-sm text-muted-foreground">
-            Passo 1 — identidade via dnd-api (classe, espécie, antecedente).
+            Identidade via dnd-api — escolha o nível inicial (1–20).
           </p>
         </div>
         <CreateCharacterForm />

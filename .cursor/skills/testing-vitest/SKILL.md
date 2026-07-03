@@ -10,16 +10,14 @@ disable-model-invocation: true
 
 ```text
 tests/
-├── entities/character-sheet/   # regras puras, dados
-├── features/character-sheet/model/
-└── shared/api/health/
+└── shared/api/health/   # schemas e utilitários compartilhados
 ```
 
 ## O que testar
 
-- `entities/` — lógica pura, parsers, regras D&D locais
-- `features/*/model/` — schemas, merge, sync
-- `shared/` — utils, serializers
+- `entities/` — tipos e helpers puros (quando existirem)
+- `features/*/model/` — schemas Zod, transformações de formulário
+- `shared/` — utils, serializers, validação de API
 
 Rodar: `pnpm test:run`
 

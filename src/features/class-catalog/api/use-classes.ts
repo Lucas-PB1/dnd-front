@@ -25,10 +25,11 @@ export function useClassDetail(slug: string) {
   });
 }
 
-export function useClassSubclasses(slug: string) {
+export function useClassSubclasses(slug: string, enabled = true) {
   return useQuery({
     queryKey: classKeys.subclasses(slug),
     queryFn: () => fetchClassSubclasses(slug),
+    enabled: enabled && !!slug,
     staleTime: 60 * 60 * 1000,
   });
 }

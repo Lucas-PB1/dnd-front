@@ -8,13 +8,13 @@ disable-model-invocation: true
 
 ## Camadas
 
-| Camada   | Pasta       | Exemplo                                    |
-| -------- | ----------- | ------------------------------------------ |
-| App      | `app/`      | `app/classes/page.tsx`                     |
-| Widgets  | `widgets/`  | `widgets/app-header/`                      |
-| Features | `features/` | `auth`, `class-catalog`, `character-sheet` |
-| Entities | `entities/` | `class/`, `character-sheet/`               |
-| Shared   | `shared/`   | `ui/`, `api/`, `lib/`                      |
+| Camada   | Pasta       | Exemplo                                     |
+| -------- | ----------- | ------------------------------------------- |
+| App      | `app/`      | `app/classes/page.tsx`                      |
+| Widgets  | `widgets/`  | `widgets/app-header/`                       |
+| Features | `features/` | `auth`, `class-catalog`, `create-character` |
+| Entities | `entities/` | `class/`, `character/`, `species/`          |
+| Shared   | `shared/`   | `ui/`, `api/`, `lib/`                       |
 
 ## Segmentos
 
@@ -32,11 +32,11 @@ Só para baixo: `features` → `entities` → `shared`
 
 ## Exemplos no repo
 
-| Feature          | entities                   | features                   |
-| ---------------- | -------------------------- | -------------------------- |
-| Catálogo classes | `entities/class`           | `features/class-catalog`   |
-| Auth             | —                          | `features/auth`            |
-| Wizard ficha     | `entities/character-sheet` | `features/character-sheet` |
-| Status API       | —                          | `widgets/system-status`    |
+| Feature          | entities             | features                                  |
+| ---------------- | -------------------- | ----------------------------------------- |
+| Catálogo classes | `entities/class`     | `features/class-catalog`                  |
+| Auth             | —                    | `features/auth`                           |
+| Fichas           | `entities/character` | `features/characters`, `create-character` |
+| Status API       | —                    | `widgets/system-status`                   |
 
 Detalhes: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)

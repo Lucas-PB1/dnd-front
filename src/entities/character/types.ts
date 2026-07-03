@@ -45,12 +45,14 @@ export type CharacterSummary = Pick<
   | "updatedAt"
 >;
 
-/** Payload mínimo para POST /characters */
+/** Payload para POST /characters */
 export type CreateCharacterPayload = {
   name: string;
+  level?: number;
   classSlug: string;
   speciesSlug: string;
   backgroundSlug: string;
+  subclassSlug?: string;
 };
 
 export const ABILITY_LABELS_PT: Record<keyof AbilityScores, string> = {
