@@ -1,16 +1,18 @@
 ---
-description: SOLID aplicado à Clean Architecture do dnd
+description: Princípios SOLID adaptados ao FSD
 alwaysApply: true
 ---
 
-# SOLID (dnd)
+# SOLID (FSD)
 
-| Princípio | Regra |
-|-----------|-------|
-| **SRP** | Route orquestra; use case em `application/`; repo em `infrastructure/` |
-| **OCP** | Novos adapters em `infrastructure/`; não alterar `domain/` para estender |
-| **LSP** | Repos substituíveis (`StaticHealthRepository` ↔ `SupabaseHealthRepository`) |
-| **ISP** | Ports pequenos (`check()`, não interfaces gigantes) |
-| **DIP** | `application` → `domain` (abstração); nunca importar Supabase em `application/` |
+| Princípio | No dnd-front                                      |
+| --------- | ------------------------------------------------- |
+| **SRP**   | Um slice = uma responsabilidade de produto        |
+| **OCP**   | Estender via novo slice, não editar `shared`      |
+| **LSP**   | Tipos em `entities/` estáveis para features       |
+| **ISP**   | `index.ts` exporta só API pública do slice        |
+| **DIP**   | Features usam `shared/api/` — não fetch inline    |
 
-Detalhes: `.cursor/skills/solid/SKILL.md`
+`features/*/model/` não importa `@supabase/supabase-js` direto — usar `shared/api/supabase`.
+
+Skill: `solid`

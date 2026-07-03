@@ -13,7 +13,7 @@ export const healthRepository = isSupabaseConfigured()
 
 ```typescript
 // BAD em application/
-import { createSupabaseServerClient } from "@/infrastructure/supabase/server";
+import { createSupabaseServerClient } from "@/shared/api/supabase/server";
 
 // GOOD — port injetado
 export async function getHealthStatus(repository: HealthRepository) { ... }

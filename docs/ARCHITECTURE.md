@@ -1,50 +1,56 @@
-# Clean Architecture — dnd
+# Feature-Sliced Design — dnd-front
 
-Código da aplicação em **`src/`**. Na raiz ficam só config, testes E2E e docs.
+Código em **`src/`**. Repo irmão da API: **`dnd-api`** (NestJS).
 
-## Estrutura
-
-```text
-dnd/
-├── src/                      # código da aplicação
-│   ├── app/                  # Next.js — rotas + api
-│   ├── domain/
-│   ├── application/
-│   ├── infrastructure/
-│   ├── presentation/         # componentes, hooks, providers
-│   ├── components/ui/        # shadcn
-│   ├── lib/
-│   └── proxy.ts              # sessão Supabase (Next 16)
-├── cypress/                  # E2E
-├── docs/
-├── public/
-└── *config*                  # package.json, tsconfig, eslint, etc.
-```
-
-## Camadas
-
-| Camada             | Pasta                           | Pode importar               |
-| ------------------ | ------------------------------- | --------------------------- |
-| **Presentation**   | `src/app/`, `src/presentation/` | application, domain (tipos) |
-| **Application**    | `src/application/`              | domain                      |
-| **Domain**         | `src/domain/`                   | nada externo                |
-| **Infrastructure** | `src/infrastructure/`           | domain, libs externas       |
-| **UI kit**         | `src/components/ui/`            | shadcn                      |
-| **Util**           | `src/lib/`                      | helpers transversais        |
-
-## Fluxo
+## Camadas FSD
 
 ```text
-app/api/route.ts  →  application/use-case  →  domain/port  ←  infrastructure/adapter
-app/page.tsx      →  presentation/components  →  application (ou fetch /api)
+src/
+├── app/                    # Next.js — rotas finas, providers globais
+├── widgets/                # blocos compostos (header, system-status)
+├── features/               # ações do usuário (auth, class-catalog, character-sheet)
+├── entities/               # modelos de negócio (class, character, character-sheet)
+├── shared/                 # ui, api, lib, config
+│   ├── ui/                 # shadcn / Base UI
+│   ├── api/
+│   │   ├── dnd-api/        # catalogFetch, gameFetch
+│   │   ├── supabase/       # browser/server clients
+│   │   └── health/         # check local /api/health
+│   └── lib/
+└── proxy.ts                # sessão Supabase + rotas protegidas
 ```
 
-## Regras
+## Regra de imports
 
-1. **domain/** — entidades, tipos, interfaces. Sem React, sem Supabase.
-2. **application/** — casos de uso. Ports via parâmetro ou `infrastructure/di.ts`.
-3. **infrastructure/** — adapters, Supabase, wiring.
-4. **app/** — rotas finas: Zod → use case → response.
-5. **presentation/** — UI de feature (não shadcn).
+| Camada     | Pode importar                       |
+| ---------- | ----------------------------------- |
+| `app`      | widgets, features, entities, shared |
+| `widgets`  | features, entities, shared          |
+| `features` | entities, shared                    |
+| `entities` | shared                              |
+| `shared`   | apenas pacotes npm                  |
 
-**Supabase:** [SUPABASE.md](./SUPABASE.md)
+**Proibido:** importar de camada superior.
+
+## Divisão front / API / Supabase
+
+| Assunto        | Front                      | API / Supabase            |
+| -------------- | -------------------------- | ------------------------- |
+| Login, sessão  | `features/auth`            | API valida JWT            |
+| Catálogo PHB   | `features/class-catalog`   | `GET /classes`, …         |
+| Fichas jogador | `features/characters`      | `GET/POST /characters`    |
+| Wizard local   | `features/character-sheet` | dados JSON em `entities/` |
+| Regras D&D     | **nunca** no front         | dnd-api                   |
+
+## Nova feature
+
+1. `entities/<nome>/` — tipos
+2. `features/<nome>/` — api, model, ui
+3. `widgets/` — composição (opcional)
+4. `app/<rota>/page.tsx` — fino
+
+## Stack
+
+Next.js 16 · React 19 · TanStack Query · Supabase SSR · shadcn · Tailwind 4 · Zod · RHF
+
+Ver: [STACK-OPTIONS.md](./STACK-OPTIONS.md) · [API-INTEGRATION.md](./API-INTEGRATION.md) · [SUPABASE.md](./SUPABASE.md)

@@ -8,7 +8,7 @@ Next.js 16 fullstack. Backend no próprio Next (sem .NET).
 
 | Área              | Escolha                                   | Status                         |
 | ----------------- | ----------------------------------------- | ------------------------------ |
-| **Arquitetura**   | Clean Architecture                        | ✅                             |
+| **Arquitetura**   | Feature-Sliced Design                     | ✅                             |
 | **Backend**       | Híbrido — Route Handlers + Server Actions | ✅ base (`/api/health`)        |
 | **Data client**   | TanStack Query                            | ✅                             |
 | **Tema**          | next-themes (claro / escuro / sistema)    | ✅                             |
@@ -29,19 +29,21 @@ Next.js 16 fullstack. Backend no próprio Next (sem .NET).
 ## O que está no repo
 
 ```text
-src/          → app, domain, application, infrastructure, presentation, components, lib, proxy.ts
+src/          → app, widgets, features, entities, shared, proxy.ts
 cypress/      → E2E
 docs/         → documentação
+tests/        → espelha FSD (entities, features, shared)
 public/       → assets estáticos
 ```
 
-| Item               | Onde                                                     |
-| ------------------ | -------------------------------------------------------- |
-| Providers          | `src/presentation/providers/`                            |
-| TanStack Query     | `src/presentation/hooks/`, `src/lib/query-client.ts`     |
-| Forms              | RHF + Zod + shadcn `field`, `input`, `label`             |
-| Clean Architecture | `src/domain/`, `src/application/`, `src/infrastructure/` |
-| Supabase           | `src/infrastructure/supabase/`, `src/proxy.ts`           |
+| Item           | Onde                                                              |
+| -------------- | ----------------------------------------------------------------- |
+| Providers      | `src/app/providers/`                                              |
+| TanStack Query | `features/*/api/`, `widgets/*/api/`, `shared/lib/query-client.ts` |
+| Forms          | RHF + Zod + shadcn em `shared/ui/`                                |
+| FSD            | `features/`, `entities/`, `widgets/`, `shared/`                   |
+| Supabase       | `shared/api/supabase/`, `features/auth/`, `proxy.ts`              |
+| dnd-api client | `shared/api/dnd-api/`                                             |
 
 Docs: [ARCHITECTURE.md](./ARCHITECTURE.md) · [SUPABASE.md](./SUPABASE.md) · [COLORS.md](./COLORS.md)
 

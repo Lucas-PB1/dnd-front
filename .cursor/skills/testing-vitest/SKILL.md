@@ -1,36 +1,26 @@
 ---
 name: testing-vitest
-description: Vitest unit tests for dnd — application, domain, schemas. Use when writing *.test.ts files or mocking repository ports.
+description: Vitest unit tests for dnd-front FSD layers.
 disable-model-invocation: true
 ---
 
-# Vitest — unitários
+# Vitest
 
-## Comandos
+## Layout
 
-`pnpm test` (watch) · `pnpm test:run` (CI)
-
-## Onde testar
-
-- `application/` — use cases com mock de port
-- `*.schema.ts` — validação Zod
-- `domain/` — lógica pura
-
-## Exemplo
-
-`src/application/health/health.schema.test.ts`
-
-## Mock de port
-
-```typescript
-const mockRepo: HealthRepository = {
-  check: vi.fn().mockResolvedValue({ status: "ok", database: "connected" }),
-};
-await getHealthStatus(mockRepo);
+```text
+tests/
+├── entities/character-sheet/   # regras puras, dados
+├── features/character-sheet/model/
+└── shared/api/health/
 ```
 
-## Evitar
+## O que testar
 
-Supabase real, fetch de rede em unitários.
+- `entities/` — lógica pura, parsers, regras D&D locais
+- `features/*/model/` — schemas, merge, sync
+- `shared/` — utils, serializers
+
+Rodar: `pnpm test:run`
 
 Config: `vitest.config.ts`

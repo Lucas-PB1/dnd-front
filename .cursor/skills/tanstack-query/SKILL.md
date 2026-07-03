@@ -1,37 +1,28 @@
 ---
 name: tanstack-query
-description: TanStack Query for dnd — hooks, query keys, providers, fetching /api routes. Use when adding data fetching, mutations, cache, or editing presentation/hooks.
+description: TanStack Query for dnd-front — hooks in features/*/api or widgets/*/api.
 disable-model-invocation: true
 ---
 
-# TanStack Query — dnd
+# TanStack Query
 
-## Setup
+## Provider
 
-- `lib/query-client.ts` — factory do QueryClient
-- `presentation/providers/query-provider.tsx` — `QueryClientProvider`
-- Envolvido em `AppProviders` no root layout
+`app/providers/query-provider.tsx`
 
-## Padrão por feature
+## Padrão FSD
 
 ```text
-presentation/hooks/<feature>.api.ts   → keys + fetch
-presentation/hooks/use-<feature>.ts     → useQuery
+features/<nome>/api/<nome>.api.ts   → query keys + fetch
+features/<nome>/api/use-<nome>.ts   → useQuery / useMutation
 ```
 
-## Exemplo health
-
-```typescript
-// health.api.ts
-export const healthKeys = { all: ["health"] as const };
-export async function fetchHealth(): Promise<HealthResponse> { ... }
-
-// use-health.ts
-useQuery({ queryKey: healthKeys.all, queryFn: fetchHealth });
-```
+Exemplos: `features/class-catalog/api/`, `features/characters/api/`, `widgets/system-status/api/`
 
 ## Regras
 
-- Fetch para `/api/*`, não Supabase direto (regra de negócio no backend)
-- Keys centralizadas no mesmo arquivo do fetch
-- Tipos de `@/application/*/schema`
+- Catálogo: `catalogFetch` + `staleTime` longo (1h)
+- Game: `gameFetch` + token de `features/auth`
+- 401: redirect login
+
+Skill: `dnd-api-client`

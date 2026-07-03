@@ -18,7 +18,7 @@ const arrayStart = content.indexOf("export const PHB_2024_SPECIES_DETAILS");
 const arrayEnd = content.lastIndexOf("];") + 2;
 const arrayBlock = content.slice(arrayStart, arrayEnd);
 const header =
-  'import type { SpeciesDefinition } from "@/domain/character-sheet/types/species";\n\n';
+  'import type { SpeciesDefinition } from "@/entities/character-sheet/types/species";\n\n';
 const part1End = arrayBlock.indexOf('id: "goliath"');
 const splitIdx = arrayBlock.lastIndexOf("},", part1End) + 2;
 const openBracket = arrayBlock.indexOf("[") + 1;

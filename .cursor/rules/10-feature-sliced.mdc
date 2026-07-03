@@ -1,0 +1,36 @@
+---
+description: Feature-Sliced Design — camadas, imports, nova feature
+globs: src/app/**,src/widgets/**,src/features/**,src/entities/**,src/shared/**
+alwaysApply: false
+---
+
+# Feature-Sliced Design
+
+## Imports permitidos
+
+| De          | Pode importar                    |
+| ----------- | -------------------------------- |
+| `app/`      | widgets, features, entities, shared |
+| `widgets/`  | features, entities, shared       |
+| `features/` | entities, shared                 |
+| `entities/` | shared                           |
+| `shared/`   | só npm                           |
+
+## Segmentos por slice
+
+```text
+features/foo/
+├── ui/       # componentes React
+├── api/      # fetch, hooks de dados
+├── model/    # schemas Zod, stores, providers
+└── index.ts  # public API do slice
+```
+
+## Nova feature
+
+1. Tipo/contrato em `entities/<nome>/`
+2. Lógica + UI em `features/<nome>/`
+3. Composição em `widgets/` (se a página for grande)
+4. Rota fina em `app/<rota>/page.tsx`
+
+Skill: `.cursor/skills/fsd-architecture/SKILL.md`

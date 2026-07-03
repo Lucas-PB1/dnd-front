@@ -98,7 +98,7 @@ writeParts({
   partOneExport: "PHB_2024_CLASS_PROFICIENCIES_PART_ONE",
   partTwoExport: "PHB_2024_CLASS_PROFICIENCIES_PART_TWO",
   header:
-    'import type { ClassProficienciesDefinition } from "@/domain/character-sheet/types/class";\n\n',
+    'import type { ClassProficienciesDefinition } from "@/entities/character-sheet/types/class";\n\n',
   inner: splitArrayInner(profInner, "sorcerer"),
 });
 
@@ -106,7 +106,7 @@ const detailsSource = gitShow("src/domain/character-sheet/class-details.ts");
 const detailsInner = extractArrayBlock(detailsSource, "PHB_2024_CLASS_DETAILS");
 const detailsParts = splitArrayInner(detailsInner, "sorcerer");
 const detailsHeader =
-  'import type { ClassDetail } from "@/domain/character-sheet/types/class";\n\nconst SUBCLASS_UNLOCK_LEVEL = 3;\n\n';
+  'import type { ClassDetail } from "@/entities/character-sheet/types/class";\n\nconst SUBCLASS_UNLOCK_LEVEL = 3;\n\n';
 const detailsDir = path.join(
   root,
   "src/domain/character-sheet/data/classes/details",
@@ -130,7 +130,7 @@ writeParts({
   partOneExport: "PHB_2024_BACKGROUND_DETAILS_PART_ONE",
   partTwoExport: "PHB_2024_BACKGROUND_DETAILS_PART_TWO",
   header:
-    'import type { BackgroundDefinition } from "@/domain/character-sheet/types/background";\n\n',
+    'import type { BackgroundDefinition } from "@/entities/character-sheet/types/background";\n\n',
   inner: splitArrayInner(bgInner, "scribe"),
 });
 
@@ -146,7 +146,7 @@ writeParts({
   partOneExport: "PHB_2024_SPECIES_DETAILS_PART_ONE",
   partTwoExport: "PHB_2024_SPECIES_DETAILS_PART_TWO",
   header:
-    'import type { SpeciesDefinition } from "@/domain/character-sheet/types/species";\n\n',
+    'import type { SpeciesDefinition } from "@/entities/character-sheet/types/species";\n\n',
   inner: splitArrayInner(speciesInner, "human"),
 });
 

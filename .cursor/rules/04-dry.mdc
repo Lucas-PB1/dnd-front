@@ -1,17 +1,14 @@
 ---
-description: DRY — uma fonte de verdade para schemas e lógica
+description: DRY — schemas, query keys, tipos compartilhados
 alwaysApply: true
 ---
 
 # DRY
 
-- **Zod**: uma fonte em `application/*/schema.ts` ou `lib/validators/`
-- Não repetir validação em route + form + use case
-- **Query keys**: centralizar (ex.: `healthKeys` em `presentation/hooks/`)
-- Extrair para `lib/` ou hook só na **3ª** repetição real — evitar DRY prematuro
+- **Zod**: `features/<nome>/model/*.schema.ts` ou `shared/api/`
+- **Query keys**: `features/<nome>/api/*.api.ts` (ex.: `classKeys`, `charactersKeys`)
+- **Tipos API**: `entities/<nome>/types.ts` — uma fonte para features
 
-## Exemplo
+Exemplo: `toHealthResponse` + `healthResponseSchema` em `shared/api/health/`.
 
-`toHealthResponse` + `healthResponseSchema` em `application/health/` — route só chama ambos.
-
-Detalhes: `.cursor/skills/dry/SKILL.md`
+Skill: `dry`

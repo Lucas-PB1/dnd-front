@@ -1,9 +1,7 @@
-import { getHealthStatus } from "@/application/health/get-health-status";
-import { toHealthResponse } from "@/application/health/health.schema";
-import { healthRepository } from "@/infrastructure/di";
+import { checkHealth } from "@/shared/api/health/check-health";
+import { toHealthResponse } from "@/shared/api/health/health.schema";
 
 export async function GET() {
-  const health = await getHealthStatus(healthRepository);
-
+  const health = await checkHealth();
   return Response.json(toHealthResponse(health));
 }

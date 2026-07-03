@@ -1,41 +1,40 @@
 ---
 name: dnd-router
-description: Routes agent tasks in the dnd project to the correct skill. Use for any non-trivial coding task in this repo — features, API, UI, Supabase, tests, refactor, architecture, or when unsure which skill applies.
+description: Routes agent tasks in dnd-front to the correct skill. Use for any non-trivial coding task.
 ---
 
-# dnd — Skill Router
+# dnd-front — Skill Router
 
-Antes de codar tarefas não triviais: identifique a skill abaixo e **leia o `SKILL.md` correspondente** em `.cursor/skills/<nome>/`.
-
-Rules `alwaysApply` (TypeScript strict, Clean Code, SOLID, DRY) já estão ativas — não ignorar.
+Arquitetura: **Feature-Sliced Design**. Ler `fsd-architecture` antes de codar.
 
 ## Mapa intent → skill
 
-| Se o usuário / tarefa envolve…                        | Skill              |
-| ----------------------------------------------------- | ------------------ |
-| nova feature, camada, domain, use case, port, adapter | `dnd-architecture` |
-| pasta, script, pnpm, Husky, docs, estrutura `src/`    | `dnd-infra`        |
-| TypeScript, tipos, interface, generic, strict         | `typescript`       |
-| legibilidade, nomes, função grande, clean code        | `clean-code`       |
-| SOLID, SRP, OCP, DIP, acoplamento, responsabilidade   | `solid`            |
-| DRY, duplicação, schema repetido, extrair             | `dry`              |
-| página, layout, RSC, Server Action                    | `next-core`        |
-| `/api`, route handler, REST                           | `next-api`         |
-| proxy, sessão, cookies auth                           | `next-proxy`       |
-| Supabase, banco, migração, RLS, publishable key       | `supabase`         |
-| TanStack Query, useQuery, mutation, cache             | `tanstack-query`   |
-| shadcn, componente UI, field, input                   | `ui-shadcn`        |
-| tema, dark mode, cores, tokens, Heroicons             | `ui-theme`         |
-| formulário, RHF, zodResolver                          | `forms-rhf-zod`    |
-| teste unitário, Vitest                                | `testing-vitest`   |
-| E2E, Cypress                                          | `testing-cypress`  |
+| Tarefa                                        | Skill                                |
+| --------------------------------------------- | ------------------------------------ |
+| camada FSD, nova feature, onde colocar código | `fsd-architecture`                   |
+| pasta, pnpm, layout `src/`                    | `dnd-infra`                          |
+| contrato REST, endpoints da API               | `dnd-api-contract`                   |
+| catalogFetch, gameFetch, ApiError             | `dnd-api-client`                     |
+| login, signup, sessão, JWT                    | `supabase-auth`                      |
+| client Supabase, env, tipos DB                | `supabase`                           |
+| proxy, cookies sessão                         | `next-proxy`                         |
+| página, layout, RSC                           | `next-core`                          |
+| route handler `/api`                          | `next-api`                           |
+| TanStack Query                                | `tanstack-query`                     |
+| shadcn, UI kit                                | `ui-shadcn`                          |
+| tema, dark mode                               | `ui-theme`                           |
+| RHF + Zod                                     | `forms-rhf-zod`                      |
+| TypeScript                                    | `typescript`                         |
+| Vitest / Cypress                              | `testing-vitest` / `testing-cypress` |
 
-## Futuro (não instalado)
+## Referência — repo dnd-api
 
-TanStack Table, nuqs, Sentry, next-intl — ver `docs/STACK-OPTIONS.md`
+| Assunto          | Skill dnd-api            |
+| ---------------- | ------------------------ |
+| Módulos Nest     | `nestjs-bounded-context` |
+| Catálogo vs game | `cqrs-catalog-vs-game`   |
+| JWT + RLS        | `supabase-auth`          |
 
-## Referência rápida
+## Docs
 
-- Stack: `docs/STACK-OPTIONS.md`
-- Arquitetura: `docs/ARCHITECTURE.md`
-- Código em: `src/`
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · [docs/API-INTEGRATION.md](docs/API-INTEGRATION.md)

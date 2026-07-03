@@ -65,7 +65,7 @@ const profDir = path.join(
 fs.mkdirSync(profDir, { recursive: true });
 
 const header =
-  'import type { ClassProficienciesDefinition } from "@/domain/character-sheet/types/class";\n\n';
+  'import type { ClassProficienciesDefinition } from "@/entities/character-sheet/types/class";\n\n';
 
 fs.writeFileSync(
   path.join(profDir, "part-one.ts"),

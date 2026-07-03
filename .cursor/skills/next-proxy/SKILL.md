@@ -31,8 +31,12 @@ export const config = {
 
 ## Sem Supabase configurado
 
-`isSupabaseConfigured()` → `NextResponse.next()` sem tentar auth.
+`isSupabaseConfigured()` → rotas em `shared/lib/auth-routes.ts` (`PROTECTED_ROUTES`) redirecionam para `/login`.
+
+## Rotas protegidas
+
+`isProtectedRoute()` / `isAuthRoute()` em `shared/lib/auth-routes.ts`.
 
 ## Referência
 
-Ver implementação atual em `src/proxy.ts`.
+Skill: `supabase-auth` · código em `src/proxy.ts`

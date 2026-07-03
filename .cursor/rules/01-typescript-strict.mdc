@@ -1,20 +1,15 @@
 ---
-description: TypeScript strict — tipos obrigatórios em todo o código
+description: TypeScript strict — tipos, entities, features
+globs: src/**/*.ts,src/**/*.tsx
 alwaysApply: true
 ---
 
 # TypeScript strict
 
-- `strict: true` em `tsconfig.json` — não desativar sem pedido explícito
-- Proibido: `any`, `@ts-ignore`, `as` sem justificativa clara
-- Alias `@/*` → `src/*`
+- `strict: true` — sem `any` implícito
+- Tipos de API em `entities/<nome>/types.ts` (espelhar DTOs da dnd-api)
+- Schemas Zod em `features/<nome>/model/` ou `shared/api/`
+- `entities/` e `shared/lib/`: sem importar React ou `@supabase/*`
+- Preferir `type` para DTOs; `interface` para contratos extensíveis
 
-## Camadas
-
-- **Ports** em `src/domain/`: `interface` (ex.: `HealthRepository`)
-- **DTOs / responses**: `type` ou `z.infer<typeof schema>`
-- `src/domain/` e `src/application/`: **sem** importar React ou Supabase
-
-## Zod
-
-Schema único; inferir tipos com `z.infer`. Ver skill `typescript` para detalhes.
+Skill: `typescript`

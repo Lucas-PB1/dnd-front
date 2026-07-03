@@ -1,14 +1,13 @@
 ---
-description: Testes unitários e E2E
-globs: "**/*.{test,spec}.{ts,tsx},cypress/**"
+description: Testes — Vitest e Cypress
+globs: tests/**,**/*.test.ts,**/*.spec.ts,cypress/**
 alwaysApply: false
 ---
 
 # Testes
 
-- **Unitário**: Vitest + `pnpm test:run` — testar `application/`, schemas, domain
-- **E2E**: Cypress em `cypress/e2e/` — `pnpm test:e2e`
-- Mock de ports (`HealthRepository`), não Supabase real em unitários
-- Colocar testes ao lado do código: `*.test.ts`
+- **Unitário**: Vitest — `tests/entities/`, `tests/features/`, `tests/shared/`
+- **E2E**: Cypress em `cypress/`
+- Rodar: `pnpm test:run` · `pnpm test:e2e`
 
 Skills: `testing-vitest` · `testing-cypress`

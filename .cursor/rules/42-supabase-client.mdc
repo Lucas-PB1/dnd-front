@@ -1,0 +1,18 @@
+---
+description: Clientes Supabase — browser, server, env
+globs: src/shared/api/supabase/**
+alwaysApply: false
+---
+
+# Supabase (clientes)
+
+- Key: `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (`sb_publishable_...`)
+- **Server** (Route Handler, Actions, proxy): `createSupabaseServerClient()`
+- **Browser**: `createSupabaseBrowserClient()`
+- Tipos DB: `shared/api/supabase/database.ts` (gerar com CLI)
+
+Auth é slice `features/auth` — não misturar com catálogo da API.
+
+Docs: [docs/SUPABASE.md](docs/SUPABASE.md)
+
+Skill: `supabase`

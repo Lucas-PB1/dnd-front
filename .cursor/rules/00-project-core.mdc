@@ -1,14 +1,14 @@
 ---
-description: Convenções gerais do projeto dnd
+description: Convenções gerais do projeto dnd-front
 alwaysApply: true
 ---
 
-# Projeto dnd
+# Projeto dnd-front
 
 - Responder em **português**; código e identificadores em **inglês**
-- Código da aplicação em `src/`; configs e testes E2E na raiz
+- Arquitetura: **Feature-Sliced Design** — [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- API irmã: **dnd-api** (NestJS) — [docs/API-INTEGRATION.md](docs/API-INTEGRATION.md)
 - Stack: [docs/STACK-OPTIONS.md](docs/STACK-OPTIONS.md)
-- Arquitetura: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
 ## Antes de implementar
 

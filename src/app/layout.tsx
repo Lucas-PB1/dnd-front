@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
-import { AppProviders } from "@/presentation/providers/app-providers";
+import { AppProviders } from "@/app/providers/app-providers";
 
 import "./globals.css";
 
@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "dnd",
-  description: "Campanhas e fichas de D&D",
+  title: "dnd-front",
+  description: "Frontend D&D — consome dnd-api",
 };
 
 export default function RootLayout({

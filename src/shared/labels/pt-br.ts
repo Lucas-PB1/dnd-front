@@ -1,5 +1,5 @@
-import type { Ability } from "@/domain/character-sheet/constants/abilities";
-import type { SkillKey } from "@/domain/character-sheet/constants/skills";
+import type { Ability } from "@/entities/character-sheet/constants/abilities";
+import type { SkillKey } from "@/entities/character-sheet/constants/skills";
 
 export const ABILITY_LABELS_PT: Record<Ability, string> = {
   strength: "Força",

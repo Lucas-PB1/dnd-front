@@ -1,4 +1,4 @@
-import type { SkillKey } from "@/domain/character-sheet/constants/skills";
+import type { SkillKey } from "@/entities/character-sheet/constants/skills";
 import type { SetCharacterSheetValue } from "@/shared/form/sheet-form.types";
 
 export function setSkillsProficiency(

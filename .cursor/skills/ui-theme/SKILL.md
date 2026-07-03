@@ -1,31 +1,14 @@
 ---
 name: ui-theme
-description: Taverna/Masmorra theme for dnd — globals.css tokens, next-themes, dark mode, Heroicons. Use when styling pages, theme toggle, or color tokens.
+description: Theme tokens and next-themes for dnd-front.
 disable-model-invocation: true
 ---
 
-# Tema — Taverna / Masmorra
+# Tema
 
-## Tokens
+- Tokens em `src/app/globals.css` — ver [docs/COLORS.md](docs/COLORS.md)
+- `next-themes` via `app/providers/theme-provider.tsx`
+- `ThemeToggle` em `widgets/app-header/ui/theme-toggle.tsx`
+- Usar classes semânticas: `bg-background`, `text-foreground`, `border-border`
 
-Definidos em `src/app/globals.css` — variáveis CSS (`--primary`, `--background`, etc.).
-
-Usar classes Tailwind semânticas: `bg-background`, `text-foreground`, `border-border`.
-
-## Dark mode
-
-- `next-themes` via `presentation/providers/theme-provider.tsx`
-- `ThemeToggle` em `presentation/components/theme-toggle.tsx`
-- `suppressHydrationWarning` no `<html>` do layout
-
-## Ícones
-
-Heroicons no app: `@heroicons/react/24/outline`
-
-## Cores
-
-Paleta documentada em [docs/COLORS.md](docs/COLORS.md)
-
-## Evitar
-
-`#hex` ou `rgb()` hardcoded em componentes — usar tokens.
+Skill: `ui-shadcn`

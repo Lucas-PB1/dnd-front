@@ -1,39 +1,16 @@
 ---
 name: forms-rhf-zod
-description: React Hook Form + Zod resolver for dnd forms. Use when building forms with validation, Field/FieldError integration, or sharing schemas with API routes.
+description: React Hook Form + Zod in dnd-front feature slices.
 disable-model-invocation: true
 ---
 
 # Forms — RHF + Zod
 
-## Stack
+- Schemas em `features/<nome>/model/*.schema.ts`
+- UI em `features/<nome>/ui/`
+- `zodResolver` de `@hookform/resolvers/zod`
+- Componentes: `shared/ui/field`, `input`, `button`
 
-- `react-hook-form`
-- `@hookform/resolvers/zod`
-- Schemas em `application/*/schema.ts` (mesma fonte da API — DRY)
+Exemplo: `features/auth/model/credentials.schema.ts`
 
-## Padrão
-
-```typescript
-const form = useForm<FormValues>({
-  resolver: zodResolver(mySchema),
-});
-```
-
-## UI
-
-```tsx
-<Field>
-  <Label htmlFor="name">Nome</Label>
-  <Input id="name" {...register("name")} />
-  <FieldError>{errors.name?.message}</FieldError>
-</Field>
-```
-
-## Submit
-
-Server Action ou `fetch("/api/...")` — validar de novo no servidor com o mesmo Zod schema.
-
-## Tipos
-
-`z.infer<typeof mySchema>` — não duplicar interface manual.
+Skill: `ui-shadcn`

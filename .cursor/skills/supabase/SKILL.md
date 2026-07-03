@@ -1,38 +1,41 @@
 ---
 name: supabase
-description: Supabase client, server, env, and repository adapters for dnd. Use when configuring auth, database types, RLS, migrations, or infrastructure/supabase files.
+description: Supabase clients and env in dnd-front (shared/api/supabase). Use for database types, server/browser clients, env validation — not for login UI (see supabase-auth).
 disable-model-invocation: true
 ---
 
-# Supabase — dnd
+# Supabase — clientes (dnd-front)
+
+Auth UI e fluxo: skill **`supabase-auth`**.
 
 ## Env
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=   # sb_publishable_... (não anon)
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=   # sb_publishable_...
 ```
 
 ## Clientes
 
-| Contexto                      | Arquivo                             |
-| ----------------------------- | ----------------------------------- |
-| Server (Route, Action, proxy) | `infrastructure/supabase/server.ts` |
-| Browser                       | `infrastructure/supabase/client.ts` |
-| Config check                  | `infrastructure/supabase/env.ts`    |
-
-## Repos
-
-Implementam ports em `domain/` — ex.: `SupabaseHealthRepository`.
-
-`application/` nunca importa `@supabase/*`.
+| Contexto                      | Arquivo                         |
+| ----------------------------- | ------------------------------- |
+| Server (Route, Action, proxy) | `shared/api/supabase/server.ts` |
+| Browser                       | `shared/api/supabase/client.ts` |
+| Config check                  | `shared/api/supabase/env.ts`    |
 
 ## Tipos
 
-`src/infrastructure/supabase/database.ts` — gerar/atualizar com CLI Supabase.
+`shared/api/supabase/database.ts` — gerar com CLI Supabase.
 
-## Docs
+## Divisão de responsabilidade
 
-[docs/SUPABASE.md](docs/SUPABASE.md)
+| Supabase              | Front             | API (dnd-api) |
+| --------------------- | ----------------- | ------------- |
+| Auth (login)          | ✅ features/auth  | valida JWT    |
+| Postgres catálogo PHB | —                 | ✅ TypeORM    |
+| Postgres jogador      | —                 | ✅ + RLS      |
+| Health check local    | opcional via repo | —             |
 
-Ver [reference.md](reference.md) para fluxo health.
+`features/` e `entities/` **não** importam `@supabase/*` diretamente — usar `shared/api/supabase` ou hooks em `features/auth`.
+
+Docs: [docs/SUPABASE.md](docs/SUPABASE.md)

@@ -5,36 +5,42 @@
 1. [supabase.com/dashboard](https://supabase.com/dashboard) → New project
 2. Settings → **API Keys** → copiar **Project URL** e **Publishable key** (`sb_publishable_...`)
 
-> A chave legada `anon` foi substituída pela **publishable key**. Mesmos privilégios (RLS), formato novo.
-
 ## 2. Variáveis locais
 
 ```bash
 cp .env.example .env.local
 ```
 
-Preencha `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
+```env
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+```
 
 ## 3. Verificar
 
 ```bash
 pnpm dev
-# GET http://localhost:3000/api/health
-# database: "ok" quando Supabase estiver configurado
+# GET http://localhost:3001/api/health — database: "ok"
 ```
 
-## 4. Tipos do banco (quando houver tabelas)
+## 4. Tipos do banco
 
 ```bash
-pnpm dlx supabase login
-pnpm dlx supabase gen types typescript --project-id <id> > src/infrastructure/supabase/database.ts
+pnpm dlx supabase gen types typescript --project-id <id> > src/shared/api/supabase/database.ts
 ```
 
-## Clientes no código
+## Código (FSD)
 
-| Contexto                      | Arquivo                         |
-| ----------------------------- | ------------------------------- |
-| Route Handler / Server Action | `createSupabaseServerClient()`  |
-| Client Component              | `createSupabaseBrowserClient()` |
+| Contexto       | Arquivo                         |
+| -------------- | ------------------------------- |
+| Browser        | `shared/api/supabase/client.ts` |
+| Server / proxy | `shared/api/supabase/server.ts` |
+| Login UI       | `features/auth/`                |
+| Sessão cookies | `src/proxy.ts`                  |
 
-Sessão auth é renovada via `src/proxy.ts` (convenção Next.js 16+).
+## Divisão com dnd-api
+
+- **Front:** login, signup, sessão, enviar JWT
+- **API:** validar JWT (`SupabaseAuthGuard`), RLS no Postgres
+
+Skills: `supabase-auth` · `supabase` · `dnd-api-contract/references/auth-flow.md`

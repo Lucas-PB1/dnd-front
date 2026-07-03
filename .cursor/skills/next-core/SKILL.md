@@ -1,41 +1,30 @@
 ---
 name: next-core
-description: Next.js 16 App Router for dnd — pages, layouts, RSC vs client components, Server Actions, metadata. Use when creating or editing src/app pages, layouts, or server/client boundaries.
+description: Next.js 16 App Router for dnd-front — thin pages, RSC, metadata. Use when editing src/app pages or layouts.
 disable-model-invocation: true
 ---
 
-# Next.js 16 — Core (dnd)
+# Next.js 16 — App layer
 
-## Antes de codar
+## Estrutura FSD
 
-Ler `node_modules/next/dist/docs/` — Next 16 tem breaking changes vs versões anteriores.
-
-## Estrutura
-
-- `src/app/layout.tsx` — root layout, `AppProviders`, `globals.css`
-- `src/app/page.tsx` — páginas por rota
-- `src/app/api/` — Route Handlers (ver skill `next-api`)
+- `src/app/layout.tsx` — root + `AppProviders` de `app/providers/`
+- `src/app/<rota>/page.tsx` — **fino** — importa `widgets/` ou `features/`
+- `src/app/api/` — Route Handlers (skill `next-api`)
 
 ## RSC vs Client
 
-| Default                                | `"use client"`                          |
-| -------------------------------------- | --------------------------------------- |
-| Server Components                      | Hooks, estado, eventos                  |
-| `layout.tsx`, `page.tsx` sem interação | `presentation/components/*` interativos |
+| Server (default)    | `"use client"`              |
+| ------------------- | --------------------------- |
+| `page.tsx` estático | hooks, eventos, formulários |
+| fetch catálogo RSC  | `features/*/ui/`            |
 
-Providers client em `presentation/providers/` — importados no layout.
+## Regra
 
-## Server Actions
-
-```typescript
-"use server";
-// delegar para application/ — mesma regra das routes
-```
-
-## Metadata
-
-`export const metadata` em layouts/pages server.
+`app/` **não** contém lógica de negócio — só composição de slices.
 
 ## Não usar
 
 - `middleware.ts` — usar `src/proxy.ts` (skill `next-proxy`)
+
+Ler `node_modules/next/dist/docs/` para APIs novas do Next 16.

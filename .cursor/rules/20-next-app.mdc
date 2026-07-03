@@ -1,15 +1,16 @@
 ---
-description: Next.js App Router — rotas finas
+description: Next.js App Router — rotas finas no layer app
 globs: src/app/**
 alwaysApply: false
 ---
 
-# App Router (dnd)
+# App Router
 
-- `page.tsx` / `layout.tsx`: sem regra de negócio — delegar para `presentation/` ou `application/`
-- `app/api/**/route.ts`: validar com Zod → use case → `Response.json`
-- Server Actions: `"use server"`; mesma delegação para `application/`
+- `page.tsx` / `layout.tsx`: **sem lógica** — importar de `widgets/` ou `features/`
+- Providers globais: `app/providers/`
+- `app/api/**/route.ts`: validar Zod → chamar `shared/api` ou `features/*/api`
+- Server Actions: `"use server"`; delegar para `features/*/api`
 
-Next 16: ler `node_modules/next/dist/docs/` antes de APIs novas.
+Next 16: proxy em `src/proxy.ts` (não `middleware.ts`).
 
-Skill: `.cursor/skills/next-api/SKILL.md` (API) · `next-core` (páginas)
+Skills: `next-core` · `next-api` · `next-proxy`
