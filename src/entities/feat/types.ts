@@ -35,6 +35,7 @@ export type FeatOptionDefinition = {
   sortOrder: number;
   dependsOnOptionKey: string | null;
   spellMaxLevel: number | null;
+  spellSchoolSlugs: string[] | null;
   values: FeatOptionValue[];
 };
 

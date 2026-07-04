@@ -186,17 +186,18 @@ widgets/
 
 **Objetivo:** `POST /characters` com payload validado pela API.
 
-| Etapa                  | Status                                                    |
-| ---------------------- | --------------------------------------------------------- |
-| 1. Identidade          | ✅                                                        |
-| 2. Atributos           | ✅ standard-array / roll / point-buy + boosts antecedente |
-| 3. Perícias de classe  | ✅                                                        |
-| 4. Antecedente         | ✅ talento de origem + ferramenta                         |
-| 5. Traços de espécie   | ✅ `speciesChoices` via trait-choices                     |
-| 6. Opções de subclasse | ✅ `subclassOptions` via `GET /subclasses/:slug/options`  |
-| 7. Equipamento inicial | ✅ pacotes classe + antecedente                           |
-| 8. Magias iniciais     | ✅ `characterSpells` (opcional)                           |
-| 9. Revisão             | ✅                                                        |
+| Etapa                    | Status                                                     |
+| ------------------------ | ---------------------------------------------------------- |
+| 1. Identidade            | ✅                                                         |
+| 2. Atributos             | ✅ standard-array / roll / point-buy + boosts antecedente  |
+| 3. Perícias de classe    | ✅                                                         |
+| 4. Antecedente           | ✅ talento de origem + ferramenta                          |
+| 5. Traços de espécie     | ✅ `speciesChoices` via trait-choices                      |
+| 6. Opções de subclasse   | ✅ `subclassOptions` via `GET /subclasses/:slug/options`   |
+| 7. Equipamento inicial   | ✅ pacotes classe + antecedente                            |
+| 8. Magias iniciais       | ✅ `characterSpells` (opcional)                            |
+| 9. Idiomas + alinhamento | ✅ `languageSlugs`, `alignmentSlug` opcional na identidade |
+| 10. Revisão              | ✅                                                         |
 
 Após criar → redireciona para `/characters/[id]`. ✅
 
@@ -325,6 +326,8 @@ Endpoints já na API, sem front ainda.
 | Picker de itens no inventário | Slug manual                   | ✅ `GET /items` + `ItemPicker` no inventário                         |
 | CA com armadura do inventário | Só CA sem armadura            | ✅ CA + `armorClassNote` via inventário equipado                     |
 | Escolhas internas de feats    | Magic Initiate, Skilled, etc. | ✅ `featOptions` + `GET /feats/:slug/options`                        |
+| Talentos repetíveis           | Magic Initiate 2×             | ✅ `characterFeats` com `instanceIndex` + validação por instância    |
+| Fey/Shadow Touched            | Magia por escola              | ✅ `spellSchoolSlugs` em `phb_feat_option_def`                       |
 
 Fases 0–3 funcionam com a API **como está**. Fase 4 e combate completo dependem de evolução no back.
 
@@ -340,7 +343,7 @@ Sprint 4   Fase 3 — edição + delete
 Sprint 5+  Fase 4 — mesa + gaps API
 Sprint 6   Polish — mecânicas subclasse, level-up ASI, inventário com picker
 Sprint 7   CA com armadura, validação create obrigatória, editar ferramenta do antecedente
-Sprint 8   Feats com opções internas (Magic Initiate, Skilled)
+Sprint 8   Feats com opções internas (Magic Initiate, Skilled, Fey/Shadow Touched) + instâncias repetíveis
 ```
 
 ---

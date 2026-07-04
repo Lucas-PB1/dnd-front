@@ -29,6 +29,10 @@ import {
   useClassFeatures,
 } from "@/features/class-catalog/api/use-classes";
 import { isSubclassRequired } from "@/entities/character/lib/subclass";
+import {
+  featInstanceKey,
+  formatCharacterFeatLabel,
+} from "@/entities/character/lib/character-feat";
 import { groupEquipmentPackages } from "@/features/create-character/lib/equipment-selection";
 import { useMemo } from "react";
 import { Button } from "@/shared/ui/button";
@@ -693,7 +697,7 @@ export function EquipmentSection({ character }: SectionProps) {
 }
 
 export function FeatsSection({ character, labels }: SectionProps) {
-  if (character.featSlugs.length === 0) {
+  if (character.characterFeats.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
         Nenhum talento registrado.
@@ -701,32 +705,43 @@ export function FeatsSection({ character, labels }: SectionProps) {
     );
   }
 
-  const optionsByFeat = character.featOptions.reduce<
+  const optionsByInstance = character.featOptions.reduce<
     Record<string, typeof character.featOptions>
   >((acc, option) => {
-    const list = acc[option.featSlug] ?? [];
+    const key = featInstanceKey(option.featSlug, option.instanceIndex);
+    const list = acc[key] ?? [];
     list.push(option);
-    acc[option.featSlug] = list;
+    acc[key] = list;
     return acc;
   }, {});
 
   return (
     <ul className="space-y-3">
-      {character.featSlugs.map((feat) => (
-        <li key={feat} className="rounded-md border border-border px-3 py-2">
-          <p className="text-sm font-medium">{labels.resolveFeat(feat)}</p>
-          {(optionsByFeat[feat] ?? []).length > 0 ? (
-            <dl className="mt-2 grid gap-1 text-xs text-muted-foreground">
-              {optionsByFeat[feat].map((option) => (
-                <div key={option.optionKey} className="flex gap-2">
-                  <dt>{option.optionKey}:</dt>
-                  <dd className="text-foreground">{option.valueId}</dd>
-                </div>
-              ))}
-            </dl>
-          ) : null}
-        </li>
-      ))}
+      {character.characterFeats.map((feat) => {
+        const key = featInstanceKey(feat.featSlug, feat.instanceIndex);
+        const options = optionsByInstance[key] ?? [];
+        return (
+          <li key={key} className="rounded-md border border-border px-3 py-2">
+            <p className="text-sm font-medium">
+              {formatCharacterFeatLabel(
+                feat,
+                { [feat.featSlug]: labels.resolveFeat(feat.featSlug) },
+                character.characterFeats,
+              )}
+            </p>
+            {options.length > 0 ? (
+              <dl className="mt-2 grid gap-1 text-xs text-muted-foreground">
+                {options.map((option) => (
+                  <div key={option.optionKey} className="flex gap-2">
+                    <dt>{option.optionKey}:</dt>
+                    <dd className="text-foreground">{option.valueId}</dd>
+                  </div>
+                ))}
+              </dl>
+            ) : null}
+          </li>
+        );
+      })}
     </ul>
   );
 }

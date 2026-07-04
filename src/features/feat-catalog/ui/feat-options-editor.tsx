@@ -2,10 +2,13 @@
 
 import { useMemo } from "react";
 
+import type { CharacterFeat } from "@/entities/character/sheet-types";
 import type { FeatOption } from "@/entities/character/sheet-types";
+import { formatCharacterFeatLabel } from "@/entities/character/lib/character-feat";
 import { useClassSpells } from "@/features/class-catalog/api/use-classes";
 import { useFeatOptions } from "@/features/feat-catalog/api/use-feat-options";
 import { useItems } from "@/features/item-catalog/api/use-items";
+import { useSpells } from "@/features/spell-catalog/api/use-spells";
 import { useSkills } from "@/features/reference-catalog/api/use-reference";
 import { CatalogSelect } from "@/features/create-character/ui/catalog-select";
 import {
@@ -15,41 +18,54 @@ import {
   FieldLabel,
 } from "@/shared/ui/field";
 
-type FeatOptionsEditorProps = {
-  featSlug: string;
+type FeatOptionFieldsProps = {
+  feat: CharacterFeat;
   value: FeatOption[];
   onChange: (next: FeatOption[]) => void;
 };
 
 function upsertOption(
   current: FeatOption[],
-  featSlug: string,
+  feat: CharacterFeat,
   optionKey: string,
   valueId: string,
 ): FeatOption[] {
   const next = current.filter(
-    (o) => !(o.featSlug === featSlug && o.optionKey === optionKey),
+    (option) =>
+      !(
+        option.featSlug === feat.featSlug &&
+        option.instanceIndex === feat.instanceIndex &&
+        option.optionKey === optionKey
+      ),
   );
   if (valueId) {
-    next.push({ featSlug, optionKey, valueId, instanceIndex: 0 });
+    next.push({
+      featSlug: feat.featSlug,
+      instanceIndex: feat.instanceIndex,
+      optionKey,
+      valueId,
+    });
   }
   return next;
 }
 
-function FeatOptionFields({
-  featSlug,
-  value,
-  onChange,
-}: FeatOptionsEditorProps) {
-  const optionsQuery = useFeatOptions(featSlug, !!featSlug);
+function FeatOptionFields({ feat, value, onChange }: FeatOptionFieldsProps) {
+  const optionsQuery = useFeatOptions(feat.featSlug, !!feat.featSlug);
   const defs = optionsQuery.data?.data ?? [];
 
-  const spellList = value.find(
-    (o) => o.featSlug === featSlug && o.optionKey === "spellList",
+  const instanceOptions = value.filter(
+    (option) =>
+      option.featSlug === feat.featSlug &&
+      option.instanceIndex === feat.instanceIndex,
+  );
+
+  const spellList = instanceOptions.find(
+    (option) => option.optionKey === "spellList",
   )?.valueId;
 
   const classSpellsLevel0 = useClassSpells(spellList ?? "", 0, !!spellList);
   const classSpellsLevel1 = useClassSpells(spellList ?? "", 1, !!spellList);
+  const allSpells = useSpells();
   const skills = useSkills();
   const tools = useItems({ itemType: "tool", limit: 200 });
 
@@ -79,30 +95,24 @@ function FeatOptionFields({
     <FieldGroup>
       {defs.map((def) => {
         const selected =
-          value.find(
-            (o) => o.featSlug === featSlug && o.optionKey === def.optionKey,
-          )?.valueId ?? "";
+          instanceOptions.find((option) => option.optionKey === def.optionKey)
+            ?.valueId ?? "";
 
         if (def.valueType === "catalog") {
           return (
             <Field key={def.optionKey}>
               <FieldLabel>{def.label}</FieldLabel>
               <CatalogSelect
-                id={`${featSlug}-${def.optionKey}`}
+                id={`${feat.featSlug}-${feat.instanceIndex}-${def.optionKey}`}
                 label={def.label}
-                options={def.values.map((v) => ({
-                  value: v.valueId,
-                  label: v.label,
+                options={def.values.map((item) => ({
+                  value: item.valueId,
+                  label: item.label,
                 }))}
                 value={selected}
                 onChange={(e) =>
                   onChange(
-                    upsertOption(
-                      value,
-                      featSlug,
-                      def.optionKey,
-                      e.target.value,
-                    ),
+                    upsertOption(value, feat, def.optionKey, e.target.value),
                   )
                 }
               />
@@ -113,18 +123,24 @@ function FeatOptionFields({
         if (def.valueType === "spell") {
           const dependsMet =
             !def.dependsOnOptionKey ||
-            value.some(
-              (o) =>
-                o.featSlug === featSlug &&
-                o.optionKey === def.dependsOnOptionKey &&
-                o.valueId,
+            instanceOptions.some(
+              (option) =>
+                option.optionKey === def.dependsOnOptionKey && option.valueId,
             );
-          const spellRows =
-            def.spellMaxLevel === 0
+
+          const spellRows = def.spellSchoolSlugs?.length
+            ? (allSpells.data?.data ?? []).filter(
+                (spell) =>
+                  spell.level === (def.spellMaxLevel ?? 1) &&
+                  def.spellSchoolSlugs?.includes(spell.schoolSlug),
+              )
+            : def.spellMaxLevel === 0
               ? (classSpellsLevel0.data?.data ?? [])
               : (classSpellsLevel1.data?.data ?? []);
-          const loading =
-            def.spellMaxLevel === 0
+
+          const loading = def.spellSchoolSlugs?.length
+            ? allSpells.isPending
+            : def.spellMaxLevel === 0
               ? classSpellsLevel0.isPending
               : classSpellsLevel1.isPending;
 
@@ -137,7 +153,7 @@ function FeatOptionFields({
                 </FieldDescription>
               ) : (
                 <CatalogSelect
-                  id={`${featSlug}-${def.optionKey}`}
+                  id={`${feat.featSlug}-${feat.instanceIndex}-${def.optionKey}`}
                   label={def.label}
                   options={spellRows.map((spell) => ({
                     value: spell.slug,
@@ -147,12 +163,7 @@ function FeatOptionFields({
                   value={selected}
                   onChange={(e) =>
                     onChange(
-                      upsertOption(
-                        value,
-                        featSlug,
-                        def.optionKey,
-                        e.target.value,
-                      ),
+                      upsertOption(value, feat, def.optionKey, e.target.value),
                     )
                   }
                 />
@@ -167,19 +178,14 @@ function FeatOptionFields({
               <FieldLabel>{def.label}</FieldLabel>
               <FieldDescription>Perícia ou ferramenta do PHB.</FieldDescription>
               <CatalogSelect
-                id={`${featSlug}-${def.optionKey}`}
+                id={`${feat.featSlug}-${feat.instanceIndex}-${def.optionKey}`}
                 label={def.label}
                 options={proficiencyOptions}
                 isLoading={skills.isPending || tools.isPending}
                 value={selected}
                 onChange={(e) =>
                   onChange(
-                    upsertOption(
-                      value,
-                      featSlug,
-                      def.optionKey,
-                      e.target.value,
-                    ),
+                    upsertOption(value, feat, def.optionKey, e.target.value),
                   )
                 }
               />
@@ -194,18 +200,17 @@ function FeatOptionFields({
 }
 
 export function FeatOptionsEditor({
-  featSlugs,
+  characterFeats,
   featNameBySlug,
   value,
   onChange,
 }: {
-  featSlugs: string[];
+  characterFeats: CharacterFeat[];
   featNameBySlug?: Record<string, string>;
   value: FeatOption[];
   onChange: (next: FeatOption[]) => void;
 }) {
-  const slugsWithOptions = featSlugs.filter(Boolean);
-  if (slugsWithOptions.length === 0) {
+  if (characterFeats.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
         Nenhum talento com escolhas internas.
@@ -215,12 +220,19 @@ export function FeatOptionsEditor({
 
   return (
     <div className="space-y-6">
-      {slugsWithOptions.map((slug) => (
-        <div key={slug} className="space-y-3">
+      {characterFeats.map((feat) => (
+        <div
+          key={`${feat.featSlug}-${feat.instanceIndex}`}
+          className="space-y-3"
+        >
           <h3 className="text-sm font-semibold">
-            {featNameBySlug?.[slug] ?? slug}
+            {formatCharacterFeatLabel(
+              feat,
+              featNameBySlug ?? {},
+              characterFeats,
+            )}
           </h3>
-          <FeatOptionFields featSlug={slug} value={value} onChange={onChange} />
+          <FeatOptionFields feat={feat} value={value} onChange={onChange} />
         </div>
       ))}
     </div>

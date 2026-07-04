@@ -5,6 +5,7 @@ import type {
   SpeciesChoice,
   SubclassOption,
   FeatOption,
+  CharacterFeat,
 } from "@/entities/character/sheet-types";
 
 export type {
@@ -14,6 +15,7 @@ export type {
   SpeciesChoice,
   SubclassOption,
   FeatOption,
+  CharacterFeat,
 } from "@/entities/character/sheet-types";
 export type AbilityScores = {
   forca: number;
@@ -42,6 +44,7 @@ export type CharacterDetail = {
   backgroundSkillSlugs: string[];
   speciesChoices: SpeciesChoice[];
   subclassOptions: SubclassOption[];
+  characterFeats: CharacterFeat[];
   featSlugs: string[];
   featOptions: FeatOption[];
   characterSpells: CharacterSpell[];

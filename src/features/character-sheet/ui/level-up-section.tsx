@@ -2,6 +2,10 @@
 
 import { useState } from "react";
 
+import {
+  appendCharacterFeat,
+  canAddCharacterFeat,
+} from "@/entities/character/lib/character-feat";
 import type { CharacterDetail } from "@/entities/character/types";
 import type { CharacterSpell } from "@/entities/character/sheet-types";
 import { useClassSubclasses } from "@/features/class-catalog/api/use-classes";
@@ -91,10 +95,22 @@ export function LevelUpSection({
       payload.characterSpells = merged;
     }
     if (data.isAsiOrFeatLevel && selectedFeatSlug) {
-      const mergedFeats = [
-        ...new Set([...character.featSlugs, selectedFeatSlug]),
-      ];
-      payload.featSlugs = mergedFeats;
+      const feat = (feats.data?.data ?? []).find(
+        (item) => item.slug === selectedFeatSlug,
+      );
+      if (
+        feat &&
+        canAddCharacterFeat(
+          character.characterFeats,
+          selectedFeatSlug,
+          feat.repeatable,
+        )
+      ) {
+        payload.characterFeats = appendCharacterFeat(
+          character.characterFeats,
+          selectedFeatSlug,
+        );
+      }
     }
     await levelUp.mutateAsync(payload);
     setSelectedSpells([]);
@@ -147,8 +163,19 @@ export function LevelUpSection({
               options={[
                 { value: "", label: "Nenhum — só subir de nível" },
                 ...(feats.data?.data ?? [])
-                  .filter((feat) => !character.featSlugs.includes(feat.slug))
-                  .map((feat) => ({ value: feat.slug, label: feat.name })),
+                  .filter((feat) =>
+                    canAddCharacterFeat(
+                      character.characterFeats,
+                      feat.slug,
+                      feat.repeatable,
+                    ),
+                  )
+                  .map((feat) => ({
+                    value: feat.slug,
+                    label: feat.repeatable
+                      ? `${feat.name} (repetível)`
+                      : feat.name,
+                  })),
               ]}
               value={selectedFeatSlug}
               onChange={(e) => setSelectedFeatSlug(e.target.value)}

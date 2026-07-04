@@ -30,7 +30,7 @@ const subclassOptionSchema = z.object({
 
 const featOptionSchema = z.object({
   featSlug: z.string().min(1),
-  instanceIndex: z.number().int().min(0).optional(),
+  instanceIndex: z.number().int().min(0),
   optionKey: z.string().min(1),
   valueId: z.string().min(1),
 });
@@ -71,6 +71,8 @@ export const createCharacterBaseSchema = z.object({
   speciesChoices: z.array(speciesChoiceSchema),
   subclassOptions: z.array(subclassOptionSchema),
   featOptions: z.array(featOptionSchema),
+  alignmentSlug: z.string().optional(),
+  languageSlugs: z.array(z.string()),
   equipment: z.array(equipmentSchema),
   characterSpells: z.array(characterSpellSchema),
 });

@@ -44,7 +44,9 @@ function previewCharacter(values: CreateCharacterInput): CharacterDetail {
     speciesSlug: values.speciesSlug,
     backgroundSlug: values.backgroundSlug,
     subclassSlug: values.subclassSlug?.trim() ? values.subclassSlug : null,
-    alignmentSlug: null,
+    alignmentSlug: values.alignmentSlug?.trim()
+      ? values.alignmentSlug.trim()
+      : null,
     abilityScores: finalScores,
     hitPointsMax: null,
     hitPointsCurrent: null,
@@ -54,10 +56,11 @@ function previewCharacter(values: CreateCharacterInput): CharacterDetail {
     speciesChoices: values.speciesChoices,
     subclassOptions: values.subclassOptions,
     featSlugs: [],
+    characterFeats: [],
     featOptions: values.featOptions,
     characterSpells: values.characterSpells,
     equipment: values.equipment,
-    languageSlugs: [],
+    languageSlugs: values.languageSlugs,
     abilityGenerationMethodSlug: values.abilityGenerationMethodSlug,
     backgroundAbilityBoostPlus2Slug:
       values.backgroundAbilityBoostPlus2Slug ?? null,
@@ -164,6 +167,14 @@ export function StepReview({ control }: StepReviewProps) {
         <p className="text-muted-foreground">
           Método: {values.abilityGenerationMethodSlug}
         </p>
+        {labels.identity.alignmentName ? (
+          <p className="text-muted-foreground">
+            Alinhamento:{" "}
+            <span className="text-foreground">
+              {labels.identity.alignmentName}
+            </span>
+          </p>
+        ) : null}
       </section>
 
       <section className="space-y-2">
@@ -325,6 +336,22 @@ export function StepReview({ control }: StepReviewProps) {
                 <span className="ml-1 text-xs text-muted-foreground">
                   ({s.listType})
                 </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {values.languageSlugs.length > 0 ? (
+        <section className="space-y-2">
+          <h3 className="font-semibold">Idiomas</h3>
+          <ul className="flex flex-wrap gap-2">
+            {values.languageSlugs.map((slug) => (
+              <li
+                key={slug}
+                className="rounded-md border border-border px-2 py-1"
+              >
+                {labels.resolveLanguage(slug)}
               </li>
             ))}
           </ul>

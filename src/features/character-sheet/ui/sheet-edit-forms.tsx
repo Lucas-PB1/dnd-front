@@ -41,7 +41,16 @@ import { StepEquipment } from "@/features/create-character/ui/steps/step-equipme
 import { StepSpeciesChoices } from "@/features/create-character/ui/steps/step-species-choices";
 import { StepSubclassOptions } from "@/features/create-character/ui/steps/step-subclass-options";
 import { StepSpells } from "@/features/create-character/ui/steps/step-spells";
-import type { FeatOption } from "@/entities/character/sheet-types";
+import type {
+  CharacterFeat,
+  FeatOption,
+} from "@/entities/character/sheet-types";
+import {
+  appendCharacterFeat,
+  canAddCharacterFeat,
+  featInstanceKey,
+  formatCharacterFeatLabel,
+} from "@/entities/character/lib/character-feat";
 import { FeatOptionsEditor } from "@/features/feat-catalog/ui/feat-options-editor";
 import {
   useAlignments,
@@ -684,67 +693,135 @@ export function EditEquipmentForm(props: EditFormProps) {
 export function EditFeatsForm({ character, onSuccess }: EditFormProps) {
   const { patch, formError, submit } = useSectionPatch(character, onSuccess);
   const feats = useFeats();
-  const [selected, setSelected] = useState<string[]>(character.featSlugs);
+  const [characterFeats, setCharacterFeats] = useState<CharacterFeat[]>(
+    character.characterFeats,
+  );
   const [featOptions, setFeatOptions] = useState<FeatOption[]>(
     character.featOptions,
   );
+  const [addFeatSlug, setAddFeatSlug] = useState("");
 
   const featNameBySlug = Object.fromEntries(
     (feats.data?.data ?? []).map((feat) => [feat.slug, feat.name]),
   );
+  const featRepeatableBySlug = Object.fromEntries(
+    (feats.data?.data ?? []).map((feat) => [feat.slug, feat.repeatable]),
+  );
 
-  function toggle(slug: string) {
-    setSelected((prev) => {
-      const next = prev.includes(slug)
-        ? prev.filter((s) => s !== slug)
-        : [...prev, slug];
-      if (!next.includes(slug)) {
-        setFeatOptions((options) => options.filter((o) => o.featSlug !== slug));
-      }
-      return next;
-    });
+  function removeFeat(feat: CharacterFeat) {
+    const key = featInstanceKey(feat.featSlug, feat.instanceIndex);
+    setCharacterFeats((prev) =>
+      prev.filter(
+        (item) => featInstanceKey(item.featSlug, item.instanceIndex) !== key,
+      ),
+    );
+    setFeatOptions((prev) =>
+      prev.filter(
+        (option) =>
+          !(
+            option.featSlug === feat.featSlug &&
+            option.instanceIndex === feat.instanceIndex
+          ),
+      ),
+    );
   }
+
+  function handleAddFeat() {
+    if (!addFeatSlug) return;
+    const repeatable = featRepeatableBySlug[addFeatSlug] ?? false;
+    if (!canAddCharacterFeat(characterFeats, addFeatSlug, repeatable)) return;
+    setCharacterFeats((prev) => appendCharacterFeat(prev, addFeatSlug));
+    setAddFeatSlug("");
+  }
+
+  const addableFeats = (feats.data?.data ?? []).filter((feat) =>
+    canAddCharacterFeat(characterFeats, feat.slug, feat.repeatable),
+  );
 
   return (
     <form
       className="space-y-4"
       onSubmit={(e) => {
         e.preventDefault();
+        const validKeys = new Set(
+          characterFeats.map((feat) =>
+            featInstanceKey(feat.featSlug, feat.instanceIndex),
+          ),
+        );
         submit({
-          featSlugs: selected,
-          featOptions: featOptions.filter((o) => selected.includes(o.featSlug)),
+          characterFeats,
+          featOptions: featOptions.filter((option) =>
+            validKeys.has(
+              featInstanceKey(option.featSlug, option.instanceIndex),
+            ),
+          ),
         });
       }}
     >
       {feats.isPending ? (
         <p className="text-sm text-muted-foreground">Carregando talentos…</p>
       ) : (
-        <ul className="grid gap-2 sm:grid-cols-2">
-          {(feats.data?.data ?? []).map((feat) => (
-            <li key={feat.slug}>
-              <label
-                className={cn(
-                  "flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 text-sm",
-                  selected.includes(feat.slug) && "border-primary bg-primary/5",
-                )}
+        <>
+          <ul className="space-y-2">
+            {characterFeats.map((feat) => (
+              <li
+                key={featInstanceKey(feat.featSlug, feat.instanceIndex)}
+                className="flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2 text-sm"
               >
-                <input
-                  type="checkbox"
-                  checked={selected.includes(feat.slug)}
-                  onChange={() => toggle(feat.slug)}
-                  className="size-4 rounded border-input"
+                <span className="font-medium">
+                  {formatCharacterFeatLabel(
+                    feat,
+                    featNameBySlug,
+                    characterFeats,
+                  )}
+                </span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeFeat(feat)}
+                >
+                  Remover
+                </Button>
+              </li>
+            ))}
+          </ul>
+          {addableFeats.length > 0 ? (
+            <div className="flex flex-wrap items-end gap-2">
+              <div className="min-w-[220px] flex-1">
+                <CatalogSelect
+                  id="add-feat"
+                  label="Adicionar talento"
+                  options={[
+                    { value: "", label: "Selecione…" },
+                    ...addableFeats.map((feat) => ({
+                      value: feat.slug,
+                      label: feat.repeatable
+                        ? `${feat.name} (repetível)`
+                        : feat.name,
+                    })),
+                  ]}
+                  value={addFeatSlug}
+                  onChange={(e) => setAddFeatSlug(e.target.value)}
                 />
-                {feat.name}
-              </label>
-            </li>
-          ))}
-        </ul>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={!addFeatSlug}
+                onClick={handleAddFeat}
+              >
+                Adicionar
+              </Button>
+            </div>
+          ) : null}
+        </>
       )}
-      {selected.length > 0 ? (
+      {characterFeats.length > 0 ? (
         <div className="border-t border-border pt-4">
           <h3 className="mb-3 text-sm font-semibold">Opções dos talentos</h3>
           <FeatOptionsEditor
-            featSlugs={selected}
+            characterFeats={characterFeats}
             featNameBySlug={featNameBySlug}
             value={featOptions}
             onChange={setFeatOptions}

@@ -90,7 +90,10 @@ export type LevelUpPayload = {
   classSkillSlugs?: string[];
   speciesChoices?: import("@/entities/character/sheet-types").SpeciesChoice[];
   subclassOptions?: import("@/entities/character/sheet-types").SubclassOption[];
+  /** @deprecated Prefer characterFeats */
   featSlugs?: string[];
+  characterFeats?: import("@/entities/character/sheet-types").CharacterFeat[];
+  featOptions?: import("@/entities/character/sheet-types").FeatOption[];
   characterSpells?: import("@/entities/character/sheet-types").CharacterSpell[];
   equipment?: import("@/entities/character/sheet-types").CharacterEquipment[];
   languageSlugs?: string[];

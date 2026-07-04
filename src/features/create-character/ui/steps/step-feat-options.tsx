@@ -59,6 +59,8 @@ export function StepFeatOptions({
     );
   }
 
+  const originFeat = { featSlug: originFeatSlug, instanceIndex: 0 };
+
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
@@ -66,7 +68,7 @@ export function StepFeatOptions({
         talento automaticamente na ficha.
       </p>
       <FeatOptionsEditor
-        featSlugs={[originFeatSlug]}
+        characterFeats={[originFeat]}
         featNameBySlug={
           originFeatName ? { [originFeatSlug]: originFeatName } : undefined
         }

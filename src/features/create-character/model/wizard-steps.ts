@@ -8,6 +8,7 @@ export const WIZARD_STEPS = [
   { id: "subclass", label: "Subclasse" },
   { id: "equipment", label: "Equipamento" },
   { id: "spells", label: "Magias" },
+  { id: "languages", label: "Idiomas" },
   { id: "review", label: "Revisão" },
 ] as const;
 

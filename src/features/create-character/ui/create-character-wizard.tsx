@@ -31,6 +31,7 @@ import { StepClassSkills } from "@/features/create-character/ui/steps/step-class
 import { StepEquipment } from "@/features/create-character/ui/steps/step-equipment";
 import { StepFeatOptions } from "@/features/create-character/ui/steps/step-feat-options";
 import { StepIdentity } from "@/features/create-character/ui/steps/step-identity";
+import { StepLanguages } from "@/features/create-character/ui/steps/step-languages";
 import { StepReview } from "@/features/create-character/ui/steps/step-review";
 import { StepSpeciesChoices } from "@/features/create-character/ui/steps/step-species-choices";
 import { StepSpells } from "@/features/create-character/ui/steps/step-spells";
@@ -58,6 +59,8 @@ const DEFAULT_VALUES: CreateCharacterInput = {
   speciesChoices: [],
   subclassOptions: [],
   featOptions: [],
+  alignmentSlug: "",
+  languageSlugs: [],
   equipment: [],
   characterSpells: [],
 };
@@ -118,6 +121,9 @@ export function CreateCharacterWizard() {
   );
   const originFeatSlug = backgroundDetail.data?.originFeatSlug ?? "";
   const originFeatOptionDefs = useFeatOptions(originFeatSlug, !!originFeatSlug);
+
+  const hasOriginFeatStep =
+    !!originFeatSlug && (originFeatOptionDefs.data?.data.length ?? 0) > 0;
 
   const prevClassSlugRef = useRef(classSlug);
   const prevSpeciesSlugRef = useRef(speciesSlug);
@@ -235,7 +241,7 @@ export function CreateCharacterWizard() {
         setBackgroundError("Escolha a ferramenta do antecedente.");
         return;
       }
-      setStep("feats");
+      setStep(hasOriginFeatStep ? "feats" : "species");
       return;
     }
 
@@ -300,12 +306,21 @@ export function CreateCharacterWizard() {
     }
 
     if (step === "spells") {
+      setStep("languages");
+      return;
+    }
+
+    if (step === "languages") {
       setStep("review");
       return;
     }
   }
 
   function goBack() {
+    if (step === "species" && !hasOriginFeatStep) {
+      setStep("background");
+      return;
+    }
     const prev = prevWizardStep(step);
     if (prev) setStep(prev);
   }
@@ -396,6 +411,10 @@ export function CreateCharacterWizard() {
 
       {step === "spells" ? (
         <StepSpells control={control} setValue={setValue} />
+      ) : null}
+
+      {step === "languages" ? (
+        <StepLanguages control={control} setValue={setValue} />
       ) : null}
 
       {step === "review" ? <StepReview control={control} /> : null}

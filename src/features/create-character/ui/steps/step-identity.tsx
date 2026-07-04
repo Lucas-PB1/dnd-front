@@ -18,6 +18,7 @@ import {
   type CreateCharacterInput,
 } from "@/features/create-character/model/create-character.schema";
 import { CatalogSelect } from "@/features/create-character/ui/catalog-select";
+import { useAlignments } from "@/features/reference-catalog/api/use-reference";
 import { useSpecies } from "@/features/species-catalog/api/use-species";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/shared/ui/field";
 import { Input } from "@/shared/ui/input";
@@ -32,6 +33,7 @@ export function StepIdentity({ register, control, errors }: StepIdentityProps) {
   const classes = useClasses();
   const species = useSpecies();
   const backgrounds = useBackgrounds();
+  const alignments = useAlignments();
 
   const level = useWatch({ control, name: "level", defaultValue: 1 });
   const classSlug = useWatch({ control, name: "classSlug", defaultValue: "" });
@@ -131,6 +133,21 @@ export function StepIdentity({ register, control, errors }: StepIdentityProps) {
         }))}
         error={errors.backgroundSlug}
         {...register("backgroundSlug")}
+      />
+
+      <CatalogSelect
+        id="alignmentSlug"
+        label="Alinhamento"
+        description="Opcional — pode definir depois na ficha."
+        isLoading={alignments.isPending}
+        options={[
+          { value: "", label: "Não definido" },
+          ...(alignments.data?.data ?? []).map((alignment) => ({
+            value: alignment.slug,
+            label: alignment.name,
+          })),
+        ]}
+        {...register("alignmentSlug")}
       />
 
       {backgroundSlug && backgroundAbilityOptions.length > 0 ? (
