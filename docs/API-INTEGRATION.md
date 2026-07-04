@@ -25,3 +25,5 @@ Criação e leitura via API — sem dados PHB locais no front.
 - **Listar / detalhe:** `/characters`, `/characters/[id]` → `GET /characters`
 
 Regras de jogo (PV, PB, validação de subclasse por nível, etc.) ficam na **dnd-api**.
+
+Roadmap da ficha completa: [CHARACTER-SHEET-PLAN.md](./CHARACTER-SHEET-PLAN.md)
