@@ -25,6 +25,7 @@ import {
   type WizardNavOptions,
   type WizardStepId,
 } from "@/features/create-character/model/wizard-steps";
+import { useWizardHasSubclassStep } from "@/features/create-character/api/use-wizard-has-subclass-step";
 import { useWizardHasSpellStep } from "@/features/create-character/api/use-wizard-has-spell-step";
 import { StepAbilities } from "@/features/create-character/ui/steps/step-abilities";
 import { StepBackground } from "@/features/create-character/ui/steps/step-background";
@@ -132,10 +133,15 @@ export function CreateCharacterWizard() {
     subclassSlug ?? "",
     level,
   );
+  const { hasSubclassStep } = useWizardHasSubclassStep(
+    level,
+    subclassSlug ?? "",
+  );
 
   const wizardNav: WizardNavOptions = {
     skipSpells: !hasSpellStep,
     skipFeats: !hasFeatsStep,
+    skipSubclass: !hasSubclassStep,
   };
   const visibleSteps = visibleWizardSteps(wizardNav);
 
@@ -314,7 +320,7 @@ export function CreateCharacterWizard() {
           return;
         }
       }
-      setStep("subclass");
+      setStep(hasSubclassStep ? "subclass" : "equipment");
       return;
     }
 

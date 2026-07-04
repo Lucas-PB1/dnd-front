@@ -216,15 +216,23 @@ export function TableStateSection({
             />
           </Field>
           <Field>
-            <FieldLabel htmlFor="concentration">
-              Concentração (slug ou vazio)
-            </FieldLabel>
-            <Input
+            <FieldLabel htmlFor="concentration">Concentração</FieldLabel>
+            <select
               id="concentration"
               value={concentration}
               onChange={(e) => setConcentration(e.target.value)}
-              placeholder="slug da magia ou vazio"
-            />
+              className={cn(
+                "h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm",
+                "dark:bg-input/30",
+              )}
+            >
+              <option value="">Nenhuma</option>
+              {character.characterSpells.map((s) => (
+                <option key={s.spellSlug} value={s.spellSlug}>
+                  {labels.resolveSpell(s.spellSlug)}
+                </option>
+              ))}
+            </select>
           </Field>
           <Button
             type="button"

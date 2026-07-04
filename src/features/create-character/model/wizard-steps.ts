@@ -17,6 +17,7 @@ export type WizardStepId = (typeof WIZARD_STEPS)[number]["id"];
 export type WizardNavOptions = {
   skipSpells?: boolean;
   skipFeats?: boolean;
+  skipSubclass?: boolean;
 };
 
 function shouldSkipStep(
@@ -25,6 +26,7 @@ function shouldSkipStep(
 ): boolean {
   if (step === "spells" && options?.skipSpells) return true;
   if (step === "feats" && options?.skipFeats) return true;
+  if (step === "subclass" && options?.skipSubclass) return true;
   return false;
 }
 

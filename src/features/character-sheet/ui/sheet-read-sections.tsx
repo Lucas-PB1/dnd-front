@@ -312,6 +312,7 @@ export function SpeciesChoicesSection({ character }: SectionProps) {
         ...choice,
         traitName: match?.traitName ?? choice.choiceKind,
         choiceName: match?.choiceName ?? choice.choiceSlug,
+        level1Benefit: match?.level1Benefit ?? null,
       };
     });
   }, [character.speciesChoices, traitChoices.data?.data]);
@@ -337,6 +338,11 @@ export function SpeciesChoicesSection({ character }: SectionProps) {
         >
           <p className="text-xs text-muted-foreground">{item.traitName}</p>
           <p className="font-medium">{item.choiceName}</p>
+          {item.level1Benefit ? (
+            <p className="mt-1 text-sm text-muted-foreground">
+              {item.level1Benefit}
+            </p>
+          ) : null}
         </li>
       ))}
     </ul>

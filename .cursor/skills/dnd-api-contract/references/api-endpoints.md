@@ -15,7 +15,7 @@ Fonte canônica: `dnd-api/.cursor/skills/api-consumer-next/references/api-endpoi
 | GET    | `/species`, `/species/:slug`, `/species/:slug/traits`, `/species/:slug/trait-choices`                                                    |
 | GET    | `/backgrounds`, `/backgrounds/:slug`, `/backgrounds/:slug/equipment`                                                                     |
 | GET    | `/spells`, `/spells/:slug`                                                                                                               |
-| GET    | `/feats`, `/feats/:slug`                                                                                                                 |
+| GET    | `/feats`, `/feats/:slug`, `/feats/:slug/options`                                                                                         |
 | GET    | `/skills`, `/skills/:slug`                                                                                                               |
 | GET    | `/abilities`                                                                                                                             |
 | GET    | `/weapons`, `/weapons/:slug`, `/armor`, `/armor/:slug`                                                                                   |

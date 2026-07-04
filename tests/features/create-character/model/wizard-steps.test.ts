@@ -41,15 +41,19 @@ describe("computeWizardHasSpellStep", () => {
 });
 
 describe("wizard step navigation", () => {
-  it("skips spells and feats when configured", () => {
-    const nav = { skipSpells: true, skipFeats: true };
+  it("skips spells, feats and subclass when configured", () => {
+    const nav = { skipSpells: true, skipFeats: true, skipSubclass: true };
     expect(visibleWizardSteps(nav).map((step) => step.id)).not.toContain(
       "spells",
     );
     expect(visibleWizardSteps(nav).map((step) => step.id)).not.toContain(
       "feats",
     );
+    expect(visibleWizardSteps(nav).map((step) => step.id)).not.toContain(
+      "subclass",
+    );
     expect(nextWizardStep("equipment", nav)).toBe("languages");
+    expect(nextWizardStep("species", nav)).toBe("equipment");
     expect(prevWizardStep("species", nav)).toBe("background");
   });
 
