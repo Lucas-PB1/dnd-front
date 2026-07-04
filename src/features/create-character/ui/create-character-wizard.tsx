@@ -21,10 +21,11 @@ import {
 import { toCreateCharacterPayload } from "@/features/create-character/model/to-create-payload";
 import {
   prevWizardStep,
-  WIZARD_STEPS,
+  visibleWizardSteps,
+  type WizardNavOptions,
   type WizardStepId,
-  wizardStepIndex,
 } from "@/features/create-character/model/wizard-steps";
+import { useWizardHasSpellStep } from "@/features/create-character/api/use-wizard-has-spell-step";
 import { StepAbilities } from "@/features/create-character/ui/steps/step-abilities";
 import { StepBackground } from "@/features/create-character/ui/steps/step-background";
 import { StepClassSkills } from "@/features/create-character/ui/steps/step-class-skills";
@@ -126,6 +127,17 @@ export function CreateCharacterWizard() {
   const originFeatSlug = backgroundDetail.data?.originFeatSlug ?? "";
   const asiSlotCount = countAsiFeatSlots(level);
   const hasFeatsStep = !!originFeatSlug || asiSlotCount > 0;
+  const { hasSpellStep } = useWizardHasSpellStep(
+    classSlug,
+    subclassSlug ?? "",
+    level,
+  );
+
+  const wizardNav: WizardNavOptions = {
+    skipSpells: !hasSpellStep,
+    skipFeats: !hasFeatsStep,
+  };
+  const visibleSteps = visibleWizardSteps(wizardNav);
 
   const prevClassSlugRef = useRef(classSlug);
   const prevSpeciesSlugRef = useRef(speciesSlug);
@@ -326,7 +338,7 @@ export function CreateCharacterWizard() {
     }
 
     if (step === "equipment") {
-      setStep("spells");
+      setStep(hasSpellStep ? "spells" : "languages");
       return;
     }
 
@@ -342,15 +354,11 @@ export function CreateCharacterWizard() {
   }
 
   function goBack() {
-    if (step === "species" && !hasFeatsStep) {
-      setStep("background");
-      return;
-    }
-    const prev = prevWizardStep(step);
+    const prev = prevWizardStep(step, wizardNav);
     if (prev) setStep(prev);
   }
 
-  const stepIndex = wizardStepIndex(step);
+  const stepIndex = visibleSteps.findIndex((item) => item.id === step);
   const isLastStep = step === "review";
 
   return (
@@ -360,7 +368,7 @@ export function CreateCharacterWizard() {
         create.mutate(toCreateCharacterPayload(values));
       })}
     >
-      <WizardStepIndicator currentStep={step} />
+      <WizardStepIndicator currentStep={step} navOptions={wizardNav} />
 
       {step === "identity" ? (
         <StepIdentity register={register} control={control} errors={errors} />
@@ -476,7 +484,7 @@ export function CreateCharacterWizard() {
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Etapa {stepIndex + 1} de {WIZARD_STEPS.length} — a dnd-api valida
+        Etapa {stepIndex + 1} de {visibleSteps.length} — a dnd-api valida
         atributos, perícias e calcula PV/PB.
       </p>
     </form>

@@ -17,3 +17,5 @@ Tarefas não triviais: ler `.cursor/skills/dnd-router/SKILL.md` e carregar a ski
 ## Scripts
 
 `pnpm lint` · `pnpm format:check` · `pnpm test:run` · `pnpm build`
+
+Após mudanças em `src/`, ver regra **51-front-verify** — rodar `pnpm lint` antes de concluir.

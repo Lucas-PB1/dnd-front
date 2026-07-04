@@ -33,6 +33,9 @@ import {
   featInstanceKey,
   formatCharacterFeatLabel,
 } from "@/entities/character/lib/character-feat";
+import { useFeatOptionLabels } from "@/features/feat-catalog/api/use-feat-option-labels";
+import { useFeatDetails } from "@/features/feat-catalog/api/use-feat-details";
+import { FeatBenefits } from "@/features/feat-catalog/ui/feat-benefits";
 import { groupEquipmentPackages } from "@/features/create-character/lib/equipment-selection";
 import { useMemo } from "react";
 import { Button } from "@/shared/ui/button";
@@ -697,6 +700,18 @@ export function EquipmentSection({ character }: SectionProps) {
 }
 
 export function FeatsSection({ character, labels }: SectionProps) {
+  const featSlugs = character.characterFeats.map((feat) => feat.featSlug);
+  const { featBySlug, isLoading: featDetailsLoading } =
+    useFeatDetails(featSlugs);
+  const { resolveFeatOption, isLoading: featOptionsLoading } =
+    useFeatOptionLabels({
+      characterFeats: character.characterFeats,
+      labelContext: {
+        resolveSpell: labels.resolveSpell,
+        resolveSkill: labels.resolveSkill,
+      },
+    });
+
   if (character.characterFeats.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
@@ -729,14 +744,29 @@ export function FeatsSection({ character, labels }: SectionProps) {
                 character.characterFeats,
               )}
             </p>
+            {featDetailsLoading ? (
+              <p className="mt-2 text-xs text-muted-foreground">
+                Carregando descrição…
+              </p>
+            ) : (
+              <FeatBenefits
+                benefits={featBySlug[feat.featSlug]?.benefits ?? []}
+                prerequisite={featBySlug[feat.featSlug]?.prerequisite}
+              />
+            )}
             {options.length > 0 ? (
               <dl className="mt-2 grid gap-1 text-xs text-muted-foreground">
-                {options.map((option) => (
-                  <div key={option.optionKey} className="flex gap-2">
-                    <dt>{option.optionKey}:</dt>
-                    <dd className="text-foreground">{option.valueId}</dd>
-                  </div>
-                ))}
+                {options.map((option) => {
+                  const display = resolveFeatOption(option);
+                  return (
+                    <div key={option.optionKey} className="flex gap-2">
+                      <dt>{display.label}:</dt>
+                      <dd className="text-foreground">
+                        {featOptionsLoading ? option.valueId : display.value}
+                      </dd>
+                    </div>
+                  );
+                })}
               </dl>
             ) : null}
           </li>

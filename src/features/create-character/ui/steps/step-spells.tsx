@@ -10,6 +10,7 @@ import {
 } from "@/features/class-catalog/api/use-classes";
 import { isSubclassRequired } from "@/entities/character/lib/subclass";
 import type { CreateCharacterInput } from "@/features/create-character/model/create-character.schema";
+import { wizardMaxSpellLevelForLevel } from "@/features/create-character/lib/wizard-spell-step";
 import {
   Field,
   FieldDescription,
@@ -22,10 +23,6 @@ type StepSpellsProps = {
   control: Control<CreateCharacterInput>;
   setValue: UseFormSetValue<CreateCharacterInput>;
 };
-
-function spellMaxLevelForCharacter(level: number): number {
-  return level >= 1 ? 1 : 0;
-}
 
 export function StepSpells({ control, setValue }: StepSpellsProps) {
   const level = useWatch({ control, name: "level", defaultValue: 1 });
@@ -41,7 +38,7 @@ export function StepSpells({ control, setValue }: StepSpellsProps) {
     defaultValue: [],
   });
 
-  const maxLevel = spellMaxLevelForCharacter(level);
+  const maxLevel = wizardMaxSpellLevelForLevel(level);
   const classSpells = useClassSpells(classSlug, maxLevel, !!classSlug);
   const subclassSpells = useSubclassSpells(
     subclassSlug ?? "",

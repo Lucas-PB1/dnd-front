@@ -1,20 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import {
   appendCharacterFeat,
   canAddCharacterFeat,
 } from "@/entities/character/lib/character-feat";
 import type { CharacterDetail } from "@/entities/character/types";
-import type { CharacterSpell } from "@/entities/character/sheet-types";
+import type {
+  CharacterSpell,
+  FeatOption,
+} from "@/entities/character/sheet-types";
 import { useClassSubclasses } from "@/features/class-catalog/api/use-classes";
 import {
   useLevelUp,
   useLevelUpPreview,
 } from "@/features/character-sheet/api/use-character-progression";
-import { useFeats } from "@/features/reference-catalog/api/use-reference";
+import { findIncompleteCreateFeatOptions } from "@/features/create-character/lib/validate-create-feat-options";
 import { CatalogSelect } from "@/features/create-character/ui/catalog-select";
+import { useFeatOptions } from "@/features/feat-catalog/api/use-feat-options";
+import { FeatOptionsEditor } from "@/features/feat-catalog/ui/feat-options-editor";
+import { useFeats } from "@/features/reference-catalog/api/use-reference";
 import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
 
@@ -37,10 +43,37 @@ export function LevelUpSection({
   );
   const [selectedSpells, setSelectedSpells] = useState<CharacterSpell[]>([]);
   const [selectedFeatSlug, setSelectedFeatSlug] = useState("");
+  const [levelUpFeatOptions, setLevelUpFeatOptions] = useState<FeatOption[]>(
+    [],
+  );
+  const [levelUpError, setLevelUpError] = useState<string | undefined>();
 
   const subclasses = useClassSubclasses(
     character.classSlug,
     !!preview.data?.subclassRequired,
+  );
+
+  const newFeatInstance = useMemo(() => {
+    if (!selectedFeatSlug) return null;
+    const merged = appendCharacterFeat(
+      character.characterFeats,
+      selectedFeatSlug,
+    );
+    return merged[merged.length - 1] ?? null;
+  }, [selectedFeatSlug, character.characterFeats]);
+
+  const selectedFeatOptionDefs = useFeatOptions(
+    selectedFeatSlug,
+    !!selectedFeatSlug,
+  );
+  const hasFeatOptions = (selectedFeatOptionDefs.data?.data.length ?? 0) > 0;
+
+  const featNameBySlug = useMemo(
+    () =>
+      Object.fromEntries(
+        (feats.data?.data ?? []).map((feat) => [feat.slug, feat.name]),
+      ),
+    [feats.data?.data],
   );
 
   if (!canLevelUp) {
@@ -81,6 +114,8 @@ export function LevelUpSection({
 
   async function handleLevelUp() {
     if (!data) return;
+    setLevelUpError(undefined);
+
     const payload: Parameters<typeof levelUp.mutateAsync>[0] = {};
     if (data.subclassRequired && subclassSlug) {
       payload.subclassSlug = subclassSlug;
@@ -94,7 +129,7 @@ export function LevelUpSection({
       ];
       payload.characterSpells = merged;
     }
-    if (data.isAsiOrFeatLevel && selectedFeatSlug) {
+    if (data.isAsiOrFeatLevel && selectedFeatSlug && newFeatInstance) {
       const feat = (feats.data?.data ?? []).find(
         (item) => item.slug === selectedFeatSlug,
       );
@@ -106,15 +141,34 @@ export function LevelUpSection({
           feat.repeatable,
         )
       ) {
+        if (hasFeatOptions) {
+          const incomplete = await findIncompleteCreateFeatOptions(
+            [newFeatInstance],
+            levelUpFeatOptions,
+            featNameBySlug,
+          );
+          if (incomplete) {
+            setLevelUpError(incomplete);
+            return;
+          }
+        }
+
         payload.characterFeats = appendCharacterFeat(
           character.characterFeats,
           selectedFeatSlug,
         );
+        if (levelUpFeatOptions.length > 0) {
+          payload.featOptions = [
+            ...character.featOptions,
+            ...levelUpFeatOptions,
+          ];
+        }
       }
     }
     await levelUp.mutateAsync(payload);
     setSelectedSpells([]);
     setSelectedFeatSlug("");
+    setLevelUpFeatOptions([]);
   }
 
   return (
@@ -178,9 +232,23 @@ export function LevelUpSection({
                   })),
               ]}
               value={selectedFeatSlug}
-              onChange={(e) => setSelectedFeatSlug(e.target.value)}
+              onChange={(e) => {
+                setSelectedFeatSlug(e.target.value);
+                setLevelUpFeatOptions([]);
+                setLevelUpError(undefined);
+              }}
             />
           )}
+          {hasFeatOptions && newFeatInstance ? (
+            <div className="border-t border-border pt-3">
+              <FeatOptionsEditor
+                characterFeats={[newFeatInstance]}
+                featNameBySlug={featNameBySlug}
+                value={levelUpFeatOptions}
+                onChange={setLevelUpFeatOptions}
+              />
+            </div>
+          ) : null}
         </div>
       ) : null}
 
@@ -237,6 +305,12 @@ export function LevelUpSection({
             ))}
           </ul>
         </div>
+      ) : null}
+
+      {levelUpError ? (
+        <p className="text-sm text-destructive" role="alert">
+          {levelUpError}
+        </p>
       ) : null}
 
       <Button

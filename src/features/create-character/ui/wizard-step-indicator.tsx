@@ -1,22 +1,27 @@
 import { cn } from "@/shared/lib/utils";
 import {
-  WIZARD_STEPS,
+  visibleWizardSteps,
+  type WizardNavOptions,
   type WizardStepId,
-  wizardStepIndex,
 } from "@/features/create-character/model/wizard-steps";
 
 type WizardStepIndicatorProps = {
   currentStep: WizardStepId;
+  navOptions?: WizardNavOptions;
 };
 
-export function WizardStepIndicator({ currentStep }: WizardStepIndicatorProps) {
-  const currentIndex = wizardStepIndex(currentStep);
+export function WizardStepIndicator({
+  currentStep,
+  navOptions,
+}: WizardStepIndicatorProps) {
+  const steps = visibleWizardSteps(navOptions);
+  const currentIndex = steps.findIndex((step) => step.id === currentStep);
 
   return (
     <ol className="flex flex-wrap gap-2">
-      {WIZARD_STEPS.map((step, index) => {
+      {steps.map((step, index) => {
         const isActive = step.id === currentStep;
-        const isDone = index < currentIndex;
+        const isDone = currentIndex >= 0 && index < currentIndex;
 
         return (
           <li

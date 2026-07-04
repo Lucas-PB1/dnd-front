@@ -20,6 +20,7 @@ import {
 import { formatCharacterFeatLabel } from "@/entities/character/lib/character-feat";
 import { asiFeatSlotsToCharacterFeats } from "@/features/create-character/lib/asi-feat-slots-to-feats";
 import { previewCreateCharacterFeats } from "@/features/create-character/lib/preview-create-character-feats";
+import { useFeatOptionLabels } from "@/features/feat-catalog/api/use-feat-option-labels";
 import { useFeats } from "@/features/reference-catalog/api/use-reference";
 import { isSubclassRequired } from "@/entities/character/lib/subclass";
 
@@ -125,6 +126,13 @@ export function StepReview({ control }: StepReviewProps) {
   const featNameBySlug = Object.fromEntries(
     (allFeats.data?.data ?? []).map((feat) => [feat.slug, feat.name]),
   );
+  const { resolveFeatOption } = useFeatOptionLabels({
+    characterFeats: previewFeats,
+    labelContext: {
+      resolveSpell: labels.resolveSpell,
+      resolveSkill: labels.resolveSkill,
+    },
+  });
 
   const toolLabel =
     backgroundDetail.data?.toolProficiencyKind === "fixed"
@@ -158,12 +166,9 @@ export function StepReview({ control }: StepReviewProps) {
     return value?.label ?? valueId;
   }
 
-  function featOptionLabel(
-    featSlug: string,
-    optionKey: string,
-    valueId: string,
-  ) {
-    return `${optionKey}: ${valueId}`;
+  function featOptionLabel(option: (typeof values.featOptions)[number]) {
+    const display = resolveFeatOption(option);
+    return `${display.label}: ${display.value}`;
   }
 
   return (
@@ -261,11 +266,7 @@ export function StepReview({ control }: StepReviewProps) {
                 <li
                   key={`${option.featSlug}-${option.instanceIndex}-${option.optionKey}`}
                 >
-                  {featOptionLabel(
-                    option.featSlug,
-                    option.optionKey,
-                    option.valueId,
-                  )}
+                  {featOptionLabel(option)}
                 </li>
               ))}
             </ul>

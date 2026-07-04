@@ -186,19 +186,19 @@ widgets/
 
 **Objetivo:** `POST /characters` com payload validado pela API.
 
-| Etapa                    | Status                                                     |
-| ------------------------ | ---------------------------------------------------------- |
-| 1. Identidade            | ✅                                                         |
-| 2. Atributos             | ✅ standard-array / roll / point-buy + boosts antecedente  |
-| 3. Perícias de classe    | ✅                                                         |
-| 4. Antecedente           | ✅ talento de origem + ferramenta                          |
-| 4b. Talentos (nível 4+)  | ✅ marcos ASI + opções (origem injetada pela API)          |
-| 5. Traços de espécie     | ✅ `speciesChoices` via trait-choices                      |
-| 6. Opções de subclasse   | ✅ `subclassOptions` via `GET /subclasses/:slug/options`   |
-| 7. Equipamento inicial   | ✅ pacotes classe + antecedente                            |
-| 8. Magias iniciais       | ✅ `characterSpells` (opcional)                            |
-| 9. Idiomas + alinhamento | ✅ `languageSlugs`, `alignmentSlug` opcional na identidade |
-| 10. Revisão              | ✅                                                         |
+| Etapa                    | Status                                                        |
+| ------------------------ | ------------------------------------------------------------- |
+| 1. Identidade            | ✅                                                            |
+| 2. Atributos             | ✅ standard-array / roll / point-buy + boosts antecedente     |
+| 3. Perícias de classe    | ✅                                                            |
+| 4. Antecedente           | ✅ talento de origem + ferramenta                             |
+| 4b. Talentos (nível 4+)  | ✅ marcos ASI + opções (origem injetada pela API)             |
+| 5. Traços de espécie     | ✅ `speciesChoices` via trait-choices                         |
+| 6. Opções de subclasse   | ✅ `subclassOptions` via `GET /subclasses/:slug/options`      |
+| 7. Equipamento inicial   | ✅ pacotes classe + antecedente                               |
+| 8. Magias iniciais       | ✅ `characterSpells` (opcional; etapa omitida se não conjura) |
+| 9. Idiomas + alinhamento | ✅ `languageSlugs`, `alignmentSlug` opcional na identidade    |
+| 10. Revisão              | ✅                                                            |
 
 Após criar → redireciona para `/characters/[id]`. ✅
 
@@ -216,8 +216,9 @@ flowchart TD
   G --> H
   H --> I{conjurador?}
   I -->|sim| J[8. Magias iniciais]
-  I -->|não| K[9. Revisão]
-  J --> K
+  I -->|não| L[10. Idiomas]
+  J --> L
+  L --> K[11. Revisão]
   K -->|POST| L[/characters/id]
 ```
 
@@ -264,7 +265,7 @@ flowchart TD
 | Classe            | `GET /classes/:slug/features`  | Características até o nível do personagem                |
 | Magias            | `characterSpells` + `/spells`  | known / prepared / always_prepared                       |
 | Equipamento       | `equipment` + catálogo         | Pacotes iniciais                                         |
-| Talentos          | `featSlugs` + `/feats`         | Nome e descrição                                         |
+| Talentos          | `characterFeats` + `/feats`    | Nome, benefícios PHB, opções em PT                       |
 | Idiomas           | `languageSlugs` + `/languages` | Lista resolvida                                          |
 
 **Critério de pronto:** jogador abre a ficha e entende o personagem sem conhecer slugs.
@@ -323,7 +324,8 @@ Endpoints já na API, sem front ainda.
 | Modificadores não na resposta | Front recalcula (ok)          | ✅ `abilityModifiers` no DTO                                         |
 | Sem CA / passive perception   | Combate incompleto            | ✅ Derived stats na API (sem armadura equipada)                      |
 | Validação só se campo enviado | Create pode ficar incompleto  | ✅ Exige perícias, traços de espécie e opções de subclasse no create |
-| Level-up ASI                  | Marco sem UI                  | ✅ Aviso + talento opcional; ASI via edição de Atributos             |
+| Level-up ASI                  | Marco sem UI                  | ✅ Aviso + talento opcional + opções internas; ASI via Atributos     |
+| Rótulos de opções de feat     | valueId cru na ficha          | ✅ resolve via catálogo / magias / perícias                          |
 | Picker de itens no inventário | Slug manual                   | ✅ `GET /items` + `ItemPicker` no inventário                         |
 | CA com armadura do inventário | Só CA sem armadura            | ✅ CA + `armorClassNote` via inventário equipado                     |
 | Escolhas internas de feats    | Magic Initiate, Skilled, etc. | ✅ `featOptions` + `GET /feats/:slug/options`                        |
