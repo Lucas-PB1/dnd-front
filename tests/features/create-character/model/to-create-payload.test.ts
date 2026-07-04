@@ -50,6 +50,7 @@ describe("toCreateCharacterPayload", () => {
     speciesChoices: [],
     subclassOptions: [],
     featOptions: [],
+    asiFeatSlotSlugs: [],
     alignmentSlug: "",
     languageSlugs: [],
     equipment: [],
@@ -86,5 +87,16 @@ describe("toCreateCharacterPayload", () => {
     expect(payload.speciesChoices).toHaveLength(1);
     expect(payload.equipment).toHaveLength(1);
     expect(payload.characterSpells).toHaveLength(1);
+  });
+
+  it("includes ASI feats from slot picks", () => {
+    const payload = toCreateCharacterPayload({
+      ...base,
+      asiFeatSlotSlugs: ["", "alert"],
+      featOptions: [],
+    });
+    expect(payload.characterFeats).toEqual([
+      { featSlug: "alert", instanceIndex: 0 },
+    ]);
   });
 });

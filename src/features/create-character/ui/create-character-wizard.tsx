@@ -29,7 +29,7 @@ import { StepAbilities } from "@/features/create-character/ui/steps/step-abiliti
 import { StepBackground } from "@/features/create-character/ui/steps/step-background";
 import { StepClassSkills } from "@/features/create-character/ui/steps/step-class-skills";
 import { StepEquipment } from "@/features/create-character/ui/steps/step-equipment";
-import { StepFeatOptions } from "@/features/create-character/ui/steps/step-feat-options";
+import { StepFeats } from "@/features/create-character/ui/steps/step-feats";
 import { StepIdentity } from "@/features/create-character/ui/steps/step-identity";
 import { StepLanguages } from "@/features/create-character/ui/steps/step-languages";
 import { StepReview } from "@/features/create-character/ui/steps/step-review";
@@ -39,7 +39,10 @@ import { StepSubclassOptions } from "@/features/create-character/ui/steps/step-s
 import { WizardStepIndicator } from "@/features/create-character/ui/wizard-step-indicator";
 import { useSpeciesTraitChoices } from "@/features/species-catalog/api/use-species";
 import { useBackgroundDetail } from "@/features/background-catalog/api/use-backgrounds";
-import { useFeatOptions } from "@/features/feat-catalog/api/use-feat-options";
+import { countAsiFeatSlots } from "@/features/create-character/lib/asi-feat-slots";
+import { asiFeatSlotsToCharacterFeats } from "@/features/create-character/lib/asi-feat-slots-to-feats";
+import { previewCreateCharacterFeats } from "@/features/create-character/lib/preview-create-character-feats";
+import { findIncompleteCreateFeatOptions } from "@/features/create-character/lib/validate-create-feat-options";
 import { Button } from "@/shared/ui/button";
 
 const DEFAULT_VALUES: CreateCharacterInput = {
@@ -59,6 +62,7 @@ const DEFAULT_VALUES: CreateCharacterInput = {
   speciesChoices: [],
   subclassOptions: [],
   featOptions: [],
+  asiFeatSlotSlugs: [],
   alignmentSlug: "",
   languageSlugs: [],
   equipment: [],
@@ -120,10 +124,8 @@ export function CreateCharacterWizard() {
     isSubclassRequired(level) && !!subclassSlug,
   );
   const originFeatSlug = backgroundDetail.data?.originFeatSlug ?? "";
-  const originFeatOptionDefs = useFeatOptions(originFeatSlug, !!originFeatSlug);
-
-  const hasOriginFeatStep =
-    !!originFeatSlug && (originFeatOptionDefs.data?.data.length ?? 0) > 0;
+  const asiSlotCount = countAsiFeatSlots(level);
+  const hasFeatsStep = !!originFeatSlug || asiSlotCount > 0;
 
   const prevClassSlugRef = useRef(classSlug);
   const prevSpeciesSlugRef = useRef(speciesSlug);
@@ -136,6 +138,7 @@ export function CreateCharacterWizard() {
       setValue("backgroundAbilityBoostPlus1Slug", "");
       setValue("backgroundToolItemSlug", "");
       setValue("featOptions", []);
+      setValue("asiFeatSlotSlugs", []);
       prevBackgroundSlugRef.current = backgroundSlug;
     }
   }, [backgroundSlug, setValue]);
@@ -165,6 +168,27 @@ export function CreateCharacterWizard() {
       prevSubclassSlugRef.current = subclassSlug;
     }
   }, [subclassSlug, setValue]);
+
+  useEffect(() => {
+    const count = countAsiFeatSlots(level);
+    const slots = getValues("asiFeatSlotSlugs") ?? [];
+    if (slots.length > count) {
+      setValue("asiFeatSlotSlugs", slots.slice(0, count));
+      const preview = previewCreateCharacterFeats(
+        backgroundDetail.data?.originFeatSlug ?? null,
+        asiFeatSlotsToCharacterFeats(slots.slice(0, count)),
+      );
+      const keys = new Set(
+        preview.map((f) => `${f.featSlug}:${f.instanceIndex}`),
+      );
+      setValue(
+        "featOptions",
+        (getValues("featOptions") ?? []).filter((option) =>
+          keys.has(`${option.featSlug}:${option.instanceIndex}`),
+        ),
+      );
+    }
+  }, [level, setValue, getValues, backgroundDetail.data?.originFeatSlug]);
 
   async function goNext() {
     setSkillsError(undefined);
@@ -241,22 +265,23 @@ export function CreateCharacterWizard() {
         setBackgroundError("Escolha a ferramenta do antecedente.");
         return;
       }
-      setStep(hasOriginFeatStep ? "feats" : "species");
+      setStep(hasFeatsStep ? "feats" : "species");
       return;
     }
 
     if (step === "feats") {
       const values = getValues();
-      const requiredDefs = originFeatOptionDefs.data?.data ?? [];
-      if (requiredDefs.length > 0) {
-        const provided = new Set(
-          values.featOptions.map((option) => option.optionKey),
+      const previewFeats = previewCreateCharacterFeats(
+        originFeatSlug || null,
+        asiFeatSlotsToCharacterFeats(values.asiFeatSlotSlugs ?? []),
+      );
+      if (previewFeats.length > 0) {
+        const incomplete = await findIncompleteCreateFeatOptions(
+          previewFeats,
+          values.featOptions ?? [],
         );
-        const missing = requiredDefs.filter(
-          (def) => !provided.has(def.optionKey),
-        );
-        if (missing.length > 0) {
-          setFeatsError("Complete todas as escolhas do talento de origem.");
+        if (incomplete) {
+          setFeatsError(incomplete);
           return;
         }
       }
@@ -317,7 +342,7 @@ export function CreateCharacterWizard() {
   }
 
   function goBack() {
-    if (step === "species" && !hasOriginFeatStep) {
+    if (step === "species" && !hasFeatsStep) {
       setStep("background");
       return;
     }
@@ -380,11 +405,7 @@ export function CreateCharacterWizard() {
       ) : null}
 
       {step === "feats" ? (
-        <StepFeatOptions
-          control={control}
-          setValue={setValue}
-          error={featsError}
-        />
+        <StepFeats control={control} setValue={setValue} error={featsError} />
       ) : null}
 
       {step === "species" ? (

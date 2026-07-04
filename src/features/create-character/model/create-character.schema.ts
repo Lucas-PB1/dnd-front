@@ -71,6 +71,8 @@ export const createCharacterBaseSchema = z.object({
   speciesChoices: z.array(speciesChoiceSchema),
   subclassOptions: z.array(subclassOptionSchema),
   featOptions: z.array(featOptionSchema),
+  /** Um slug por marco ASI (níveis 4/8/12/16/19); vazio = +2/+1 em atributos */
+  asiFeatSlotSlugs: z.array(z.string()),
   alignmentSlug: z.string().optional(),
   languageSlugs: z.array(z.string()),
   equipment: z.array(equipmentSchema),

@@ -1,4 +1,5 @@
 import type { CreateCharacterPayload } from "@/entities/character/types";
+import { asiFeatSlotsToCharacterFeats } from "@/features/create-character/lib/asi-feat-slots-to-feats";
 import { SUBCLASS_UNLOCK_LEVEL_DEFAULT } from "@/entities/character/lib/subclass";
 import type { CreateCharacterInput } from "@/features/create-character/model/create-character.schema";
 
@@ -41,6 +42,10 @@ export function toCreateCharacterPayload(
   }
   if (values.featOptions.length > 0) {
     payload.featOptions = values.featOptions;
+  }
+  const asiFeats = asiFeatSlotsToCharacterFeats(values.asiFeatSlotSlugs ?? []);
+  if (asiFeats.length > 0) {
+    payload.characterFeats = asiFeats;
   }
   if (values.alignmentSlug?.trim()) {
     payload.alignmentSlug = values.alignmentSlug.trim();

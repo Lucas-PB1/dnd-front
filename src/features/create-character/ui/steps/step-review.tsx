@@ -17,7 +17,10 @@ import {
   useBackgroundSkills,
   useBackgroundTools,
 } from "@/features/background-catalog/api/use-backgrounds";
-import { useFeatOptions } from "@/features/feat-catalog/api/use-feat-options";
+import { formatCharacterFeatLabel } from "@/entities/character/lib/character-feat";
+import { asiFeatSlotsToCharacterFeats } from "@/features/create-character/lib/asi-feat-slots-to-feats";
+import { previewCreateCharacterFeats } from "@/features/create-character/lib/preview-create-character-feats";
+import { useFeats } from "@/features/reference-catalog/api/use-reference";
 import { isSubclassRequired } from "@/entities/character/lib/subclass";
 
 type StepReviewProps = {
@@ -114,7 +117,14 @@ export function StepReview({ control }: StepReviewProps) {
     needsToolChoice,
   );
   const originFeatSlug = backgroundDetail.data?.originFeatSlug ?? "";
-  const originFeatOptionDefs = useFeatOptions(originFeatSlug, !!originFeatSlug);
+  const allFeats = useFeats();
+  const previewFeats = previewCreateCharacterFeats(
+    originFeatSlug || null,
+    asiFeatSlotsToCharacterFeats(values.asiFeatSlotSlugs ?? []),
+  );
+  const featNameBySlug = Object.fromEntries(
+    (allFeats.data?.data ?? []).map((feat) => [feat.slug, feat.name]),
+  );
 
   const toolLabel =
     backgroundDetail.data?.toolProficiencyKind === "fixed"
@@ -148,12 +158,12 @@ export function StepReview({ control }: StepReviewProps) {
     return value?.label ?? valueId;
   }
 
-  function featOptionLabel(optionKey: string, valueId: string) {
-    const group = originFeatOptionDefs.data?.data.find(
-      (g) => g.optionKey === optionKey,
-    );
-    const value = group?.values.find((v) => v.valueId === valueId);
-    return value?.label ?? valueId;
+  function featOptionLabel(
+    featSlug: string,
+    optionKey: string,
+    valueId: string,
+  ) {
+    return `${optionKey}: ${valueId}`;
   }
 
   return (
@@ -232,32 +242,41 @@ export function StepReview({ control }: StepReviewProps) {
         </section>
       ) : null}
 
-      {backgroundDetail.data ||
-      (backgroundSkills.data?.data.length ?? 0) > 0 ? (
+      {previewFeats.length > 0 ? (
         <section className="space-y-2">
-          <h3 className="font-semibold">Antecedente</h3>
-          {backgroundDetail.data?.originFeatName ||
-          backgroundDetail.data?.originFeatSlug ? (
-            <p className="text-muted-foreground">
-              Talento de origem:{" "}
-              <span className="text-foreground">
-                {backgroundDetail.data.originFeatName ??
-                  backgroundDetail.data.originFeatSlug}
-              </span>
-            </p>
-          ) : null}
+          <h3 className="font-semibold">Talentos</h3>
+          <ul className="flex flex-wrap gap-2">
+            {previewFeats.map((feat) => (
+              <li
+                key={`${feat.featSlug}-${feat.instanceIndex}`}
+                className="rounded-md border border-border px-2 py-1"
+              >
+                {formatCharacterFeatLabel(feat, featNameBySlug, previewFeats)}
+              </li>
+            ))}
+          </ul>
           {values.featOptions.length > 0 ? (
             <ul className="text-sm text-muted-foreground">
               {values.featOptions.map((option) => (
-                <li key={option.optionKey}>
-                  {option.optionKey}:{" "}
-                  <span className="text-foreground">
-                    {featOptionLabel(option.optionKey, option.valueId)}
-                  </span>
+                <li
+                  key={`${option.featSlug}-${option.instanceIndex}-${option.optionKey}`}
+                >
+                  {featOptionLabel(
+                    option.featSlug,
+                    option.optionKey,
+                    option.valueId,
+                  )}
                 </li>
               ))}
             </ul>
           ) : null}
+        </section>
+      ) : null}
+
+      {backgroundDetail.data ||
+      (backgroundSkills.data?.data.length ?? 0) > 0 ? (
+        <section className="space-y-2">
+          <h3 className="font-semibold">Antecedente</h3>
           {(backgroundSkills.data?.data.length ?? 0) > 0 ? (
             <p className="text-muted-foreground">
               Perícias:{" "}

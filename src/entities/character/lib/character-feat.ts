@@ -18,11 +18,19 @@ export function appendCharacterFeat(
   feats: CharacterFeat[],
   featSlug: string,
 ): CharacterFeat[] {
+  const instanceIndex = nextCharacterFeatInstanceIndex(feats, featSlug);
+  return [...feats, { featSlug, instanceIndex }];
+}
+
+export function nextCharacterFeatInstanceIndex(
+  feats: CharacterFeat[],
+  featSlug: string,
+): number {
   const indices = feats
     .filter((feat) => feat.featSlug === featSlug)
     .map((feat) => feat.instanceIndex);
-  const instanceIndex = indices.length === 0 ? 0 : Math.max(...indices) + 1;
-  return [...feats, { featSlug, instanceIndex }];
+  if (indices.length === 0) return 0;
+  return Math.max(...indices) + 1;
 }
 
 export function formatCharacterFeatLabel(

@@ -192,6 +192,7 @@ widgets/
 | 2. Atributos             | ✅ standard-array / roll / point-buy + boosts antecedente  |
 | 3. Perícias de classe    | ✅                                                         |
 | 4. Antecedente           | ✅ talento de origem + ferramenta                          |
+| 4b. Talentos (nível 4+)  | ✅ marcos ASI + opções (origem injetada pela API)          |
 | 5. Traços de espécie     | ✅ `speciesChoices` via trait-choices                      |
 | 6. Opções de subclasse   | ✅ `subclassOptions` via `GET /subclasses/:slug/options`   |
 | 7. Equipamento inicial   | ✅ pacotes classe + antecedente                            |

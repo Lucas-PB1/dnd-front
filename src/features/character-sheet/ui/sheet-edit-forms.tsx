@@ -609,9 +609,12 @@ function SheetStepForm({
       "standard-array",
     abilityScores: character.abilityScores,
     classSkillSlugs: character.classSkillSlugs,
+    alignmentSlug: character.alignmentSlug ?? "",
+    languageSlugs: character.languageSlugs,
     speciesChoices: character.speciesChoices,
     subclassOptions: character.subclassOptions,
     featOptions: character.featOptions,
+    asiFeatSlotSlugs: [],
     equipment: character.equipment,
     characterSpells: character.characterSpells,
   } satisfies CreateCharacterInput;
