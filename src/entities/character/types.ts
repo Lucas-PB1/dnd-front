@@ -1,3 +1,19 @@
+import type { CharacterSheetInput } from "@/entities/character/sheet-types";
+import type {
+  CharacterEquipment,
+  CharacterSpell,
+  SpeciesChoice,
+  SubclassOption,
+} from "@/entities/character/sheet-types";
+
+export type {
+  CharacterEquipment,
+  CharacterSpell,
+  CharacterSheetInput,
+  SpeciesChoice,
+  SubclassOption,
+} from "@/entities/character/sheet-types";
+
 /** Atributos PHB — slugs em PT como na API */
 export type AbilityScores = {
   forca: number;
@@ -24,9 +40,19 @@ export type CharacterDetail = {
   proficiencyBonus: number;
   classSkillSlugs: string[];
   backgroundSkillSlugs: string[];
+  speciesChoices: SpeciesChoice[];
+  subclassOptions: SubclassOption[];
   featSlugs: string[];
+  characterSpells: CharacterSpell[];
+  equipment: CharacterEquipment[];
   languageSlugs: string[];
   abilityGenerationMethodSlug: string | null;
+  backgroundAbilityBoostPlus2Slug: string | null;
+  backgroundAbilityBoostPlus1Slug: string | null;
+  backgroundToolItemSlug: string | null;
+  abilityModifiers: AbilityScores;
+  passivePerception: number;
+  armorClass: number;
   createdAt: string;
   updatedAt: string;
 };
@@ -45,15 +71,25 @@ export type CharacterSummary = Pick<
   | "updatedAt"
 >;
 
-/** Payload para POST /characters */
+/** Payload para POST /characters — espelha CreateCharacterDto */
 export type CreateCharacterPayload = {
   name: string;
-  level?: number;
   classSlug: string;
   speciesSlug: string;
   backgroundSlug: string;
+  level?: number;
   subclassSlug?: string;
-};
+  alignmentSlug?: string;
+  abilityScores?: AbilityScores;
+  backgroundAbilityBoostPlus2Slug?: string;
+  backgroundAbilityBoostPlus1Slug?: string;
+  backgroundToolItemSlug?: string;
+  hitPointsMax?: number;
+  hitPointsCurrent?: number;
+} & CharacterSheetInput;
+
+/** Payload para PATCH /characters/:id — espelha UpdateCharacterDto */
+export type UpdateCharacterPayload = Partial<CreateCharacterPayload>;
 
 export const ABILITY_LABELS_PT: Record<keyof AbilityScores, string> = {
   forca: "Força",
@@ -64,7 +100,4 @@ export const ABILITY_LABELS_PT: Record<keyof AbilityScores, string> = {
   carisma: "Carisma",
 };
 
-export function abilityModifier(score: number): string {
-  const mod = Math.floor((score - 10) / 2);
-  return mod >= 0 ? `+${mod}` : String(mod);
-}
+export { abilityModifier } from "@/entities/character/lib/ability";

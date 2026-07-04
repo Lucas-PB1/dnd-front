@@ -2,7 +2,7 @@
 
 Roadmap do **dnd-front** para sair do MVP de identidade e chegar a uma ficha jogável, consumindo tudo que a **dnd-api** já expõe (e evoluindo a API onde faltar).
 
-**Estado atual (jul/2026):** criar e listar fichas com nome, nível, classe, espécie, antecedente e subclasse; visualização parcial read-only. Sem edição, sem escolhas de sheet na criação, sem magias/equipamento/features.
+**Estado atual (jul/2026):** Fases 0–4 concluídas — wizard, ficha com edição PATCH, mesa de jogo. Lacunas recentes: `GET /classes/:slug/features` ✅, boosts de antecedente ✅, stats derivados ✅, perícias de antecedente no catálogo ✅, **antecedente completo (talento de origem + ferramenta)** ✅.
 
 **Princípio:** o front **coleta escolhas** e **exibe** dados; a API **valida e computa** (PV, PB, perícias de antecedente, disponibilidade de magias). Zero regras PHB hardcoded no front.
 
@@ -107,10 +107,13 @@ A implementar para a ficha:
 | `GET /classes/:slug/skills`                          | Pool de perícias de classe     |
 | `GET /classes/:slug/equipment`                       | Pacotes de equipamento inicial |
 | `GET /classes/:slug/spells`, `/spell-slots`          | Magias e slots por classe      |
+| `GET /classes/:slug/features`                        | Features de classe por nível   |
 | `GET /subclasses/:slug/mechanics`                    | Features e opções de subclasse |
 | `GET /subclasses/:slug/spells`                       | Magias de subclasse            |
 | `GET /species/:slug/traits`, `/trait-choices`        | Traços e escolhas de espécie   |
 | `GET /backgrounds/:slug/equipment`                   | Equipamento de antecedente     |
+| `GET /backgrounds/:slug/skills`                      | Perícias do antecedente        |
+| `GET /backgrounds/:slug/tools`                       | Opções de ferramenta (choice)  |
 | `GET /skills`, `/feats`, `/alignments`, `/languages` | Labels e seleção               |
 | `GET /ability-generation-methods`                    | Método de geração de atributos |
 
@@ -157,37 +160,45 @@ widgets/
 
 ## Fases de implementação
 
-### Fase 0 — Fundação
+### Fase 0 — Fundação ✅
 
 **Objetivo:** tipos, clientes HTTP e utilitários compartilhados. Pré-requisito de tudo.
 
-| Entrega                    | Detalhe                                                                                                              |
-| -------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `CharacterDetail` completo | Incluir `speciesChoices`, `subclassOptions`, `characterSpells`, `equipment`                                          |
-| `UpdateCharacterPayload`   | `Partial<CreateCharacterPayload & SheetInput>`                                                                       |
-| `characters.api.ts`        | `patchCharacter`, `deleteCharacter`                                                                                  |
-| `character-build.api.ts`   | `POST /characters/roll-abilities`                                                                                    |
-| Catálogos auxiliares       | clients para `/skills`, `/feats`, `/alignments`, `/languages`, `/ability-generation-methods`                         |
-| Catálogos aninhados        | skills/equipment/spells da classe; trait-choices da espécie; mechanics/spells da subclasse; equipment do antecedente |
-| `entities/character/lib/`  | `skillBonus(score, proficient, pb)`, helpers de subclasse por nível                                                  |
-| Hook `useCatalogLabels`    | Dado slugs da ficha, busca nomes PT do catálogo (TanStack Query, cache 1h)                                           |
+| Entrega                             | Status                                                   |
+| ----------------------------------- | -------------------------------------------------------- |
+| `CharacterDetail` completo          | ✅ `entities/character/types.ts` + `sheet-types.ts`      |
+| `UpdateCharacterPayload`            | ✅                                                       |
+| `patchCharacter`, `deleteCharacter` | ✅ `features/characters/api/characters.api.ts`           |
+| `rollAbilities`                     | ✅ `features/character-sheet/api/character-build.api.ts` |
+| Catálogos auxiliares                | ✅ `features/reference-catalog/`                         |
+| Catálogos aninhados                 | ✅ class / species / background APIs expandidos          |
+| `entities/character/lib/`           | ✅ `ability.ts`, `subclass.ts`                           |
+| `useCharacterCatalogLabels`         | ✅ resolve slugs → nomes PT na ficha                     |
 
-**Critério de pronto:** `pnpm build` ok; tipos 1:1 com `CharacterResponseDto`; nenhuma regra PHB hardcoded.
+**Hooks adicionais:** `usePatchCharacter`, `useDeleteCharacter`, `useRollAbilities`
 
-**Arquivos principais:**
-
-- `src/entities/character/types.ts`
-- `src/features/characters/api/characters.api.ts`
-- `src/features/character-sheet/api/` (novo)
-- `src/features/class-catalog/api/` (expandir)
-- `src/features/species-catalog/api/` (expandir)
-- `src/features/background-catalog/api/` (expandir)
+**Critério de pronto:** `pnpm build` ok; tipos 1:1 com `CharacterResponseDto`; nenhuma regra PHB hardcoded. ✅
 
 ---
 
-### Fase 1 — Wizard de criação completo
+### Fase 1 — Wizard de criação ✅
 
 **Objetivo:** `POST /characters` com payload validado pela API.
+
+| Etapa                  | Status                                                   |
+| ---------------------- | -------------------------------------------------------- |
+| 1. Identidade          | ✅                                                       |
+| 2. Atributos           | ✅ standard-array / roll / point-buy                     |
+| 3. Perícias de classe  | ✅                                                       |
+| 4. Traços de espécie   | ✅ `speciesChoices` via trait-choices                    |
+| 5. Opções de subclasse | ✅ `subclassOptions` via `GET /subclasses/:slug/options` |
+| 6. Equipamento inicial | ✅ pacotes classe + antecedente                          |
+| 7. Magias iniciais     | ✅ `characterSpells` (opcional)                          |
+| 8. Revisão             | ✅                                                       |
+
+Após criar → redireciona para `/characters/[id]`. ✅
+
+**API adicionada:** `GET /subclasses/:slug/options?level=N`
 
 ```mermaid
 flowchart TD
@@ -232,7 +243,7 @@ flowchart TD
 
 ---
 
-### Fase 2 — Ficha de leitura estruturada
+### Fase 2 — Ficha de leitura estruturada ✅
 
 **Objetivo:** `/characters/[id]` como ficha jogável, não lista de slugs.
 
@@ -244,6 +255,7 @@ flowchart TD
 | Perícias          | character + `/skills`          | Bônus calculado; proficientes (classe + antecedente) |
 | Traços de espécie | `speciesChoices` + traits      | Nome e descrição                                     |
 | Subclasse         | `subclassOptions` + mechanics  | Features por nível + opções escolhidas               |
+| Classe            | `GET /classes/:slug/features`  | Características até o nível do personagem            |
 | Magias            | `characterSpells` + `/spells`  | known / prepared / always_prepared                   |
 | Equipamento       | `equipment` + catálogo         | Pacotes iniciais                                     |
 | Talentos          | `featSlugs` + `/feats`         | Nome e descrição                                     |
@@ -259,7 +271,7 @@ flowchart TD
 
 ---
 
-### Fase 3 — Edição da ficha
+### Fase 3 — Edição da ficha ✅
 
 **Objetivo:** alterar qualquer seção via `PATCH`.
 
@@ -281,7 +293,7 @@ flowchart TD
 
 ---
 
-### Fase 4 — Mesa de jogo
+### Fase 4 — Mesa de jogo ✅
 
 Endpoints já na API, sem front ainda.
 
@@ -300,14 +312,15 @@ Endpoints já na API, sem front ainda.
 
 ## Lacunas da API (tratar em paralelo)
 
-| Lacuna                                | Impacto                                | Sugestão                                                     |
-| ------------------------------------- | -------------------------------------- | ------------------------------------------------------------ |
-| Modificadores não na resposta         | Front recalcula (ok)                   | `abilityModifiers` opcional no DTO                           |
-| Sem `GET /backgrounds/:slug/skills`   | Só via `backgroundSkillSlugs` na ficha | Novo endpoint de catálogo                                    |
-| Validação só se campo enviado         | Create pode ficar incompleto           | Exigir `classSkillSlugs` / `speciesChoices` quando aplicável |
-| Sem CA / passive perception           | Combate incompleto                     | Derived stats na API                                         |
-| Features de classe (não só subclasse) | Seção features parcial                 | `GET /classes/:slug/features`                                |
-| Escolha de atributos do antecedente   | PHB 2024 +2/+1                         | Campo na ficha                                               |
+| Lacuna                                | Impacto                                | Sugestão                                                               |
+| ------------------------------------- | -------------------------------------- | ---------------------------------------------------------------------- |
+| Modificadores não na resposta         | Front recalcula (ok)                   | `abilityModifiers` opcional no DTO                                     |
+| Sem `GET /backgrounds/:slug/skills`   | Só via `backgroundSkillSlugs` na ficha | ✅ `GET /backgrounds/:slug/skills`                                     |
+| Validação só se campo enviado         | Create pode ficar incompleto           | Exigir `classSkillSlugs` / `speciesChoices` quando aplicável           |
+| Sem CA / passive perception           | Combate incompleto                     | Derived stats na API                                                   |
+| Features de classe (não só subclasse) | Seção features parcial                 | ✅ `GET /classes/:slug/features` + seção na ficha                      |
+| Escolha de atributos do antecedente   | PHB 2024 +2/+1                         | ✅ create + PATCH na API; edição na ficha (seção Atributos)            |
+| Talento de origem + ferramenta        | PHB 2024 antecedente                   | ✅ API merge feat + `backgroundToolItemSlug`; wizard etapa Antecedente |
 
 Fases 0–3 funcionam com a API **como está**. Fase 4 e combate completo dependem de evolução no back.
 

@@ -11,7 +11,7 @@ export default async function CharacterDetailPage({ params }: PageProps) {
   return (
     <div className="flex flex-1 flex-col bg-background text-foreground">
       <AppHeader />
-      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-6 py-10">
+      <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-6 py-10">
         <CharacterDetailView id={id} />
       </main>
     </div>

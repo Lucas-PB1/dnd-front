@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { CreateCharacterForm } from "@/features/create-character/ui/create-character-form";
+import { CreateCharacterWizard } from "@/features/create-character/ui/create-character-wizard";
 import { AppHeader } from "@/widgets/app-header/ui/app-header";
 import { buttonVariants } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
@@ -19,10 +19,11 @@ export default function NewCharacterPage() {
           </Link>
           <h1 className="text-2xl font-semibold tracking-tight">Nova ficha</h1>
           <p className="text-sm text-muted-foreground">
-            Identidade via dnd-api — escolha o nível inicial (1–20).
+            Assistente em 8 etapas — identidade, atributos, perícias,
+            equipamento e magias. A dnd-api valida e calcula PV, PB e perícias.
           </p>
         </div>
-        <CreateCharacterForm />
+        <CreateCharacterWizard />
         <p className="text-sm text-muted-foreground">
           Quer só explorar o livro?{" "}
           <Link

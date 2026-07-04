@@ -3,6 +3,7 @@ import type {
   CharacterDetail,
   CharacterSummary,
   CreateCharacterPayload,
+  UpdateCharacterPayload,
 } from "@/entities/character/types";
 
 export type { CharacterSummary, CharacterDetail };
@@ -27,5 +28,22 @@ export async function createCharacter(
   return gameFetch<CharacterDetail>("/characters", accessToken, {
     method: "POST",
     body: JSON.stringify(payload),
+  });
+}
+
+export async function patchCharacter(
+  accessToken: string,
+  id: string,
+  payload: UpdateCharacterPayload,
+) {
+  return gameFetch<CharacterDetail>(`/characters/${id}`, accessToken, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteCharacter(accessToken: string, id: string) {
+  return gameFetch<void>(`/characters/${id}`, accessToken, {
+    method: "DELETE",
   });
 }

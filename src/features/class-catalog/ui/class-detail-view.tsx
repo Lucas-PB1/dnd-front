@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import {
   useClassDetail,
+  useClassFeatures,
   useClassSubclasses,
 } from "@/features/class-catalog/api/use-classes";
 import { buttonVariants } from "@/shared/ui/button";
@@ -16,6 +17,7 @@ type ClassDetailViewProps = {
 export function ClassDetailView({ slug }: ClassDetailViewProps) {
   const classQuery = useClassDetail(slug);
   const subclassesQuery = useClassSubclasses(slug);
+  const featuresQuery = useClassFeatures(slug, undefined, !!slug);
 
   if (classQuery.isPending) {
     return <p className="text-sm text-muted-foreground">Carregando classe…</p>;
@@ -93,6 +95,33 @@ export function ClassDetailView({ slug }: ClassDetailViewProps) {
           </div>
         ) : null}
       </dl>
+
+      <section className="space-y-3">
+        <h2 className="text-lg font-semibold">Características</h2>
+        {featuresQuery.isPending ? (
+          <p className="text-sm text-muted-foreground">Carregando…</p>
+        ) : featuresQuery.isError || !featuresQuery.data?.data.length ? (
+          <p className="text-sm text-muted-foreground">
+            Sem características cadastradas.
+          </p>
+        ) : (
+          <ul className="space-y-3">
+            {featuresQuery.data.data.map((feature) => (
+              <li
+                key={`${feature.featureLevel}-${feature.featureName}`}
+                className="rounded-lg border border-border px-4 py-3"
+              >
+                <p className="text-sm font-medium">
+                  Nv. {feature.featureLevel} — {feature.featureName}
+                </p>
+                <p className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">
+                  {feature.featureDescription}
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       <section className="space-y-3">
         <h2 className="text-lg font-semibold">Subclasses</h2>

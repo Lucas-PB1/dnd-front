@@ -6,21 +6,21 @@ Fonte canônica: `dnd-api/.cursor/skills/api-consumer-next/references/api-endpoi
 
 ## Catálogo (sem auth)
 
-| Método | Path                                                                                                        |
-| ------ | ----------------------------------------------------------------------------------------------------------- |
-| GET    | `/health`                                                                                                   |
-| GET    | `/classes`, `/classes/:slug`                                                                                |
-| GET    | `/classes/:slug/subclasses`, `/subclasses/:slug`, `/subclasses/:slug/mechanics`, `/subclasses/:slug/spells` |
-| GET    | `/classes/:slug/spells`, `/classes/:slug/spell-slots`, `/classes/:slug/equipment`, `/classes/:slug/skills`  |
-| GET    | `/species`, `/species/:slug`, `/species/:slug/traits`, `/species/:slug/trait-choices`                       |
-| GET    | `/backgrounds`, `/backgrounds/:slug`, `/backgrounds/:slug/equipment`                                        |
-| GET    | `/spells`, `/spells/:slug`                                                                                  |
-| GET    | `/feats`, `/feats/:slug`                                                                                    |
-| GET    | `/skills`, `/skills/:slug`                                                                                  |
-| GET    | `/abilities`                                                                                                |
-| GET    | `/weapons`, `/weapons/:slug`, `/armor`, `/armor/:slug`                                                      |
-| GET    | `/alignments`, `/languages`, `/character-levels`                                                            |
-| GET    | `/ability-generation-methods`                                                                               |
+| Método | Path                                                                                                                                     |
+| ------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/health`                                                                                                                                |
+| GET    | `/classes`, `/classes/:slug`                                                                                                             |
+| GET    | `/classes/:slug/subclasses`, `/subclasses/:slug`, `/subclasses/:slug/options`, `/subclasses/:slug/mechanics`, `/subclasses/:slug/spells` |
+| GET    | `/classes/:slug/spells`, `/classes/:slug/spell-slots`, `/classes/:slug/equipment`, `/classes/:slug/skills`                               |
+| GET    | `/species`, `/species/:slug`, `/species/:slug/traits`, `/species/:slug/trait-choices`                                                    |
+| GET    | `/backgrounds`, `/backgrounds/:slug`, `/backgrounds/:slug/equipment`                                                                     |
+| GET    | `/spells`, `/spells/:slug`                                                                                                               |
+| GET    | `/feats`, `/feats/:slug`                                                                                                                 |
+| GET    | `/skills`, `/skills/:slug`                                                                                                               |
+| GET    | `/abilities`                                                                                                                             |
+| GET    | `/weapons`, `/weapons/:slug`, `/armor`, `/armor/:slug`                                                                                   |
+| GET    | `/alignments`, `/languages`, `/character-levels`                                                                                         |
+| GET    | `/ability-generation-methods`                                                                                                            |
 
 ## Game (Bearer JWT Supabase)
 
