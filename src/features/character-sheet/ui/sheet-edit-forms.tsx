@@ -23,6 +23,7 @@ import { usePatchCharacter } from "@/features/character-sheet/api/use-patch-char
 import {
   useBackgroundDetail,
   useBackgrounds,
+  useBackgroundTools,
 } from "@/features/background-catalog/api/use-backgrounds";
 import {
   useClasses,
@@ -720,6 +721,64 @@ export function EditFeatsForm({ character, onSuccess }: EditFormProps) {
           ))}
         </ul>
       )}
+      <FormAlert message={formError} />
+      <FormActions isPending={patch.isPending} />
+    </form>
+  );
+}
+
+export function EditBackgroundToolForm({
+  character,
+  onSuccess,
+}: EditFormProps) {
+  const { patch, formError, submit } = useSectionPatch(character, onSuccess);
+  const backgroundDetail = useBackgroundDetail(character.backgroundSlug, true);
+  const needsToolChoice =
+    backgroundDetail.data?.toolProficiencyKind === "choice";
+  const backgroundTools = useBackgroundTools(
+    character.backgroundSlug,
+    needsToolChoice,
+  );
+  const [selected, setSelected] = useState(
+    character.backgroundToolItemSlug ?? "",
+  );
+
+  if (backgroundDetail.isPending) {
+    return (
+      <p className="text-sm text-muted-foreground">Carregando antecedente…</p>
+    );
+  }
+
+  if (!needsToolChoice) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        Este antecedente não permite escolher ferramenta.
+      </p>
+    );
+  }
+
+  const toolOptions = (backgroundTools.data?.data ?? []).map((tool) => ({
+    value: tool.itemSlug,
+    label: tool.itemName,
+  }));
+
+  return (
+    <form
+      className="space-y-4"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (!selected) return;
+        submit({ backgroundToolItemSlug: selected });
+      }}
+    >
+      <CatalogSelect
+        id="edit-background-tool"
+        label="Ferramenta do antecedente"
+        options={toolOptions}
+        isLoading={backgroundTools.isPending}
+        value={selected}
+        onChange={(e) => setSelected(e.target.value)}
+      />
       <FormAlert message={formError} />
       <FormActions isPending={patch.isPending} />
     </form>

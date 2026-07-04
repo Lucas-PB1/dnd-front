@@ -9,6 +9,7 @@ import { DeleteCharacterButton } from "@/features/character-sheet/ui/delete-char
 import {
   EditAbilitiesForm,
   EditClassSkillsForm,
+  EditBackgroundToolForm,
   EditCombatForm,
   EditEquipmentForm,
   EditFeatsForm,
@@ -46,6 +47,7 @@ import { cn } from "@/shared/lib/utils";
 
 type SheetSectionId =
   | "identity"
+  | "background-tool"
   | "combat"
   | "abilities"
   | "skills"
@@ -154,11 +156,15 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
         id="identity"
         title="Identidade"
         description="Nome, nível, classe, espécie e antecedente."
-        isEditing={editing === "identity"}
+        isEditing={editing === "identity" || editing === "background-tool"}
         onEdit={() => setEditing("identity")}
         onCancel={closeEdit}
         editContent={
-          <EditIdentityForm character={data} onSuccess={closeEdit} />
+          editing === "background-tool" ? (
+            <EditBackgroundToolForm character={data} onSuccess={closeEdit} />
+          ) : (
+            <EditIdentityForm character={data} onSuccess={closeEdit} />
+          )
         }
       >
         <dl className="grid gap-3 text-sm sm:grid-cols-2">
@@ -191,7 +197,10 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
         </dl>
         <div className="mt-6 border-t border-border pt-4">
           <h3 className="mb-3 text-sm font-semibold">Traços do antecedente</h3>
-          <BackgroundTraitsSection {...sectionProps} />
+          <BackgroundTraitsSection
+            {...sectionProps}
+            onEditTool={() => setEditing("background-tool")}
+          />
         </div>
       </SheetSection>
 

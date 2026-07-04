@@ -316,15 +316,15 @@ Endpoints já na API, sem front ainda.
 
 ## Lacunas da API (tratar em paralelo)
 
-| Lacuna                        | Impacto                       | Sugestão                                                     |
-| ----------------------------- | ----------------------------- | ------------------------------------------------------------ |
-| Modificadores não na resposta | Front recalcula (ok)          | ✅ `abilityModifiers` no DTO                                 |
-| Sem CA / passive perception   | Combate incompleto            | ✅ Derived stats na API (sem armadura equipada)              |
-| Validação só se campo enviado | Create pode ficar incompleto  | Exigir `classSkillSlugs` / `speciesChoices` quando aplicável |
-| Level-up ASI                  | Marco sem UI                  | ✅ Aviso + talento opcional; ASI via edição de Atributos     |
-| Picker de itens no inventário | Slug manual                   | ✅ `GET /items` + `ItemPicker` no inventário                 |
-| CA com armadura do inventário | Só CA sem armadura            | ✅ CA + `armorClassNote` via inventário equipado             |
-| Escolhas internas de feats    | Magic Initiate, Skilled, etc. | Fora do escopo MVP — feats com opções aninhadas              |
+| Lacuna                        | Impacto                       | Sugestão                                                             |
+| ----------------------------- | ----------------------------- | -------------------------------------------------------------------- |
+| Modificadores não na resposta | Front recalcula (ok)          | ✅ `abilityModifiers` no DTO                                         |
+| Sem CA / passive perception   | Combate incompleto            | ✅ Derived stats na API (sem armadura equipada)                      |
+| Validação só se campo enviado | Create pode ficar incompleto  | ✅ Exige perícias, traços de espécie e opções de subclasse no create |
+| Level-up ASI                  | Marco sem UI                  | ✅ Aviso + talento opcional; ASI via edição de Atributos             |
+| Picker de itens no inventário | Slug manual                   | ✅ `GET /items` + `ItemPicker` no inventário                         |
+| CA com armadura do inventário | Só CA sem armadura            | ✅ CA + `armorClassNote` via inventário equipado                     |
+| Escolhas internas de feats    | Magic Initiate, Skilled, etc. | Fora do escopo MVP — feats com opções aninhadas                      |
 
 Fases 0–3 funcionam com a API **como está**. Fase 4 e combate completo dependem de evolução no back.
 
@@ -339,7 +339,8 @@ Sprint 3   Fase 1 — etapas 5–8 + Fase 2 (espécie → equipamento → magias
 Sprint 4   Fase 3 — edição + delete
 Sprint 5+  Fase 4 — mesa + gaps API
 Sprint 6   Polish — mecânicas subclasse, level-up ASI, inventário com picker
-Sprint 7+  CA com armadura, feats com opções internas, validação create obrigatória
+Sprint 7   CA com armadura, validação create obrigatória, editar ferramenta do antecedente
+Sprint 8+  Feats com opções internas (Magic Initiate, Skilled)
 ```
 
 ---

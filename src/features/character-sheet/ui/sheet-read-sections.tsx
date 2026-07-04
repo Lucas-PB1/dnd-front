@@ -31,6 +31,7 @@ import {
 import { isSubclassRequired } from "@/entities/character/lib/subclass";
 import { groupEquipmentPackages } from "@/features/create-character/lib/equipment-selection";
 import { useMemo } from "react";
+import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
 
 const SPELL_LIST_LABELS: Record<string, string> = {
@@ -202,7 +203,11 @@ export function SkillsSection({ character, skills }: SkillsSectionProps) {
   );
 }
 
-export function BackgroundTraitsSection({ character, labels }: SectionProps) {
+export function BackgroundTraitsSection({
+  character,
+  labels,
+  onEditTool,
+}: SectionProps & { onEditTool?: () => void }) {
   const backgroundDetail = useBackgroundDetail(character.backgroundSlug, true);
   const backgroundTools = useBackgroundTools(
     character.backgroundSlug,
@@ -232,7 +237,12 @@ export function BackgroundTraitsSection({ character, labels }: SectionProps) {
       ? character.backgroundSkillSlugs.map((slug) => labels.resolveSkill(slug))
       : [];
 
-  if (!originFeat && !toolName && backgroundSkills.length === 0) {
+  if (
+    !originFeat &&
+    !toolName &&
+    backgroundSkills.length === 0 &&
+    bg?.toolProficiencyKind !== "choice"
+  ) {
     return (
       <p className="text-sm text-muted-foreground">
         Nenhum traço de antecedente registrado.
@@ -254,10 +264,23 @@ export function BackgroundTraitsSection({ character, labels }: SectionProps) {
           <dd className="font-medium">{backgroundSkills.join(", ")}</dd>
         </div>
       ) : null}
-      {toolName ? (
+      {toolName || bg?.toolProficiencyKind === "choice" ? (
         <div className="sm:col-span-2">
-          <dt className="text-muted-foreground">Ferramenta</dt>
-          <dd className="font-medium">{toolName}</dd>
+          <div className="flex items-center justify-between gap-2">
+            <dt className="text-muted-foreground">Ferramenta</dt>
+            {bg?.toolProficiencyKind === "choice" && onEditTool ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-auto px-2 py-1 text-xs"
+                onClick={onEditTool}
+              >
+                Editar
+              </Button>
+            ) : null}
+          </div>
+          <dd className="font-medium">{toolName ?? "—"}</dd>
         </div>
       ) : null}
     </dl>
