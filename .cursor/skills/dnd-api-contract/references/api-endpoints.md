@@ -19,6 +19,7 @@ Fonte canônica: `dnd-api/.cursor/skills/api-consumer-next/references/api-endpoi
 | GET    | `/skills`, `/skills/:slug`                                                                                                               |
 | GET    | `/abilities`                                                                                                                             |
 | GET    | `/weapons`, `/weapons/:slug`, `/armor`, `/armor/:slug`                                                                                   |
+| GET    | `/items`, `/items/:slug`                                                                                                                 |
 | GET    | `/alignments`, `/languages`, `/character-levels`                                                                                         |
 | GET    | `/ability-generation-methods`                                                                                                            |
 

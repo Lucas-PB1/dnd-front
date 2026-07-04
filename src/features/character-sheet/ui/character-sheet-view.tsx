@@ -29,6 +29,7 @@ import {
   SkillsSection,
   SpeciesChoicesSection,
   SpellsSection,
+  SubclassMechanicsSection,
   SubclassOptionsSection,
 } from "@/features/character-sheet/ui/sheet-read-sections";
 import { InventorySection } from "@/features/character-sheet/ui/inventory-section";
@@ -270,7 +271,8 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
 
       <SheetSection
         id="subclass"
-        title="Opções de subclasse"
+        title="Subclasse"
+        description="Opções escolhidas e mecânicas até o nível atual."
         isEditing={editing === "subclass"}
         onEdit={() => setEditing("subclass")}
         onCancel={closeEdit}
@@ -278,7 +280,16 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
           <EditSubclassOptionsForm character={data} onSuccess={closeEdit} />
         }
       >
-        <SubclassOptionsSection {...sectionProps} />
+        <div className="space-y-6">
+          <div>
+            <h3 className="mb-3 text-sm font-semibold">Opções escolhidas</h3>
+            <SubclassOptionsSection {...sectionProps} />
+          </div>
+          <div className="border-t border-border pt-4">
+            <h3 className="mb-3 text-sm font-semibold">Mecânicas</h3>
+            <SubclassMechanicsSection {...sectionProps} />
+          </div>
+        </div>
       </SheetSection>
 
       <SheetSection

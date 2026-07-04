@@ -12,9 +12,12 @@ import {
 } from "@/entities/character";
 import type { CharacterCatalogLabels } from "@/features/character-sheet/api/use-character-catalog-labels";
 import type { SkillSummary } from "@/entities/skill/types";
-import type { ClassFeature } from "@/entities/class/types";
+import type { ClassFeature, SubclassMechanic } from "@/entities/class/types";
 import { useSpeciesTraitChoices } from "@/features/species-catalog/api/use-species";
-import { useSubclassOptions } from "@/features/class-catalog/api/use-classes";
+import {
+  useSubclassMechanics,
+  useSubclassOptions,
+} from "@/features/class-catalog/api/use-classes";
 import {
   useBackgroundEquipment,
   useBackgroundDetail,
@@ -59,7 +62,9 @@ export function CombatSection({ character }: SectionProps) {
           Classe de armadura
         </dt>
         <dd className="text-lg font-mono">{character.armorClass}</dd>
-        <p className="text-xs text-muted-foreground">sem armadura</p>
+        <p className="text-xs text-muted-foreground">
+          {character.armorClassNote ?? "sem armadura"}
+        </p>
       </div>
       <div>
         <dt className="text-xs font-medium text-muted-foreground">
@@ -417,6 +422,119 @@ export function SubclassOptionsSection({ character }: SectionProps) {
         </li>
       ))}
     </ul>
+  );
+}
+
+function formatSubclassMechanicDetail(
+  mechanic: SubclassMechanic,
+): string | null {
+  const parts: string[] = [];
+  if (mechanic.featureKind) {
+    parts.push(mechanic.featureKind);
+  }
+  if (mechanic.resourceName) {
+    let resource = mechanic.resourceName;
+    if (mechanic.resourceUnlockLevel != null) {
+      resource += ` (nv. ${mechanic.resourceUnlockLevel})`;
+    }
+    parts.push(resource);
+  }
+  if (mechanic.fixedMax != null) {
+    parts.push(`máx. ${mechanic.fixedMax}`);
+  } else if (mechanic.maxFormula) {
+    parts.push(`máx. ${mechanic.maxFormula}`);
+  }
+  return parts.length > 0 ? parts.join(" · ") : null;
+}
+
+export function SubclassMechanicsSection({ character }: SectionProps) {
+  const enabled =
+    isSubclassRequired(character.level) && !!character.subclassSlug;
+  const mechanicsQuery = useSubclassMechanics(
+    character.subclassSlug ?? "",
+    enabled,
+  );
+
+  const selectedOptionKeys = useMemo(
+    () => new Set(character.subclassOptions.map((o) => o.optionKey)),
+    [character.subclassOptions],
+  );
+
+  const byLevel = useMemo(() => {
+    const map = new Map<number, SubclassMechanic[]>();
+    for (const mechanic of mechanicsQuery.data?.data ?? []) {
+      if (mechanic.featureLevel > character.level) continue;
+      const list = map.get(mechanic.featureLevel) ?? [];
+      list.push(mechanic);
+      map.set(mechanic.featureLevel, list);
+    }
+    return [...map.entries()].sort(([a], [b]) => a - b);
+  }, [character.level, mechanicsQuery.data?.data]);
+
+  if (!enabled) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        Subclasse disponível a partir do nível 3.
+      </p>
+    );
+  }
+
+  if (mechanicsQuery.isPending) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        Carregando mecânicas de subclasse…
+      </p>
+    );
+  }
+
+  if (byLevel.length === 0) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        Nenhuma mecânica de subclasse até o nível atual.
+      </p>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {byLevel.map(([level, mechanics]) => (
+        <section key={level} className="space-y-2">
+          <h4 className="text-sm font-semibold text-muted-foreground">
+            Nível {level}
+          </h4>
+          <ul className="space-y-3">
+            {mechanics.map((mechanic) => {
+              const detail = formatSubclassMechanicDetail(mechanic);
+              const matchesOption =
+                mechanic.optionKey != null &&
+                selectedOptionKeys.has(mechanic.optionKey);
+
+              return (
+                <li
+                  key={`${level}-${mechanic.featureName}-${mechanic.optionKey ?? ""}`}
+                  className={cn(
+                    "rounded-lg border border-border px-3 py-2",
+                    matchesOption && "border-primary/40 bg-primary/5",
+                  )}
+                >
+                  <p className="font-medium">{mechanic.featureName}</p>
+                  {detail ? (
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {detail}
+                    </p>
+                  ) : null}
+                  {matchesOption ? (
+                    <p className="mt-1 text-xs text-primary">
+                      Relacionada a uma opção escolhida
+                    </p>
+                  ) : null}
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ))}
+    </div>
   );
 }
 

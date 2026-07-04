@@ -9,6 +9,7 @@ import {
   useLevelUp,
   useLevelUpPreview,
 } from "@/features/character-sheet/api/use-character-progression";
+import { useFeats } from "@/features/reference-catalog/api/use-reference";
 import { CatalogSelect } from "@/features/create-character/ui/catalog-select";
 import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
@@ -25,11 +26,13 @@ export function LevelUpSection({
   const canLevelUp = character.level < 20;
   const preview = useLevelUpPreview(characterId, canLevelUp);
   const levelUp = useLevelUp(characterId);
+  const feats = useFeats();
 
   const [subclassSlug, setSubclassSlug] = useState(
     character.subclassSlug ?? "",
   );
   const [selectedSpells, setSelectedSpells] = useState<CharacterSpell[]>([]);
+  const [selectedFeatSlug, setSelectedFeatSlug] = useState("");
 
   const subclasses = useClassSubclasses(
     character.classSlug,
@@ -87,8 +90,15 @@ export function LevelUpSection({
       ];
       payload.characterSpells = merged;
     }
+    if (data.isAsiOrFeatLevel && selectedFeatSlug) {
+      const mergedFeats = [
+        ...new Set([...character.featSlugs, selectedFeatSlug]),
+      ];
+      payload.featSlugs = mergedFeats;
+    }
     await levelUp.mutateAsync(payload);
     setSelectedSpells([]);
+    setSelectedFeatSlug("");
   }
 
   return (
@@ -119,6 +129,33 @@ export function LevelUpSection({
           </div>
         ) : null}
       </dl>
+
+      {data.isAsiOrFeatLevel ? (
+        <div className="space-y-3 rounded-md border border-border bg-muted/30 px-3 py-3 text-sm">
+          <p className="font-medium">Melhoria de atributos ou talento</p>
+          <p className="text-muted-foreground">
+            Para +2/+1 em atributos, edite a seção{" "}
+            <span className="font-medium text-foreground">Atributos</span> após
+            subir de nível. Ou escolha um talento abaixo para incluir na subida.
+          </p>
+          {feats.isPending ? (
+            <p className="text-muted-foreground">Carregando talentos…</p>
+          ) : (
+            <CatalogSelect
+              id="level-up-feat"
+              label="Adicionar talento (opcional)"
+              options={[
+                { value: "", label: "Nenhum — só subir de nível" },
+                ...(feats.data?.data ?? [])
+                  .filter((feat) => !character.featSlugs.includes(feat.slug))
+                  .map((feat) => ({ value: feat.slug, label: feat.name })),
+              ]}
+              value={selectedFeatSlug}
+              onChange={(e) => setSelectedFeatSlug(e.target.value)}
+            />
+          )}
+        </div>
+      ) : null}
 
       {data.subclassRequired ? (
         <CatalogSelect

@@ -13,6 +13,7 @@ import {
   patchInventoryItem,
   removeInventoryItem,
 } from "@/features/character-sheet/api/character-inventory.api";
+import { charactersKeys } from "@/features/characters/api/characters.api";
 import { useGameAuth } from "@/features/character-sheet/api/use-game-auth";
 
 export function useCharacterInventory(characterId: string) {
@@ -39,6 +40,9 @@ function useInvalidateInventory(characterId: string) {
   return () => {
     queryClient.invalidateQueries({
       queryKey: inventoryKeys.list(characterId),
+    });
+    queryClient.invalidateQueries({
+      queryKey: charactersKeys.detail(characterId),
     });
   };
 }

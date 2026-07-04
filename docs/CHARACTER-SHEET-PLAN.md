@@ -2,7 +2,7 @@
 
 Roadmap do **dnd-front** para sair do MVP de identidade e chegar a uma ficha jogável, consumindo tudo que a **dnd-api** já expõe (e evoluindo a API onde faltar).
 
-**Estado atual (jul/2026):** Fases 0–4 concluídas — wizard, ficha com edição PATCH, mesa de jogo. Lacunas recentes: `GET /classes/:slug/features` ✅, boosts de antecedente ✅, stats derivados ✅, perícias de antecedente no catálogo ✅, **antecedente completo (talento de origem + ferramenta)** ✅.
+**Estado atual (jul/2026):** Fases 0–4 concluídas — wizard, ficha com edição PATCH, mesa de jogo. Lacunas recentes: features de classe ✅, boosts de antecedente ✅, antecedente completo ✅, edição de boosts na ficha ✅, mecânicas de subclasse na ficha ✅, level-up ASI/talento (parcial) ✅.
 
 **Princípio:** o front **coleta escolhas** e **exibe** dados; a API **valida e computa** (PV, PB, perícias de antecedente, disponibilidade de magias). Zero regras PHB hardcoded no front.
 
@@ -115,6 +115,7 @@ A implementar para a ficha:
 | `GET /backgrounds/:slug/skills`                      | Perícias do antecedente        |
 | `GET /backgrounds/:slug/tools`                       | Opções de ferramenta (choice)  |
 | `GET /skills`, `/feats`, `/alignments`, `/languages` | Labels e seleção               |
+| `GET /items`                                         | Picker de inventário           |
 | `GET /ability-generation-methods`                    | Método de geração de atributos |
 
 Referência completa: `.cursor/skills/dnd-api-contract/references/api-endpoints.md`
@@ -185,16 +186,17 @@ widgets/
 
 **Objetivo:** `POST /characters` com payload validado pela API.
 
-| Etapa                  | Status                                                   |
-| ---------------------- | -------------------------------------------------------- |
-| 1. Identidade          | ✅                                                       |
-| 2. Atributos           | ✅ standard-array / roll / point-buy                     |
-| 3. Perícias de classe  | ✅                                                       |
-| 4. Traços de espécie   | ✅ `speciesChoices` via trait-choices                    |
-| 5. Opções de subclasse | ✅ `subclassOptions` via `GET /subclasses/:slug/options` |
-| 6. Equipamento inicial | ✅ pacotes classe + antecedente                          |
-| 7. Magias iniciais     | ✅ `characterSpells` (opcional)                          |
-| 8. Revisão             | ✅                                                       |
+| Etapa                  | Status                                                    |
+| ---------------------- | --------------------------------------------------------- |
+| 1. Identidade          | ✅                                                        |
+| 2. Atributos           | ✅ standard-array / roll / point-buy + boosts antecedente |
+| 3. Perícias de classe  | ✅                                                        |
+| 4. Antecedente         | ✅ talento de origem + ferramenta                         |
+| 5. Traços de espécie   | ✅ `speciesChoices` via trait-choices                     |
+| 6. Opções de subclasse | ✅ `subclassOptions` via `GET /subclasses/:slug/options`  |
+| 7. Equipamento inicial | ✅ pacotes classe + antecedente                           |
+| 8. Magias iniciais     | ✅ `characterSpells` (opcional)                           |
+| 9. Revisão             | ✅                                                        |
 
 Após criar → redireciona para `/characters/[id]`. ✅
 
@@ -203,27 +205,29 @@ Após criar → redireciona para `/characters/[id]`. ✅
 ```mermaid
 flowchart TD
   A[1. Identidade] --> B[2. Atributos]
-  B --> C[3. Classe e perícias]
-  C --> D{nível >= 3?}
-  D -->|sim| E[4. Subclasse + opções]
-  D -->|não| F[5. Espécie + trait choices]
-  E --> F
-  F --> G[6. Antecedente + equipamento]
-  G --> H{conjurador?}
-  H -->|sim| I[7. Magias iniciais]
-  H -->|não| J[8. Revisão]
-  I --> J
-  J -->|POST| K[/characters/id]
+  B --> C[3. Perícias de classe]
+  C --> D[4. Antecedente]
+  D --> E[5. Espécie + trait choices]
+  E --> F{nível >= 3?}
+  F -->|sim| G[6. Subclasse + opções]
+  F -->|não| H[7. Equipamento]
+  G --> H
+  H --> I{conjurador?}
+  I -->|sim| J[8. Magias iniciais]
+  I -->|não| K[9. Revisão]
+  J --> K
+  K -->|POST| L[/characters/id]
 ```
 
 | Etapa       | Campos API                                                                      | Catálogo                                  |
 | ----------- | ------------------------------------------------------------------------------- | ----------------------------------------- |
 | Identidade  | `name`, `level`, `classSlug`, `speciesSlug`, `backgroundSlug`, `alignmentSlug?` | classes, species, backgrounds, alignments |
-| Atributos   | `abilityScores`, `abilityGenerationMethodSlug`                                  | `POST /characters/roll-abilities`         |
-| Classe      | `subclassSlug?`, `classSkillSlugs`                                              | `/classes/:slug/skills`                   |
-| Subclasse   | `subclassOptions[]`                                                             | `/subclasses/:slug/mechanics`             |
+| Atributos   | `abilityScores`, `abilityGenerationMethodSlug`, boosts +2/+1                    | `POST /characters/roll-abilities`         |
+| Classe      | `classSkillSlugs`                                                               | `/classes/:slug/skills`                   |
+| Antecedente | `backgroundToolItemSlug?`, preview feat/ferramenta                              | `/backgrounds/:slug`, `/tools`            |
 | Espécie     | `speciesChoices[]`                                                              | `/species/:slug/trait-choices`            |
-| Antecedente | `equipment[]`                                                                   | class + background equipment              |
+| Subclasse   | `subclassSlug?`, `subclassOptions[]`                                            | `/subclasses/:slug/options`               |
+| Equipamento | `equipment[]`                                                                   | class + background equipment              |
 | Magias      | `characterSpells[]`                                                             | class + subclass spells                   |
 | Revisão     | —                                                                               | preview read-only                         |
 
@@ -247,19 +251,19 @@ flowchart TD
 
 **Objetivo:** `/characters/[id]` como ficha jogável, não lista de slugs.
 
-| Seção             | Fonte                          | Conteúdo                                             |
-| ----------------- | ------------------------------ | ---------------------------------------------------- |
-| Cabeçalho         | character + catálogo           | Nome, nível, identidade em PT, alinhamento           |
-| Combate           | character                      | PV, PB                                               |
-| Atributos         | character                      | 6 scores + modificadores                             |
-| Perícias          | character + `/skills`          | Bônus calculado; proficientes (classe + antecedente) |
-| Traços de espécie | `speciesChoices` + traits      | Nome e descrição                                     |
-| Subclasse         | `subclassOptions` + mechanics  | Features por nível + opções escolhidas               |
-| Classe            | `GET /classes/:slug/features`  | Características até o nível do personagem            |
-| Magias            | `characterSpells` + `/spells`  | known / prepared / always_prepared                   |
-| Equipamento       | `equipment` + catálogo         | Pacotes iniciais                                     |
-| Talentos          | `featSlugs` + `/feats`         | Nome e descrição                                     |
-| Idiomas           | `languageSlugs` + `/languages` | Lista resolvida                                      |
+| Seção             | Fonte                          | Conteúdo                                                 |
+| ----------------- | ------------------------------ | -------------------------------------------------------- |
+| Cabeçalho         | character + catálogo           | Nome, nível, identidade em PT, alinhamento               |
+| Combate           | character                      | PV, PB                                                   |
+| Atributos         | character                      | 6 scores + modificadores                                 |
+| Perícias          | character + `/skills`          | Bônus calculado; proficientes (classe + antecedente)     |
+| Traços de espécie | `speciesChoices` + traits      | Nome e descrição                                         |
+| Subclasse         | `subclassOptions` + mechanics  | ✅ Opções escolhidas + `GET /subclasses/:slug/mechanics` |
+| Classe            | `GET /classes/:slug/features`  | Características até o nível do personagem                |
+| Magias            | `characterSpells` + `/spells`  | known / prepared / always_prepared                       |
+| Equipamento       | `equipment` + catálogo         | Pacotes iniciais                                         |
+| Talentos          | `featSlugs` + `/feats`         | Nome e descrição                                         |
+| Idiomas           | `languageSlugs` + `/languages` | Lista resolvida                                          |
 
 **Critério de pronto:** jogador abre a ficha e entende o personagem sem conhecer slugs.
 
@@ -312,15 +316,15 @@ Endpoints já na API, sem front ainda.
 
 ## Lacunas da API (tratar em paralelo)
 
-| Lacuna                                | Impacto                                | Sugestão                                                               |
-| ------------------------------------- | -------------------------------------- | ---------------------------------------------------------------------- |
-| Modificadores não na resposta         | Front recalcula (ok)                   | `abilityModifiers` opcional no DTO                                     |
-| Sem `GET /backgrounds/:slug/skills`   | Só via `backgroundSkillSlugs` na ficha | ✅ `GET /backgrounds/:slug/skills`                                     |
-| Validação só se campo enviado         | Create pode ficar incompleto           | Exigir `classSkillSlugs` / `speciesChoices` quando aplicável           |
-| Sem CA / passive perception           | Combate incompleto                     | Derived stats na API                                                   |
-| Features de classe (não só subclasse) | Seção features parcial                 | ✅ `GET /classes/:slug/features` + seção na ficha                      |
-| Escolha de atributos do antecedente   | PHB 2024 +2/+1                         | ✅ create + PATCH na API; edição na ficha (seção Atributos)            |
-| Talento de origem + ferramenta        | PHB 2024 antecedente                   | ✅ API merge feat + `backgroundToolItemSlug`; wizard etapa Antecedente |
+| Lacuna                        | Impacto                       | Sugestão                                                     |
+| ----------------------------- | ----------------------------- | ------------------------------------------------------------ |
+| Modificadores não na resposta | Front recalcula (ok)          | ✅ `abilityModifiers` no DTO                                 |
+| Sem CA / passive perception   | Combate incompleto            | ✅ Derived stats na API (sem armadura equipada)              |
+| Validação só se campo enviado | Create pode ficar incompleto  | Exigir `classSkillSlugs` / `speciesChoices` quando aplicável |
+| Level-up ASI                  | Marco sem UI                  | ✅ Aviso + talento opcional; ASI via edição de Atributos     |
+| Picker de itens no inventário | Slug manual                   | ✅ `GET /items` + `ItemPicker` no inventário                 |
+| CA com armadura do inventário | Só CA sem armadura            | ✅ CA + `armorClassNote` via inventário equipado             |
+| Escolhas internas de feats    | Magic Initiate, Skilled, etc. | Fora do escopo MVP — feats com opções aninhadas              |
 
 Fases 0–3 funcionam com a API **como está**. Fase 4 e combate completo dependem de evolução no back.
 
@@ -334,6 +338,8 @@ Sprint 2   Fase 1 — etapas 1–4 (identidade → atributos → classe → subc
 Sprint 3   Fase 1 — etapas 5–8 + Fase 2 (espécie → equipamento → magias → ficha leitura)
 Sprint 4   Fase 3 — edição + delete
 Sprint 5+  Fase 4 — mesa + gaps API
+Sprint 6   Polish — mecânicas subclasse, level-up ASI, inventário com picker
+Sprint 7+  CA com armadura, feats com opções internas, validação create obrigatória
 ```
 
 ---

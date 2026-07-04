@@ -53,6 +53,7 @@ export type CharacterDetail = {
   abilityModifiers: AbilityScores;
   passivePerception: number;
   armorClass: number;
+  armorClassNote: string;
   createdAt: string;
   updatedAt: string;
 };

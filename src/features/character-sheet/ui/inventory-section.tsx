@@ -8,6 +8,7 @@ import {
   usePatchInventoryItem,
   useRemoveInventoryItem,
 } from "@/features/character-sheet/api/use-character-inventory";
+import { ItemPicker } from "@/features/item-catalog/ui/item-picker";
 import { Button } from "@/shared/ui/button";
 import { Field, FieldLabel } from "@/shared/ui/field";
 import { Input } from "@/shared/ui/input";
@@ -17,6 +18,13 @@ const LOCATION_LABELS = {
   equipped: "Equipado",
   backpack: "Mochila",
 } as const;
+
+const SLOT_LABELS: Record<string, string> = {
+  armor: "Armadura",
+  shield: "Escudo",
+  main_hand: "Mão principal",
+  off_hand: "Mão secundária",
+};
 
 type InventorySectionProps = {
   characterId: string;
@@ -28,7 +36,7 @@ export function InventorySection({ characterId }: InventorySectionProps) {
   const patchItem = usePatchInventoryItem(characterId);
   const removeItem = useRemoveInventoryItem(characterId);
 
-  const [newSlug, setNewSlug] = useState("");
+  const [selectedSlug, setSelectedSlug] = useState("");
   const [newQty, setNewQty] = useState("1");
 
   const items = inventory.data?.items ?? [];
@@ -37,12 +45,12 @@ export function InventorySection({ characterId }: InventorySectionProps) {
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
-    if (!newSlug.trim()) return;
+    if (!selectedSlug.trim()) return;
     await addItem.mutateAsync({
-      itemSlug: newSlug.trim(),
+      itemSlug: selectedSlug.trim(),
       quantity: Number(newQty) || 1,
     });
-    setNewSlug("");
+    setSelectedSlug("");
     setNewQty("1");
   }
 
@@ -58,29 +66,31 @@ export function InventorySection({ characterId }: InventorySectionProps) {
         Itens adquiridos em jogo — separado do equipamento inicial da criação.
       </p>
 
-      <form onSubmit={handleAdd} className="flex flex-wrap items-end gap-3">
-        <Field className="min-w-[180px] flex-1">
-          <FieldLabel htmlFor="item-slug">Slug do item</FieldLabel>
-          <Input
-            id="item-slug"
-            value={newSlug}
-            onChange={(e) => setNewSlug(e.target.value)}
-            placeholder="ex.: longsword"
-          />
-        </Field>
-        <Field className="w-24">
-          <FieldLabel htmlFor="item-qty">Qtd</FieldLabel>
-          <Input
-            id="item-qty"
-            type="number"
-            min={1}
-            value={newQty}
-            onChange={(e) => setNewQty(e.target.value)}
-          />
-        </Field>
-        <Button type="submit" disabled={addItem.isPending || !newSlug.trim()}>
-          {addItem.isPending ? "Adicionando…" : "Adicionar"}
-        </Button>
+      <form onSubmit={handleAdd} className="flex flex-col gap-4">
+        <ItemPicker
+          id="inventory-item"
+          value={selectedSlug}
+          onChange={setSelectedSlug}
+          disabled={addItem.isPending}
+        />
+        <div className="flex flex-wrap items-end gap-3">
+          <Field className="w-24">
+            <FieldLabel htmlFor="item-qty">Qtd</FieldLabel>
+            <Input
+              id="item-qty"
+              type="number"
+              min={1}
+              value={newQty}
+              onChange={(e) => setNewQty(e.target.value)}
+            />
+          </Field>
+          <Button
+            type="submit"
+            disabled={addItem.isPending || !selectedSlug.trim()}
+          >
+            {addItem.isPending ? "Adicionando…" : "Adicionar"}
+          </Button>
+        </div>
       </form>
 
       <InventoryGroup
@@ -166,7 +176,7 @@ function InventoryGroup({
               </span>
               {item.equipmentSlot ? (
                 <span className="ml-2 text-xs text-muted-foreground">
-                  ({item.equipmentSlot})
+                  ({SLOT_LABELS[item.equipmentSlot] ?? item.equipmentSlot})
                 </span>
               ) : null}
             </div>

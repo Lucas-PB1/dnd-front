@@ -74,6 +74,7 @@ function previewCharacter(values: CreateCharacterInput): CharacterDetail {
     },
     passivePerception: 10 + abilityModifierValue(finalScores.sabedoria),
     armorClass: 10 + abilityModifierValue(finalScores.destreza),
+    armorClassNote: "Sem armadura",
     createdAt: "",
     updatedAt: "",
   };
