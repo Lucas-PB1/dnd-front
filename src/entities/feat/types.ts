@@ -21,3 +21,21 @@ export type FeatSummary = {
 };
 
 export type FeatListResponse = PaginatedResponse<FeatSummary>;
+
+export type FeatOptionValue = {
+  valueId: string;
+  label: string;
+  sortOrder: number;
+};
+
+export type FeatOptionDefinition = {
+  optionKey: string;
+  label: string;
+  valueType: string;
+  sortOrder: number;
+  dependsOnOptionKey: string | null;
+  spellMaxLevel: number | null;
+  values: FeatOptionValue[];
+};
+
+export type FeatOptionListResponse = PaginatedResponse<FeatOptionDefinition>;

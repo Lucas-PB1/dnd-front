@@ -10,6 +10,13 @@ export type SubclassOption = {
   valueId: string;
 };
 
+export type FeatOption = {
+  featSlug: string;
+  instanceIndex?: number;
+  optionKey: string;
+  valueId: string;
+};
+
 export type CharacterSpell = {
   spellSlug: string;
   listType: "known" | "prepared" | "always_prepared";
@@ -28,6 +35,7 @@ export type CharacterSheetInput = {
   speciesChoices?: SpeciesChoice[];
   subclassOptions?: SubclassOption[];
   featSlugs?: string[];
+  featOptions?: FeatOption[];
   characterSpells?: CharacterSpell[];
   equipment?: CharacterEquipment[];
   languageSlugs?: string[];

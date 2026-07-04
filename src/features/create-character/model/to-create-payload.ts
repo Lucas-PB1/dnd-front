@@ -39,6 +39,9 @@ export function toCreateCharacterPayload(
   if (values.characterSpells.length > 0) {
     payload.characterSpells = values.characterSpells;
   }
+  if (values.featOptions.length > 0) {
+    payload.featOptions = values.featOptions;
+  }
 
   return payload;
 }

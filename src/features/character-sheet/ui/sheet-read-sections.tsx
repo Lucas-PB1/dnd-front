@@ -701,14 +701,30 @@ export function FeatsSection({ character, labels }: SectionProps) {
     );
   }
 
+  const optionsByFeat = character.featOptions.reduce<
+    Record<string, typeof character.featOptions>
+  >((acc, option) => {
+    const list = acc[option.featSlug] ?? [];
+    list.push(option);
+    acc[option.featSlug] = list;
+    return acc;
+  }, {});
+
   return (
-    <ul className="flex flex-wrap gap-2">
+    <ul className="space-y-3">
       {character.featSlugs.map((feat) => (
-        <li
-          key={feat}
-          className="rounded-md border border-border px-2 py-1 text-sm"
-        >
-          {labels.resolveFeat(feat)}
+        <li key={feat} className="rounded-md border border-border px-3 py-2">
+          <p className="text-sm font-medium">{labels.resolveFeat(feat)}</p>
+          {(optionsByFeat[feat] ?? []).length > 0 ? (
+            <dl className="mt-2 grid gap-1 text-xs text-muted-foreground">
+              {optionsByFeat[feat].map((option) => (
+                <div key={option.optionKey} className="flex gap-2">
+                  <dt>{option.optionKey}:</dt>
+                  <dd className="text-foreground">{option.valueId}</dd>
+                </div>
+              ))}
+            </dl>
+          ) : null}
         </li>
       ))}
     </ul>

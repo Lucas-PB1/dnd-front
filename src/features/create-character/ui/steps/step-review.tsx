@@ -17,6 +17,7 @@ import {
   useBackgroundSkills,
   useBackgroundTools,
 } from "@/features/background-catalog/api/use-backgrounds";
+import { useFeatOptions } from "@/features/feat-catalog/api/use-feat-options";
 import { isSubclassRequired } from "@/entities/character/lib/subclass";
 
 type StepReviewProps = {
@@ -53,6 +54,7 @@ function previewCharacter(values: CreateCharacterInput): CharacterDetail {
     speciesChoices: values.speciesChoices,
     subclassOptions: values.subclassOptions,
     featSlugs: [],
+    featOptions: values.featOptions,
     characterSpells: values.characterSpells,
     equipment: values.equipment,
     languageSlugs: [],
@@ -108,6 +110,8 @@ export function StepReview({ control }: StepReviewProps) {
     values.backgroundSlug,
     needsToolChoice,
   );
+  const originFeatSlug = backgroundDetail.data?.originFeatSlug ?? "";
+  const originFeatOptionDefs = useFeatOptions(originFeatSlug, !!originFeatSlug);
 
   const toolLabel =
     backgroundDetail.data?.toolProficiencyKind === "fixed"
@@ -135,6 +139,14 @@ export function StepReview({ control }: StepReviewProps) {
 
   function subclassOptionLabel(optionKey: string, valueId: string) {
     const group = subclassOpts.data?.data.find(
+      (g) => g.optionKey === optionKey,
+    );
+    const value = group?.values.find((v) => v.valueId === valueId);
+    return value?.label ?? valueId;
+  }
+
+  function featOptionLabel(optionKey: string, valueId: string) {
+    const group = originFeatOptionDefs.data?.data.find(
       (g) => g.optionKey === optionKey,
     );
     const value = group?.values.find((v) => v.valueId === valueId);
@@ -222,6 +234,18 @@ export function StepReview({ control }: StepReviewProps) {
                   backgroundDetail.data.originFeatSlug}
               </span>
             </p>
+          ) : null}
+          {values.featOptions.length > 0 ? (
+            <ul className="text-sm text-muted-foreground">
+              {values.featOptions.map((option) => (
+                <li key={option.optionKey}>
+                  {option.optionKey}:{" "}
+                  <span className="text-foreground">
+                    {featOptionLabel(option.optionKey, option.valueId)}
+                  </span>
+                </li>
+              ))}
+            </ul>
           ) : null}
           {(backgroundSkills.data?.data.length ?? 0) > 0 ? (
             <p className="text-muted-foreground">

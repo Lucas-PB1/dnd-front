@@ -29,6 +29,7 @@ import { StepAbilities } from "@/features/create-character/ui/steps/step-abiliti
 import { StepBackground } from "@/features/create-character/ui/steps/step-background";
 import { StepClassSkills } from "@/features/create-character/ui/steps/step-class-skills";
 import { StepEquipment } from "@/features/create-character/ui/steps/step-equipment";
+import { StepFeatOptions } from "@/features/create-character/ui/steps/step-feat-options";
 import { StepIdentity } from "@/features/create-character/ui/steps/step-identity";
 import { StepReview } from "@/features/create-character/ui/steps/step-review";
 import { StepSpeciesChoices } from "@/features/create-character/ui/steps/step-species-choices";
@@ -37,6 +38,7 @@ import { StepSubclassOptions } from "@/features/create-character/ui/steps/step-s
 import { WizardStepIndicator } from "@/features/create-character/ui/wizard-step-indicator";
 import { useSpeciesTraitChoices } from "@/features/species-catalog/api/use-species";
 import { useBackgroundDetail } from "@/features/background-catalog/api/use-backgrounds";
+import { useFeatOptions } from "@/features/feat-catalog/api/use-feat-options";
 import { Button } from "@/shared/ui/button";
 
 const DEFAULT_VALUES: CreateCharacterInput = {
@@ -55,6 +57,7 @@ const DEFAULT_VALUES: CreateCharacterInput = {
   abilityRawValues: undefined,
   speciesChoices: [],
   subclassOptions: [],
+  featOptions: [],
   equipment: [],
   characterSpells: [],
 };
@@ -68,6 +71,7 @@ export function CreateCharacterWizard() {
   const [speciesError, setSpeciesError] = useState<string | undefined>();
   const [subclassError, setSubclassError] = useState<string | undefined>();
   const [backgroundError, setBackgroundError] = useState<string | undefined>();
+  const [featsError, setFeatsError] = useState<string | undefined>();
 
   const {
     register,
@@ -112,6 +116,8 @@ export function CreateCharacterWizard() {
     level,
     isSubclassRequired(level) && !!subclassSlug,
   );
+  const originFeatSlug = backgroundDetail.data?.originFeatSlug ?? "";
+  const originFeatOptionDefs = useFeatOptions(originFeatSlug, !!originFeatSlug);
 
   const prevClassSlugRef = useRef(classSlug);
   const prevSpeciesSlugRef = useRef(speciesSlug);
@@ -123,6 +129,7 @@ export function CreateCharacterWizard() {
       setValue("backgroundAbilityBoostPlus2Slug", "");
       setValue("backgroundAbilityBoostPlus1Slug", "");
       setValue("backgroundToolItemSlug", "");
+      setValue("featOptions", []);
       prevBackgroundSlugRef.current = backgroundSlug;
     }
   }, [backgroundSlug, setValue]);
@@ -159,6 +166,7 @@ export function CreateCharacterWizard() {
     setSpeciesError(undefined);
     setSubclassError(undefined);
     setBackgroundError(undefined);
+    setFeatsError(undefined);
 
     if (step === "identity") {
       const valid = await trigger([
@@ -226,6 +234,25 @@ export function CreateCharacterWizard() {
       ) {
         setBackgroundError("Escolha a ferramenta do antecedente.");
         return;
+      }
+      setStep("feats");
+      return;
+    }
+
+    if (step === "feats") {
+      const values = getValues();
+      const requiredDefs = originFeatOptionDefs.data?.data ?? [];
+      if (requiredDefs.length > 0) {
+        const provided = new Set(
+          values.featOptions.map((option) => option.optionKey),
+        );
+        const missing = requiredDefs.filter(
+          (def) => !provided.has(def.optionKey),
+        );
+        if (missing.length > 0) {
+          setFeatsError("Complete todas as escolhas do talento de origem.");
+          return;
+        }
       }
       setStep("species");
       return;
@@ -335,6 +362,14 @@ export function CreateCharacterWizard() {
             </p>
           ) : null}
         </>
+      ) : null}
+
+      {step === "feats" ? (
+        <StepFeatOptions
+          control={control}
+          setValue={setValue}
+          error={featsError}
+        />
       ) : null}
 
       {step === "species" ? (

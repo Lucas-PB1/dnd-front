@@ -4,6 +4,7 @@ import type {
   CharacterSpell,
   SpeciesChoice,
   SubclassOption,
+  FeatOption,
 } from "@/entities/character/sheet-types";
 
 export type {
@@ -12,9 +13,8 @@ export type {
   CharacterSheetInput,
   SpeciesChoice,
   SubclassOption,
+  FeatOption,
 } from "@/entities/character/sheet-types";
-
-/** Atributos PHB — slugs em PT como na API */
 export type AbilityScores = {
   forca: number;
   destreza: number;
@@ -43,6 +43,7 @@ export type CharacterDetail = {
   speciesChoices: SpeciesChoice[];
   subclassOptions: SubclassOption[];
   featSlugs: string[];
+  featOptions: FeatOption[];
   characterSpells: CharacterSpell[];
   equipment: CharacterEquipment[];
   languageSlugs: string[];

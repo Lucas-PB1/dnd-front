@@ -28,6 +28,13 @@ const subclassOptionSchema = z.object({
   valueId: z.string().min(1),
 });
 
+const featOptionSchema = z.object({
+  featSlug: z.string().min(1),
+  instanceIndex: z.number().int().min(0).optional(),
+  optionKey: z.string().min(1),
+  valueId: z.string().min(1),
+});
+
 const characterSpellSchema = z.object({
   spellSlug: z.string().min(1),
   listType: z.enum(["known", "prepared", "always_prepared"]),
@@ -63,6 +70,7 @@ export const createCharacterBaseSchema = z.object({
   abilityRawValues: z.array(z.number().int()).length(6).optional(),
   speciesChoices: z.array(speciesChoiceSchema),
   subclassOptions: z.array(subclassOptionSchema),
+  featOptions: z.array(featOptionSchema),
   equipment: z.array(equipmentSchema),
   characterSpells: z.array(characterSpellSchema),
 });

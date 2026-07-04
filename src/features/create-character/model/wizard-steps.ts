@@ -3,6 +3,7 @@ export const WIZARD_STEPS = [
   { id: "abilities", label: "Atributos" },
   { id: "skills", label: "Perícias" },
   { id: "background", label: "Antecedente" },
+  { id: "feats", label: "Talentos" },
   { id: "species", label: "Espécie" },
   { id: "subclass", label: "Subclasse" },
   { id: "equipment", label: "Equipamento" },

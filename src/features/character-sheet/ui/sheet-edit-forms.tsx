@@ -41,6 +41,8 @@ import { StepEquipment } from "@/features/create-character/ui/steps/step-equipme
 import { StepSpeciesChoices } from "@/features/create-character/ui/steps/step-species-choices";
 import { StepSubclassOptions } from "@/features/create-character/ui/steps/step-subclass-options";
 import { StepSpells } from "@/features/create-character/ui/steps/step-spells";
+import type { FeatOption } from "@/entities/character/sheet-types";
+import { FeatOptionsEditor } from "@/features/feat-catalog/ui/feat-options-editor";
 import {
   useAlignments,
   useFeats,
@@ -600,6 +602,7 @@ function SheetStepForm({
     classSkillSlugs: character.classSkillSlugs,
     speciesChoices: character.speciesChoices,
     subclassOptions: character.subclassOptions,
+    featOptions: character.featOptions,
     equipment: character.equipment,
     characterSpells: character.characterSpells,
   } satisfies CreateCharacterInput;
@@ -682,11 +685,24 @@ export function EditFeatsForm({ character, onSuccess }: EditFormProps) {
   const { patch, formError, submit } = useSectionPatch(character, onSuccess);
   const feats = useFeats();
   const [selected, setSelected] = useState<string[]>(character.featSlugs);
+  const [featOptions, setFeatOptions] = useState<FeatOption[]>(
+    character.featOptions,
+  );
+
+  const featNameBySlug = Object.fromEntries(
+    (feats.data?.data ?? []).map((feat) => [feat.slug, feat.name]),
+  );
 
   function toggle(slug: string) {
-    setSelected((prev) =>
-      prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug],
-    );
+    setSelected((prev) => {
+      const next = prev.includes(slug)
+        ? prev.filter((s) => s !== slug)
+        : [...prev, slug];
+      if (!next.includes(slug)) {
+        setFeatOptions((options) => options.filter((o) => o.featSlug !== slug));
+      }
+      return next;
+    });
   }
 
   return (
@@ -694,7 +710,10 @@ export function EditFeatsForm({ character, onSuccess }: EditFormProps) {
       className="space-y-4"
       onSubmit={(e) => {
         e.preventDefault();
-        submit({ featSlugs: selected });
+        submit({
+          featSlugs: selected,
+          featOptions: featOptions.filter((o) => selected.includes(o.featSlug)),
+        });
       }}
     >
       {feats.isPending ? (
@@ -721,6 +740,17 @@ export function EditFeatsForm({ character, onSuccess }: EditFormProps) {
           ))}
         </ul>
       )}
+      {selected.length > 0 ? (
+        <div className="border-t border-border pt-4">
+          <h3 className="mb-3 text-sm font-semibold">Opções dos talentos</h3>
+          <FeatOptionsEditor
+            featSlugs={selected}
+            featNameBySlug={featNameBySlug}
+            value={featOptions}
+            onChange={setFeatOptions}
+          />
+        </div>
+      ) : null}
       <FormAlert message={formError} />
       <FormActions isPending={patch.isPending} />
     </form>

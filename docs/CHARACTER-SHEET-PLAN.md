@@ -324,7 +324,7 @@ Endpoints já na API, sem front ainda.
 | Level-up ASI                  | Marco sem UI                  | ✅ Aviso + talento opcional; ASI via edição de Atributos             |
 | Picker de itens no inventário | Slug manual                   | ✅ `GET /items` + `ItemPicker` no inventário                         |
 | CA com armadura do inventário | Só CA sem armadura            | ✅ CA + `armorClassNote` via inventário equipado                     |
-| Escolhas internas de feats    | Magic Initiate, Skilled, etc. | Fora do escopo MVP — feats com opções aninhadas                      |
+| Escolhas internas de feats    | Magic Initiate, Skilled, etc. | ✅ `featOptions` + `GET /feats/:slug/options`                        |
 
 Fases 0–3 funcionam com a API **como está**. Fase 4 e combate completo dependem de evolução no back.
 
@@ -340,7 +340,7 @@ Sprint 4   Fase 3 — edição + delete
 Sprint 5+  Fase 4 — mesa + gaps API
 Sprint 6   Polish — mecânicas subclasse, level-up ASI, inventário com picker
 Sprint 7   CA com armadura, validação create obrigatória, editar ferramenta do antecedente
-Sprint 8+  Feats com opções internas (Magic Initiate, Skilled)
+Sprint 8   Feats com opções internas (Magic Initiate, Skilled)
 ```
 
 ---
