@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import type { CharacterDetail } from "@/entities/character/types";
 import type { CharacterCatalogLabels } from "@/features/character-sheet/api/use-character-catalog-labels";
@@ -10,7 +10,6 @@ import {
   usePatchCharacterState,
   useTakeRest,
 } from "@/features/character-sheet/api/use-character-state";
-import { useConditions } from "@/features/reference-catalog/api/use-reference";
 import { Button } from "@/shared/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/shared/ui/field";
 import { Input } from "@/shared/ui/input";
@@ -33,9 +32,8 @@ export function TableStateSection({
   const patchState = usePatchCharacterState(characterId);
   const castSpell = useCastSpell(characterId);
   const takeRest = useTakeRest(characterId);
-  const conditionsCatalog = useConditions();
 
-  const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
+  const [conditionsText, setConditionsText] = useState("");
   const [tempHp, setTempHp] = useState("");
   const [concentration, setConcentration] = useState("");
   const [castSlug, setCastSlug] = useState("");
@@ -56,35 +54,23 @@ export function TableStateSection({
     ? SLOT_LEVELS.some((lv) => (state.spellSlotsMax[lv] ?? 0) > 0)
     : false;
 
-  const conditionNameBySlug = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const row of conditionsCatalog.data ?? []) {
-      map.set(row.slug, row.name);
-    }
-    return map;
-  }, [conditionsCatalog.data]);
-
   function openStateForm() {
     if (!state) return;
-    setSelectedConditions([...state.conditions]);
+    setConditionsText(state.conditions.join(", "));
     setTempHp(String(state.tempHp));
     setConcentration(state.concentratingOn ?? "");
     setShowStateForm(true);
   }
 
-  function toggleCondition(slug: string) {
-    setSelectedConditions((prev) =>
-      prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug],
-    );
-  }
-
   async function saveState() {
     await patchState.mutateAsync({
-      conditions: selectedConditions,
+      conditions: conditionsText
+        .split(",")
+        .map((c) => c.trim())
+        .filter(Boolean),
       tempHp: Number(tempHp) || 0,
       concentratingOn: concentration.trim() || null,
     });
-    setShowStateForm(false);
   }
 
   async function handleCast() {
@@ -141,11 +127,7 @@ export function TableStateSection({
             Condições
           </dt>
           <dd className="text-sm">
-            {state.conditions.length > 0
-              ? state.conditions
-                  .map((slug) => conditionNameBySlug.get(slug) ?? slug)
-                  .join(", ")
-              : "—"}
+            {state.conditions.length > 0 ? state.conditions.join(", ") : "—"}
           </dd>
         </div>
       </dl>
@@ -213,31 +195,15 @@ export function TableStateSection({
       {showStateForm ? (
         <FieldGroup className="rounded-lg border border-border p-4">
           <Field>
-            <FieldLabel>Condições</FieldLabel>
-            {conditionsCatalog.isPending ? (
-              <p className="text-sm text-muted-foreground">
-                Carregando condições…
-              </p>
-            ) : (
-              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                {(conditionsCatalog.data ?? []).map((condition) => {
-                  const checked = selectedConditions.includes(condition.slug);
-                  return (
-                    <label
-                      key={condition.slug}
-                      className="flex items-center gap-2 rounded-md border border-border px-2 py-1.5 text-sm"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        onChange={() => toggleCondition(condition.slug)}
-                      />
-                      <span>{condition.name}</span>
-                    </label>
-                  );
-                })}
-              </div>
-            )}
+            <FieldLabel htmlFor="conditions">
+              Condições (separadas por vírgula)
+            </FieldLabel>
+            <Input
+              id="conditions"
+              value={conditionsText}
+              onChange={(e) => setConditionsText(e.target.value)}
+              placeholder="ex.: envenenado, caído"
+            />
           </Field>
           <Field>
             <FieldLabel htmlFor="tempHp">PV temporários</FieldLabel>
@@ -296,35 +262,34 @@ export function TableStateSection({
                 ))}
               </select>
             </Field>
-            <Field>
-              <FieldLabel htmlFor="cast-slot">Slot (opcional)</FieldLabel>
+            <Field className="w-32">
+              <FieldLabel htmlFor="cast-slot">Círculo do slot</FieldLabel>
               <Input
                 id="cast-slot"
                 type="number"
-                min={1}
+                min={0}
                 max={9}
+                placeholder="auto"
                 value={castSlotLevel}
                 onChange={(e) => setCastSlotLevel(e.target.value)}
-                className="w-24"
               />
             </Field>
             <Button
               type="button"
-              size="sm"
               disabled={!castSlug || castSpell.isPending}
               onClick={handleCast}
             >
-              Conjurar
+              {castSpell.isPending ? "Conjurando…" : "Conjurar"}
             </Button>
           </div>
         </div>
       ) : null}
 
       {mutationError ? (
-        <p className="text-sm text-destructive">
+        <p className="text-sm text-destructive" role="alert">
           {mutationError instanceof Error
             ? mutationError.message
-            : "Erro na mesa"}
+            : "Erro na mesa de jogo"}
         </p>
       ) : null}
     </div>

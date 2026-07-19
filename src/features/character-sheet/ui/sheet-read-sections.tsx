@@ -7,6 +7,7 @@ import type {
 import {
   ABILITY_LABELS_PT,
   abilityModifier,
+  abilityModifierValue,
   formatSkillBonus,
   skillBonus,
 } from "@/entities/character";
@@ -14,7 +15,7 @@ import type { CharacterCatalogLabels } from "@/features/character-sheet/api/use-
 import type { SkillSummary } from "@/entities/skill/types";
 import type { ClassFeature } from "@/entities/class/types";
 import type { SubclassMechanic } from "@/entities/subclass/types";
-import { useSpeciesTraitChoices } from "@/features/species-catalog/api/use-species";
+import { useSpeciesTraitChoices, useSpeciesDetail, useSpeciesTraits } from "@/features/species-catalog/api/use-species";
 import {
   useSubclassMechanics,
   useSubclassOptions,
@@ -106,6 +107,78 @@ export function CombatSection({ character }: SectionProps) {
         </div>
       )}
     </dl>
+  );
+}
+
+const ABILITY_ORDER = Object.keys(ABILITY_LABELS_PT) as (keyof AbilityScores)[];
+
+/** Salvaguardas no estilo Beyond: todas as 6, com proficiência da classe. */
+export function SavingThrowsSection({ character }: SectionProps) {
+  const classDetail = useClassDetail(
+    character.classSlug,
+    !!character.classSlug,
+  );
+  const proficient = new Set(classDetail.data?.savingThrowSlugs ?? []);
+  const pb = character.proficiencyBonus;
+
+  if (classDetail.isPending) {
+    return (
+      <p className="text-sm text-muted-foreground">Carregando salvaguardas…</p>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        {ABILITY_ORDER.map((slug) => {
+          const mod = abilityModifierValue(character.abilityScores[slug]);
+          const isProficient = proficient.has(slug);
+          const total = mod + (isProficient ? pb : 0);
+          return (
+            <li
+              key={slug}
+              className={cn(
+                "flex items-center justify-between rounded-lg border px-3 py-2",
+                isProficient ? "border-primary/40 bg-primary/5" : "border-border",
+              )}
+            >
+              <span className="text-sm font-medium">
+                {ABILITY_LABELS_PT[slug]}
+                {isProficient ? (
+                  <span className="ml-1.5 text-[0.65rem] tracking-wide text-primary uppercase">
+                    Prof.
+                  </span>
+                ) : null}
+              </span>
+              <span className="font-mono text-base font-semibold">
+                {formatSkillBonus(total)}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+      {(classDetail.data?.armorTrainingNames?.length ||
+        classDetail.data?.weaponProficiencyNames?.length) ? (
+        <dl className="grid gap-3 border-t border-border pt-3 text-sm sm:grid-cols-2">
+          {classDetail.data?.armorTrainingNames?.length ? (
+            <div>
+              <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                Armaduras
+              </dt>
+              <dd>{classDetail.data.armorTrainingNames.join(", ")}</dd>
+            </div>
+          ) : null}
+          {classDetail.data?.weaponProficiencyNames?.length ? (
+            <div>
+              <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                Armas
+              </dt>
+              <dd>{classDetail.data.weaponProficiencyNames.join(", ")}</dd>
+            </div>
+          ) : null}
+        </dl>
+      ) : null}
+    </div>
   );
 }
 
@@ -302,6 +375,14 @@ export function BackgroundTraitsSection({
 }
 
 export function SpeciesChoicesSection({ character }: SectionProps) {
+  const speciesDetail = useSpeciesDetail(
+    character.speciesSlug,
+    !!character.speciesSlug,
+  );
+  const traitsQuery = useSpeciesTraits(
+    character.speciesSlug,
+    !!character.speciesSlug,
+  );
   const traitChoices = useSpeciesTraitChoices(
     character.speciesSlug,
     character.speciesChoices.length > 0,
@@ -324,35 +405,92 @@ export function SpeciesChoicesSection({ character }: SectionProps) {
     });
   }, [character.speciesChoices, traitChoices.data?.data]);
 
-  if (character.speciesChoices.length === 0) {
-    return (
-      <p className="text-sm text-muted-foreground">
-        Nenhuma escolha de traço registrada.
-      </p>
-    );
-  }
-
-  if (traitChoices.isPending) {
-    return <p className="text-sm text-muted-foreground">Carregando traços…</p>;
-  }
+  const fixedTraits = (traitsQuery.data?.data ?? []).filter(
+    (trait) => !trait.choiceKind,
+  );
 
   return (
-    <ul className="space-y-3">
-      {resolved.map((item) => (
-        <li
-          key={`${item.choiceKind}-${item.choiceSlug}`}
-          className="rounded-lg border border-border px-3 py-2"
-        >
-          <p className="text-xs text-muted-foreground">{item.traitName}</p>
-          <p className="font-medium">{item.choiceName}</p>
-          {item.level1Benefit ? (
-            <p className="mt-1 text-sm text-muted-foreground">
-              {item.level1Benefit}
-            </p>
-          ) : null}
-        </li>
-      ))}
-    </ul>
+    <div className="space-y-5">
+      {speciesDetail.data ? (
+        <dl className="grid gap-3 sm:grid-cols-3">
+          <div>
+            <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+              Tipo
+            </dt>
+            <dd className="text-sm font-medium">
+              {speciesDetail.data.creatureType}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+              Tamanho
+            </dt>
+            <dd className="text-sm font-medium">{speciesDetail.data.size}</dd>
+          </div>
+          <div>
+            <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+              Deslocamento
+            </dt>
+            <dd className="text-sm font-medium">{speciesDetail.data.speed}</dd>
+          </div>
+        </dl>
+      ) : null}
+
+      {traitsQuery.isPending ? (
+        <p className="text-sm text-muted-foreground">Carregando traços…</p>
+      ) : fixedTraits.length > 0 ? (
+        <div className="space-y-2">
+          <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+            Traços fixos
+          </p>
+          <ul className="space-y-2">
+            {fixedTraits.map((trait) => (
+              <li
+                key={trait.name}
+                className="rounded-lg border border-border px-3 py-2"
+              >
+                <p className="font-medium">{trait.name}</p>
+                {trait.description ? (
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {trait.description}
+                  </p>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
+      <div className="space-y-2">
+        <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+          Escolhas
+        </p>
+        {character.speciesChoices.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            Nenhuma escolha de traço registrada.
+          </p>
+        ) : traitChoices.isPending ? (
+          <p className="text-sm text-muted-foreground">Carregando escolhas…</p>
+        ) : (
+          <ul className="space-y-3">
+            {resolved.map((item) => (
+              <li
+                key={`${item.choiceKind}-${item.choiceSlug}`}
+                className="rounded-lg border border-border px-3 py-2"
+              >
+                <p className="text-xs text-muted-foreground">{item.traitName}</p>
+                <p className="font-medium">{item.choiceName}</p>
+                {item.level1Benefit ? (
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {item.level1Benefit}
+                  </p>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
   );
 }
 

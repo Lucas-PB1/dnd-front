@@ -23,6 +23,7 @@ import {
 } from "@/features/background-catalog/api/use-backgrounds";
 import { CatalogSelect } from "@/features/create-character/ui/catalog-select";
 import { previewBackgroundAbilityBoosts } from "@/entities/character/lib/background-boost";
+import { useAbilityGenerationMethods } from "@/features/reference-catalog/api/use-reference";
 import { useRollAbilities } from "@/features/character-sheet/api/use-roll-abilities";
 import { Button } from "@/shared/ui/button";
 import {
@@ -65,6 +66,7 @@ export function StepAbilities({
   setValue,
 }: StepAbilitiesProps) {
   const roll = useRollAbilities();
+  const methods = useAbilityGenerationMethods();
   const method = useWatch({
     control,
     name: "abilityGenerationMethodSlug",
@@ -211,7 +213,8 @@ export function StepAbilities({
             Método de geração
           </FieldLabel>
           <FieldDescription>
-            Conjunto padrão, rolagem 4d6 ou point-buy (27 pontos).
+            {methods.data?.find((m) => m.slug === method)?.description ??
+              "Conjunto padrão, rolagem 4d6 ou point-buy (27 pontos)."}
           </FieldDescription>
           <select
             id="abilityGenerationMethodSlug"
@@ -224,11 +227,21 @@ export function StepAbilities({
               )
             }
           >
-            <option value="standard-array">
-              Conjunto padrão (15, 14, 13, 12, 10, 8)
-            </option>
-            <option value="roll">Rolagem 4d6 (descarta o menor)</option>
-            <option value="point-buy">Point-buy (27 pontos)</option>
+            {methods.isPending || !methods.data?.length ? (
+              <>
+                <option value="standard-array">
+                  Conjunto padrão (15, 14, 13, 12, 10, 8)
+                </option>
+                <option value="roll">Rolagem 4d6 (descarta o menor)</option>
+                <option value="point-buy">Point-buy (27 pontos)</option>
+              </>
+            ) : (
+              methods.data.map((row) => (
+                <option key={row.slug} value={row.slug}>
+                  {row.name}
+                </option>
+              ))
+            )}
           </select>
         </Field>
 

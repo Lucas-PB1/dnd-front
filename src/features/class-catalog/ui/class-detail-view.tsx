@@ -60,6 +60,12 @@ function ClassHero({
       value: `${cls.skillChoiceCount} à escolha${cls.skillChoiceFrom === "any" ? " (qualquer)" : ""}`,
     });
   }
+  if (cls.savingThrowNames?.length) {
+    stats.push({
+      label: "Salvaguardas",
+      value: cls.savingThrowNames.join(", "),
+    });
+  }
 
   return (
     <CatalogDetailHero
@@ -75,7 +81,28 @@ function ClassHero({
       summary={cls.summary}
       stats={stats}
       statsClassName="grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"
-    />
+    >
+      {(cls.armorTrainingNames?.length || cls.weaponProficiencyNames?.length) ? (
+        <dl className="grid gap-3 text-sm sm:grid-cols-2">
+          {cls.armorTrainingNames?.length ? (
+            <div>
+              <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                Armaduras
+              </dt>
+              <dd>{cls.armorTrainingNames.join(", ")}</dd>
+            </div>
+          ) : null}
+          {cls.weaponProficiencyNames?.length ? (
+            <div>
+              <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                Armas
+              </dt>
+              <dd>{cls.weaponProficiencyNames.join(", ")}</dd>
+            </div>
+          ) : null}
+        </dl>
+      ) : null}
+    </CatalogDetailHero>
   );
 }
 

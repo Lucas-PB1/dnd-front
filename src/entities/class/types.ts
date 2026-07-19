@@ -24,6 +24,12 @@ export type ClassSummary = {
   skillChoiceFrom: string | null;
   sourceChapter: number | null;
   editionSlug: string | null;
+  savingThrowSlugs?: string[];
+  savingThrowNames?: string[];
+  armorTrainingSlugs?: string[];
+  armorTrainingNames?: string[];
+  weaponProficiencySlugs?: string[];
+  weaponProficiencyNames?: string[];
 };
 
 export type ClassListResponse = PaginatedResponse<ClassSummary>;

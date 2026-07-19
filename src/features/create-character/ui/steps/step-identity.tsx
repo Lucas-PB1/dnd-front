@@ -18,6 +18,7 @@ import {
   type CreateCharacterInput,
 } from "@/features/create-character/model/create-character.schema";
 import { CatalogSelect } from "@/features/create-character/ui/catalog-select";
+import { OriginPreview } from "@/features/create-character/ui/origin-preview";
 import { useAlignments } from "@/features/reference-catalog/api/use-reference";
 import { useSpecies } from "@/features/species-catalog/api/use-species";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/shared/ui/field";
@@ -37,6 +38,11 @@ export function StepIdentity({ register, control, errors }: StepIdentityProps) {
 
   const level = useWatch({ control, name: "level", defaultValue: 1 });
   const classSlug = useWatch({ control, name: "classSlug", defaultValue: "" });
+  const speciesSlug = useWatch({
+    control,
+    name: "speciesSlug",
+    defaultValue: "",
+  });
   const backgroundSlug = useWatch({
     control,
     name: "backgroundSlug",
@@ -60,109 +66,119 @@ export function StepIdentity({ register, control, errors }: StepIdentityProps) {
   );
 
   return (
-    <FieldGroup>
-      <Field>
-        <FieldLabel htmlFor="name">Nome do personagem</FieldLabel>
-        <Input
-          id="name"
-          autoComplete="off"
-          aria-invalid={!!errors.name}
-          {...register("name")}
-        />
-        <FieldError errors={[errors.name]} />
-      </Field>
+    <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(16rem,20rem)] lg:items-start lg:gap-8">
+      <FieldGroup>
+        <Field>
+          <FieldLabel htmlFor="name">Nome do personagem</FieldLabel>
+          <Input
+            id="name"
+            autoComplete="off"
+            aria-invalid={!!errors.name}
+            {...register("name")}
+          />
+          <FieldError errors={[errors.name]} />
+        </Field>
 
-      <CatalogSelect
-        id="level"
-        label="Nível inicial"
-        description="1 para personagem novo; 5+ para entrar em campanha já em andamento."
-        options={LEVEL_OPTIONS.map((lv) => ({
-          value: String(lv),
-          label: `Nível ${lv}`,
-        }))}
-        error={errors.level}
-        {...register("level", { valueAsNumber: true })}
-      />
-
-      <CatalogSelect
-        id="classSlug"
-        label="Classe"
-        isLoading={classes.isPending}
-        options={(classes.data?.data ?? []).map((c) => ({
-          value: c.slug,
-          label: c.name,
-        }))}
-        error={errors.classSlug}
-        {...register("classSlug")}
-      />
-
-      {needsSubclass ? (
         <CatalogSelect
-          id="subclassSlug"
-          label="Subclasse"
-          description={`Obrigatória a partir do nível ${SUBCLASS_REQUIRED_FROM_LEVEL}.`}
-          isLoading={subclasses.isPending}
-          options={(subclasses.data?.data ?? []).map((s) => ({
+          id="level"
+          label="Nível inicial"
+          description="1 para personagem novo; 5+ para entrar em campanha já em andamento."
+          options={LEVEL_OPTIONS.map((lv) => ({
+            value: String(lv),
+            label: `Nível ${lv}`,
+          }))}
+          error={errors.level}
+          {...register("level", { valueAsNumber: true })}
+        />
+
+        <CatalogSelect
+          id="classSlug"
+          label="Classe"
+          description="Comece pela classe — ela define o estilo de jogo (como no Beyond 2024)."
+          isLoading={classes.isPending}
+          options={(classes.data?.data ?? []).map((c) => ({
+            value: c.slug,
+            label: c.name,
+          }))}
+          error={errors.classSlug}
+          {...register("classSlug")}
+        />
+
+        {needsSubclass ? (
+          <CatalogSelect
+            id="subclassSlug"
+            label="Subclasse"
+            description={`Obrigatória a partir do nível ${SUBCLASS_REQUIRED_FROM_LEVEL}.`}
+            isLoading={subclasses.isPending}
+            options={(subclasses.data?.data ?? []).map((s) => ({
+              value: s.slug,
+              label: s.name,
+            }))}
+            error={errors.subclassSlug}
+            {...register("subclassSlug")}
+          />
+        ) : null}
+
+        <CatalogSelect
+          id="speciesSlug"
+          label="Espécie"
+          isLoading={species.isPending}
+          options={(species.data?.data ?? []).map((s) => ({
             value: s.slug,
             label: s.name,
           }))}
-          error={errors.subclassSlug}
-          {...register("subclassSlug")}
+          error={errors.speciesSlug}
+          {...register("speciesSlug")}
         />
-      ) : null}
 
-      <CatalogSelect
-        id="speciesSlug"
-        label="Espécie"
-        isLoading={species.isPending}
-        options={(species.data?.data ?? []).map((s) => ({
-          value: s.slug,
-          label: s.name,
-        }))}
-        error={errors.speciesSlug}
-        {...register("speciesSlug")}
+        <CatalogSelect
+          id="backgroundSlug"
+          label="Antecedente"
+          description="Concede boosts de atributo, talento de origem e perícias."
+          isLoading={backgrounds.isPending}
+          options={(backgrounds.data?.data ?? []).map((b) => ({
+            value: b.slug,
+            label: b.name,
+          }))}
+          error={errors.backgroundSlug}
+          {...register("backgroundSlug")}
+        />
+
+        <CatalogSelect
+          id="alignmentSlug"
+          label="Alinhamento"
+          description="Opcional — pode definir depois na ficha."
+          isLoading={alignments.isPending}
+          options={[
+            { value: "", label: "Não definido" },
+            ...(alignments.data?.data ?? []).map((alignment) => ({
+              value: alignment.slug,
+              label: alignment.name,
+            })),
+          ]}
+          {...register("alignmentSlug")}
+        />
+
+        {backgroundSlug && backgroundAbilityOptions.length > 0 ? (
+          <p className="text-sm text-muted-foreground">
+            Bônus de atributo ({selectedBackground?.name}):{" "}
+            {backgroundAbilityOptions.map((o) => o.label).join(", ")}
+          </p>
+        ) : null}
+
+        {backgroundSlug && (backgroundSkills.data?.data.length ?? 0) > 0 ? (
+          <p className="text-sm text-muted-foreground">
+            Perícias do antecedente:{" "}
+            {backgroundSkills.data!.data.map((s) => s.name).join(", ")}
+          </p>
+        ) : null}
+      </FieldGroup>
+
+      <OriginPreview
+        classSlug={classSlug || undefined}
+        speciesSlug={speciesSlug || undefined}
+        backgroundSlug={backgroundSlug || undefined}
       />
-
-      <CatalogSelect
-        id="backgroundSlug"
-        label="Antecedente"
-        isLoading={backgrounds.isPending}
-        options={(backgrounds.data?.data ?? []).map((b) => ({
-          value: b.slug,
-          label: b.name,
-        }))}
-        error={errors.backgroundSlug}
-        {...register("backgroundSlug")}
-      />
-
-      <CatalogSelect
-        id="alignmentSlug"
-        label="Alinhamento"
-        description="Opcional — pode definir depois na ficha."
-        isLoading={alignments.isPending}
-        options={[
-          { value: "", label: "Não definido" },
-          ...(alignments.data?.data ?? []).map((alignment) => ({
-            value: alignment.slug,
-            label: alignment.name,
-          })),
-        ]}
-        {...register("alignmentSlug")}
-      />
-
-      {backgroundSlug && backgroundAbilityOptions.length > 0 ? (
-        <p className="text-sm text-muted-foreground">
-          Bônus de atributo ({selectedBackground?.name}):{" "}
-          {backgroundAbilityOptions.map((o) => o.label).join(", ")}
-        </p>
-      ) : null}
-
-      {backgroundSlug && (backgroundSkills.data?.data.length ?? 0) > 0 ? (
-        <p className="text-sm text-muted-foreground">
-          Perícias do antecedente:{" "}
-          {backgroundSkills.data!.data.map((s) => s.name).join(", ")}
-        </p>
-      ) : null}
-    </FieldGroup>
+    </div>
   );
 }

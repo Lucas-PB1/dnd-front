@@ -24,6 +24,7 @@ import {
   BackgroundTraitsSection,
   ClassFeaturesSection,
   CombatSection,
+  SavingThrowsSection,
   EquipmentSection,
   FeatsSection,
   LanguagesSection,
@@ -244,6 +245,14 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
         editContent={<EditCombatForm character={data} onSuccess={closeEdit} />}
       >
         <CombatSection {...sectionProps} />
+      </SheetSection>
+
+      <SheetSection
+        id="saving-throws"
+        title="Salvaguardas e treinos"
+        description="Proficiências da classe — no estilo Beyond."
+      >
+        <SavingThrowsSection {...sectionProps} />
       </SheetSection>
 
       <SheetSection
