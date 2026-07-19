@@ -9,8 +9,12 @@ import { CATALOG_PAGE_SIZE } from "@/shared/lib/catalog-pagination";
 export const featKeys = {
   all: ["feats"] as const,
   listAll: () => [...featKeys.all, "list", "all"] as const,
-  listPage: (params: { page: number; limit: number; q: string }) =>
-    [...featKeys.all, "list", "page", params] as const,
+  listPage: (params: {
+    page: number;
+    limit: number;
+    q: string;
+    category: string;
+  }) => [...featKeys.all, "list", "page", params] as const,
   detail: (slug: string) => [...featKeys.all, "detail", slug] as const,
   options: (slug: string) => [...featKeys.all, "options", slug] as const,
 };
@@ -19,6 +23,7 @@ export async function fetchFeatsPage(params?: {
   page?: number;
   limit?: number;
   q?: string;
+  category?: string;
 }): Promise<FeatListResponse> {
   const page = params?.page ?? 1;
   const limit = params?.limit ?? CATALOG_PAGE_SIZE;
@@ -27,6 +32,8 @@ export async function fetchFeatsPage(params?: {
   search.set("limit", String(limit));
   const q = params?.q?.trim();
   if (q) search.set("q", q);
+  const category = params?.category?.trim();
+  if (category) search.set("category", category);
 
   return catalogFetch<FeatListResponse>(`/feats?${search.toString()}`, {
     next: { revalidate: 3600 },

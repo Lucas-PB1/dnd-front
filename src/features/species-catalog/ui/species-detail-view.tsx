@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { Suspense, useMemo } from "react";
 
 import { shortSpeciesSize } from "@/entities/species/short-size";
 import type {
@@ -14,6 +14,7 @@ import {
   useSpeciesTraitChoices,
   useSpeciesTraits,
 } from "@/features/species-catalog/api/use-species";
+import { useCatalogBackHref } from "@/shared/lib/use-catalog-back-href";
 import { cn } from "@/shared/lib/utils";
 import { BackLink } from "@/shared/ui/back-link";
 import { buttonVariants } from "@/shared/ui/button";
@@ -24,7 +25,13 @@ type SpeciesDetailViewProps = {
   slug: string;
 };
 
-function SpeciesHero({ species }: { species: SpeciesSummary }) {
+function SpeciesHero({
+  species,
+  backHref,
+}: {
+  species: SpeciesSummary;
+  backHref: string;
+}) {
   const stats = [
     { label: "Tipo", value: species.creatureType },
     { label: "Tamanho", value: shortSpeciesSize(species.size) },
@@ -38,7 +45,7 @@ function SpeciesHero({ species }: { species: SpeciesSummary }) {
         aria-hidden
       />
       <div className="relative space-y-6 p-5 sm:p-8">
-        <BackLink href="/species">Espécies</BackLink>
+        <BackLink href={backHref}>Espécies</BackLink>
 
         <div className="space-y-3">
           <h1 className="font-heading text-4xl font-semibold tracking-tight sm:text-5xl">
@@ -127,9 +134,20 @@ function TraitChoiceBlock({ choices }: { choices: SpeciesTraitChoice[] }) {
 }
 
 export function SpeciesDetailView({ slug }: SpeciesDetailViewProps) {
+  return (
+    <Suspense
+      fallback={<p className="text-sm text-muted-foreground">Carregando…</p>}
+    >
+      <SpeciesDetailBody slug={slug} />
+    </Suspense>
+  );
+}
+
+function SpeciesDetailBody({ slug }: SpeciesDetailViewProps) {
   const speciesQuery = useSpeciesDetail(slug);
   const traitsQuery = useSpeciesTraits(slug, !!slug);
   const choicesQuery = useSpeciesTraitChoices(slug, !!slug);
+  const backHref = useCatalogBackHref("/species");
 
   const choicesByTrait = useMemo(
     () => groupChoicesByTrait(choicesQuery.data?.data ?? []),
@@ -154,7 +172,7 @@ export function SpeciesDetailView({ slug }: SpeciesDetailViewProps) {
             : "Espécie não encontrada"}
         </p>
         <Link
-          href="/species"
+          href={backHref}
           className={cn(buttonVariants({ variant: "outline" }))}
         >
           Voltar ao compêndio
@@ -168,7 +186,7 @@ export function SpeciesDetailView({ slug }: SpeciesDetailViewProps) {
 
   return (
     <div className="flex flex-col gap-12">
-      <SpeciesHero species={species} />
+      <SpeciesHero species={species} backHref={backHref} />
 
       {species.description ? (
         <section aria-labelledby="species-about" className="space-y-4">

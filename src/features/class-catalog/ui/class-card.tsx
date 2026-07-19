@@ -1,17 +1,19 @@
 import Link from "next/link";
 
 import type { ClassSummary } from "@/entities/class/types";
+import { withCatalogReturn } from "@/shared/lib/catalog-return";
 import { cn } from "@/shared/lib/utils";
 
 type ClassCardProps = {
   classItem: ClassSummary;
+  listPath?: string;
   className?: string;
 };
 
-export function ClassCard({ classItem, className }: ClassCardProps) {
+export function ClassCard({ classItem, listPath, className }: ClassCardProps) {
   return (
     <Link
-      href={`/classes/${classItem.slug}`}
+      href={withCatalogReturn(`/classes/${classItem.slug}`, listPath)}
       className={cn(
         "group flex flex-col gap-3 rounded-lg border border-border bg-card p-4 transition-colors hover:border-ring hover:bg-muted/30",
         className,

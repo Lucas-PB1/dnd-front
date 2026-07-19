@@ -11,12 +11,14 @@ import {
   fetchClassSpellSlots,
   fetchClassSpells,
   fetchClasses,
+  fetchClassesPage,
   fetchClassSubclasses,
   fetchSubclassMechanics,
   fetchSubclassOptions,
   fetchSubclassSpells,
   subclassKeys,
 } from "@/features/class-catalog/api/classes.api";
+import { CATALOG_PAGE_SIZE } from "@/shared/lib/catalog-pagination";
 
 const STALE = 60 * 60 * 1000;
 
@@ -25,6 +27,20 @@ export function useClasses() {
     queryKey: classKeys.list(),
     queryFn: () => fetchClasses(),
     staleTime: STALE,
+  });
+}
+
+/** Compêndio: busca `q` na API (dataset pequeno). */
+export function useClassesCatalog(params: { page: number; q?: string }) {
+  const page = params.page;
+  const q = params.q?.trim() ?? "";
+  const limit = CATALOG_PAGE_SIZE;
+
+  return useQuery({
+    queryKey: classKeys.listPage({ page, limit, q }),
+    queryFn: () => fetchClassesPage({ page, limit, q: q || undefined }),
+    staleTime: 60 * 1000,
+    placeholderData: (previous) => previous,
   });
 }
 

@@ -17,6 +17,8 @@ import type { PaginatedResponse } from "@/shared/api/dnd-api/types";
 export const classKeys = {
   all: ["classes"] as const,
   list: () => [...classKeys.all, "list"] as const,
+  listPage: (params: { page: number; limit: number; q: string }) =>
+    [...classKeys.all, "list", "page", params] as const,
   detail: (slug: string) => [...classKeys.all, "detail", slug] as const,
   subclasses: (slug: string) => [...classKeys.all, "subclasses", slug] as const,
   skills: (slug: string) => [...classKeys.all, "skills", slug] as const,
@@ -38,10 +40,26 @@ export const subclassKeys = {
     [...subclassKeys.all, "options", slug, level] as const,
 };
 
-export async function fetchClasses(limit = 50) {
-  return catalogFetch<ClassListResponse>(`/classes?limit=${limit}`, {
+export async function fetchClassesPage(params?: {
+  page?: number;
+  limit?: number;
+  q?: string;
+}) {
+  const page = params?.page ?? 1;
+  const limit = params?.limit ?? 50;
+  const search = new URLSearchParams();
+  search.set("page", String(page));
+  search.set("limit", String(limit));
+  const q = params?.q?.trim();
+  if (q) search.set("q", q);
+
+  return catalogFetch<ClassListResponse>(`/classes?${search.toString()}`, {
     next: { revalidate: 3600 },
   });
+}
+
+export async function fetchClasses(limit = 50) {
+  return fetchClassesPage({ page: 1, limit });
 }
 
 export async function fetchClassBySlug(slug: string) {

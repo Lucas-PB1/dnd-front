@@ -21,15 +21,26 @@ export function useFeatsList() {
   });
 }
 
-/** Compêndio: 20/página + busca na API. */
-export function useFeatsCatalog(params: { page: number; q?: string }) {
+/** Compêndio: 20/página + busca/filtros na API. */
+export function useFeatsCatalog(params: {
+  page: number;
+  q?: string;
+  category?: string;
+}) {
   const page = params.page;
   const q = params.q?.trim() ?? "";
+  const category = params.category?.trim() ?? "";
   const limit = CATALOG_PAGE_SIZE;
 
   return useQuery({
-    queryKey: featKeys.listPage({ page, limit, q }),
-    queryFn: () => fetchFeatsPage({ page, limit, q: q || undefined }),
+    queryKey: featKeys.listPage({ page, limit, q, category }),
+    queryFn: () =>
+      fetchFeatsPage({
+        page,
+        limit,
+        q: q || undefined,
+        category: category || undefined,
+      }),
     staleTime: 60 * 1000,
     placeholderData: (previous) => previous,
   });

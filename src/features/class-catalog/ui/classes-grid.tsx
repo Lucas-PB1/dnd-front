@@ -1,33 +1,35 @@
 "use client";
 
-import { useMemo, useState } from "react";
-
-import { useClasses } from "@/features/class-catalog/api/use-classes";
+import { useClassesCatalog } from "@/features/class-catalog/api/use-classes";
 import { ClassCard } from "@/features/class-catalog/ui/class-card";
-import { filterByQuery } from "@/shared/lib/filter-by-query";
+import { useCatalogListState } from "@/shared/lib/use-catalog-list-state";
+import { useClampCatalogPage } from "@/shared/lib/use-clamp-catalog-page";
+import { CatalogPagination } from "@/shared/ui/catalog-pagination";
 import { CatalogSearch } from "@/shared/ui/catalog-search";
 
 export function ClassesGrid() {
-  const { data, isPending, isError, error } = useClasses();
-  const [query, setQuery] = useState("");
+  const {
+    query,
+    setQuery,
+    debouncedQuery,
+    page,
+    setPage,
+    pageWindow,
+    listPath,
+  } = useCatalogListState({ syncUrl: true });
 
-  const filtered = useMemo(
-    () =>
-      filterByQuery(data?.data ?? [], query, (item) =>
-        [
-          item.name,
-          item.hitDie,
-          item.primaryAbilityLabel,
-          item.tagline,
-          item.summary,
-        ]
-          .filter(Boolean)
-          .join(" "),
-      ),
-    [data?.data, query],
-  );
+  const { data, isPending, isError, error, isFetching } = useClassesCatalog({
+    page,
+    q: debouncedQuery,
+  });
 
-  if (isPending) {
+  const { total, totalPages, safePage, from, to } = pageWindow(data?.meta);
+
+  const outOfRange =
+    !data?.data.length && (data?.meta.total ?? 0) > 0 && page > totalPages;
+  useClampCatalogPage(outOfRange, setPage);
+
+  if (isPending && !data) {
     return <p className="text-sm text-muted-foreground">Carregando classes…</p>;
   }
 
@@ -39,32 +41,48 @@ export function ClassesGrid() {
     );
   }
 
-  if (!data?.data.length) {
-    return (
-      <p className="text-sm text-muted-foreground">
-        Nenhuma classe encontrada na API.
-      </p>
-    );
-  }
-
   return (
     <div className="flex flex-col gap-4">
       <CatalogSearch
         value={query}
         onChange={setQuery}
         placeholder="Buscar classe…"
-        resultCount={filtered.length}
+        resultCount={total}
       />
-      {filtered.length === 0 ? (
+      {outOfRange ? (
+        <p className="text-sm text-muted-foreground">Ajustando página…</p>
+      ) : !data?.data.length ? (
         <p className="text-sm text-muted-foreground">
-          Nenhuma classe corresponde à busca.
+          {debouncedQuery
+            ? "Nenhuma classe corresponde à busca."
+            : "Nenhuma classe encontrada."}
         </p>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((classItem) => (
-            <ClassCard key={classItem.slug} classItem={classItem} />
-          ))}
-        </div>
+        <>
+          <div
+            className={
+              isFetching
+                ? "grid gap-3 opacity-70 transition-opacity sm:grid-cols-2 lg:grid-cols-3"
+                : "grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
+            }
+          >
+            {data.data.map((classItem) => (
+              <ClassCard
+                key={classItem.slug}
+                classItem={classItem}
+                listPath={listPath}
+              />
+            ))}
+          </div>
+          <CatalogPagination
+            page={safePage}
+            totalPages={totalPages}
+            total={total}
+            from={from}
+            to={to}
+            onPageChange={setPage}
+          />
+        </>
       )}
     </div>
   );

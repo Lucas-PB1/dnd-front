@@ -19,15 +19,29 @@ export function useSpells() {
   });
 }
 
-/** Listagem do compêndio: 20/página + busca `q` na API. */
-export function useSpellsCatalog(params: { page: number; q?: string }) {
+/** Listagem do compêndio: 20/página + busca/filtros na API. */
+export function useSpellsCatalog(params: {
+  page: number;
+  q?: string;
+  level?: string;
+  school?: string;
+}) {
   const page = params.page;
   const q = params.q?.trim() ?? "";
+  const level = params.level?.trim() ?? "";
+  const school = params.school?.trim() ?? "";
   const limit = CATALOG_PAGE_SIZE;
 
   return useQuery({
-    queryKey: spellKeys.listPage({ page, limit, q }),
-    queryFn: () => fetchSpellsPage({ page, limit, q: q || undefined }),
+    queryKey: spellKeys.listPage({ page, limit, q, level, school }),
+    queryFn: () =>
+      fetchSpellsPage({
+        page,
+        limit,
+        q: q || undefined,
+        level: level === "" ? undefined : level,
+        school: school || undefined,
+      }),
     staleTime: 60 * 1000,
     placeholderData: (previous) => previous,
   });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { CATALOG_PAGE_SIZE } from "@/shared/lib/catalog-pagination";
@@ -12,25 +12,57 @@ type CatalogMeta = {
 };
 
 type UseCatalogListStateOptions = {
-  /** Persiste `q` e `page` na URL (mantém listagem ao voltar do detalhe). */
+  /** Persiste `q`, `page` e filtros na URL (mantém listagem ao voltar do detalhe). */
   syncUrl?: boolean;
+  /** Chaves de filtro estruturado sincronizadas na URL (ex.: level, school). */
+  filterKeys?: readonly string[];
 };
 
-/** Estado de busca + página para listagens paginadas do catálogo. */
+function readFilters(
+  searchParams: Pick<URLSearchParams, "get">,
+  filterKeys: readonly string[],
+): Record<string, string> {
+  const next: Record<string, string> = {};
+  for (const key of filterKeys) {
+    const value = searchParams.get(key)?.trim() ?? "";
+    if (value) next[key] = value;
+  }
+  return next;
+}
+
+function filtersEqual(a: Record<string, string>, b: Record<string, string>) {
+  const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
+  for (const key of keys) {
+    if ((a[key] ?? "") !== (b[key] ?? "")) return false;
+  }
+  return true;
+}
+
+/** Estado de busca + página + filtros para listagens paginadas do catálogo. */
 export function useCatalogListState(options?: UseCatalogListStateOptions) {
   const syncUrl = options?.syncUrl ?? false;
+  const filterKeysKey = options?.filterKeys?.join("\0") ?? "";
+  const filterKeys = useMemo(
+    () => (filterKeysKey ? filterKeysKey.split("\0") : []),
+    [filterKeysKey],
+  );
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const urlQuery = searchParams.get("q") ?? "";
   const urlPage = Math.max(1, Number(searchParams.get("page")) || 1);
+  const urlFilters = useMemo(
+    () => readFilters(searchParams, filterKeys),
+    [searchParams, filterKeys],
+  );
 
   const [query, setQuery] = useState(syncUrl ? urlQuery : "");
   const debouncedQuery = useDebouncedValue(query, 300);
 
   const [localPage, setLocalPage] = useState(1);
   const [pageQuery, setPageQuery] = useState(debouncedQuery);
+  const [localFilters, setLocalFilters] = useState<Record<string, string>>({});
 
   const [seenUrlQuery, setSeenUrlQuery] = useState(urlQuery);
 
@@ -44,6 +76,8 @@ export function useCatalogListState(options?: UseCatalogListStateOptions) {
     setPageQuery(debouncedQuery);
     setLocalPage(1);
   }
+
+  const filters = syncUrl ? urlFilters : localFilters;
 
   // Com syncUrl, a página vem só da URL — evita corrida que regrava `page`
   // ao trocar de aba (ex.: itens p.3 → armaduras vazias).
@@ -91,6 +125,58 @@ export function useCatalogListState(options?: UseCatalogListStateOptions) {
     [syncUrl, searchParams, pathname, router],
   );
 
+  const setFilter = useCallback(
+    (key: string, value: string) => {
+      const trimmed = value.trim();
+      if (!syncUrl) {
+        setLocalFilters((current) => {
+          const next = { ...current };
+          if (trimmed) next[key] = trimmed;
+          else delete next[key];
+          return next;
+        });
+        setLocalPage(1);
+        return;
+      }
+
+      const params = new URLSearchParams(searchParams.toString());
+      if (trimmed) params.set(key, trimmed);
+      else params.delete(key);
+      params.delete("page");
+      const qs = params.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    },
+    [syncUrl, searchParams, pathname, router],
+  );
+
+  const setFilters = useCallback(
+    (nextFilters: Record<string, string>) => {
+      if (!syncUrl) {
+        const cleaned: Record<string, string> = {};
+        for (const [key, value] of Object.entries(nextFilters)) {
+          const trimmed = value.trim();
+          if (trimmed) cleaned[key] = trimmed;
+        }
+        setLocalFilters(cleaned);
+        setLocalPage(1);
+        return;
+      }
+
+      const params = new URLSearchParams(searchParams.toString());
+      for (const key of filterKeys) {
+        params.delete(key);
+      }
+      for (const [key, value] of Object.entries(nextFilters)) {
+        const trimmed = value.trim();
+        if (trimmed) params.set(key, trimmed);
+      }
+      params.delete("page");
+      const qs = params.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    },
+    [syncUrl, searchParams, pathname, router, filterKeys],
+  );
+
   const page = syncUrl ? urlPage : localPage;
 
   function pageWindow(meta?: CatalogMeta) {
@@ -106,6 +192,11 @@ export function useCatalogListState(options?: UseCatalogListStateOptions) {
     const params = new URLSearchParams(searchParams.toString());
     if (debouncedQuery.trim()) params.set("q", debouncedQuery.trim());
     else params.delete("q");
+    for (const key of filterKeys) {
+      const value = filters[key]?.trim() ?? "";
+      if (value) params.set(key, value);
+      else params.delete(key);
+    }
     if (page > 1) params.set("page", String(page));
     else params.delete("page");
     const queryString = params.toString();
@@ -118,6 +209,11 @@ export function useCatalogListState(options?: UseCatalogListStateOptions) {
     debouncedQuery,
     page,
     setPage,
+    filters,
+    setFilter,
+    setFilters,
+    filtersEqual: (other: Record<string, string>) =>
+      filtersEqual(filters, other),
     pageWindow,
     listPath,
   };

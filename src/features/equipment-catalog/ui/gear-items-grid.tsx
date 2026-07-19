@@ -2,8 +2,10 @@
 
 import { useGearCatalog } from "@/features/equipment-catalog/api/use-equipment";
 import { GearItemCard } from "@/features/equipment-catalog/ui/gear-item-card";
+import { ITEM_TYPE_FILTER } from "@/shared/lib/catalog-filter-options";
 import { useCatalogListState } from "@/shared/lib/use-catalog-list-state";
 import { useClampCatalogPage } from "@/shared/lib/use-clamp-catalog-page";
+import { CatalogFilters } from "@/shared/ui/catalog-filters";
 import { CatalogPagination } from "@/shared/ui/catalog-pagination";
 import { CatalogSearch } from "@/shared/ui/catalog-search";
 
@@ -14,13 +16,18 @@ export function GearItemsGrid() {
     debouncedQuery,
     page,
     setPage,
+    filters,
+    setFilter,
     pageWindow,
     listPath,
-  } = useCatalogListState({ syncUrl: true });
+  } = useCatalogListState({ syncUrl: true, filterKeys: ["itemType"] });
+
+  const itemType = filters.itemType ?? "";
 
   const { data, isPending, isError, error, isFetching } = useGearCatalog({
     page,
     q: debouncedQuery,
+    itemType,
   });
 
   const { total, totalPages, safePage, from, to } = pageWindow(data?.meta);
@@ -43,22 +50,27 @@ export function GearItemsGrid() {
 
   return (
     <div className="flex flex-col gap-4">
-      <CatalogSearch
-        value={query}
-        onChange={setQuery}
-        placeholder="Buscar item…"
-        resultCount={total}
-      />
-      {!data?.data.length ? (
-        outOfRange ? (
-          <p className="text-sm text-muted-foreground">Ajustando página…</p>
-        ) : (
-          <p className="text-sm text-muted-foreground">
-            {debouncedQuery
-              ? "Nenhum item corresponde à busca."
-              : "Nenhum item encontrado."}
-          </p>
-        )
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <CatalogSearch
+          value={query}
+          onChange={setQuery}
+          placeholder="Buscar item…"
+          resultCount={total}
+        />
+        <CatalogFilters
+          fields={[ITEM_TYPE_FILTER]}
+          values={filters}
+          onChange={setFilter}
+        />
+      </div>
+      {outOfRange ? (
+        <p className="text-sm text-muted-foreground">Ajustando página…</p>
+      ) : !data?.data.length ? (
+        <p className="text-sm text-muted-foreground">
+          {debouncedQuery || itemType
+            ? "Nenhum item corresponde aos filtros."
+            : "Nenhum item encontrado."}
+        </p>
       ) : (
         <>
           <div

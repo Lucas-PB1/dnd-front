@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { Suspense, useMemo } from "react";
 
 import type { ClassFeature, ClassSummary } from "@/entities/class/types";
 import {
@@ -11,6 +11,7 @@ import {
   useClassSubclasses,
 } from "@/features/class-catalog/api/use-classes";
 import { SubclassCard } from "@/features/class-catalog/ui/subclass-card";
+import { useCatalogBackHref } from "@/shared/lib/use-catalog-back-href";
 import { cn } from "@/shared/lib/utils";
 import { BackLink } from "@/shared/ui/back-link";
 import { CollapsibleCard } from "@/shared/ui/collapsible-card";
@@ -31,7 +32,13 @@ function groupFeaturesByLevel(features: ClassFeature[]) {
   return [...map.entries()].sort(([a], [b]) => a - b);
 }
 
-function ClassHero({ cls }: { cls: ClassSummary }) {
+function ClassHero({
+  cls,
+  backHref,
+}: {
+  cls: ClassSummary;
+  backHref: string;
+}) {
   const stats: { label: string; value: string }[] = [
     { label: "Dado de vida", value: cls.hitDie },
   ];
@@ -61,7 +68,7 @@ function ClassHero({ cls }: { cls: ClassSummary }) {
         aria-hidden
       />
       <div className="relative space-y-6 p-5 sm:p-8">
-        <BackLink href="/classes">Classes</BackLink>
+        <BackLink href={backHref}>Classes</BackLink>
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="space-y-3">
@@ -107,10 +114,23 @@ function ClassHero({ cls }: { cls: ClassSummary }) {
 }
 
 export function ClassDetailView({ slug }: ClassDetailViewProps) {
+  return (
+    <Suspense
+      fallback={
+        <p className="text-sm text-muted-foreground">Carregando classe…</p>
+      }
+    >
+      <ClassDetailBody slug={slug} />
+    </Suspense>
+  );
+}
+
+function ClassDetailBody({ slug }: ClassDetailViewProps) {
   const classQuery = useClassDetail(slug);
   const subclassesQuery = useClassSubclasses(slug);
   const featuresQuery = useClassFeatures(slug, undefined, !!slug);
   const skillsQuery = useClassSkills(slug, !!slug);
+  const backHref = useCatalogBackHref("/classes");
 
   const featuresByLevel = useMemo(
     () => groupFeaturesByLevel(featuresQuery.data?.data ?? []),
@@ -130,7 +150,7 @@ export function ClassDetailView({ slug }: ClassDetailViewProps) {
             : "Classe não encontrada"}
         </p>
         <Link
-          href="/classes"
+          href={backHref}
           className={cn(buttonVariants({ variant: "outline" }))}
         >
           Voltar ao compêndio
@@ -143,7 +163,7 @@ export function ClassDetailView({ slug }: ClassDetailViewProps) {
 
   return (
     <div className="flex flex-col gap-12">
-      <ClassHero cls={cls} />
+      <ClassHero cls={cls} backHref={backHref} />
 
       {cls.description ? (
         <section aria-labelledby="class-about" className="space-y-4">

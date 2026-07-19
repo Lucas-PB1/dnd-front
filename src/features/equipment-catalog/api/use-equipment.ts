@@ -22,16 +22,27 @@ import { CATALOG_PAGE_SIZE } from "@/shared/lib/catalog-pagination";
 
 const STALE = 60 * 60 * 1000;
 
-export function useWeaponsCatalog(params: { page: number; q?: string }) {
+export function useWeaponsCatalog(params: {
+  page: number;
+  q?: string;
+  category?: string;
+}) {
   const page = params.page;
   const q = params.q?.trim() ?? "";
+  const category = params.category?.trim() ?? "";
   const limit = CATALOG_PAGE_SIZE;
 
   return useQuery({
-    queryKey: weaponKeys.listPage({ page, limit, q }),
-    queryFn: () => fetchWeaponsPage({ page, limit, q: q || undefined }),
+    queryKey: weaponKeys.listPage({ page, limit, q, category }),
+    queryFn: () =>
+      fetchWeaponsPage({
+        page,
+        limit,
+        q: q || undefined,
+        category: category || undefined,
+      }),
     staleTime: 60 * 1000,
-    placeholderData: (previous) => previous,
+    placeholderData: (previous) => (category || q ? undefined : previous),
   });
 }
 
@@ -44,16 +55,28 @@ export function useWeaponDetail(slug: string, enabled = true) {
   });
 }
 
-export function useArmorCatalog(params: { page: number; q?: string }) {
+export function useArmorCatalog(params: {
+  page: number;
+  q?: string;
+  category?: string;
+}) {
   const page = params.page;
   const q = params.q?.trim() ?? "";
+  const category = params.category?.trim() ?? "";
   const limit = CATALOG_PAGE_SIZE;
 
   return useQuery({
-    queryKey: armorKeys.listPage({ page, limit, q }),
-    queryFn: () => fetchArmorPage({ page, limit, q: q || undefined }),
+    queryKey: armorKeys.listPage({ page, limit, q, category }),
+    queryFn: () =>
+      fetchArmorPage({
+        page,
+        limit,
+        q: q || undefined,
+        category: category || undefined,
+      }),
     staleTime: 60 * 1000,
-    placeholderData: (previous) => previous,
+    // Não reaproveitar lista sem filtro quando há filtro ativo.
+    placeholderData: (previous) => (category || q ? undefined : previous),
   });
 }
 
@@ -66,11 +89,15 @@ export function useArmorDetail(slug: string, enabled = true) {
   });
 }
 
-export function useGearCatalog(params: { page: number; q?: string }) {
+export function useGearCatalog(params: {
+  page: number;
+  q?: string;
+  itemType?: string;
+}) {
   const page = params.page;
   const q = params.q?.trim() ?? "";
   const limit = CATALOG_PAGE_SIZE;
-  const itemType = EQUIPMENT_GEAR_ITEM_TYPES;
+  const itemType = params.itemType?.trim() || EQUIPMENT_GEAR_ITEM_TYPES;
 
   return useQuery({
     queryKey: [

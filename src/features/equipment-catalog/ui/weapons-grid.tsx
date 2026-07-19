@@ -2,8 +2,10 @@
 
 import { useWeaponsCatalog } from "@/features/equipment-catalog/api/use-equipment";
 import { WeaponCard } from "@/features/equipment-catalog/ui/weapon-card";
+import { WEAPON_CATEGORY_FILTER } from "@/shared/lib/catalog-filter-options";
 import { useCatalogListState } from "@/shared/lib/use-catalog-list-state";
 import { useClampCatalogPage } from "@/shared/lib/use-clamp-catalog-page";
+import { CatalogFilters } from "@/shared/ui/catalog-filters";
 import { CatalogPagination } from "@/shared/ui/catalog-pagination";
 import { CatalogSearch } from "@/shared/ui/catalog-search";
 
@@ -14,13 +16,18 @@ export function WeaponsGrid() {
     debouncedQuery,
     page,
     setPage,
+    filters,
+    setFilter,
     pageWindow,
     listPath,
-  } = useCatalogListState({ syncUrl: true });
+  } = useCatalogListState({ syncUrl: true, filterKeys: ["category"] });
+
+  const category = filters.category ?? "";
 
   const { data, isPending, isError, error, isFetching } = useWeaponsCatalog({
     page,
     q: debouncedQuery,
+    category,
   });
 
   const { total, totalPages, safePage, from, to } = pageWindow(data?.meta);
@@ -43,18 +50,25 @@ export function WeaponsGrid() {
 
   return (
     <div className="flex flex-col gap-4">
-      <CatalogSearch
-        value={query}
-        onChange={setQuery}
-        placeholder="Buscar arma…"
-        resultCount={total}
-      />
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <CatalogSearch
+          value={query}
+          onChange={setQuery}
+          placeholder="Buscar arma…"
+          resultCount={total}
+        />
+        <CatalogFilters
+          fields={[WEAPON_CATEGORY_FILTER]}
+          values={filters}
+          onChange={setFilter}
+        />
+      </div>
       {outOfRange ? (
         <p className="text-sm text-muted-foreground">Ajustando página…</p>
       ) : !data?.data.length ? (
         <p className="text-sm text-muted-foreground">
-          {debouncedQuery
-            ? "Nenhuma arma corresponde à busca."
+          {debouncedQuery || category
+            ? "Nenhuma arma corresponde aos filtros."
             : "Nenhuma arma encontrada."}
         </p>
       ) : (

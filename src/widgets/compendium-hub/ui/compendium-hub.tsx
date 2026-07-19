@@ -26,6 +26,13 @@ const SECTIONS = [
       "De onde você veio — talento de origem, perícias e equipamento inicial.",
   },
   {
+    href: "/skills",
+    title: "Perícias",
+    eyebrow: "Competências",
+    description:
+      "As dezoito perícias — atributo ligado e quando usá-las na mesa.",
+  },
+  {
     href: "/feats",
     title: "Talentos",
     eyebrow: "Especialização",
@@ -33,10 +40,24 @@ const SECTIONS = [
       "Origem, geral e estilo de luta — pré-requisitos e benefícios do PHB.",
   },
   {
+    href: "/subclasses",
+    title: "Subclasses",
+    eyebrow: "Arquétipos",
+    description:
+      "Caminhos de cada classe — tagline, resumo e características por nível.",
+  },
+  {
     href: "/equipment",
     title: "Equipamento",
     eyebrow: "Arsenal",
     description: "Armas, armaduras e itens — dano, CA, custo e propriedades.",
+  },
+  {
+    href: "/languages",
+    title: "Idiomas",
+    eyebrow: "Línguas",
+    description:
+      "Comuns e raras — escrita, falantes típicos e raridade no PHB.",
   },
   {
     href: "/spells",
@@ -61,7 +82,7 @@ export function CompendiumHub() {
           </p>
           <p className="max-w-2xl font-heading text-lg leading-snug text-foreground/90 sm:text-xl">
             Explore o catálogo público — sem login. Escolha uma seção para ler
-            arquétipos, origens, talentos, equipamento e magias.
+            arquétipos, perícias, talentos, subclasses, equipamento e magias.
           </p>
         </div>
       </div>
