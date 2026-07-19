@@ -7,6 +7,8 @@ export type ItemSummary = {
   itemType: string;
   costText: string | null;
   weight: string | null;
+  description: string | null;
+  properties: Record<string, unknown> | null;
 };
 
 export type ItemListResponse = PaginatedResponse<ItemSummary>;

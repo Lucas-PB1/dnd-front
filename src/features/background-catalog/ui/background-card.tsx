@@ -1,17 +1,23 @@
 import Link from "next/link";
 
 import type { BackgroundSummary } from "@/entities/background/types";
+import { withCatalogReturn } from "@/shared/lib/catalog-return";
 import { cn } from "@/shared/lib/utils";
 
 type BackgroundCardProps = {
   background: BackgroundSummary;
+  listPath?: string;
   className?: string;
 };
 
-export function BackgroundCard({ background, className }: BackgroundCardProps) {
+export function BackgroundCard({
+  background,
+  listPath,
+  className,
+}: BackgroundCardProps) {
   return (
     <Link
-      href={`/backgrounds/${background.slug}`}
+      href={withCatalogReturn(`/backgrounds/${background.slug}`, listPath)}
       className={cn(
         "group flex flex-col gap-1.5 border-b border-border px-1 py-3 transition-colors hover:bg-muted/30 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4",
         className,

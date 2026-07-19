@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { Suspense, useMemo } from "react";
 
 import type {
   BackgroundEquipmentOption,
@@ -13,6 +13,7 @@ import {
   useBackgroundSkills,
   useBackgroundTools,
 } from "@/features/background-catalog/api/use-backgrounds";
+import { useCatalogBackHref } from "@/shared/lib/use-catalog-back-href";
 import { cn } from "@/shared/lib/utils";
 import { BackLink } from "@/shared/ui/back-link";
 import { buttonVariants } from "@/shared/ui/button";
@@ -26,9 +27,11 @@ type BackgroundDetailViewProps = {
 function BackgroundHero({
   background,
   skillNames,
+  backHref,
 }: {
   background: BackgroundSummary;
   skillNames: string[];
+  backHref: string;
 }) {
   const toolLabel =
     background.toolProficiencyKind === "fixed"
@@ -72,7 +75,7 @@ function BackgroundHero({
         aria-hidden
       />
       <div className="relative space-y-6 p-5 sm:p-8">
-        <BackLink href="/backgrounds">Antecedentes</BackLink>
+        <BackLink href={backHref}>Antecedentes</BackLink>
 
         <div className="space-y-3">
           <h1 className="font-heading text-4xl font-semibold tracking-tight sm:text-5xl">
@@ -139,8 +142,9 @@ function groupEquipmentByPackage(items: BackgroundEquipmentOption[]) {
   return [...map.entries()];
 }
 
-export function BackgroundDetailView({ slug }: BackgroundDetailViewProps) {
+function BackgroundDetailBody({ slug }: BackgroundDetailViewProps) {
   const detailQuery = useBackgroundDetail(slug);
+  const backHref = useCatalogBackHref("/backgrounds");
   const skillsQuery = useBackgroundSkills(
     slug,
     !!slug && !detailQuery.isPending && !detailQuery.isError,
@@ -172,7 +176,7 @@ export function BackgroundDetailView({ slug }: BackgroundDetailViewProps) {
             : "Antecedente não encontrado"}
         </p>
         <Link
-          href="/backgrounds"
+          href={backHref}
           className={cn(buttonVariants({ variant: "outline" }))}
         >
           Voltar ao compêndio
@@ -185,7 +189,11 @@ export function BackgroundDetailView({ slug }: BackgroundDetailViewProps) {
 
   return (
     <div className="flex flex-col gap-12">
-      <BackgroundHero background={background} skillNames={skillNames} />
+      <BackgroundHero
+        background={background}
+        skillNames={skillNames}
+        backHref={backHref}
+      />
 
       {background.description ? (
         <section aria-labelledby="background-about" className="space-y-4">
@@ -303,5 +311,15 @@ export function BackgroundDetailView({ slug }: BackgroundDetailViewProps) {
         )}
       </section>
     </div>
+  );
+}
+
+export function BackgroundDetailView({ slug }: BackgroundDetailViewProps) {
+  return (
+    <Suspense
+      fallback={<p className="text-sm text-muted-foreground">Carregando…</p>}
+    >
+      <BackgroundDetailBody slug={slug} />
+    </Suspense>
   );
 }

@@ -7,8 +7,15 @@ import { CatalogPagination } from "@/shared/ui/catalog-pagination";
 import { CatalogSearch } from "@/shared/ui/catalog-search";
 
 export function SpellsGrid() {
-  const { query, setQuery, debouncedQuery, page, setPage, pageWindow } =
-    useCatalogListState();
+  const {
+    query,
+    setQuery,
+    debouncedQuery,
+    page,
+    setPage,
+    pageWindow,
+    listPath,
+  } = useCatalogListState({ syncUrl: true });
 
   const { data, isPending, isError, error, isFetching } = useSpellsCatalog({
     page,
@@ -51,7 +58,7 @@ export function SpellsGrid() {
             <ul className="divide-y-0 border-t border-border">
               {data.data.map((spell) => (
                 <li key={spell.slug}>
-                  <SpellCard spell={spell} />
+                  <SpellCard spell={spell} listPath={listPath} />
                 </li>
               ))}
             </ul>

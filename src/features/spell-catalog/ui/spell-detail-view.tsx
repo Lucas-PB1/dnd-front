@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { Suspense } from "react";
 
 import type { SpellSummary } from "@/entities/spell/types";
 import { useSpellDetail } from "@/features/spell-catalog/api/use-spells";
+import { useCatalogBackHref } from "@/shared/lib/use-catalog-back-href";
 import { cn } from "@/shared/lib/utils";
 import { BackLink } from "@/shared/ui/back-link";
 import { buttonVariants } from "@/shared/ui/button";
@@ -13,7 +15,13 @@ type SpellDetailViewProps = {
   slug: string;
 };
 
-function SpellHero({ spell }: { spell: SpellSummary }) {
+function SpellHero({
+  spell,
+  backHref,
+}: {
+  spell: SpellSummary;
+  backHref: string;
+}) {
   const stats: { label: string; value: string }[] = [
     { label: "Tempo", value: spell.castingTime },
     { label: "Alcance", value: spell.range },
@@ -33,7 +41,7 @@ function SpellHero({ spell }: { spell: SpellSummary }) {
         aria-hidden
       />
       <div className="relative space-y-6 p-5 sm:p-8">
-        <BackLink href="/spells">Magias</BackLink>
+        <BackLink href={backHref}>Magias</BackLink>
 
         <div className="space-y-3">
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
@@ -88,8 +96,9 @@ function SpellHero({ spell }: { spell: SpellSummary }) {
   );
 }
 
-export function SpellDetailView({ slug }: SpellDetailViewProps) {
+function SpellDetailBody({ slug }: SpellDetailViewProps) {
   const { data, isPending, isError, error } = useSpellDetail(slug);
+  const backHref = useCatalogBackHref("/spells");
 
   if (isPending) {
     return <p className="text-sm text-muted-foreground">Carregando magia…</p>;
@@ -102,7 +111,7 @@ export function SpellDetailView({ slug }: SpellDetailViewProps) {
           {error instanceof Error ? error.message : "Magia não encontrada"}
         </p>
         <Link
-          href="/spells"
+          href={backHref}
           className={cn(buttonVariants({ variant: "outline" }))}
         >
           Voltar ao compêndio
@@ -113,7 +122,7 @@ export function SpellDetailView({ slug }: SpellDetailViewProps) {
 
   return (
     <div className="flex flex-col gap-12">
-      <SpellHero spell={data} />
+      <SpellHero spell={data} backHref={backHref} />
 
       <section aria-labelledby="spell-effect" className="space-y-4">
         <div className="space-y-1">
@@ -152,5 +161,17 @@ export function SpellDetailView({ slug }: SpellDetailViewProps) {
         </section>
       ) : null}
     </div>
+  );
+}
+
+export function SpellDetailView({ slug }: SpellDetailViewProps) {
+  return (
+    <Suspense
+      fallback={
+        <p className="text-sm text-muted-foreground">Carregando magia…</p>
+      }
+    >
+      <SpellDetailBody slug={slug} />
+    </Suspense>
   );
 }

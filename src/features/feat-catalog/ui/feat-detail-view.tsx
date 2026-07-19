@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { Suspense } from "react";
 
 import { useFeatDetail } from "@/features/feat-catalog/api/use-feats";
 import type { FeatSummary } from "@/entities/feat/types";
+import { useCatalogBackHref } from "@/shared/lib/use-catalog-back-href";
 import { cn } from "@/shared/lib/utils";
 import { BackLink } from "@/shared/ui/back-link";
 import { buttonVariants } from "@/shared/ui/button";
@@ -14,7 +16,7 @@ type FeatDetailViewProps = {
   slug: string;
 };
 
-function FeatHero({ feat }: { feat: FeatSummary }) {
+function FeatHero({ feat, backHref }: { feat: FeatSummary; backHref: string }) {
   const stats: { label: string; value: string }[] = [
     {
       label: "Categoria",
@@ -41,7 +43,7 @@ function FeatHero({ feat }: { feat: FeatSummary }) {
         aria-hidden
       />
       <div className="relative space-y-6 p-5 sm:p-8">
-        <BackLink href="/feats">Talentos</BackLink>
+        <BackLink href={backHref}>Talentos</BackLink>
 
         <div className="space-y-3">
           <h1 className="font-heading text-4xl font-semibold tracking-tight sm:text-5xl">
@@ -79,8 +81,9 @@ function FeatHero({ feat }: { feat: FeatSummary }) {
   );
 }
 
-export function FeatDetailView({ slug }: FeatDetailViewProps) {
+function FeatDetailBody({ slug }: FeatDetailViewProps) {
   const { data, isPending, isError, error } = useFeatDetail(slug);
+  const backHref = useCatalogBackHref("/feats");
 
   if (isPending) {
     return <p className="text-sm text-muted-foreground">Carregando talento…</p>;
@@ -93,7 +96,7 @@ export function FeatDetailView({ slug }: FeatDetailViewProps) {
           {error instanceof Error ? error.message : "Talento não encontrado"}
         </p>
         <Link
-          href="/feats"
+          href={backHref}
           className={cn(buttonVariants({ variant: "outline" }))}
         >
           Voltar ao compêndio
@@ -104,7 +107,7 @@ export function FeatDetailView({ slug }: FeatDetailViewProps) {
 
   return (
     <div className="flex flex-col gap-12">
-      <FeatHero feat={data} />
+      <FeatHero feat={data} backHref={backHref} />
 
       <section aria-labelledby="feat-benefits" className="space-y-4">
         <div className="space-y-1">
@@ -147,5 +150,17 @@ export function FeatDetailView({ slug }: FeatDetailViewProps) {
         )}
       </section>
     </div>
+  );
+}
+
+export function FeatDetailView({ slug }: FeatDetailViewProps) {
+  return (
+    <Suspense
+      fallback={
+        <p className="text-sm text-muted-foreground">Carregando talento…</p>
+      }
+    >
+      <FeatDetailBody slug={slug} />
+    </Suspense>
   );
 }

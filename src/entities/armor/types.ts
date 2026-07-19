@@ -11,6 +11,8 @@ export type ArmorSummary = {
   acFormula: string | null;
   strengthReq: number | null;
   stealthDisadvantage: boolean;
+  costText: string | null;
+  weight: string | null;
 };
 
 export type ArmorListResponse = PaginatedResponse<ArmorSummary>;

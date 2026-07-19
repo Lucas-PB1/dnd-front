@@ -7,8 +7,15 @@ import { CatalogPagination } from "@/shared/ui/catalog-pagination";
 import { CatalogSearch } from "@/shared/ui/catalog-search";
 
 export function GearItemsGrid() {
-  const { query, setQuery, debouncedQuery, page, setPage, pageWindow } =
-    useCatalogListState();
+  const {
+    query,
+    setQuery,
+    debouncedQuery,
+    page,
+    setPage,
+    pageWindow,
+    listPath,
+  } = useCatalogListState({ syncUrl: true });
 
   const { data, isPending, isError, error, isFetching } = useGearCatalog({
     page,
@@ -51,7 +58,7 @@ export function GearItemsGrid() {
             <ul className="border-t border-border">
               {data.data.map((item) => (
                 <li key={item.slug}>
-                  <GearItemCard item={item} />
+                  <GearItemCard item={item} listPath={listPath} />
                 </li>
               ))}
             </ul>

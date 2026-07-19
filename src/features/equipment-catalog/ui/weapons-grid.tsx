@@ -7,8 +7,15 @@ import { CatalogPagination } from "@/shared/ui/catalog-pagination";
 import { CatalogSearch } from "@/shared/ui/catalog-search";
 
 export function WeaponsGrid() {
-  const { query, setQuery, debouncedQuery, page, setPage, pageWindow } =
-    useCatalogListState();
+  const {
+    query,
+    setQuery,
+    debouncedQuery,
+    page,
+    setPage,
+    pageWindow,
+    listPath,
+  } = useCatalogListState({ syncUrl: true });
 
   const { data, isPending, isError, error, isFetching } = useWeaponsCatalog({
     page,
@@ -51,7 +58,7 @@ export function WeaponsGrid() {
             <ul className="border-t border-border">
               {data.data.map((weapon) => (
                 <li key={weapon.slug}>
-                  <WeaponCard weapon={weapon} />
+                  <WeaponCard weapon={weapon} listPath={listPath} />
                 </li>
               ))}
             </ul>

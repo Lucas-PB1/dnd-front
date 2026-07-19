@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+
 import { SpellsGrid } from "@/features/spell-catalog/ui/spells-grid";
 import { CatalogShell } from "@/widgets/catalog-shell/ui/catalog-shell";
 
@@ -9,7 +11,13 @@ export default function SpellsPage() {
       backHref="/compendium"
       backLabel="Compêndio"
     >
-      <SpellsGrid />
+      <Suspense
+        fallback={
+          <p className="text-sm text-muted-foreground">Carregando magias…</p>
+        }
+      >
+        <SpellsGrid />
+      </Suspense>
     </CatalogShell>
   );
 }

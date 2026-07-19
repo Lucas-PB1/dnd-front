@@ -7,8 +7,15 @@ import { CatalogPagination } from "@/shared/ui/catalog-pagination";
 import { CatalogSearch } from "@/shared/ui/catalog-search";
 
 export function ArmorGrid() {
-  const { query, setQuery, debouncedQuery, page, setPage, pageWindow } =
-    useCatalogListState();
+  const {
+    query,
+    setQuery,
+    debouncedQuery,
+    page,
+    setPage,
+    pageWindow,
+    listPath,
+  } = useCatalogListState({ syncUrl: true });
 
   const { data, isPending, isError, error, isFetching } = useArmorCatalog({
     page,
@@ -53,7 +60,7 @@ export function ArmorGrid() {
             <ul className="border-t border-border">
               {data.data.map((armor) => (
                 <li key={armor.slug}>
-                  <ArmorCard armor={armor} />
+                  <ArmorCard armor={armor} listPath={listPath} />
                 </li>
               ))}
             </ul>

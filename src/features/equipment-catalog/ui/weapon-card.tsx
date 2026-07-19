@@ -6,20 +6,22 @@ import {
   weaponCostText,
   weaponTeaser,
 } from "@/features/equipment-catalog/lib/weapon-labels";
+import { withCatalogReturn } from "@/shared/lib/catalog-return";
 import { cn } from "@/shared/lib/utils";
 
 type WeaponCardProps = {
   weapon: WeaponSummary;
+  listPath?: string;
   className?: string;
 };
 
-export function WeaponCard({ weapon, className }: WeaponCardProps) {
+export function WeaponCard({ weapon, listPath, className }: WeaponCardProps) {
   const teaser = weaponTeaser(weapon);
   const cost = weaponCostText(weapon);
 
   return (
     <Link
-      href={`/equipment/weapons/${weapon.slug}`}
+      href={withCatalogReturn(`/equipment/weapons/${weapon.slug}`, listPath)}
       className={cn(
         "group flex flex-col gap-1.5 border-b border-border px-1 py-3 transition-colors hover:bg-muted/30 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4",
         className,

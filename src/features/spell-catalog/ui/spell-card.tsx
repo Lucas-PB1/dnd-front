@@ -1,10 +1,12 @@
 import Link from "next/link";
 
 import type { SpellSummary } from "@/entities/spell/types";
+import { withCatalogReturn } from "@/shared/lib/catalog-return";
 import { cn } from "@/shared/lib/utils";
 
 type SpellCardProps = {
   spell: SpellSummary;
+  listPath?: string;
   className?: string;
 };
 
@@ -12,7 +14,7 @@ function spellTeaser(description: string): string {
   return description.replace(/\s+/g, " ").trim();
 }
 
-export function SpellCard({ spell, className }: SpellCardProps) {
+export function SpellCard({ spell, listPath, className }: SpellCardProps) {
   const flags = [
     spell.concentration ? "Concentração" : null,
     spell.ritual ? "Ritual" : null,
@@ -20,7 +22,7 @@ export function SpellCard({ spell, className }: SpellCardProps) {
 
   return (
     <Link
-      href={`/spells/${spell.slug}`}
+      href={withCatalogReturn(`/spells/${spell.slug}`, listPath)}
       className={cn(
         "group flex flex-col gap-1.5 border-b border-border px-1 py-3 transition-colors hover:bg-muted/30 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4",
         className,

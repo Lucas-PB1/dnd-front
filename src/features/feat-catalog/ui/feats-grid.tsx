@@ -7,8 +7,15 @@ import { CatalogPagination } from "@/shared/ui/catalog-pagination";
 import { CatalogSearch } from "@/shared/ui/catalog-search";
 
 export function FeatsGrid() {
-  const { query, setQuery, debouncedQuery, page, setPage, pageWindow } =
-    useCatalogListState();
+  const {
+    query,
+    setQuery,
+    debouncedQuery,
+    page,
+    setPage,
+    pageWindow,
+    listPath,
+  } = useCatalogListState({ syncUrl: true });
 
   const { data, isPending, isError, error, isFetching } = useFeatsCatalog({
     page,
@@ -53,7 +60,7 @@ export function FeatsGrid() {
             <ul className="border-t border-border">
               {data.data.map((feat) => (
                 <li key={feat.slug}>
-                  <FeatCard feat={feat} />
+                  <FeatCard feat={feat} listPath={listPath} />
                 </li>
               ))}
             </ul>

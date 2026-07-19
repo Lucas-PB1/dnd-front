@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+
 import { FeatsGrid } from "@/features/feat-catalog/ui/feats-grid";
 import { CatalogShell } from "@/widgets/catalog-shell/ui/catalog-shell";
 
@@ -9,7 +11,13 @@ export default function FeatsPage() {
       backHref="/compendium"
       backLabel="Compêndio"
     >
-      <FeatsGrid />
+      <Suspense
+        fallback={
+          <p className="text-sm text-muted-foreground">Carregando talentos…</p>
+        }
+      >
+        <FeatsGrid />
+      </Suspense>
     </CatalogShell>
   );
 }

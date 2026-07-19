@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { Suspense } from "react";
 
 import type { ArmorSummary } from "@/entities/armor/types";
 import { useArmorDetail } from "@/features/equipment-catalog/api/use-equipment";
+import { useCatalogBackHref } from "@/shared/lib/use-catalog-back-href";
 import { cn } from "@/shared/lib/utils";
 import { BackLink } from "@/shared/ui/back-link";
 import { buttonVariants } from "@/shared/ui/button";
@@ -12,13 +14,21 @@ type ArmorDetailViewProps = {
   slug: string;
 };
 
-function ArmorHero({ armor }: { armor: ArmorSummary }) {
+function ArmorHero({
+  armor,
+  backHref,
+}: {
+  armor: ArmorSummary;
+  backHref: string;
+}) {
   const stats: { label: string; value: string }[] = [
     { label: "Categoria", value: armor.categoryName },
   ];
   const ac =
     armor.acFormula ?? (armor.acBase != null ? String(armor.acBase) : null);
   if (ac) stats.push({ label: "CA", value: ac });
+  if (armor.costText) stats.push({ label: "Custo", value: armor.costText });
+  if (armor.weight) stats.push({ label: "Peso", value: armor.weight });
   if (armor.strengthReq != null) {
     stats.push({ label: "Força", value: `${armor.strengthReq}+` });
   }
@@ -37,7 +47,7 @@ function ArmorHero({ armor }: { armor: ArmorSummary }) {
         aria-hidden
       />
       <div className="relative space-y-6 p-5 sm:p-8">
-        <BackLink href="/equipment?tab=armor">Equipamento</BackLink>
+        <BackLink href={backHref}>Equipamento</BackLink>
 
         <div className="space-y-3">
           <h1 className="font-heading text-4xl font-semibold tracking-tight sm:text-5xl">
@@ -75,8 +85,9 @@ function ArmorHero({ armor }: { armor: ArmorSummary }) {
   );
 }
 
-export function ArmorDetailView({ slug }: ArmorDetailViewProps) {
+function ArmorDetailBody({ slug }: ArmorDetailViewProps) {
   const { data, isPending, isError, error } = useArmorDetail(slug);
+  const backHref = useCatalogBackHref("/equipment?tab=armor");
 
   if (isPending) {
     return (
@@ -91,7 +102,7 @@ export function ArmorDetailView({ slug }: ArmorDetailViewProps) {
           {error instanceof Error ? error.message : "Armadura não encontrada"}
         </p>
         <Link
-          href="/equipment?tab=armor"
+          href={backHref}
           className={cn(buttonVariants({ variant: "outline" }))}
         >
           Voltar ao equipamento
@@ -102,7 +113,19 @@ export function ArmorDetailView({ slug }: ArmorDetailViewProps) {
 
   return (
     <div className="flex flex-col gap-12">
-      <ArmorHero armor={data} />
+      <ArmorHero armor={data} backHref={backHref} />
     </div>
+  );
+}
+
+export function ArmorDetailView({ slug }: ArmorDetailViewProps) {
+  return (
+    <Suspense
+      fallback={
+        <p className="text-sm text-muted-foreground">Carregando armadura…</p>
+      }
+    >
+      <ArmorDetailBody slug={slug} />
+    </Suspense>
   );
 }

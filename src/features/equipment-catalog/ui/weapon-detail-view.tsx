@@ -1,34 +1,44 @@
 "use client";
 
 import Link from "next/link";
+import { Suspense } from "react";
 
 import type { WeaponSummary } from "@/entities/weapon/types";
+import { useEquipmentCatalogLinks } from "@/features/equipment-catalog/api/use-equipment-catalog-links";
 import { useWeaponDetail } from "@/features/equipment-catalog/api/use-equipment";
 import {
-  formatWeaponMasteryId,
   weaponCategoryLabel,
   weaponCostText,
-  weaponPropertyLabels,
 } from "@/features/equipment-catalog/lib/weapon-labels";
+import { useCatalogBackHref } from "@/shared/lib/use-catalog-back-href";
 import { cn } from "@/shared/lib/utils";
 import { BackLink } from "@/shared/ui/back-link";
 import { buttonVariants } from "@/shared/ui/button";
+import { CollapsibleCard } from "@/shared/ui/collapsible-card";
+import { PhbProse } from "@/shared/ui/phb-prose";
 
 type WeaponDetailViewProps = {
   slug: string;
 };
 
-function WeaponHero({ weapon }: { weapon: WeaponSummary }) {
+function WeaponHero({
+  weapon,
+  backHref,
+}: {
+  weapon: WeaponSummary;
+  backHref: string;
+}) {
   const cost = weaponCostText(weapon);
   const stats: { label: string; value: string }[] = [
     { label: "Categoria", value: weaponCategoryLabel(weapon.category) },
   ];
   if (weapon.damage) {
+    const dmg = weapon.versatileDamage
+      ? `${weapon.damage} (${weapon.versatileDamage} duas mãos)`
+      : weapon.damage;
     stats.push({
       label: "Dano",
-      value: weapon.damageType
-        ? `${weapon.damage} ${weapon.damageType}`
-        : weapon.damage,
+      value: weapon.damageType ? `${dmg} ${weapon.damageType}` : dmg,
     });
   }
   if (cost) stats.push({ label: "Custo", value: cost });
@@ -50,7 +60,7 @@ function WeaponHero({ weapon }: { weapon: WeaponSummary }) {
         aria-hidden
       />
       <div className="relative space-y-6 p-5 sm:p-8">
-        <BackLink href="/equipment">Equipamento</BackLink>
+        <BackLink href={backHref}>Equipamento</BackLink>
 
         <div className="space-y-3">
           <h1 className="font-heading text-4xl font-semibold tracking-tight sm:text-5xl">
@@ -88,8 +98,10 @@ function WeaponHero({ weapon }: { weapon: WeaponSummary }) {
   );
 }
 
-export function WeaponDetailView({ slug }: WeaponDetailViewProps) {
+function WeaponDetailBody({ slug }: WeaponDetailViewProps) {
   const { data, isPending, isError, error } = useWeaponDetail(slug);
+  const backHref = useCatalogBackHref("/equipment?tab=weapons");
+  const { links } = useEquipmentCatalogLinks();
 
   if (isPending) {
     return <p className="text-sm text-muted-foreground">Carregando arma…</p>;
@@ -102,7 +114,7 @@ export function WeaponDetailView({ slug }: WeaponDetailViewProps) {
           {error instanceof Error ? error.message : "Arma não encontrada"}
         </p>
         <Link
-          href="/equipment"
+          href={backHref}
           className={cn(buttonVariants({ variant: "outline" }))}
         >
           Voltar ao equipamento
@@ -111,14 +123,14 @@ export function WeaponDetailView({ slug }: WeaponDetailViewProps) {
     );
   }
 
-  const properties = weaponPropertyLabels(data.properties);
-  const masteryId = data.properties?.masteryId;
+  const properties = data.propertyDetails ?? [];
+  const mastery = data.mastery;
 
   return (
     <div className="flex flex-col gap-12">
-      <WeaponHero weapon={data} />
+      <WeaponHero weapon={data} backHref={backHref} />
 
-      {(properties.length > 0 || masteryId) && (
+      {(properties.length > 0 || mastery) && (
         <section aria-labelledby="weapon-traits" className="space-y-4">
           <div className="space-y-1">
             <p className="text-xs font-medium tracking-wider text-primary uppercase">
@@ -132,30 +144,48 @@ export function WeaponDetailView({ slug }: WeaponDetailViewProps) {
             </h2>
           </div>
 
-          <dl className="space-y-3 border-t border-border pt-4">
-            {properties.length > 0 ? (
-              <div className="space-y-1">
-                <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                  Propriedades
-                </dt>
-                <dd className="text-base text-foreground/90">
-                  {properties.join(" · ")}
-                </dd>
-              </div>
+          <div className="space-y-3">
+            {properties.map((prop) => (
+              <CollapsibleCard
+                key={prop.slug}
+                title={prop.name}
+                defaultOpen={properties.length <= 3}
+              >
+                <PhbProse
+                  text={prop.description}
+                  catalogLinks={links}
+                  currentSlug={data.slug}
+                  returnTo={backHref}
+                  className="text-base leading-relaxed text-justify text-foreground/85 [&_p]:text-justify [&_p]:text-foreground/85"
+                />
+              </CollapsibleCard>
+            ))}
+            {mastery ? (
+              <CollapsibleCard title={`Maestria: ${mastery.name}`} defaultOpen>
+                <PhbProse
+                  text={mastery.description}
+                  catalogLinks={links}
+                  currentSlug={data.slug}
+                  returnTo={backHref}
+                  className="text-base leading-relaxed text-justify text-foreground/85 [&_p]:text-justify [&_p]:text-foreground/85"
+                />
+              </CollapsibleCard>
             ) : null}
-            {masteryId ? (
-              <div className="space-y-1">
-                <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                  Maestria
-                </dt>
-                <dd className="text-base text-foreground/90">
-                  {formatWeaponMasteryId(masteryId)}
-                </dd>
-              </div>
-            ) : null}
-          </dl>
+          </div>
         </section>
       )}
     </div>
+  );
+}
+
+export function WeaponDetailView({ slug }: WeaponDetailViewProps) {
+  return (
+    <Suspense
+      fallback={
+        <p className="text-sm text-muted-foreground">Carregando arma…</p>
+      }
+    >
+      <WeaponDetailBody slug={slug} />
+    </Suspense>
   );
 }
