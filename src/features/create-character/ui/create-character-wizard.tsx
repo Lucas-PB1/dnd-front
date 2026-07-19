@@ -376,89 +376,92 @@ export function CreateCharacterWizard() {
     >
       <WizardStepIndicator currentStep={step} navOptions={wizardNav} />
 
-      {step === "identity" ? (
-        <StepIdentity register={register} control={control} errors={errors} />
-      ) : null}
+      <div
+        key={step}
+        className="animate-in fade-in-0 slide-in-from-right-2 duration-300 fill-mode-both"
+      >
+        {step === "identity" ? (
+          <StepIdentity register={register} control={control} errors={errors} />
+        ) : null}
 
-      {step === "abilities" ? (
-        <>
-          <StepAbilities
+        {step === "abilities" ? (
+          <>
+            <StepAbilities
+              control={control}
+              errors={errors}
+              setValue={setValue}
+            />
+            {abilitiesError ? (
+              <p className="text-sm text-destructive" role="alert">
+                {abilitiesError}
+              </p>
+            ) : null}
+          </>
+        ) : null}
+
+        {step === "skills" ? (
+          <StepClassSkills
             control={control}
-            errors={errors}
             setValue={setValue}
+            error={skillsError}
           />
-          {abilitiesError ? (
-            <p className="text-sm text-destructive" role="alert">
-              {abilitiesError}
-            </p>
-          ) : null}
-        </>
-      ) : null}
+        ) : null}
 
-      {step === "skills" ? (
-        <StepClassSkills
-          control={control}
-          setValue={setValue}
-          error={skillsError}
-        />
-      ) : null}
+        {step === "background" ? (
+          <>
+            <StepBackground
+              control={control}
+              errors={errors}
+              setValue={setValue}
+            />
+            {backgroundError ? (
+              <p className="text-sm text-destructive" role="alert">
+                {backgroundError}
+              </p>
+            ) : null}
+          </>
+        ) : null}
 
-      {step === "background" ? (
-        <>
-          <StepBackground
-            control={control}
-            errors={errors}
-            setValue={setValue}
-          />
-          {backgroundError ? (
-            <p className="text-sm text-destructive" role="alert">
-              {backgroundError}
-            </p>
-          ) : null}
-        </>
-      ) : null}
+        {step === "feats" ? (
+          <StepFeats control={control} setValue={setValue} error={featsError} />
+        ) : null}
 
-      {step === "feats" ? (
-        <StepFeats control={control} setValue={setValue} error={featsError} />
-      ) : null}
-
-      {step === "species" ? (
-        <>
+        {step === "species" ? (
           <StepSpeciesChoices
             control={control}
             setValue={setValue}
             error={speciesError}
           />
-        </>
-      ) : null}
+        ) : null}
 
-      {step === "subclass" ? (
-        <StepSubclassOptions
-          control={control}
-          setValue={setValue}
-          error={subclassError}
-        />
-      ) : null}
+        {step === "subclass" ? (
+          <StepSubclassOptions
+            control={control}
+            setValue={setValue}
+            error={subclassError}
+          />
+        ) : null}
 
-      {step === "equipment" ? (
-        <StepEquipment control={control} setValue={setValue} />
-      ) : null}
+        {step === "equipment" ? (
+          <StepEquipment control={control} setValue={setValue} />
+        ) : null}
 
-      {step === "spells" ? (
-        <StepSpells control={control} setValue={setValue} />
-      ) : null}
+        {step === "spells" ? (
+          <StepSpells control={control} setValue={setValue} />
+        ) : null}
 
-      {step === "languages" ? (
-        <StepLanguages control={control} setValue={setValue} />
-      ) : null}
+        {step === "languages" ? (
+          <StepLanguages control={control} setValue={setValue} />
+        ) : null}
 
-      {step === "review" ? <StepReview control={control} /> : null}
+        {step === "review" ? <StepReview control={control} /> : null}
+      </div>
 
       {create.isError ? (
         <p className="text-sm text-destructive" role="alert">
           {create.error instanceof Error
             ? create.error.message
-            : "Erro ao criar ficha"}
+            : "Não foi possível criar a ficha. Tente de novo."}
         </p>
       ) : null}
 
@@ -475,7 +478,7 @@ export function CreateCharacterWizard() {
           </Button>
         ) : (
           <Button type="submit" size="lg" disabled={create.isPending}>
-            {create.isPending ? "Criando…" : "Criar ficha"}
+            {create.isPending ? "Criando ficha…" : "Criar ficha"}
           </Button>
         )}
 
@@ -485,12 +488,12 @@ export function CreateCharacterWizard() {
           size="lg"
           onClick={() => router.push("/characters")}
         >
-          Cancelar
+          Voltar às fichas
         </Button>
       </div>
 
       <p className="text-xs text-muted-foreground">
-        A API valida escolhas e calcula PV, bônus de proficiência e perícias.
+        Suas escolhas são validadas ao criar — PV e bônus saem prontos na ficha.
       </p>
     </form>
   );

@@ -10,7 +10,9 @@ import type { PaginatedResponse } from "@/shared/api/dnd-api/types";
 
 export const backgroundKeys = {
   all: ["backgrounds"] as const,
-  list: () => [...backgroundKeys.all, "list"] as const,
+  listAll: () => [...backgroundKeys.all, "list", "all"] as const,
+  listPage: (params: { page: number; limit: number; q: string }) =>
+    [...backgroundKeys.all, "list", "page", params] as const,
   detail: (slug: string) => [...backgroundKeys.all, "detail", slug] as const,
   equipment: (slug: string) =>
     [...backgroundKeys.all, "equipment", slug] as const,
@@ -18,10 +20,28 @@ export const backgroundKeys = {
   tools: (slug: string) => [...backgroundKeys.all, "tools", slug] as const,
 };
 
+export async function fetchBackgroundsPage(params?: {
+  page?: number;
+  limit?: number;
+  q?: string;
+}) {
+  const page = params?.page ?? 1;
+  const limit = params?.limit ?? 20;
+  const search = new URLSearchParams();
+  search.set("page", String(page));
+  search.set("limit", String(limit));
+  const q = params?.q?.trim();
+  if (q) search.set("q", q);
+
+  return catalogFetch<BackgroundListResponse>(
+    `/backgrounds?${search.toString()}`,
+    { next: { revalidate: 3600 } },
+  );
+}
+
+/** Lista completa (poucos itens) — wizard / ficha. */
 export async function fetchBackgrounds(limit = 50) {
-  return catalogFetch<BackgroundListResponse>(`/backgrounds?limit=${limit}`, {
-    next: { revalidate: 3600 },
-  });
+  return fetchBackgroundsPage({ page: 1, limit });
 }
 
 export async function fetchBackgroundBySlug(slug: string) {

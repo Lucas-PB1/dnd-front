@@ -14,7 +14,13 @@ export function ClassesGrid() {
   const filtered = useMemo(
     () =>
       filterByQuery(data?.data ?? [], query, (item) =>
-        [item.name, item.hitDie, item.primaryAbilityLabel]
+        [
+          item.name,
+          item.hitDie,
+          item.primaryAbilityLabel,
+          item.tagline,
+          item.summary,
+        ]
           .filter(Boolean)
           .join(" "),
       ),

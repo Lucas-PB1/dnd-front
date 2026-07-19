@@ -133,6 +133,9 @@
   html.dark {
     color-scheme: dark;
   }
+  a:focus-visible {
+    @apply rounded-sm outline-none ring-3 ring-ring/55 ring-offset-2 ring-offset-background;
+  }
   h1,
   h2,
   h3 {

@@ -3,8 +3,12 @@ import type { ItemListResponse, ItemSummary } from "@/entities/item/types";
 
 export const itemKeys = {
   all: ["items"] as const,
-  list: (params?: { q?: string; itemType?: string; limit?: number }) =>
-    [...itemKeys.all, "list", params ?? {}] as const,
+  list: (params?: {
+    q?: string;
+    itemType?: string;
+    limit?: number;
+    page?: number;
+  }) => [...itemKeys.all, "list", params ?? {}] as const,
   detail: (slug: string) => [...itemKeys.all, "detail", slug] as const,
 };
 

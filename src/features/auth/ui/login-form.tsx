@@ -33,11 +33,9 @@ export function LoginForm() {
 
   if (!isConfigured) {
     return (
-      <p className="text-sm text-destructive">
-        Supabase não configurado. Preencha{" "}
-        <code className="text-xs">NEXT_PUBLIC_SUPABASE_URL</code> e{" "}
-        <code className="text-xs">NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY</code> no
-        .env.
+      <p className="text-sm text-destructive" role="alert">
+        Login temporariamente indisponível. Tente de novo mais tarde ou fale com
+        quem mantém a Taverna.
       </p>
     );
   }
@@ -53,7 +51,9 @@ export function LoginForm() {
           router.refresh();
         } catch (error) {
           setSubmitError(
-            error instanceof Error ? error.message : "Falha ao entrar",
+            error instanceof Error
+              ? error.message
+              : "Não foi possível entrar. Confira e-mail e senha.",
           );
         }
       })}
@@ -98,7 +98,7 @@ export function LoginForm() {
         Não tem conta?{" "}
         <Link
           href="/signup"
-          className="text-primary underline-offset-4 hover:underline"
+          className="rounded-sm text-primary underline-offset-4 hover:underline focus-visible:ring-3 focus-visible:ring-ring/55 focus-visible:outline-none"
         >
           Criar conta
         </Link>

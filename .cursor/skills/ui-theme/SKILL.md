@@ -11,4 +11,4 @@ disable-model-invocation: true
 - `ThemeToggle` em `widgets/app-header/ui/theme-toggle.tsx`
 - Usar classes semânticas: `bg-background`, `text-foreground`, `border-border`
 
-Skill: `ui-shadcn`
+Skills relacionadas: `ui-shadcn` · `ui-icons` · `ui-catalog`

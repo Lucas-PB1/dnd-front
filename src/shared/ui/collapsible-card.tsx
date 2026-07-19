@@ -58,7 +58,7 @@ export function CollapsibleCard({
       {open ? (
         <div
           id={panelId}
-          className="border-t border-border/70 px-4 pt-3 pb-4 sm:px-5 sm:pb-5"
+          className="animate-in fade-in-0 slide-in-from-top-1 border-t border-border/70 px-4 pt-3 pb-4 duration-200 sm:px-5 sm:pb-5"
         >
           {children}
         </div>

@@ -33,21 +33,30 @@ export default function Home() {
         <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
           <Link
             href="/compendium"
-            className={cn(buttonVariants({ size: "lg" }))}
+            className={cn(
+              buttonVariants({ size: "lg" }),
+              "transition-transform duration-200 hover:-translate-y-0.5",
+            )}
           >
-            Compêndio PHB
+            Abrir compêndio
           </Link>
           <Link
             href="/characters"
-            className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
+            className={cn(
+              buttonVariants({ variant: "outline", size: "lg" }),
+              "transition-transform duration-200 hover:-translate-y-0.5",
+            )}
           >
             Minhas fichas
           </Link>
           <Link
             href="/characters/new"
-            className={cn(buttonVariants({ variant: "secondary", size: "lg" }))}
+            className={cn(
+              buttonVariants({ variant: "secondary", size: "lg" }),
+              "transition-transform duration-200 hover:-translate-y-0.5",
+            )}
           >
-            Criar ficha
+            Criar personagem
           </Link>
         </div>
       </main>

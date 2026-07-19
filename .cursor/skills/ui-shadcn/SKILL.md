@@ -26,4 +26,7 @@ Combinar `Field`, `FieldError`, `Input`, `Label` com RHF (skill `forms-rhf-zod`)
 
 Usar tokens semânticos (`bg-primary`, `text-muted-foreground`) — ver skill `ui-theme`.
 
-Lucide pode vir com componentes shadcn; ícones do app usam Heroicons.
+Ícones do app: **Heroicons** (`@heroicons/react/24/outline`) — skill `ui-icons`.  
+Compêndio (BackLink, CatalogPageHeader, PhbProse): skill `ui-catalog`.
+
+Lucide pode vir com componentes shadcn; **não** importar Lucide em features.

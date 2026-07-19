@@ -13,18 +13,33 @@ export function BackgroundCard({ background, className }: BackgroundCardProps) {
     <Link
       href={`/backgrounds/${background.slug}`}
       className={cn(
-        "group flex flex-col gap-2 rounded-lg border border-border bg-card p-4 transition-colors hover:border-ring hover:bg-muted/30",
+        "group flex flex-col gap-1.5 border-b border-border px-1 py-3 transition-colors hover:bg-muted/30 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4",
         className,
       )}
     >
-      <h2 className="font-heading text-lg font-semibold tracking-tight group-hover:text-primary">
-        {background.name}
-      </h2>
-      {background.abilityOptionNames?.length ? (
-        <p className="text-sm text-muted-foreground">
-          Atributos: {background.abilityOptionNames.join(", ")}
-        </p>
-      ) : null}
+      <div className="min-w-0 flex-1 space-y-1">
+        <h2 className="font-heading text-base font-semibold tracking-tight group-hover:text-primary sm:text-lg">
+          {background.name}
+        </h2>
+        {background.tagline ? (
+          <p className="text-xs font-medium tracking-wide text-primary/90 uppercase">
+            {background.tagline}
+          </p>
+        ) : null}
+        {background.summary ? (
+          <p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">
+            {background.summary}
+          </p>
+        ) : null}
+      </div>
+      <div className="flex shrink-0 flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground sm:max-w-64 sm:justify-end">
+        {background.originFeatName ? (
+          <span>{background.originFeatName}</span>
+        ) : null}
+        {background.abilityOptionNames?.length ? (
+          <span>{background.abilityOptionNames.join(" · ")}</span>
+        ) : null}
+      </div>
     </Link>
   );
 }

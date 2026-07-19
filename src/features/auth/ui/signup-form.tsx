@@ -32,11 +32,8 @@ export function SignupForm() {
 
   if (!isConfigured) {
     return (
-      <p className="text-sm text-destructive">
-        Supabase não configurado. Preencha{" "}
-        <code className="text-xs">NEXT_PUBLIC_SUPABASE_URL</code> e{" "}
-        <code className="text-xs">NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY</code> no
-        .env.
+      <p className="text-sm text-destructive" role="alert">
+        Cadastro temporariamente indisponível. Tente de novo mais tarde.
       </p>
     );
   }
@@ -78,7 +75,9 @@ export function SignupForm() {
           router.refresh();
         } catch (error) {
           setSubmitError(
-            error instanceof Error ? error.message : "Falha ao criar conta",
+            error instanceof Error
+              ? error.message
+              : "Não foi possível criar a conta. Tente de novo.",
           );
         }
       })}
@@ -135,7 +134,7 @@ export function SignupForm() {
         Já tem conta?{" "}
         <Link
           href="/login"
-          className="text-primary underline-offset-4 hover:underline"
+          className="rounded-sm text-primary underline-offset-4 hover:underline focus-visible:ring-3 focus-visible:ring-ring/55 focus-visible:outline-none"
         >
           Entrar
         </Link>

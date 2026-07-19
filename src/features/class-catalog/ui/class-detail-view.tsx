@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo } from "react";
 
-import type { ClassFeature } from "@/entities/class/types";
+import type { ClassFeature, ClassSummary } from "@/entities/class/types";
 import {
   useClassDetail,
   useClassFeatures,
@@ -12,7 +12,7 @@ import {
 } from "@/features/class-catalog/api/use-classes";
 import { SubclassCard } from "@/features/class-catalog/ui/subclass-card";
 import { cn } from "@/shared/lib/utils";
-import { CatalogPageHeader } from "@/shared/ui/catalog-page-header";
+import { BackLink } from "@/shared/ui/back-link";
 import { CollapsibleCard } from "@/shared/ui/collapsible-card";
 import { PhbProse } from "@/shared/ui/phb-prose";
 import { buttonVariants } from "@/shared/ui/button";
@@ -29,6 +29,81 @@ function groupFeaturesByLevel(features: ClassFeature[]) {
     map.set(feature.featureLevel, list);
   }
   return [...map.entries()].sort(([a], [b]) => a - b);
+}
+
+function ClassHero({ cls }: { cls: ClassSummary }) {
+  const stats: { label: string; value: string }[] = [
+    { label: "Dado de vida", value: cls.hitDie },
+  ];
+  if (cls.primaryAbilityLabel) {
+    stats.push({ label: "Atributo", value: cls.primaryAbilityLabel });
+  }
+  if (cls.hpLevel1DieValue != null) {
+    stats.push({ label: "PV nível 1", value: `${cls.hpLevel1DieValue} + CON` });
+  }
+  if (cls.hpFixedPerLevel != null) {
+    stats.push({
+      label: "PV por nível",
+      value: `+${cls.hpFixedPerLevel} + CON`,
+    });
+  }
+  if (cls.skillChoiceCount != null) {
+    stats.push({
+      label: "Perícias",
+      value: `${cls.skillChoiceCount} à escolha${cls.skillChoiceFrom === "any" ? " (qualquer)" : ""}`,
+    });
+  }
+
+  return (
+    <header className="relative overflow-hidden rounded-xl border border-border">
+      <div
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,color-mix(in_oklch,var(--primary)_22%,transparent),transparent_55%),radial-gradient(ellipse_at_bottom_right,color-mix(in_oklch,var(--secondary)_14%,transparent),transparent_50%)]"
+        aria-hidden
+      />
+      <div className="relative space-y-6 p-5 sm:p-8">
+        <BackLink href="/classes">Classes</BackLink>
+
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <h1 className="font-heading text-4xl font-semibold tracking-tight sm:text-5xl">
+                {cls.name}
+              </h1>
+              <span className="font-mono text-sm tracking-wide text-secondary">
+                {cls.hitDie}
+              </span>
+            </div>
+            {cls.tagline ? (
+              <p className="max-w-xl text-sm font-medium tracking-wide text-primary uppercase sm:text-base">
+                {cls.tagline}
+              </p>
+            ) : null}
+            {cls.summary ? (
+              <p className="max-w-2xl font-heading text-lg leading-snug text-foreground/90 sm:text-xl">
+                {cls.summary}
+              </p>
+            ) : null}
+          </div>
+        </div>
+
+        <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-3 lg:grid-cols-5">
+          {stats.map((stat) => (
+            <div
+              key={stat.label}
+              className="bg-card/80 px-3 py-3 backdrop-blur-sm sm:px-4"
+            >
+              <dt className="text-[0.65rem] font-medium tracking-wider text-muted-foreground uppercase">
+                {stat.label}
+              </dt>
+              <dd className="mt-1 font-heading text-base font-semibold leading-tight sm:text-lg">
+                {stat.value}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    </header>
+  );
 }
 
 export function ClassDetailView({ slug }: ClassDetailViewProps) {
@@ -67,67 +142,30 @@ export function ClassDetailView({ slug }: ClassDetailViewProps) {
   const cls = classQuery.data;
 
   return (
-    <div className="flex flex-col gap-10">
-      <CatalogPageHeader
-        title={cls.name}
-        backHref="/classes"
-        backLabel="Classes"
-        description={
-          cls.primaryAbilityLabel
-            ? `Atributo principal: ${cls.primaryAbilityLabel}`
-            : undefined
-        }
-      />
+    <div className="flex flex-col gap-12">
+      <ClassHero cls={cls} />
 
-      <section aria-labelledby="class-overview" className="space-y-4">
-        <h2
-          id="class-overview"
-          className="font-heading text-2xl font-semibold tracking-tight"
-        >
-          Visão geral
-        </h2>
-        <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="space-y-1 border-l-2 border-primary/40 pl-4">
-            <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-              Dado de vida
-            </dt>
-            <dd className="font-heading text-2xl font-semibold">
-              {cls.hitDie}
-            </dd>
+      {cls.description ? (
+        <section aria-labelledby="class-about" className="space-y-4">
+          <div className="space-y-1">
+            <p className="text-xs font-medium tracking-wider text-primary uppercase">
+              Lore
+            </p>
+            <h2
+              id="class-about"
+              className="font-heading text-2xl font-semibold tracking-tight"
+            >
+              Sobre a classe
+            </h2>
           </div>
-          {cls.hpLevel1DieValue != null ? (
-            <div className="space-y-1 border-l-2 border-border pl-4">
-              <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                PV nível 1
-              </dt>
-              <dd className="text-lg font-medium">
-                {cls.hpLevel1DieValue} + CON
-              </dd>
-            </div>
-          ) : null}
-          {cls.hpFixedPerLevel != null ? (
-            <div className="space-y-1 border-l-2 border-border pl-4">
-              <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                PV por nível
-              </dt>
-              <dd className="text-lg font-medium">
-                +{cls.hpFixedPerLevel} + CON
-              </dd>
-            </div>
-          ) : null}
-          {cls.skillChoiceCount != null ? (
-            <div className="space-y-1 border-l-2 border-border pl-4">
-              <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                Perícias
-              </dt>
-              <dd className="text-lg font-medium">
-                {cls.skillChoiceCount} à escolha
-                {cls.skillChoiceFrom === "any" ? " (qualquer)" : ""}
-              </dd>
-            </div>
-          ) : null}
-        </dl>
-      </section>
+          <div className="relative border-l-2 border-primary/50 pl-5 sm:pl-6">
+            <PhbProse
+              text={cls.description}
+              className="text-base leading-relaxed text-justify text-foreground/85 [&_p]:text-justify [&_p]:text-foreground/85"
+            />
+          </div>
+        </section>
+      ) : null}
 
       <section aria-labelledby="class-skills" className="space-y-4">
         <CollapsibleCard

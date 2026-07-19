@@ -9,15 +9,32 @@ import {
   fetchBackgroundSkills,
   fetchBackgroundTools,
   fetchBackgrounds,
+  fetchBackgroundsPage,
 } from "@/features/background-catalog/api/backgrounds.api";
+import { CATALOG_PAGE_SIZE } from "@/shared/lib/catalog-pagination";
 
 const STALE = 60 * 60 * 1000;
 
+/** Lista completa — wizard / ficha. */
 export function useBackgrounds() {
   return useQuery({
-    queryKey: backgroundKeys.list(),
+    queryKey: backgroundKeys.listAll(),
     queryFn: () => fetchBackgrounds(),
     staleTime: STALE,
+  });
+}
+
+/** Listagem do compêndio: 20/página + busca `q` na API. */
+export function useBackgroundsCatalog(params: { page: number; q?: string }) {
+  const page = params.page;
+  const q = params.q?.trim() ?? "";
+  const limit = CATALOG_PAGE_SIZE;
+
+  return useQuery({
+    queryKey: backgroundKeys.listPage({ page, limit, q }),
+    queryFn: () => fetchBackgroundsPage({ page, limit, q: q || undefined }),
+    staleTime: 60 * 1000,
+    placeholderData: (previous) => previous,
   });
 }
 

@@ -43,6 +43,7 @@ import {
   type SheetNavGroup,
 } from "@/widgets/character-sheet-layout";
 import { buttonVariants } from "@/shared/ui/button";
+import { BackLink } from "@/shared/ui/back-link";
 import { cn } from "@/shared/lib/utils";
 
 type SheetSectionId =
@@ -139,12 +140,7 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
       nav={nav}
       header={
         <div className="space-y-2">
-          <Link
-            href="/characters"
-            className="text-sm text-muted-foreground hover:text-foreground"
-          >
-            ← Minhas fichas
-          </Link>
+          <BackLink href="/characters">Minhas fichas</BackLink>
           <h1 className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
             {data.name}
           </h1>

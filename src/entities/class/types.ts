@@ -4,6 +4,9 @@ import type { PaginatedResponse } from "@/shared/api/dnd-api/types";
 export type ClassSummary = {
   slug: string;
   name: string;
+  tagline: string | null;
+  summary: string | null;
+  description: string | null;
   hitDie: string;
   primaryAbilityLabel: string | null;
   primaryAbilityOperator: string | null;

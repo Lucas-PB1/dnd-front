@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ArrowRightIcon } from "@heroicons/react/24/outline";
 
 import { useCharacters } from "@/features/characters/api/use-characters";
 import { cn } from "@/shared/lib/utils";
@@ -26,18 +27,18 @@ export function CharactersList() {
       <div className="flex flex-col items-center gap-4 rounded-lg border border-dashed border-border px-6 py-12 text-center">
         <div className="space-y-2">
           <p className="font-heading text-lg font-semibold tracking-tight">
-            Nenhuma ficha ainda
+            Ainda sem fichas
           </p>
           <p className="max-w-sm text-sm text-muted-foreground">
-            Crie seu primeiro personagem PHB 2024 e ele aparece aqui para editar
-            e usar na mesa.
+            Crie seu primeiro personagem do PHB 2024. Depois ele fica aqui para
+            editar e usar na mesa.
           </p>
         </div>
         <Link
           href="/characters/new"
           className={cn(buttonVariants({ size: "lg" }))}
         >
-          Criar primeira ficha
+          Criar personagem
         </Link>
       </div>
     );
@@ -58,8 +59,9 @@ export function CharactersList() {
                 {character.classSlug}
               </p>
             </div>
-            <span className="shrink-0 text-xs text-muted-foreground">
-              Ver →
+            <span className="inline-flex shrink-0 items-center gap-1 text-xs text-muted-foreground">
+              Ver
+              <ArrowRightIcon className="size-3.5" aria-hidden />
             </span>
           </Link>
         </li>

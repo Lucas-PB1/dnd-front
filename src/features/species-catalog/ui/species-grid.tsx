@@ -14,7 +14,16 @@ export function SpeciesGrid() {
   const filtered = useMemo(
     () =>
       filterByQuery(data?.data ?? [], query, (item) =>
-        [item.name, item.creatureType, item.size].filter(Boolean).join(" "),
+        [
+          item.name,
+          item.creatureType,
+          item.size,
+          item.speed,
+          item.tagline,
+          item.summary,
+        ]
+          .filter(Boolean)
+          .join(" "),
       ),
     [data?.data, query],
   );

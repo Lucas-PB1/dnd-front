@@ -8,24 +8,51 @@ type SpellCardProps = {
   className?: string;
 };
 
+function spellTeaser(description: string): string {
+  return description.replace(/\s+/g, " ").trim();
+}
+
 export function SpellCard({ spell, className }: SpellCardProps) {
+  const flags = [
+    spell.concentration ? "Concentração" : null,
+    spell.ritual ? "Ritual" : null,
+  ].filter(Boolean);
+
   return (
     <Link
       href={`/spells/${spell.slug}`}
       className={cn(
-        "group flex flex-col gap-1 rounded-lg border border-border bg-card p-4 transition-colors hover:border-ring hover:bg-muted/30",
+        "group flex flex-col gap-1.5 border-b border-border px-1 py-3 transition-colors hover:bg-muted/30 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4",
         className,
       )}
     >
-      <div className="flex items-start justify-between gap-2">
-        <h2 className="font-heading text-lg font-semibold tracking-tight group-hover:text-primary">
-          {spell.name}
-        </h2>
-        <span className="shrink-0 text-xs text-muted-foreground">
-          {spell.levelLabel}
-        </span>
+      <div className="min-w-0 flex-1 space-y-1">
+        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+          <h2 className="font-heading text-base font-semibold tracking-tight group-hover:text-primary sm:text-lg">
+            {spell.name}
+          </h2>
+          <span className="font-mono text-xs text-secondary">
+            {spell.levelLabel}
+          </span>
+        </div>
+        <p className="text-xs font-medium tracking-wide text-primary/90 uppercase">
+          {spell.schoolName}
+        </p>
+        {spell.description ? (
+          <p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">
+            {spellTeaser(spell.description)}
+          </p>
+        ) : null}
       </div>
-      <p className="text-sm text-muted-foreground">{spell.schoolName}</p>
+      <div className="flex shrink-0 flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground sm:max-w-56 sm:justify-end">
+        <span>{spell.castingTime}</span>
+        <span>{spell.range}</span>
+        {flags.map((flag) => (
+          <span key={flag} className="text-primary/90">
+            {flag}
+          </span>
+        ))}
+      </div>
     </Link>
   );
 }

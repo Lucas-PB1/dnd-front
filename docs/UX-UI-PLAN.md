@@ -124,10 +124,10 @@ Ordem de implementação. Features de regra (ASI, picker de condições) ficam n
 
 ### Fase 6 — Polish final
 
-- [ ] Motion nos 2–3 pontos definidos (tema, wizard, ficha)
-- [ ] Microcopy PT revisada (botões, empty states, erros)
-- [ ] Contraste e foco teclado nos CTAs principais
-- [ ] Smoke visual light + dark nas rotas críticas
+- [x] Motion nos 2–3 pontos definidos (tema, wizard, ficha)
+- [x] Microcopy PT revisada (botões, empty states, erros)
+- [x] Contraste e foco teclado nos CTAs principais
+- [x] Smoke visual light + dark nas rotas críticas
 
 ---
 
@@ -163,8 +163,8 @@ Ordem de implementação. Features de regra (ASI, picker de condições) ficam n
 
 ### Fase 6
 
-- [ ] Tema light/dark sem regressão óbvia de contraste
-- [ ] Pelo menos 2 motions perceptíveis e úteis (não decoração aleatória)
+- [x] Tema light/dark sem regressão óbvia de contraste
+- [x] Pelo menos 2 motions perceptíveis e úteis (não decoração aleatória)
 
 ---
 

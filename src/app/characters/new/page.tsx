@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { CreateCharacterWizard } from "@/features/create-character/ui/create-character-wizard";
 import { cn } from "@/shared/lib/utils";
+import { BackLink } from "@/shared/ui/back-link";
 import { buttonVariants } from "@/shared/ui/button";
 import { PageMain } from "@/shared/ui/page-main";
 import { AppHeader } from "@/widgets/app-header/ui/app-header";
@@ -12,12 +13,7 @@ export default function NewCharacterPage() {
       <AppHeader />
       <PageMain>
         <div className="space-y-1">
-          <Link
-            href="/characters"
-            className="text-sm text-muted-foreground hover:text-foreground"
-          >
-            ← Minhas fichas
-          </Link>
+          <BackLink href="/characters">Minhas fichas</BackLink>
           <h1 className="font-heading text-2xl font-semibold tracking-tight sm:text-3xl">
             Nova ficha
           </h1>

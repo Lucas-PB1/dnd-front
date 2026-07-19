@@ -3,6 +3,9 @@ import type { PaginatedResponse } from "@/shared/api/dnd-api/types";
 export type BackgroundSummary = {
   slug: string;
   name: string;
+  tagline: string | null;
+  summary: string | null;
+  description: string | null;
   equipmentGoldOption: number | null;
   abilityOptionSlugs: string[];
   abilityOptionNames: string[];

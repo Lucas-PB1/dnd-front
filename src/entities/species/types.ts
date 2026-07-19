@@ -3,6 +3,8 @@ import type { PaginatedResponse } from "@/shared/api/dnd-api/types";
 export type SpeciesSummary = {
   slug: string;
   name: string;
+  tagline: string | null;
+  summary: string | null;
   creatureType: string;
   size: string;
   speed: string;

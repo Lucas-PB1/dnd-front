@@ -14,7 +14,9 @@ export function AuthNav() {
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   if (!isConfigured) {
-    return <span className="text-xs text-muted-foreground">Auth off</span>;
+    return (
+      <span className="text-xs text-muted-foreground">Login indisponível</span>
+    );
   }
 
   if (isLoading) {

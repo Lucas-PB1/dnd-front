@@ -23,6 +23,8 @@ Arquitetura: **Feature-Sliced Design**. Ler `fsd-architecture` antes de codar.
 | TanStack Query                                | `tanstack-query`                     |
 | shadcn, UI kit                                | `ui-shadcn`                          |
 | tema, dark mode                               | `ui-theme`                           |
+| Heroicons, setas, chevrons                    | `ui-icons`                           |
+| catálogo/compêndio (header, search, PhbProse) | `ui-catalog`                         |
 | RHF + Zod                                     | `forms-rhf-zod`                      |
 | TypeScript                                    | `typescript`                         |
 | Vitest / Cypress                              | `testing-vitest` / `testing-cypress` |

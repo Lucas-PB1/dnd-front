@@ -1,25 +1,25 @@
 "use client";
 
-import { useMemo, useState } from "react";
-
-import { useBackgrounds } from "@/features/background-catalog/api/use-backgrounds";
+import { useBackgroundsCatalog } from "@/features/background-catalog/api/use-backgrounds";
 import { BackgroundCard } from "@/features/background-catalog/ui/background-card";
-import { filterByQuery } from "@/shared/lib/filter-by-query";
+import { useCatalogListState } from "@/shared/lib/use-catalog-list-state";
+import { CatalogPagination } from "@/shared/ui/catalog-pagination";
 import { CatalogSearch } from "@/shared/ui/catalog-search";
 
 export function BackgroundsGrid() {
-  const { data, isPending, isError, error } = useBackgrounds();
-  const [query, setQuery] = useState("");
+  const { query, setQuery, debouncedQuery, page, setPage, pageWindow } =
+    useCatalogListState();
 
-  const filtered = useMemo(
-    () =>
-      filterByQuery(data?.data ?? [], query, (item) =>
-        [item.name, ...(item.abilityOptionNames ?? [])].join(" "),
-      ),
-    [data?.data, query],
+  const { data, isPending, isError, error, isFetching } = useBackgroundsCatalog(
+    {
+      page,
+      q: debouncedQuery,
+    },
   );
 
-  if (isPending) {
+  const { total, totalPages, safePage, from, to } = pageWindow(data?.meta);
+
+  if (isPending && !data) {
     return (
       <p className="text-sm text-muted-foreground">Carregando antecedentes…</p>
     );
@@ -35,32 +35,42 @@ export function BackgroundsGrid() {
     );
   }
 
-  if (!data?.data.length) {
-    return (
-      <p className="text-sm text-muted-foreground">
-        Nenhum antecedente encontrado.
-      </p>
-    );
-  }
-
   return (
     <div className="flex flex-col gap-4">
       <CatalogSearch
         value={query}
         onChange={setQuery}
         placeholder="Buscar antecedente…"
-        resultCount={filtered.length}
+        resultCount={total}
       />
-      {filtered.length === 0 ? (
+      {!data?.data.length ? (
         <p className="text-sm text-muted-foreground">
-          Nenhum antecedente corresponde à busca.
+          {debouncedQuery
+            ? "Nenhum antecedente corresponde à busca."
+            : "Nenhum antecedente encontrado."}
         </p>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((background) => (
-            <BackgroundCard key={background.slug} background={background} />
-          ))}
-        </div>
+        <>
+          <div
+            className={isFetching ? "opacity-70 transition-opacity" : undefined}
+          >
+            <ul className="border-t border-border">
+              {data.data.map((background) => (
+                <li key={background.slug}>
+                  <BackgroundCard background={background} />
+                </li>
+              ))}
+            </ul>
+          </div>
+          <CatalogPagination
+            page={safePage}
+            totalPages={totalPages}
+            total={total}
+            from={from}
+            to={to}
+            onPageChange={setPage}
+          />
+        </>
       )}
     </div>
   );
