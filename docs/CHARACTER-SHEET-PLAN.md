@@ -6,7 +6,7 @@ Roadmap geral do monorepo: [`dnd-api/docs/product-roadmap.md`](../../dnd-api/doc
 
 **Princípio:** o front **coleta escolhas** e **exibe**; a API **valida e computa**. Zero regras PHB hardcoded no front.
 
-Ver também: [ARCHITECTURE.md](./ARCHITECTURE.md) · [API-INTEGRATION.md](./API-INTEGRATION.md)
+Ver também: [ARCHITECTURE.md](./ARCHITECTURE.md) · [API-INTEGRATION.md](./API-INTEGRATION.md) · [UX-UI-PLAN.md](./UX-UI-PLAN.md)
 
 ---
 
@@ -67,12 +67,15 @@ pnpm lint && pnpm test && pnpm build
 | Média      | Páginas compêndio: feats, skills, equipamento                     |
 | Baixa      | Testes E2E dos fluxos críticos (criar → ver → editar → deletar)   |
 
+**Polish visual / UX** (home, brand, tipografia, hierarquia ficha/wizard/compêndio): ver **[UX-UI-PLAN.md](./UX-UI-PLAN.md)** — não duplicar aqui.
+
 ---
 
 ## Referências
 
 | Assunto  | Caminho                                                       |
 | -------- | ------------------------------------------------------------- |
+| UX / UI  | [UX-UI-PLAN.md](./UX-UI-PLAN.md)                              |
 | Wizard   | `src/features/create-character/`                              |
 | Ficha    | `src/features/character-sheet/`                               |
 | Tipos    | `src/entities/character/types.ts`                             |

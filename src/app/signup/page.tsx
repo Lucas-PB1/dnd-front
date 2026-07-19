@@ -5,7 +5,7 @@ export default function SignupPage() {
   return (
     <AuthPageShell
       title="Criar conta"
-      description="Cadastre-se para salvar fichas na dnd-api."
+      description="Crie uma conta para salvar e editar suas fichas."
     >
       <SignupForm />
     </AuthPageShell>

@@ -18,7 +18,7 @@ export function SpellCard({ spell, className }: SpellCardProps) {
       )}
     >
       <div className="flex items-start justify-between gap-2">
-        <h2 className="font-semibold tracking-tight group-hover:underline">
+        <h2 className="font-heading text-lg font-semibold tracking-tight group-hover:text-primary">
           {spell.name}
         </h2>
         <span className="shrink-0 text-xs text-muted-foreground">

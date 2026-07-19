@@ -17,7 +17,7 @@ export function BackgroundCard({ background, className }: BackgroundCardProps) {
         className,
       )}
     >
-      <h2 className="font-semibold tracking-tight group-hover:underline">
+      <h2 className="font-heading text-lg font-semibold tracking-tight group-hover:text-primary">
         {background.name}
       </h2>
       {background.abilityOptionNames?.length ? (

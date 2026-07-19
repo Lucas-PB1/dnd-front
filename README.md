@@ -1,36 +1,34 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# dnd-front
 
-## Getting Started
+Frontend Next.js do produto **Taverna** — consome a API irmã [`dnd-api`](../dnd-api). Auth via Supabase; catálogo e fichas via Nest.
 
-First, run the development server:
+## Dev
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre [http://localhost:3001](http://localhost:3001). A API local deve estar em `http://localhost:3000` (`NEXT_PUBLIC_API_URL` no `.env`).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm lint
+pnpm test:run
+pnpm build
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Docs
 
-## Learn More
+| Doc                                                            | Assunto                 |
+| -------------------------------------------------------------- | ----------------------- |
+| [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)                 | Feature-Sliced Design   |
+| [docs/UX-UI-PLAN.md](./docs/UX-UI-PLAN.md)                     | Plano geral UX/UI       |
+| [docs/COLORS.md](./docs/COLORS.md)                             | Tema Taverna / Masmorra |
+| [docs/CHARACTER-SHEET-PLAN.md](./docs/CHARACTER-SHEET-PLAN.md) | Wizard, ficha, mesa     |
+| [docs/API-INTEGRATION.md](./docs/API-INTEGRATION.md)           | Contrato com dnd-api    |
+| [docs/SUPABASE.md](./docs/SUPABASE.md)                         | Auth / sessão           |
+| [docs/DEPLOY.md](./docs/DEPLOY.md)                             | Deploy Vercel           |
 
-To learn more about Next.js, take a look at the following resources:
+## Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Next.js 16 · React 19 · TanStack Query · Supabase SSR · shadcn · Tailwind 4 · Zod · Vitest

@@ -7,8 +7,9 @@ import {
   useClassFeatures,
   useClassSubclasses,
 } from "@/features/class-catalog/api/use-classes";
-import { buttonVariants } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
+import { CatalogPageHeader } from "@/shared/ui/catalog-page-header";
+import { buttonVariants } from "@/shared/ui/button";
 
 type ClassDetailViewProps = {
   slug: string;
@@ -45,20 +46,16 @@ export function ClassDetailView({ slug }: ClassDetailViewProps) {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="space-y-2">
-        <Link
-          href="/classes"
-          className="text-sm text-muted-foreground hover:text-foreground"
-        >
-          ← Compêndio
-        </Link>
-        <h1 className="text-3xl font-semibold tracking-tight">{cls.name}</h1>
-        {cls.primaryAbilityLabel ? (
-          <p className="text-muted-foreground">
-            Atributo principal: {cls.primaryAbilityLabel}
-          </p>
-        ) : null}
-      </div>
+      <CatalogPageHeader
+        title={cls.name}
+        backHref="/classes"
+        backLabel="Classes"
+        meta={
+          cls.primaryAbilityLabel
+            ? `Atributo principal: ${cls.primaryAbilityLabel}`
+            : undefined
+        }
+      />
 
       <dl className="grid gap-4 rounded-lg border border-border p-4 sm:grid-cols-2">
         <div>

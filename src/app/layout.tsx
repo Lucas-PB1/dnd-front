@@ -1,23 +1,33 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Fraunces, Geist_Mono, Source_Sans_3 } from "next/font/google";
 
 import { AppProviders } from "@/app/providers/app-providers";
+import { BRAND_DESCRIPTION, BRAND_NAME } from "@/shared/config/brand";
 
 import "./globals.css";
 
-const geistSans = Geist({
+const fontHeading = Fraunces({
+  variable: "--font-heading",
+  subsets: ["latin"],
+  axes: ["SOFT", "WONK", "opsz"],
+});
+
+const fontSans = Source_Sans_3({
   variable: "--font-sans",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
+const fontMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "dnd-front",
-  description: "Frontend D&D — consome dnd-api",
+  title: {
+    default: BRAND_NAME,
+    template: `%s · ${BRAND_NAME}`,
+  },
+  description: BRAND_DESCRIPTION,
 };
 
 export default function RootLayout({
@@ -29,9 +39,9 @@ export default function RootLayout({
     <html
       lang="pt-BR"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${fontHeading.variable} ${fontSans.variable} ${fontMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="flex min-h-full flex-col font-sans">
         <AppProviders>{children}</AppProviders>
       </body>
     </html>

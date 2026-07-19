@@ -3,8 +3,9 @@
 import Link from "next/link";
 
 import { useSpellDetail } from "@/features/spell-catalog/api/use-spells";
-import { buttonVariants } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
+import { CatalogPageHeader } from "@/shared/ui/catalog-page-header";
+import { buttonVariants } from "@/shared/ui/button";
 
 type SpellDetailViewProps = {
   slug: string;
@@ -35,20 +36,19 @@ export function SpellDetailView({ slug }: SpellDetailViewProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="space-y-2">
-        <Link
-          href="/spells"
-          className="text-sm text-muted-foreground hover:text-foreground"
-        >
-          ← Magias
-        </Link>
-        <h1 className="text-3xl font-semibold tracking-tight">{data.name}</h1>
-        <p className="text-muted-foreground">
-          {data.levelLabel} · {data.schoolName}
-          {data.concentration ? " · Concentração" : ""}
-          {data.ritual ? " · Ritual" : ""}
-        </p>
-      </div>
+      <CatalogPageHeader
+        title={data.name}
+        backHref="/spells"
+        backLabel="Magias"
+        meta={[
+          data.levelLabel,
+          data.schoolName,
+          data.concentration ? "Concentração" : null,
+          data.ritual ? "Ritual" : null,
+        ]
+          .filter(Boolean)
+          .join(" · ")}
+      />
 
       <dl className="grid gap-3 rounded-lg border border-border p-4 text-sm sm:grid-cols-2">
         <div>

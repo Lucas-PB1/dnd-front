@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-import { buttonVariants } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
 
 const SECTIONS = [
@@ -28,22 +27,25 @@ const SECTIONS = [
 
 export function CompendiumHub() {
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
+    <ul className="grid gap-3 sm:grid-cols-2">
       {SECTIONS.map((section) => (
-        <Link
-          key={section.href}
-          href={section.href}
-          className={cn(
-            buttonVariants({ variant: "outline" }),
-            "h-auto flex-col items-start gap-2 p-4 text-left whitespace-normal",
-          )}
-        >
-          <span className="font-semibold">{section.title}</span>
-          <span className="text-xs font-normal text-muted-foreground">
-            {section.description}
-          </span>
-        </Link>
+        <li key={section.href}>
+          <Link
+            href={section.href}
+            className={cn(
+              "group flex h-full flex-col gap-2 rounded-lg border border-border bg-card p-5 text-left transition-colors",
+              "hover:border-ring hover:bg-muted/30 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
+            )}
+          >
+            <span className="font-heading text-xl font-semibold tracking-tight group-hover:text-primary">
+              {section.title}
+            </span>
+            <span className="text-sm text-muted-foreground">
+              {section.description}
+            </span>
+          </Link>
+        </li>
       ))}
-    </div>
+    </ul>
   );
 }

@@ -52,4 +52,4 @@ src/
 
 Next.js 16 · React 19 · TanStack Query · Supabase SSR · shadcn · Tailwind 4 · Zod · RHF
 
-Ver: [STACK-OPTIONS.md](./STACK-OPTIONS.md) · [API-INTEGRATION.md](./API-INTEGRATION.md) · [CHARACTER-SHEET-PLAN.md](./CHARACTER-SHEET-PLAN.md) · [SUPABASE.md](./SUPABASE.md)
+Ver: [STACK-OPTIONS.md](./STACK-OPTIONS.md) · [API-INTEGRATION.md](./API-INTEGRATION.md) · [CHARACTER-SHEET-PLAN.md](./CHARACTER-SHEET-PLAN.md) · [UX-UI-PLAN.md](./UX-UI-PLAN.md) · [COLORS.md](./COLORS.md) · [SUPABASE.md](./SUPABASE.md)

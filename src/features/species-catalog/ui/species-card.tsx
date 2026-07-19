@@ -17,7 +17,7 @@ export function SpeciesCard({ species, className }: SpeciesCardProps) {
         className,
       )}
     >
-      <h2 className="font-semibold tracking-tight group-hover:underline">
+      <h2 className="font-heading text-lg font-semibold tracking-tight group-hover:text-primary">
         {species.name}
       </h2>
       <p className="text-sm text-muted-foreground">

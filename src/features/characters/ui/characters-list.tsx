@@ -3,6 +3,8 @@
 import Link from "next/link";
 
 import { useCharacters } from "@/features/characters/api/use-characters";
+import { cn } from "@/shared/lib/utils";
+import { buttonVariants } from "@/shared/ui/button";
 
 export function CharactersList() {
   const { data, isPending, isError, error } = useCharacters();
@@ -21,15 +23,23 @@ export function CharactersList() {
 
   if (!data?.length) {
     return (
-      <p className="text-sm text-muted-foreground">
-        Nenhuma ficha ainda.{" "}
+      <div className="flex flex-col items-center gap-4 rounded-lg border border-dashed border-border px-6 py-12 text-center">
+        <div className="space-y-2">
+          <p className="font-heading text-lg font-semibold tracking-tight">
+            Nenhuma ficha ainda
+          </p>
+          <p className="max-w-sm text-sm text-muted-foreground">
+            Crie seu primeiro personagem PHB 2024 e ele aparece aqui para editar
+            e usar na mesa.
+          </p>
+        </div>
         <Link
           href="/characters/new"
-          className="text-primary underline-offset-4 hover:underline"
+          className={cn(buttonVariants({ size: "lg" }))}
         >
           Criar primeira ficha
         </Link>
-      </p>
+      </div>
     );
   }
 

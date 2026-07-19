@@ -3,8 +3,9 @@
 import Link from "next/link";
 
 import { useSpeciesDetail } from "@/features/species-catalog/api/use-species";
-import { buttonVariants } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
+import { CatalogPageHeader } from "@/shared/ui/catalog-page-header";
+import { buttonVariants } from "@/shared/ui/button";
 
 type SpeciesDetailViewProps = {
   slug: string;
@@ -35,18 +36,12 @@ export function SpeciesDetailView({ slug }: SpeciesDetailViewProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="space-y-2">
-        <Link
-          href="/species"
-          className="text-sm text-muted-foreground hover:text-foreground"
-        >
-          ← Espécies
-        </Link>
-        <h1 className="text-3xl font-semibold tracking-tight">{data.name}</h1>
-        <p className="text-muted-foreground">
-          {data.creatureType} · {data.size} · deslocamento {data.speed}
-        </p>
-      </div>
+      <CatalogPageHeader
+        title={data.name}
+        backHref="/species"
+        backLabel="Espécies"
+        meta={`${data.creatureType} · ${data.size} · deslocamento ${data.speed}`}
+      />
       <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-line">
         {data.description}
       </p>

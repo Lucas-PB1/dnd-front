@@ -7,8 +7,9 @@ import {
   useBackgroundSkills,
   useBackgroundTools,
 } from "@/features/background-catalog/api/use-backgrounds";
-import { buttonVariants } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
+import { CatalogPageHeader } from "@/shared/ui/catalog-page-header";
+import { buttonVariants } from "@/shared/ui/button";
 
 type BackgroundDetailViewProps = {
   slug: string;
@@ -44,15 +45,11 @@ export function BackgroundDetailView({ slug }: BackgroundDetailViewProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="space-y-2">
-        <Link
-          href="/backgrounds"
-          className="text-sm text-muted-foreground hover:text-foreground"
-        >
-          ← Antecedentes
-        </Link>
-        <h1 className="text-3xl font-semibold tracking-tight">{data.name}</h1>
-      </div>
+      <CatalogPageHeader
+        title={data.name}
+        backHref="/backgrounds"
+        backLabel="Antecedentes"
+      />
 
       <dl className="grid gap-4 rounded-lg border border-border p-4 sm:grid-cols-2">
         {data.abilityOptionNames?.length ? (

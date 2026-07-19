@@ -4,9 +4,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { Button, buttonVariants } from "@/shared/ui/button";
-import { cn } from "@/shared/lib/utils";
 import { useAuth } from "@/features/auth/model/use-auth";
+import { cn } from "@/shared/lib/utils";
+import { Button, buttonVariants } from "@/shared/ui/button";
 
 export function AuthNav() {
   const router = useRouter();
@@ -23,7 +23,7 @@ export function AuthNav() {
 
   if (!user) {
     return (
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <Link
           href="/login"
           className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
@@ -38,22 +38,10 @@ export function AuthNav() {
   }
 
   return (
-    <div className="flex items-center gap-3">
-      <span className="hidden max-w-40 truncate text-sm text-muted-foreground sm:inline">
+    <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+      <span className="hidden max-w-40 truncate text-sm text-muted-foreground lg:inline">
         {user.email}
       </span>
-      <Link
-        href="/compendium"
-        className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
-      >
-        Compêndio
-      </Link>
-      <Link
-        href="/characters"
-        className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
-      >
-        Fichas
-      </Link>
       <Button
         type="button"
         variant="outline"
