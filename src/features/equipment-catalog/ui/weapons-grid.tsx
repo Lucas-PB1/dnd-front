@@ -3,6 +3,7 @@
 import { useWeaponsCatalog } from "@/features/equipment-catalog/api/use-equipment";
 import { WeaponCard } from "@/features/equipment-catalog/ui/weapon-card";
 import { useCatalogListState } from "@/shared/lib/use-catalog-list-state";
+import { useClampCatalogPage } from "@/shared/lib/use-clamp-catalog-page";
 import { CatalogPagination } from "@/shared/ui/catalog-pagination";
 import { CatalogSearch } from "@/shared/ui/catalog-search";
 
@@ -24,6 +25,10 @@ export function WeaponsGrid() {
 
   const { total, totalPages, safePage, from, to } = pageWindow(data?.meta);
 
+  const outOfRange =
+    !data?.data.length && (data?.meta.total ?? 0) > 0 && page > totalPages;
+  useClampCatalogPage(outOfRange, setPage);
+
   if (isPending && !data) {
     return <p className="text-sm text-muted-foreground">Carregando armas…</p>;
   }
@@ -44,7 +49,9 @@ export function WeaponsGrid() {
         placeholder="Buscar arma…"
         resultCount={total}
       />
-      {!data?.data.length ? (
+      {outOfRange ? (
+        <p className="text-sm text-muted-foreground">Ajustando página…</p>
+      ) : !data?.data.length ? (
         <p className="text-sm text-muted-foreground">
           {debouncedQuery
             ? "Nenhuma arma corresponde à busca."

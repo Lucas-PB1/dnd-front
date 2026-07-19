@@ -4,11 +4,11 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 import type { WeaponSummary } from "@/entities/weapon/types";
-import { useEquipmentCatalogLinks } from "@/features/equipment-catalog/api/use-equipment-catalog-links";
 import { useWeaponDetail } from "@/features/equipment-catalog/api/use-equipment";
 import {
   weaponCategoryLabel,
   weaponCostText,
+  weaponWeightText,
 } from "@/features/equipment-catalog/lib/weapon-labels";
 import { useCatalogBackHref } from "@/shared/lib/use-catalog-back-href";
 import { cn } from "@/shared/lib/utils";
@@ -42,7 +42,8 @@ function WeaponHero({
     });
   }
   if (cost) stats.push({ label: "Custo", value: cost });
-  if (weapon.weight) stats.push({ label: "Peso", value: weapon.weight });
+  const weight = weaponWeightText(weapon);
+  if (weight) stats.push({ label: "Peso", value: weight });
 
   const range = weapon.properties?.range;
   if (range?.normal != null) {
@@ -101,7 +102,6 @@ function WeaponHero({
 function WeaponDetailBody({ slug }: WeaponDetailViewProps) {
   const { data, isPending, isError, error } = useWeaponDetail(slug);
   const backHref = useCatalogBackHref("/equipment?tab=weapons");
-  const { links } = useEquipmentCatalogLinks();
 
   if (isPending) {
     return <p className="text-sm text-muted-foreground">Carregando arma…</p>;
@@ -153,9 +153,6 @@ function WeaponDetailBody({ slug }: WeaponDetailViewProps) {
               >
                 <PhbProse
                   text={prop.description}
-                  catalogLinks={links}
-                  currentSlug={data.slug}
-                  returnTo={backHref}
                   className="text-base leading-relaxed text-justify text-foreground/85 [&_p]:text-justify [&_p]:text-foreground/85"
                 />
               </CollapsibleCard>
@@ -164,9 +161,6 @@ function WeaponDetailBody({ slug }: WeaponDetailViewProps) {
               <CollapsibleCard title={`Maestria: ${mastery.name}`} defaultOpen>
                 <PhbProse
                   text={mastery.description}
-                  catalogLinks={links}
-                  currentSlug={data.slug}
-                  returnTo={backHref}
                   className="text-base leading-relaxed text-justify text-foreground/85 [&_p]:text-justify [&_p]:text-foreground/85"
                 />
               </CollapsibleCard>

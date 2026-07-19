@@ -5,6 +5,7 @@ import {
   weaponCategoryLabel,
   weaponCostText,
   weaponTeaser,
+  weaponWeightText,
 } from "@/features/equipment-catalog/lib/weapon-labels";
 import { withCatalogReturn } from "@/shared/lib/catalog-return";
 import { cn } from "@/shared/lib/utils";
@@ -18,6 +19,7 @@ type WeaponCardProps = {
 export function WeaponCard({ weapon, listPath, className }: WeaponCardProps) {
   const teaser = weaponTeaser(weapon);
   const cost = weaponCostText(weapon);
+  const weight = weaponWeightText(weapon);
 
   return (
     <Link
@@ -42,7 +44,7 @@ export function WeaponCard({ weapon, listPath, className }: WeaponCardProps) {
       </div>
       <div className="shrink-0 space-y-0.5 text-xs text-muted-foreground sm:max-w-40 sm:text-right">
         {cost ? <p>{cost}</p> : null}
-        {weapon.weight ? <p>{weapon.weight}</p> : null}
+        {weight ? <p>{weight}</p> : null}
       </div>
     </Link>
   );

@@ -32,6 +32,9 @@ export function EquipmentCatalog() {
       const params = new URLSearchParams(searchParams.toString());
       if (next === "weapons") params.delete("tab");
       else params.set("tab", next);
+      // Cada aba tem seu próprio universo de busca/paginação.
+      params.delete("q");
+      params.delete("page");
       const query = params.toString();
       router.replace(query ? `${pathname}?${query}` : pathname, {
         scroll: false,

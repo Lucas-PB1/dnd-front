@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { CATALOG_PAGE_SIZE } from "@/shared/lib/catalog-pagination";
@@ -28,78 +28,75 @@ export function useCatalogListState(options?: UseCatalogListStateOptions) {
 
   const [query, setQuery] = useState(syncUrl ? urlQuery : "");
   const debouncedQuery = useDebouncedValue(query, 300);
-  const [page, setPageState] = useState(syncUrl ? urlPage : 1);
+
+  const [localPage, setLocalPage] = useState(1);
   const [pageQuery, setPageQuery] = useState(debouncedQuery);
 
   const [seenUrlQuery, setSeenUrlQuery] = useState(urlQuery);
-  const [seenUrlPage, setSeenUrlPage] = useState(urlPage);
 
-  // Hidrata input/página quando a URL muda (voltar/avançar) — durante o render.
+  // Hidrata o input quando a URL muda (voltar/avançar / troca de aba).
   if (syncUrl && urlQuery !== seenUrlQuery) {
     setSeenUrlQuery(urlQuery);
     setQuery(urlQuery);
-    setPageQuery(urlQuery);
-  }
-  if (syncUrl && urlPage !== seenUrlPage) {
-    setSeenUrlPage(urlPage);
-    setPageState(urlPage);
   }
 
-  if (pageQuery !== debouncedQuery) {
+  if (!syncUrl && pageQuery !== debouncedQuery) {
     setPageQuery(debouncedQuery);
-    // Evita zerar a página ao ecoar a URL após voltar do detalhe.
-    if (!(syncUrl && debouncedQuery === urlQuery)) {
-      setPageState(1);
-    }
+    setLocalPage(1);
   }
 
+  // Com syncUrl, a página vem só da URL — evita corrida que regrava `page`
+  // ao trocar de aba (ex.: itens p.3 → armaduras vazias).
   useEffect(() => {
     if (!syncUrl) return;
 
     // Debounce atrasado após hidratar da URL: não reescreve o `q` antigo.
     if (query === urlQuery && debouncedQuery !== urlQuery) return;
 
-    const params = new URLSearchParams(searchParams.toString());
-    if (debouncedQuery.trim()) params.set("q", debouncedQuery.trim());
-    else params.delete("q");
+    const trimmed = debouncedQuery.trim();
+    const currentQ = searchParams.get("q") ?? "";
+    if (trimmed === currentQ) return;
 
-    const nextPage = query === urlQuery ? page : 1;
-    if (nextPage > 1) params.set("page", String(nextPage));
-    else params.delete("page");
+    const params = new URLSearchParams(searchParams.toString());
+    if (trimmed) params.set("q", trimmed);
+    else params.delete("q");
+    params.delete("page");
 
     const next = params.toString();
-    const current = searchParams.toString();
-    if (next === current) return;
     router.replace(next ? `${pathname}?${next}` : pathname, { scroll: false });
   }, [
     syncUrl,
     query,
     debouncedQuery,
-    page,
     urlQuery,
     pathname,
     router,
     searchParams,
   ]);
 
-  function setPage(next: number) {
-    setPageState(next);
-    if (!syncUrl) return;
+  const setPage = useCallback(
+    (next: number) => {
+      const safe = Math.max(1, next);
+      if (!syncUrl) {
+        setLocalPage(safe);
+        return;
+      }
 
-    const params = new URLSearchParams(searchParams.toString());
-    if (next > 1) params.set("page", String(next));
-    else params.delete("page");
-    const qs = params.toString();
-    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-  }
+      const params = new URLSearchParams(searchParams.toString());
+      if (safe > 1) params.set("page", String(safe));
+      else params.delete("page");
+      const qs = params.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    },
+    [syncUrl, searchParams, pathname, router],
+  );
 
-  const activePage =
-    syncUrl && debouncedQuery !== urlQuery ? 1 : syncUrl ? urlPage : page;
+  const page = syncUrl ? urlPage : localPage;
 
   function pageWindow(meta?: CatalogMeta) {
     const total = meta?.total ?? 0;
     const totalPages = Math.max(1, meta?.totalPages ?? 1);
-    const safePage = Math.min(Math.max(1, activePage), totalPages);
+    const safePage = Math.min(Math.max(1, page), totalPages);
     const from = total === 0 ? 0 : (safePage - 1) * CATALOG_PAGE_SIZE + 1;
     const to = Math.min(safePage * CATALOG_PAGE_SIZE, total);
     return { total, totalPages, safePage, from, to };
@@ -109,7 +106,7 @@ export function useCatalogListState(options?: UseCatalogListStateOptions) {
     const params = new URLSearchParams(searchParams.toString());
     if (debouncedQuery.trim()) params.set("q", debouncedQuery.trim());
     else params.delete("q");
-    if (activePage > 1) params.set("page", String(activePage));
+    if (page > 1) params.set("page", String(page));
     else params.delete("page");
     const queryString = params.toString();
     return queryString ? `${pathname}?${queryString}` : pathname;
@@ -119,7 +116,7 @@ export function useCatalogListState(options?: UseCatalogListStateOptions) {
     query,
     setQuery,
     debouncedQuery,
-    page: activePage,
+    page,
     setPage,
     pageWindow,
     listPath,

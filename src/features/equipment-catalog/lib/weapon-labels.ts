@@ -10,6 +10,13 @@ export function weaponCostText(weapon: WeaponSummary) {
   return typeof text === "string" ? text : null;
 }
 
+/** Ignora placeholder de peso vazio (`—`, `-`, etc.). */
+export function weaponWeightText(weapon: WeaponSummary) {
+  const weight = weapon.weight?.trim();
+  if (!weight || /^[—–−-]+$/.test(weight)) return null;
+  return weight;
+}
+
 export function weaponTeaser(weapon: WeaponSummary) {
   const parts: string[] = [];
   if (weapon.damage) {

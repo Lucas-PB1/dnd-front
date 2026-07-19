@@ -3,6 +3,7 @@
 import { useGearCatalog } from "@/features/equipment-catalog/api/use-equipment";
 import { GearItemCard } from "@/features/equipment-catalog/ui/gear-item-card";
 import { useCatalogListState } from "@/shared/lib/use-catalog-list-state";
+import { useClampCatalogPage } from "@/shared/lib/use-clamp-catalog-page";
 import { CatalogPagination } from "@/shared/ui/catalog-pagination";
 import { CatalogSearch } from "@/shared/ui/catalog-search";
 
@@ -23,6 +24,10 @@ export function GearItemsGrid() {
   });
 
   const { total, totalPages, safePage, from, to } = pageWindow(data?.meta);
+
+  const outOfRange =
+    !data?.data.length && (data?.meta.total ?? 0) > 0 && page > totalPages;
+  useClampCatalogPage(outOfRange, setPage);
 
   if (isPending && !data) {
     return <p className="text-sm text-muted-foreground">Carregando itens…</p>;
@@ -45,11 +50,15 @@ export function GearItemsGrid() {
         resultCount={total}
       />
       {!data?.data.length ? (
-        <p className="text-sm text-muted-foreground">
-          {debouncedQuery
-            ? "Nenhum item corresponde à busca."
-            : "Nenhum item encontrado."}
-        </p>
+        outOfRange ? (
+          <p className="text-sm text-muted-foreground">Ajustando página…</p>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            {debouncedQuery
+              ? "Nenhum item corresponde à busca."
+              : "Nenhum item encontrado."}
+          </p>
+        )
       ) : (
         <>
           <div

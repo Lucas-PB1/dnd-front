@@ -3,6 +3,7 @@
 import { useArmorCatalog } from "@/features/equipment-catalog/api/use-equipment";
 import { ArmorCard } from "@/features/equipment-catalog/ui/armor-card";
 import { useCatalogListState } from "@/shared/lib/use-catalog-list-state";
+import { useClampCatalogPage } from "@/shared/lib/use-clamp-catalog-page";
 import { CatalogPagination } from "@/shared/ui/catalog-pagination";
 import { CatalogSearch } from "@/shared/ui/catalog-search";
 
@@ -23,6 +24,10 @@ export function ArmorGrid() {
   });
 
   const { total, totalPages, safePage, from, to } = pageWindow(data?.meta);
+
+  const outOfRange =
+    !data?.data.length && (data?.meta.total ?? 0) > 0 && page > totalPages;
+  useClampCatalogPage(outOfRange, setPage);
 
   if (isPending && !data) {
     return (
@@ -46,7 +51,9 @@ export function ArmorGrid() {
         placeholder="Buscar armadura…"
         resultCount={total}
       />
-      {!data?.data.length ? (
+      {outOfRange ? (
+        <p className="text-sm text-muted-foreground">Ajustando página…</p>
+      ) : !data?.data.length ? (
         <p className="text-sm text-muted-foreground">
           {debouncedQuery
             ? "Nenhuma armadura corresponde à busca."
