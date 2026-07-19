@@ -39,8 +39,6 @@ export type CharacterSheetInput = {
   classSkillSlugs?: string[];
   speciesChoices?: SpeciesChoice[];
   subclassOptions?: SubclassOption[];
-  /** @deprecated Prefer characterFeats */
-  featSlugs?: string[];
   characterFeats?: CharacterFeat[];
   featOptions?: FeatOption[];
   characterSpells?: CharacterSpell[];

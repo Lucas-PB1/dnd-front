@@ -6,12 +6,9 @@ export type WeaponTrait = {
   description: string;
 };
 
-export type WeaponProperties = {
-  propertyIds?: string[];
-  masteryId?: string;
-  versatileDamage?: string;
-  range?: { normal?: number; max?: number };
-  [key: string]: unknown;
+export type WeaponRange = {
+  normal: number | null;
+  max: number | null;
 };
 
 /** Espelha WeaponResponseDto */
@@ -24,7 +21,7 @@ export type WeaponSummary = {
   versatileDamage: string | null;
   cost: Record<string, unknown> | null;
   weight: string | null;
-  properties: WeaponProperties | null;
+  range: WeaponRange | null;
   propertyDetails: WeaponTrait[];
   mastery: WeaponTrait | null;
 };

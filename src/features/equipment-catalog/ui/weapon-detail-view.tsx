@@ -45,7 +45,7 @@ function WeaponHero({
   const weight = weaponWeightText(weapon);
   if (weight) stats.push({ label: "Peso", value: weight });
 
-  const range = weapon.properties?.range;
+  const range = weapon.range;
   if (range?.normal != null) {
     const rangeText =
       range.max != null

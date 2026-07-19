@@ -60,7 +60,6 @@ function previewCharacter(values: CreateCharacterInput): CharacterDetail {
     backgroundSkillSlugs: [],
     speciesChoices: values.speciesChoices,
     subclassOptions: values.subclassOptions,
-    featSlugs: [],
     characterFeats: [],
     featOptions: values.featOptions,
     characterSpells: values.characterSpells,

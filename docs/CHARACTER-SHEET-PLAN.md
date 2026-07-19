@@ -4,6 +4,8 @@
 
 Roadmap geral do monorepo: [`dnd-api/docs/product-roadmap.md`](../../dnd-api/docs/product-roadmap.md)
 
+**Próximo foco (catálogo → ficha):** [`dnd-api/docs/sheet-readiness-plan.md`](../../dnd-api/docs/sheet-readiness-plan.md) — salvaguardas, proficiências, traits de espécie, condições, progressão/magias, ASI no level-up.
+
 **Princípio:** o front **coleta escolhas** e **exibe**; a API **valida e computa**. Zero regras PHB hardcoded no front.
 
 Ver também: [ARCHITECTURE.md](./ARCHITECTURE.md) · [API-INTEGRATION.md](./API-INTEGRATION.md) · [UX-UI-PLAN.md](./UX-UI-PLAN.md)
@@ -18,6 +20,7 @@ Ver também: [ARCHITECTURE.md](./ARCHITECTURE.md) · [API-INTEGRATION.md](./API-
 | **Ver**    | Nomes PT, perícias com bônus, traços com benefício, subclasse, features de classe, magias, equipamento, talentos com benefícios PHB, idiomas, CA derivada                               |
 | **Editar** | PATCH por seção; DELETE com redirect                                                                                                                                                    |
 | **Mesa**   | PV, slots, concentração (picker), condições, descanso, conjurar, inventário com picker, level-up                                                                                        |
+| **Compêndio** | Hub: classes, espécies, antecedentes, perícias, talentos, subclasses, equipamento, idiomas, magias (filtros + URL sync)                                                              |
 
 ### Sprints entregues (histórico)
 
@@ -46,26 +49,30 @@ pnpm lint && pnpm test && pnpm build
 
 ## Lacunas conhecidas (não bloqueiam MVP)
 
-| Item                      | Estado      | Notas                                              |
-| ------------------------- | ----------- | -------------------------------------------------- |
-| Level-up ASI +2/+1 guiado | Parcial     | Aviso no level-up; edição via seção Atributos      |
-| Condições na mesa         | Texto livre | API tem `phb_condition`; UI ainda não usa picker   |
-| Compêndio feats/skills    | Pendente    | Hub só classes, espécies, antecedentes, magias     |
+Detalhamento e fases: **[`sheet-readiness-plan.md`](../../dnd-api/docs/sheet-readiness-plan.md)**.
+
+| Item | Estado | Notas |
+|------|--------|-------|
+| Salvaguardas / prof. arma-armadura | Pendente | Seed no DB; não no `ClassResponseDto` nem na ficha |
+| Traços fixos de espécie na ficha | Parcial | API `/species/:slug/traits` existe; UI foca em choices |
+| Level-up ASI +2/+1 guiado | Parcial | Aviso no level-up; edição via seção Atributos |
+| Condições na mesa | Texto livre | `phb_condition` seedado; falta `GET /conditions` + picker |
+| Cotas cantrip / prepared | Pendente | `phb_class_progression` no DB; wizard sem quota |
 | Mais feats PHB com opções | API parcial | Seeds: Magic Initiate, Skilled, Fey/Shadow Touched |
-| E2E browser               | Pendente    | Só testes unitários Vitest                         |
-| Deploy                    | Pendente    | Fase 6 do roadmap                                  |
+| E2E browser | Pendente | Só testes unitários Vitest |
+| Deploy | Pendente | Fase 6 do roadmap |
 
 ---
 
 ## Próximas melhorias (front)
 
-| Prioridade | Melhoria                                                          |
-| ---------- | ----------------------------------------------------------------- |
-| Alta       | Deploy + smoke em prod                                            |
-| Média      | Picker de condições na mesa (`GET` catálogo condições se exposto) |
-| Média      | Fluxo ASI no level-up (sem sair para editar atributos)            |
-| Média      | Páginas compêndio: feats, skills, equipamento                     |
-| Baixa      | Testes E2E dos fluxos críticos (criar → ver → editar → deletar)   |
+| Prioridade | Melhoria |
+| ---------- | -------- |
+| Alta | Sheet readiness Fases 2–3 (ST/traits na ficha; picker de condições) — ver plano |
+| Alta | Deploy + smoke em prod |
+| Média | Cotas de magia no wizard (Fase 4 do plano) |
+| Média | Fluxo ASI no level-up (Fase 5 do plano) |
+| Baixa | Testes E2E dos fluxos críticos (criar → ver → editar → deletar) |
 
 **Polish visual / UX** (home, brand, tipografia, hierarquia ficha/wizard/compêndio): ver **[UX-UI-PLAN.md](./UX-UI-PLAN.md)** — não duplicar aqui.
 
@@ -73,11 +80,12 @@ pnpm lint && pnpm test && pnpm build
 
 ## Referências
 
-| Assunto  | Caminho                                                       |
-| -------- | ------------------------------------------------------------- |
-| UX / UI  | [UX-UI-PLAN.md](./UX-UI-PLAN.md)                              |
-| Wizard   | `src/features/create-character/`                              |
-| Ficha    | `src/features/character-sheet/`                               |
-| Tipos    | `src/entities/character/types.ts`                             |
-| API DTO  | `dnd-api/src/game/sheet/dto/character-response.dto.ts`        |
+| Assunto | Caminho |
+| -------- | ------- |
+| Sheet readiness | [`dnd-api/docs/sheet-readiness-plan.md`](../../dnd-api/docs/sheet-readiness-plan.md) |
+| UX / UI | [UX-UI-PLAN.md](./UX-UI-PLAN.md) |
+| Wizard | `src/features/create-character/` |
+| Ficha | `src/features/character-sheet/` |
+| Tipos | `src/entities/character/types.ts` |
+| API DTO | `dnd-api/src/game/sheet/dto/character-response.dto.ts` |
 | Contrato | `.cursor/skills/dnd-api-contract/references/api-endpoints.md` |

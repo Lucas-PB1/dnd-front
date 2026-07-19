@@ -45,7 +45,6 @@ export type CharacterDetail = {
   speciesChoices: SpeciesChoice[];
   subclassOptions: SubclassOption[];
   characterFeats: CharacterFeat[];
-  featSlugs: string[];
   featOptions: FeatOption[];
   characterSpells: CharacterSpell[];
   equipment: CharacterEquipment[];
