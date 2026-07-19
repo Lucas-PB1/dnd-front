@@ -8,8 +8,8 @@ Código em **`src/`**. Repo irmão da API: **`dnd-api`** (NestJS).
 src/
 ├── app/                    # Next.js — rotas finas, providers globais
 ├── widgets/                # blocos compostos (header, system-status)
-├── features/               # ações do usuário (auth, *-catalog, characters)
-├── entities/               # modelos de negócio (class, character, species, …)
+├── features/               # ações do usuário (auth, *-catalog, characters, …)
+├── entities/               # modelos de negócio (class, character, subclass, …)
 ├── shared/                 # ui, api, lib, config
 │   ├── ui/                 # shadcn / Base UI
 │   ├── api/
@@ -34,12 +34,14 @@ src/
 
 ## Divisão front / API / Supabase
 
-| Assunto        | Front                                     | API / Supabase         |
-| -------------- | ----------------------------------------- | ---------------------- |
-| Login, sessão  | `features/auth`                           | API valida JWT         |
-| Catálogo PHB   | `features/class-catalog`                  | `GET /classes`, …      |
-| Fichas jogador | `features/characters`, `create-character` | `GET/POST /characters` |
-| Regras D&D     | **nunca** no front                        | dnd-api                |
+| Assunto        | Front                                                      | API / Supabase              |
+| -------------- | ---------------------------------------------------------- | --------------------------- |
+| Login, sessão  | `features/auth`                                            | API valida JWT              |
+| Catálogo PHB   | `features/*-catalog`                                       | `GET /classes`, …           |
+| Listar fichas  | `features/characters`                                      | `GET /characters`           |
+| Detalhe / mesa | `features/character-sheet`                                 | `GET/PATCH` + session etc.  |
+| Criar ficha    | `features/create-character`                                | `POST /characters`          |
+| Regras D&D     | **não** (exceto enums UI explícitos, ex. métodos atributo) | dnd-api                     |
 
 ## Nova feature
 
@@ -50,6 +52,6 @@ src/
 
 ## Stack
 
-Next.js 16 · React 19 · TanStack Query · Supabase SSR · shadcn · Tailwind 4 · Zod · RHF
+Next.js 16 · React 19 · TanStack Query · Supabase SSR · shadcn · Tailwind 4 · Zod · RHF · **dnd-api** Nest
 
 Ver: [STACK-OPTIONS.md](./STACK-OPTIONS.md) · [API-INTEGRATION.md](./API-INTEGRATION.md) · [CHARACTER-SHEET-PLAN.md](./CHARACTER-SHEET-PLAN.md) · [UX-UI-PLAN.md](./UX-UI-PLAN.md) · [COLORS.md](./COLORS.md) · [SUPABASE.md](./SUPABASE.md)

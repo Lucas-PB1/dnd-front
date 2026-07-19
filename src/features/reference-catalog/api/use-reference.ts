@@ -3,7 +3,6 @@
 import { useQuery } from "@tanstack/react-query";
 
 import {
-  fetchAbilityGenerationMethods,
   fetchAlignments,
   fetchFeats,
   fetchLanguages,
@@ -41,14 +40,6 @@ export function useLanguages() {
   return useQuery({
     queryKey: referenceKeys.languages(),
     queryFn: () => fetchLanguages(),
-    staleTime: STALE,
-  });
-}
-
-export function useAbilityGenerationMethods() {
-  return useQuery({
-    queryKey: referenceKeys.abilityGenerationMethods(),
-    queryFn: () => fetchAbilityGenerationMethods(),
     staleTime: STALE,
   });
 }

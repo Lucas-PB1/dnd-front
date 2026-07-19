@@ -6,7 +6,9 @@ Roadmap geral do monorepo: [`dnd-api/docs/product-roadmap.md`](../../dnd-api/doc
 
 **Próximo foco (catálogo → ficha):** [`dnd-api/docs/sheet-readiness-plan.md`](../../dnd-api/docs/sheet-readiness-plan.md) — salvaguardas, proficiências, traits de espécie, condições, progressão/magias, ASI no level-up.
 
-**Princípio:** o front **coleta escolhas** e **exibe**; a API **valida e computa**. Zero regras PHB hardcoded no front.
+**Princípio:** o front **coleta escolhas** e **exibe**; a API **valida e computa**. Evitar regras PHB no front.
+
+**Exceção explícita:** métodos de geração de atributos no wizard usam enum local (`standard-array` / `roll` / `point-buy`); `GET /ability-generation-methods` existe na API mas o front não consome o catálogo.
 
 Ver também: [ARCHITECTURE.md](./ARCHITECTURE.md) · [API-INTEGRATION.md](./API-INTEGRATION.md) · [UX-UI-PLAN.md](./UX-UI-PLAN.md)
 

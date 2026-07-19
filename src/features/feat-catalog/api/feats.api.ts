@@ -8,7 +8,6 @@ import { CATALOG_PAGE_SIZE } from "@/shared/lib/catalog-pagination";
 
 export const featKeys = {
   all: ["feats"] as const,
-  listAll: () => [...featKeys.all, "list", "all"] as const,
   listPage: (params: {
     page: number;
     limit: number;
@@ -38,11 +37,6 @@ export async function fetchFeatsPage(params?: {
   return catalogFetch<FeatListResponse>(`/feats?${search.toString()}`, {
     next: { revalidate: 3600 },
   });
-}
-
-/** Lista ampla — wizard / ficha (API max 100). */
-export async function fetchFeats(limit = 100): Promise<FeatListResponse> {
-  return fetchFeatsPage({ page: 1, limit });
 }
 
 export async function fetchFeatBySlug(slug: string) {

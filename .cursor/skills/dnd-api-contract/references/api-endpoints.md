@@ -21,7 +21,8 @@ Fonte canônica: `dnd-api/.cursor/skills/api-consumer-next/references/api-endpoi
 | GET    | `/weapons`, `/weapons/:slug`, `/armor`, `/armor/:slug`                                                                                   |
 | GET    | `/items`, `/items/:slug`                                                                                                                 |
 | GET    | `/alignments`, `/languages`, `/character-levels`                                                                                         |
-| GET    | `/ability-generation-methods`                                                                                                            |
+| GET    | `/ability-generation-methods` (catálogo PHB; wizard do front usa enum local e **não** consome este endpoint)                             |
+| GET    | `/subclasses` (lista paginada do compêndio)                                                                                              |
 
 ## Game (Bearer JWT Supabase)
 

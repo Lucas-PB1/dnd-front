@@ -1,28 +1,16 @@
-# Clean Code — anti-patterns
+# Clean Code — exemplos
 
-## Função faz demais na route
+## Health fino
 
 ```typescript
-// BAD — lógica + fetch + parse na route
-export async function GET() {
-  const client = createClient(...);
-  const { error } = await client.auth.getSession();
-  // ... 20 linhas
-}
+import { checkHealth } from "@/shared/api/health/check-health";
+import { toHealthResponse } from "@/shared/api/health/to-health-response";
 
-// GOOD — delega ao use case + repo
 export async function GET() {
-  const health = await getHealthStatus(healthRepository);
-  return Response.json(toHealthResponse(health));
+  return Response.json(toHealthResponse(await checkHealth()));
 }
 ```
 
-## Nome vago
+## Ficha — sem alias legado
 
-```typescript
-// BAD
-async function handle() { ... }
-
-// GOOD
-async function getHealthStatus(repository: HealthRepository) { ... }
-```
+Usar `CharacterSheetView` direto na rota `/characters/[id]`. Não recriar wrappers `@deprecated`.

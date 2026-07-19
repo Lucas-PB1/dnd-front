@@ -1,38 +1,29 @@
-# TypeScript — exemplos (health)
+# TypeScript — exemplos
 
-## Port (domain)
-
-```typescript
-// src/domain/health/health-repository.ts
-export interface HealthRepository {
-  check(): Promise<HealthStatus>;
-}
-```
-
-## Use case (application)
+## Health
 
 ```typescript
-// src/application/health/get-health-status.ts
-export async function getHealthStatus(
-  repository: HealthRepository,
-): Promise<HealthStatus> {
-  return repository.check();
-}
+// shared/api/health/types.ts
+export type HealthStatus = {
+  status: "ok" | "degraded";
+  timestamp: Date;
+  database: "ok" | "degraded";
+};
 ```
 
-## Schema + infer
+## Entidades espelhando dnd-api
 
 ```typescript
-// src/application/health/health.schema.ts
-export type HealthResponse = z.infer<typeof healthResponseSchema>;
+// entities/weapon/types.ts — espelha WeaponResponseDto
+export type WeaponSummary = {
+  slug: string;
+  range: WeaponRange | null;
+  propertyDetails: WeaponTrait[];
+  mastery: WeaponTrait | null;
+  // …
+};
 ```
 
-## Evitar
+## Character feats
 
-```typescript
-// BAD
-const data = (await res.json()) as HealthResponse;
-
-// GOOD
-const data = healthResponseSchema.parse(await res.json());
-```
+Usar `CharacterFeat` de `entities/character/lib/character-feat` (reexportado em `sheet-types`).

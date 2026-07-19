@@ -1,5 +1,9 @@
 /** Escolhas persistidas na ficha — espelham character-sheet.dto da dnd-api */
 
+import type { CharacterFeat } from "@/entities/character/lib/character-feat";
+
+export type { CharacterFeat };
+
 export type SpeciesChoice = {
   choiceKind: string;
   choiceSlug: string;
@@ -15,11 +19,6 @@ export type FeatOption = {
   instanceIndex: number;
   optionKey: string;
   valueId: string;
-};
-
-export type CharacterFeat = {
-  featSlug: string;
-  instanceIndex: number;
 };
 
 export type CharacterSpell = {

@@ -1,7 +1,7 @@
 import type { CharacterFeat } from "@/entities/character/sheet-types";
 import { nextCharacterFeatInstanceIndex } from "@/entities/character/lib/character-feat";
 
-/** Espelha resolveBackgroundOriginCharacterFeats da API (sem legado featSlugs). */
+/** Espelha resolveBackgroundOriginCharacterFeats da API. */
 export function previewCreateCharacterFeats(
   backgroundOriginSlug: string | null | undefined,
   asiFeats: CharacterFeat[],

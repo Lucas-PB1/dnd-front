@@ -1,10 +1,10 @@
 ---
 name: typescript
-description: TypeScript patterns for dnd strict mode. Use when typing APIs, domain ports, Zod schemas, generics, or fixing type errors. Complements rule 01-typescript-strict.
+description: TypeScript patterns for dnd-front strict mode. Use when typing APIs, entities, Zod schemas, or fixing type errors. Complements rule 01-typescript-strict.
 disable-model-invocation: true
 ---
 
-# TypeScript — dnd
+# TypeScript — dnd-front
 
 ## Strict
 
@@ -12,27 +12,28 @@ disable-model-invocation: true
 
 ## Convenções
 
-| Uso             | Preferência                         |
-| --------------- | ----------------------------------- |
-| Repository port | `interface` em `domain/`            |
-| DTO / response  | `type` ou `z.infer<typeof schema>`  |
-| Enum de status  | `type` union (`"ok" \| "degraded"`) |
+| Uso            | Preferência                        |
+| -------------- | ---------------------------------- |
+| Tipos API/DTO  | `type` em `entities/*/types.ts`    |
+| Form / payload | `z.infer<typeof schema>` em `features/*/model` |
+| Enum de status | `type` union (`"ok" \| "degraded"`) |
 
 ## Zod + tipos
 
 ```typescript
-export const healthResponseSchema = z.object({ ... });
-export type HealthResponse = z.infer<typeof healthResponseSchema>;
+export const createCharacterSchema = z.object({ ... });
+export type CreateCharacterInput = z.infer<typeof createCharacterSchema>;
 ```
 
 ## Camadas sem React
 
-`domain/` e `application/` não importam `react` nem `@supabase/*`.
+`entities/` e `shared/lib` / `shared/api` não importam `react` (exceto UI em `shared/ui`).
 
 ## Evitar
 
 - `any`, `@ts-ignore`
 - `as Foo` sem narrowing ou validação Zod prévia
 - Duplicar tipo manualmente quando `z.infer` resolve
+- Campos de contrato removidos na API (`featSlugs`, `weapon.properties` bruto)
 
-Ver [reference.md](reference.md) para exemplos do módulo health.
+Ver [reference.md](reference.md).

@@ -12,7 +12,8 @@ import {
 } from "@/entities/character";
 import type { CharacterCatalogLabels } from "@/features/character-sheet/api/use-character-catalog-labels";
 import type { SkillSummary } from "@/entities/skill/types";
-import type { ClassFeature, SubclassMechanic } from "@/entities/class/types";
+import type { ClassFeature } from "@/entities/class/types";
+import type { SubclassMechanic } from "@/entities/subclass/types";
 import { useSpeciesTraitChoices } from "@/features/species-catalog/api/use-species";
 import {
   useSubclassMechanics,
@@ -712,9 +713,9 @@ export function EquipmentSection({ character }: SectionProps) {
 }
 
 export function FeatsSection({ character, labels }: SectionProps) {
-  const featSlugs = character.characterFeats.map((feat) => feat.featSlug);
+  const featDetailSlugs = character.characterFeats.map((feat) => feat.featSlug);
   const { featBySlug, isLoading: featDetailsLoading } =
-    useFeatDetails(featSlugs);
+    useFeatDetails(featDetailSlugs);
   const { resolveFeatOption, isLoading: featOptionsLoading } =
     useFeatOptionLabels({
       characterFeats: character.characterFeats,

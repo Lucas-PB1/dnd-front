@@ -8,13 +8,13 @@ disable-model-invocation: true
 
 ## Camadas
 
-| Camada   | Pasta       | Exemplo                                     |
-| -------- | ----------- | ------------------------------------------- |
-| App      | `app/`      | `app/classes/page.tsx`                      |
-| Widgets  | `widgets/`  | `widgets/app-header/`                       |
-| Features | `features/` | `auth`, `class-catalog`, `create-character` |
-| Entities | `entities/` | `class/`, `character/`, `species/`          |
-| Shared   | `shared/`   | `ui/`, `api/`, `lib/`                       |
+| Camada   | Pasta       | Exemplo                                              |
+| -------- | ----------- | ---------------------------------------------------- |
+| App      | `app/`      | `app/classes/page.tsx`, `app/characters/[id]/page.tsx` |
+| Widgets  | `widgets/`  | `widgets/app-header/`                                |
+| Features | `features/` | `auth`, `*-catalog`, `character-sheet`, `create-character` |
+| Entities | `entities/` | `class/`, `character/`, `subclass/`, `weapon/`       |
+| Shared   | `shared/`   | `ui/`, `api/`, `lib/`                                |
 
 ## Segmentos
 
@@ -32,11 +32,15 @@ Só para baixo: `features` → `entities` → `shared`
 
 ## Exemplos no repo
 
-| Feature          | entities             | features                                  |
-| ---------------- | -------------------- | ----------------------------------------- |
-| Catálogo classes | `entities/class`     | `features/class-catalog`                  |
-| Auth             | —                    | `features/auth`                           |
-| Fichas           | `entities/character` | `features/characters`, `create-character` |
-| Status API       | —                    | `widgets/system-status`                   |
+| Domínio          | entities                         | features                                      |
+| ---------------- | -------------------------------- | --------------------------------------------- |
+| Catálogo classes | `entities/class`                 | `features/class-catalog`                      |
+| Subclasses       | `entities/subclass` (tipos canônicos; `class` reexporta) | `features/subclass-catalog` + mechanics via `class-catalog` (`useSubclassMechanics`) |
+| Armas / gear     | `entities/weapon`, `entities/item` | `features/equipment-catalog`                |
+| Auth             | —                                | `features/auth`                               |
+| Listar fichas    | `entities/character`             | `features/characters`                         |
+| Detalhe / mesa   | `entities/character`             | `features/character-sheet` (`CharacterSheetView`) |
+| Criar ficha      | `entities/character`             | `features/create-character`                   |
+| Status API       | —                                | `widgets/system-status`                       |
 
 Detalhes: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)

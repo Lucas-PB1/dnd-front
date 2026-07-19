@@ -6,21 +6,21 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 <!-- END:nextjs-agent-rules -->
 
-# Agente dnd
+# Agente dnd-front
 
 ## Skills
 
 Roteador (ler primeiro em tarefas não triviais): [`.cursor/skills/dnd-router/SKILL.md`](.cursor/skills/dnd-router/SKILL.md)
 
-| Grupo   | Skills                                     |
-| ------- | ------------------------------------------ |
-| Projeto | `dnd-architecture`, `dnd-infra`            |
-| Código  | `typescript`, `clean-code`, `solid`, `dry` |
-| Next.js | `next-core`, `next-api`, `next-proxy`      |
-| Dados   | `supabase`, `tanstack-query`               |
-| UI      | `ui-shadcn`, `ui-theme`                    |
-| Forms   | `forms-rhf-zod`                            |
-| Testes  | `testing-vitest`, `testing-cypress`        |
+| Grupo   | Skills                                              |
+| ------- | --------------------------------------------------- |
+| Projeto | `fsd-architecture`, `dnd-infra`, `dnd-api-contract` |
+| Código  | `typescript`, `clean-code`, `solid`, `dry`          |
+| Next.js | `next-core`, `next-api`, `next-proxy`               |
+| Dados   | `supabase`, `supabase-auth`, `tanstack-query`       |
+| UI      | `ui-shadcn`, `ui-theme`                             |
+| Forms   | `forms-rhf-zod`                                     |
+| Testes  | `testing-vitest`, `testing-cypress`                 |
 
 Todas em `.cursor/skills/<nome>/SKILL.md`.
 
@@ -29,17 +29,20 @@ Todas em `.cursor/skills/<nome>/SKILL.md`.
 `.cursor/rules/` — aplicadas em toda conversa:
 
 - `00-project-core` — PT-BR, `src/`, stack
-- `01-typescript-strict` — strict, ports, Zod
+- `01-typescript-strict` — strict, Zod
 - `02-clean-code` — legibilidade
-- `03-solid` — SOLID nas camadas
+- `03-solid` — SOLID no FSD
 - `04-dry` — schemas e keys únicos
 
 Rules por contexto (globs): `10`–`50` em `.cursor/rules/`.
 
 ## Arquitetura
 
-Clean Architecture em `src/`: `domain` → `application` → `infrastructure`; rotas finas em `app/`. Detalhes: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+**Feature-Sliced Design** em `src/`: `app` → `widgets` → `features` → `entities` → `shared`.  
+Detalhes: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+
+API irmã: **dnd-api** (Nest). Não recriar backend de regras PHB no Next.
 
 ## Stack
 
-Decisões de tecnologia: [docs/STACK-OPTIONS.md](docs/STACK-OPTIONS.md)
+Decisões: [docs/STACK-OPTIONS.md](docs/STACK-OPTIONS.md) · Integração: [docs/API-INTEGRATION.md](docs/API-INTEGRATION.md)

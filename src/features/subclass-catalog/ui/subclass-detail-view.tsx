@@ -4,10 +4,8 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 import type { SubclassSummary } from "@/entities/subclass/types";
-import {
-  useSubclassDetail,
-  useSubclassMechanics,
-} from "@/features/subclass-catalog/api/use-subclasses";
+import { useSubclassMechanics } from "@/features/class-catalog/api/use-classes";
+import { useSubclassDetail } from "@/features/subclass-catalog/api/use-subclasses";
 import { useCatalogBackHref } from "@/shared/lib/use-catalog-back-href";
 import { cn } from "@/shared/lib/utils";
 import { BackLink } from "@/shared/ui/back-link";

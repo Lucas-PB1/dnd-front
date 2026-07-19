@@ -6,10 +6,7 @@ import {
   formatSkillBonus,
   skillBonus,
 } from "@/entities/character/lib/ability";
-import {
-  isSubclassForbidden,
-  isSubclassRequired,
-} from "@/entities/character/lib/subclass";
+import { isSubclassRequired } from "@/entities/character/lib/subclass";
 
 describe("ability helpers", () => {
   it("computes modifier values", () => {
@@ -34,7 +31,5 @@ describe("subclass helpers", () => {
   it("requires subclass from level 3", () => {
     expect(isSubclassRequired(2)).toBe(false);
     expect(isSubclassRequired(3)).toBe(true);
-    expect(isSubclassForbidden(2)).toBe(true);
-    expect(isSubclassForbidden(3)).toBe(false);
   });
 });

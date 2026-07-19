@@ -13,13 +13,11 @@ export type {
 export { ABILITY_LABELS_PT, abilityModifier } from "@/entities/character/types";
 export {
   abilityModifierValue,
-  defaultAbilityForSkill,
   formatAbilityModifier,
   formatSkillBonus,
   skillBonus,
 } from "@/entities/character/lib/ability";
 export {
-  isSubclassForbidden,
   isSubclassRequired,
   SUBCLASS_UNLOCK_LEVEL_DEFAULT,
 } from "@/entities/character/lib/subclass";

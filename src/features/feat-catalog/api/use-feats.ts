@@ -5,21 +5,11 @@ import { useQuery } from "@tanstack/react-query";
 import {
   featKeys,
   fetchFeatBySlug,
-  fetchFeats,
   fetchFeatsPage,
 } from "@/features/feat-catalog/api/feats.api";
 import { CATALOG_PAGE_SIZE } from "@/shared/lib/catalog-pagination";
 
 const STALE = 60 * 60 * 1000;
-
-/** Lista ampla — wizard / ficha. */
-export function useFeatsList() {
-  return useQuery({
-    queryKey: featKeys.listAll(),
-    queryFn: () => fetchFeats(),
-    staleTime: STALE,
-  });
-}
 
 /** Compêndio: 20/página + busca/filtros na API. */
 export function useFeatsCatalog(params: {

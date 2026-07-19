@@ -1,7 +1,6 @@
 import { catalogFetch } from "@/shared/api/dnd-api/api-client";
 import type {
   SubclassListResponse,
-  SubclassMechanicListResponse,
   SubclassSummary,
 } from "@/entities/subclass/types";
 import { CATALOG_PAGE_SIZE } from "@/shared/lib/catalog-pagination";
@@ -16,8 +15,6 @@ export const subclassCatalogKeys = {
   }) => [...subclassCatalogKeys.all, "list", "page", params] as const,
   detail: (slug: string) =>
     [...subclassCatalogKeys.all, "detail", slug] as const,
-  mechanics: (slug: string) =>
-    [...subclassCatalogKeys.all, "mechanics", slug] as const,
 };
 
 export async function fetchSubclassesPage(params?: {
@@ -45,13 +42,6 @@ export async function fetchSubclassesPage(params?: {
 export async function fetchSubclassBySlug(slug: string) {
   return catalogFetch<SubclassSummary>(
     `/subclasses/${encodeURIComponent(slug)}`,
-    { next: { revalidate: 3600 } },
-  );
-}
-
-export async function fetchSubclassMechanics(slug: string, limit = 50) {
-  return catalogFetch<SubclassMechanicListResponse>(
-    `/subclasses/${encodeURIComponent(slug)}/mechanics?limit=${limit}`,
     { next: { revalidate: 3600 } },
   );
 }

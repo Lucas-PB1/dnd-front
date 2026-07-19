@@ -1,5 +1,4 @@
 import { catalogFetch } from "@/shared/api/dnd-api/api-client";
-import type { AbilityGenerationMethod } from "@/entities/ability-generation/types";
 import type { AlignmentListResponse } from "@/entities/alignment/types";
 import type { FeatListResponse } from "@/entities/feat/types";
 import type { LanguageListResponse } from "@/entities/language/types";
@@ -11,8 +10,6 @@ export const referenceKeys = {
   feats: () => [...referenceKeys.all, "feats"] as const,
   alignments: () => [...referenceKeys.all, "alignments"] as const,
   languages: () => [...referenceKeys.all, "languages"] as const,
-  abilityGenerationMethods: () =>
-    [...referenceKeys.all, "ability-generation-methods"] as const,
 };
 
 export async function fetchSkills(limit = 100) {
@@ -37,11 +34,4 @@ export async function fetchLanguages(limit = 100) {
   return catalogFetch<LanguageListResponse>(`/languages?limit=${limit}`, {
     next: { revalidate: 3600 },
   });
-}
-
-export async function fetchAbilityGenerationMethods() {
-  return catalogFetch<AbilityGenerationMethod[]>(
-    "/ability-generation-methods",
-    { next: { revalidate: 3600 } },
-  );
 }

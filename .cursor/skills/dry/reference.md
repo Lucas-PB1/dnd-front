@@ -1,21 +1,21 @@
-# DRY — health module
+# DRY — exemplos
 
-## Schema reutilizado
-
-`healthResponseSchema` + `toHealthResponse()` em `application/health/health.schema.ts`
-
-Route:
+## Schema único no wizard
 
 ```typescript
-return Response.json(toHealthResponse(health));
+// features/create-character/model/create-character.schema.ts
+export const createCharacterSchema = z.object({ ... });
+
+// steps + to-create-payload importam o mesmo schema / tipo inferido
 ```
 
-Hook:
+## Health keys (widget)
 
 ```typescript
-// fetchHealth retorna HealthResponse — mesmo shape validado
+// widgets/system-status/api/…
+export const healthKeys = { all: ["health"] as const };
 ```
 
-## Evitar
+## Tipos subclass
 
-Definir `{ status, timestamp, database }` manualmente em route, hook e teste — usar schema único.
+Canônicos em `entities/subclass/types.ts`; `entities/class/types` **reexporta** — não copiar campos.

@@ -1,13 +1,18 @@
-# Supabase — health adapter
+# Supabase — health no front
+
+Health local não usa `di.ts` / repositórios antigos. Fluxo atual:
 
 ```typescript
-// infrastructure/health/supabase-health-repository.ts
-export class SupabaseHealthRepository implements HealthRepository {
-  async check(): Promise<HealthStatus> {
-    const client = await createSupabaseServerClient();
-    // ...
+// shared/api/health/check-health.ts
+export async function checkHealth(): Promise<HealthStatus> {
+  if (!isSupabaseConfigured()) {
+    return { status: "ok", timestamp, database: "degraded" };
   }
+  const supabase = await createSupabaseServerClient();
+  // getSession — degraded se falhar
 }
 ```
 
-Fallback quando env ausente: `StaticHealthRepository` em `di.ts`.
+Route: `app/api/health` → `checkHealth()` → JSON.
+
+Auth de jogo: JWT Supabase enviado pelo front; validação na **dnd-api** (`SupabaseAuthGuard`).

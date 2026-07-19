@@ -1,28 +1,28 @@
-# Stack dnd — decisões e status
+# Stack dnd-front — decisões e status
 
-Next.js 16 fullstack. Backend no próprio Next (sem .NET).
+Next.js 16 (UI) consome a API Nest no repo irmão **`dnd-api`**. Auth/sessão via Supabase no front; regras PHB e fichas na API.
 
 ---
 
 ## Decisões
 
-| Área              | Escolha                                   | Status                         |
-| ----------------- | ----------------------------------------- | ------------------------------ |
-| **Arquitetura**   | Feature-Sliced Design                     | ✅                             |
-| **Backend**       | Híbrido — Route Handlers + Server Actions | ✅ base (`/api/health`)        |
-| **Data client**   | TanStack Query                            | ✅                             |
-| **Tema**          | next-themes (claro / escuro / sistema)    | ✅                             |
-| **Validação**     | Zod                                       | ✅                             |
-| **Banco**         | Supabase (publishable key)                | ✅ código — falta `.env.local` |
-| **UI**            | shadcn/ui                                 | ✅ init + `button`             |
-| **Ícones**        | Heroicons                                 | ✅                             |
-| **Cores**         | Tema Taverna / Masmorra                   | ✅ [COLORS.md](./COLORS.md)    |
-| **Proxy**         | `proxy.ts` (Next 16)                      | ✅ sessão Supabase             |
-| **Testes unit.**  | Vitest + Testing Library                  | ✅                             |
-| **E2E**           | Cypress                                   | ✅                             |
-| **Lint / format** | ESLint + Prettier + Husky                 | ✅                             |
+| Área              | Escolha                                         | Status                         |
+| ----------------- | ----------------------------------------------- | ------------------------------ |
+| **Arquitetura**   | Feature-Sliced Design                           | ✅                             |
+| **Backend PHB**   | **dnd-api** (NestJS)                            | ✅                             |
+| **BFF mínimo**    | Route Handler só `/api/health`                  | ✅                             |
+| **Data client**   | TanStack Query + `catalogFetch` / `gameFetch`   | ✅                             |
+| **Tema**          | next-themes (claro / escuro / sistema)          | ✅                             |
+| **Validação**     | Zod                                             | ✅                             |
+| **Auth**          | Supabase SSR (`proxy.ts`) + JWT na dnd-api      | ✅                             |
+| **UI**            | shadcn/ui                                       | ✅                             |
+| **Ícones**        | Heroicons                                       | ✅                             |
+| **Cores**         | Tema Taverna / Masmorra                         | ✅ [COLORS.md](./COLORS.md)    |
+| **Testes unit.**  | Vitest + Testing Library                        | ✅                             |
+| **E2E**           | Cypress                                         | ✅                             |
+| **Lint / format** | ESLint + Prettier + Husky                       | ✅                             |
 
-**Falta só no seu ambiente:** `.env.local` com publishable key do Supabase.
+**Ambiente local:** `.env.local` com Supabase + URL da dnd-api.
 
 ---
 
@@ -44,8 +44,9 @@ public/       → assets estáticos
 | FSD            | `features/`, `entities/`, `widgets/`, `shared/`                   |
 | Supabase       | `shared/api/supabase/`, `features/auth/`, `proxy.ts`              |
 | dnd-api client | `shared/api/dnd-api/`                                             |
+| Health         | `shared/api/health/` + `app/api/health`                           |
 
-Docs: [ARCHITECTURE.md](./ARCHITECTURE.md) · [SUPABASE.md](./SUPABASE.md) · [COLORS.md](./COLORS.md)
+Docs: [ARCHITECTURE.md](./ARCHITECTURE.md) · [API-INTEGRATION.md](./API-INTEGRATION.md) · [SUPABASE.md](./SUPABASE.md) · [COLORS.md](./COLORS.md)
 
 ---
 
@@ -58,8 +59,6 @@ Docs: [ARCHITECTURE.md](./ARCHITECTURE.md) · [SUPABASE.md](./SUPABASE.md) · [C
 | **shadcn `dialog`** | Modais                           | Média                |
 | **Sentry**          | Erros em produção                | Baixa (pré-deploy)   |
 | **next-intl**       | i18n                             | Só se precisar PT/EN |
-
-Já incluso indiretamente: `cn()` (`clsx` + `tailwind-merge` em `lib/utils.ts`).
 
 ---
 

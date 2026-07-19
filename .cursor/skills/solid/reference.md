@@ -1,20 +1,26 @@
-# SOLID — wiring (di.ts)
+# SOLID — exemplos FSD
+
+## DIP — health
 
 ```typescript
-// src/infrastructure/di.ts
-export const healthRepository = isSupabaseConfigured()
-  ? new SupabaseHealthRepository()
-  : new StaticHealthRepository();
+// shared/api/health/check-health.ts
+export async function checkHealth(): Promise<HealthStatus> { /* supabase ou degraded */ }
+
+// app/api/health/route.ts — fino
+export async function GET() {
+  const health = await checkHealth();
+  return Response.json(toHealthResponse(health));
+}
 ```
 
-`application` recebe `HealthRepository` por parâmetro — não conhece implementação concreta.
+## SRP — fichas
 
-## Violação DIP
+| Slice | Responsabilidade |
+| ----- | ---------------- |
+| `features/characters` | Listagem |
+| `features/character-sheet` | Detalhe, edição, mesa |
+| `features/create-character` | Wizard de criação |
 
-```typescript
-// BAD em application/
-import { createSupabaseServerClient } from "@/shared/api/supabase/server";
+## ISP
 
-// GOOD — port injetado
-export async function getHealthStatus(repository: HealthRepository) { ... }
-```
+Exportar só o necessário no `index.ts` do slice; consumidores preferem deep imports quando o barrel não agrega valor.

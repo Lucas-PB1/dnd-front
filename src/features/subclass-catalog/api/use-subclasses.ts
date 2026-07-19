@@ -5,7 +5,6 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchClasses } from "@/features/class-catalog/api/classes.api";
 import {
   fetchSubclassBySlug,
-  fetchSubclassMechanics,
   fetchSubclassesPage,
   subclassCatalogKeys,
 } from "@/features/subclass-catalog/api/subclasses.api";
@@ -55,15 +54,6 @@ export function useSubclassDetail(slug: string, enabled = true) {
   return useQuery({
     queryKey: subclassCatalogKeys.detail(slug),
     queryFn: () => fetchSubclassBySlug(slug),
-    enabled: enabled && !!slug,
-    staleTime: STALE,
-  });
-}
-
-export function useSubclassMechanics(slug: string, enabled = true) {
-  return useQuery({
-    queryKey: subclassCatalogKeys.mechanics(slug),
-    queryFn: () => fetchSubclassMechanics(slug),
     enabled: enabled && !!slug,
     staleTime: STALE,
   });

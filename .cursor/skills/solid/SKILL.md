@@ -1,42 +1,25 @@
 ---
 name: solid
-description: SOLID principles applied to dnd Clean Architecture. Use when refactoring coupling, responsibilities, ports, adapters, or use case boundaries. Complements rule 03-solid.
+description: SOLID principles applied to dnd-front FSD. Use when refactoring coupling, slice boundaries, or shared/api usage. Complements rule 03-solid.
 disable-model-invocation: true
 ---
 
-# SOLID — dnd
+# SOLID — dnd-front (FSD)
 
-## SRP
+| Princípio | No dnd-front |
+| --------- | ------------ |
+| **SRP**   | Um slice = uma responsabilidade de produto |
+| **OCP**   | Estender via novo slice; não inchir `shared` |
+| **LSP**   | Tipos em `entities/` estáveis para features |
+| **ISP**   | `index.ts` exporta só API pública do slice |
+| **DIP**   | Features usam `shared/api/` — não fetch inline |
 
-| Camada             | Responsabilidade                        |
-| ------------------ | --------------------------------------- |
-| `app/api/route.ts` | HTTP: parse, chamar use case, responder |
-| `application/`     | Orquestração de regra de negócio        |
-| `infrastructure/`  | Acesso a Supabase, DI                   |
-| `domain/`          | Tipos e contratos                       |
+## Exemplos
 
-## OCP
+- Health: `shared/api/health/check-health.ts` — route `app/api/health` só chama e responde
+- Catálogo: `features/*/api` usa `catalogFetch` / `gameFetch` de `shared/api/dnd-api`
+- Auth: `features/auth` → `shared/api/supabase` (nunca `@supabase/supabase-js` em `model/`)
 
-Novo storage? Novo `*Repository` em `infrastructure/` — não editar interface sem necessidade.
-
-## LSP
-
-`healthRepository` em `di.ts` pode ser `StaticHealthRepository` ou `SupabaseHealthRepository` — mesma interface.
-
-## ISP
-
-Ports focados: `HealthRepository` só tem `check()`, não métodos genéricos de DB.
-
-## DIP
-
-```typescript
-// application — depende de abstração
-export async function getHealthStatus(repository: HealthRepository) { ... }
-
-// infrastructure — implementa
-export class SupabaseHealthRepository implements HealthRepository { ... }
-```
-
-`application/` **nunca** importa `@supabase/supabase-js`.
+`features/*/model/` **não** importa `@supabase/supabase-js` direto.
 
 Ver [reference.md](reference.md).

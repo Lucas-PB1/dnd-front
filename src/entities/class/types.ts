@@ -1,5 +1,12 @@
 import type { PaginatedResponse } from "@/shared/api/dnd-api/types";
 
+export type {
+  SubclassSummary,
+  SubclassListResponse,
+  SubclassMechanic,
+  SubclassMechanicListResponse,
+} from "@/entities/subclass/types";
+
 /** Espelha ClassResponseDto da dnd-api */
 export type ClassSummary = {
   slug: string;
@@ -20,22 +27,6 @@ export type ClassSummary = {
 };
 
 export type ClassListResponse = PaginatedResponse<ClassSummary>;
-
-/** Espelha SubclassResponseDto da dnd-api */
-export type SubclassSummary = {
-  slug: string;
-  name: string;
-  classSlug: string;
-  className: string;
-  tagline: string | null;
-  summary: string | null;
-  sourceChapter: number | null;
-  editionSlug: string | null;
-  spellSourceSlug: string | null;
-  spellSourceLabel: string | null;
-};
-
-export type SubclassListResponse = PaginatedResponse<SubclassSummary>;
 
 /** Espelha ClassSkillResponseDto */
 export type ClassSkillOption = {
@@ -80,21 +71,6 @@ export type ClassFeature = {
   featureLevel: number;
   featureName: string;
   featureDescription: string;
-};
-
-/** Espelha SubclassMechanicResponseDto */
-export type SubclassMechanic = {
-  classSlug: string;
-  featureLevel: number;
-  featureName: string;
-  featureDescription: string;
-  featureKind: string | null;
-  optionKey: string | null;
-  resourceSlug: string | null;
-  resourceName: string | null;
-  resourceUnlockLevel: number | null;
-  maxFormula: string | null;
-  fixedMax: number | null;
 };
 
 /** Espelha SubclassSpellResponseDto */

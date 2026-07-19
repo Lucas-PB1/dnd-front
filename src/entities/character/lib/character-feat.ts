@@ -10,10 +10,6 @@ export function featInstanceKey(
   return `${featSlug}:${instanceIndex}`;
 }
 
-export function characterFeatSlugs(feats: CharacterFeat[]): string[] {
-  return feats.map((feat) => feat.featSlug);
-}
-
 export function appendCharacterFeat(
   feats: CharacterFeat[],
   featSlug: string,

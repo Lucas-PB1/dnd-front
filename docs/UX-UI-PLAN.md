@@ -4,7 +4,7 @@ Documento de referência visual e de experiência do produto.
 Complementa [COLORS.md](./COLORS.md) (tokens) e [ARCHITECTURE.md](./ARCHITECTURE.md) (FSD).  
 Não substitui [CHARACTER-SHEET-PLAN.md](./CHARACTER-SHEET-PLAN.md) (fluxo de ficha / regras via API) nem o [product-roadmap](../../dnd-api/docs/product-roadmap.md) (features de produto).
 
-**Princípio de produto:** o front **coleta escolhas** e **exibe**; a API **valida e computa**. Zero regras PHB hardcoded no UI.
+**Princípio de produto:** o front **coleta escolhas** e **exibe**; a API **valida e computa**. Evitar regras PHB no UI (exceto enums explícitos, ex. métodos de atributo no wizard).
 
 ---
 
