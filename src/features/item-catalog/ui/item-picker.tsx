@@ -7,6 +7,8 @@ import { useItems } from "@/features/item-catalog/api/use-items";
 import { CatalogSelect } from "@/features/create-character/ui/catalog-select";
 import { Field, FieldDescription, FieldLabel } from "@/shared/ui/field";
 import { Input } from "@/shared/ui/input";
+import { nativeSelectClassName } from "@/shared/ui/native-select";
+import { cn } from "@/shared/lib/utils";
 
 type ItemPickerProps = {
   id: string;
@@ -67,7 +69,7 @@ export function ItemPicker({
           <FieldLabel htmlFor={`${id}-type`}>Tipo</FieldLabel>
           <select
             id={`${id}-type`}
-            className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50 dark:bg-input/30"
+            className={cn(nativeSelectClassName)}
             value={itemType}
             onChange={(e) => setItemType(e.target.value)}
             disabled={disabled}

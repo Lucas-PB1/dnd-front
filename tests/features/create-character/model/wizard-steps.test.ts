@@ -7,6 +7,7 @@ import {
 import {
   nextWizardStep,
   prevWizardStep,
+  skippedWizardSteps,
   visibleWizardSteps,
 } from "@/features/create-character/model/wizard-steps";
 
@@ -52,6 +53,11 @@ describe("wizard step navigation", () => {
     expect(visibleWizardSteps(nav).map((step) => step.id)).not.toContain(
       "subclass",
     );
+    expect(skippedWizardSteps(nav).map((step) => step.id)).toEqual([
+      "feats",
+      "subclass",
+      "spells",
+    ]);
     expect(nextWizardStep("equipment", nav)).toBe("languages");
     expect(nextWizardStep("species", nav)).toBe("equipment");
     expect(prevWizardStep("species", nav)).toBe("background");

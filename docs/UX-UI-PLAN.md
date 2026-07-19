@@ -110,16 +110,16 @@ Ordem de implementação. Features de regra (ASI, picker de condições) ficam n
 
 ### Fase 4 — Wizard de criação
 
-- [ ] Indicador de passos mais legível (etapa atual, restantes, skips)
-- [ ] Feedback visual em skip (subclasse / magias N/A)
-- [ ] Tela de revisão: resumo escaneável antes do submit
-- [ ] Erros de validação próximos ao campo/seção (já via API — polish de apresentação)
+- [x] Indicador de passos mais legível (etapa atual, restantes, skips)
+- [x] Feedback visual em skip (subclasse / magias N/A)
+- [x] Tela de revisão: resumo escaneável antes do submit
+- [x] Erros de validação próximos ao campo/seção (já via API — polish de apresentação)
 
 ### Fase 5 — Ficha (leitura vs mesa)
 
-- [ ] Hierarquia clara: bloco identidade → combate/atributos → seções PHB → mesa
-- [ ] Separar visualmente **leitura/edição** de **mesa** (PV, slots, descanso)
-- [ ] Densidade: menos “parede de cards”; seções colapsáveis com motion leve
+- [x] Hierarquia clara: bloco identidade → combate/atributos → seções PHB → mesa
+- [x] Separar visualmente **leitura/edição** de **mesa** (PV, slots, descanso)
+- [x] Densidade: menos “parede de cards”; seções colapsáveis com motion leve
 - [ ] Alinhar polish visual ao picker de condições / ASI quando forem implementados (roadmap funcional)
 
 ### Fase 6 — Polish final
@@ -153,13 +153,13 @@ Ordem de implementação. Features de regra (ASI, picker de condições) ficam n
 
 ### Fase 4
 
-- [ ] Usuário sabe em qual passo está e quantos faltam
-- [ ] Skips não parecem “bug” (rótulo/estado explícito)
+- [x] Usuário sabe em qual passo está e quantos faltam
+- [x] Skips não parecem “bug” (rótulo/estado explícito)
 
 ### Fase 5
 
-- [ ] Em 5s dá para achar PV / atributos / magias na ficha
-- [ ] Mesa não compete visualmente com seções de leitura no mesmo peso
+- [x] Em 5s dá para achar PV / atributos / magias na ficha
+- [x] Mesa não compete visualmente com seções de leitura no mesmo peso
 
 ### Fase 6
 

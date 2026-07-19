@@ -60,39 +60,45 @@ export function CombatSection({ character }: SectionProps) {
   return (
     <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <div>
-        <dt className="text-xs font-medium text-muted-foreground">
+        <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
           Bônus de proficiência
         </dt>
-        <dd className="text-lg font-mono">+{character.proficiencyBonus}</dd>
+        <dd className="font-heading text-2xl font-semibold font-mono">
+          +{character.proficiencyBonus}
+        </dd>
       </div>
       <div>
-        <dt className="text-xs font-medium text-muted-foreground">
+        <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
           Classe de armadura
         </dt>
-        <dd className="text-lg font-mono">{character.armorClass}</dd>
+        <dd className="font-heading text-2xl font-semibold font-mono">
+          {character.armorClass}
+        </dd>
         <p className="text-xs text-muted-foreground">
           {character.armorClassNote ?? "sem armadura"}
         </p>
       </div>
       <div>
-        <dt className="text-xs font-medium text-muted-foreground">
+        <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
           Percepção passiva
         </dt>
-        <dd className="text-lg font-mono">{character.passivePerception}</dd>
+        <dd className="font-heading text-2xl font-semibold font-mono">
+          {character.passivePerception}
+        </dd>
       </div>
       {character.hitPointsMax != null ? (
         <div>
-          <dt className="text-xs font-medium text-muted-foreground">
+          <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
             Pontos de vida
           </dt>
-          <dd className="text-lg">
+          <dd className="font-heading text-2xl font-semibold">
             {character.hitPointsCurrent ?? character.hitPointsMax} /{" "}
             {character.hitPointsMax}
           </dd>
         </div>
       ) : (
         <div>
-          <dt className="text-xs font-medium text-muted-foreground">
+          <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
             Pontos de vida
           </dt>
           <dd className="text-sm text-muted-foreground">Não definidos</dd>

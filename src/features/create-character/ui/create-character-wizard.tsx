@@ -369,7 +369,7 @@ export function CreateCharacterWizard() {
 
   return (
     <form
-      className="flex w-full max-w-3xl flex-col gap-6"
+      className="flex w-full flex-col gap-6"
       onSubmit={handleSubmit((values) => {
         create.mutate(toCreateCharacterPayload(values));
       })}
@@ -490,8 +490,7 @@ export function CreateCharacterWizard() {
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Etapa {stepIndex + 1} de {visibleSteps.length} — a dnd-api valida
-        atributos, perícias e calcula PV/PB.
+        A API valida escolhas e calcula PV, bônus de proficiência e perícias.
       </p>
     </form>
   );

@@ -40,7 +40,7 @@ import { TableStateSection } from "@/features/character-sheet/ui/table-state-sec
 import { useSkills } from "@/features/reference-catalog/api/use-reference";
 import {
   CharacterSheetLayout,
-  type SheetNavItem,
+  type SheetNavGroup,
 } from "@/widgets/character-sheet-layout";
 import { buttonVariants } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
@@ -71,21 +71,37 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
 
   const closeEdit = useCallback(() => setEditing(null), []);
 
-  const nav = useMemo<SheetNavItem[]>(
+  const nav = useMemo<SheetNavGroup[]>(
     () => [
-      { id: "combat", label: "Combate" },
-      { id: "table", label: "Mesa" },
-      { id: "abilities", label: "Atributos" },
-      { id: "skills", label: "Perícias" },
-      { id: "class-features", label: "Classe" },
-      { id: "species", label: "Espécie" },
-      { id: "subclass", label: "Subclasse" },
-      { id: "spells", label: "Magias" },
-      { id: "equipment", label: "Equipamento" },
-      { id: "inventory", label: "Inventário" },
-      { id: "feats", label: "Talentos" },
-      { id: "languages", label: "Idiomas" },
-      { id: "level-up", label: "Level-up" },
+      {
+        label: "Resumo",
+        items: [
+          { id: "identity", label: "Identidade" },
+          { id: "combat", label: "Combate" },
+          { id: "abilities", label: "Atributos" },
+          { id: "skills", label: "Perícias" },
+        ],
+      },
+      {
+        label: "Mesa",
+        items: [
+          { id: "table", label: "Estado ao vivo" },
+          { id: "inventory", label: "Inventário" },
+          { id: "level-up", label: "Level-up" },
+        ],
+      },
+      {
+        label: "Personagem",
+        items: [
+          { id: "class-features", label: "Classe" },
+          { id: "species", label: "Espécie" },
+          { id: "subclass", label: "Subclasse" },
+          { id: "spells", label: "Magias" },
+          { id: "equipment", label: "Equipamento" },
+          { id: "feats", label: "Talentos" },
+          { id: "languages", label: "Idiomas" },
+        ],
+      },
     ],
     [],
   );
@@ -129,29 +145,43 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
           >
             ← Minhas fichas
           </Link>
-          <h1 className="text-3xl font-semibold tracking-tight">{data.name}</h1>
-          <p className="text-muted-foreground">
+          <h1 className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
+            {data.name}
+          </h1>
+          <p className="text-base text-muted-foreground">
             Nv. {data.level}
             {identityParts.length > 0
               ? ` · ${identityParts.join(" · ")}`
               : null}
           </p>
-          {labels.identity.subclassName ? (
-            <p className="text-sm text-muted-foreground">
-              Subclasse: {labels.identity.subclassName}
-            </p>
-          ) : null}
-          {labels.identity.alignmentName ? (
-            <p className="text-sm text-muted-foreground">
-              Alinhamento: {labels.identity.alignmentName}
-            </p>
-          ) : null}
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+            {labels.identity.subclassName ? (
+              <p>
+                Subclasse:{" "}
+                <span className="text-foreground">
+                  {labels.identity.subclassName}
+                </span>
+              </p>
+            ) : null}
+            {labels.identity.alignmentName ? (
+              <p>
+                Alinhamento:{" "}
+                <span className="text-foreground">
+                  {labels.identity.alignmentName}
+                </span>
+              </p>
+            ) : null}
+          </div>
         </div>
       }
       actions={
         <DeleteCharacterButton characterId={id} characterName={data.name} />
       }
     >
+      <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+        Resumo
+      </p>
+
       <SheetSection
         id="identity"
         title="Identidade"
@@ -167,30 +197,34 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
           )
         }
       >
-        <dl className="grid gap-3 text-sm sm:grid-cols-2">
+        <dl className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
           <div>
-            <dt className="text-muted-foreground">Nome</dt>
+            <dt className="text-xs text-muted-foreground uppercase">Nome</dt>
             <dd className="font-medium">{data.name}</dd>
           </div>
           <div>
-            <dt className="text-muted-foreground">Nível</dt>
+            <dt className="text-xs text-muted-foreground uppercase">Nível</dt>
             <dd className="font-medium">{data.level}</dd>
           </div>
           <div>
-            <dt className="text-muted-foreground">Classe</dt>
+            <dt className="text-xs text-muted-foreground uppercase">Classe</dt>
             <dd className="font-medium">{labels.identity.className}</dd>
           </div>
           <div>
-            <dt className="text-muted-foreground">Espécie</dt>
+            <dt className="text-xs text-muted-foreground uppercase">Espécie</dt>
             <dd className="font-medium">{labels.identity.speciesName}</dd>
           </div>
           <div>
-            <dt className="text-muted-foreground">Antecedente</dt>
+            <dt className="text-xs text-muted-foreground uppercase">
+              Antecedente
+            </dt>
             <dd className="font-medium">{labels.identity.backgroundName}</dd>
           </div>
           {labels.identity.subclassName ? (
             <div>
-              <dt className="text-muted-foreground">Subclasse</dt>
+              <dt className="text-xs text-muted-foreground uppercase">
+                Subclasse
+              </dt>
               <dd className="font-medium">{labels.identity.subclassName}</dd>
             </div>
           ) : null}
@@ -207,20 +241,13 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
       <SheetSection
         id="combat"
         title="Combate"
+        description="PV, CA, proficiência e percepção — o essencial em jogo."
         isEditing={editing === "combat"}
         onEdit={() => setEditing("combat")}
         onCancel={closeEdit}
         editContent={<EditCombatForm character={data} onSuccess={closeEdit} />}
       >
         <CombatSection {...sectionProps} />
-      </SheetSection>
-
-      <SheetSection
-        id="table"
-        title="Mesa de jogo"
-        description="Estado ao vivo: slots, concentração, condições e descansos."
-      >
-        <TableStateSection characterId={id} character={data} labels={labels} />
       </SheetSection>
 
       <SheetSection
@@ -239,7 +266,7 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
       <SheetSection
         id="skills"
         title="Perícias"
-        description="Bônus = modificador do atributo + bônus de proficiência quando aplicável."
+        description="Bônus = modificador do atributo + bônus de proficiência."
         isEditing={editing === "skills"}
         onEdit={() => setEditing("skills")}
         onCancel={closeEdit}
@@ -257,10 +284,51 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
         )}
       </SheetSection>
 
+      <p className="pt-2 text-xs font-medium tracking-wide text-primary uppercase">
+        Mesa de jogo
+      </p>
+
+      <SheetSection
+        id="table"
+        title="Estado ao vivo"
+        description="PV temporários, slots, concentração, condições e descansos."
+        variant="table"
+      >
+        <TableStateSection characterId={id} character={data} labels={labels} />
+      </SheetSection>
+
+      <SheetSection
+        id="inventory"
+        title="Inventário"
+        description="Mochila e itens equipados em jogo."
+        variant="table"
+        collapsible
+        defaultOpen={false}
+      >
+        <InventorySection characterId={id} />
+      </SheetSection>
+
+      <SheetSection
+        id="level-up"
+        title="Subir de nível"
+        description="Preview e aplicação do próximo nível via API."
+        variant="table"
+        collapsible
+        defaultOpen={false}
+      >
+        <LevelUpSection characterId={id} character={data} />
+      </SheetSection>
+
+      <p className="pt-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+        Personagem (PHB)
+      </p>
+
       <SheetSection
         id="class-features"
         title="Características de classe"
-        description="Features da classe até o nível atual do personagem."
+        description="Features da classe até o nível atual."
+        collapsible
+        defaultOpen={false}
       >
         <ClassFeaturesSection {...sectionProps} />
       </SheetSection>
@@ -274,6 +342,8 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
         editContent={
           <EditSpeciesChoicesForm character={data} onSuccess={closeEdit} />
         }
+        collapsible
+        defaultOpen={false}
       >
         <SpeciesChoicesSection {...sectionProps} />
       </SheetSection>
@@ -288,6 +358,8 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
         editContent={
           <EditSubclassOptionsForm character={data} onSuccess={closeEdit} />
         }
+        collapsible
+        defaultOpen={false}
       >
         <div className="space-y-6">
           <div>
@@ -308,6 +380,8 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
         onEdit={() => setEditing("spells")}
         onCancel={closeEdit}
         editContent={<EditSpellsForm character={data} onSuccess={closeEdit} />}
+        collapsible
+        defaultOpen={false}
       >
         <SpellsSection {...sectionProps} />
       </SheetSection>
@@ -322,16 +396,10 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
         editContent={
           <EditEquipmentForm character={data} onSuccess={closeEdit} />
         }
+        collapsible
+        defaultOpen={false}
       >
         <EquipmentSection {...sectionProps} />
-      </SheetSection>
-
-      <SheetSection
-        id="inventory"
-        title="Inventário"
-        description="Mochila e itens equipados em jogo."
-      >
-        <InventorySection characterId={id} />
       </SheetSection>
 
       <SheetSection
@@ -341,6 +409,8 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
         onEdit={() => setEditing("feats")}
         onCancel={closeEdit}
         editContent={<EditFeatsForm character={data} onSuccess={closeEdit} />}
+        collapsible
+        defaultOpen={false}
       >
         <FeatsSection {...sectionProps} />
       </SheetSection>
@@ -354,16 +424,10 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
         editContent={
           <EditLanguagesForm character={data} onSuccess={closeEdit} />
         }
+        collapsible
+        defaultOpen={false}
       >
         <LanguagesSection {...sectionProps} />
-      </SheetSection>
-
-      <SheetSection
-        id="level-up"
-        title="Subir de nível"
-        description="Preview e aplicação do próximo nível via API."
-      >
-        <LevelUpSection characterId={id} character={data} />
       </SheetSection>
     </CharacterSheetLayout>
   );

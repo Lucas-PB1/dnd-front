@@ -4,6 +4,7 @@ import {
   FieldError,
   FieldLabel,
 } from "@/shared/ui/field";
+import { nativeSelectClassName } from "@/shared/ui/native-select";
 import { cn } from "@/shared/lib/utils";
 
 export function CatalogSelect({
@@ -13,6 +14,7 @@ export function CatalogSelect({
   options,
   isLoading,
   error,
+  className,
   ...props
 }: {
   id: string;
@@ -30,11 +32,7 @@ export function CatalogSelect({
         id={id}
         disabled={isLoading}
         aria-invalid={!!error}
-        className={cn(
-          "h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none",
-          "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
-          "disabled:opacity-50 dark:bg-input/30",
-        )}
+        className={cn(nativeSelectClassName, className)}
         {...props}
       >
         <option value="">{isLoading ? "Carregando…" : "Selecione"}</option>

@@ -1,6 +1,7 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { useId, useState, type ReactNode } from "react";
 
 import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
@@ -15,6 +16,11 @@ type SheetSectionProps = {
   onEdit?: () => void;
   onCancel?: () => void;
   className?: string;
+  /** Mesa de jogo — peso visual distinto da leitura */
+  variant?: "sheet" | "table";
+  /** Seções densas do PHB começam fechadas */
+  collapsible?: boolean;
+  defaultOpen?: boolean;
 };
 
 export function SheetSection({
@@ -27,23 +33,65 @@ export function SheetSection({
   onEdit,
   onCancel,
   className,
+  variant = "sheet",
+  collapsible = false,
+  defaultOpen = true,
 }: SheetSectionProps) {
+  const [open, setOpen] = useState(defaultOpen);
+  const panelId = useId();
   const canEdit = !!editContent && !!onEdit;
+  const isTable = variant === "table";
+  const showBody = !collapsible || open || isEditing;
 
   return (
     <section
       id={id}
       className={cn(
-        "scroll-mt-24 space-y-4 rounded-lg border border-border p-4",
+        "scroll-mt-24 space-y-4 rounded-lg border p-4 transition-colors sm:p-5",
+        isTable
+          ? "border-primary/35 bg-primary/5 shadow-sm dark:bg-primary/10"
+          : "border-border bg-card/40",
         className,
       )}
     >
       <div className="flex items-start justify-between gap-3">
-        <div className="space-y-1">
-          <h2 className="text-lg font-semibold">{title}</h2>
-          {description ? (
-            <p className="text-sm text-muted-foreground">{description}</p>
-          ) : null}
+        <div className="min-w-0 flex-1 space-y-1">
+          {collapsible && !isEditing ? (
+            <button
+              type="button"
+              aria-expanded={open}
+              aria-controls={panelId}
+              onClick={() => setOpen((value) => !value)}
+              className="flex w-full items-start justify-between gap-3 text-left"
+            >
+              <span className="space-y-1">
+                <span className="font-heading block text-xl font-semibold tracking-tight">
+                  {title}
+                </span>
+                {description ? (
+                  <span className="block text-sm text-muted-foreground">
+                    {description}
+                  </span>
+                ) : null}
+              </span>
+              <ChevronDownIcon
+                className={cn(
+                  "mt-1 size-5 shrink-0 text-muted-foreground transition-transform duration-200",
+                  open && "rotate-180",
+                )}
+                aria-hidden
+              />
+            </button>
+          ) : (
+            <>
+              <h2 className="font-heading text-xl font-semibold tracking-tight">
+                {title}
+              </h2>
+              {description ? (
+                <p className="text-sm text-muted-foreground">{description}</p>
+              ) : null}
+            </>
+          )}
         </div>
         {canEdit ? (
           <div className="flex shrink-0 gap-2">
@@ -62,7 +110,10 @@ export function SheetSection({
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={onEdit}
+                onClick={() => {
+                  if (collapsible) setOpen(true);
+                  onEdit?.();
+                }}
               >
                 Editar
               </Button>
@@ -71,7 +122,17 @@ export function SheetSection({
         ) : null}
       </div>
 
-      {isEditing && editContent ? editContent : children}
+      {showBody ? (
+        <div
+          id={panelId}
+          className={cn(
+            collapsible &&
+              "animate-in fade-in-0 slide-in-from-top-1 duration-200",
+          )}
+        >
+          {isEditing && editContent ? editContent : children}
+        </div>
+      ) : null}
     </section>
   );
 }

@@ -34,6 +34,10 @@ export function visibleWizardSteps(options?: WizardNavOptions) {
   return WIZARD_STEPS.filter((step) => !shouldSkipStep(step.id, options));
 }
 
+export function skippedWizardSteps(options?: WizardNavOptions) {
+  return WIZARD_STEPS.filter((step) => shouldSkipStep(step.id, options));
+}
+
 export function wizardStepIndex(step: WizardStepId): number {
   return WIZARD_STEPS.findIndex((s) => s.id === step);
 }

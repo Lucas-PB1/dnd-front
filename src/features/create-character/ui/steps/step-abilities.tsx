@@ -33,6 +33,7 @@ import {
   FieldLabel,
 } from "@/shared/ui/field";
 import { Input } from "@/shared/ui/input";
+import { nativeSelectClassName } from "@/shared/ui/native-select";
 import { cn } from "@/shared/lib/utils";
 import type { Control, FieldErrors, UseFormSetValue } from "react-hook-form";
 import { useWatch } from "react-hook-form";
@@ -214,11 +215,7 @@ export function StepAbilities({
           </FieldDescription>
           <select
             id="abilityGenerationMethodSlug"
-            className={cn(
-              "h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none",
-              "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
-              "dark:bg-input/30",
-            )}
+            className={nativeSelectClassName}
             value={method}
             onChange={(e) =>
               applyMethodChange(
@@ -296,10 +293,7 @@ export function StepAbilities({
               />
             ) : hasRawPool ? (
               <select
-                className={cn(
-                  "mt-2 h-8 w-full rounded-lg border border-input bg-transparent px-2 text-sm",
-                  "dark:bg-input/30",
-                )}
+                className={cn(nativeSelectClassName, "mt-2")}
                 value={rawValues.indexOf(abilityScores[key])}
                 onChange={(e) => handleRawPick(key, Number(e.target.value))}
               >

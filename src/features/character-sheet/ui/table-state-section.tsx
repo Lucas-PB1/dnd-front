@@ -13,7 +13,7 @@ import {
 import { Button } from "@/shared/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/shared/ui/field";
 import { Input } from "@/shared/ui/input";
-import { cn } from "@/shared/lib/utils";
+import { nativeSelectClassName } from "@/shared/ui/native-select";
 
 const SLOT_LEVELS = ["1", "2", "3", "4", "5", "6", "7", "8", "9"] as const;
 
@@ -221,10 +221,7 @@ export function TableStateSection({
               id="concentration"
               value={concentration}
               onChange={(e) => setConcentration(e.target.value)}
-              className={cn(
-                "h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm",
-                "dark:bg-input/30",
-              )}
+              className={nativeSelectClassName}
             >
               <option value="">Nenhuma</option>
               {character.characterSpells.map((s) => (
@@ -255,10 +252,7 @@ export function TableStateSection({
                 id="cast-spell"
                 value={castSlug}
                 onChange={(e) => setCastSlug(e.target.value)}
-                className={cn(
-                  "h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm",
-                  "dark:bg-input/30",
-                )}
+                className={nativeSelectClassName}
               >
                 <option value="">Selecione</option>
                 {character.characterSpells.map((s) => (
