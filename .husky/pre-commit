@@ -1,1 +1,1 @@
-pnpm exec lint-staged
+# Pre-commit desativado — rode `pnpm lint` / `pnpm format:check` quando quiser.
