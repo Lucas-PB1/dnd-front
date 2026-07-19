@@ -84,6 +84,7 @@ export type SubclassMechanic = {
   classSlug: string;
   featureLevel: number;
   featureName: string;
+  featureDescription: string;
   featureKind: string | null;
   optionKey: string | null;
   resourceSlug: string | null;

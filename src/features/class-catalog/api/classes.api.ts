@@ -108,9 +108,9 @@ export async function fetchClassSpellSlots(slug: string, limit = 20) {
   );
 }
 
-export async function fetchSubclassMechanics(slug: string) {
+export async function fetchSubclassMechanics(slug: string, limit = 50) {
   return catalogFetch<PaginatedResponse<SubclassMechanic>>(
-    `/subclasses/${slug}/mechanics`,
+    `/subclasses/${slug}/mechanics?limit=${limit}`,
     { next: { revalidate: 3600 } },
   );
 }
