@@ -170,18 +170,19 @@ Ordem de implementação. Features de regra (ASI, picker de condições) ficam n
 
 ## 7. Arquivos-chave
 
-| Assunto               | Caminho                                                 |
-| --------------------- | ------------------------------------------------------- |
-| Tokens / tema         | `src/app/globals.css`                                   |
-| Fontes                | `src/app/layout.tsx`                                    |
-| Home                  | `src/app/page.tsx`                                      |
-| Header                | `src/widgets/app-header/`                               |
-| Compêndio hub         | `src/widgets/compendium-hub/`                           |
-| Catalog shell / busca | `src/widgets/catalog-shell/`, `src/shared/ui/catalog-*` |
-| Wizard                | `src/features/create-character/`                        |
-| Ficha                 | `src/features/character-sheet/`                         |
-| Layout ficha          | `src/widgets/character-sheet-layout/`                   |
-| Cores (doc)           | [COLORS.md](./COLORS.md)                                |
+| Assunto               | Caminho                                                   |
+| --------------------- | --------------------------------------------------------- |
+| Tokens / tema         | `src/app/globals.css`                                     |
+| Fontes                | `src/app/layout.tsx`                                      |
+| Home                  | `src/app/page.tsx`                                        |
+| Header                | `src/widgets/app-header/`                                 |
+| Compêndio hub         | `src/widgets/compendium-hub/`                             |
+| Catalog shell / busca | `src/widgets/catalog-shell/`, `src/shared/ui/catalog-*`   |
+| Largura de conteúdo   | `src/shared/ui/page-main.tsx` (`max-w-6xl` / `max-w-7xl`) |
+| Wizard                | `src/features/create-character/`                          |
+| Ficha                 | `src/features/character-sheet/`                           |
+| Layout ficha          | `src/widgets/character-sheet-layout/`                     |
+| Cores (doc)           | [COLORS.md](./COLORS.md)                                  |
 
 ---
 

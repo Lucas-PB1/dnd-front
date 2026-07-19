@@ -1,5 +1,6 @@
-import { AppHeader } from "@/widgets/app-header/ui/app-header";
 import { ClassDetailView } from "@/features/class-catalog/ui/class-detail-view";
+import { PageMain } from "@/shared/ui/page-main";
+import { AppHeader } from "@/widgets/app-header/ui/app-header";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -11,10 +12,9 @@ export default async function ClassDetailPage({ params }: PageProps) {
   return (
     <div className="flex flex-1 flex-col bg-background text-foreground">
       <AppHeader />
-
-      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-6 py-10">
+      <PageMain>
         <ClassDetailView slug={slug} />
-      </main>
+      </PageMain>
     </div>
   );
 }

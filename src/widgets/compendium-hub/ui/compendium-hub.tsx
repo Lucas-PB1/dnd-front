@@ -27,7 +27,7 @@ const SECTIONS = [
 
 export function CompendiumHub() {
   return (
-    <ul className="grid gap-3 sm:grid-cols-2">
+    <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
       {SECTIONS.map((section) => (
         <li key={section.href}>
           <Link

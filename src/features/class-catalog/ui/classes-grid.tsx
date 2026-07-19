@@ -54,7 +54,7 @@ export function ClassesGrid() {
           Nenhuma classe corresponde à busca.
         </p>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((classItem) => (
             <ClassCard key={classItem.slug} classItem={classItem} />
           ))}

@@ -50,7 +50,7 @@ export function AppHeader() {
 
   return (
     <header className="border-b border-border/80">
-      <div className="flex items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
         <div className="flex min-w-0 items-center gap-4 sm:gap-6">
           <Link
             href="/"
@@ -96,7 +96,7 @@ export function AppHeader() {
       {menuOpen ? (
         <div
           id="mobile-nav"
-          className="border-t border-border/60 px-4 py-3 md:hidden"
+          className="mx-auto max-w-7xl border-t border-border/60 px-4 py-3 md:hidden sm:px-6"
         >
           <nav className="flex flex-col gap-1" aria-label="Principal mobile">
             {NAV_LINKS.map((link) => (

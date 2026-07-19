@@ -369,7 +369,7 @@ export function CreateCharacterWizard() {
 
   return (
     <form
-      className="flex max-w-lg flex-col gap-6"
+      className="flex w-full max-w-3xl flex-col gap-6"
       onSubmit={handleSubmit((values) => {
         create.mutate(toCreateCharacterPayload(values));
       })}

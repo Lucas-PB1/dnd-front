@@ -50,7 +50,7 @@ export function SpellsGrid() {
           Nenhuma magia corresponde à busca.
         </p>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((spell) => (
             <SpellCard key={spell.slug} spell={spell} />
           ))}
