@@ -6,6 +6,10 @@ import type {
   SpeciesTraitChoice,
 } from "@/entities/species/types";
 import type { PaginatedResponse } from "@/shared/api/dnd-api/types";
+import {
+  buildCatalogSearchParams,
+  CATALOG_FETCH_INIT,
+} from "@/shared/lib/catalog-query";
 
 export const speciesKeys = {
   all: ["species"] as const,
@@ -23,17 +27,16 @@ export async function fetchSpeciesPage(params?: {
   limit?: number;
   q?: string;
 }) {
-  const page = params?.page ?? 1;
-  const limit = params?.limit ?? 50;
-  const search = new URLSearchParams();
-  search.set("page", String(page));
-  search.set("limit", String(limit));
-  const q = params?.q?.trim();
-  if (q) search.set("q", q);
-
-  return catalogFetch<SpeciesListResponse>(`/species?${search.toString()}`, {
-    next: { revalidate: 3600 },
+  const search = buildCatalogSearchParams({
+    page: params?.page,
+    limit: params?.limit ?? 50,
+    q: params?.q,
   });
+
+  return catalogFetch<SpeciesListResponse>(
+    `/species?${search}`,
+    CATALOG_FETCH_INIT,
+  );
 }
 
 export async function fetchSpecies(limit = 50) {
@@ -41,21 +44,19 @@ export async function fetchSpecies(limit = 50) {
 }
 
 export async function fetchSpeciesBySlug(slug: string) {
-  return catalogFetch<SpeciesSummary>(`/species/${slug}`, {
-    next: { revalidate: 3600 },
-  });
+  return catalogFetch<SpeciesSummary>(`/species/${slug}`, CATALOG_FETCH_INIT);
 }
 
 export async function fetchSpeciesTraits(slug: string) {
   return catalogFetch<PaginatedResponse<SpeciesTrait>>(
     `/species/${slug}/traits`,
-    { next: { revalidate: 3600 } },
+    CATALOG_FETCH_INIT,
   );
 }
 
 export async function fetchSpeciesTraitChoices(slug: string) {
   return catalogFetch<PaginatedResponse<SpeciesTraitChoice>>(
     `/species/${slug}/trait-choices`,
-    { next: { revalidate: 3600 } },
+    CATALOG_FETCH_INIT,
   );
 }

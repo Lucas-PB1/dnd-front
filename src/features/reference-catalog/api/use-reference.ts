@@ -9,14 +9,13 @@ import {
   fetchSkills,
   referenceKeys,
 } from "@/features/reference-catalog/api/reference.api";
-
-const STALE = 60 * 60 * 1000;
+import { CATALOG_DETAIL_STALE_MS } from "@/shared/lib/catalog-query";
 
 export function useSkills() {
   return useQuery({
     queryKey: referenceKeys.skills(),
     queryFn: () => fetchSkills(),
-    staleTime: STALE,
+    staleTime: CATALOG_DETAIL_STALE_MS,
   });
 }
 
@@ -24,7 +23,7 @@ export function useFeats() {
   return useQuery({
     queryKey: referenceKeys.feats(),
     queryFn: () => fetchFeats(),
-    staleTime: STALE,
+    staleTime: CATALOG_DETAIL_STALE_MS,
   });
 }
 
@@ -32,7 +31,7 @@ export function useAlignments() {
   return useQuery({
     queryKey: referenceKeys.alignments(),
     queryFn: () => fetchAlignments(),
-    staleTime: STALE,
+    staleTime: CATALOG_DETAIL_STALE_MS,
   });
 }
 
@@ -40,6 +39,6 @@ export function useLanguages() {
   return useQuery({
     queryKey: referenceKeys.languages(),
     queryFn: () => fetchLanguages(),
-    staleTime: STALE,
+    staleTime: CATALOG_DETAIL_STALE_MS,
   });
 }

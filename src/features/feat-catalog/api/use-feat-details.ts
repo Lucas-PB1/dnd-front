@@ -8,8 +8,7 @@ import {
   featKeys,
   fetchFeatBySlug,
 } from "@/features/feat-catalog/api/feats.api";
-
-const STALE = 60 * 60 * 1000;
+import { CATALOG_DETAIL_STALE_MS } from "@/shared/lib/catalog-query";
 
 export function useFeatDetails(slugs: string[]) {
   const uniqueSlugs = useMemo(
@@ -21,7 +20,7 @@ export function useFeatDetails(slugs: string[]) {
     queries: uniqueSlugs.map((slug) => ({
       queryKey: featKeys.detail(slug),
       queryFn: () => fetchFeatBySlug(slug),
-      staleTime: STALE,
+      staleTime: CATALOG_DETAIL_STALE_MS,
       enabled: !!slug,
     })),
   });

@@ -17,7 +17,7 @@ import { charactersKeys } from "@/features/characters/api/characters.api";
 import { useGameAuth } from "@/features/character-sheet/api/use-game-auth";
 
 export function useCharacterInventory(characterId: string) {
-  const { accessToken, handleUnauthorized } = useGameAuth(characterId);
+  const { accessToken, handleUnauthorized } = useGameAuth(`/characters/${characterId}`);
 
   return useQuery({
     queryKey: inventoryKeys.list(characterId),
@@ -48,7 +48,7 @@ function useInvalidateInventory(characterId: string) {
 }
 
 export function useAddInventoryItem(characterId: string) {
-  const { requireToken, handleUnauthorized } = useGameAuth(characterId);
+  const { requireToken, handleUnauthorized } = useGameAuth(`/characters/${characterId}`);
   const invalidate = useInvalidateInventory(characterId);
 
   return useMutation({
@@ -64,7 +64,7 @@ export function useAddInventoryItem(characterId: string) {
 }
 
 export function usePatchInventoryItem(characterId: string) {
-  const { requireToken, handleUnauthorized } = useGameAuth(characterId);
+  const { requireToken, handleUnauthorized } = useGameAuth(`/characters/${characterId}`);
   const invalidate = useInvalidateInventory(characterId);
 
   return useMutation({
@@ -91,7 +91,7 @@ export function usePatchInventoryItem(characterId: string) {
 }
 
 export function useRemoveInventoryItem(characterId: string) {
-  const { requireToken, handleUnauthorized } = useGameAuth(characterId);
+  const { requireToken, handleUnauthorized } = useGameAuth(`/characters/${characterId}`);
   const invalidate = useInvalidateInventory(characterId);
 
   return useMutation({

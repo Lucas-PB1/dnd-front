@@ -1,10 +1,8 @@
-import Link from "next/link";
-
 import type { ItemSummary } from "@/entities/item/types";
 import { ITEM_TYPE_LABELS_PT } from "@/entities/item/types";
 import { withCatalogReturn } from "@/shared/lib/catalog-return";
 import { stripCatalogWikiLinks } from "@/shared/lib/strip-catalog-wiki-links";
-import { cn } from "@/shared/lib/utils";
+import { CatalogListCard } from "@/shared/ui/catalog-list-card";
 
 type GearItemCardProps = {
   item: ItemSummary;
@@ -16,30 +14,20 @@ export function GearItemCard({ item, listPath, className }: GearItemCardProps) {
   const typeLabel = ITEM_TYPE_LABELS_PT[item.itemType] ?? item.itemType;
 
   return (
-    <Link
+    <CatalogListCard
       href={withCatalogReturn(`/equipment/items/${item.slug}`, listPath)}
-      className={cn(
-        "group flex flex-col gap-1.5 border-b border-border px-1 py-3 transition-colors hover:bg-muted/30 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4",
-        className,
-      )}
-    >
-      <div className="min-w-0 flex-1 space-y-1">
-        <h2 className="font-heading text-base font-semibold tracking-tight group-hover:text-primary sm:text-lg">
-          {item.name}
-        </h2>
-        <p className="text-xs font-medium tracking-wide text-primary/90 uppercase">
-          {typeLabel}
-        </p>
-        {item.description ? (
-          <p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">
-            {stripCatalogWikiLinks(item.description)}
-          </p>
-        ) : null}
-      </div>
-      <div className="shrink-0 space-y-0.5 text-xs text-muted-foreground sm:max-w-40 sm:text-right">
-        {item.costText ? <p>{item.costText}</p> : null}
-        {item.weight ? <p>{item.weight}</p> : null}
-      </div>
-    </Link>
+      title={item.name}
+      eyebrow={typeLabel}
+      teaser={
+        item.description ? stripCatalogWikiLinks(item.description) : null
+      }
+      aside={
+        <div className="shrink-0 space-y-0.5 text-xs text-muted-foreground sm:max-w-40 sm:text-right">
+          {item.costText ? <p>{item.costText}</p> : null}
+          {item.weight ? <p>{item.weight}</p> : null}
+        </div>
+      }
+      className={className}
+    />
   );
 }

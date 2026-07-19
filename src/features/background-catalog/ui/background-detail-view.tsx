@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { Suspense, useMemo } from "react";
 
 import type {
@@ -14,9 +13,10 @@ import {
   useBackgroundTools,
 } from "@/features/background-catalog/api/use-backgrounds";
 import { useCatalogBackHref } from "@/shared/lib/use-catalog-back-href";
-import { cn } from "@/shared/lib/utils";
-import { BackLink } from "@/shared/ui/back-link";
-import { buttonVariants } from "@/shared/ui/button";
+import {
+  CatalogDetailError,
+  CatalogDetailHero,
+} from "@/shared/ui/catalog-detail-hero";
 import { CollapsibleCard } from "@/shared/ui/collapsible-card";
 import { PhbProse } from "@/shared/ui/phb-prose";
 
@@ -69,56 +69,21 @@ function BackgroundHero({
   }
 
   return (
-    <header className="relative overflow-hidden rounded-xl border border-border">
-      <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,color-mix(in_oklch,var(--primary)_22%,transparent),transparent_55%),radial-gradient(ellipse_at_bottom_right,color-mix(in_oklch,var(--secondary)_14%,transparent),transparent_50%)]"
-        aria-hidden
-      />
-      <div className="relative space-y-6 p-5 sm:p-8">
-        <BackLink href={backHref}>Antecedentes</BackLink>
-
-        <div className="space-y-3">
-          <h1 className="font-heading text-4xl font-semibold tracking-tight sm:text-5xl">
-            {background.name}
-          </h1>
-          {background.tagline ? (
-            <p className="max-w-xl text-sm font-medium tracking-wide text-primary uppercase sm:text-base">
-              {background.tagline}
-            </p>
-          ) : null}
-          {background.summary ? (
-            <p className="max-w-2xl font-heading text-lg leading-snug text-foreground/90 sm:text-xl">
-              {background.summary}
-            </p>
-          ) : null}
-        </div>
-
-        {stats.length > 0 ? (
-          <dl
-            className={cn(
-              "grid gap-px overflow-hidden rounded-lg border border-border bg-border",
-              stats.length >= 4
-                ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"
-                : "grid-cols-1 sm:grid-cols-3",
-            )}
-          >
-            {stats.map((stat) => (
-              <div
-                key={stat.label}
-                className="bg-card/80 px-3 py-3 backdrop-blur-sm sm:px-4"
-              >
-                <dt className="text-[0.65rem] font-medium tracking-wider text-muted-foreground uppercase">
-                  {stat.label}
-                </dt>
-                <dd className="mt-1 font-heading text-base font-semibold leading-tight sm:text-lg">
-                  {stat.value}
-                </dd>
-              </div>
-            ))}
-          </dl>
-        ) : null}
-      </div>
-    </header>
+    <CatalogDetailHero
+      backHref={backHref}
+      backLabel="Antecedentes"
+      title={background.name}
+      eyebrow={background.tagline}
+      summary={background.summary}
+      stats={stats}
+      statsClassName={
+        stats.length > 0
+          ? stats.length >= 4
+            ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"
+            : "grid-cols-1 sm:grid-cols-3"
+          : undefined
+      }
+    />
   );
 }
 
@@ -169,19 +134,14 @@ function BackgroundDetailBody({ slug }: BackgroundDetailViewProps) {
 
   if (detailQuery.isError || !detailQuery.data) {
     return (
-      <div className="flex flex-col gap-4">
-        <p className="text-sm text-destructive">
-          {detailQuery.error instanceof Error
+      <CatalogDetailError
+        backHref={backHref}
+        message={
+          detailQuery.error instanceof Error
             ? detailQuery.error.message
-            : "Antecedente não encontrado"}
-        </p>
-        <Link
-          href={backHref}
-          className={cn(buttonVariants({ variant: "outline" }))}
-        >
-          Voltar ao compêndio
-        </Link>
-      </div>
+            : "Antecedente não encontrado"
+        }
+      />
     );
   }
 

@@ -17,7 +17,9 @@ import {
 import { useGameAuth } from "@/features/character-sheet/api/use-game-auth";
 
 export function useCharacterState(characterId: string) {
-  const { accessToken, handleUnauthorized } = useGameAuth(characterId);
+  const { accessToken, handleUnauthorized } = useGameAuth(
+    `/characters/${characterId}`,
+  );
 
   return useQuery({
     queryKey: sessionKeys.state(characterId),
@@ -43,7 +45,9 @@ function useInvalidateState(characterId: string) {
 }
 
 export function usePatchCharacterState(characterId: string) {
-  const { requireToken, handleUnauthorized } = useGameAuth(characterId);
+  const { requireToken, handleUnauthorized } = useGameAuth(
+    `/characters/${characterId}`,
+  );
   const setState = useInvalidateState(characterId);
 
   return useMutation({
@@ -59,7 +63,9 @@ export function usePatchCharacterState(characterId: string) {
 }
 
 export function useCastSpell(characterId: string) {
-  const { requireToken, handleUnauthorized } = useGameAuth(characterId);
+  const { requireToken, handleUnauthorized } = useGameAuth(
+    `/characters/${characterId}`,
+  );
   const setState = useInvalidateState(characterId);
 
   return useMutation({
@@ -77,7 +83,9 @@ export function useCastSpell(characterId: string) {
 }
 
 export function useTakeRest(characterId: string) {
-  const { requireToken, handleUnauthorized } = useGameAuth(characterId);
+  const { requireToken, handleUnauthorized } = useGameAuth(
+    `/characters/${characterId}`,
+  );
   const setState = useInvalidateState(characterId);
 
   return useMutation({

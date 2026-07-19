@@ -4,6 +4,10 @@ import type {
   FeatOptionListResponse,
   FeatSummary,
 } from "@/entities/feat/types";
+import {
+  buildCatalogSearchParams,
+  CATALOG_FETCH_INIT,
+} from "@/shared/lib/catalog-query";
 import { CATALOG_PAGE_SIZE } from "@/shared/lib/catalog-pagination";
 
 export const featKeys = {
@@ -24,30 +28,26 @@ export async function fetchFeatsPage(params?: {
   q?: string;
   category?: string;
 }): Promise<FeatListResponse> {
-  const page = params?.page ?? 1;
-  const limit = params?.limit ?? CATALOG_PAGE_SIZE;
-  const search = new URLSearchParams();
-  search.set("page", String(page));
-  search.set("limit", String(limit));
-  const q = params?.q?.trim();
-  if (q) search.set("q", q);
-  const category = params?.category?.trim();
-  if (category) search.set("category", category);
-
-  return catalogFetch<FeatListResponse>(`/feats?${search.toString()}`, {
-    next: { revalidate: 3600 },
+  const search = buildCatalogSearchParams({
+    page: params?.page,
+    limit: params?.limit ?? CATALOG_PAGE_SIZE,
+    q: params?.q,
+    filters: { category: params?.category },
   });
+
+  return catalogFetch<FeatListResponse>(`/feats?${search}`, CATALOG_FETCH_INIT);
 }
 
 export async function fetchFeatBySlug(slug: string) {
-  return catalogFetch<FeatSummary>(`/feats/${encodeURIComponent(slug)}`, {
-    next: { revalidate: 3600 },
-  });
+  return catalogFetch<FeatSummary>(
+    `/feats/${encodeURIComponent(slug)}`,
+    CATALOG_FETCH_INIT,
+  );
 }
 
 export async function fetchFeatOptions(slug: string, limit = 50) {
   return catalogFetch<FeatOptionListResponse>(
     `/feats/${encodeURIComponent(slug)}/options?limit=${limit}`,
-    { next: { revalidate: 3600 } },
+    CATALOG_FETCH_INIT,
   );
 }

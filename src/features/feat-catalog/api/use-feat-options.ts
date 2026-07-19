@@ -1,19 +1,16 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-
 import {
   featKeys,
   fetchFeatOptions,
 } from "@/features/feat-catalog/api/feats.api";
-
-const STALE = 60 * 60 * 1000;
+import { useCatalogDetailQuery } from "@/shared/lib/use-catalog-query";
 
 export function useFeatOptions(slug: string, enabled = true) {
-  return useQuery({
+  return useCatalogDetailQuery({
+    slug,
     queryKey: featKeys.options(slug),
     queryFn: () => fetchFeatOptions(slug),
-    enabled: enabled && !!slug,
-    staleTime: STALE,
+    enabled,
   });
 }

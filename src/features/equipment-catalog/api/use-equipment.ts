@@ -1,7 +1,5 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-
 import {
   armorKeys,
   fetchArmorBySlug,
@@ -18,40 +16,43 @@ import {
   itemKeys,
 } from "@/features/item-catalog/api/items.api";
 import { EQUIPMENT_GEAR_ITEM_TYPES } from "@/entities/item/types";
-import { CATALOG_PAGE_SIZE } from "@/shared/lib/catalog-pagination";
-
-const STALE = 60 * 60 * 1000;
+import {
+  useCatalogDetailQuery,
+  useCatalogListQuery,
+} from "@/shared/lib/use-catalog-query";
 
 export function useWeaponsCatalog(params: {
   page: number;
   q?: string;
   category?: string;
 }) {
-  const page = params.page;
-  const q = params.q?.trim() ?? "";
-  const category = params.category?.trim() ?? "";
-  const limit = CATALOG_PAGE_SIZE;
-
-  return useQuery({
-    queryKey: weaponKeys.listPage({ page, limit, q, category }),
-    queryFn: () =>
-      fetchWeaponsPage({
-        page,
-        limit,
-        q: q || undefined,
-        category: category || undefined,
+  return useCatalogListQuery({
+    page: params.page,
+    filters: { q: params.q, category: params.category },
+    clearPlaceholderOnFilter: true,
+    queryKey: (p) =>
+      weaponKeys.listPage({
+        page: p.page,
+        limit: p.limit,
+        q: p.q ?? "",
+        category: p.category ?? "",
       }),
-    staleTime: 60 * 1000,
-    placeholderData: (previous) => (category || q ? undefined : previous),
+    queryFn: (p) =>
+      fetchWeaponsPage({
+        page: p.page,
+        limit: p.limit,
+        q: p.q,
+        category: p.category,
+      }),
   });
 }
 
 export function useWeaponDetail(slug: string, enabled = true) {
-  return useQuery({
+  return useCatalogDetailQuery({
+    slug,
     queryKey: weaponKeys.detail(slug),
     queryFn: () => fetchWeaponBySlug(slug),
-    enabled: enabled && !!slug,
-    staleTime: STALE,
+    enabled,
   });
 }
 
@@ -60,32 +61,33 @@ export function useArmorCatalog(params: {
   q?: string;
   category?: string;
 }) {
-  const page = params.page;
-  const q = params.q?.trim() ?? "";
-  const category = params.category?.trim() ?? "";
-  const limit = CATALOG_PAGE_SIZE;
-
-  return useQuery({
-    queryKey: armorKeys.listPage({ page, limit, q, category }),
-    queryFn: () =>
-      fetchArmorPage({
-        page,
-        limit,
-        q: q || undefined,
-        category: category || undefined,
+  return useCatalogListQuery({
+    page: params.page,
+    filters: { q: params.q, category: params.category },
+    clearPlaceholderOnFilter: true,
+    queryKey: (p) =>
+      armorKeys.listPage({
+        page: p.page,
+        limit: p.limit,
+        q: p.q ?? "",
+        category: p.category ?? "",
       }),
-    staleTime: 60 * 1000,
-    // Não reaproveitar lista sem filtro quando há filtro ativo.
-    placeholderData: (previous) => (category || q ? undefined : previous),
+    queryFn: (p) =>
+      fetchArmorPage({
+        page: p.page,
+        limit: p.limit,
+        q: p.q,
+        category: p.category,
+      }),
   });
 }
 
 export function useArmorDetail(slug: string, enabled = true) {
-  return useQuery({
+  return useCatalogDetailQuery({
+    slug,
     queryKey: armorKeys.detail(slug),
     queryFn: () => fetchArmorBySlug(slug),
-    enabled: enabled && !!slug,
-    staleTime: STALE,
+    enabled,
   });
 }
 
@@ -94,35 +96,33 @@ export function useGearCatalog(params: {
   q?: string;
   itemType?: string;
 }) {
-  const page = params.page;
-  const q = params.q?.trim() ?? "";
-  const limit = CATALOG_PAGE_SIZE;
   const itemType = params.itemType?.trim() || EQUIPMENT_GEAR_ITEM_TYPES;
 
-  return useQuery({
-    queryKey: [
-      ...itemKeys.all,
-      "list",
-      "page",
-      { page, limit, q, itemType },
-    ] as const,
-    queryFn: () =>
+  return useCatalogListQuery({
+    page: params.page,
+    filters: { q: params.q },
+    queryKey: (p) =>
+      [
+        ...itemKeys.all,
+        "list",
+        "page",
+        { page: p.page, limit: p.limit, q: p.q ?? "", itemType },
+      ] as const,
+    queryFn: (p) =>
       fetchItems({
-        page,
-        limit,
-        q: q || undefined,
+        page: p.page,
+        limit: p.limit,
+        q: p.q,
         itemType,
       }),
-    staleTime: 60 * 1000,
-    placeholderData: (previous) => previous,
   });
 }
 
 export function useItemDetail(slug: string, enabled = true) {
-  return useQuery({
+  return useCatalogDetailQuery({
+    slug,
     queryKey: itemKeys.detail(slug),
     queryFn: () => fetchItemBySlug(slug),
-    enabled: enabled && !!slug,
-    staleTime: STALE,
+    enabled,
   });
 }

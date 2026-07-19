@@ -13,7 +13,7 @@ import { sessionKeys } from "@/features/character-sheet/api/character-session.ap
 import { useGameAuth } from "@/features/character-sheet/api/use-game-auth";
 
 export function useLevelUpPreview(characterId: string, enabled = true) {
-  const { accessToken, handleUnauthorized } = useGameAuth(characterId);
+  const { accessToken, handleUnauthorized } = useGameAuth(`/characters/${characterId}`);
 
   return useQuery({
     queryKey: progressionKeys.preview(characterId),
@@ -33,7 +33,7 @@ export function useLevelUpPreview(characterId: string, enabled = true) {
 
 export function useLevelUp(characterId: string) {
   const queryClient = useQueryClient();
-  const { requireToken, handleUnauthorized } = useGameAuth(characterId);
+  const { requireToken, handleUnauthorized } = useGameAuth(`/characters/${characterId}`);
 
   return useMutation({
     mutationFn: async (payload: LevelUpPayload) => {

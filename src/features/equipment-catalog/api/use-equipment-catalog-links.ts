@@ -6,36 +6,35 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchArmorPage } from "@/features/equipment-catalog/api/armor.api";
 import { fetchWeaponsPage } from "@/features/equipment-catalog/api/weapons.api";
 import { fetchItems } from "@/features/item-catalog/api/items.api";
+import {
+  CATALOG_DETAIL_STALE_MS,
+  fetchAllCatalogPages,
+} from "@/shared/lib/catalog-query";
 import type { CatalogLinkEntry } from "@/shared/lib/segment-catalog-text";
-
-const STALE = 60 * 60 * 1000;
 
 /** Índice nome/slug → href para hyperlinks no catálogo de equipamento. */
 export function useEquipmentCatalogLinks() {
   const weapons = useQuery({
     queryKey: ["equipment-links", "weapons"],
     queryFn: () => fetchWeaponsPage({ page: 1, limit: 100 }),
-    staleTime: STALE,
+    staleTime: CATALOG_DETAIL_STALE_MS,
   });
   const armor = useQuery({
     queryKey: ["equipment-links", "armor"],
     queryFn: () => fetchArmorPage({ page: 1, limit: 100 }),
-    staleTime: STALE,
+    staleTime: CATALOG_DETAIL_STALE_MS,
   });
   const items = useQuery({
     queryKey: ["equipment-links", "items"],
     queryFn: async () => {
       const itemType = "gear,tool,focus,other";
-      const first = await fetchItems({ page: 1, limit: 100, itemType });
-      if (first.meta.totalPages <= 1) return first.data;
-      const rest = await Promise.all(
-        Array.from({ length: first.meta.totalPages - 1 }, (_, index) =>
-          fetchItems({ page: index + 2, limit: 100, itemType }),
-        ),
+      const all = await fetchAllCatalogPages(
+        (page) => fetchItems({ ...page, itemType }),
+        100,
       );
-      return [...first.data, ...rest.flatMap((page) => page.data)];
+      return all.data;
     },
-    staleTime: STALE,
+    staleTime: CATALOG_DETAIL_STALE_MS,
   });
 
   const links = useMemo(() => {

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { Suspense, useMemo } from "react";
 
 import type { ClassFeature, ClassSummary } from "@/entities/class/types";
@@ -12,11 +11,12 @@ import {
 } from "@/features/class-catalog/api/use-classes";
 import { SubclassCard } from "@/features/class-catalog/ui/subclass-card";
 import { useCatalogBackHref } from "@/shared/lib/use-catalog-back-href";
-import { cn } from "@/shared/lib/utils";
-import { BackLink } from "@/shared/ui/back-link";
+import {
+  CatalogDetailError,
+  CatalogDetailHero,
+} from "@/shared/ui/catalog-detail-hero";
 import { CollapsibleCard } from "@/shared/ui/collapsible-card";
 import { PhbProse } from "@/shared/ui/phb-prose";
-import { buttonVariants } from "@/shared/ui/button";
 
 type ClassDetailViewProps = {
   slug: string;
@@ -62,54 +62,20 @@ function ClassHero({
   }
 
   return (
-    <header className="relative overflow-hidden rounded-xl border border-border">
-      <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,color-mix(in_oklch,var(--primary)_22%,transparent),transparent_55%),radial-gradient(ellipse_at_bottom_right,color-mix(in_oklch,var(--secondary)_14%,transparent),transparent_50%)]"
-        aria-hidden
-      />
-      <div className="relative space-y-6 p-5 sm:p-8">
-        <BackLink href={backHref}>Classes</BackLink>
-
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div className="space-y-3">
-            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <h1 className="font-heading text-4xl font-semibold tracking-tight sm:text-5xl">
-                {cls.name}
-              </h1>
-              <span className="font-mono text-sm tracking-wide text-secondary">
-                {cls.hitDie}
-              </span>
-            </div>
-            {cls.tagline ? (
-              <p className="max-w-xl text-sm font-medium tracking-wide text-primary uppercase sm:text-base">
-                {cls.tagline}
-              </p>
-            ) : null}
-            {cls.summary ? (
-              <p className="max-w-2xl font-heading text-lg leading-snug text-foreground/90 sm:text-xl">
-                {cls.summary}
-              </p>
-            ) : null}
-          </div>
-        </div>
-
-        <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-3 lg:grid-cols-5">
-          {stats.map((stat) => (
-            <div
-              key={stat.label}
-              className="bg-card/80 px-3 py-3 backdrop-blur-sm sm:px-4"
-            >
-              <dt className="text-[0.65rem] font-medium tracking-wider text-muted-foreground uppercase">
-                {stat.label}
-              </dt>
-              <dd className="mt-1 font-heading text-base font-semibold leading-tight sm:text-lg">
-                {stat.value}
-              </dd>
-            </div>
-          ))}
-        </dl>
-      </div>
-    </header>
+    <CatalogDetailHero
+      backHref={backHref}
+      backLabel="Classes"
+      title={cls.name}
+      titleExtra={
+        <span className="font-mono text-sm tracking-wide text-secondary">
+          {cls.hitDie}
+        </span>
+      }
+      eyebrow={cls.tagline}
+      summary={cls.summary}
+      stats={stats}
+      statsClassName="grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"
+    />
   );
 }
 
@@ -143,19 +109,14 @@ function ClassDetailBody({ slug }: ClassDetailViewProps) {
 
   if (classQuery.isError || !classQuery.data) {
     return (
-      <div className="flex flex-col gap-4">
-        <p className="text-sm text-destructive">
-          {classQuery.error instanceof Error
+      <CatalogDetailError
+        backHref={backHref}
+        message={
+          classQuery.error instanceof Error
             ? classQuery.error.message
-            : "Classe não encontrada"}
-        </p>
-        <Link
-          href={backHref}
-          className={cn(buttonVariants({ variant: "outline" }))}
-        >
-          Voltar ao compêndio
-        </Link>
-      </div>
+            : "Classe não encontrada"
+        }
+      />
     );
   }
 

@@ -18,65 +18,65 @@ import {
   fetchSubclassSpells,
   subclassKeys,
 } from "@/features/class-catalog/api/classes.api";
-import { CATALOG_PAGE_SIZE } from "@/shared/lib/catalog-pagination";
-
-const STALE = 60 * 60 * 1000;
+import { CATALOG_DETAIL_STALE_MS } from "@/shared/lib/catalog-query";
+import {
+  useCatalogDetailQuery,
+  useCatalogListQuery,
+} from "@/shared/lib/use-catalog-query";
 
 export function useClasses() {
   return useQuery({
     queryKey: classKeys.list(),
     queryFn: () => fetchClasses(),
-    staleTime: STALE,
+    staleTime: CATALOG_DETAIL_STALE_MS,
   });
 }
 
 /** Compêndio: busca `q` na API (dataset pequeno). */
 export function useClassesCatalog(params: { page: number; q?: string }) {
-  const page = params.page;
-  const q = params.q?.trim() ?? "";
-  const limit = CATALOG_PAGE_SIZE;
-
-  return useQuery({
-    queryKey: classKeys.listPage({ page, limit, q }),
-    queryFn: () => fetchClassesPage({ page, limit, q: q || undefined }),
-    staleTime: 60 * 1000,
-    placeholderData: (previous) => previous,
+  return useCatalogListQuery({
+    page: params.page,
+    filters: { q: params.q },
+    queryKey: (p) =>
+      classKeys.listPage({ page: p.page, limit: p.limit, q: p.q ?? "" }),
+    queryFn: (p) =>
+      fetchClassesPage({ page: p.page, limit: p.limit, q: p.q }),
   });
 }
 
 export function useClassDetail(slug: string, enabled = true) {
-  return useQuery({
+  return useCatalogDetailQuery({
+    slug,
     queryKey: classKeys.detail(slug),
     queryFn: () => fetchClassBySlug(slug),
-    enabled: enabled && !!slug,
-    staleTime: STALE,
+    enabled,
   });
 }
 
 export function useClassSubclasses(slug: string, enabled = true) {
-  return useQuery({
+  return useCatalogDetailQuery({
+    slug,
     queryKey: classKeys.subclasses(slug),
     queryFn: () => fetchClassSubclasses(slug),
-    enabled: enabled && !!slug,
-    staleTime: STALE,
+    enabled,
   });
 }
 
 export function useClassSkills(slug: string, enabled = true) {
-  return useQuery({
+  return useCatalogDetailQuery({
+    slug,
     queryKey: classKeys.skills(slug),
     queryFn: () => fetchClassSkills(slug),
-    enabled: enabled && !!slug,
-    staleTime: STALE,
+    enabled,
   });
 }
 
 export function useClassEquipment(slug: string, enabled = true) {
-  return useQuery({
+  return useCatalogDetailQuery({
+    slug,
     queryKey: classKeys.equipment(slug),
     queryFn: () => fetchClassEquipment(slug),
-    enabled: enabled && !!slug,
-    staleTime: STALE,
+    enabled,
   });
 }
 
@@ -85,11 +85,11 @@ export function useClassFeatures(
   maxLevel?: number,
   enabled = true,
 ) {
-  return useQuery({
+  return useCatalogDetailQuery({
+    slug,
     queryKey: classKeys.features(slug, maxLevel),
     queryFn: () => fetchClassFeatures(slug, maxLevel),
-    enabled: enabled && !!slug,
-    staleTime: STALE,
+    enabled,
   });
 }
 
@@ -98,38 +98,38 @@ export function useClassSpells(
   maxLevel?: number,
   enabled = true,
 ) {
-  return useQuery({
+  return useCatalogDetailQuery({
+    slug,
     queryKey: classKeys.spells(slug, maxLevel),
     queryFn: () => fetchClassSpells(slug, maxLevel),
-    enabled: enabled && !!slug,
-    staleTime: STALE,
+    enabled,
   });
 }
 
 export function useClassSpellSlots(slug: string, enabled = true) {
-  return useQuery({
+  return useCatalogDetailQuery({
+    slug,
     queryKey: classKeys.spellSlots(slug),
     queryFn: () => fetchClassSpellSlots(slug),
-    enabled: enabled && !!slug,
-    staleTime: STALE,
+    enabled,
   });
 }
 
 export function useSubclassMechanics(slug: string, enabled = true) {
-  return useQuery({
+  return useCatalogDetailQuery({
+    slug,
     queryKey: subclassKeys.mechanics(slug),
     queryFn: () => fetchSubclassMechanics(slug),
-    enabled: enabled && !!slug,
-    staleTime: STALE,
+    enabled,
   });
 }
 
 export function useSubclassSpells(slug: string, enabled = true) {
-  return useQuery({
+  return useCatalogDetailQuery({
+    slug,
     queryKey: subclassKeys.spells(slug),
     queryFn: () => fetchSubclassSpells(slug),
-    enabled: enabled && !!slug,
-    staleTime: STALE,
+    enabled,
   });
 }
 
@@ -142,6 +142,6 @@ export function useSubclassOptions(
     queryKey: subclassKeys.options(slug, level),
     queryFn: () => fetchSubclassOptions(slug, level),
     enabled: enabled && !!slug && level > 0,
-    staleTime: STALE,
+    staleTime: CATALOG_DETAIL_STALE_MS,
   });
 }

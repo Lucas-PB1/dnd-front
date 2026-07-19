@@ -10,55 +10,55 @@ import {
   fetchSpeciesTraits,
   speciesKeys,
 } from "@/features/species-catalog/api/species.api";
-import { CATALOG_PAGE_SIZE } from "@/shared/lib/catalog-pagination";
-
-const STALE = 60 * 60 * 1000;
+import { CATALOG_DETAIL_STALE_MS } from "@/shared/lib/catalog-query";
+import {
+  useCatalogDetailQuery,
+  useCatalogListQuery,
+} from "@/shared/lib/use-catalog-query";
 
 export function useSpecies() {
   return useQuery({
     queryKey: speciesKeys.list(),
     queryFn: () => fetchSpecies(),
-    staleTime: STALE,
+    staleTime: CATALOG_DETAIL_STALE_MS,
   });
 }
 
 /** Compêndio: busca `q` na API. */
 export function useSpeciesCatalog(params: { page: number; q?: string }) {
-  const page = params.page;
-  const q = params.q?.trim() ?? "";
-  const limit = CATALOG_PAGE_SIZE;
-
-  return useQuery({
-    queryKey: speciesKeys.listPage({ page, limit, q }),
-    queryFn: () => fetchSpeciesPage({ page, limit, q: q || undefined }),
-    staleTime: 60 * 1000,
-    placeholderData: (previous) => previous,
+  return useCatalogListQuery({
+    page: params.page,
+    filters: { q: params.q },
+    queryKey: (p) =>
+      speciesKeys.listPage({ page: p.page, limit: p.limit, q: p.q ?? "" }),
+    queryFn: (p) =>
+      fetchSpeciesPage({ page: p.page, limit: p.limit, q: p.q }),
   });
 }
 
 export function useSpeciesDetail(slug: string, enabled = true) {
-  return useQuery({
+  return useCatalogDetailQuery({
+    slug,
     queryKey: speciesKeys.detail(slug),
     queryFn: () => fetchSpeciesBySlug(slug),
-    enabled: enabled && !!slug,
-    staleTime: STALE,
+    enabled,
   });
 }
 
 export function useSpeciesTraits(slug: string, enabled = true) {
-  return useQuery({
+  return useCatalogDetailQuery({
+    slug,
     queryKey: speciesKeys.traits(slug),
     queryFn: () => fetchSpeciesTraits(slug),
-    enabled: enabled && !!slug,
-    staleTime: STALE,
+    enabled,
   });
 }
 
 export function useSpeciesTraitChoices(slug: string, enabled = true) {
-  return useQuery({
+  return useCatalogDetailQuery({
+    slug,
     queryKey: speciesKeys.traitChoices(slug),
     queryFn: () => fetchSpeciesTraitChoices(slug),
-    enabled: enabled && !!slug,
-    staleTime: STALE,
+    enabled,
   });
 }

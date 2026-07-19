@@ -4,6 +4,7 @@ import { useFeatsCatalog } from "@/features/feat-catalog/api/use-feats";
 import { FeatCard } from "@/features/feat-catalog/ui/feat-card";
 import { FEAT_CATEGORY_FILTER } from "@/shared/lib/catalog-filter-options";
 import { useCatalogListState } from "@/shared/lib/use-catalog-list-state";
+import { isCatalogPageOutOfRange } from "@/shared/lib/catalog-query";
 import { useClampCatalogPage } from "@/shared/lib/use-clamp-catalog-page";
 import { CatalogFilters } from "@/shared/ui/catalog-filters";
 import { CatalogPagination } from "@/shared/ui/catalog-pagination";
@@ -32,8 +33,7 @@ export function FeatsGrid() {
 
   const { total, totalPages, safePage, from, to } = pageWindow(data?.meta);
 
-  const outOfRange =
-    !data?.data.length && (data?.meta.total ?? 0) > 0 && page > totalPages;
+  const outOfRange = isCatalogPageOutOfRange(data, page, totalPages);
   useClampCatalogPage(outOfRange, setPage);
 
   if (isPending && !data) {

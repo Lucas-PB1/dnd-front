@@ -8,6 +8,7 @@ import {
 } from "@/features/subclass-catalog/api/use-subclasses";
 import { SubclassCard } from "@/features/subclass-catalog/ui/subclass-card";
 import { useCatalogListState } from "@/shared/lib/use-catalog-list-state";
+import { isCatalogPageOutOfRange } from "@/shared/lib/catalog-query";
 import { useClampCatalogPage } from "@/shared/lib/use-clamp-catalog-page";
 import {
   CatalogFilters,
@@ -54,8 +55,7 @@ export function SubclassesGrid() {
 
   const { total, totalPages, safePage, from, to } = pageWindow(data?.meta);
 
-  const outOfRange =
-    !data?.data.length && (data?.meta.total ?? 0) > 0 && page > totalPages;
+  const outOfRange = isCatalogPageOutOfRange(data, page, totalPages);
   useClampCatalogPage(outOfRange, setPage);
 
   if (isPending && !data) {

@@ -1,4 +1,22 @@
+import { ABILITY_LABELS_PT } from "@/entities/character/types";
 import type { CatalogFilterField } from "@/shared/ui/catalog-filters";
+
+export const ABILITY_FILTER: CatalogFilterField = {
+  key: "ability",
+  label: "Atributo",
+  options: (
+    Object.entries(ABILITY_LABELS_PT) as [string, string][]
+  ).map(([value, label]) => ({ value, label })),
+};
+
+export const RARE_FILTER: CatalogFilterField = {
+  key: "rare",
+  label: "Raridade",
+  options: [
+    { value: "true", label: "Raros" },
+    { value: "false", label: "Comuns" },
+  ],
+};
 
 export const SPELL_LEVEL_FILTER: CatalogFilterField = {
   key: "level",

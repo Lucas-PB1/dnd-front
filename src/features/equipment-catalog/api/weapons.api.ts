@@ -3,6 +3,10 @@ import type {
   WeaponListResponse,
   WeaponSummary,
 } from "@/entities/weapon/types";
+import {
+  buildCatalogSearchParams,
+  CATALOG_FETCH_INIT,
+} from "@/shared/lib/catalog-query";
 import { CATALOG_PAGE_SIZE } from "@/shared/lib/catalog-pagination";
 
 export const weaponKeys = {
@@ -22,23 +26,22 @@ export async function fetchWeaponsPage(params?: {
   q?: string;
   category?: string;
 }): Promise<WeaponListResponse> {
-  const page = params?.page ?? 1;
-  const limit = params?.limit ?? CATALOG_PAGE_SIZE;
-  const search = new URLSearchParams();
-  search.set("page", String(page));
-  search.set("limit", String(limit));
-  const q = params?.q?.trim();
-  if (q) search.set("q", q);
-  const category = params?.category?.trim();
-  if (category) search.set("category", category);
-
-  return catalogFetch<WeaponListResponse>(`/weapons?${search.toString()}`, {
-    next: { revalidate: 3600 },
+  const search = buildCatalogSearchParams({
+    page: params?.page,
+    limit: params?.limit ?? CATALOG_PAGE_SIZE,
+    q: params?.q,
+    filters: { category: params?.category },
   });
+
+  return catalogFetch<WeaponListResponse>(
+    `/weapons?${search}`,
+    CATALOG_FETCH_INIT,
+  );
 }
 
 export async function fetchWeaponBySlug(slug: string) {
-  return catalogFetch<WeaponSummary>(`/weapons/${encodeURIComponent(slug)}`, {
-    next: { revalidate: 3600 },
-  });
+  return catalogFetch<WeaponSummary>(
+    `/weapons/${encodeURIComponent(slug)}`,
+    CATALOG_FETCH_INIT,
+  );
 }

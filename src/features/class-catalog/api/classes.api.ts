@@ -1,4 +1,4 @@
-import { catalogFetch } from "@/shared/api/dnd-api/api-client";
+﻿import { catalogFetch } from "@/shared/api/dnd-api/api-client";
 import type {
   ClassEquipmentOption,
   ClassListResponse,
@@ -13,6 +13,10 @@ import type {
   SubclassSpellOption,
 } from "@/entities/class/types";
 import type { PaginatedResponse } from "@/shared/api/dnd-api/types";
+import {
+  buildCatalogSearchParams,
+  CATALOG_FETCH_INIT,
+} from "@/shared/lib/catalog-query";
 
 export const classKeys = {
   all: ["classes"] as const,
@@ -45,17 +49,16 @@ export async function fetchClassesPage(params?: {
   limit?: number;
   q?: string;
 }) {
-  const page = params?.page ?? 1;
-  const limit = params?.limit ?? 50;
-  const search = new URLSearchParams();
-  search.set("page", String(page));
-  search.set("limit", String(limit));
-  const q = params?.q?.trim();
-  if (q) search.set("q", q);
-
-  return catalogFetch<ClassListResponse>(`/classes?${search.toString()}`, {
-    next: { revalidate: 3600 },
+  const search = buildCatalogSearchParams({
+    page: params?.page,
+    limit: params?.limit ?? 50,
+    q: params?.q,
   });
+
+  return catalogFetch<ClassListResponse>(
+    `/classes?${search}`,
+    CATALOG_FETCH_INIT,
+  );
 }
 
 export async function fetchClasses(limit = 50) {
@@ -63,29 +66,27 @@ export async function fetchClasses(limit = 50) {
 }
 
 export async function fetchClassBySlug(slug: string) {
-  return catalogFetch<ClassSummary>(`/classes/${slug}`, {
-    next: { revalidate: 3600 },
-  });
+  return catalogFetch<ClassSummary>(`/classes/${slug}`, CATALOG_FETCH_INIT);
 }
 
 export async function fetchClassSubclasses(slug: string, limit = 50) {
   return catalogFetch<SubclassListResponse>(
     `/classes/${slug}/subclasses?limit=${limit}`,
-    { next: { revalidate: 3600 } },
+    CATALOG_FETCH_INIT,
   );
 }
 
 export async function fetchClassSkills(slug: string) {
   return catalogFetch<PaginatedResponse<ClassSkillOption>>(
     `/classes/${slug}/skills`,
-    { next: { revalidate: 3600 } },
+    CATALOG_FETCH_INIT,
   );
 }
 
 export async function fetchClassEquipment(slug: string) {
   return catalogFetch<PaginatedResponse<ClassEquipmentOption>>(
     `/classes/${slug}/equipment`,
-    { next: { revalidate: 3600 } },
+    CATALOG_FETCH_INIT,
   );
 }
 
@@ -100,7 +101,7 @@ export async function fetchClassFeatures(
   }
   return catalogFetch<PaginatedResponse<ClassFeature>>(
     `/classes/${slug}/features?${params}`,
-    { next: { revalidate: 3600 } },
+    CATALOG_FETCH_INIT,
   );
 }
 
@@ -115,28 +116,28 @@ export async function fetchClassSpells(
   }
   return catalogFetch<PaginatedResponse<ClassSpellOption>>(
     `/classes/${slug}/spells?${params}`,
-    { next: { revalidate: 3600 } },
+    CATALOG_FETCH_INIT,
   );
 }
 
 export async function fetchClassSpellSlots(slug: string, limit = 20) {
   return catalogFetch<PaginatedResponse<ClassSpellSlots>>(
     `/classes/${slug}/spell-slots?limit=${limit}`,
-    { next: { revalidate: 3600 } },
+    CATALOG_FETCH_INIT,
   );
 }
 
 export async function fetchSubclassMechanics(slug: string, limit = 50) {
   return catalogFetch<PaginatedResponse<SubclassMechanic>>(
     `/subclasses/${slug}/mechanics?limit=${limit}`,
-    { next: { revalidate: 3600 } },
+    CATALOG_FETCH_INIT,
   );
 }
 
 export async function fetchSubclassSpells(slug: string) {
   return catalogFetch<PaginatedResponse<SubclassSpellOption>>(
     `/subclasses/${slug}/spells`,
-    { next: { revalidate: 3600 } },
+    CATALOG_FETCH_INIT,
   );
 }
 
@@ -147,6 +148,6 @@ export async function fetchSubclassOptions(
 ) {
   return catalogFetch<PaginatedResponse<SubclassOptionGroup>>(
     `/subclasses/${slug}/options?level=${level}&limit=${limit}`,
-    { next: { revalidate: 3600 } },
+    CATALOG_FETCH_INIT,
   );
 }

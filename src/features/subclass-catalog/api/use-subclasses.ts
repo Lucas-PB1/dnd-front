@@ -8,9 +8,11 @@ import {
   fetchSubclassesPage,
   subclassCatalogKeys,
 } from "@/features/subclass-catalog/api/subclasses.api";
-import { CATALOG_PAGE_SIZE } from "@/shared/lib/catalog-pagination";
-
-const STALE = 60 * 60 * 1000;
+import { CATALOG_DETAIL_STALE_MS } from "@/shared/lib/catalog-query";
+import {
+  useCatalogDetailQuery,
+  useCatalogListQuery,
+} from "@/shared/lib/use-catalog-query";
 
 /** Compêndio: 20/página + busca e filtro por classe. */
 export function useSubclassesCatalog(params: {
@@ -18,27 +20,23 @@ export function useSubclassesCatalog(params: {
   q?: string;
   class?: string;
 }) {
-  const page = params.page;
-  const q = params.q?.trim() ?? "";
-  const classSlug = params.class?.trim() ?? "";
-  const limit = CATALOG_PAGE_SIZE;
-
-  return useQuery({
-    queryKey: subclassCatalogKeys.listPage({
-      page,
-      limit,
-      q,
-      class: classSlug,
-    }),
-    queryFn: () =>
-      fetchSubclassesPage({
-        page,
-        limit,
-        q: q || undefined,
-        class: classSlug || undefined,
+  return useCatalogListQuery({
+    page: params.page,
+    filters: { q: params.q, class: params.class },
+    queryKey: (p) =>
+      subclassCatalogKeys.listPage({
+        page: p.page,
+        limit: p.limit,
+        q: p.q ?? "",
+        class: p.class ?? "",
       }),
-    staleTime: 60 * 1000,
-    placeholderData: (previous) => previous,
+    queryFn: (p) =>
+      fetchSubclassesPage({
+        page: p.page,
+        limit: p.limit,
+        q: p.q,
+        class: p.class,
+      }),
   });
 }
 
@@ -46,15 +44,15 @@ export function useSubclassClassOptions() {
   return useQuery({
     queryKey: ["classes", "list", "filter-options"] as const,
     queryFn: () => fetchClasses(50),
-    staleTime: STALE,
+    staleTime: CATALOG_DETAIL_STALE_MS,
   });
 }
 
 export function useSubclassDetail(slug: string, enabled = true) {
-  return useQuery({
+  return useCatalogDetailQuery({
+    slug,
     queryKey: subclassCatalogKeys.detail(slug),
     queryFn: () => fetchSubclassBySlug(slug),
-    enabled: enabled && !!slug,
-    staleTime: STALE,
+    enabled,
   });
 }

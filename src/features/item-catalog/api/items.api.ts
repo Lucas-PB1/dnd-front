@@ -1,5 +1,9 @@
 import { catalogFetch } from "@/shared/api/dnd-api/api-client";
 import type { ItemListResponse, ItemSummary } from "@/entities/item/types";
+import {
+  buildCatalogSearchParams,
+  CATALOG_FETCH_INIT,
+} from "@/shared/lib/catalog-query";
 
 export const itemKeys = {
   all: ["items"] as const,
@@ -18,19 +22,16 @@ export async function fetchItems(params?: {
   limit?: number;
   page?: number;
 }) {
-  const search = new URLSearchParams();
-  search.set("limit", String(params?.limit ?? 100));
-  search.set("page", String(params?.page ?? 1));
-  if (params?.q?.trim()) search.set("q", params.q.trim());
-  if (params?.itemType?.trim()) search.set("itemType", params.itemType.trim());
-
-  return catalogFetch<ItemListResponse>(`/items?${search.toString()}`, {
-    next: { revalidate: 3600 },
+  const search = buildCatalogSearchParams({
+    page: params?.page ?? 1,
+    limit: params?.limit ?? 100,
+    q: params?.q,
+    filters: { itemType: params?.itemType },
   });
+
+  return catalogFetch<ItemListResponse>(`/items?${search}`, CATALOG_FETCH_INIT);
 }
 
 export async function fetchItemBySlug(slug: string) {
-  return catalogFetch<ItemSummary>(`/items/${slug}`, {
-    next: { revalidate: 3600 },
-  });
+  return catalogFetch<ItemSummary>(`/items/${slug}`, CATALOG_FETCH_INIT);
 }

@@ -3,6 +3,7 @@
 import { useSpeciesCatalog } from "@/features/species-catalog/api/use-species";
 import { SpeciesCard } from "@/features/species-catalog/ui/species-card";
 import { useCatalogListState } from "@/shared/lib/use-catalog-list-state";
+import { isCatalogPageOutOfRange } from "@/shared/lib/catalog-query";
 import { useClampCatalogPage } from "@/shared/lib/use-clamp-catalog-page";
 import { CatalogPagination } from "@/shared/ui/catalog-pagination";
 import { CatalogSearch } from "@/shared/ui/catalog-search";
@@ -25,8 +26,7 @@ export function SpeciesGrid() {
 
   const { total, totalPages, safePage, from, to } = pageWindow(data?.meta);
 
-  const outOfRange =
-    !data?.data.length && (data?.meta.total ?? 0) > 0 && page > totalPages;
+  const outOfRange = isCatalogPageOutOfRange(data, page, totalPages);
   useClampCatalogPage(outOfRange, setPage);
 
   if (isPending && !data) {

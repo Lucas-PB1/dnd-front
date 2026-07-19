@@ -17,8 +17,7 @@ import {
   type FeatOptionLabelContext,
 } from "@/features/feat-catalog/lib/resolve-feat-option-label";
 import { useItems } from "@/features/item-catalog/api/use-items";
-
-const STALE = 60 * 60 * 1000;
+import { CATALOG_DETAIL_STALE_MS } from "@/shared/lib/catalog-query";
 
 type UseFeatOptionLabelsInput = {
   characterFeats: CharacterFeat[];
@@ -38,7 +37,7 @@ export function useFeatOptionLabels({
     queries: slugs.map((slug) => ({
       queryKey: featKeys.options(slug),
       queryFn: () => fetchFeatOptions(slug),
-      staleTime: STALE,
+      staleTime: CATALOG_DETAIL_STALE_MS,
       enabled: !!slug,
     })),
   });
