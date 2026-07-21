@@ -16,9 +16,13 @@ import {
   countAsiFeatSlots,
 } from "@/features/create-character/lib/asi-feat-slots";
 import { asiFeatSlotsToCharacterFeats } from "@/features/create-character/lib/asi-feat-slots-to-feats";
-import { previewCreateCharacterFeats, resolveCreateCharacterFeats } from "@/features/create-character/lib/preview-create-character-feats";
+import {
+  previewCreateCharacterFeats,
+  resolveCreateCharacterFeats,
+} from "@/features/create-character/lib/preview-create-character-feats";
 import type { CreateCharacterInput } from "@/features/create-character/model/create-character.schema";
 import { CatalogSelect } from "@/features/create-character/ui/catalog-select";
+import { WizardFormSection } from "@/features/create-character/ui/wizard-form-section";
 import {
   FIGHTING_STYLE_FEAT_CATEGORY,
   collectTakenFightingStyleSlugs,
@@ -169,9 +173,7 @@ export function StepFeats({ control, setValue, error }: StepFeatsProps) {
       if (feat.slug === currentSlotSlug) {
         return allowedStyles.has(feat.slug);
       }
-      return (
-        allowedStyles.has(feat.slug) && !takenStyles.includes(feat.slug)
-      );
+      return allowedStyles.has(feat.slug) && !takenStyles.includes(feat.slug);
     });
   }
 
@@ -210,47 +212,32 @@ export function StepFeats({ control, setValue, error }: StepFeatsProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {showAsiSection ? (
-        <section className="space-y-4">
-          <div>
-            <h3 className="text-sm font-semibold">Marcos ASI / talento</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
-              No marco nível {asiLevels.join(", ")}, escolha{" "}
-              <span className="font-medium text-foreground">
-                Aumento no Valor de Atributo
-              </span>{" "}
-              (ou outro talento) e configure abaixo, ou deixe{" "}
-              <span className="font-medium text-foreground">
-                melhoria manual
-              </span>{" "}
-              se você já somou +2/+1 nos atributos na etapa Atributos.
-            </p>
-          </div>
+        <WizardFormSection title="ASI / talentos" compact>
           {feats.isPending ? (
-            <p className="text-sm text-muted-foreground">
-              Carregando talentos…
-            </p>
+            <p className="text-sm text-muted-foreground">Carregando…</p>
           ) : (
-            <div className="space-y-3">
+            <div
+              className={cnAsiGrid(asiLevels.length)}
+            >
               {asiLevels.map((asiLevel, index) => (
                 <CatalogSelect
                   key={asiLevel}
                   id={`asi-feat-slot-${asiLevel}`}
-                  label={`Marco nível ${asiLevel}`}
+                  label={`Nv. ${asiLevel}`}
                   options={[
                     {
                       value: "",
-                      label:
-                        "Melhoria manual (+2/+1 já na etapa Atributos)",
+                      label: "Melhoria manual",
                     },
                     ...sortedSlotFeatOptions(index).map((feat) => ({
                       value: feat.slug,
                       label:
                         feat.slug === ASI_FEAT_SLUG
-                          ? `${feat.name} (+2/+1 ou +1/+1)`
+                          ? `${feat.name} (+2/+1)`
                           : feat.repeatable
-                            ? `${feat.name} (repetível)`
+                            ? `${feat.name} (rep.)`
                             : feat.name,
                     })),
                   ]}
@@ -260,31 +247,25 @@ export function StepFeats({ control, setValue, error }: StepFeatsProps) {
               ))}
             </div>
           )}
-        </section>
+        </WizardFormSection>
       ) : null}
 
       {showOriginSection ? (
-        <section className="space-y-3">
-          <div>
-            <h3 className="text-sm font-semibold">Talento de origem</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Concedido pelo antecedente{" "}
-              <span className="font-medium text-foreground">
-                {backgroundDetail.data?.name}
-              </span>
-              . A API inclui{" "}
-              <span className="font-medium text-foreground">
-                {originFeatName ?? originFeatSlug}
-              </span>{" "}
-              automaticamente na ficha.
-            </p>
-          </div>
-        </section>
+        <WizardFormSection title="Origem" compact>
+          <p className="text-sm">
+            <span className="font-medium">
+              {originFeatName ?? originFeatSlug}
+            </span>
+            <span className="text-muted-foreground">
+              {" "}
+              · {backgroundDetail.data?.name}
+            </span>
+          </p>
+        </WizardFormSection>
       ) : null}
 
       {previewFeats.length > 0 ? (
-        <section className="space-y-3 border-t border-border pt-4">
-          <h3 className="text-sm font-semibold">Opções dos talentos</h3>
+        <WizardFormSection title="Opções" compact>
           <FeatOptionsEditor
             characterFeats={previewFeats}
             featNameBySlug={featNameBySlug}
@@ -293,7 +274,7 @@ export function StepFeats({ control, setValue, error }: StepFeatsProps) {
             classSlug={classSlug}
             onChange={(next: FeatOption[]) => setValue("featOptions", next)}
           />
-        </section>
+        </WizardFormSection>
       ) : null}
 
       {error ? (
@@ -303,4 +284,10 @@ export function StepFeats({ control, setValue, error }: StepFeatsProps) {
       ) : null}
     </div>
   );
+}
+
+function cnAsiGrid(count: number) {
+  if (count <= 1) return "grid gap-4";
+  if (count === 2) return "grid gap-4 sm:grid-cols-2";
+  return "grid gap-4 sm:grid-cols-2 lg:grid-cols-3";
 }

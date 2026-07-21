@@ -1,13 +1,10 @@
 "use client";
 
+import { useMemo } from "react";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { useWatch } from "react-hook-form";
 
-import {
-  useBackgrounds,
-  useBackgroundSkills,
-} from "@/features/background-catalog/api/use-backgrounds";
-import { buildBackgroundAbilityBoostOptions } from "@/entities/background/lib/background-ability-options";
+import { useBackgrounds } from "@/features/background-catalog/api/use-backgrounds";
 import {
   useClasses,
   useClassSubclasses,
@@ -19,9 +16,10 @@ import {
 } from "@/features/create-character/model/create-character.schema";
 import { CatalogSelect } from "@/features/create-character/ui/catalog-select";
 import { OriginPreview } from "@/features/create-character/ui/origin-preview";
+import { WizardFormSection } from "@/features/create-character/ui/wizard-form-section";
 import { useAlignments } from "@/features/reference-catalog/api/use-reference";
 import { useSpecies } from "@/features/species-catalog/api/use-species";
-import { Field, FieldError, FieldGroup, FieldLabel } from "@/shared/ui/field";
+import { Field, FieldError, FieldLabel } from "@/shared/ui/field";
 import { Input } from "@/shared/ui/input";
 
 type StepIdentityProps = {
@@ -29,6 +27,10 @@ type StepIdentityProps = {
   control: Control<CreateCharacterInput>;
   errors: FieldErrors<CreateCharacterInput>;
 };
+
+function sortByLabel<T extends { label: string }>(items: T[]): T[] {
+  return [...items].sort((a, b) => a.label.localeCompare(b.label, "pt"));
+}
 
 export function StepIdentity({ register, control, errors }: StepIdentityProps) {
   const classes = useClasses();
@@ -48,137 +50,166 @@ export function StepIdentity({ register, control, errors }: StepIdentityProps) {
     name: "backgroundSlug",
     defaultValue: "",
   });
+
   const needsSubclass = level >= SUBCLASS_REQUIRED_FROM_LEVEL;
   const subclasses = useClassSubclasses(
     classSlug,
     needsSubclass && !!classSlug,
   );
-  const backgroundSkills = useBackgroundSkills(
-    backgroundSlug,
-    !!backgroundSlug,
+
+  const classOptions = useMemo(
+    () =>
+      sortByLabel(
+        (classes.data?.data ?? []).map((c) => ({
+          value: c.slug,
+          label: c.name,
+        })),
+      ),
+    [classes.data?.data],
   );
-  const selectedBackground = backgrounds.data?.data.find(
-    (b) => b.slug === backgroundSlug,
+
+  const speciesOptions = useMemo(
+    () =>
+      sortByLabel(
+        (species.data?.data ?? []).map((s) => ({
+          value: s.slug,
+          label: s.name,
+        })),
+      ),
+    [species.data?.data],
   );
-  const backgroundAbilityOptions = buildBackgroundAbilityBoostOptions(
-    selectedBackground?.abilityOptionSlugs,
-    selectedBackground?.abilityOptionNames,
+
+  const backgroundOptions = useMemo(
+    () =>
+      sortByLabel(
+        (backgrounds.data?.data ?? []).map((b) => ({
+          value: b.slug,
+          label: b.name,
+        })),
+      ),
+    [backgrounds.data?.data],
+  );
+
+  const subclassOptions = useMemo(
+    () =>
+      sortByLabel(
+        (subclasses.data?.data ?? []).map((s) => ({
+          value: s.slug,
+          label: s.name,
+        })),
+      ),
+    [subclasses.data?.data],
+  );
+
+  const alignmentOptions = useMemo(
+    () =>
+      sortByLabel(
+        (alignments.data?.data ?? []).map((alignment) => ({
+          value: alignment.slug,
+          label: alignment.name,
+        })),
+      ),
+    [alignments.data?.data],
   );
 
   return (
-    <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(16rem,20rem)] lg:items-start lg:gap-8">
-      <FieldGroup>
-        <Field>
-          <FieldLabel htmlFor="name">Nome do personagem</FieldLabel>
-          <Input
-            id="name"
-            autoComplete="off"
-            aria-invalid={!!errors.name}
-            {...register("name")}
-          />
-          <FieldError errors={[errors.name]} />
-        </Field>
+    <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(17rem,22rem)] lg:items-start lg:gap-6">
+      <div className="space-y-3">
+        <WizardFormSection title="Identidade" compact>
+          <Field>
+            <FieldLabel htmlFor="name">Nome</FieldLabel>
+            <Input
+              id="name"
+              autoComplete="off"
+              placeholder="Ex.: Lyra Nocturna"
+              aria-invalid={!!errors.name}
+              {...register("name")}
+            />
+            <FieldError errors={[errors.name]} />
+          </Field>
 
-        <CatalogSelect
-          id="level"
-          label="Nível inicial"
-          description="1 para personagem novo; 5+ para entrar em campanha já em andamento."
-          options={LEVEL_OPTIONS.map((lv) => ({
-            value: String(lv),
-            label: `Nível ${lv}`,
-          }))}
-          error={errors.level}
-          {...register("level", { valueAsNumber: true })}
-        />
+          <div
+            className={
+              needsSubclass
+                ? "grid gap-4 sm:grid-cols-[minmax(6.5rem,8rem)_minmax(0,1fr)_minmax(0,1fr)] sm:items-start"
+                : "grid gap-4 sm:grid-cols-[minmax(7.5rem,9rem)_minmax(0,1fr)] sm:items-start"
+            }
+          >
+            <CatalogSelect
+              id="level"
+              label="Nível"
+              options={LEVEL_OPTIONS.map((lv) => ({
+                value: String(lv),
+                label: String(lv),
+              }))}
+              error={errors.level}
+              {...register("level", { valueAsNumber: true })}
+            />
 
-        <CatalogSelect
-          id="classSlug"
-          label="Classe"
-          description="Comece pela classe — ela define o estilo de jogo (como no Beyond 2024)."
-          isLoading={classes.isPending}
-          options={(classes.data?.data ?? []).map((c) => ({
-            value: c.slug,
-            label: c.name,
-          }))}
-          error={errors.classSlug}
-          {...register("classSlug")}
-        />
+            <CatalogSelect
+              id="classSlug"
+              label="Classe"
+              isLoading={classes.isPending}
+              options={classOptions}
+              error={errors.classSlug}
+              {...register("classSlug")}
+            />
 
-        {needsSubclass ? (
+            {needsSubclass ? (
+              <CatalogSelect
+                id="subclassSlug"
+                label="Subclasse"
+                isLoading={subclasses.isPending}
+                disabled={!classSlug}
+                options={subclassOptions}
+                error={errors.subclassSlug}
+                {...register("subclassSlug")}
+              />
+            ) : null}
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 sm:items-start">
+            <CatalogSelect
+              id="speciesSlug"
+              label="Espécie"
+              isLoading={species.isPending}
+              options={speciesOptions}
+              error={errors.speciesSlug}
+              {...register("speciesSlug")}
+            />
+
+            <CatalogSelect
+              id="backgroundSlug"
+              label="Antecedente"
+              isLoading={backgrounds.isPending}
+              options={backgroundOptions}
+              error={errors.backgroundSlug}
+              {...register("backgroundSlug")}
+            />
+          </div>
+
           <CatalogSelect
-            id="subclassSlug"
-            label="Subclasse"
-            description={`Obrigatória a partir do nível ${SUBCLASS_REQUIRED_FROM_LEVEL}.`}
-            isLoading={subclasses.isPending}
-            options={(subclasses.data?.data ?? []).map((s) => ({
-              value: s.slug,
-              label: s.name,
-            }))}
-            error={errors.subclassSlug}
-            {...register("subclassSlug")}
+            id="alignmentSlug"
+            label="Alinhamento"
+            isLoading={alignments.isPending}
+            options={[
+              { value: "", label: "Não definido" },
+              ...alignmentOptions,
+            ]}
+            {...register("alignmentSlug")}
           />
-        ) : null}
+        </WizardFormSection>
+      </div>
 
-        <CatalogSelect
-          id="speciesSlug"
-          label="Espécie"
-          isLoading={species.isPending}
-          options={(species.data?.data ?? []).map((s) => ({
-            value: s.slug,
-            label: s.name,
-          }))}
-          error={errors.speciesSlug}
-          {...register("speciesSlug")}
+      <aside className="lg:sticky lg:top-4">
+        <OriginPreview
+          classSlug={classSlug || undefined}
+          speciesSlug={speciesSlug || undefined}
+          backgroundSlug={backgroundSlug || undefined}
+          level={level}
+          showPlaceholder={!classSlug && !speciesSlug && !backgroundSlug}
         />
-
-        <CatalogSelect
-          id="backgroundSlug"
-          label="Antecedente"
-          description="Concede boosts de atributo, talento de origem e perícias."
-          isLoading={backgrounds.isPending}
-          options={(backgrounds.data?.data ?? []).map((b) => ({
-            value: b.slug,
-            label: b.name,
-          }))}
-          error={errors.backgroundSlug}
-          {...register("backgroundSlug")}
-        />
-
-        <CatalogSelect
-          id="alignmentSlug"
-          label="Alinhamento"
-          description="Opcional — pode definir depois na ficha."
-          isLoading={alignments.isPending}
-          options={[
-            { value: "", label: "Não definido" },
-            ...(alignments.data?.data ?? []).map((alignment) => ({
-              value: alignment.slug,
-              label: alignment.name,
-            })),
-          ]}
-          {...register("alignmentSlug")}
-        />
-
-        {backgroundSlug && backgroundAbilityOptions.length > 0 ? (
-          <p className="text-sm text-muted-foreground">
-            Bônus de atributo ({selectedBackground?.name}):{" "}
-            {backgroundAbilityOptions.map((o) => o.label).join(", ")}
-          </p>
-        ) : null}
-
-        {backgroundSlug && (backgroundSkills.data?.data.length ?? 0) > 0 ? (
-          <p className="text-sm text-muted-foreground">
-            Perícias do antecedente:{" "}
-            {backgroundSkills.data!.data.map((s) => s.name).join(", ")}
-          </p>
-        ) : null}
-      </FieldGroup>
-
-      <OriginPreview
-        classSlug={classSlug || undefined}
-        speciesSlug={speciesSlug || undefined}
-        backgroundSlug={backgroundSlug || undefined}
-      />
+      </aside>
     </div>
   );
 }

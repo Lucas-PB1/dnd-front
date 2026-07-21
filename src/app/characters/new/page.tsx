@@ -11,27 +11,25 @@ export default function NewCharacterPage() {
   return (
     <div className="flex flex-1 flex-col bg-background text-foreground">
       <AppHeader />
-      <PageMain>
-        <div className="space-y-1">
-          <BackLink href="/characters">Minhas fichas</BackLink>
-          <h1 className="font-heading text-2xl font-semibold tracking-tight sm:text-3xl">
-            Nova ficha
-          </h1>
-          <p className="max-w-2xl text-sm text-muted-foreground">
-            Assistente em etapas — identidade, atributos, perícias, equipamento
-            e magias. A API valida e calcula PV, PB e perícias.
-          </p>
-        </div>
-        <CreateCharacterWizard />
-        <p className="text-sm text-muted-foreground">
-          Quer só explorar o livro?{" "}
+      <PageMain className="gap-4 py-4 sm:py-6">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <BackLink href="/characters">Fichas</BackLink>
+            <h1 className="font-heading text-xl font-semibold tracking-tight sm:text-2xl">
+              Nova ficha
+            </h1>
+          </div>
           <Link
             href="/compendium"
-            className={cn(buttonVariants({ variant: "link" }), "h-auto p-0")}
+            className={cn(
+              buttonVariants({ variant: "link" }),
+              "h-auto p-0 text-sm text-muted-foreground",
+            )}
           >
-            Abrir compêndio
+            Compêndio
           </Link>
-        </p>
+        </div>
+        <CreateCharacterWizard />
       </PageMain>
     </div>
   );

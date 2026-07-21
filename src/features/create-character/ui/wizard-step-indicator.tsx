@@ -25,36 +25,36 @@ export function WizardStepIndicator({
       : Math.round(((Math.max(currentIndex, 0) + 1) / steps.length) * 100);
 
   return (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <p className="text-sm text-muted-foreground">
-            Etapa{" "}
-            <span className="font-medium text-foreground">
-              {currentIndex + 1}
-            </span>{" "}
-            de {steps.length}
+    <div className="space-y-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="font-heading text-lg font-semibold tracking-tight">
+          {current?.label ?? "—"}
+          <span className="ml-2 text-sm font-normal text-muted-foreground">
+            {currentIndex + 1}/{steps.length}
+          </span>
+        </p>
+        {skipped.length > 0 ? (
+          <p className="text-xs text-muted-foreground">
+            Puladas: {skipped.map((step) => step.label).join(", ")}
           </p>
-          <p className="font-heading text-xl font-semibold tracking-tight sm:text-2xl">
-            {current?.label ?? "—"}
-          </p>
-        </div>
-        <div
-          className="h-1.5 overflow-hidden rounded-full bg-muted"
-          role="progressbar"
-          aria-valuenow={progress}
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-label={`Progresso do assistente: ${progress}%`}
-        >
-          <div
-            className="h-full rounded-full bg-primary transition-[width] duration-300 ease-out"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
+        ) : null}
       </div>
 
-      <ol className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div
+        className="h-1 overflow-hidden rounded-full bg-muted"
+        role="progressbar"
+        aria-valuenow={progress}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label={`Progresso do assistente: ${progress}%`}
+      >
+        <div
+          className="h-full rounded-full bg-primary transition-[width] duration-300 ease-out"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+
+      <ol className="flex gap-1.5 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {steps.map((step, index) => {
           const isActive = step.id === currentStep;
           const isDone = currentIndex >= 0 && index < currentIndex;
@@ -63,9 +63,9 @@ export function WizardStepIndicator({
             <li key={step.id} className="shrink-0">
               <span
                 className={cn(
-                  "inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium transition-colors",
+                  "inline-flex items-center gap-1 rounded border px-2 py-1 text-[11px] font-medium transition-colors",
                   isActive &&
-                    "border-primary bg-primary/10 text-primary shadow-sm",
+                    "border-primary bg-primary/10 text-primary",
                   isDone &&
                     !isActive &&
                     "border-border bg-muted/40 text-foreground",
@@ -73,10 +73,11 @@ export function WizardStepIndicator({
                     !isDone &&
                     "border-border/70 text-muted-foreground",
                 )}
+                title={step.label}
               >
                 <span
                   className={cn(
-                    "inline-flex size-5 items-center justify-center rounded-full text-[11px] font-semibold",
+                    "inline-flex size-4 items-center justify-center rounded-full text-[10px] font-semibold",
                     isActive && "bg-primary text-primary-foreground",
                     isDone && !isActive && "bg-secondary/50 text-foreground",
                     !isActive && !isDone && "bg-muted text-muted-foreground",
@@ -84,20 +85,12 @@ export function WizardStepIndicator({
                 >
                   {index + 1}
                 </span>
-                {step.label}
+                <span className="hidden sm:inline">{step.label}</span>
               </span>
             </li>
           );
         })}
       </ol>
-
-      {skipped.length > 0 ? (
-        <p className="rounded-md border border-dashed border-border bg-muted/30 px-3 py-2 text-sm text-muted-foreground">
-          <span className="font-medium text-foreground">Etapas puladas: </span>
-          {skipped.map((step) => step.label).join(", ")}
-          <span> — não se aplicam a esta ficha.</span>
-        </p>
-      ) : null}
     </div>
   );
 }

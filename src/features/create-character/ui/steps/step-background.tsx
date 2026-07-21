@@ -11,12 +11,7 @@ import {
   useBackgroundTools,
 } from "@/features/background-catalog/api/use-backgrounds";
 import { CatalogSelect } from "@/features/create-character/ui/catalog-select";
-import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-} from "@/shared/ui/field";
+import { WizardFormSection } from "@/features/create-character/ui/wizard-form-section";
 
 type StepBackgroundProps = {
   control: Control<CreateCharacterInput>;
@@ -84,54 +79,41 @@ export function StepBackground({
   }));
 
   return (
-    <div className="flex flex-col gap-5">
-      <FieldGroup>
-        <Field>
-          <FieldLabel>Talento de origem</FieldLabel>
-          <FieldDescription>
-            Concedido automaticamente pelo antecedente — a API inclui na ficha.
-          </FieldDescription>
-          <p className="rounded-lg border border-border px-3 py-2 text-sm font-medium">
+    <WizardFormSection title={bg.name} compact>
+      <dl className="grid gap-2 text-sm sm:grid-cols-2">
+        <div>
+          <dt className="text-xs text-muted-foreground">Talento de origem</dt>
+          <dd className="font-medium">
             {bg.originFeatName ?? bg.originFeatSlug ?? "—"}
-          </p>
-        </Field>
-
+          </dd>
+        </div>
         {(skills.data?.data.length ?? 0) > 0 ? (
-          <Field>
-            <FieldLabel>Perícias do antecedente</FieldLabel>
-            <p className="text-sm text-muted-foreground">
-              {skills.data!.data.map((s) => s.name).join(", ")}
-            </p>
-          </Field>
+          <div>
+            <dt className="text-xs text-muted-foreground">Perícias</dt>
+            <dd>{skills.data!.data.map((s) => s.name).join(", ")}</dd>
+          </div>
         ) : null}
-
-        <Field>
-          <FieldLabel>Proficiência em ferramenta</FieldLabel>
-          <FieldDescription>
-            {bg.toolProficiencyDescription ?? "Conforme o PHB 2024."}
-          </FieldDescription>
-
-          {bg.toolProficiencyKind === "fixed" ? (
-            <p className="rounded-lg border border-border px-3 py-2 text-sm font-medium">
+        {bg.toolProficiencyKind === "fixed" ? (
+          <div className="sm:col-span-2">
+            <dt className="text-xs text-muted-foreground">Ferramenta</dt>
+            <dd className="font-medium">
               {bg.toolItemName ?? bg.toolItemSlug ?? "—"}
-            </p>
-          ) : bg.toolProficiencyKind === "choice" ? (
-            <CatalogSelect
-              id="background-tool"
-              label="Escolha a ferramenta"
-              options={toolOptions}
-              isLoading={tools.isPending}
-              value={toolSlug}
-              onChange={(e) =>
-                setValue("backgroundToolItemSlug", e.target.value)
-              }
-              error={errors.backgroundToolItemSlug}
-            />
-          ) : (
-            <p className="text-sm text-muted-foreground">Nenhuma ferramenta.</p>
-          )}
-        </Field>
-      </FieldGroup>
-    </div>
+            </dd>
+          </div>
+        ) : null}
+      </dl>
+
+      {bg.toolProficiencyKind === "choice" ? (
+        <CatalogSelect
+          id="background-tool"
+          label="Ferramenta"
+          options={toolOptions}
+          isLoading={tools.isPending}
+          value={toolSlug}
+          onChange={(e) => setValue("backgroundToolItemSlug", e.target.value)}
+          error={errors.backgroundToolItemSlug}
+        />
+      ) : null}
+    </WizardFormSection>
   );
 }

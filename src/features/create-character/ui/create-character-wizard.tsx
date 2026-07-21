@@ -17,6 +17,7 @@ import {
   createCharacterSchema,
   identityStepSchema,
   type CreateCharacterInput,
+  SUBCLASS_REQUIRED_FROM_LEVEL,
 } from "@/features/create-character/model/create-character.schema";
 import { toCreateCharacterPayload } from "@/features/create-character/model/to-create-payload";
 import {
@@ -153,6 +154,13 @@ export function CreateCharacterWizard() {
   const prevBackgroundSlugRef = useRef(backgroundSlug);
 
   useEffect(() => {
+    if (level < SUBCLASS_REQUIRED_FROM_LEVEL) {
+      setValue("subclassSlug", "");
+      setValue("subclassOptions", []);
+    }
+  }, [level, setValue]);
+
+  useEffect(() => {
     if (prevBackgroundSlugRef.current !== backgroundSlug) {
       setValue("backgroundAbilityBoostPlus2Slug", "");
       setValue("backgroundAbilityBoostPlus1Slug", "");
@@ -166,6 +174,8 @@ export function CreateCharacterWizard() {
   useEffect(() => {
     if (prevClassSlugRef.current !== classSlug) {
       setValue("classSkillSlugs", []);
+      setValue("subclassSlug", "");
+      setValue("subclassOptions", []);
       setValue(
         "equipment",
         (getValues("equipment") ?? []).filter((e) => e.source !== "class"),
@@ -382,7 +392,7 @@ export function CreateCharacterWizard() {
 
   return (
     <form
-      className="flex w-full flex-col gap-6"
+      className="flex w-full flex-col gap-4"
       onSubmit={handleSubmit((values) => {
         create.mutate(toCreateCharacterPayload(values));
       })}
@@ -478,19 +488,19 @@ export function CreateCharacterWizard() {
         </p>
       ) : null}
 
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-2 pt-1">
         {stepIndex > 0 ? (
-          <Button type="button" variant="outline" size="lg" onClick={goBack}>
+          <Button type="button" variant="outline" onClick={goBack}>
             Voltar
           </Button>
         ) : null}
 
         {!isLastStep ? (
-          <Button type="button" size="lg" onClick={goNext}>
+          <Button type="button" onClick={goNext}>
             Continuar
           </Button>
         ) : (
-          <Button type="submit" size="lg" disabled={create.isPending}>
+          <Button type="submit" disabled={create.isPending}>
             {create.isPending ? "Criando ficha…" : "Criar ficha"}
           </Button>
         )}
@@ -498,16 +508,11 @@ export function CreateCharacterWizard() {
         <Button
           type="button"
           variant="ghost"
-          size="lg"
           onClick={() => router.push("/characters")}
         >
-          Voltar às fichas
+          Cancelar
         </Button>
       </div>
-
-      <p className="text-xs text-muted-foreground">
-        Suas escolhas são validadas ao criar — PV e bônus saem prontos na ficha.
-      </p>
     </form>
   );
 }

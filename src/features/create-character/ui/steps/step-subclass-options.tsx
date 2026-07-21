@@ -6,7 +6,10 @@ import { useWatch } from "react-hook-form";
 
 import type { SubclassOption } from "@/entities/character/sheet-types";
 import { isSubclassRequired } from "@/entities/character/lib/subclass";
-import { useClassDetail, useSubclassOptions } from "@/features/class-catalog/api/use-classes";
+import {
+  useClassDetail,
+  useSubclassOptions,
+} from "@/features/class-catalog/api/use-classes";
 import {
   FIGHTING_STYLE_FEAT_CATEGORY,
   collectTakenFightingStyleSlugs,
@@ -16,13 +19,8 @@ import {
 import { useFeats } from "@/features/reference-catalog/api/use-reference";
 import type { CreateCharacterInput } from "@/features/create-character/model/create-character.schema";
 import { CatalogSelect } from "@/features/create-character/ui/catalog-select";
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/shared/ui/field";
+import { WizardFormSection } from "@/features/create-character/ui/wizard-form-section";
+import { FieldError } from "@/shared/ui/field";
 
 type StepSubclassOptionsProps = {
   control: Control<CreateCharacterInput>;
@@ -94,7 +92,7 @@ export function StepSubclassOptions({
   if (!enabled) {
     return (
       <p className="text-sm text-muted-foreground">
-        Subclasse não aplicável neste nível — nenhuma opção necessária.
+        Nenhuma opção de subclasse neste nível.
       </p>
     );
   }
@@ -108,73 +106,67 @@ export function StepSubclassOptions({
   }
 
   if (optionsQuery.isPending) {
-    return <p className="text-sm text-muted-foreground">Carregando opções…</p>;
+    return <p className="text-sm text-muted-foreground">Carregando…</p>;
   }
 
   if (groups.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
-        A subclasse escolhida não tem opções selecionáveis neste nível.
+        Sem opções selecionáveis neste nível.
       </p>
     );
   }
 
   return (
-    <FieldGroup>
-      <Field>
-        <FieldLabel>Opções de subclasse</FieldLabel>
-        <FieldDescription>
-          Features com escolha desbloqueadas até o nível {level}.
-        </FieldDescription>
-        <FieldError errors={error ? [{ message: error }] : []} />
-      </Field>
+    <WizardFormSection title="Opções de subclasse" compact>
+      <FieldError errors={error ? [{ message: error }] : []} />
+      <div className="grid gap-4 sm:grid-cols-2">
+        {groups.map((group) => {
+          const selected = subclassOptions.find(
+            (o) => o.optionKey === group.optionKey,
+          )?.valueId;
 
-      {groups.map((group) => {
-        const selected = subclassOptions.find(
-          (o) => o.optionKey === group.optionKey,
-        )?.valueId;
+          const isFightingStyle =
+            group.valueType === "fighting_style" ||
+            isFightingStyleSubclassOptionKey(group.optionKey);
 
-        const isFightingStyle =
-          group.valueType === "fighting_style" ||
-          isFightingStyleSubclassOptionKey(group.optionKey);
-
-        let valueOptions = group.values;
-        if (isFightingStyle && classFightingStyles.length > 0) {
-          const taken = collectTakenFightingStyleSlugs({
-            characterFeatSlugs: asiFeatSlotSlugs.filter(Boolean),
-            fightingStyleFeatSlugs: fightingStyleFeatSlugs,
-            subclassOptions: subclassOptions.filter(
-              (o) => o.optionKey !== group.optionKey,
-            ),
-          });
-          valueOptions = filterAllowedFightingStyleValues(
-            group.values,
-            classFightingStyles,
-            taken,
-          );
-          if (selected && !valueOptions.some((v) => v.valueId === selected)) {
-            const current = group.values.find((v) => v.valueId === selected);
-            if (current) {
-              valueOptions = [current, ...valueOptions];
+          let valueOptions = group.values;
+          if (isFightingStyle && classFightingStyles.length > 0) {
+            const taken = collectTakenFightingStyleSlugs({
+              characterFeatSlugs: asiFeatSlotSlugs.filter(Boolean),
+              fightingStyleFeatSlugs: fightingStyleFeatSlugs,
+              subclassOptions: subclassOptions.filter(
+                (o) => o.optionKey !== group.optionKey,
+              ),
+            });
+            valueOptions = filterAllowedFightingStyleValues(
+              group.values,
+              classFightingStyles,
+              taken,
+            );
+            if (selected && !valueOptions.some((v) => v.valueId === selected)) {
+              const current = group.values.find((v) => v.valueId === selected);
+              if (current) {
+                valueOptions = [current, ...valueOptions];
+              }
             }
           }
-        }
 
-        return (
-          <CatalogSelect
-            key={group.optionKey}
-            id={`subclass-opt-${group.optionKey}`}
-            label={group.label}
-            description={`Desbloqueia no nível ${group.unlockLevel}`}
-            options={valueOptions.map((v) => ({
-              value: v.valueId,
-              label: v.label,
-            }))}
-            value={selected ?? ""}
-            onChange={(e) => setOption(group.optionKey, e.target.value)}
-          />
-        );
-      })}
-    </FieldGroup>
+          return (
+            <CatalogSelect
+              key={group.optionKey}
+              id={`subclass-opt-${group.optionKey}`}
+              label={`${group.label} (nv. ${group.unlockLevel})`}
+              options={valueOptions.map((v) => ({
+                value: v.valueId,
+                label: v.label,
+              }))}
+              value={selected ?? ""}
+              onChange={(e) => setOption(group.optionKey, e.target.value)}
+            />
+          );
+        })}
+      </div>
+    </WizardFormSection>
   );
 }

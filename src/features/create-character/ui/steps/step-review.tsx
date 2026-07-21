@@ -116,11 +116,11 @@ function ReviewSection({
   return (
     <section
       className={cn(
-        "space-y-3 border-b border-border/70 pb-5 last:border-b-0 last:pb-0",
+        "space-y-2 border-b border-border/70 pb-3 last:border-b-0 last:pb-0",
         className,
       )}
     >
-      <h3 className="font-heading text-lg font-semibold tracking-tight">
+      <h3 className="font-heading text-base font-semibold tracking-tight">
         {title}
       </h3>
       {children}
@@ -134,11 +134,11 @@ function ChipList({ items }: { items: string[] }) {
   }
 
   return (
-    <ul className="flex flex-wrap gap-2">
+    <ul className="flex flex-wrap gap-1.5">
       {items.map((item) => (
         <li
           key={item}
-          className="rounded-md border border-border bg-muted/30 px-2.5 py-1 text-sm"
+          className="rounded-md border border-border bg-muted/30 px-2 py-0.5 text-xs"
         >
           {item}
         </li>
@@ -244,69 +244,49 @@ export function StepReview({ control }: StepReviewProps) {
         : values.abilityGenerationMethodSlug;
 
   return (
-    <div className="flex flex-col gap-2">
-      <p className="mb-2 text-sm text-muted-foreground">
-        Confira os dados antes de criar. Você ainda pode voltar e ajustar.
-      </p>
-
+    <div className="flex flex-col gap-3">
       <ReviewSection title="Identidade">
-        <dl className="grid gap-3 sm:grid-cols-2">
+        <dl className="grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-3">
           <div>
-            <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-              Nome
-            </dt>
-            <dd className="font-heading text-xl font-semibold">
+            <dt className="text-xs text-muted-foreground">Nome</dt>
+            <dd className="font-heading font-semibold">
               {values.name || "—"}
             </dd>
           </div>
           <div>
-            <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-              Nível
-            </dt>
-            <dd className="text-lg font-medium">{values.level}</dd>
+            <dt className="text-xs text-muted-foreground">Nível</dt>
+            <dd className="font-medium">{values.level}</dd>
           </div>
           <div>
-            <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-              Espécie
-            </dt>
+            <dt className="text-xs text-muted-foreground">Espécie</dt>
             <dd>{labels.identity.speciesName ?? values.speciesSlug}</dd>
           </div>
           <div>
-            <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-              Classe
-            </dt>
+            <dt className="text-xs text-muted-foreground">Classe</dt>
             <dd>{labels.identity.className ?? values.classSlug}</dd>
           </div>
           <div>
-            <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-              Antecedente
-            </dt>
+            <dt className="text-xs text-muted-foreground">Antecedente</dt>
             <dd>{labels.identity.backgroundName ?? values.backgroundSlug}</dd>
           </div>
           <div>
-            <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-              Subclasse
-            </dt>
+            <dt className="text-xs text-muted-foreground">Subclasse</dt>
             <dd>
               {labels.identity.subclassName ?? (
-                <span className="text-muted-foreground">Não se aplica</span>
+                <span className="text-muted-foreground">—</span>
               )}
             </dd>
           </div>
           <div>
-            <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-              Alinhamento
-            </dt>
+            <dt className="text-xs text-muted-foreground">Alinhamento</dt>
             <dd>
               {labels.identity.alignmentName ?? (
-                <span className="text-muted-foreground">Não definido</span>
+                <span className="text-muted-foreground">—</span>
               )}
             </dd>
           </div>
           <div>
-            <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-              Método de atributos
-            </dt>
+            <dt className="text-xs text-muted-foreground">Método</dt>
             <dd>{methodLabel}</dd>
           </div>
         </dl>
@@ -392,10 +372,10 @@ export function StepReview({ control }: StepReviewProps) {
       </ReviewSection>
 
       <ReviewSection title="Antecedente">
-        <dl className="space-y-2 text-sm">
+        <dl className="grid gap-2 text-sm sm:grid-cols-2">
           {(backgroundSkills.data?.data.length ?? 0) > 0 ? (
             <div>
-              <dt className="text-muted-foreground">Perícias</dt>
+              <dt className="text-xs text-muted-foreground">Perícias</dt>
               <dd>
                 {backgroundSkills.data!.data.map((s) => s.name).join(", ")}
               </dd>
@@ -403,11 +383,13 @@ export function StepReview({ control }: StepReviewProps) {
           ) : null}
           {toolLabel ? (
             <div>
-              <dt className="text-muted-foreground">Ferramenta</dt>
+              <dt className="text-xs text-muted-foreground">Ferramenta</dt>
               <dd>{toolLabel}</dd>
             </div>
           ) : (
-            <p className="text-muted-foreground">Sem ferramenta escolhida.</p>
+            <p className="text-sm text-muted-foreground">
+              Sem ferramenta escolhida.
+            </p>
           )}
         </dl>
       </ReviewSection>

@@ -8,13 +8,8 @@ import {
   useClassSkills,
 } from "@/features/class-catalog/api/use-classes";
 import type { CreateCharacterInput } from "@/features/create-character/model/create-character.schema";
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/shared/ui/field";
+import { WizardFormSection } from "@/features/create-character/ui/wizard-form-section";
+import { FieldError } from "@/shared/ui/field";
 import { cn } from "@/shared/lib/utils";
 
 type StepClassSkillsProps = {
@@ -60,7 +55,7 @@ export function StepClassSkills({
   if (!classSlug) {
     return (
       <p className="text-sm text-muted-foreground">
-        Volte à etapa de identidade e escolha uma classe.
+        Volte à identidade e escolha uma classe.
       </p>
     );
   }
@@ -74,30 +69,18 @@ export function StepClassSkills({
   if (requiredCount === 0 || options.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
-        A classe <strong>{classDetail.data?.name ?? classSlug}</strong> não
-        exige escolha de perícias adicionais.
+        {classDetail.data?.name ?? classSlug} não exige perícias à escolha.
       </p>
     );
   }
 
   return (
-    <FieldGroup>
-      <Field>
-        <FieldLabel>Perícias de classe</FieldLabel>
-        <FieldDescription>
-          Escolha {requiredCount} perícia{requiredCount === 1 ? "" : "s"} da
-          pool de {classDetail.data?.name ?? classSlug}.
-          {classDetail.data?.skillChoiceFrom
-            ? ` (${classDetail.data.skillChoiceFrom})`
-            : null}
-        </FieldDescription>
-        <p className="text-sm text-muted-foreground">
-          Selecionadas: {classSkillSlugs.length} / {requiredCount}
-        </p>
-        <FieldError errors={error ? [{ message: error }] : []} />
-      </Field>
-
-      <ul className="grid gap-2 sm:grid-cols-2">
+    <WizardFormSection
+      title={`Perícias · ${classSkillSlugs.length}/${requiredCount}`}
+      compact
+    >
+      <FieldError errors={error ? [{ message: error }] : []} />
+      <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
         {options.map((skill) => {
           const checked = classSkillSlugs.includes(skill.slug);
           const disabled = !checked && atLimit;
@@ -106,7 +89,7 @@ export function StepClassSkills({
             <li key={skill.slug}>
               <label
                 className={cn(
-                  "flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 text-sm",
+                  "flex cursor-pointer items-center gap-2 rounded-lg border px-2.5 py-2 text-sm",
                   checked && "border-primary bg-primary/5",
                   disabled && "cursor-not-allowed opacity-50",
                 )}
@@ -124,6 +107,6 @@ export function StepClassSkills({
           );
         })}
       </ul>
-    </FieldGroup>
+    </WizardFormSection>
   );
 }

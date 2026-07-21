@@ -22,17 +22,12 @@ import {
   useBackgrounds,
 } from "@/features/background-catalog/api/use-backgrounds";
 import { CatalogSelect } from "@/features/create-character/ui/catalog-select";
+import { WizardFormSection } from "@/features/create-character/ui/wizard-form-section";
 import { previewBackgroundAbilityBoosts } from "@/entities/character/lib/background-boost";
 import { useAbilityGenerationMethods } from "@/features/reference-catalog/api/use-reference";
 import { useRollAbilities } from "@/features/character-sheet/api/use-roll-abilities";
 import { Button } from "@/shared/ui/button";
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/shared/ui/field";
+import { Field, FieldError, FieldLabel } from "@/shared/ui/field";
 import { Input } from "@/shared/ui/input";
 import { nativeSelectClassName } from "@/shared/ui/native-select";
 import { cn } from "@/shared/lib/utils";
@@ -165,7 +160,6 @@ export function StepAbilities({
       : null;
 
   const isPointBuy = method === "point-buy";
-  const isRoll = method === "roll";
   const hasRawPool = !isPointBuy && rawValues && rawValues.length === 6;
   const rawTotal = hasRawPool
     ? rawValues.reduce((sum, value) => sum + value, 0)
@@ -210,92 +204,63 @@ export function StepAbilities({
   }
 
   return (
-    <div className="flex flex-col gap-5">
-      <FieldGroup>
-        <Field>
-          <FieldLabel htmlFor="abilityGenerationMethodSlug">
-            Método de geração
-          </FieldLabel>
-          <FieldDescription>
-            {methods.data?.find((m) => m.slug === method)?.description ??
-              "Conjunto padrão, rolagem 4d6 ou point-buy (27 pontos)."}
-            {isRoll ? (
-              <>
-                {" "}
-                A soma dos seis valores costuma ficar entre{" "}
-                <span className="font-medium text-foreground">72 e 80</span>{" "}
-                (média ~73).
-              </>
-            ) : null}
-          </FieldDescription>
-          <select
-            id="abilityGenerationMethodSlug"
-            className={nativeSelectClassName}
-            value={method}
-            onChange={(e) =>
-              applyMethodChange(
-                e.target
-                  .value as CreateCharacterInput["abilityGenerationMethodSlug"],
-              )
-            }
-          >
-            {methods.isPending || !methods.data?.length ? (
-              <>
-                <option value="standard-array">
-                  Conjunto padrão (15, 14, 13, 12, 10, 8)
-                </option>
-                <option value="roll">Rolagem 4d6 (descarta o menor)</option>
-                <option value="point-buy">Point-buy (27 pontos)</option>
-              </>
-            ) : (
-              methods.data.map((row) => (
-                <option key={row.slug} value={row.slug}>
-                  {row.name}
-                </option>
-              ))
-            )}
-          </select>
-        </Field>
+    <div className="space-y-3">
+      <WizardFormSection title="Atributos" compact>
+        <div className="flex flex-wrap items-end gap-3">
+          <Field className="min-w-[12rem] flex-1">
+            <FieldLabel htmlFor="abilityGenerationMethodSlug">
+              Método
+            </FieldLabel>
+            <select
+              id="abilityGenerationMethodSlug"
+              className={nativeSelectClassName}
+              value={method}
+              onChange={(e) =>
+                applyMethodChange(
+                  e.target
+                    .value as CreateCharacterInput["abilityGenerationMethodSlug"],
+                )
+              }
+            >
+              {methods.isPending || !methods.data?.length ? (
+                <>
+                  <option value="standard-array">Conjunto padrão</option>
+                  <option value="roll">Rolagem 4d6</option>
+                  <option value="point-buy">Point-buy</option>
+                </>
+              ) : (
+                methods.data.map((row) => (
+                  <option key={row.slug} value={row.slug}>
+                    {row.name}
+                  </option>
+                ))
+              )}
+            </select>
+          </Field>
 
-        {!isPointBuy ? (
-          <div className="flex flex-wrap items-center gap-3">
+          {!isPointBuy ? (
             <Button
               type="button"
               variant="outline"
               onClick={handleGenerate}
               disabled={roll.isPending}
             >
-              {roll.isPending ? "Gerando…" : "Gerar valores"}
+              {roll.isPending ? "Gerando…" : "Gerar"}
             </Button>
-            {hasRawPool ? (
-              <p className="text-sm text-muted-foreground">
-                Valores gerados: {rawValues.join(", ")}
-                {rawTotal != null ? (
-                  <>
-                    {" "}
-                    · Soma{" "}
-                    <span className="font-medium text-foreground">
-                      {rawTotal}
-                    </span>
-                    {isRoll && rawTotal >= 72 && rawTotal <= 80 ? (
-                      <span className="text-primary"> (faixa típica)</span>
-                    ) : null}
-                  </>
-                ) : null}{" "}
-                — ordem padrão Força → Carisma; ajuste nos selects se quiser.
-              </p>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Clique em gerar para obter os valores da API.
-              </p>
-            )}
-          </div>
-        ) : (
-          <p className="text-sm text-muted-foreground">
-            Pontos gastos: {pointBuySpent(abilityScores)} / 27 · Restantes:{" "}
-            {pointBuyRemaining(abilityScores)}
-          </p>
-        )}
+          ) : (
+            <p className="pb-2 text-xs text-muted-foreground">
+              {pointBuySpent(abilityScores)}/27 · resta{" "}
+              {pointBuyRemaining(abilityScores)}
+            </p>
+          )}
+
+          {hasRawPool ? (
+            <p className="pb-2 text-xs text-muted-foreground">
+              Pool: {rawValues.join(", ")}
+              {rawTotal != null ? ` · Σ ${rawTotal}` : null}
+            </p>
+          ) : null}
+        </div>
 
         {roll.isError ? (
           <p className="text-sm text-destructive" role="alert">
@@ -306,71 +271,66 @@ export function StepAbilities({
         ) : null}
 
         <FieldError errors={[errors.abilityScores]} />
-      </FieldGroup>
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        {ABILITY_KEYS.map((key) => (
-          <div key={key} className="rounded-lg border border-border px-3 py-3">
-            <p className="text-sm font-medium">{ABILITY_LABELS_PT[key]}</p>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+          {ABILITY_KEYS.map((key) => (
+            <div
+              key={key}
+              className="rounded-lg border border-border px-2.5 py-2"
+            >
+              <p className="text-xs font-medium">{ABILITY_LABELS_PT[key]}</p>
 
-            {isPointBuy ? (
-              <Input
-                type="number"
-                min={POINT_BUY_MIN}
-                max={POINT_BUY_MAX}
-                className="mt-2"
-                value={abilityScores[key]}
-                onChange={(e) => {
-                  const next = Number(e.target.value);
-                  setValue("abilityScores", {
-                    ...abilityScores,
-                    [key]: Number.isFinite(next) ? next : POINT_BUY_MIN,
-                  });
-                }}
-              />
-            ) : hasRawPool ? (
-              <select
-                className={cn(nativeSelectClassName, "mt-2")}
-                value={rawValues.indexOf(abilityScores[key])}
-                onChange={(e) => handleRawPick(key, Number(e.target.value))}
-              >
-                {rawValues.map((value, index) => (
-                  <option key={`${key}-${index}`} value={index}>
-                    {value}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <p className="mt-2 text-2xl font-semibold">
-                {abilityScores[key]}
+              {isPointBuy ? (
+                <Input
+                  type="number"
+                  min={POINT_BUY_MIN}
+                  max={POINT_BUY_MAX}
+                  className="mt-1.5 h-8"
+                  value={abilityScores[key]}
+                  onChange={(e) => {
+                    const next = Number(e.target.value);
+                    setValue("abilityScores", {
+                      ...abilityScores,
+                      [key]: Number.isFinite(next) ? next : POINT_BUY_MIN,
+                    });
+                  }}
+                />
+              ) : hasRawPool ? (
+                <select
+                  className={cn(nativeSelectClassName, "mt-1.5 h-8")}
+                  value={rawValues.indexOf(abilityScores[key])}
+                  onChange={(e) => handleRawPick(key, Number(e.target.value))}
+                >
+                  {rawValues.map((value, index) => (
+                    <option key={`${key}-${index}`} value={index}>
+                      {value}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <p className="mt-1 text-xl font-semibold tabular-nums">
+                  {abilityScores[key]}
+                </p>
+              )}
+
+              <p className="mt-0.5 font-mono text-xs text-muted-foreground">
+                {abilityModifier(abilityScores[key])}
               </p>
-            )}
-
-            <p className="mt-1 font-mono text-sm text-muted-foreground">
-              {abilityModifier(abilityScores[key])}
-            </p>
-          </div>
-        ))}
-      </div>
+            </div>
+          ))}
+        </div>
+      </WizardFormSection>
 
       {backgroundSlug && boostOptions.length > 0 ? (
-        <FieldGroup key={backgroundSlug}>
-          <Field>
-            <FieldLabel>Bônus do antecedente (PHB 2024)</FieldLabel>
-            <FieldDescription>
-              {selectedBackground?.name ?? "Antecedente"} permite +2 e +1 apenas
-              em:{" "}
-              <span className="font-medium text-foreground">
-                {boostOptions.map((o) => o.label).join(", ")}
-              </span>
-              . A API aplica os bônus sobre os valores base acima.
-            </FieldDescription>
-          </Field>
-
-          <div className="grid gap-3 sm:grid-cols-2">
+        <WizardFormSection
+          key={backgroundSlug}
+          title={`Bônus · ${selectedBackground?.name ?? "Antecedente"}`}
+          compact
+        >
+          <div className="grid gap-4 sm:grid-cols-2">
             <CatalogSelect
               id="background-boost-plus2"
-              label="Atributo +2"
+              label="+2"
               options={boostOptions}
               isLoading={boostOptionsLoading}
               value={boostPlus2Value}
@@ -381,7 +341,7 @@ export function StepAbilities({
             />
             <CatalogSelect
               id="background-boost-plus1"
-              label="Atributo +1"
+              label="+1"
               options={boostOptions.filter((o) => o.value !== boostPlus2Value)}
               isLoading={boostOptionsLoading}
               value={boostPlus1Value}
@@ -393,32 +353,29 @@ export function StepAbilities({
           </div>
 
           {previewScores ? (
-            <div className="rounded-lg border border-border p-3">
-              <p className="mb-2 text-sm font-medium">
-                Valores finais (preview)
-              </p>
-              <div className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-3">
-                {ABILITY_KEYS.map((key) => (
-                  <div key={key}>
-                    <span className="text-muted-foreground">
-                      {ABILITY_LABELS_PT[key]}:{" "}
+            <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
+              {ABILITY_KEYS.map((key) => (
+                <span key={key}>
+                  <span className="text-muted-foreground">
+                    {ABILITY_LABELS_PT[key]}{" "}
+                  </span>
+                  <span className="font-medium tabular-nums">
+                    {previewScores[key]}
+                  </span>
+                  {previewScores[key] !== abilityScores[key] ? (
+                    <span className="text-primary">
+                      {" "}
+                      (+{previewScores[key] - abilityScores[key]})
                     </span>
-                    <span className="font-medium">{previewScores[key]}</span>
-                    {previewScores[key] !== abilityScores[key] ? (
-                      <span className="ml-1 text-xs text-primary">
-                        (base {abilityScores[key]})
-                      </span>
-                    ) : null}
-                  </div>
-                ))}
-              </div>
+                  ) : null}
+                </span>
+              ))}
             </div>
           ) : null}
-        </FieldGroup>
+        </WizardFormSection>
       ) : backgroundSlug && !boostOptionsLoading ? (
         <p className="text-sm text-destructive" role="alert">
-          Não foi possível carregar os atributos permitidos para este
-          antecedente.
+          Não foi possível carregar os atributos deste antecedente.
         </p>
       ) : null}
     </div>

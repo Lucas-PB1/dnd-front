@@ -15,6 +15,7 @@ export function CatalogSelect({
   isLoading,
   error,
   className,
+  disabled,
   ...props
 }: {
   id: string;
@@ -23,6 +24,7 @@ export function CatalogSelect({
   options: { value: string; label: string }[];
   isLoading?: boolean;
   error?: { message?: string };
+  disabled?: boolean;
 } & React.ComponentProps<"select">) {
   const hasEmptyOption = options.some((opt) => opt.value === "");
 
@@ -32,7 +34,7 @@ export function CatalogSelect({
       {description ? <FieldDescription>{description}</FieldDescription> : null}
       <select
         id={id}
-        disabled={isLoading}
+        disabled={isLoading || disabled}
         aria-invalid={!!error}
         className={cn(nativeSelectClassName, className)}
         {...props}

@@ -22,13 +22,8 @@ import {
   type EquipmentPackage,
 } from "@/features/create-character/lib/equipment-selection";
 import type { CreateCharacterInput } from "@/features/create-character/model/create-character.schema";
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/shared/ui/field";
+import { WizardFormSection } from "@/features/create-character/ui/wizard-form-section";
+import { FieldError } from "@/shared/ui/field";
 import { cn } from "@/shared/lib/utils";
 
 type StepEquipmentProps = {
@@ -48,7 +43,7 @@ function PackagePreviewList({
     );
   }
   return (
-    <ul className="mt-2 list-inside list-disc space-y-0.5 text-xs text-muted-foreground">
+    <ul className="mt-1 list-inside list-disc space-y-0 text-[11px] leading-snug text-muted-foreground">
       {lines.map((line, index) => (
         <li key={`${line}-${index}`}>{line}</li>
       ))}
@@ -158,25 +153,17 @@ export function StepEquipment({
   }
 
   return (
-    <FieldGroup>
-      <Field>
-        <FieldLabel>Equipamento inicial</FieldLabel>
-        <FieldDescription>
-          Escolha um pacote da classe e do antecedente. Os itens do pacote entram
-          automaticamente na ficha — não é preciso marcar checkboxes.
-        </FieldDescription>
-        <FieldError errors={error ? [{ message: error }] : []} />
-      </Field>
+    <div className="space-y-3">
+      <FieldError errors={error ? [{ message: error }] : []} />
 
       {classPackages.length > 0 ? (
-        <Field>
-          <FieldLabel>Pacote da classe</FieldLabel>
-          <div className="flex flex-col gap-3">
+        <WizardFormSection title="Classe" compact>
+          <div className="grid gap-2 sm:grid-cols-2">
             {classPackages.map((pkg) => (
               <label
                 key={pkg.packageSlug}
                 className={cn(
-                  "flex cursor-pointer gap-3 rounded-lg border px-3 py-3 text-sm",
+                  "flex cursor-pointer gap-2 rounded-lg border px-2.5 py-2 text-sm",
                   selectedClassPkg === pkg.packageSlug &&
                     "border-primary bg-primary/5",
                 )}
@@ -184,7 +171,7 @@ export function StepEquipment({
                 <input
                   type="radio"
                   name="class-equipment-package"
-                  className="mt-1 shrink-0"
+                  className="mt-0.5 shrink-0"
                   checked={selectedClassPkg === pkg.packageSlug}
                   onChange={() => selectClassPackage(pkg.packageSlug)}
                 />
@@ -195,18 +182,17 @@ export function StepEquipment({
               </label>
             ))}
           </div>
-        </Field>
+        </WizardFormSection>
       ) : null}
 
       {backgroundPackages.length > 0 || backgroundGoldOption != null ? (
-        <Field>
-          <FieldLabel>Pacote do antecedente</FieldLabel>
-          <div className="flex flex-col gap-3">
+        <WizardFormSection title="Antecedente" compact>
+          <div className="grid gap-2 sm:grid-cols-2">
             {backgroundPackages.map((pkg) => (
               <label
                 key={pkg.packageSlug}
                 className={cn(
-                  "flex cursor-pointer gap-3 rounded-lg border px-3 py-3 text-sm",
+                  "flex cursor-pointer gap-2 rounded-lg border px-2.5 py-2 text-sm",
                   selectedBgPkg === pkg.packageSlug &&
                     "border-primary bg-primary/5",
                 )}
@@ -214,7 +200,7 @@ export function StepEquipment({
                 <input
                   type="radio"
                   name="background-equipment-package"
-                  className="mt-1 shrink-0"
+                  className="mt-0.5 shrink-0"
                   checked={selectedBgPkg === pkg.packageSlug}
                   onChange={() => selectBackgroundPackage(pkg.packageSlug)}
                 />
@@ -230,7 +216,7 @@ export function StepEquipment({
             {backgroundGoldOption != null ? (
               <label
                 className={cn(
-                  "flex cursor-pointer gap-3 rounded-lg border px-3 py-3 text-sm",
+                  "flex cursor-pointer gap-2 rounded-lg border px-2.5 py-2 text-sm",
                   selectedBgPkg === BACKGROUND_GOLD_PACKAGE_SLUG &&
                     "border-primary bg-primary/5",
                 )}
@@ -238,7 +224,7 @@ export function StepEquipment({
                 <input
                   type="radio"
                   name="background-equipment-package"
-                  className="mt-1 shrink-0"
+                  className="mt-0.5 shrink-0"
                   checked={selectedBgPkg === BACKGROUND_GOLD_PACKAGE_SLUG}
                   onChange={() =>
                     selectBackgroundPackage(BACKGROUND_GOLD_PACKAGE_SLUG)
@@ -246,18 +232,17 @@ export function StepEquipment({
                 />
                 <div className="min-w-0 flex-1">
                   <span className="font-medium">
-                    {backgroundGoldOption} PO (em vez do pacote de itens)
+                    {backgroundGoldOption} PO
                   </span>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Opção do PHB: receber ouro no lugar do equipamento do
-                    antecedente.
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    Em vez do pacote de itens
                   </p>
                 </div>
               </label>
             ) : null}
           </div>
-        </Field>
+        </WizardFormSection>
       ) : null}
-    </FieldGroup>
+    </div>
   );
 }

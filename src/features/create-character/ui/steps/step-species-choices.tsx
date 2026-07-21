@@ -11,17 +11,12 @@ import type { CreateCharacterInput } from "@/features/create-character/model/cre
 import { asiFeatSlotsToCharacterFeats } from "@/features/create-character/lib/asi-feat-slots-to-feats";
 import { resolveCreateCharacterFeats } from "@/features/create-character/lib/preview-create-character-feats";
 import { CatalogSelect } from "@/features/create-character/ui/catalog-select";
+import { WizardFormSection } from "@/features/create-character/ui/wizard-form-section";
 import { FeatOptionsEditor } from "@/features/feat-catalog/ui/feat-options-editor";
 import { useBackgroundDetail } from "@/features/background-catalog/api/use-backgrounds";
 import { useSpeciesTraitChoices } from "@/features/species-catalog/api/use-species";
 import { useFeats } from "@/features/reference-catalog/api/use-reference";
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/shared/ui/field";
+import { FieldError } from "@/shared/ui/field";
 import { cn } from "@/shared/lib/utils";
 
 type StepSpeciesChoicesProps = {
@@ -34,7 +29,7 @@ const COMPACT_LIST_THRESHOLD = 8;
 
 function traitChoiceLabel(kind: string, traitName: string): string {
   if (kind === "human_origin_feat") {
-    return "Versátil — talento de origem";
+    return "Versátil — talento";
   }
   return traitName;
 }
@@ -140,9 +135,7 @@ export function StepSpeciesChoices({
     if (!humanFeat) return new Set<string>();
     const match = previewFeats.find((f) => f.featSlug === humanFeat.choiceSlug);
     if (!match) return new Set<string>();
-    return new Set([
-      featInstanceKey(match.featSlug, match.instanceIndex),
-    ]);
+    return new Set([featInstanceKey(match.featSlug, match.instanceIndex)]);
   }, [previewFeats, speciesChoices]);
 
   function setChoice(kind: string, slug: string) {
@@ -165,15 +158,9 @@ export function StepSpeciesChoices({
     setValue(
       "featOptions",
       featOptions.filter((option) =>
-        validKeys.has(
-          featInstanceKey(option.featSlug, option.instanceIndex),
-        ),
+        validKeys.has(featInstanceKey(option.featSlug, option.instanceIndex)),
       ),
     );
-  }
-
-  function updateFeatOptions(next: FeatOption[]) {
-    setValue("featOptions", next);
   }
 
   if (!speciesSlug) {
@@ -191,83 +178,72 @@ export function StepSpeciesChoices({
   if (groups.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
-        Esta espécie não exige escolhas adicionais de traço.
+        Esta espécie não exige escolhas de traço.
       </p>
     );
   }
 
   return (
-    <FieldGroup>
-      <Field>
-        <FieldLabel>Traços da espécie</FieldLabel>
-        <FieldDescription>
-          Escolha uma opção para cada traço exigido pelo PHB (perícia, talento
-          de origem, tamanho, linhagem, etc.).
-        </FieldDescription>
+    <div className="space-y-3">
+      <WizardFormSection title="Traços" compact>
         <FieldError errors={error ? [{ message: error }] : []} />
-      </Field>
+        <div className="space-y-4">
+          {groups.map(([kind, group]) => {
+            const selected = speciesChoices.find(
+              (c) => c.choiceKind === kind,
+            )?.choiceSlug;
+            const useSelect = group.options.length > COMPACT_LIST_THRESHOLD;
 
-      {groups.map(([kind, group]) => {
-        const selected = speciesChoices.find(
-          (c) => c.choiceKind === kind,
-        )?.choiceSlug;
-        const useSelect = group.options.length > COMPACT_LIST_THRESHOLD;
-
-        return (
-          <Field key={kind}>
-            <FieldLabel>{traitChoiceLabel(kind, group.traitName)}</FieldLabel>
-            {useSelect ? (
-              <CatalogSelect
-                id={`species-choice-${kind}`}
-                label=""
-                options={[
-                  { value: "", label: "Selecione…" },
-                  ...group.options.map((opt) => ({
-                    value: opt.choiceSlug,
-                    label: opt.choiceName,
-                  })),
-                ]}
-                value={selected ?? ""}
-                onChange={(e) => setChoice(kind, e.target.value)}
-              />
-            ) : (
-              <div className="flex flex-col gap-2">
-                {group.options.map((opt) => (
-                  <label
-                    key={opt.choiceSlug}
-                    className={cn(
-                      "flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 text-sm",
-                      selected === opt.choiceSlug &&
-                        "border-primary bg-primary/5",
-                    )}
-                  >
-                    <input
-                      type="radio"
-                      name={`species-${kind}`}
-                      checked={selected === opt.choiceSlug}
-                      onChange={() => setChoice(kind, opt.choiceSlug)}
-                      className="size-4"
-                    />
-                    {opt.choiceName}
-                  </label>
-                ))}
+            return (
+              <div key={kind} className="space-y-2">
+                <p className="text-sm font-medium">
+                  {traitChoiceLabel(kind, group.traitName)}
+                </p>
+                {useSelect ? (
+                  <CatalogSelect
+                    id={`species-choice-${kind}`}
+                    label=""
+                    options={[
+                      { value: "", label: "Selecione…" },
+                      ...group.options.map((opt) => ({
+                        value: opt.choiceSlug,
+                        label: opt.choiceName,
+                      })),
+                    ]}
+                    value={selected ?? ""}
+                    onChange={(e) => setChoice(kind, e.target.value)}
+                  />
+                ) : (
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {group.options.map((opt) => (
+                      <label
+                        key={opt.choiceSlug}
+                        className={cn(
+                          "flex cursor-pointer items-center gap-2 rounded-lg border px-2.5 py-2 text-sm",
+                          selected === opt.choiceSlug &&
+                            "border-primary bg-primary/5",
+                        )}
+                      >
+                        <input
+                          type="radio"
+                          name={`species-${kind}`}
+                          checked={selected === opt.choiceSlug}
+                          onChange={() => setChoice(kind, opt.choiceSlug)}
+                          className="size-4"
+                        />
+                        {opt.choiceName}
+                      </label>
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
-          </Field>
-        );
-      })}
+            );
+          })}
+        </div>
+      </WizardFormSection>
 
       {humanOriginFeatKeys.size > 0 && previewFeats.length > 0 ? (
-        <section className="space-y-3 border-t border-border pt-4">
-          <div>
-            <h3 className="text-sm font-semibold">
-              Opções do talento (Versátil)
-            </h3>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Configure perícias, magias ou outras escolhas do talento de origem
-              que você acabou de selecionar.
-            </p>
-          </div>
+        <WizardFormSection title="Opções do talento" compact>
           <FeatOptionsEditor
             characterFeats={previewFeats.filter((feat) =>
               humanOriginFeatKeys.has(
@@ -278,10 +254,10 @@ export function StepSpeciesChoices({
             value={featOptions}
             characterLevel={level}
             classSlug={classSlug}
-            onChange={updateFeatOptions}
+            onChange={(next: FeatOption[]) => setValue("featOptions", next)}
           />
-        </section>
+        </WizardFormSection>
       ) : null}
-    </FieldGroup>
+    </div>
   );
 }
