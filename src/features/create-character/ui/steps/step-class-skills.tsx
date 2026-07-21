@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import type { Control, UseFormSetValue } from "react-hook-form";
 import { useWatch } from "react-hook-form";
 
@@ -7,6 +8,7 @@ import {
   useClassDetail,
   useClassSkills,
 } from "@/features/class-catalog/api/use-classes";
+import { useBackgroundSkills } from "@/features/background-catalog/api/use-backgrounds";
 import type { CreateCharacterInput } from "@/features/create-character/model/create-character.schema";
 import { WizardFormSection } from "@/features/create-character/ui/wizard-form-section";
 import { FieldError } from "@/shared/ui/field";
@@ -24,6 +26,11 @@ export function StepClassSkills({
   error,
 }: StepClassSkillsProps) {
   const classSlug = useWatch({ control, name: "classSlug", defaultValue: "" });
+  const backgroundSlug = useWatch({
+    control,
+    name: "backgroundSlug",
+    defaultValue: "",
+  });
   const classSkillSlugs = useWatch({
     control,
     name: "classSkillSlugs",
@@ -32,12 +39,21 @@ export function StepClassSkills({
 
   const classDetail = useClassDetail(classSlug, !!classSlug);
   const classSkills = useClassSkills(classSlug, !!classSlug);
+  const backgroundSkills = useBackgroundSkills(
+    backgroundSlug,
+    !!backgroundSlug,
+  );
 
   const requiredCount = classDetail.data?.skillChoiceCount ?? 0;
   const options = classSkills.data?.data ?? [];
+  const backgroundSkillSlugs = useMemo(
+    () => new Set((backgroundSkills.data?.data ?? []).map((s) => s.slug)),
+    [backgroundSkills.data?.data],
+  );
   const atLimit = requiredCount > 0 && classSkillSlugs.length >= requiredCount;
 
   function toggleSkill(slug: string) {
+    if (backgroundSkillSlugs.has(slug)) return;
     const selected = classSkillSlugs.includes(slug);
     if (selected) {
       setValue(
@@ -80,10 +96,16 @@ export function StepClassSkills({
       compact
     >
       <FieldError errors={error ? [{ message: error }] : []} />
+      {backgroundSkillSlugs.size > 0 ? (
+        <p className="text-xs text-muted-foreground">
+          Perícias do antecedente já estão concedidas — escolha outras.
+        </p>
+      ) : null}
       <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
         {options.map((skill) => {
+          const fromBackground = backgroundSkillSlugs.has(skill.slug);
           const checked = classSkillSlugs.includes(skill.slug);
-          const disabled = !checked && atLimit;
+          const disabled = fromBackground || (!checked && atLimit);
 
           return (
             <li key={skill.slug}>
@@ -91,17 +113,25 @@ export function StepClassSkills({
                 className={cn(
                   "flex cursor-pointer items-center gap-2 rounded-lg border px-2.5 py-2 text-sm",
                   checked && "border-primary bg-primary/5",
+                  fromBackground && "border-muted bg-muted/40",
                   disabled && "cursor-not-allowed opacity-50",
                 )}
               >
                 <input
                   type="checkbox"
-                  checked={checked}
+                  checked={checked || fromBackground}
                   disabled={disabled}
                   onChange={() => toggleSkill(skill.slug)}
                   className="size-4 rounded border-input"
                 />
-                <span>{skill.name}</span>
+                <span>
+                  {skill.name}
+                  {fromBackground ? (
+                    <span className="ml-1 text-xs text-muted-foreground">
+                      · antecedente
+                    </span>
+                  ) : null}
+                </span>
               </label>
             </li>
           );

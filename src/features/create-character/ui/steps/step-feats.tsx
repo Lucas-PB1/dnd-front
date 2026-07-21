@@ -10,6 +10,7 @@ import {
 } from "@/entities/character/lib/character-feat";
 import type { FeatOption } from "@/entities/character/sheet-types";
 import { useBackgroundDetail } from "@/features/background-catalog/api/use-backgrounds";
+import { useBackgroundSkills } from "@/features/background-catalog/api/use-backgrounds";
 import { useClassDetail } from "@/features/class-catalog/api/use-classes";
 import {
   asiFeatLevelsUpTo,
@@ -20,6 +21,7 @@ import {
   previewCreateCharacterFeats,
   resolveCreateCharacterFeats,
 } from "@/features/create-character/lib/preview-create-character-feats";
+import { skillChoiceKinds } from "@/features/create-character/lib/granted-proficiencies";
 import type { CreateCharacterInput } from "@/features/create-character/model/create-character.schema";
 import { CatalogSelect } from "@/features/create-character/ui/catalog-select";
 import { WizardFormSection } from "@/features/create-character/ui/wizard-form-section";
@@ -82,11 +84,25 @@ export function StepFeats({ control, setValue, error }: StepFeatsProps) {
     name: "subclassOptions",
     defaultValue: [],
   });
+  const classSkillSlugs = useWatch({
+    control,
+    name: "classSkillSlugs",
+    defaultValue: [],
+  });
+  const backgroundToolItemSlug = useWatch({
+    control,
+    name: "backgroundToolItemSlug",
+    defaultValue: "",
+  });
 
   const ASI_FEAT_SLUG = "ability-score-improvement";
   const feats = useFeats();
   const classDetail = useClassDetail(classSlug, !!classSlug);
   const backgroundDetail = useBackgroundDetail(
+    backgroundSlug,
+    !!backgroundSlug,
+  );
+  const backgroundSkills = useBackgroundSkills(
     backgroundSlug,
     !!backgroundSlug,
   );
@@ -142,6 +158,25 @@ export function StepFeats({ control, setValue, error }: StepFeatsProps) {
         .map((feat) => feat.slug),
     );
   }, [feats.data?.data]);
+
+  const skillKinds = useMemo(() => skillChoiceKinds(), []);
+  const grantedSkillSlugs = useMemo(() => {
+    const fromSpecies = speciesChoices
+      .filter((choice) => skillKinds.has(choice.choiceKind))
+      .map((choice) => choice.choiceSlug);
+    const fromBackground = (backgroundSkills.data?.data ?? []).map(
+      (skill) => skill.slug,
+    );
+    return [...new Set([...classSkillSlugs, ...fromBackground, ...fromSpecies])];
+  }, [backgroundSkills.data?.data, classSkillSlugs, skillKinds, speciesChoices]);
+
+  const grantedToolSlugs = useMemo(() => {
+    const tool =
+      backgroundToolItemSlug?.trim() ||
+      backgroundDetail.data?.toolItemSlug?.trim() ||
+      "";
+    return tool ? [tool] : [];
+  }, [backgroundDetail.data?.toolItemSlug, backgroundToolItemSlug]);
 
   function slotFeatOptions(slotIndex: number) {
     const otherSlots = asiFeatSlotSlugs.map((slug, index) =>
@@ -272,6 +307,8 @@ export function StepFeats({ control, setValue, error }: StepFeatsProps) {
             value={featOptions}
             characterLevel={level}
             classSlug={classSlug}
+            grantedSkillSlugs={grantedSkillSlugs}
+            grantedToolSlugs={grantedToolSlugs}
             onChange={(next: FeatOption[]) => setValue("featOptions", next)}
           />
         </WizardFormSection>

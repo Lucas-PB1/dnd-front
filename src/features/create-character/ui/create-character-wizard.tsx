@@ -167,6 +167,7 @@ export function CreateCharacterWizard() {
       setValue("backgroundToolItemSlug", "");
       setValue("featOptions", []);
       setValue("asiFeatSlotSlugs", []);
+      setValue("classSkillSlugs", []);
       prevBackgroundSlugRef.current = backgroundSlug;
     }
   }, [backgroundSlug, setValue]);

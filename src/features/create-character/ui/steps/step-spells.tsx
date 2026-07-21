@@ -118,6 +118,13 @@ export function StepSpells({ control, setValue }: StepSpellsProps) {
     [characterSpells, availableClass],
   );
 
+  const atCantripLimit =
+    cantripMax != null && counts.cantrips >= cantripMax;
+  const atLeveledKnownLimit =
+    leveledKnownMax != null && counts.leveledKnown >= leveledKnownMax;
+  const atLeveledPreparedLimit =
+    leveledPreparedMax != null && counts.leveledPrepared >= leveledPreparedMax;
+
   const selectedSlugs = useMemo(
     () => new Set(characterSpells.map((s) => s.spellSlug)),
     [characterSpells],
@@ -255,6 +262,16 @@ export function StepSpells({ control, setValue }: StepSpellsProps) {
         </p>
       ) : null}
 
+      {availableClass.length > 0 &&
+      cantripMax == null &&
+      leveledPreparedMax == null &&
+      leveledKnownMax == null ? (
+        <p className="text-sm text-destructive" role="alert">
+          Cotas de magia não carregaram para esta classe. Recarregue a página;
+          sem cotas a seleção fica sem limite.
+        </p>
+      ) : null}
+
       {availableClass.length > 0 ? (
         <WizardFormSection title="Lista" compact>
           <div className="flex flex-wrap gap-1.5">
@@ -330,6 +347,9 @@ export function StepSpells({ control, setValue }: StepSpellsProps) {
                   key={spell.slug}
                   spell={spell}
                   checked={selectedSlugs.has(spell.slug)}
+                  disabled={
+                    !selectedSlugs.has(spell.slug) && atCantripLimit
+                  }
                   onToggle={() => onCantrip(spell)}
                 />
               ))}
@@ -346,6 +366,15 @@ export function StepSpells({ control, setValue }: StepSpellsProps) {
                     entry={characterSpells.find(
                       (s) => s.spellSlug === spell.slug,
                     )}
+                    knownDisabled={
+                      !selectedSlugs.has(spell.slug) && atLeveledKnownLimit
+                    }
+                    preparedDisabled={
+                      !(
+                        characterSpells.find((s) => s.spellSlug === spell.slug)
+                          ?.listType === "prepared"
+                      ) && atLeveledPreparedLimit
+                    }
                     onKnown={() => onLeveled(spell, "known")}
                     onPrepared={() => onLeveled(spell, "prepared")}
                   />
@@ -354,6 +383,12 @@ export function StepSpells({ control, setValue }: StepSpellsProps) {
                     key={spell.slug}
                     spell={spell}
                     checked={selectedSlugs.has(spell.slug)}
+                    disabled={
+                      !selectedSlugs.has(spell.slug) &&
+                      (mode === "known"
+                        ? atLeveledKnownLimit
+                        : atLeveledPreparedLimit)
+                    }
                     onToggle={() =>
                       onLeveled(
                         spell,
@@ -569,10 +604,12 @@ function SpellMeta({ spell }: { spell: ClassSpellOption }) {
 function SimpleSpellRow({
   spell,
   checked,
+  disabled = false,
   onToggle,
 }: {
   spell: ClassSpellOption;
   checked: boolean;
+  disabled?: boolean;
   onToggle: () => void;
 }) {
   return (
@@ -581,12 +618,14 @@ function SimpleSpellRow({
         className={cn(
           "flex h-full cursor-pointer items-start gap-2 rounded-lg border px-3 py-2.5 text-sm",
           checked && "border-primary bg-primary/5",
+          disabled && "cursor-not-allowed opacity-50",
         )}
       >
         <input
           type="checkbox"
           className="mt-1"
           checked={checked}
+          disabled={disabled}
           onChange={onToggle}
         />
         <SpellMeta spell={spell} />
@@ -598,11 +637,15 @@ function SimpleSpellRow({
 function WizardSpellRow({
   spell,
   entry,
+  knownDisabled = false,
+  preparedDisabled = false,
   onKnown,
   onPrepared,
 }: {
   spell: ClassSpellOption;
   entry?: { listType: string };
+  knownDisabled?: boolean;
+  preparedDisabled?: boolean;
   onKnown: () => void;
   onPrepared: () => void;
 }) {
@@ -616,24 +659,35 @@ function WizardSpellRow({
         className={cn(
           "flex flex-col gap-3 rounded-lg border px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between",
           inBook && "border-primary/50 bg-primary/5",
+          knownDisabled && !inBook && "opacity-50",
         )}
       >
         <SpellMeta spell={spell} />
         <div className="flex shrink-0 gap-3 text-xs">
-          <label className="flex items-center gap-1.5">
-            <input type="checkbox" checked={inBook} onChange={onKnown} />
+          <label
+            className={cn(
+              "flex items-center gap-1.5",
+              knownDisabled && !inBook && "cursor-not-allowed",
+            )}
+          >
+            <input
+              type="checkbox"
+              checked={inBook}
+              disabled={knownDisabled && !inBook}
+              onChange={onKnown}
+            />
             Grimório
           </label>
           <label
             className={cn(
               "flex items-center gap-1.5",
-              !inBook && "opacity-40",
+              (!inBook || (preparedDisabled && !prepared)) && "opacity-40",
             )}
           >
             <input
               type="checkbox"
               checked={prepared}
-              disabled={!inBook}
+              disabled={!inBook || (preparedDisabled && !prepared)}
               onChange={onPrepared}
             />
             Preparada

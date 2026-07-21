@@ -12,8 +12,15 @@ import { asiFeatSlotsToCharacterFeats } from "@/features/create-character/lib/as
 import { resolveCreateCharacterFeats } from "@/features/create-character/lib/preview-create-character-feats";
 import { CatalogSelect } from "@/features/create-character/ui/catalog-select";
 import { WizardFormSection } from "@/features/create-character/ui/wizard-form-section";
+import {
+  filterOptionsExcludingTaken,
+  skillChoiceKinds,
+} from "@/features/create-character/lib/granted-proficiencies";
 import { FeatOptionsEditor } from "@/features/feat-catalog/ui/feat-options-editor";
-import { useBackgroundDetail } from "@/features/background-catalog/api/use-backgrounds";
+import {
+  useBackgroundDetail,
+  useBackgroundSkills,
+} from "@/features/background-catalog/api/use-backgrounds";
 import { useSpeciesTraitChoices } from "@/features/species-catalog/api/use-species";
 import { useFeats } from "@/features/reference-catalog/api/use-reference";
 import { FieldError } from "@/shared/ui/field";
@@ -28,10 +35,24 @@ type StepSpeciesChoicesProps = {
 const COMPACT_LIST_THRESHOLD = 8;
 
 function traitChoiceLabel(kind: string, traitName: string): string {
-  if (kind === "human_origin_feat") {
-    return "Versátil — talento";
+  switch (kind) {
+    case "human_origin_feat":
+      return "Versátil — talento";
+    case "human_skill":
+      return "Hábil — perícia";
+    case "elf_keen_senses":
+      return "Sentidos aguçados — perícia";
+    case "elf_casting_ability":
+    case "gnome_casting_ability":
+    case "infernal_casting_ability":
+      return "Atributo de conjuração";
+    case "aasimar_size":
+    case "tiefling_size":
+    case "human_size":
+      return "Tamanho";
+    default:
+      return traitName;
   }
-  return traitName;
 }
 
 export function StepSpeciesChoices({
@@ -74,13 +95,43 @@ export function StepSpeciesChoices({
     name: "classSlug",
     defaultValue: "",
   });
+  const classSkillSlugs = useWatch({
+    control,
+    name: "classSkillSlugs",
+    defaultValue: [],
+  });
+  const backgroundToolItemSlug = useWatch({
+    control,
+    name: "backgroundToolItemSlug",
+    defaultValue: "",
+  });
 
   const traitChoices = useSpeciesTraitChoices(speciesSlug, !!speciesSlug);
   const backgroundDetail = useBackgroundDetail(
     backgroundSlug,
     !!backgroundSlug,
   );
+  const backgroundSkills = useBackgroundSkills(
+    backgroundSlug,
+    !!backgroundSlug,
+  );
   const featsCatalog = useFeats();
+  const skillKinds = useMemo(() => skillChoiceKinds(), []);
+
+  const grantedSkillSlugs = useMemo(() => {
+    const fromBackground = (backgroundSkills.data?.data ?? []).map(
+      (skill) => skill.slug,
+    );
+    return [...new Set([...classSkillSlugs, ...fromBackground])];
+  }, [backgroundSkills.data?.data, classSkillSlugs]);
+
+  const grantedToolSlugs = useMemo(() => {
+    const tool =
+      backgroundToolItemSlug?.trim() ||
+      backgroundDetail.data?.toolItemSlug?.trim() ||
+      "";
+    return tool ? [tool] : [];
+  }, [backgroundDetail.data?.toolItemSlug, backgroundToolItemSlug]);
 
   const groups = useMemo(() => {
     const map = new Map<
@@ -192,20 +243,39 @@ export function StepSpeciesChoices({
             const selected = speciesChoices.find(
               (c) => c.choiceKind === kind,
             )?.choiceSlug;
-            const useSelect = group.options.length > COMPACT_LIST_THRESHOLD;
+            const isSkillChoice = skillKinds.has(kind);
+            const visibleOptions = isSkillChoice
+              ? filterOptionsExcludingTaken(
+                  group.options.map((opt) => ({
+                    value: opt.choiceSlug,
+                    label: opt.choiceName,
+                  })),
+                  grantedSkillSlugs,
+                  selected,
+                ).map((opt) => ({
+                  choiceSlug: opt.value,
+                  choiceName: opt.label,
+                }))
+              : group.options;
+            const useSelect = visibleOptions.length > COMPACT_LIST_THRESHOLD;
 
             return (
               <div key={kind} className="space-y-2">
                 <p className="text-sm font-medium">
                   {traitChoiceLabel(kind, group.traitName)}
                 </p>
+                {isSkillChoice && grantedSkillSlugs.length > 0 ? (
+                  <p className="text-xs text-muted-foreground">
+                    Perícias já concedidas foram removidas — escolha outra.
+                  </p>
+                ) : null}
                 {useSelect ? (
                   <CatalogSelect
                     id={`species-choice-${kind}`}
                     label=""
                     options={[
                       { value: "", label: "Selecione…" },
-                      ...group.options.map((opt) => ({
+                      ...visibleOptions.map((opt) => ({
                         value: opt.choiceSlug,
                         label: opt.choiceName,
                       })),
@@ -215,7 +285,7 @@ export function StepSpeciesChoices({
                   />
                 ) : (
                   <div className="grid gap-2 sm:grid-cols-2">
-                    {group.options.map((opt) => (
+                    {visibleOptions.map((opt) => (
                       <label
                         key={opt.choiceSlug}
                         className={cn(
@@ -254,6 +324,8 @@ export function StepSpeciesChoices({
             value={featOptions}
             characterLevel={level}
             classSlug={classSlug}
+            grantedSkillSlugs={grantedSkillSlugs}
+            grantedToolSlugs={grantedToolSlugs}
             onChange={(next: FeatOption[]) => setValue("featOptions", next)}
           />
         </WizardFormSection>

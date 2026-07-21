@@ -13,6 +13,10 @@ import {
   linkedCastingAsiHint,
 } from "@/features/feat-catalog/lib/linked-casting-feats";
 import { filterResilientAbilityOptionValues } from "@/features/feat-catalog/lib/resilient-feat-options";
+import {
+  filterOptionsExcludingTaken,
+  siblingFeatOptionValueIds,
+} from "@/features/create-character/lib/granted-proficiencies";
 import { useClassDetail } from "@/features/class-catalog/api/use-classes";
 import { useClassSpells } from "@/features/class-catalog/api/use-classes";
 import { useFeatOptions } from "@/features/feat-catalog/api/use-feat-options";
@@ -33,6 +37,8 @@ type FeatOptionFieldsProps = {
   onChange: (next: FeatOption[]) => void;
   characterLevel: number;
   classSlug?: string;
+  grantedSkillSlugs?: string[];
+  grantedToolSlugs?: string[];
 };
 
 function upsertOption(
@@ -100,6 +106,8 @@ function FeatOptionFields({
   onChange,
   characterLevel,
   classSlug = "",
+  grantedSkillSlugs = [],
+  grantedToolSlugs = [],
 }: FeatOptionFieldsProps) {
   const optionsQuery = useFeatOptions(feat.featSlug, !!feat.featSlug);
   const classDetail = useClassDetail(classSlug, !!classSlug);
@@ -133,7 +141,7 @@ function FeatOptionFields({
   const skills = useSkills();
   const tools = useItems({ itemType: "tool", limit: 200 });
 
-  const proficiencyOptions = useMemo(() => {
+  const catalogProficiencyOptions = useMemo(() => {
     const skillOpts = (skills.data?.data ?? []).map((skill) => ({
       value: skill.slug,
       label: skill.name,
@@ -147,6 +155,10 @@ function FeatOptionFields({
     );
   }, [skills.data?.data, tools.data?.data]);
 
+  const grantedProficiencySlugs = useMemo(
+    () => [...grantedSkillSlugs, ...grantedToolSlugs],
+    [grantedSkillSlugs, grantedToolSlugs],
+  );
   if (optionsQuery.isPending) {
     return <p className="text-sm text-muted-foreground">Carregando opções…</p>;
   }
@@ -269,14 +281,33 @@ function FeatOptionFields({
         }
 
         if (def.valueType === "proficiency") {
+          const whitelist = def.values?.length
+            ? def.values.map((item) => ({
+                value: item.valueId,
+                label: item.label,
+              }))
+            : catalogProficiencyOptions;
+          const siblingTaken = siblingFeatOptionValueIds(
+            value,
+            feat.featSlug,
+            feat.instanceIndex,
+            def.optionKey,
+          );
+          const options = filterOptionsExcludingTaken(
+            whitelist,
+            [...grantedProficiencySlugs, ...siblingTaken],
+            selected,
+          );
           return (
             <CatalogSelect
               key={def.optionKey}
               id={`${feat.featSlug}-${feat.instanceIndex}-${def.optionKey}`}
               label={def.label}
-              description="Perícia ou ferramenta do PHB."
-              options={proficiencyOptions}
-              isLoading={skills.isPending || tools.isPending}
+              description="Se já tiver a proficiência, escolha outra."
+              options={options}
+              isLoading={
+                !def.values?.length && (skills.isPending || tools.isPending)
+              }
               value={selected}
               onChange={(e) =>
                 onChange(
@@ -305,6 +336,8 @@ export function FeatOptionsEditor({
   onChange,
   characterLevel = 1,
   classSlug = "",
+  grantedSkillSlugs = [],
+  grantedToolSlugs = [],
 }: {
   characterFeats: CharacterFeat[];
   featNameBySlug?: Record<string, string>;
@@ -312,6 +345,8 @@ export function FeatOptionsEditor({
   onChange: (next: FeatOption[]) => void;
   characterLevel?: number;
   classSlug?: string;
+  grantedSkillSlugs?: string[];
+  grantedToolSlugs?: string[];
 }) {
   if (characterFeats.length === 0) {
     return (
@@ -341,6 +376,8 @@ export function FeatOptionsEditor({
             onChange={onChange}
             characterLevel={characterLevel}
             classSlug={classSlug}
+            grantedSkillSlugs={grantedSkillSlugs}
+            grantedToolSlugs={grantedToolSlugs}
           />
         </div>
       ))}
