@@ -26,7 +26,6 @@ import {
   formatCharacterFeatLabel,
 } from "@/entities/character/lib/character-feat";
 import { asiFeatSlotsToCharacterFeats } from "@/features/create-character/lib/asi-feat-slots-to-feats";
-import { resolveCreateCharacterFeats } from "@/features/create-character/lib/preview-create-character-feats";
 import { useFeatOptionLabels } from "@/features/feat-catalog/api/use-feat-option-labels";
 import { FeatOptionsReadList } from "@/features/feat-catalog/ui/feat-options-read-list";
 import { useFeats } from "@/features/reference-catalog/api/use-reference";

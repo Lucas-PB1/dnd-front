@@ -24,6 +24,8 @@ export function CatalogSelect({
   isLoading?: boolean;
   error?: { message?: string };
 } & React.ComponentProps<"select">) {
+  const hasEmptyOption = options.some((opt) => opt.value === "");
+
   return (
     <Field>
       <FieldLabel htmlFor={id}>{label}</FieldLabel>
@@ -35,9 +37,11 @@ export function CatalogSelect({
         className={cn(nativeSelectClassName, className)}
         {...props}
       >
-        <option value="">{isLoading ? "Carregando…" : "Selecione"}</option>
+        {!hasEmptyOption ? (
+          <option value="">{isLoading ? "Carregando…" : "Selecione"}</option>
+        ) : null}
         {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>
+          <option key={opt.value === "" ? "__empty__" : opt.value} value={opt.value}>
             {opt.label}
           </option>
         ))}

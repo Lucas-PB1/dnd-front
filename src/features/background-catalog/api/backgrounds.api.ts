@@ -10,6 +10,7 @@ import type { PaginatedResponse } from "@/shared/api/dnd-api/types";
 import {
   buildCatalogSearchParams,
   CATALOG_FETCH_INIT,
+  fetchAllCatalogPages,
 } from "@/shared/lib/catalog-query";
 import { CATALOG_PAGE_SIZE } from "@/shared/lib/catalog-pagination";
 
@@ -55,10 +56,13 @@ export async function fetchBackgroundBySlug(slug: string) {
 }
 
 export async function fetchBackgroundEquipment(slug: string) {
-  return catalogFetch<PaginatedResponse<BackgroundEquipmentOption>>(
-    `/backgrounds/${slug}/equipment`,
-    CATALOG_FETCH_INIT,
-  );
+  return fetchAllCatalogPages<BackgroundEquipmentOption>(({ page, limit }) => {
+    const search = buildCatalogSearchParams({ page, limit });
+    return catalogFetch<PaginatedResponse<BackgroundEquipmentOption>>(
+      `/backgrounds/${slug}/equipment?${search}`,
+      CATALOG_FETCH_INIT,
+    );
+  });
 }
 
 export async function fetchBackgroundSkills(slug: string) {

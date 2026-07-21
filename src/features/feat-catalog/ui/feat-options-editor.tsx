@@ -172,38 +172,34 @@ function FeatOptionFields({
             def.optionKey === "abilityIncrease"
               ? "Escolha um atributo em que você ainda não tem proficiência em salvaguarda (da classe)."
               : null;
+          const description = [asiHint, resilientHint].filter(Boolean).join(" ");
           const catalogOptions = filterResilientAbilityOptionValues(
             feat.featSlug,
             def.values,
             classSavingThrowSlugs,
           );
           return (
-            <Field key={def.optionKey}>
-              <FieldLabel>{def.label}</FieldLabel>
-              {asiHint ? <FieldDescription>{asiHint}</FieldDescription> : null}
-              {resilientHint ? (
-                <FieldDescription>{resilientHint}</FieldDescription>
-              ) : null}
-              <CatalogSelect
-                id={`${feat.featSlug}-${feat.instanceIndex}-${def.optionKey}`}
-                label={def.label}
-                options={catalogOptions.map((item) => ({
-                  value: item.valueId,
-                  label: item.label,
-                }))}
-                value={selected}
-                onChange={(e) =>
-                  onChange(
-                    applyFeatOptionChange(
-                      value,
-                      feat,
-                      def.optionKey,
-                      e.target.value,
-                    ),
-                  )
-                }
-              />
-            </Field>
+            <CatalogSelect
+              key={def.optionKey}
+              id={`${feat.featSlug}-${feat.instanceIndex}-${def.optionKey}`}
+              label={def.label}
+              description={description || undefined}
+              options={catalogOptions.map((item) => ({
+                value: item.valueId,
+                label: item.label,
+              }))}
+              value={selected}
+              onChange={(e) =>
+                onChange(
+                  applyFeatOptionChange(
+                    value,
+                    feat,
+                    def.optionKey,
+                    e.target.value,
+                  ),
+                )
+              }
+            />
           );
         }
 
@@ -236,62 +232,63 @@ function FeatOptionFields({
               ? classSpellsLevel0.isPending
               : classSpellsLevel1.isPending;
 
-          return (
-            <Field key={def.optionKey}>
-              <FieldLabel>{def.label}</FieldLabel>
-              {!dependsMet ? (
+          if (!dependsMet) {
+            return (
+              <Field key={def.optionKey}>
+                <FieldLabel>{def.label}</FieldLabel>
                 <FieldDescription>
                   Escolha a lista de magias primeiro.
                 </FieldDescription>
-              ) : (
-                <CatalogSelect
-                  id={`${feat.featSlug}-${feat.instanceIndex}-${def.optionKey}`}
-                  label={def.label}
-                  options={spellRows.map((spell) => ({
-                    value: spell.slug,
-                    label: spell.name,
-                  }))}
-                  isLoading={loading}
-                  value={selected}
-                  onChange={(e) =>
-                    onChange(
-                      applyFeatOptionChange(
-                        value,
-                        feat,
-                        def.optionKey,
-                        e.target.value,
-                      ),
-                    )
-                  }
-                />
-              )}
-            </Field>
+              </Field>
+            );
+          }
+
+          return (
+            <CatalogSelect
+              key={def.optionKey}
+              id={`${feat.featSlug}-${feat.instanceIndex}-${def.optionKey}`}
+              label={def.label}
+              options={spellRows.map((spell) => ({
+                value: spell.slug,
+                label: spell.name,
+              }))}
+              isLoading={loading}
+              value={selected}
+              onChange={(e) =>
+                onChange(
+                  applyFeatOptionChange(
+                    value,
+                    feat,
+                    def.optionKey,
+                    e.target.value,
+                  ),
+                )
+              }
+            />
           );
         }
 
         if (def.valueType === "proficiency") {
           return (
-            <Field key={def.optionKey}>
-              <FieldLabel>{def.label}</FieldLabel>
-              <FieldDescription>Perícia ou ferramenta do PHB.</FieldDescription>
-              <CatalogSelect
-                id={`${feat.featSlug}-${feat.instanceIndex}-${def.optionKey}`}
-                label={def.label}
-                options={proficiencyOptions}
-                isLoading={skills.isPending || tools.isPending}
-                value={selected}
-                onChange={(e) =>
-                  onChange(
-                    applyFeatOptionChange(
-                      value,
-                      feat,
-                      def.optionKey,
-                      e.target.value,
-                    ),
-                  )
-                }
-              />
-            </Field>
+            <CatalogSelect
+              key={def.optionKey}
+              id={`${feat.featSlug}-${feat.instanceIndex}-${def.optionKey}`}
+              label={def.label}
+              description="Perícia ou ferramenta do PHB."
+              options={proficiencyOptions}
+              isLoading={skills.isPending || tools.isPending}
+              value={selected}
+              onChange={(e) =>
+                onChange(
+                  applyFeatOptionChange(
+                    value,
+                    feat,
+                    def.optionKey,
+                    e.target.value,
+                  ),
+                )
+              }
+            />
           );
         }
 

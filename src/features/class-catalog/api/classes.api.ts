@@ -16,6 +16,7 @@ import type { PaginatedResponse } from "@/shared/api/dnd-api/types";
 import {
   buildCatalogSearchParams,
   CATALOG_FETCH_INIT,
+  fetchAllCatalogPages,
 } from "@/shared/lib/catalog-query";
 
 export const classKeys = {
@@ -84,10 +85,13 @@ export async function fetchClassSkills(slug: string) {
 }
 
 export async function fetchClassEquipment(slug: string) {
-  return catalogFetch<PaginatedResponse<ClassEquipmentOption>>(
-    `/classes/${slug}/equipment`,
-    CATALOG_FETCH_INIT,
-  );
+  return fetchAllCatalogPages<ClassEquipmentOption>(({ page, limit }) => {
+    const search = buildCatalogSearchParams({ page, limit });
+    return catalogFetch<PaginatedResponse<ClassEquipmentOption>>(
+      `/classes/${slug}/equipment?${search}`,
+      CATALOG_FETCH_INIT,
+    );
+  });
 }
 
 export async function fetchClassFeatures(

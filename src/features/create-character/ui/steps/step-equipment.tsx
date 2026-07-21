@@ -4,14 +4,22 @@ import { useMemo } from "react";
 import type { Control, UseFormSetValue } from "react-hook-form";
 import { useWatch } from "react-hook-form";
 
+import type { BackgroundEquipmentOption } from "@/entities/background/types";
+import type { ClassEquipmentOption } from "@/entities/class/types";
 import type { CharacterEquipment } from "@/entities/character/sheet-types";
-import { useBackgroundEquipment } from "@/features/background-catalog/api/use-backgrounds";
+import {
+  useBackgroundDetail,
+  useBackgroundEquipment,
+} from "@/features/background-catalog/api/use-backgrounds";
 import { useClassEquipment } from "@/features/class-catalog/api/use-classes";
 import {
+  BACKGROUND_GOLD_PACKAGE_SLUG,
   buildBackgroundEquipmentPayload,
   buildClassEquipmentPayload,
-  getPackageItemChoices,
+  formatBackgroundEquipmentLine,
+  formatClassEquipmentLine,
   groupEquipmentPackages,
+  type EquipmentPackage,
 } from "@/features/create-character/lib/equipment-selection";
 import type { CreateCharacterInput } from "@/features/create-character/model/create-character.schema";
 import {
@@ -28,6 +36,44 @@ type StepEquipmentProps = {
   setValue: UseFormSetValue<CreateCharacterInput>;
   error?: string;
 };
+
+function PackagePreviewList({
+  lines,
+}: {
+  lines: string[];
+}) {
+  if (lines.length === 0) {
+    return (
+      <p className="text-xs text-muted-foreground">Sem itens listados.</p>
+    );
+  }
+  return (
+    <ul className="mt-2 list-inside list-disc space-y-0.5 text-xs text-muted-foreground">
+      {lines.map((line, index) => (
+        <li key={`${line}-${index}`}>{line}</li>
+      ))}
+    </ul>
+  );
+}
+
+function classPackageLines(pkg: EquipmentPackage<ClassEquipmentOption>): string[] {
+  return pkg.rows
+    .map(formatClassEquipmentLine)
+    .filter((line) => line !== "—");
+}
+
+function backgroundPackageLines(
+  pkg: EquipmentPackage<BackgroundEquipmentOption>,
+): string[] {
+  const lines = pkg.rows
+    .map(formatBackgroundEquipmentLine)
+    .filter((line) => line !== "—");
+  const extraGold = pkg.rows[0]?.packageGold;
+  if (extraGold != null && extraGold > 0) {
+    lines.push(`${extraGold} PO`);
+  }
+  return lines;
+}
 
 export function StepEquipment({
   control,
@@ -47,6 +93,7 @@ export function StepEquipment({
     backgroundSlug,
     !!backgroundSlug,
   );
+  const backgroundDetail = useBackgroundDetail(backgroundSlug, !!backgroundSlug);
 
   const classPackages = useMemo(
     () => groupEquipmentPackages(classEquipment.data?.data ?? []),
@@ -57,6 +104,9 @@ export function StepEquipment({
     [backgroundEquipment.data?.data],
   );
 
+  const backgroundGoldOption =
+    backgroundDetail.data?.equipmentGoldOption ?? null;
+
   const selectedClassPkg = equipment.find(
     (e) => e.source === "class",
   )?.packageSlug;
@@ -64,51 +114,33 @@ export function StepEquipment({
     (e) => e.source === "background",
   )?.packageSlug;
 
-  const classItemSlugs = equipment
-    .filter((e) => e.source === "class" && e.itemSlug)
-    .map((e) => e.itemSlug!);
-  const bgItemSlugs = equipment
-    .filter((e) => e.source === "background" && e.itemSlug)
-    .map((e) => e.itemSlug!);
-
-  function syncEquipment(
-    classPkg: string | undefined,
-    classItems: string[],
-    bgPkg: string | undefined,
-    bgItems: string[],
-  ) {
-    const next: CharacterEquipment[] = [];
-    if (classPkg) {
-      const pkg = classPackages.find((p) => p.packageSlug === classPkg);
-      next.push(
-        ...buildClassEquipmentPayload(classPkg, pkg?.rows ?? [], classItems),
-      );
-    }
-    if (bgPkg) {
-      const pkg = backgroundPackages.find((p) => p.packageSlug === bgPkg);
-      next.push(
-        ...buildBackgroundEquipmentPayload(bgPkg, pkg?.rows ?? [], bgItems),
-      );
-    }
+  function applyEquipment(next: CharacterEquipment[]) {
     setValue("equipment", next);
   }
 
-  function toggleClassItem(slug: string) {
-    const pkg = selectedClassPkg;
-    if (!pkg) return;
-    const next = classItemSlugs.includes(slug)
-      ? classItemSlugs.filter((s) => s !== slug)
-      : [...classItemSlugs, slug];
-    syncEquipment(pkg, next, selectedBgPkg, bgItemSlugs);
+  function selectClassPackage(packageSlug: string) {
+    const pkg = classPackages.find((p) => p.packageSlug === packageSlug);
+    const classPart = pkg
+      ? buildClassEquipmentPayload(packageSlug, pkg.rows)
+      : [];
+    const bgPart = equipment.filter((e) => e.source === "background");
+    applyEquipment([...classPart, ...bgPart]);
   }
 
-  function toggleBgItem(slug: string) {
-    const pkg = selectedBgPkg;
-    if (!pkg) return;
-    const next = bgItemSlugs.includes(slug)
-      ? bgItemSlugs.filter((s) => s !== slug)
-      : [...bgItemSlugs, slug];
-    syncEquipment(selectedClassPkg, classItemSlugs, pkg, next);
+  function selectBackgroundPackage(packageSlug: string) {
+    const classPart = equipment.filter((e) => e.source === "class");
+    if (packageSlug === BACKGROUND_GOLD_PACKAGE_SLUG) {
+      applyEquipment([
+        ...classPart,
+        ...buildBackgroundEquipmentPayload(BACKGROUND_GOLD_PACKAGE_SLUG, []),
+      ]);
+      return;
+    }
+    const pkg = backgroundPackages.find((p) => p.packageSlug === packageSlug);
+    const bgPart = pkg
+      ? buildBackgroundEquipmentPayload(packageSlug, pkg.rows)
+      : [];
+    applyEquipment([...classPart, ...bgPart]);
   }
 
   if (classEquipment.isPending || backgroundEquipment.isPending) {
@@ -125,25 +157,13 @@ export function StepEquipment({
     );
   }
 
-  const activeClassPkg = classPackages.find(
-    (p) => p.packageSlug === selectedClassPkg,
-  );
-  const classChoices = activeClassPkg
-    ? getPackageItemChoices(activeClassPkg)
-    : [];
-
-  const activeBgPkg = backgroundPackages.find(
-    (p) => p.packageSlug === selectedBgPkg,
-  );
-  const bgChoices = activeBgPkg ? getPackageItemChoices(activeBgPkg) : [];
-
   return (
     <FieldGroup>
       <Field>
         <FieldLabel>Equipamento inicial</FieldLabel>
         <FieldDescription>
-          Escolha os pacotes de classe e antecedente; marque itens quando houver
-          opções.
+          Escolha um pacote da classe e do antecedente. Os itens do pacote entram
+          automaticamente na ficha — não é preciso marcar checkboxes.
         </FieldDescription>
         <FieldError errors={error ? [{ message: error }] : []} />
       </Field>
@@ -151,12 +171,12 @@ export function StepEquipment({
       {classPackages.length > 0 ? (
         <Field>
           <FieldLabel>Pacote da classe</FieldLabel>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-3">
             {classPackages.map((pkg) => (
               <label
                 key={pkg.packageSlug}
                 className={cn(
-                  "flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 text-sm",
+                  "flex cursor-pointer gap-3 rounded-lg border px-3 py-3 text-sm",
                   selectedClassPkg === pkg.packageSlug &&
                     "border-primary bg-primary/5",
                 )}
@@ -164,55 +184,29 @@ export function StepEquipment({
                 <input
                   type="radio"
                   name="class-equipment-package"
+                  className="mt-1 shrink-0"
                   checked={selectedClassPkg === pkg.packageSlug}
-                  onChange={() =>
-                    syncEquipment(
-                      pkg.packageSlug,
-                      [],
-                      selectedBgPkg,
-                      bgItemSlugs,
-                    )
-                  }
+                  onChange={() => selectClassPackage(pkg.packageSlug)}
                 />
-                Pacote {pkg.packageLabel}
+                <div className="min-w-0 flex-1">
+                  <span className="font-medium">Pacote {pkg.packageLabel}</span>
+                  <PackagePreviewList lines={classPackageLines(pkg)} />
+                </div>
               </label>
             ))}
           </div>
-          {classChoices.length > 0 ? (
-            <ul className="mt-3 flex flex-col gap-2">
-              {classChoices.map((row) =>
-                row.itemSlug ? (
-                  <li key={row.itemSlug}>
-                    <label className="flex items-center gap-2 text-sm">
-                      <input
-                        type="checkbox"
-                        checked={classItemSlugs.includes(row.itemSlug)}
-                        onChange={() => toggleClassItem(row.itemSlug!)}
-                      />
-                      {row.itemName ?? row.itemSlug}
-                      {row.choiceText ? (
-                        <span className="text-muted-foreground">
-                          — {row.choiceText}
-                        </span>
-                      ) : null}
-                    </label>
-                  </li>
-                ) : null,
-              )}
-            </ul>
-          ) : null}
         </Field>
       ) : null}
 
-      {backgroundPackages.length > 0 ? (
+      {backgroundPackages.length > 0 || backgroundGoldOption != null ? (
         <Field>
           <FieldLabel>Pacote do antecedente</FieldLabel>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-3">
             {backgroundPackages.map((pkg) => (
               <label
                 key={pkg.packageSlug}
                 className={cn(
-                  "flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 text-sm",
+                  "flex cursor-pointer gap-3 rounded-lg border px-3 py-3 text-sm",
                   selectedBgPkg === pkg.packageSlug &&
                     "border-primary bg-primary/5",
                 )}
@@ -220,41 +214,48 @@ export function StepEquipment({
                 <input
                   type="radio"
                   name="background-equipment-package"
+                  className="mt-1 shrink-0"
                   checked={selectedBgPkg === pkg.packageSlug}
-                  onChange={() =>
-                    syncEquipment(
-                      selectedClassPkg,
-                      classItemSlugs,
-                      pkg.packageSlug,
-                      [],
-                    )
-                  }
+                  onChange={() => selectBackgroundPackage(pkg.packageSlug)}
                 />
-                Pacote {pkg.packageLabel}
-                {pkg.rows[0]?.packageGold
-                  ? ` (${pkg.rows[0].packageGold} PO)`
-                  : null}
+                <div className="min-w-0 flex-1">
+                  <span className="font-medium">
+                    Pacote {pkg.packageLabel}
+                  </span>
+                  <PackagePreviewList lines={backgroundPackageLines(pkg)} />
+                </div>
               </label>
             ))}
+
+            {backgroundGoldOption != null ? (
+              <label
+                className={cn(
+                  "flex cursor-pointer gap-3 rounded-lg border px-3 py-3 text-sm",
+                  selectedBgPkg === BACKGROUND_GOLD_PACKAGE_SLUG &&
+                    "border-primary bg-primary/5",
+                )}
+              >
+                <input
+                  type="radio"
+                  name="background-equipment-package"
+                  className="mt-1 shrink-0"
+                  checked={selectedBgPkg === BACKGROUND_GOLD_PACKAGE_SLUG}
+                  onChange={() =>
+                    selectBackgroundPackage(BACKGROUND_GOLD_PACKAGE_SLUG)
+                  }
+                />
+                <div className="min-w-0 flex-1">
+                  <span className="font-medium">
+                    {backgroundGoldOption} PO (em vez do pacote de itens)
+                  </span>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Opção do PHB: receber ouro no lugar do equipamento do
+                    antecedente.
+                  </p>
+                </div>
+              </label>
+            ) : null}
           </div>
-          {bgChoices.length > 0 ? (
-            <ul className="mt-3 flex flex-col gap-2">
-              {bgChoices.map((row) =>
-                row.itemSlug ? (
-                  <li key={row.itemSlug}>
-                    <label className="flex items-center gap-2 text-sm">
-                      <input
-                        type="checkbox"
-                        checked={bgItemSlugs.includes(row.itemSlug)}
-                        onChange={() => toggleBgItem(row.itemSlug!)}
-                      />
-                      {row.itemName ?? row.itemSlug}
-                    </label>
-                  </li>
-                ) : null,
-              )}
-            </ul>
-          ) : null}
         </Field>
       ) : null}
     </FieldGroup>

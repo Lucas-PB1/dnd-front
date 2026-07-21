@@ -39,7 +39,10 @@ import { useFeatOptionLabels } from "@/features/feat-catalog/api/use-feat-option
 import { useFeatDetails } from "@/features/feat-catalog/api/use-feat-details";
 import { FeatBenefits } from "@/features/feat-catalog/ui/feat-benefits";
 import { FeatOptionsReadList } from "@/features/feat-catalog/ui/feat-options-read-list";
-import { groupEquipmentPackages } from "@/features/create-character/lib/equipment-selection";
+import {
+  BACKGROUND_GOLD_PACKAGE_SLUG,
+  groupEquipmentPackages,
+} from "@/features/create-character/lib/equipment-selection";
 import { useMemo } from "react";
 import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
@@ -804,6 +807,13 @@ export function EquipmentSection({ character }: SectionProps) {
     source: "class" | "background",
     packageSlug: string,
   ) {
+    if (
+      source === "background" &&
+      packageSlug === BACKGROUND_GOLD_PACKAGE_SLUG
+    ) {
+      const gold = backgroundDetail.data?.equipmentGoldOption;
+      return gold != null ? `${gold} PO` : "Ouro";
+    }
     const packages = source === "class" ? classPackages : backgroundPackages;
     const pkg = packages.find((p) => p.packageSlug === packageSlug);
     return pkg?.packageLabel ?? packageSlug;

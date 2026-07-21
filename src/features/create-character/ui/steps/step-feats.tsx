@@ -16,7 +16,7 @@ import {
   countAsiFeatSlots,
 } from "@/features/create-character/lib/asi-feat-slots";
 import { asiFeatSlotsToCharacterFeats } from "@/features/create-character/lib/asi-feat-slots-to-feats";
-import { previewCreateCharacterFeats } from "@/features/create-character/lib/preview-create-character-feats";
+import { previewCreateCharacterFeats, resolveCreateCharacterFeats } from "@/features/create-character/lib/preview-create-character-feats";
 import type { CreateCharacterInput } from "@/features/create-character/model/create-character.schema";
 import { CatalogSelect } from "@/features/create-character/ui/catalog-select";
 import {
@@ -68,12 +68,18 @@ export function StepFeats({ control, setValue, error }: StepFeatsProps) {
     name: "featOptions",
     defaultValue: [],
   });
+  const speciesChoices = useWatch({
+    control,
+    name: "speciesChoices",
+    defaultValue: [],
+  });
   const subclassOptions = useWatch({
     control,
     name: "subclassOptions",
     defaultValue: [],
   });
 
+  const ASI_FEAT_SLUG = "ability-score-improvement";
   const feats = useFeats();
   const classDetail = useClassDetail(classSlug, !!classSlug);
   const backgroundDetail = useBackgroundDetail(
@@ -99,8 +105,8 @@ export function StepFeats({ control, setValue, error }: StepFeatsProps) {
     [asiFeatSlotSlugs],
   );
   const previewFeats = useMemo(
-    () => previewCreateCharacterFeats(originFeatSlug, asiFeats),
-    [originFeatSlug, asiFeats],
+    () => resolveCreateCharacterFeats(originFeatSlug, asiFeats, speciesChoices),
+    [originFeatSlug, asiFeats, speciesChoices],
   );
 
   useEffect(() => {
@@ -117,9 +123,10 @@ export function StepFeats({ control, setValue, error }: StepFeatsProps) {
     nextSlots[index] = slug;
     setValue("asiFeatSlotSlugs", nextSlots);
 
-    const nextPreview = previewCreateCharacterFeats(
+    const nextPreview = resolveCreateCharacterFeats(
       originFeatSlug,
       asiFeatSlotsToCharacterFeats(nextSlots),
+      speciesChoices,
     );
     setValue("featOptions", pruneFeatOptions(nextPreview, featOptions));
   }
@@ -137,9 +144,10 @@ export function StepFeats({ control, setValue, error }: StepFeatsProps) {
       index === slotIndex ? "" : slug,
     );
     const otherFeats = asiFeatSlotsToCharacterFeats(otherSlots);
-    const previewWithoutSlot = previewCreateCharacterFeats(
+    const previewWithoutSlot = resolveCreateCharacterFeats(
       originFeatSlug,
       otherFeats,
+      speciesChoices,
     );
     const currentSlotSlug = asiFeatSlotSlugs[slotIndex] ?? "";
     const takenStyles = collectTakenFightingStyleSlugs({
@@ -165,6 +173,15 @@ export function StepFeats({ control, setValue, error }: StepFeatsProps) {
         allowedStyles.has(feat.slug) && !takenStyles.includes(feat.slug)
       );
     });
+  }
+
+  function sortedSlotFeatOptions(slotIndex: number) {
+    const list = slotFeatOptions(slotIndex);
+    const asiFeat = list.find((f) => f.slug === ASI_FEAT_SLUG);
+    const rest = list
+      .filter((f) => f.slug !== ASI_FEAT_SLUG)
+      .sort((a, b) => a.name.localeCompare(b.name, "pt"));
+    return asiFeat ? [asiFeat, ...rest] : rest;
   }
 
   if (!backgroundSlug) {
@@ -199,9 +216,15 @@ export function StepFeats({ control, setValue, error }: StepFeatsProps) {
           <div>
             <h3 className="text-sm font-semibold">Marcos ASI / talento</h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              Nos níveis {asiLevels.join(", ")}, escolha um talento na lista
-              (inclui Aumento no Valor de Atributo com +2/+1) ou deixe em branco
-              se já aplicou a melhoria manualmente na etapa Atributos.
+              No marco nível {asiLevels.join(", ")}, escolha{" "}
+              <span className="font-medium text-foreground">
+                Aumento no Valor de Atributo
+              </span>{" "}
+              (ou outro talento) e configure abaixo, ou deixe{" "}
+              <span className="font-medium text-foreground">
+                melhoria manual
+              </span>{" "}
+              se você já somou +2/+1 nos atributos na etapa Atributos.
             </p>
           </div>
           {feats.isPending ? (
@@ -216,12 +239,19 @@ export function StepFeats({ control, setValue, error }: StepFeatsProps) {
                   id={`asi-feat-slot-${asiLevel}`}
                   label={`Marco nível ${asiLevel}`}
                   options={[
-                    { value: "", label: "Melhoria de atributos (+2/+1)" },
-                    ...slotFeatOptions(index).map((feat) => ({
+                    {
+                      value: "",
+                      label:
+                        "Melhoria manual (+2/+1 já na etapa Atributos)",
+                    },
+                    ...sortedSlotFeatOptions(index).map((feat) => ({
                       value: feat.slug,
-                      label: feat.repeatable
-                        ? `${feat.name} (repetível)`
-                        : feat.name,
+                      label:
+                        feat.slug === ASI_FEAT_SLUG
+                          ? `${feat.name} (+2/+1 ou +1/+1)`
+                          : feat.repeatable
+                            ? `${feat.name} (repetível)`
+                            : feat.name,
                     })),
                   ]}
                   value={asiFeatSlotSlugs[index] ?? ""}

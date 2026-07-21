@@ -291,7 +291,25 @@ export function CreateCharacterWizard() {
         setBackgroundError("Escolha a ferramenta do antecedente.");
         return;
       }
-      setStep(hasFeatsStep ? "feats" : "species");
+      setStep("species");
+      return;
+    }
+
+    if (step === "species") {
+      const values = getValues();
+      const requiredKinds = [
+        ...new Set((speciesTraits.data?.data ?? []).map((r) => r.choiceKind)),
+      ];
+      if (requiredKinds.length > 0) {
+        const provided = values.speciesChoices.map((c) => c.choiceKind);
+        const missing = requiredKinds.filter((k) => !provided.includes(k));
+        if (missing.length > 0) {
+          setSpeciesError("Complete todas as escolhas de traço da espécie.");
+          return;
+        }
+      }
+      setSpeciesError(undefined);
+      setStep(hasFeatsStep ? "feats" : hasSubclassStep ? "subclass" : "equipment");
       return;
     }
 
@@ -314,40 +332,7 @@ export function CreateCharacterWizard() {
           return;
         }
       }
-      setStep("species");
-      return;
-    }
-
-    if (step === "species") {
-      const values = getValues();
-      const requiredKinds = [
-        ...new Set((speciesTraits.data?.data ?? []).map((r) => r.choiceKind)),
-      ];
-      if (requiredKinds.length > 0) {
-        const provided = values.speciesChoices.map((c) => c.choiceKind);
-        const missing = requiredKinds.filter((k) => !provided.includes(k));
-        if (missing.length > 0) {
-          setSpeciesError("Complete todas as escolhas de traço da espécie.");
-          return;
-        }
-      }
-      const previewFeats = resolveCreateCharacterFeats(
-        originFeatSlug || null,
-        asiFeatSlotsToCharacterFeats(values.asiFeatSlotSlugs ?? []),
-        values.speciesChoices ?? [],
-      );
-      if (previewFeats.length > 0) {
-        const incomplete = await findIncompleteCreateFeatOptions(
-          previewFeats,
-          values.featOptions ?? [],
-          {},
-          values.level,
-        );
-        if (incomplete) {
-          setSpeciesError(incomplete);
-          return;
-        }
-      }
+      setFeatsError(undefined);
       setStep(hasSubclassStep ? "subclass" : "equipment");
       return;
     }

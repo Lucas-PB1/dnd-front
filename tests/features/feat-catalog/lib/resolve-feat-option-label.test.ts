@@ -15,6 +15,7 @@ const defs: FeatOptionDefinition[] = [
     dependsOnOptionKey: null,
     spellMaxLevel: null,
     spellSchoolSlugs: null,
+    spellRitualOnly: false,
     values: [
       { valueId: "cleric", label: "Clérigo", sortOrder: 1 },
       { valueId: "wizard", label: "Mago", sortOrder: 2 },
@@ -28,6 +29,7 @@ const defs: FeatOptionDefinition[] = [
     dependsOnOptionKey: "spellList",
     spellMaxLevel: 0,
     spellSchoolSlugs: null,
+    spellRitualOnly: false,
     values: [],
   },
 ];
