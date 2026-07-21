@@ -5,6 +5,15 @@ import { useMemo } from "react";
 import type { CharacterFeat } from "@/entities/character/sheet-types";
 import type { FeatOption } from "@/entities/character/sheet-types";
 import { formatCharacterFeatLabel } from "@/entities/character/lib/character-feat";
+import { requiredFeatOptionDefsForInstance } from "@/features/create-character/lib/feat-option-requirements";
+import { proficiencyBonusForLevel } from "@/features/create-character/lib/proficiency-bonus-for-level";
+import {
+  syncLinkedCastingAbilityOption,
+  visibleFeatOptionDefs,
+  linkedCastingAsiHint,
+} from "@/features/feat-catalog/lib/linked-casting-feats";
+import { filterResilientAbilityOptionValues } from "@/features/feat-catalog/lib/resilient-feat-options";
+import { useClassDetail } from "@/features/class-catalog/api/use-classes";
 import { useClassSpells } from "@/features/class-catalog/api/use-classes";
 import { useFeatOptions } from "@/features/feat-catalog/api/use-feat-options";
 import { useItems } from "@/features/item-catalog/api/use-items";
@@ -22,6 +31,8 @@ type FeatOptionFieldsProps = {
   feat: CharacterFeat;
   value: FeatOption[];
   onChange: (next: FeatOption[]) => void;
+  characterLevel: number;
+  classSlug?: string;
 };
 
 function upsertOption(
@@ -49,15 +60,68 @@ function upsertOption(
   return next;
 }
 
-function FeatOptionFields({ feat, value, onChange }: FeatOptionFieldsProps) {
+function applyFeatOptionChange(
+  current: FeatOption[],
+  feat: CharacterFeat,
+  optionKey: string,
+  valueId: string,
+): FeatOption[] {
+  let next = upsertOption(current, feat, optionKey, valueId);
+  const synced = syncLinkedCastingAbilityOption(
+    feat.featSlug,
+    optionKey,
+    valueId,
+    next,
+    feat,
+  );
+  if (synced) {
+    next = synced;
+  }
+  if (
+    feat.featSlug === "ability-score-improvement" &&
+    optionKey === "distributionMode" &&
+    valueId === "plus2"
+  ) {
+    next = next.filter(
+      (option) =>
+        !(
+          option.featSlug === feat.featSlug &&
+          option.instanceIndex === feat.instanceIndex &&
+          option.optionKey === "secondaryAbility"
+        ),
+    );
+  }
+  return next;
+}
+
+function FeatOptionFields({
+  feat,
+  value,
+  onChange,
+  characterLevel,
+  classSlug = "",
+}: FeatOptionFieldsProps) {
   const optionsQuery = useFeatOptions(feat.featSlug, !!feat.featSlug);
-  const defs = optionsQuery.data?.data ?? [];
+  const classDetail = useClassDetail(classSlug, !!classSlug);
+  const classSavingThrowSlugs = classDetail.data?.savingThrowSlugs ?? [];
+  const allDefs = optionsQuery.data?.data ?? [];
+  const proficiencyBonus = proficiencyBonusForLevel(characterLevel);
 
   const instanceOptions = value.filter(
     (option) =>
       option.featSlug === feat.featSlug &&
       option.instanceIndex === feat.instanceIndex,
   );
+
+  const defs = useMemo(() => {
+    const required = requiredFeatOptionDefsForInstance(
+      feat.featSlug,
+      allDefs,
+      proficiencyBonus,
+      instanceOptions,
+    );
+    return visibleFeatOptionDefs(feat.featSlug, required);
+  }, [allDefs, feat.featSlug, proficiencyBonus, instanceOptions]);
 
   const spellList = instanceOptions.find(
     (option) => option.optionKey === "spellList",
@@ -98,21 +162,44 @@ function FeatOptionFields({ feat, value, onChange }: FeatOptionFieldsProps) {
           instanceOptions.find((option) => option.optionKey === def.optionKey)
             ?.valueId ?? "";
 
-        if (def.valueType === "catalog") {
+        if (def.valueType === "catalog" || def.valueType === "ability") {
+          const asiHint =
+            def.optionKey === "abilityIncrease"
+              ? linkedCastingAsiHint(feat.featSlug)
+              : null;
+          const resilientHint =
+            feat.featSlug === "resilient" &&
+            def.optionKey === "abilityIncrease"
+              ? "Escolha um atributo em que você ainda não tem proficiência em salvaguarda (da classe)."
+              : null;
+          const catalogOptions = filterResilientAbilityOptionValues(
+            feat.featSlug,
+            def.values,
+            classSavingThrowSlugs,
+          );
           return (
             <Field key={def.optionKey}>
               <FieldLabel>{def.label}</FieldLabel>
+              {asiHint ? <FieldDescription>{asiHint}</FieldDescription> : null}
+              {resilientHint ? (
+                <FieldDescription>{resilientHint}</FieldDescription>
+              ) : null}
               <CatalogSelect
                 id={`${feat.featSlug}-${feat.instanceIndex}-${def.optionKey}`}
                 label={def.label}
-                options={def.values.map((item) => ({
+                options={catalogOptions.map((item) => ({
                   value: item.valueId,
                   label: item.label,
                 }))}
                 value={selected}
                 onChange={(e) =>
                   onChange(
-                    upsertOption(value, feat, def.optionKey, e.target.value),
+                    applyFeatOptionChange(
+                      value,
+                      feat,
+                      def.optionKey,
+                      e.target.value,
+                    ),
                   )
                 }
               />
@@ -128,7 +215,12 @@ function FeatOptionFields({ feat, value, onChange }: FeatOptionFieldsProps) {
                 option.optionKey === def.dependsOnOptionKey && option.valueId,
             );
 
-          const spellRows = def.spellSchoolSlugs?.length
+          const spellRows = def.spellRitualOnly
+            ? (allSpells.data?.data ?? []).filter(
+                (spell) =>
+                  spell.level === (def.spellMaxLevel ?? 1) && spell.ritual,
+              )
+            : def.spellSchoolSlugs?.length
             ? (allSpells.data?.data ?? []).filter(
                 (spell) =>
                   spell.level === (def.spellMaxLevel ?? 1) &&
@@ -138,7 +230,7 @@ function FeatOptionFields({ feat, value, onChange }: FeatOptionFieldsProps) {
               ? (classSpellsLevel0.data?.data ?? [])
               : (classSpellsLevel1.data?.data ?? []);
 
-          const loading = def.spellSchoolSlugs?.length
+          const loading = def.spellRitualOnly || def.spellSchoolSlugs?.length
             ? allSpells.isPending
             : def.spellMaxLevel === 0
               ? classSpellsLevel0.isPending
@@ -163,7 +255,12 @@ function FeatOptionFields({ feat, value, onChange }: FeatOptionFieldsProps) {
                   value={selected}
                   onChange={(e) =>
                     onChange(
-                      upsertOption(value, feat, def.optionKey, e.target.value),
+                      applyFeatOptionChange(
+                        value,
+                        feat,
+                        def.optionKey,
+                        e.target.value,
+                      ),
                     )
                   }
                 />
@@ -185,7 +282,12 @@ function FeatOptionFields({ feat, value, onChange }: FeatOptionFieldsProps) {
                 value={selected}
                 onChange={(e) =>
                   onChange(
-                    upsertOption(value, feat, def.optionKey, e.target.value),
+                    applyFeatOptionChange(
+                      value,
+                      feat,
+                      def.optionKey,
+                      e.target.value,
+                    ),
                   )
                 }
               />
@@ -204,11 +306,15 @@ export function FeatOptionsEditor({
   featNameBySlug,
   value,
   onChange,
+  characterLevel = 1,
+  classSlug = "",
 }: {
   characterFeats: CharacterFeat[];
   featNameBySlug?: Record<string, string>;
   value: FeatOption[];
   onChange: (next: FeatOption[]) => void;
+  characterLevel?: number;
+  classSlug?: string;
 }) {
   if (characterFeats.length === 0) {
     return (
@@ -232,7 +338,13 @@ export function FeatOptionsEditor({
               characterFeats,
             )}
           </h3>
-          <FeatOptionFields feat={feat} value={value} onChange={onChange} />
+          <FeatOptionFields
+            feat={feat}
+            value={value}
+            onChange={onChange}
+            characterLevel={characterLevel}
+            classSlug={classSlug}
+          />
         </div>
       ))}
     </div>

@@ -3,6 +3,7 @@
 import { useQueries } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
 
+import { ABILITY_LABELS_PT } from "@/entities/character/types";
 import type {
   CharacterFeat,
   FeatOption,
@@ -17,6 +18,7 @@ import {
   type FeatOptionLabelContext,
 } from "@/features/feat-catalog/lib/resolve-feat-option-label";
 import { useItems } from "@/features/item-catalog/api/use-items";
+import { useFeats } from "@/features/reference-catalog/api/use-reference";
 import { CATALOG_DETAIL_STALE_MS } from "@/shared/lib/catalog-query";
 
 type UseFeatOptionLabelsInput = {
@@ -43,6 +45,15 @@ export function useFeatOptionLabels({
   });
 
   const tools = useItems({ itemType: "tool", limit: 200 });
+  const featsCatalog = useFeats();
+
+  const featLabels = useMemo(
+    () =>
+      Object.fromEntries(
+        (featsCatalog.data?.data ?? []).map((feat) => [feat.slug, feat.name]),
+      ),
+    [featsCatalog.data?.data],
+  );
 
   const defsBySlug = useMemo(() => {
     const map: Record<string, FeatOptionDefinition[]> = {};
@@ -65,8 +76,11 @@ export function useFeatOptionLabels({
       resolveSpell: labelContext.resolveSpell,
       resolveSkill: labelContext.resolveSkill,
       resolveItem: (slug) => itemLabels[slug] ?? slug,
+      resolveAbility: (slug) =>
+        ABILITY_LABELS_PT[slug as keyof typeof ABILITY_LABELS_PT] ?? slug,
+      resolveFeat: (slug) => featLabels[slug] ?? slug,
     }),
-    [labelContext, itemLabels],
+    [labelContext, itemLabels, featLabels],
   );
 
   const resolveFeatOption = useCallback(
@@ -81,7 +95,14 @@ export function useFeatOptionLabels({
   );
 
   const isLoading =
-    optionQueries.some((query) => query.isPending) || tools.isPending;
+    optionQueries.some((query) => query.isPending) ||
+    tools.isPending ||
+    featsCatalog.isPending;
 
-  return { resolveFeatOption, isLoading };
+  const featOptionDefsFor = useCallback(
+    (featSlug: string) => defsBySlug[featSlug] ?? [],
+    [defsBySlug],
+  );
+
+  return { resolveFeatOption, featOptionDefsFor, isLoading };
 }

@@ -4,7 +4,17 @@ export type FeatOptionLabelContext = {
   resolveSpell: (slug: string) => string;
   resolveSkill: (slug: string) => string;
   resolveItem?: (slug: string) => string;
+  resolveAbility?: (slug: string) => string;
+  resolveFeat?: (slug: string) => string;
 };
+
+function labelFromDefValues(
+  def: FeatOptionDefinition | undefined,
+  valueId: string,
+): string | null {
+  if (!def?.values.length) return null;
+  return def.values.find((value) => value.valueId === valueId)?.label ?? null;
+}
 
 export function resolveFeatOptionValueLabel(
   def: FeatOptionDefinition | undefined,
@@ -13,10 +23,17 @@ export function resolveFeatOptionValueLabel(
 ): string {
   if (!def) return valueId;
 
+  const fromValues = labelFromDefValues(def, valueId);
+  if (fromValues) return fromValues;
+
   if (def.valueType === "catalog") {
-    return (
-      def.values.find((value) => value.valueId === valueId)?.label ?? valueId
-    );
+    return valueId;
+  }
+  if (def.valueType === "ability") {
+    return ctx.resolveAbility?.(valueId) ?? valueId;
+  }
+  if (def.valueType === "fighting_style") {
+    return ctx.resolveFeat?.(valueId) ?? valueId;
   }
   if (def.valueType === "spell") {
     return ctx.resolveSpell(valueId);

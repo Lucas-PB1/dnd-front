@@ -43,7 +43,9 @@ import { useSpeciesTraitChoices } from "@/features/species-catalog/api/use-speci
 import { useBackgroundDetail } from "@/features/background-catalog/api/use-backgrounds";
 import { countAsiFeatSlots } from "@/features/create-character/lib/asi-feat-slots";
 import { asiFeatSlotsToCharacterFeats } from "@/features/create-character/lib/asi-feat-slots-to-feats";
-import { previewCreateCharacterFeats } from "@/features/create-character/lib/preview-create-character-feats";
+import { resolveCreateCharacterFeats } from "@/features/create-character/lib/preview-create-character-feats";
+import { ritualSpellSlotIndex } from "@/features/create-character/lib/feat-option-requirements";
+import { proficiencyBonusForLevel } from "@/features/create-character/lib/proficiency-bonus-for-level";
 import { findIncompleteCreateFeatOptions } from "@/features/create-character/lib/validate-create-feat-options";
 import { Button } from "@/shared/ui/button";
 
@@ -192,18 +194,24 @@ export function CreateCharacterWizard() {
     const slots = getValues("asiFeatSlotSlugs") ?? [];
     if (slots.length > count) {
       setValue("asiFeatSlotSlugs", slots.slice(0, count));
-      const preview = previewCreateCharacterFeats(
+      const preview = resolveCreateCharacterFeats(
         backgroundDetail.data?.originFeatSlug ?? null,
         asiFeatSlotsToCharacterFeats(slots.slice(0, count)),
+        getValues("speciesChoices") ?? [],
       );
       const keys = new Set(
         preview.map((f) => `${f.featSlug}:${f.instanceIndex}`),
       );
       setValue(
         "featOptions",
-        (getValues("featOptions") ?? []).filter((option) =>
-          keys.has(`${option.featSlug}:${option.instanceIndex}`),
-        ),
+        (getValues("featOptions") ?? []).filter((option) => {
+          if (!keys.has(`${option.featSlug}:${option.instanceIndex}`)) {
+            return false;
+          }
+          const slot = ritualSpellSlotIndex(option.optionKey);
+          if (slot === null) return true;
+          return slot <= proficiencyBonusForLevel(level);
+        }),
       );
     }
   }, [level, setValue, getValues, backgroundDetail.data?.originFeatSlug]);
@@ -289,14 +297,17 @@ export function CreateCharacterWizard() {
 
     if (step === "feats") {
       const values = getValues();
-      const previewFeats = previewCreateCharacterFeats(
+      const previewFeats = resolveCreateCharacterFeats(
         originFeatSlug || null,
         asiFeatSlotsToCharacterFeats(values.asiFeatSlotSlugs ?? []),
+        values.speciesChoices ?? [],
       );
       if (previewFeats.length > 0) {
         const incomplete = await findIncompleteCreateFeatOptions(
           previewFeats,
           values.featOptions ?? [],
+          {},
+          values.level,
         );
         if (incomplete) {
           setFeatsError(incomplete);
@@ -317,6 +328,23 @@ export function CreateCharacterWizard() {
         const missing = requiredKinds.filter((k) => !provided.includes(k));
         if (missing.length > 0) {
           setSpeciesError("Complete todas as escolhas de traço da espécie.");
+          return;
+        }
+      }
+      const previewFeats = resolveCreateCharacterFeats(
+        originFeatSlug || null,
+        asiFeatSlotsToCharacterFeats(values.asiFeatSlotSlugs ?? []),
+        values.speciesChoices ?? [],
+      );
+      if (previewFeats.length > 0) {
+        const incomplete = await findIncompleteCreateFeatOptions(
+          previewFeats,
+          values.featOptions ?? [],
+          {},
+          values.level,
+        );
+        if (incomplete) {
+          setSpeciesError(incomplete);
           return;
         }
       }

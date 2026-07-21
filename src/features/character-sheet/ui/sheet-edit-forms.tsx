@@ -827,6 +827,8 @@ export function EditFeatsForm({ character, onSuccess }: EditFormProps) {
             characterFeats={characterFeats}
             featNameBySlug={featNameBySlug}
             value={featOptions}
+            characterLevel={character.level}
+            classSlug={character.classSlug}
             onChange={setFeatOptions}
           />
         </div>

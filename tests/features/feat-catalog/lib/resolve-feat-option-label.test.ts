@@ -47,6 +47,46 @@ describe("resolveFeatOptionValueLabel", () => {
       "Orientação",
     );
   });
+
+  it("resolves ability slugs via context when values are absent", () => {
+    const abilityDef: FeatOptionDefinition = {
+      optionKey: "abilityIncrease",
+      label: "Atributo",
+      valueType: "ability",
+      sortOrder: 1,
+      dependsOnOptionKey: null,
+      spellMaxLevel: null,
+      spellSchoolSlugs: null,
+      spellRitualOnly: false,
+      values: [],
+    };
+    expect(
+      resolveFeatOptionValueLabel(abilityDef, "inteligencia", {
+        ...ctx,
+        resolveAbility: () => "Inteligência",
+      }),
+    ).toBe("Inteligência");
+  });
+
+  it("resolves fighting_style via feat names", () => {
+    const styleDef: FeatOptionDefinition = {
+      optionKey: "fightingStyle",
+      label: "Estilo",
+      valueType: "fighting_style",
+      sortOrder: 1,
+      dependsOnOptionKey: null,
+      spellMaxLevel: null,
+      spellSchoolSlugs: null,
+      spellRitualOnly: false,
+      values: [],
+    };
+    expect(
+      resolveFeatOptionValueLabel(styleDef, "dueling", {
+        ...ctx,
+        resolveFeat: () => "Duelismo",
+      }),
+    ).toBe("Duelismo");
+  });
 });
 
 describe("resolveFeatOptionDisplay", () => {

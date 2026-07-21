@@ -38,6 +38,7 @@ import {
 import { useFeatOptionLabels } from "@/features/feat-catalog/api/use-feat-option-labels";
 import { useFeatDetails } from "@/features/feat-catalog/api/use-feat-details";
 import { FeatBenefits } from "@/features/feat-catalog/ui/feat-benefits";
+import { FeatOptionsReadList } from "@/features/feat-catalog/ui/feat-options-read-list";
 import { groupEquipmentPackages } from "@/features/create-character/lib/equipment-selection";
 import { useMemo } from "react";
 import { Button } from "@/shared/ui/button";
@@ -854,7 +855,7 @@ export function FeatsSection({ character, labels }: SectionProps) {
   const featDetailSlugs = character.characterFeats.map((feat) => feat.featSlug);
   const { featBySlug, isLoading: featDetailsLoading } =
     useFeatDetails(featDetailSlugs);
-  const { resolveFeatOption, isLoading: featOptionsLoading } =
+  const { resolveFeatOption, featOptionDefsFor, isLoading: featOptionsLoading } =
     useFeatOptionLabels({
       characterFeats: character.characterFeats,
       labelContext: {
@@ -906,19 +907,12 @@ export function FeatsSection({ character, labels }: SectionProps) {
               />
             )}
             {options.length > 0 ? (
-              <dl className="mt-2 grid gap-1 text-xs text-muted-foreground">
-                {options.map((option) => {
-                  const display = resolveFeatOption(option);
-                  return (
-                    <div key={option.optionKey} className="flex gap-2">
-                      <dt>{display.label}:</dt>
-                      <dd className="text-foreground">
-                        {featOptionsLoading ? option.valueId : display.value}
-                      </dd>
-                    </div>
-                  );
-                })}
-              </dl>
+              <FeatOptionsReadList
+                options={options}
+                defs={featOptionDefsFor(feat.featSlug)}
+                resolveFeatOption={resolveFeatOption}
+                loading={featOptionsLoading}
+              />
             ) : null}
           </li>
         );

@@ -1,10 +1,14 @@
 "use client";
 
+import { useMemo } from "react";
 import { useWatch } from "react-hook-form";
 import type { Control } from "react-hook-form";
 
 import { ABILITY_LABELS_PT, abilityModifier } from "@/entities/character/types";
 import { previewBackgroundAbilityBoosts } from "@/entities/character/lib/background-boost";
+import { previewFeatAbilityBoosts } from "@/entities/character/lib/feat-ability-boost";
+import { epicBoonFeatSlugsFromCatalog } from "@/entities/character/lib/epic-boon-feat-options";
+import { resolveCreateCharacterFeats } from "@/features/create-character/lib/preview-create-character-feats";
 import { abilityModifierValue } from "@/entities/character";
 import { ABILITY_KEYS } from "@/features/create-character/lib/point-buy";
 import type { CreateCharacterInput } from "@/features/create-character/model/create-character.schema";
@@ -17,10 +21,14 @@ import {
   useBackgroundSkills,
   useBackgroundTools,
 } from "@/features/background-catalog/api/use-backgrounds";
-import { formatCharacterFeatLabel } from "@/entities/character/lib/character-feat";
+import {
+  featInstanceKey,
+  formatCharacterFeatLabel,
+} from "@/entities/character/lib/character-feat";
 import { asiFeatSlotsToCharacterFeats } from "@/features/create-character/lib/asi-feat-slots-to-feats";
-import { previewCreateCharacterFeats } from "@/features/create-character/lib/preview-create-character-feats";
+import { resolveCreateCharacterFeats } from "@/features/create-character/lib/preview-create-character-feats";
 import { useFeatOptionLabels } from "@/features/feat-catalog/api/use-feat-option-labels";
+import { FeatOptionsReadList } from "@/features/feat-catalog/ui/feat-options-read-list";
 import { useFeats } from "@/features/reference-catalog/api/use-reference";
 import { isSubclassRequired } from "@/entities/character/lib/subclass";
 import { cn } from "@/shared/lib/utils";
@@ -29,10 +37,13 @@ type StepReviewProps = {
   control: Control<CreateCharacterInput>;
 };
 
-function previewCharacter(values: CreateCharacterInput): CharacterDetail {
+function previewCharacter(
+  values: CreateCharacterInput,
+  epicBoonFeatSlugs: ReadonlySet<string>,
+): CharacterDetail {
   const plus2 = values.backgroundAbilityBoostPlus2Slug;
   const plus1 = values.backgroundAbilityBoostPlus1Slug;
-  const finalScores =
+  const afterBackground =
     plus2 && plus1 && plus2 !== plus1
       ? previewBackgroundAbilityBoosts(
           values.abilityScores,
@@ -40,6 +51,11 @@ function previewCharacter(values: CreateCharacterInput): CharacterDetail {
           plus1 as keyof typeof values.abilityScores,
         )
       : values.abilityScores;
+  const finalScores = previewFeatAbilityBoosts(
+    afterBackground,
+    values.featOptions ?? [],
+    epicBoonFeatSlugs,
+  );
 
   return {
     id: "",
@@ -134,9 +150,16 @@ function ChipList({ items }: { items: string[] }) {
 
 export function StepReview({ control }: StepReviewProps) {
   const values = useWatch({ control }) as CreateCharacterInput;
+  const featsQuery = useFeats();
+  const epicBoonFeatSlugs = useMemo(
+    () => epicBoonFeatSlugsFromCatalog(featsQuery.data?.data ?? []),
+    [featsQuery.data?.data],
+  );
   const plus2 = values.backgroundAbilityBoostPlus2Slug;
   const plus1 = values.backgroundAbilityBoostPlus1Slug;
-  const labels = useCharacterCatalogLabels(previewCharacter(values));
+  const labels = useCharacterCatalogLabels(
+    previewCharacter(values, epicBoonFeatSlugs),
+  );
   const speciesTraits = useSpeciesTraitChoices(
     values.speciesSlug,
     !!values.speciesSlug,
@@ -162,20 +185,22 @@ export function StepReview({ control }: StepReviewProps) {
   );
   const originFeatSlug = backgroundDetail.data?.originFeatSlug ?? "";
   const allFeats = useFeats();
-  const previewFeats = previewCreateCharacterFeats(
+  const previewFeats = resolveCreateCharacterFeats(
     originFeatSlug || null,
     asiFeatSlotsToCharacterFeats(values.asiFeatSlotSlugs ?? []),
+    values.speciesChoices ?? [],
   );
   const featNameBySlug = Object.fromEntries(
     (allFeats.data?.data ?? []).map((feat) => [feat.slug, feat.name]),
   );
-  const { resolveFeatOption } = useFeatOptionLabels({
-    characterFeats: previewFeats,
-    labelContext: {
-      resolveSpell: labels.resolveSpell,
-      resolveSkill: labels.resolveSkill,
-    },
-  });
+  const { resolveFeatOption, featOptionDefsFor, isLoading: featOptionsLoading } =
+    useFeatOptionLabels({
+      characterFeats: previewFeats,
+      labelContext: {
+        resolveSpell: labels.resolveSpell,
+        resolveSkill: labels.resolveSkill,
+      },
+    });
 
   const toolLabel =
     backgroundDetail.data?.toolProficiencyKind === "fixed"
@@ -202,10 +227,15 @@ export function StepReview({ control }: StepReviewProps) {
     return value?.label ?? valueId;
   }
 
-  function featOptionLabel(option: (typeof values.featOptions)[number]) {
-    const display = resolveFeatOption(option);
-    return `${display.label}: ${display.value}`;
-  }
+  const optionsByFeatInstance = (values.featOptions ?? []).reduce<
+    Record<string, typeof values.featOptions>
+  >((acc, option) => {
+    const key = featInstanceKey(option.featSlug, option.instanceIndex);
+    const list = acc[key] ?? [];
+    list.push(option);
+    acc[key] = list;
+    return acc;
+  }, {});
 
   const methodLabel =
     values.abilityGenerationMethodSlug === "point-buy"
@@ -333,24 +363,32 @@ export function StepReview({ control }: StepReviewProps) {
             Nenhum talento nesta ficha.
           </p>
         ) : (
-          <div className="space-y-2">
-            <ChipList
-              items={previewFeats.map((feat) =>
-                formatCharacterFeatLabel(feat, featNameBySlug, previewFeats),
-              )}
-            />
-            {values.featOptions.length > 0 ? (
-              <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-                {values.featOptions.map((option) => (
-                  <li
-                    key={`${option.featSlug}-${option.instanceIndex}-${option.optionKey}`}
-                  >
-                    {featOptionLabel(option)}
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-          </div>
+          <ul className="space-y-3">
+            {previewFeats.map((feat) => {
+              const key = featInstanceKey(feat.featSlug, feat.instanceIndex);
+              const options = optionsByFeatInstance[key] ?? [];
+              return (
+                <li
+                  key={key}
+                  className="rounded-md border border-border px-3 py-2"
+                >
+                  <p className="text-sm font-medium">
+                    {formatCharacterFeatLabel(
+                      feat,
+                      featNameBySlug,
+                      previewFeats,
+                    )}
+                  </p>
+                  <FeatOptionsReadList
+                    options={options}
+                    defs={featOptionDefsFor(feat.featSlug)}
+                    resolveFeatOption={resolveFeatOption}
+                    loading={featOptionsLoading}
+                  />
+                </li>
+              );
+            })}
+          </ul>
         )}
       </ReviewSection>
 

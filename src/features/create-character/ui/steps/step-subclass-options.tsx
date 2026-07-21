@@ -1,12 +1,19 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import type { Control, UseFormSetValue } from "react-hook-form";
 import { useWatch } from "react-hook-form";
 
 import type { SubclassOption } from "@/entities/character/sheet-types";
 import { isSubclassRequired } from "@/entities/character/lib/subclass";
-import { useSubclassOptions } from "@/features/class-catalog/api/use-classes";
+import { useClassDetail, useSubclassOptions } from "@/features/class-catalog/api/use-classes";
+import {
+  FIGHTING_STYLE_FEAT_CATEGORY,
+  collectTakenFightingStyleSlugs,
+  filterAllowedFightingStyleValues,
+  isFightingStyleSubclassOptionKey,
+} from "@/features/feat-catalog/lib/fighting-style-feat-options";
+import { useFeats } from "@/features/reference-catalog/api/use-reference";
 import type { CreateCharacterInput } from "@/features/create-character/model/create-character.schema";
 import { CatalogSelect } from "@/features/create-character/ui/catalog-select";
 import {
@@ -29,6 +36,16 @@ export function StepSubclassOptions({
   error,
 }: StepSubclassOptionsProps) {
   const level = useWatch({ control, name: "level", defaultValue: 1 });
+  const classSlug = useWatch({
+    control,
+    name: "classSlug",
+    defaultValue: "",
+  });
+  const asiFeatSlotSlugs = useWatch({
+    control,
+    name: "asiFeatSlotSlugs",
+    defaultValue: [],
+  });
   const subclassSlug = useWatch({
     control,
     name: "subclassSlug",
@@ -42,6 +59,21 @@ export function StepSubclassOptions({
 
   const enabled = isSubclassRequired(level) && !!subclassSlug;
   const optionsQuery = useSubclassOptions(subclassSlug ?? "", level, enabled);
+  const classDetail = useClassDetail(classSlug, enabled && !!classSlug);
+  const featsCatalog = useFeats();
+
+  const fightingStyleFeatSlugs = useMemo(
+    () =>
+      new Set(
+        (featsCatalog.data?.data ?? [])
+          .filter((feat) => feat.categorySlug === FIGHTING_STYLE_FEAT_CATEGORY)
+          .map((feat) => feat.slug),
+      ),
+    [featsCatalog.data?.data],
+  );
+
+  const classFightingStyles = classDetail.data?.fightingStyleSlugs ?? [];
+  const groups = optionsQuery.data?.data ?? [];
 
   useEffect(() => {
     if (!enabled) {
@@ -79,8 +111,6 @@ export function StepSubclassOptions({
     return <p className="text-sm text-muted-foreground">Carregando opções…</p>;
   }
 
-  const groups = optionsQuery.data?.data ?? [];
-
   if (groups.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
@@ -104,13 +134,39 @@ export function StepSubclassOptions({
           (o) => o.optionKey === group.optionKey,
         )?.valueId;
 
+        const isFightingStyle =
+          group.valueType === "fighting_style" ||
+          isFightingStyleSubclassOptionKey(group.optionKey);
+
+        let valueOptions = group.values;
+        if (isFightingStyle && classFightingStyles.length > 0) {
+          const taken = collectTakenFightingStyleSlugs({
+            characterFeatSlugs: asiFeatSlotSlugs.filter(Boolean),
+            fightingStyleFeatSlugs: fightingStyleFeatSlugs,
+            subclassOptions: subclassOptions.filter(
+              (o) => o.optionKey !== group.optionKey,
+            ),
+          });
+          valueOptions = filterAllowedFightingStyleValues(
+            group.values,
+            classFightingStyles,
+            taken,
+          );
+          if (selected && !valueOptions.some((v) => v.valueId === selected)) {
+            const current = group.values.find((v) => v.valueId === selected);
+            if (current) {
+              valueOptions = [current, ...valueOptions];
+            }
+          }
+        }
+
         return (
           <CatalogSelect
             key={group.optionKey}
             id={`subclass-opt-${group.optionKey}`}
             label={group.label}
             description={`Desbloqueia no nível ${group.unlockLevel}`}
-            options={group.values.map((v) => ({
+            options={valueOptions.map((v) => ({
               value: v.valueId,
               label: v.label,
             }))}

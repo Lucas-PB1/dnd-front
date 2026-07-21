@@ -165,7 +165,11 @@ export function StepAbilities({
       : null;
 
   const isPointBuy = method === "point-buy";
+  const isRoll = method === "roll";
   const hasRawPool = !isPointBuy && rawValues && rawValues.length === 6;
+  const rawTotal = hasRawPool
+    ? rawValues.reduce((sum, value) => sum + value, 0)
+    : null;
 
   function applyMethodChange(
     next: CreateCharacterInput["abilityGenerationMethodSlug"],
@@ -215,6 +219,14 @@ export function StepAbilities({
           <FieldDescription>
             {methods.data?.find((m) => m.slug === method)?.description ??
               "Conjunto padrão, rolagem 4d6 ou point-buy (27 pontos)."}
+            {isRoll ? (
+              <>
+                {" "}
+                A soma dos seis valores costuma ficar entre{" "}
+                <span className="font-medium text-foreground">72 e 80</span>{" "}
+                (média ~73).
+              </>
+            ) : null}
           </FieldDescription>
           <select
             id="abilityGenerationMethodSlug"
@@ -257,8 +269,20 @@ export function StepAbilities({
             </Button>
             {hasRawPool ? (
               <p className="text-sm text-muted-foreground">
-                Valores gerados: {rawValues.join(", ")} — ordem padrão Força →
-                Carisma; ajuste nos selects se quiser.
+                Valores gerados: {rawValues.join(", ")}
+                {rawTotal != null ? (
+                  <>
+                    {" "}
+                    · Soma{" "}
+                    <span className="font-medium text-foreground">
+                      {rawTotal}
+                    </span>
+                    {isRoll && rawTotal >= 72 && rawTotal <= 80 ? (
+                      <span className="text-primary"> (faixa típica)</span>
+                    ) : null}
+                  </>
+                ) : null}{" "}
+                — ordem padrão Força → Carisma; ajuste nos selects se quiser.
               </p>
             ) : (
               <p className="text-sm text-muted-foreground">

@@ -146,6 +146,7 @@ export function LevelUpSection({
             [newFeatInstance],
             levelUpFeatOptions,
             featNameBySlug,
+            character.level + 1,
           );
           if (incomplete) {
             setLevelUpError(incomplete);
@@ -245,6 +246,8 @@ export function LevelUpSection({
                 characterFeats={[newFeatInstance]}
                 featNameBySlug={featNameBySlug}
                 value={levelUpFeatOptions}
+                characterLevel={character.level + 1}
+                classSlug={character.classSlug}
                 onChange={setLevelUpFeatOptions}
               />
             </div>

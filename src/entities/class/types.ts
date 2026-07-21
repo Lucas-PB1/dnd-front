@@ -30,6 +30,8 @@ export type ClassSummary = {
   armorTrainingNames?: string[];
   weaponProficiencySlugs?: string[];
   weaponProficiencyNames?: string[];
+  fightingStyleSlugs?: string[];
+  fightingStyleNames?: string[];
 };
 
 export type ClassListResponse = PaginatedResponse<ClassSummary>;
@@ -99,5 +101,6 @@ export type SubclassOptionGroup = {
   optionKey: string;
   label: string;
   unlockLevel: number;
+  valueType: string;
   values: SubclassOptionValue[];
 };

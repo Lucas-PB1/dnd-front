@@ -10,6 +10,7 @@ import {
 } from "@/entities/character/lib/character-feat";
 import type { FeatOption } from "@/entities/character/sheet-types";
 import { useBackgroundDetail } from "@/features/background-catalog/api/use-backgrounds";
+import { useClassDetail } from "@/features/class-catalog/api/use-classes";
 import {
   asiFeatLevelsUpTo,
   countAsiFeatSlots,
@@ -18,6 +19,10 @@ import { asiFeatSlotsToCharacterFeats } from "@/features/create-character/lib/as
 import { previewCreateCharacterFeats } from "@/features/create-character/lib/preview-create-character-feats";
 import type { CreateCharacterInput } from "@/features/create-character/model/create-character.schema";
 import { CatalogSelect } from "@/features/create-character/ui/catalog-select";
+import {
+  FIGHTING_STYLE_FEAT_CATEGORY,
+  collectTakenFightingStyleSlugs,
+} from "@/features/feat-catalog/lib/fighting-style-feat-options";
 import { FeatOptionsEditor } from "@/features/feat-catalog/ui/feat-options-editor";
 import { useFeats } from "@/features/reference-catalog/api/use-reference";
 
@@ -43,6 +48,11 @@ function pruneFeatOptions(
 
 export function StepFeats({ control, setValue, error }: StepFeatsProps) {
   const level = useWatch({ control, name: "level", defaultValue: 1 });
+  const classSlug = useWatch({
+    control,
+    name: "classSlug",
+    defaultValue: "",
+  });
   const backgroundSlug = useWatch({
     control,
     name: "backgroundSlug",
@@ -58,8 +68,14 @@ export function StepFeats({ control, setValue, error }: StepFeatsProps) {
     name: "featOptions",
     defaultValue: [],
   });
+  const subclassOptions = useWatch({
+    control,
+    name: "subclassOptions",
+    defaultValue: [],
+  });
 
   const feats = useFeats();
+  const classDetail = useClassDetail(classSlug, !!classSlug);
   const backgroundDetail = useBackgroundDetail(
     backgroundSlug,
     !!backgroundSlug,
@@ -108,6 +124,14 @@ export function StepFeats({ control, setValue, error }: StepFeatsProps) {
     setValue("featOptions", pruneFeatOptions(nextPreview, featOptions));
   }
 
+  const fightingStyleFeatSlugs = useMemo(() => {
+    return new Set(
+      (feats.data?.data ?? [])
+        .filter((feat) => feat.categorySlug === FIGHTING_STYLE_FEAT_CATEGORY)
+        .map((feat) => feat.slug),
+    );
+  }, [feats.data?.data]);
+
   function slotFeatOptions(slotIndex: number) {
     const otherSlots = asiFeatSlotSlugs.map((slug, index) =>
       index === slotIndex ? "" : slug,
@@ -117,10 +141,30 @@ export function StepFeats({ control, setValue, error }: StepFeatsProps) {
       originFeatSlug,
       otherFeats,
     );
+    const currentSlotSlug = asiFeatSlotSlugs[slotIndex] ?? "";
+    const takenStyles = collectTakenFightingStyleSlugs({
+      characterFeatSlugs: previewWithoutSlot.map((feat) => feat.featSlug),
+      fightingStyleFeatSlugs: fightingStyleFeatSlugs,
+      subclassOptions,
+    });
+    const allowedStyles = new Set(classDetail.data?.fightingStyleSlugs ?? []);
 
-    return (feats.data?.data ?? []).filter((feat) =>
-      canAddCharacterFeat(previewWithoutSlot, feat.slug, feat.repeatable),
-    );
+    return (feats.data?.data ?? []).filter((feat) => {
+      if (
+        !canAddCharacterFeat(previewWithoutSlot, feat.slug, feat.repeatable)
+      ) {
+        return false;
+      }
+      if (feat.categorySlug !== FIGHTING_STYLE_FEAT_CATEGORY) {
+        return true;
+      }
+      if (feat.slug === currentSlotSlug) {
+        return allowedStyles.has(feat.slug);
+      }
+      return (
+        allowedStyles.has(feat.slug) && !takenStyles.includes(feat.slug)
+      );
+    });
   }
 
   if (!backgroundSlug) {
@@ -155,9 +199,9 @@ export function StepFeats({ control, setValue, error }: StepFeatsProps) {
           <div>
             <h3 className="text-sm font-semibold">Marcos ASI / talento</h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              Nos níveis {asiLevels.join(", ")}, você pode escolher um talento
-              ou aplicar +2/+1 em atributos (já refletidos na etapa Atributos).
-              Deixe em branco se usou melhoria de atributos naquele marco.
+              Nos níveis {asiLevels.join(", ")}, escolha um talento na lista
+              (inclui Aumento no Valor de Atributo com +2/+1) ou deixe em branco
+              se já aplicou a melhoria manualmente na etapa Atributos.
             </p>
           </div>
           {feats.isPending ? (
@@ -215,6 +259,8 @@ export function StepFeats({ control, setValue, error }: StepFeatsProps) {
             characterFeats={previewFeats}
             featNameBySlug={featNameBySlug}
             value={featOptions}
+            characterLevel={level}
+            classSlug={classSlug}
             onChange={(next: FeatOption[]) => setValue("featOptions", next)}
           />
         </section>

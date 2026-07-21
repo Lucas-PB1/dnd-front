@@ -36,6 +36,7 @@ export type FeatOptionDefinition = {
   dependsOnOptionKey: string | null;
   spellMaxLevel: number | null;
   spellSchoolSlugs: string[] | null;
+  spellRitualOnly: boolean;
   values: FeatOptionValue[];
 };
 

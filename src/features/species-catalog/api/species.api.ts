@@ -55,8 +55,9 @@ export async function fetchSpeciesTraits(slug: string) {
 }
 
 export async function fetchSpeciesTraitChoices(slug: string) {
+  const search = buildCatalogSearchParams({ page: 1, limit: 100 });
   return catalogFetch<PaginatedResponse<SpeciesTraitChoice>>(
-    `/species/${slug}/trait-choices`,
+    `/species/${slug}/trait-choices?${search}`,
     CATALOG_FETCH_INIT,
   );
 }
