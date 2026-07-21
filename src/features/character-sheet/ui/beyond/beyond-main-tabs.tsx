@@ -60,7 +60,7 @@ export function BeyondMainTabs({
           })}
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto p-3" role="tabpanel">
+      <div className="flex-1 overflow-y-auto bg-card/40 p-3" role="tabpanel">
         {panels[tab]}
       </div>
     </BeyondPanel>

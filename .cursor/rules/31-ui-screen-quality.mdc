@@ -25,7 +25,7 @@ Tema: **Taverna** (light) / **Masmorra** (dark). Tokens em `globals.css` — sem
 ## Layout
 
 - Desktop: grid estável; mobile: **reordenar** para o essencial primeiro (vitais → atributos → conteúdo)
-- Sticky só para vitais/ações de mesa — com `scroll-mt` compatível
+- Evitar sticky que sobrepõe conteúdo ao rolar (hub de combate no fluxo normal)
 - Largura: `PageMain` (`page` / `wide` / `sheet`) — não inventar `max-w-*` soltos
 
 ## Anti-padrões

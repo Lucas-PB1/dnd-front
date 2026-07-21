@@ -19,6 +19,13 @@ type BeyondSkillsColumnProps = {
   onEdit?: () => void;
 };
 
+type SkillRowData = {
+  skill: SkillSummary;
+  abilityKey: keyof AbilityScores;
+  isProficient: boolean;
+  bonus: number;
+};
+
 export function BeyondSkillsColumn({
   character,
   skills,
@@ -29,7 +36,7 @@ export function BeyondSkillsColumn({
     ...character.backgroundSkillSlugs,
   ]);
 
-  const withBonus = skills.map((skill) => {
+  const withBonus: SkillRowData[] = skills.map((skill) => {
     const abilityKey = skill.abilitySlug as keyof AbilityScores;
     const score = character.abilityScores[abilityKey] ?? 10;
     const isProficient = proficient.has(skill.slug);
@@ -48,59 +55,52 @@ export function BeyondSkillsColumn({
     .filter((r) => !r.isProficient)
     .sort((a, b) => a.skill.name.localeCompare(b.skill.name, "pt"));
 
+  const rows = [...proficientRows, ...otherRows];
+
   return (
     <BeyondPanel
       title="Perícias"
-      className="flex h-full min-h-0 flex-col"
+      className="h-full min-w-0"
       headerRight={
-        <div className="flex items-center gap-2">
-          {proficientRows.length > 0 ? (
-            <span className="text-[0.65rem] tabular-nums text-muted-foreground">
-              {proficientRows.length} prof.
-            </span>
-          ) : null}
-          {onEdit ? (
-            <button
-              type="button"
-              onClick={onEdit}
-              className="text-[0.65rem] font-medium tracking-wide text-primary uppercase hover:underline"
-            >
-              Editar
-            </button>
-          ) : null}
-        </div>
+        onEdit ? (
+          <button
+            type="button"
+            onClick={onEdit}
+            className="text-[0.65rem] font-medium tracking-wide text-primary uppercase hover:underline"
+          >
+            Editar
+          </button>
+        ) : null
       }
       flush
     >
       <ul
         className={cn(
-          "max-h-[min(28rem,55vh)] overflow-y-auto lg:max-h-[calc(100vh-16rem)]",
-          "divide-y divide-border/40",
+          "h-full min-h-0 overflow-y-auto overscroll-contain pb-1",
+          "[scrollbar-width:thin] [scrollbar-color:var(--border)_transparent]",
+          "[&::-webkit-scrollbar]:w-1.5",
+          "[&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border",
+          "[&::-webkit-scrollbar-track]:bg-transparent",
         )}
       >
-        {proficientRows.length > 0 ? (
-          <li className="sticky top-0 z-[1] bg-muted/80 px-3 py-1.5 backdrop-blur-sm">
-            <p className="text-[0.6rem] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
-              Proficientes
-            </p>
-          </li>
-        ) : null}
+        {rows.map((row, index) => {
+          const showDivider =
+            index === proficientRows.length &&
+            proficientRows.length > 0 &&
+            otherRows.length > 0;
 
-        {proficientRows.map((row) => (
-          <SkillRow key={row.skill.slug} {...row} />
-        ))}
-
-        {otherRows.length > 0 && proficientRows.length > 0 ? (
-          <li className="sticky top-0 z-[1] bg-muted/80 px-3 py-1.5 backdrop-blur-sm">
-            <p className="text-[0.6rem] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
-              Demais
-            </p>
-          </li>
-        ) : null}
-
-        {otherRows.map((row) => (
-          <SkillRow key={row.skill.slug} {...row} />
-        ))}
+          return (
+            <li key={row.skill.slug}>
+              {showDivider ? (
+                <div
+                  className="mx-3 my-1 border-t border-border/50"
+                  aria-hidden
+                />
+              ) : null}
+              <SkillRow {...row} />
+            </li>
+          );
+        })}
       </ul>
     </BeyondPanel>
   );
@@ -111,67 +111,32 @@ function SkillRow({
   abilityKey,
   isProficient,
   bonus,
-}: {
-  skill: SkillSummary;
-  abilityKey: keyof AbilityScores;
-  isProficient: boolean;
-  bonus: number;
-}) {
+}: SkillRowData) {
   const abilityLabel =
     ABILITY_SHORT[abilityKey] ??
     ABILITY_LABELS_PT[abilityKey]?.slice(0, 3) ??
     "—";
 
   return (
-    <li
+    <div
       className={cn(
-        "group flex items-center gap-2.5 px-3 py-2 text-sm transition-colors",
-        "hover:bg-muted/35",
-        isProficient && "bg-primary/[0.06]",
+        "grid grid-cols-[auto_2.25rem_minmax(0,1fr)_2.5rem] items-baseline gap-x-2 px-3 py-1.5 text-sm",
+        "hover:bg-muted/30",
+        isProficient && "bg-primary/[0.07]",
       )}
+      title={`${skill.name} (${ABILITY_LABELS_PT[abilityKey]})`}
     >
       <span
         className={cn(
-          "flex size-4 shrink-0 items-center justify-center rounded-sm border",
-          isProficient
-            ? "border-primary/60 bg-primary text-primary-foreground"
-            : "border-border/80 bg-transparent",
+          "mt-0.5 size-1.5 shrink-0 self-center rounded-full",
+          isProficient ? "bg-primary" : "bg-border",
         )}
-        title={isProficient ? "Proficiente" : "Sem proficiência"}
-        aria-label={isProficient ? "Proficiente" : "Sem proficiência"}
-      >
-        {isProficient ? (
-          <svg
-            viewBox="0 0 12 12"
-            className="size-2.5"
-            fill="none"
-            aria-hidden
-          >
-            <path
-              d="M2.5 6.2 4.8 8.5 9.5 3.5"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        ) : null}
-      </span>
+        aria-label={isProficient ? "Proficiente" : undefined}
+        aria-hidden={!isProficient}
+      />
 
       <span
-        className={cn(
-          "min-w-0 flex-1 truncate leading-tight",
-          isProficient ? "font-medium text-foreground" : "text-foreground/85",
-        )}
-      >
-        {skill.name}
-      </span>
-
-      <span
-        className={cn(
-          "shrink-0 rounded px-1.5 py-0.5 font-mono text-[0.65rem] font-semibold tracking-wide uppercase",
-          "bg-muted/60 text-muted-foreground",
-        )}
+        className="self-center font-mono text-[0.65rem] font-semibold tracking-wide text-muted-foreground uppercase"
         title={ABILITY_LABELS_PT[abilityKey]}
       >
         {abilityLabel}
@@ -179,12 +144,21 @@ function SkillRow({
 
       <span
         className={cn(
-          "w-9 shrink-0 text-right font-mono text-sm font-semibold tabular-nums",
+          "min-w-0 leading-snug break-words",
+          isProficient ? "font-medium text-foreground" : "text-foreground/80",
+        )}
+      >
+        {skill.name}
+      </span>
+
+      <span
+        className={cn(
+          "self-center text-right font-mono text-sm font-semibold tabular-nums",
           isProficient ? "text-primary" : "text-foreground",
         )}
       >
         {formatSkillBonus(bonus)}
       </span>
-    </li>
+    </div>
   );
 }

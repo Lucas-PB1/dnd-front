@@ -14,6 +14,7 @@ import {
 } from "@/features/character-sheet/ui/beyond/beyond-main-tabs";
 import { BeyondPanel } from "@/features/character-sheet/ui/beyond/beyond-panel";
 import { BeyondSkillsColumn } from "@/features/character-sheet/ui/beyond/beyond-skills-column";
+import { BeyondTraitsTab } from "@/features/character-sheet/ui/beyond/beyond-traits-tab";
 import { DeleteCharacterButton } from "@/features/character-sheet/ui/delete-character-button";
 import {
   EditAbilitiesForm,
@@ -29,15 +30,9 @@ import {
   EditSubclassOptionsForm,
 } from "@/features/character-sheet/ui/sheet-edit-forms";
 import {
-  BackgroundTraitsSection,
-  ClassFeaturesSection,
   EquipmentSection,
-  FeatsSection,
   LanguagesSection,
-  SpeciesChoicesSection,
   SpellsSection,
-  SubclassMechanicsSection,
-  SubclassOptionsSection,
 } from "@/features/character-sheet/ui/sheet-read-sections";
 import { InventorySection } from "@/features/character-sheet/ui/inventory-section";
 import { LevelUpSection } from "@/features/character-sheet/ui/level-up-section";
@@ -200,29 +195,14 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
       </TabSection>
     ),
     features: (
-      <div className="space-y-5">
-        <TabSection title="Características de classe">
-          <ClassFeaturesSection {...sectionProps} />
-        </TabSection>
-        <TabSection title="Espécie" action={editButton("species")}>
-          <SpeciesChoicesSection {...sectionProps} />
-        </TabSection>
-        <TabSection title="Subclasse" action={editButton("subclass")}>
-          <div className="space-y-4">
-            <SubclassOptionsSection {...sectionProps} />
-            <SubclassMechanicsSection {...sectionProps} />
-          </div>
-        </TabSection>
-        <TabSection title="Talentos" action={editButton("feats")}>
-          <FeatsSection {...sectionProps} />
-        </TabSection>
-        <TabSection title="Antecedente">
-          <BackgroundTraitsSection
-            {...sectionProps}
-            onEditTool={() => setEditing("background-tool")}
-          />
-        </TabSection>
-      </div>
+      <BeyondTraitsTab
+        character={data}
+        labels={labels}
+        onEdit={(section) => {
+          if (section === "background") setEditing("background-tool");
+          else setEditing(section);
+        }}
+      />
     ),
     table: (
       <div className="space-y-4">
@@ -335,17 +315,17 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
         className={cn(
           "grid gap-3",
           "grid-cols-1",
-          "lg:grid-cols-[13.5rem_minmax(14rem,18rem)_minmax(0,1fr)]",
-          "xl:grid-cols-[14rem_16rem_minmax(0,1fr)]",
+          "lg:grid-cols-[12.5rem_minmax(18rem,22rem)_minmax(0,1fr)]",
+          "xl:grid-cols-[13rem_minmax(20rem,24rem)_minmax(0,1fr)]",
         )}
       >
-        <div className="order-3 lg:order-1">
+        <div className="order-3 min-w-0 lg:order-1">
           <BeyondLeftColumn character={data} languageNames={languageNames} />
         </div>
 
-        <div className="order-2 lg:order-2">
+        <div className="order-2 min-h-0 min-w-0 lg:order-2 lg:h-auto lg:self-stretch">
           {skillsQuery.isPending ? (
-            <BeyondPanel title="Perícias">
+            <BeyondPanel title="Perícias" className="h-full">
               <p className="text-sm text-muted-foreground">Carregando…</p>
             </BeyondPanel>
           ) : (
@@ -358,9 +338,7 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
         </div>
 
         <div className="order-1 flex min-w-0 flex-col gap-3 lg:order-3">
-          <div className="lg:sticky lg:top-3 lg:z-10">
-            <BeyondCombatHub characterId={id} character={data} />
-          </div>
+          <BeyondCombatHub characterId={id} character={data} />
           <BeyondMainTabs panels={tabPanels} />
         </div>
       </div>

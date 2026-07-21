@@ -52,9 +52,10 @@ import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
 import {
   SheetChip,
-  SheetMetaField,
   SheetStatTile,
 } from "@/features/character-sheet/ui/sheet-ui";
+import { CollapsibleCard } from "@/shared/ui/collapsible-card";
+import { PhbProse } from "@/shared/ui/phb-prose";
 
 const SPELL_LIST_LABELS: Record<string, string> = {
   known: "Conhecida",
@@ -307,6 +308,7 @@ export function BackgroundTraitsSection({
       : [];
 
   if (
+    !bg?.description &&
     !originFeat &&
     !toolName &&
     backgroundSkills.length === 0 &&
@@ -320,46 +322,78 @@ export function BackgroundTraitsSection({
   }
 
   return (
-    <dl className="grid gap-3 text-sm sm:grid-cols-2">
-      {originFeat ? (
-        <SheetMetaField label="Talento de origem">{originFeat}</SheetMetaField>
-      ) : null}
-      {backgroundSkills.length > 0 ? (
-        <div className="sm:col-span-2">
-          <dt className="text-[0.65rem] font-medium tracking-wider text-muted-foreground uppercase">
-            Perícias do antecedente
-          </dt>
-          <dd className="mt-1.5 flex flex-wrap gap-1.5">
-            {backgroundSkills.map((name) => (
-              <SheetChip key={name} active>
-                {name}
-              </SheetChip>
-            ))}
-          </dd>
-        </div>
-      ) : null}
-      {toolName || bg?.toolProficiencyKind === "choice" ? (
-        <div className="sm:col-span-2">
-          <div className="flex items-center justify-between gap-2">
-            <dt className="text-[0.65rem] font-medium tracking-wider text-muted-foreground uppercase">
-              Ferramenta
-            </dt>
-            {bg?.toolProficiencyKind === "choice" && onEditTool ? (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-auto px-2 py-1 text-xs"
-                onClick={onEditTool}
-              >
-                Editar
-              </Button>
-            ) : null}
-          </div>
-          <dd className="mt-0.5 text-sm font-medium">{toolName ?? "—"}</dd>
-        </div>
-      ) : null}
-    </dl>
+    <div className="space-y-4">
+      <p className="text-xs text-muted-foreground">
+        Toque em um item para ver detalhes.
+      </p>
+      <div className="space-y-1.5">
+        {bg?.description ? (
+          <CollapsibleCard
+            title="Sobre o antecedente"
+            size="compact"
+            defaultOpen={false}
+            className="bg-background/50"
+          >
+            <PhbProse text={bg.description} />
+          </CollapsibleCard>
+        ) : null}
+        {originFeat ? (
+          <CollapsibleCard
+            title="Talento de origem"
+            subtitle={originFeat}
+            size="compact"
+            defaultOpen={false}
+            className="bg-background/50"
+          >
+            <p className="text-sm text-muted-foreground">
+              Talento concedido pelo antecedente:{" "}
+              <span className="font-medium text-foreground">{originFeat}</span>
+            </p>
+          </CollapsibleCard>
+        ) : null}
+        {backgroundSkills.length > 0 ? (
+          <CollapsibleCard
+            title="Perícias"
+            subtitle={`${backgroundSkills.length} perícia${backgroundSkills.length > 1 ? "s" : ""}`}
+            size="compact"
+            defaultOpen
+            className="bg-background/50"
+          >
+            <ul className="flex flex-wrap gap-1.5">
+              {backgroundSkills.map((name) => (
+                <li key={name}>
+                  <SheetChip active>{name}</SheetChip>
+                </li>
+              ))}
+            </ul>
+          </CollapsibleCard>
+        ) : null}
+        {toolName || bg?.toolProficiencyKind === "choice" ? (
+          <CollapsibleCard
+            title="Ferramenta"
+            subtitle={toolName ?? "Escolher"}
+            size="compact"
+            defaultOpen
+            className="bg-background/50"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-sm font-medium">{toolName ?? "—"}</p>
+              {bg?.toolProficiencyKind === "choice" && onEditTool ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-auto px-2 py-1 text-xs"
+                  onClick={onEditTool}
+                >
+                  Editar
+                </Button>
+              ) : null}
+            </div>
+          </CollapsibleCard>
+        ) : null}
+      </div>
+    </div>
   );
 }
 
@@ -432,21 +466,23 @@ export function SpeciesChoicesSection({ character }: SectionProps) {
           <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
             Traços fixos
           </p>
-          <ul className="space-y-2">
+          <div className="space-y-2">
             {fixedTraits.map((trait) => (
-              <li
+              <CollapsibleCard
                 key={trait.name}
-                className="rounded-lg border border-border px-3 py-2"
+                title={trait.name}
+                size="compact"
+                defaultOpen={false}
+                className="bg-background/50"
               >
-                <p className="font-medium">{trait.name}</p>
                 {trait.description ? (
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {trait.description}
-                  </p>
-                ) : null}
-              </li>
+                  <PhbProse text={trait.description} />
+                ) : (
+                  <p className="text-sm text-muted-foreground">Sem descrição.</p>
+                )}
+              </CollapsibleCard>
             ))}
-          </ul>
+          </div>
         </div>
       ) : null}
 
@@ -461,19 +497,24 @@ export function SpeciesChoicesSection({ character }: SectionProps) {
         ) : traitChoices.isPending ? (
           <p className="text-sm text-muted-foreground">Carregando escolhas…</p>
         ) : (
-          <ul className="space-y-3">
+          <ul className="space-y-1.5">
             {resolved.map((item) => (
-              <li
-                key={`${item.choiceKind}-${item.choiceSlug}`}
-                className="rounded-lg border border-border px-3 py-2"
-              >
-                <p className="text-xs text-muted-foreground">{item.traitName}</p>
-                <p className="font-medium">{item.choiceName}</p>
-                {item.level1Benefit ? (
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {item.level1Benefit}
-                  </p>
-                ) : null}
+              <li key={`${item.choiceKind}-${item.choiceSlug}`}>
+                <CollapsibleCard
+                  title={item.choiceName}
+                  subtitle={item.traitName}
+                  size="compact"
+                  defaultOpen={false}
+                  className="bg-background/50"
+                >
+                  {item.level1Benefit ? (
+                    <PhbProse text={item.level1Benefit} />
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      Sem descrição adicional.
+                    </p>
+                  )}
+                </CollapsibleCard>
               </li>
             ))}
           </ul>
@@ -518,24 +559,30 @@ export function ClassFeaturesSection({ character }: SectionProps) {
 
   return (
     <div className="space-y-4">
+      <p className="text-xs text-muted-foreground">
+        Toque em uma característica para ler o texto.
+      </p>
       {byLevel.map(([level, features]) => (
-        <section key={level} className="space-y-2">
-          <h4 className="text-sm font-semibold text-muted-foreground">
-            Nível {level}
-          </h4>
-          <ul className="space-y-3">
+        <section key={level} className="space-y-1.5">
+          <div className="flex items-center gap-2">
+            <span className="rounded bg-muted/70 px-1.5 py-0.5 font-mono text-[0.65rem] font-semibold tabular-nums text-muted-foreground">
+              Nv. {level}
+            </span>
+            <span className="h-px flex-1 bg-border/50" aria-hidden />
+          </div>
+          <div className="space-y-1.5">
             {features.map((feature) => (
-              <li
+              <CollapsibleCard
                 key={`${level}-${feature.featureName}`}
-                className="rounded-lg border border-border px-3 py-2"
+                title={feature.featureName}
+                size="compact"
+                defaultOpen={false}
+                className="bg-background/50"
               >
-                <p className="font-medium">{feature.featureName}</p>
-                <p className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">
-                  {feature.featureDescription}
-                </p>
-              </li>
+                <PhbProse text={feature.featureDescription} />
+              </CollapsibleCard>
             ))}
-          </ul>
+          </div>
         </section>
       ))}
     </div>
@@ -578,20 +625,26 @@ export function SubclassOptionsSection({ character }: SectionProps) {
   }
 
   return (
-    <ul className="space-y-3">
+    <div className="space-y-1.5">
       {resolved.map((item) => (
-        <li
+        <CollapsibleCard
           key={item.optionKey}
-          className="rounded-lg border border-border px-3 py-2"
+          title={item.valueLabel}
+          subtitle={
+            item.unlockLevel != null
+              ? `${item.label} · nv. ${item.unlockLevel}`
+              : item.label
+          }
+          size="compact"
+          defaultOpen={false}
+          className="bg-background/50"
         >
-          <p className="text-xs text-muted-foreground">
-            {item.label}
-            {item.unlockLevel != null ? ` (nv. ${item.unlockLevel})` : null}
+          <p className="text-sm text-muted-foreground">
+            Opção de subclasse selecionada.
           </p>
-          <p className="font-medium">{item.valueLabel}</p>
-        </li>
+        </CollapsibleCard>
       ))}
-    </ul>
+    </div>
   );
 }
 
@@ -672,7 +725,7 @@ export function SubclassMechanicsSection({ character }: SectionProps) {
           <h4 className="text-sm font-semibold text-muted-foreground">
             Nível {level}
           </h4>
-          <ul className="space-y-3">
+          <ul className="space-y-1.5">
             {mechanics.map((mechanic) => {
               const detail = formatSubclassMechanicDetail(mechanic);
               const matchesOption =
@@ -680,24 +733,27 @@ export function SubclassMechanicsSection({ character }: SectionProps) {
                 selectedOptionKeys.has(mechanic.optionKey);
 
               return (
-                <li
-                  key={`${level}-${mechanic.featureName}-${mechanic.optionKey ?? ""}`}
-                  className={cn(
-                    "rounded-lg border border-border px-3 py-2",
-                    matchesOption && "border-primary/40 bg-primary/5",
-                  )}
-                >
-                  <p className="font-medium">{mechanic.featureName}</p>
-                  {detail ? (
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {detail}
-                    </p>
-                  ) : null}
-                  {matchesOption ? (
-                    <p className="mt-1 text-xs text-primary">
-                      Relacionada a uma opção escolhida
-                    </p>
-                  ) : null}
+                <li key={`${level}-${mechanic.featureName}-${mechanic.optionKey ?? ""}`}>
+                  <CollapsibleCard
+                    title={mechanic.featureName}
+                    subtitle={
+                      matchesOption ? "Opção escolhida" : detail ?? undefined
+                    }
+                    size="compact"
+                    defaultOpen={false}
+                    className={cn(
+                      "bg-background/50",
+                      matchesOption && "border-primary/40",
+                    )}
+                  >
+                    {detail ? (
+                      <p className="text-sm text-muted-foreground">{detail}</p>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">
+                        Sem detalhes adicionais.
+                      </p>
+                    )}
+                  </CollapsibleCard>
                 </li>
               );
             })}
@@ -990,41 +1046,61 @@ export function FeatsSection({ character, labels }: SectionProps) {
   }, {});
 
   return (
-    <ul className="space-y-3">
-      {character.characterFeats.map((feat) => {
-        const key = featInstanceKey(feat.featSlug, feat.instanceIndex);
-        const options = optionsByInstance[key] ?? [];
-        return (
-          <li key={key} className="rounded-xl border border-border/80 px-3 py-2.5">
-            <p className="text-sm font-medium">
-              {formatCharacterFeatLabel(
-                feat,
-                { [feat.featSlug]: labels.resolveFeat(feat.featSlug) },
-                character.characterFeats,
-              )}
-            </p>
-            {featDetailsLoading ? (
-              <p className="mt-2 text-xs text-muted-foreground">
-                Carregando descrição…
-              </p>
-            ) : (
-              <FeatBenefits
-                benefits={featBySlug[feat.featSlug]?.benefits ?? []}
-                prerequisite={featBySlug[feat.featSlug]?.prerequisite}
-              />
-            )}
-            {options.length > 0 ? (
-              <FeatOptionsReadList
-                options={options}
-                defs={featOptionDefsFor(feat.featSlug)}
-                resolveFeatOption={resolveFeatOption}
-                loading={featOptionsLoading}
-              />
-            ) : null}
-          </li>
-        );
-      })}
-    </ul>
+    <div className="space-y-4">
+      <p className="text-xs text-muted-foreground">
+        Toque em um talento para ler o texto.
+      </p>
+      <ul className="space-y-1.5">
+        {character.characterFeats.map((feat) => {
+          const key = featInstanceKey(feat.featSlug, feat.instanceIndex);
+          const options = optionsByInstance[key] ?? [];
+          const detail = featBySlug[feat.featSlug];
+          const title = formatCharacterFeatLabel(
+            feat,
+            { [feat.featSlug]: labels.resolveFeat(feat.featSlug) },
+            character.characterFeats,
+          );
+          return (
+            <li key={key}>
+              <CollapsibleCard
+                title={title}
+                subtitle={
+                  detail?.categoryName
+                    ? detail.categoryName
+                    : options.length > 0
+                      ? `${options.length} escolha${options.length > 1 ? "s" : ""}`
+                      : undefined
+                }
+                size="compact"
+                defaultOpen={false}
+                className="bg-background/50"
+              >
+                {featDetailsLoading ? (
+                  <p className="text-sm text-muted-foreground">
+                    Carregando descrição…
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    <FeatBenefits
+                      benefits={detail?.benefits ?? []}
+                      prerequisite={detail?.prerequisite}
+                    />
+                    {options.length > 0 ? (
+                      <FeatOptionsReadList
+                        options={options}
+                        defs={featOptionDefsFor(feat.featSlug)}
+                        resolveFeatOption={resolveFeatOption}
+                        loading={featOptionsLoading}
+                      />
+                    ) : null}
+                  </div>
+                )}
+              </CollapsibleCard>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }
 

@@ -25,10 +25,11 @@ Mobile (`order-*`): **combate + abas** → perícias → proficiências.
 
 ## Regras de UX
 
-- PV / CA / iniciativa visíveis **sem abrir aba**
+- PV / CA / iniciativa visíveis **sem abrir aba** (hub no fluxo normal — sem sticky)
 - Magias e inventário só nas abas (não duplicar no header)
 - Aba **Ações**: equipado agora + pacote inicial — sem “em breve” como foco
 - Aba **Ajustes**: atalhos de edição (nunca “Notas” / “Editar” genérico)
+- Aba **Traços**: subnavegação (Classe/Espécie/Subclasse/Talentos/Antecedente) + `CollapsibleCard` compacto + `PhbProse`
 - Edição: painel dedicado com “Voltar à ficha”; um `editing` por vez
 - Inventário ≠ equipamento inicial (`InventorySection` vs `EquipmentSection`)
 

@@ -90,7 +90,7 @@ export function BeyondCombatHub({
   }
 
   return (
-    <div className="space-y-3 rounded-xl border border-border/70 bg-card/70 p-3">
+    <div className="space-y-3 rounded-xl border border-border/70 bg-card p-3">
       <div className="flex flex-wrap gap-2">
         <StatBox
           label="Iniciativa"

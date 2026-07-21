@@ -21,19 +21,19 @@ export function BeyondPanel({
   return (
     <section
       className={cn(
-        "overflow-hidden rounded-xl border border-border/70 bg-card/60",
+        "flex min-h-0 flex-col overflow-hidden rounded-xl border border-border/70 bg-card/60",
         className,
       )}
     >
       {title ? (
-        <header className="flex items-center justify-between gap-2 border-b border-border/60 bg-muted/30 px-3 py-2">
+        <header className="flex shrink-0 items-center justify-between gap-2 border-b border-border/60 bg-muted/30 px-3 py-2">
           <h2 className="text-[0.7rem] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
             {title}
           </h2>
           {headerRight}
         </header>
       ) : null}
-      <div className={cn(!flush && "p-3")}>{children}</div>
+      <div className={cn("min-h-0 flex-1", !flush && "p-3")}>{children}</div>
     </section>
   );
 }

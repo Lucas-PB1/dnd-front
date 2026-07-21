@@ -34,18 +34,26 @@ export function FeatOptionsReadList({
   const sorted = sortFeatOptionsByDefinition(options, defs);
 
   return (
-    <dl className={className ?? "mt-2 grid gap-1.5 text-xs text-muted-foreground"}>
-      {sorted.map((option) => {
-        const display = resolveFeatOption(option);
-        return (
-          <div key={`${option.optionKey}-${option.valueId}`} className="flex gap-2">
-            <dt className="shrink-0">{display.label}:</dt>
-            <dd className="text-foreground">
-              {loading ? option.valueId : display.value}
-            </dd>
-          </div>
-        );
-      })}
-    </dl>
+    <div className={className ?? "space-y-2 border-t border-border/50 pt-3"}>
+      <p className="text-[0.65rem] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+        Escolhas
+      </p>
+      <dl className="space-y-1.5 text-sm">
+        {sorted.map((option) => {
+          const display = resolveFeatOption(option);
+          return (
+            <div
+              key={`${option.optionKey}-${option.valueId}`}
+              className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5"
+            >
+              <dt className="text-muted-foreground">{display.label}</dt>
+              <dd className="font-medium text-foreground">
+                {loading ? option.valueId : display.value}
+              </dd>
+            </div>
+          );
+        })}
+      </dl>
+    </div>
   );
 }
