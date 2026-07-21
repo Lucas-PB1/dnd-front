@@ -17,10 +17,7 @@ import {
   countAsiFeatSlots,
 } from "@/features/create-character/lib/asi-feat-slots";
 import { asiFeatSlotsToCharacterFeats } from "@/features/create-character/lib/asi-feat-slots-to-feats";
-import {
-  previewCreateCharacterFeats,
-  resolveCreateCharacterFeats,
-} from "@/features/create-character/lib/preview-create-character-feats";
+import { resolveCreateCharacterFeats } from "@/features/create-character/lib/preview-create-character-feats";
 import { skillChoiceKinds } from "@/features/create-character/lib/granted-proficiencies";
 import type { CreateCharacterInput } from "@/features/create-character/model/create-character.schema";
 import { CatalogSelect } from "@/features/create-character/ui/catalog-select";
@@ -39,7 +36,7 @@ type StepFeatsProps = {
 };
 
 function pruneFeatOptions(
-  previewFeats: ReturnType<typeof previewCreateCharacterFeats>,
+  previewFeats: ReturnType<typeof resolveCreateCharacterFeats>,
   featOptions: FeatOption[],
 ): FeatOption[] {
   const validKeys = new Set(

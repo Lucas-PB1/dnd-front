@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import type { Control, UseFormSetValue } from "react-hook-form";
 import { useWatch } from "react-hook-form";
+import { BookOpenIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 import { isSubclassRequired } from "@/entities/character/lib/subclass";
 import type { ClassSpellOption } from "@/entities/class/types";
@@ -24,7 +25,10 @@ import {
 import { wizardMaxSpellLevelForLevel } from "@/features/create-character/lib/wizard-spell-step";
 import { resolveLevelProgression } from "@/features/create-character/lib/resolve-level-progression";
 import type { CreateCharacterInput } from "@/features/create-character/model/create-character.schema";
-import { CatalogSelect } from "@/features/create-character/ui/catalog-select";
+import {
+  SpellPreviewDialog,
+  type SpellPreviewAction,
+} from "@/features/create-character/ui/spell-preview-dialog";
 import { WizardFormSection } from "@/features/create-character/ui/wizard-form-section";
 import {
   useClassDetail,
@@ -33,10 +37,10 @@ import {
   useClassSpellSlots,
   useSubclassSpells,
 } from "@/features/class-catalog/api/use-classes";
-import { Field, FieldLabel } from "@/shared/ui/field";
-import { Input } from "@/shared/ui/input";
+import { CatalogFilters } from "@/shared/ui/catalog-filters";
+import { CatalogSearch } from "@/shared/ui/catalog-search";
+import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
-import { nativeSelectClassName } from "@/shared/ui/native-select";
 
 type StepSpellsProps = {
   control: Control<CreateCharacterInput>;
@@ -49,6 +53,11 @@ const LIST_VIEWS: { id: SpellListView; label: string }[] = [
   { id: "leveled", label: "Magias" },
   { id: "selected", label: "Selecionadas" },
 ];
+
+type PreviewTarget = {
+  slug: string;
+  kind: "cantrip" | "leveled" | "subclass";
+};
 
 export function StepSpells({ control, setValue }: StepSpellsProps) {
   const level = useWatch({ control, name: "level", defaultValue: 1 });
@@ -69,6 +78,7 @@ export function StepSpells({ control, setValue }: StepSpellsProps) {
   const [circle, setCircle] = useState("");
   const [listView, setListView] = useState<SpellListView>("all");
   const [hint, setHint] = useState<string | null>(null);
+  const [preview, setPreview] = useState<PreviewTarget | null>(null);
 
   const maxLevel = wizardMaxSpellLevelForLevel(level);
   const mode = classSpellcastingMode(classSlug);
@@ -143,6 +153,8 @@ export function StepSpells({ control, setValue }: StepSpellsProps) {
     return [...levels].sort((a, b) => a - b);
   }, [availableClass]);
 
+  const hasActiveFilters = Boolean(search.trim() || schoolSlug || circle);
+
   const filtered = useMemo(
     () =>
       filterClassSpells(availableClass, {
@@ -209,6 +221,77 @@ export function StepSpells({ control, setValue }: StepSpellsProps) {
     applySpells(toggleSubclassSpell(characterSpells, slug));
   }
 
+  function clearFilters() {
+    setSearch("");
+    setSchoolSlug("");
+    setCircle("");
+  }
+
+  function previewActions(target: PreviewTarget): SpellPreviewAction[] {
+    if (target.kind === "subclass") {
+      const selected = selectedSlugs.has(target.slug);
+      return [
+        {
+          label: selected ? "Remover seleção" : "Selecionar",
+          variant: selected ? "outline" : "default",
+          onClick: () => onSubclass(target.slug),
+        },
+      ];
+    }
+
+    const spell = availableClass.find((s) => s.slug === target.slug);
+    if (!spell) return [];
+
+    if (target.kind === "cantrip") {
+      const selected = selectedSlugs.has(spell.slug);
+      return [
+        {
+          label: selected ? "Remover seleção" : "Selecionar",
+          variant: selected ? "outline" : "default",
+          disabled: !selected && atCantripLimit,
+          onClick: () => onCantrip(spell),
+        },
+      ];
+    }
+
+    if (uiProfile.showWizardDualPick) {
+      const entry = characterSpells.find((s) => s.spellSlug === spell.slug);
+      const inBook =
+        entry?.listType === "known" || entry?.listType === "prepared";
+      const prepared = entry?.listType === "prepared";
+      const actions: SpellPreviewAction[] = [
+        {
+          label: inBook ? "Remover do grimório" : "Adicionar ao grimório",
+          variant: inBook ? "outline" : "default",
+          disabled: !inBook && atLeveledKnownLimit,
+          onClick: () => onLeveled(spell, "known"),
+        },
+      ];
+      if (inBook) {
+        actions.push({
+          label: prepared ? "Despreparar" : "Preparar",
+          variant: "secondary",
+          disabled: !prepared && atLeveledPreparedLimit,
+          onClick: () => onLeveled(spell, "prepared"),
+        });
+      }
+      return actions;
+    }
+
+    const selected = selectedSlugs.has(spell.slug);
+    const atLimit =
+      mode === "known" ? atLeveledKnownLimit : atLeveledPreparedLimit;
+    return [
+      {
+        label: selected ? "Remover seleção" : "Selecionar",
+        variant: selected ? "outline" : "default",
+        disabled: !selected && atLimit,
+        onClick: () =>
+          onLeveled(spell, mode === "known" ? "known" : "prepared"),
+      },
+    ];
+  }
+
   if (
     classSpells.isPending ||
     spellSlotsQuery.isPending ||
@@ -229,10 +312,7 @@ export function StepSpells({ control, setValue }: StepSpellsProps) {
 
   return (
     <div className="space-y-3">
-      <WizardFormSection
-        title={`${className} · nv. ${level}`}
-        compact
-      >
+      <WizardFormSection title={`${className} · nv. ${level}`} compact>
         <div className="flex flex-wrap items-center gap-2">
           <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
             {uiProfile.archetypeTitle}
@@ -273,70 +353,94 @@ export function StepSpells({ control, setValue }: StepSpellsProps) {
       ) : null}
 
       {availableClass.length > 0 ? (
-        <WizardFormSection title="Lista" compact>
-          <div className="flex flex-wrap gap-1.5">
-            {LIST_VIEWS.filter((tab) => {
-              if (tab.id === "cantrips" && !uiProfile.showCantripPicker) {
-                return false;
-              }
-              return true;
-            }).map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                className={cn(
-                  "rounded border px-2 py-1 text-[11px] font-medium transition-colors",
-                  listView === tab.id
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "hover:bg-muted/50",
-                )}
-                onClick={() => setListView(tab.id)}
-              >
-                {tab.label}
-                {tab.id === "selected" ? ` (${selectedSlugs.size})` : null}
-              </button>
-            ))}
+        <WizardFormSection title="Lista de magias" compact>
+          <div className="space-y-1.5">
+            <p className="text-[0.65rem] font-medium tracking-wider text-muted-foreground uppercase">
+              Visualização
+            </p>
+            <div
+              className="flex flex-wrap gap-1 rounded-lg border bg-muted/20 p-1"
+              role="tablist"
+              aria-label="Visualização da lista"
+            >
+              {LIST_VIEWS.filter((tab) => {
+                if (tab.id === "cantrips" && !uiProfile.showCantripPicker) {
+                  return false;
+                }
+                return true;
+              }).map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={listView === tab.id}
+                  className={cn(
+                    "rounded-md px-2.5 py-1.5 text-[11px] font-medium transition-colors",
+                    listView === tab.id
+                      ? "bg-background text-foreground shadow-sm ring-1 ring-border"
+                      : "text-muted-foreground hover:bg-background/60 hover:text-foreground",
+                  )}
+                  onClick={() => setListView(tab.id)}
+                >
+                  {tab.label}
+                  {tab.id === "selected" ? ` (${selectedSlugs.size})` : null}
+                </button>
+              ))}
+            </div>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-3">
-            <Field>
-              <FieldLabel htmlFor="spell-search">Buscar</FieldLabel>
-              <Input
-                id="spell-search"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Nome"
-                className="h-8"
-              />
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="spell-school">Escola</FieldLabel>
-              <select
-                id="spell-school"
-                className={cn(nativeSelectClassName, "h-8")}
-                value={schoolSlug}
-                onChange={(e) => setSchoolSlug(e.target.value)}
-              >
-                <option value="">Todas</option>
-                {schools.map(([slug, name]) => (
-                  <option key={slug} value={slug}>
-                    {name}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <CatalogSelect
-              id="spell-circle"
-              label="Círculo"
-              value={circle}
-              onChange={(e) => setCircle(e.target.value)}
-              options={[
-                { value: "", label: "Todos" },
-                ...circleOptions.map((lv) => ({
-                  value: String(lv),
-                  label: lv === 0 ? "Truques" : `Círculo ${lv}`,
-                })),
+          <div className="space-y-3 rounded-lg border border-dashed border-border/80 bg-muted/15 p-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-[0.65rem] font-medium tracking-wider text-muted-foreground uppercase">
+                Filtros
+              </p>
+              {hasActiveFilters ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="xs"
+                  className="h-6 gap-1 text-muted-foreground"
+                  onClick={clearFilters}
+                >
+                  <XMarkIcon className="size-3.5" aria-hidden />
+                  Limpar
+                </Button>
+              ) : null}
+            </div>
+
+            <CatalogSearch
+              value={search}
+              onChange={setSearch}
+              placeholder="Buscar por nome…"
+              resultCount={filtered.length}
+            />
+
+            <CatalogFilters
+              fields={[
+                {
+                  key: "school",
+                  label: "Escola",
+                  allLabel: "Todas",
+                  options: schools.map(([slug, name]) => ({
+                    value: slug,
+                    label: name,
+                  })),
+                },
+                {
+                  key: "circle",
+                  label: "Círculo",
+                  allLabel: "Todos",
+                  options: circleOptions.map((lv) => ({
+                    value: String(lv),
+                    label: lv === 0 ? "Truques" : `Círculo ${lv}`,
+                  })),
+                },
               ]}
+              values={{ school: schoolSlug, circle }}
+              onChange={(key, value) => {
+                if (key === "school") setSchoolSlug(value);
+                if (key === "circle") setCircle(value);
+              }}
             />
           </div>
 
@@ -347,10 +451,11 @@ export function StepSpells({ control, setValue }: StepSpellsProps) {
                   key={spell.slug}
                   spell={spell}
                   checked={selectedSlugs.has(spell.slug)}
-                  disabled={
-                    !selectedSlugs.has(spell.slug) && atCantripLimit
-                  }
+                  disabled={!selectedSlugs.has(spell.slug) && atCantripLimit}
                   onToggle={() => onCantrip(spell)}
+                  onPreview={() =>
+                    setPreview({ slug: spell.slug, kind: "cantrip" })
+                  }
                 />
               ))}
             </SpellBlock>
@@ -377,6 +482,9 @@ export function StepSpells({ control, setValue }: StepSpellsProps) {
                     }
                     onKnown={() => onLeveled(spell, "known")}
                     onPrepared={() => onLeveled(spell, "prepared")}
+                    onPreview={() =>
+                      setPreview({ slug: spell.slug, kind: "leveled" })
+                    }
                   />
                 ) : (
                   <SimpleSpellRow
@@ -394,6 +502,9 @@ export function StepSpells({ control, setValue }: StepSpellsProps) {
                         spell,
                         mode === "known" ? "known" : "prepared",
                       )
+                    }
+                    onPreview={() =>
+                      setPreview({ slug: spell.slug, kind: "leveled" })
                     }
                   />
                 ),
@@ -414,30 +525,47 @@ export function StepSpells({ control, setValue }: StepSpellsProps) {
           <ul className="grid gap-2 sm:grid-cols-2">
             {availableSubclass.map((spell) => (
               <li key={spell.slug} className="list-none">
-                <label
+                <div
                   className={cn(
-                    "flex cursor-pointer items-center gap-2 rounded-lg border px-2.5 py-2 text-sm",
+                    "flex items-start gap-2 rounded-lg border px-2.5 py-2 text-sm",
                     selectedSlugs.has(spell.slug) &&
                       "border-primary bg-primary/5",
                   )}
                 >
-                  <input
-                    type="checkbox"
-                    checked={selectedSlugs.has(spell.slug)}
-                    onChange={() => onSubclass(spell.slug)}
-                  />
-                  <span>
-                    {spell.name}
-                    <span className="ml-1 text-xs text-muted-foreground">
-                      nv. {spell.unlockLevel}
+                  <label className="flex min-w-0 flex-1 cursor-pointer items-start gap-2">
+                    <input
+                      type="checkbox"
+                      className="mt-1"
+                      checked={selectedSlugs.has(spell.slug)}
+                      onChange={() => onSubclass(spell.slug)}
+                    />
+                    <span>
+                      {spell.name}
+                      <span className="mt-0.5 block text-xs text-muted-foreground">
+                        Desbloqueio nv. {spell.unlockLevel}
+                      </span>
                     </span>
-                  </span>
-                </label>
+                  </label>
+                  <PreviewButton
+                    onClick={() =>
+                      setPreview({ slug: spell.slug, kind: "subclass" })
+                    }
+                  />
+                </div>
               </li>
             ))}
           </ul>
         </WizardFormSection>
       ) : null}
+
+      <SpellPreviewDialog
+        slug={preview?.slug ?? null}
+        open={preview != null}
+        onOpenChange={(open) => {
+          if (!open) setPreview(null);
+        }}
+        actions={preview ? previewActions(preview) : []}
+      />
     </div>
   );
 }
@@ -601,35 +729,60 @@ function SpellMeta({ spell }: { spell: ClassSpellOption }) {
   );
 }
 
+function PreviewButton({ onClick }: { onClick: () => void }) {
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon-xs"
+      className="mt-0.5 shrink-0 text-muted-foreground hover:text-foreground"
+      aria-label="Ver descrição da magia"
+      onClick={onClick}
+    >
+      <BookOpenIcon className="size-3.5" aria-hidden />
+    </Button>
+  );
+}
+
 function SimpleSpellRow({
   spell,
   checked,
   disabled = false,
   onToggle,
+  onPreview,
 }: {
   spell: ClassSpellOption;
   checked: boolean;
   disabled?: boolean;
   onToggle: () => void;
+  onPreview: () => void;
 }) {
   return (
     <li className="list-none">
-      <label
+      <div
         className={cn(
-          "flex h-full cursor-pointer items-start gap-2 rounded-lg border px-3 py-2.5 text-sm",
+          "flex h-full items-start gap-1 rounded-lg border px-2 py-2 text-sm",
           checked && "border-primary bg-primary/5",
-          disabled && "cursor-not-allowed opacity-50",
+          disabled && "opacity-50",
         )}
       >
-        <input
-          type="checkbox"
-          className="mt-1"
-          checked={checked}
-          disabled={disabled}
-          onChange={onToggle}
-        />
-        <SpellMeta spell={spell} />
-      </label>
+        <label
+          className={cn(
+            "flex min-w-0 flex-1 items-start gap-2 px-1 py-0.5",
+            disabled ? "cursor-not-allowed" : "cursor-pointer",
+          )}
+        >
+          <input
+            type="checkbox"
+            className="mt-1"
+            checked={checked}
+            disabled={disabled}
+            onChange={onToggle}
+          />
+          <SpellMeta spell={spell} />
+        </label>
+        <PreviewButton onClick={onPreview} />
+      </div>
     </li>
   );
 }
@@ -641,6 +794,7 @@ function WizardSpellRow({
   preparedDisabled = false,
   onKnown,
   onPrepared,
+  onPreview,
 }: {
   spell: ClassSpellOption;
   entry?: { listType: string };
@@ -648,6 +802,7 @@ function WizardSpellRow({
   preparedDisabled?: boolean;
   onKnown: () => void;
   onPrepared: () => void;
+  onPreview: () => void;
 }) {
   const inBook =
     entry?.listType === "known" || entry?.listType === "prepared";
@@ -662,7 +817,10 @@ function WizardSpellRow({
           knownDisabled && !inBook && "opacity-50",
         )}
       >
-        <SpellMeta spell={spell} />
+        <div className="flex min-w-0 items-start gap-1">
+          <SpellMeta spell={spell} />
+          <PreviewButton onClick={onPreview} />
+        </div>
         <div className="flex shrink-0 gap-3 text-xs">
           <label
             className={cn(

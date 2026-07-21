@@ -1,10 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState, type ReactNode } from "react";
 
 import { useCharacterDetail } from "@/features/characters/api/use-character-detail";
 import { useCharacterCatalogLabels } from "@/features/character-sheet/api/use-character-catalog-labels";
+import { BeyondAbilityRow } from "@/features/character-sheet/ui/beyond/beyond-ability-row";
+import { BeyondCombatHub } from "@/features/character-sheet/ui/beyond/beyond-combat-hub";
+import { BeyondLeftColumn } from "@/features/character-sheet/ui/beyond/beyond-left-column";
+import {
+  BeyondMainTabs,
+  type BeyondTabId,
+} from "@/features/character-sheet/ui/beyond/beyond-main-tabs";
+import { BeyondPanel } from "@/features/character-sheet/ui/beyond/beyond-panel";
+import { BeyondSkillsColumn } from "@/features/character-sheet/ui/beyond/beyond-skills-column";
 import { DeleteCharacterButton } from "@/features/character-sheet/ui/delete-character-button";
 import {
   EditAbilitiesForm,
@@ -20,15 +29,11 @@ import {
   EditSubclassOptionsForm,
 } from "@/features/character-sheet/ui/sheet-edit-forms";
 import {
-  AbilitiesSection,
   BackgroundTraitsSection,
   ClassFeaturesSection,
-  CombatSection,
-  SavingThrowsSection,
   EquipmentSection,
   FeatsSection,
   LanguagesSection,
-  SkillsSection,
   SpeciesChoicesSection,
   SpellsSection,
   SubclassMechanicsSection,
@@ -36,79 +41,61 @@ import {
 } from "@/features/character-sheet/ui/sheet-read-sections";
 import { InventorySection } from "@/features/character-sheet/ui/inventory-section";
 import { LevelUpSection } from "@/features/character-sheet/ui/level-up-section";
-import { SheetSection } from "@/features/character-sheet/ui/sheet-section";
+import { SheetChip } from "@/features/character-sheet/ui/sheet-ui";
 import { TableStateSection } from "@/features/character-sheet/ui/table-state-section";
 import { useSkills } from "@/features/reference-catalog/api/use-reference";
-import {
-  CharacterSheetLayout,
-  type SheetNavGroup,
-} from "@/widgets/character-sheet-layout";
-import { buttonVariants } from "@/shared/ui/button";
 import { BackLink } from "@/shared/ui/back-link";
+import { buttonVariants } from "@/shared/ui/button";
+import { motion } from "@/shared/lib/motion";
 import { cn } from "@/shared/lib/utils";
 
-type SheetSectionId =
+type SheetEditId =
   | "identity"
   | "background-tool"
   | "combat"
   | "abilities"
   | "skills"
-  | "class-features"
   | "species"
   | "subclass"
   | "spells"
   | "equipment"
   | "feats"
-  | "languages";
+  | "languages"
+  | null;
 
 type CharacterSheetViewProps = {
   id: string;
 };
 
+function TabSection({
+  title,
+  action,
+  children,
+}: {
+  title: string;
+  action?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="text-sm font-semibold tracking-tight">{title}</h3>
+        {action}
+      </div>
+      {children}
+    </div>
+  );
+}
+
 export function CharacterSheetView({ id }: CharacterSheetViewProps) {
   const { data, isPending, isError, error } = useCharacterDetail(id);
   const labels = useCharacterCatalogLabels(data);
   const skillsQuery = useSkills();
-  const [editing, setEditing] = useState<SheetSectionId | null>(null);
+  const [editing, setEditing] = useState<SheetEditId>(null);
 
   const closeEdit = useCallback(() => setEditing(null), []);
 
-  const nav = useMemo<SheetNavGroup[]>(
-    () => [
-      {
-        label: "Resumo",
-        items: [
-          { id: "identity", label: "Identidade" },
-          { id: "combat", label: "Combate" },
-          { id: "abilities", label: "Atributos" },
-          { id: "skills", label: "Perícias" },
-        ],
-      },
-      {
-        label: "Mesa",
-        items: [
-          { id: "table", label: "Estado ao vivo" },
-          { id: "inventory", label: "Inventário" },
-          { id: "level-up", label: "Level-up" },
-        ],
-      },
-      {
-        label: "Personagem",
-        items: [
-          { id: "class-features", label: "Classe" },
-          { id: "species", label: "Espécie" },
-          { id: "subclass", label: "Subclasse" },
-          { id: "spells", label: "Magias" },
-          { id: "equipment", label: "Equipamento" },
-          { id: "feats", label: "Talentos" },
-          { id: "languages", label: "Idiomas" },
-        ],
-      },
-    ],
-    [],
-  );
-
-  if (isPending || labels.isLoading) {
+  if (isPending) {
     return <p className="text-sm text-muted-foreground">Carregando ficha…</p>;
   }
 
@@ -128,312 +115,255 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
     );
   }
 
-  const identityParts = [
-    labels.identity.speciesName,
-    labels.identity.className,
-    labels.identity.backgroundName,
-  ].filter(Boolean);
-
   const sectionProps = { character: data, labels };
+  const languageNames = data.languageSlugs.map((slug) =>
+    labels.resolveLanguage(slug),
+  );
 
-  return (
-    <CharacterSheetLayout
-      nav={nav}
-      header={
-        <div className="space-y-2">
-          <BackLink href="/characters">Minhas fichas</BackLink>
-          <h1 className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
-            {data.name}
-          </h1>
-          <p className="text-base text-muted-foreground">
-            Nv. {data.level}
-            {identityParts.length > 0
-              ? ` · ${identityParts.join(" · ")}`
-              : null}
-          </p>
-          <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-            {labels.identity.subclassName ? (
-              <p>
-                Subclasse:{" "}
-                <span className="text-foreground">
-                  {labels.identity.subclassName}
-                </span>
-              </p>
-            ) : null}
-            {labels.identity.alignmentName ? (
-              <p>
-                Alinhamento:{" "}
-                <span className="text-foreground">
-                  {labels.identity.alignmentName}
-                </span>
-              </p>
-            ) : null}
-          </div>
-        </div>
-      }
-      actions={
-        <DeleteCharacterButton characterId={id} characterName={data.name} />
-      }
+  const editButton = (editId: NonNullable<SheetEditId>, label = "Editar") => (
+    <button
+      type="button"
+      onClick={() => setEditing(editId)}
+      className="text-[0.65rem] font-medium tracking-wide text-primary uppercase hover:underline"
     >
-      <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-        Resumo
-      </p>
+      {label}
+    </button>
+  );
 
-      <SheetSection
-        id="identity"
-        title="Identidade"
-        description="Nome, nível, classe, espécie e antecedente."
-        isEditing={editing === "identity" || editing === "background-tool"}
-        onEdit={() => setEditing("identity")}
-        onCancel={closeEdit}
-        editContent={
-          editing === "background-tool" ? (
-            <EditBackgroundToolForm character={data} onSuccess={closeEdit} />
-          ) : (
-            <EditIdentityForm character={data} onSuccess={closeEdit} />
-          )
-        }
+  if (editing) {
+    const editors: Record<Exclude<SheetEditId, null>, ReactNode> = {
+      identity: <EditIdentityForm character={data} onSuccess={closeEdit} />,
+      "background-tool": (
+        <EditBackgroundToolForm character={data} onSuccess={closeEdit} />
+      ),
+      combat: <EditCombatForm character={data} onSuccess={closeEdit} />,
+      abilities: <EditAbilitiesForm character={data} onSuccess={closeEdit} />,
+      skills: <EditClassSkillsForm character={data} onSuccess={closeEdit} />,
+      species: (
+        <EditSpeciesChoicesForm character={data} onSuccess={closeEdit} />
+      ),
+      subclass: (
+        <EditSubclassOptionsForm character={data} onSuccess={closeEdit} />
+      ),
+      spells: <EditSpellsForm character={data} onSuccess={closeEdit} />,
+      equipment: <EditEquipmentForm character={data} onSuccess={closeEdit} />,
+      feats: <EditFeatsForm character={data} onSuccess={closeEdit} />,
+      languages: <EditLanguagesForm character={data} onSuccess={closeEdit} />,
+    };
+
+    return (
+      <div className={cn("mx-auto w-full max-w-3xl space-y-4", motion.enter)}>
+        <BackLink href={`/characters/${id}`}>Voltar à ficha</BackLink>
+        <BeyondPanel
+          title="Editar ficha"
+          headerRight={
+            <button
+              type="button"
+              onClick={closeEdit}
+              className="text-xs text-muted-foreground hover:text-foreground"
+            >
+              Cancelar
+            </button>
+          }
+        >
+          {editors[editing]}
+        </BeyondPanel>
+      </div>
+    );
+  }
+
+  const tabPanels: Record<BeyondTabId, ReactNode> = {
+    actions: (
+      <div className="space-y-5">
+        <TabSection title="Equipado agora">
+          <InventorySection characterId={id} equippedOnly />
+        </TabSection>
+        <TabSection
+          title="Pacote inicial"
+          action={editButton("equipment")}
+        >
+          <EquipmentSection {...sectionProps} />
+        </TabSection>
+      </div>
+    ),
+    spells: (
+      <TabSection
+        title="Magias conhecidas / preparadas"
+        action={editButton("spells")}
       >
-        <dl className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
-          <div>
-            <dt className="text-xs text-muted-foreground uppercase">Nome</dt>
-            <dd className="font-medium">{data.name}</dd>
+        <SpellsSection {...sectionProps} />
+      </TabSection>
+    ),
+    inventory: (
+      <TabSection title="Inventário de jogo">
+        <InventorySection characterId={id} />
+      </TabSection>
+    ),
+    features: (
+      <div className="space-y-5">
+        <TabSection title="Características de classe">
+          <ClassFeaturesSection {...sectionProps} />
+        </TabSection>
+        <TabSection title="Espécie" action={editButton("species")}>
+          <SpeciesChoicesSection {...sectionProps} />
+        </TabSection>
+        <TabSection title="Subclasse" action={editButton("subclass")}>
+          <div className="space-y-4">
+            <SubclassOptionsSection {...sectionProps} />
+            <SubclassMechanicsSection {...sectionProps} />
           </div>
-          <div>
-            <dt className="text-xs text-muted-foreground uppercase">Nível</dt>
-            <dd className="font-medium">{data.level}</dd>
-          </div>
-          <div>
-            <dt className="text-xs text-muted-foreground uppercase">Classe</dt>
-            <dd className="font-medium">{labels.identity.className}</dd>
-          </div>
-          <div>
-            <dt className="text-xs text-muted-foreground uppercase">Espécie</dt>
-            <dd className="font-medium">{labels.identity.speciesName}</dd>
-          </div>
-          <div>
-            <dt className="text-xs text-muted-foreground uppercase">
-              Antecedente
-            </dt>
-            <dd className="font-medium">{labels.identity.backgroundName}</dd>
-          </div>
-          {labels.identity.subclassName ? (
-            <div>
-              <dt className="text-xs text-muted-foreground uppercase">
-                Subclasse
-              </dt>
-              <dd className="font-medium">{labels.identity.subclassName}</dd>
-            </div>
-          ) : null}
-        </dl>
-        <div className="mt-6 border-t border-border pt-4">
-          <h3 className="mb-3 text-sm font-semibold">Traços do antecedente</h3>
+        </TabSection>
+        <TabSection title="Talentos" action={editButton("feats")}>
+          <FeatsSection {...sectionProps} />
+        </TabSection>
+        <TabSection title="Antecedente">
           <BackgroundTraitsSection
             {...sectionProps}
             onEditTool={() => setEditing("background-tool")}
           />
-        </div>
-      </SheetSection>
-
-      <SheetSection
-        id="combat"
-        title="Combate"
-        description="PV, CA, proficiência e percepção — o essencial em jogo."
-        isEditing={editing === "combat"}
-        onEdit={() => setEditing("combat")}
-        onCancel={closeEdit}
-        editContent={<EditCombatForm character={data} onSuccess={closeEdit} />}
-      >
-        <CombatSection {...sectionProps} />
-      </SheetSection>
-
-      <SheetSection
-        id="saving-throws"
-        title="Salvaguardas e treinos"
-        description="Proficiências da classe — no estilo Beyond."
-      >
-        <SavingThrowsSection {...sectionProps} />
-      </SheetSection>
-
-      <SheetSection
-        id="abilities"
-        title="Atributos"
-        isEditing={editing === "abilities"}
-        onEdit={() => setEditing("abilities")}
-        onCancel={closeEdit}
-        editContent={
-          <EditAbilitiesForm character={data} onSuccess={closeEdit} />
-        }
-      >
-        <AbilitiesSection {...sectionProps} />
-      </SheetSection>
-
-      <SheetSection
-        id="skills"
-        title="Perícias"
-        description="Bônus = modificador do atributo + bônus de proficiência."
-        isEditing={editing === "skills"}
-        onEdit={() => setEditing("skills")}
-        onCancel={closeEdit}
-        editContent={
-          <EditClassSkillsForm character={data} onSuccess={closeEdit} />
-        }
-      >
-        {skillsQuery.isPending ? (
-          <p className="text-sm text-muted-foreground">Carregando perícias…</p>
-        ) : (
-          <SkillsSection
-            {...sectionProps}
-            skills={skillsQuery.data?.data ?? []}
+        </TabSection>
+      </div>
+    ),
+    table: (
+      <div className="space-y-4">
+        <TabSection title="Estado ao vivo">
+          <TableStateSection
+            characterId={id}
+            character={data}
+            labels={labels}
           />
-        )}
-      </SheetSection>
+        </TabSection>
+        <TabSection title="Subir de nível">
+          <LevelUpSection characterId={id} character={data} />
+        </TabSection>
+      </div>
+    ),
+    notes: (
+      <div className="space-y-3">
+        <p className="text-sm text-muted-foreground">
+          Escolha o que deseja alterar na ficha.
+        </p>
+        <ul className="grid gap-2 sm:grid-cols-2">
+          {(
+            [
+              ["identity", "Identidade"],
+              ["abilities", "Atributos"],
+              ["skills", "Perícias"],
+              ["combat", "PV máximos"],
+              ["spells", "Magias"],
+              ["equipment", "Equipamento inicial"],
+              ["feats", "Talentos"],
+              ["languages", "Idiomas"],
+              ["species", "Espécie"],
+              ["subclass", "Subclasse"],
+            ] as const
+          ).map(([key, label]) => (
+            <li key={key}>
+              <button
+                type="button"
+                onClick={() => setEditing(key)}
+                className="w-full rounded-lg border border-border/70 bg-background/40 px-3 py-2 text-left text-sm transition-colors hover:border-primary/40 hover:bg-primary/5"
+              >
+                {label}
+              </button>
+            </li>
+          ))}
+        </ul>
+        <TabSection title="Idiomas" action={editButton("languages")}>
+          <LanguagesSection {...sectionProps} />
+        </TabSection>
+      </div>
+    ),
+  };
 
-      <p className="pt-2 text-xs font-medium tracking-wide text-primary uppercase">
-        Mesa de jogo
-      </p>
-
-      <SheetSection
-        id="table"
-        title="Estado ao vivo"
-        description="PV temporários, slots, concentração, condições e descansos."
-        variant="table"
-      >
-        <TableStateSection characterId={id} character={data} labels={labels} />
-      </SheetSection>
-
-      <SheetSection
-        id="inventory"
-        title="Inventário"
-        description="Mochila e itens equipados em jogo."
-        variant="table"
-        collapsible
-        defaultOpen={false}
-      >
-        <InventorySection characterId={id} />
-      </SheetSection>
-
-      <SheetSection
-        id="level-up"
-        title="Subir de nível"
-        description="Preview e aplicação do próximo nível via API."
-        variant="table"
-        collapsible
-        defaultOpen={false}
-      >
-        <LevelUpSection characterId={id} character={data} />
-      </SheetSection>
-
-      <p className="pt-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-        Personagem (PHB)
-      </p>
-
-      <SheetSection
-        id="class-features"
-        title="Características de classe"
-        description="Features da classe até o nível atual."
-        collapsible
-        defaultOpen={false}
-      >
-        <ClassFeaturesSection {...sectionProps} />
-      </SheetSection>
-
-      <SheetSection
-        id="species"
-        title="Traços de espécie"
-        isEditing={editing === "species"}
-        onEdit={() => setEditing("species")}
-        onCancel={closeEdit}
-        editContent={
-          <EditSpeciesChoicesForm character={data} onSuccess={closeEdit} />
-        }
-        collapsible
-        defaultOpen={false}
-      >
-        <SpeciesChoicesSection {...sectionProps} />
-      </SheetSection>
-
-      <SheetSection
-        id="subclass"
-        title="Subclasse"
-        description="Opções escolhidas e mecânicas até o nível atual."
-        isEditing={editing === "subclass"}
-        onEdit={() => setEditing("subclass")}
-        onCancel={closeEdit}
-        editContent={
-          <EditSubclassOptionsForm character={data} onSuccess={closeEdit} />
-        }
-        collapsible
-        defaultOpen={false}
-      >
-        <div className="space-y-6">
-          <div>
-            <h3 className="mb-3 text-sm font-semibold">Opções escolhidas</h3>
-            <SubclassOptionsSection {...sectionProps} />
-          </div>
-          <div className="border-t border-border pt-4">
-            <h3 className="mb-3 text-sm font-semibold">Mecânicas</h3>
-            <SubclassMechanicsSection {...sectionProps} />
+  return (
+    <div className={cn("space-y-3 pb-8 sm:space-y-4", motion.enter)}>
+      <header className="flex flex-col gap-3 border-b border-border/60 pb-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0 space-y-2">
+          <BackLink href="/characters">Minhas fichas</BackLink>
+          <div className="flex flex-wrap items-end gap-3">
+            <div
+              aria-hidden
+              className="flex size-12 shrink-0 items-center justify-center rounded-full border border-primary/35 bg-primary/12 font-heading text-lg font-semibold text-primary sm:size-14 sm:text-xl"
+            >
+              {data.name.trim().charAt(0).toUpperCase() || "?"}
+            </div>
+            <div className="min-w-0">
+              <h1 className="font-heading text-2xl font-semibold tracking-tight sm:text-3xl">
+                {data.name}
+              </h1>
+              <div className="mt-1.5 flex flex-wrap gap-1.5">
+                <SheetChip active>Nv. {data.level}</SheetChip>
+                {labels.identity.speciesName ? (
+                  <SheetChip>{labels.identity.speciesName}</SheetChip>
+                ) : null}
+                {labels.identity.className ? (
+                  <SheetChip>{labels.identity.className}</SheetChip>
+                ) : null}
+                {labels.identity.subclassName ? (
+                  <SheetChip>{labels.identity.subclassName}</SheetChip>
+                ) : null}
+                {labels.identity.backgroundName ? (
+                  <SheetChip>{labels.identity.backgroundName}</SheetChip>
+                ) : null}
+              </div>
+            </div>
           </div>
         </div>
-      </SheetSection>
+        <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+          <button
+            type="button"
+            onClick={() => setEditing("identity")}
+            className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+          >
+            Identidade
+          </button>
+          <DeleteCharacterButton characterId={id} characterName={data.name} />
+        </div>
+      </header>
 
-      <SheetSection
-        id="spells"
-        title="Magias"
-        isEditing={editing === "spells"}
-        onEdit={() => setEditing("spells")}
-        onCancel={closeEdit}
-        editContent={<EditSpellsForm character={data} onSuccess={closeEdit} />}
-        collapsible
-        defaultOpen={false}
-      >
-        <SpellsSection {...sectionProps} />
-      </SheetSection>
+      <BeyondAbilityRow
+        scores={data.abilityScores}
+        onEdit={() => setEditing("abilities")}
+      />
 
-      <SheetSection
-        id="equipment"
-        title="Equipamento inicial"
-        description="Escolhas de criação — distinto do inventário de jogo."
-        isEditing={editing === "equipment"}
-        onEdit={() => setEditing("equipment")}
-        onCancel={closeEdit}
-        editContent={
-          <EditEquipmentForm character={data} onSuccess={closeEdit} />
-        }
-        collapsible
-        defaultOpen={false}
+      {/*
+        Mobile order: combate → perícias → proffs
+        Desktop: proffs | perícias | combate+abas
+      */}
+      <div
+        className={cn(
+          "grid gap-3",
+          "grid-cols-1",
+          "lg:grid-cols-[13.5rem_minmax(14rem,18rem)_minmax(0,1fr)]",
+          "xl:grid-cols-[14rem_16rem_minmax(0,1fr)]",
+        )}
       >
-        <EquipmentSection {...sectionProps} />
-      </SheetSection>
+        <div className="order-3 lg:order-1">
+          <BeyondLeftColumn character={data} languageNames={languageNames} />
+        </div>
 
-      <SheetSection
-        id="feats"
-        title="Talentos"
-        isEditing={editing === "feats"}
-        onEdit={() => setEditing("feats")}
-        onCancel={closeEdit}
-        editContent={<EditFeatsForm character={data} onSuccess={closeEdit} />}
-        collapsible
-        defaultOpen={false}
-      >
-        <FeatsSection {...sectionProps} />
-      </SheetSection>
+        <div className="order-2 lg:order-2">
+          {skillsQuery.isPending ? (
+            <BeyondPanel title="Perícias">
+              <p className="text-sm text-muted-foreground">Carregando…</p>
+            </BeyondPanel>
+          ) : (
+            <BeyondSkillsColumn
+              character={data}
+              skills={skillsQuery.data?.data ?? []}
+              onEdit={() => setEditing("skills")}
+            />
+          )}
+        </div>
 
-      <SheetSection
-        id="languages"
-        title="Idiomas"
-        isEditing={editing === "languages"}
-        onEdit={() => setEditing("languages")}
-        onCancel={closeEdit}
-        editContent={
-          <EditLanguagesForm character={data} onSuccess={closeEdit} />
-        }
-        collapsible
-        defaultOpen={false}
-      >
-        <LanguagesSection {...sectionProps} />
-      </SheetSection>
-    </CharacterSheetLayout>
+        <div className="order-1 flex min-w-0 flex-col gap-3 lg:order-3">
+          <div className="lg:sticky lg:top-3 lg:z-10">
+            <BeyondCombatHub characterId={id} character={data} />
+          </div>
+          <BeyondMainTabs panels={tabPanels} />
+        </div>
+      </div>
+    </div>
   );
 }

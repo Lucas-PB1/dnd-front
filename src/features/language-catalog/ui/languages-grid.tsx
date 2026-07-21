@@ -9,6 +9,8 @@ import { RARE_FILTER } from "@/shared/lib/catalog-filter-options";
 import { CatalogFilters } from "@/shared/ui/catalog-filters";
 import { CatalogPagination } from "@/shared/ui/catalog-pagination";
 import { CatalogSearch } from "@/shared/ui/catalog-search";
+import { motion } from "@/shared/lib/motion";
+import { cn } from "@/shared/lib/utils";
 
 export function LanguagesGrid() {
   const {
@@ -76,9 +78,9 @@ export function LanguagesGrid() {
       ) : (
         <>
           <div
-            className={isFetching ? "opacity-70 transition-opacity" : undefined}
+            className={cn(isFetching && "opacity-70 transition-opacity")}
           >
-            <ul className="border-t border-border">
+            <ul className={cn("border-t border-border", motion.stagger)}>
               {data.data.map((language) => (
                 <li key={language.slug}>
                   <LanguageCard language={language} listPath={listPath} />

@@ -31,14 +31,14 @@ export function AuthPageShell({
         <ThemeToggle />
       </header>
 
-      <main className="relative mx-auto flex w-full max-w-sm flex-1 flex-col justify-center gap-6 px-6 py-16">
-        <div className="space-y-2 text-center">
+      <main className="motion-page relative mx-auto flex w-full max-w-sm flex-1 flex-col justify-center gap-6 px-6 py-16">
+        <div className="motion-enter space-y-2 text-center">
           <h1 className="font-heading text-3xl font-semibold tracking-tight">
             {title}
           </h1>
           <p className="text-sm text-muted-foreground">{description}</p>
         </div>
-        {children}
+        <div className="motion-enter motion-delay-1">{children}</div>
       </main>
     </div>
   );

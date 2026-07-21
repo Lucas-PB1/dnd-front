@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { motion } from "@/shared/lib/motion";
 import { cn } from "@/shared/lib/utils";
 import { BackLink } from "@/shared/ui/back-link";
 import { buttonVariants } from "@/shared/ui/button";
@@ -52,6 +53,7 @@ export function CatalogDetailHero({
     <header
       className={cn(
         "relative overflow-hidden rounded-xl border border-border",
+        motion.enter,
         className,
       )}
     >

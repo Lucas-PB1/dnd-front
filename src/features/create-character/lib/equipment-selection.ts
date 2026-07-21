@@ -1,6 +1,13 @@
 import type { CharacterEquipment } from "@/entities/character/sheet-types";
 import type { BackgroundEquipmentOption } from "@/entities/background/types";
 import type { ClassEquipmentOption } from "@/entities/class/types";
+import {
+  choicePickKey,
+  resolveEquipmentChoiceText,
+  toolNameForSlug,
+  type EquipmentToolPool,
+  type ResolvedChoice,
+} from "@/features/create-character/lib/equipment-choice-resolve";
 
 /** Pacote virtual: ouro do antecedente em vez dos itens (PHB). */
 export const BACKGROUND_GOLD_PACKAGE_SLUG = "gold";
@@ -11,6 +18,31 @@ export type EquipmentPackage<
   packageSlug: string;
   packageLabel: string;
   rows: T[];
+};
+
+export type EquipmentLineKind =
+  | "item"
+  | "gold"
+  | "text"
+  | "mirror-tool"
+  | "pick-tool";
+
+export type EquipmentLine = {
+  kind: EquipmentLineKind;
+  label: string;
+  /** sortOrder da linha no pacote (para picks). */
+  sortOrder?: number;
+  itemSlug?: string;
+  quantity?: number;
+  pool?: EquipmentToolPool;
+  /** Texto original do seed (debug / fallback). */
+  choiceText?: string;
+};
+
+export type EquipmentResolveContext = {
+  backgroundToolItemSlug?: string;
+  /** Picks explícitos: chave de `choicePickKey`. */
+  choicePicks?: Record<string, string>;
 };
 
 export function groupEquipmentPackages<
@@ -42,21 +74,168 @@ export function formatClassEquipmentLine(row: ClassEquipmentOption): string {
       row.quantity != null && row.quantity > 1 ? `${row.quantity}× ` : "";
     return `${qty}${row.itemName}`;
   }
-  if (row.choiceText) return row.choiceText;
+  if (row.choiceText) {
+    const resolved = resolveEquipmentChoiceText(row.choiceText);
+    if (resolved.kind === "fixed") return resolved.label;
+    return resolved.label;
+  }
   if (row.goldAmount != null) return `${row.goldAmount} PO`;
   return "—";
 }
 
-export function formatBackgroundEquipmentLine(
-  row: BackgroundEquipmentOption,
-): string {
-  if (row.itemName) {
-    const qty =
-      row.quantity != null && row.quantity > 1 ? `${row.quantity}× ` : "";
-    return `${qty}${row.itemName}`;
+function lineFromResolved(
+  resolved: ResolvedChoice,
+  sortOrder: number,
+  choiceText: string,
+  ctx: EquipmentResolveContext,
+  source: "class" | "background",
+  packageSlug: string,
+): EquipmentLine {
+  if (resolved.kind === "fixed") {
+    return {
+      kind: "item",
+      label: resolved.label,
+      itemSlug: resolved.itemSlug,
+      quantity: resolved.quantity,
+      sortOrder,
+      choiceText,
+    };
   }
-  if (row.choiceText) return row.choiceText;
-  return "—";
+
+  if (resolved.kind === "text") {
+    return { kind: "text", label: resolved.label, sortOrder, choiceText };
+  }
+
+  if (resolved.kind === "mirror-tool") {
+    const mirrored = ctx.backgroundToolItemSlug?.trim();
+    if (mirrored) {
+      const name = toolNameForSlug(mirrored, resolved.pool) ?? mirrored;
+      return {
+        kind: "item",
+        label: name,
+        itemSlug: mirrored,
+        quantity: 1,
+        sortOrder,
+        pool: resolved.pool,
+        choiceText,
+      };
+    }
+    return {
+      kind: "mirror-tool",
+      label: resolved.label,
+      sortOrder,
+      pool: resolved.pool,
+      choiceText,
+    };
+  }
+
+  const pickKey = choicePickKey(source, packageSlug, sortOrder);
+  const picked = ctx.choicePicks?.[pickKey]?.trim();
+  if (picked) {
+    const name = toolNameForSlug(picked, resolved.pool) ?? picked;
+    return {
+      kind: "item",
+      label: name,
+      itemSlug: picked,
+      quantity: 1,
+      sortOrder,
+      pool: resolved.pool,
+      choiceText,
+    };
+  }
+
+  return {
+    kind: "pick-tool",
+    label: resolved.label,
+    sortOrder,
+    pool: resolved.pool,
+    choiceText,
+  };
+}
+
+export function classEquipmentLines(
+  pkg: EquipmentPackage<ClassEquipmentOption>,
+  ctx: EquipmentResolveContext = {},
+): EquipmentLine[] {
+  return pkg.rows
+    .map((row): EquipmentLine | null => {
+      if (row.itemName) {
+        const qty =
+          row.quantity != null && row.quantity > 1 ? `${row.quantity}× ` : "";
+        return {
+          kind: "item",
+          label: `${qty}${row.itemName}`,
+          itemSlug: row.itemSlug ?? undefined,
+          quantity: row.quantity ?? 1,
+          sortOrder: row.sortOrder,
+        };
+      }
+      if (row.choiceText) {
+        return lineFromResolved(
+          resolveEquipmentChoiceText(row.choiceText),
+          row.sortOrder,
+          row.choiceText,
+          ctx,
+          "class",
+          pkg.packageSlug,
+        );
+      }
+      if (row.goldAmount != null) {
+        return {
+          kind: "gold",
+          label: `${row.goldAmount} PO`,
+          sortOrder: row.sortOrder,
+        };
+      }
+      return null;
+    })
+    .filter((line): line is EquipmentLine => line != null);
+}
+
+export function backgroundEquipmentLines(
+  pkg: EquipmentPackage<BackgroundEquipmentOption>,
+  ctx: EquipmentResolveContext = {},
+): EquipmentLine[] {
+  const lines = pkg.rows
+    .map((row): EquipmentLine | null => {
+      if (row.itemName) {
+        const qty =
+          row.quantity != null && row.quantity > 1 ? `${row.quantity}× ` : "";
+        return {
+          kind: "item",
+          label: `${qty}${row.itemName}`,
+          itemSlug: row.itemSlug ?? undefined,
+          quantity: row.quantity ?? 1,
+          sortOrder: row.sortOrder,
+        };
+      }
+      if (row.choiceText) {
+        return lineFromResolved(
+          resolveEquipmentChoiceText(row.choiceText),
+          row.sortOrder,
+          row.choiceText,
+          ctx,
+          "background",
+          pkg.packageSlug,
+        );
+      }
+      return null;
+    })
+    .filter((line): line is EquipmentLine => line != null);
+
+  const extraGold = pkg.rows[0]?.packageGold;
+  if (extraGold != null && extraGold > 0) {
+    lines.push({ kind: "gold", label: `${extraGold} PO` });
+  }
+  return lines;
+}
+
+/** Pacote só com ouro (ex.: opção B do guerreiro). */
+export function isGoldOnlyClassPackage(
+  pkg: EquipmentPackage<ClassEquipmentOption>,
+): boolean {
+  const lines = classEquipmentLines(pkg);
+  return lines.length > 0 && lines.every((line) => line.kind === "gold");
 }
 
 export function automaticPackageItemSlugs<
@@ -68,17 +247,50 @@ export function automaticPackageItemSlugs<
     .filter((slug, index, all) => all.indexOf(slug) === index);
 }
 
+function appendResolvedItems(
+  items: CharacterEquipment[],
+  source: "class" | "background",
+  packageSlug: string,
+  lines: EquipmentLine[],
+) {
+  let sortOrder = items.length;
+  for (const line of lines) {
+    if (line.kind !== "item" || !line.itemSlug) continue;
+    // Evita duplicar itemSlug já vindo de row.itemSlug
+    if (
+      items.some(
+        (e) => e.itemSlug === line.itemSlug && e.packageSlug === packageSlug,
+      )
+    ) {
+      continue;
+    }
+    items.push({
+      source,
+      packageSlug,
+      itemSlug: line.itemSlug,
+      quantity: line.quantity ?? 1,
+      sortOrder: sortOrder++,
+    });
+  }
+}
+
 export function buildClassEquipmentPayload(
   packageSlug: string,
   rows: ClassEquipmentOption[],
-  selectedItemSlugs?: string[],
+  ctx: EquipmentResolveContext = {},
 ): CharacterEquipment[] {
-  const slugs = selectedItemSlugs ?? automaticPackageItemSlugs(rows);
+  const pkg: EquipmentPackage<ClassEquipmentOption> = {
+    packageSlug,
+    packageLabel: packageSlug,
+    rows,
+  };
+  const lines = classEquipmentLines(pkg, ctx);
   const items: CharacterEquipment[] = [
     { source: "class", packageSlug, sortOrder: 0 },
   ];
 
-  slugs.forEach((itemSlug, index) => {
+  // Itens já ligados no seed
+  automaticPackageItemSlugs(rows).forEach((itemSlug, index) => {
     const row = rows.find((r) => r.itemSlug === itemSlug);
     items.push({
       source: "class",
@@ -89,24 +301,30 @@ export function buildClassEquipmentPayload(
     });
   });
 
+  appendResolvedItems(items, "class", packageSlug, lines);
   return items;
 }
 
 export function buildBackgroundEquipmentPayload(
   packageSlug: string,
   rows: BackgroundEquipmentOption[],
-  selectedItemSlugs?: string[],
+  ctx: EquipmentResolveContext = {},
 ): CharacterEquipment[] {
   if (packageSlug === BACKGROUND_GOLD_PACKAGE_SLUG) {
     return [{ source: "background", packageSlug, sortOrder: 0 }];
   }
 
-  const slugs = selectedItemSlugs ?? automaticPackageItemSlugs(rows);
+  const pkg: EquipmentPackage<BackgroundEquipmentOption> = {
+    packageSlug,
+    packageLabel: packageSlug,
+    rows,
+  };
+  const lines = backgroundEquipmentLines(pkg, ctx);
   const items: CharacterEquipment[] = [
     { source: "background", packageSlug, sortOrder: 0 },
   ];
 
-  slugs.forEach((itemSlug, index) => {
+  automaticPackageItemSlugs(rows).forEach((itemSlug, index) => {
     const row = rows.find((r) => r.itemSlug === itemSlug);
     items.push({
       source: "background",
@@ -117,12 +335,15 @@ export function buildBackgroundEquipmentPayload(
     });
   });
 
+  appendResolvedItems(items, "background", packageSlug, lines);
   return items;
 }
 
-/** @deprecated Use automaticPackageItemSlugs */
-export function getPackageItemChoices<
-  T extends ClassEquipmentOption | BackgroundEquipmentOption,
->(pkg: EquipmentPackage<T>): T[] {
-  return pkg.rows.filter((row) => row.itemSlug);
+/** Linhas que ainda precisam de seleção do jogador. */
+export function pendingEquipmentChoices(
+  lines: EquipmentLine[],
+): EquipmentLine[] {
+  return lines.filter(
+    (line) => line.kind === "pick-tool" || line.kind === "mirror-tool",
+  );
 }

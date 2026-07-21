@@ -42,12 +42,14 @@ import { StepSubclassOptions } from "@/features/create-character/ui/steps/step-s
 import { WizardStepIndicator } from "@/features/create-character/ui/wizard-step-indicator";
 import { useSpeciesTraitChoices } from "@/features/species-catalog/api/use-species";
 import { useBackgroundDetail } from "@/features/background-catalog/api/use-backgrounds";
+import { syncLanguagesForSpecies } from "@/features/create-character/lib/language-selection";
 import { countAsiFeatSlots } from "@/features/create-character/lib/asi-feat-slots";
 import { asiFeatSlotsToCharacterFeats } from "@/features/create-character/lib/asi-feat-slots-to-feats";
 import { resolveCreateCharacterFeats } from "@/features/create-character/lib/preview-create-character-feats";
 import { ritualSpellSlotIndex } from "@/features/create-character/lib/feat-option-requirements";
 import { proficiencyBonusForLevel } from "@/features/create-character/lib/proficiency-bonus-for-level";
 import { findIncompleteCreateFeatOptions } from "@/features/create-character/lib/validate-create-feat-options";
+import { TempTestPresetsPanel } from "@/features/create-character/ui/temp-test-presets-panel";
 import { Button } from "@/shared/ui/button";
 
 const DEFAULT_VALUES: CreateCharacterInput = {
@@ -189,6 +191,10 @@ export function CreateCharacterWizard() {
   useEffect(() => {
     if (prevSpeciesSlugRef.current !== speciesSlug) {
       setValue("speciesChoices", []);
+      setValue(
+        "languageSlugs",
+        syncLanguagesForSpecies([], speciesSlug),
+      );
       prevSpeciesSlugRef.current = speciesSlug;
     }
   }, [speciesSlug, setValue]);
@@ -400,9 +406,13 @@ export function CreateCharacterWizard() {
     >
       <WizardStepIndicator currentStep={step} navOptions={wizardNav} />
 
+      {process.env.NODE_ENV === "development" ? (
+        <TempTestPresetsPanel wizard={{ setValue, setStep }} />
+      ) : null}
+
       <div
         key={step}
-        className="animate-in fade-in-0 slide-in-from-right-2 duration-300 fill-mode-both"
+        className="animate-in fade-in-0 slide-in-from-right-3 duration-300 fill-mode-both"
       >
         {step === "identity" ? (
           <StepIdentity register={register} control={control} errors={errors} />

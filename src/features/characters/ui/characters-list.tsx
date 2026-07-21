@@ -4,6 +4,8 @@ import Link from "next/link";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 
 import { useCharacters } from "@/features/characters/api/use-characters";
+import { DeleteCharacterButton } from "@/features/character-sheet/ui/delete-character-button";
+import { motion } from "@/shared/lib/motion";
 import { cn } from "@/shared/lib/utils";
 import { buttonVariants } from "@/shared/ui/button";
 
@@ -24,7 +26,12 @@ export function CharactersList() {
 
   if (!data?.length) {
     return (
-      <div className="flex flex-col items-center gap-4 rounded-lg border border-dashed border-border px-6 py-12 text-center">
+      <div
+        className={cn(
+          "flex flex-col items-center gap-4 rounded-lg border border-dashed border-border px-6 py-12 text-center",
+          motion.enter,
+        )}
+      >
         <div className="space-y-2">
           <p className="font-heading text-lg font-semibold tracking-tight">
             Ainda sem fichas
@@ -36,7 +43,7 @@ export function CharactersList() {
         </div>
         <Link
           href="/characters/new"
-          className={cn(buttonVariants({ size: "lg" }))}
+          className={cn(buttonVariants({ size: "lg" }), motion.hoverLift)}
         >
           Criar personagem
         </Link>
@@ -45,25 +52,44 @@ export function CharactersList() {
   }
 
   return (
-    <ul className="divide-y divide-border rounded-lg border border-border">
+    <ul
+      className={cn(
+        "divide-y divide-border rounded-xl border border-border",
+        motion.stagger,
+      )}
+    >
       {data.map((character) => (
-        <li key={character.id}>
-          <Link
-            href={`/characters/${character.id}`}
-            className="flex items-center justify-between gap-4 px-4 py-3 transition-colors hover:bg-muted/30"
-          >
-            <div className="min-w-0 text-left">
-              <p className="font-medium">{character.name}</p>
-              <p className="text-sm text-muted-foreground">
-                Nv. {character.level} · {character.speciesSlug} ·{" "}
-                {character.classSlug}
-              </p>
-            </div>
-            <span className="inline-flex shrink-0 items-center gap-1 text-xs text-muted-foreground">
-              Ver
+        <li
+          key={character.id}
+          className={cn(
+            "flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between",
+            motion.hoverRow,
+          )}
+        >
+          <div className="min-w-0 flex-1">
+            <p className="font-medium">{character.name}</p>
+            <p className="text-sm text-muted-foreground">
+              Nv. {character.level} · {character.speciesSlug} ·{" "}
+              {character.classSlug}
+            </p>
+          </div>
+          <div className="flex shrink-0 flex-wrap items-center gap-2">
+            <DeleteCharacterButton
+              characterId={character.id}
+              characterName={character.name}
+              stayOnList
+            />
+            <Link
+              href={`/characters/${character.id}`}
+              className={cn(
+                buttonVariants({ size: "sm" }),
+                "inline-flex items-center gap-1",
+              )}
+            >
+              Abrir / editar
               <ArrowRightIcon className="size-3.5" aria-hidden />
-            </span>
-          </Link>
+            </Link>
+          </div>
         </li>
       ))}
     </ul>

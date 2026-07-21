@@ -608,13 +608,19 @@ function SheetStepForm({
       (character.abilityGenerationMethodSlug as CreateCharacterInput["abilityGenerationMethodSlug"]) ??
       "standard-array",
     abilityScores: character.abilityScores,
+    backgroundAbilityBoostPlus2Slug:
+      character.backgroundAbilityBoostPlus2Slug ?? undefined,
+    backgroundAbilityBoostPlus1Slug:
+      character.backgroundAbilityBoostPlus1Slug ?? undefined,
+    backgroundToolItemSlug: character.backgroundToolItemSlug ?? undefined,
     classSkillSlugs: character.classSkillSlugs,
     alignmentSlug: character.alignmentSlug ?? "",
     languageSlugs: character.languageSlugs,
     speciesChoices: character.speciesChoices,
     subclassOptions: character.subclassOptions,
     featOptions: character.featOptions,
-    asiFeatSlotSlugs: [],
+    // Hidrata slots com os feats já na ficha para o editor não podar featOptions.
+    asiFeatSlotSlugs: character.characterFeats.map((feat) => feat.featSlug),
     equipment: character.equipment,
     characterSpells: character.characterSpells,
   } satisfies CreateCharacterInput;

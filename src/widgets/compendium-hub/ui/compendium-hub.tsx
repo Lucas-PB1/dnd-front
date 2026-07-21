@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 
+import { motion } from "@/shared/lib/motion";
 import { cn } from "@/shared/lib/utils";
 
 const SECTIONS = [
@@ -71,7 +72,12 @@ const SECTIONS = [
 export function CompendiumHub() {
   return (
     <div className="space-y-8">
-      <div className="relative overflow-hidden rounded-xl border border-border">
+      <div
+        className={cn(
+          "relative overflow-hidden rounded-xl border border-border",
+          motion.enter,
+        )}
+      >
         <div
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,color-mix(in_oklch,var(--primary)_18%,transparent),transparent_55%),radial-gradient(ellipse_at_bottom_right,color-mix(in_oklch,var(--secondary)_12%,transparent),transparent_50%)]"
           aria-hidden
@@ -87,14 +93,15 @@ export function CompendiumHub() {
         </div>
       </div>
 
-      <ul className="flex flex-col border-t border-border">
+      <ul className={cn("flex flex-col border-t border-border", motion.stagger)}>
         {SECTIONS.map((section) => (
           <li key={section.href}>
             <Link
               href={section.href}
               className={cn(
-                "group flex items-start justify-between gap-4 border-b border-border px-1 py-5 transition-colors",
+                "group flex items-start justify-between gap-4 border-b border-border px-1 py-5",
                 "hover:bg-muted/30 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
+                motion.hoverRow,
               )}
             >
               <div className="min-w-0 space-y-1.5">
@@ -109,7 +116,7 @@ export function CompendiumHub() {
                 </p>
               </div>
               <ArrowRightIcon
-                className="mt-1 size-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
+                className="mt-1 size-5 shrink-0 text-muted-foreground transition-transform duration-200 group-hover:translate-x-1 group-hover:text-primary"
                 aria-hidden
               />
             </Link>

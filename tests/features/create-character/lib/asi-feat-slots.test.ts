@@ -6,7 +6,7 @@ import {
   countAsiFeatSlots,
 } from "@/features/create-character/lib/asi-feat-slots";
 import { asiFeatSlotsToCharacterFeats } from "@/features/create-character/lib/asi-feat-slots-to-feats";
-import { previewCreateCharacterFeats } from "@/features/create-character/lib/preview-create-character-feats";
+import { resolveCreateCharacterFeats } from "@/features/create-character/lib/preview-create-character-feats";
 
 describe("asi-feat-slots", () => {
   it("counts slots up to character level", () => {
@@ -37,10 +37,10 @@ describe("asiFeatSlotsToCharacterFeats", () => {
   });
 });
 
-describe("previewCreateCharacterFeats", () => {
+describe("resolveCreateCharacterFeats", () => {
   it("injects background origin when missing from ASI picks", () => {
     expect(
-      previewCreateCharacterFeats("skilled", [
+      resolveCreateCharacterFeats("skilled", [
         { featSlug: "alert", instanceIndex: 0 },
       ]),
     ).toEqual([
@@ -51,7 +51,7 @@ describe("previewCreateCharacterFeats", () => {
 
   it("does not duplicate origin slug already chosen as ASI", () => {
     expect(
-      previewCreateCharacterFeats("magic-initiate", [
+      resolveCreateCharacterFeats("magic-initiate", [
         { featSlug: "magic-initiate", instanceIndex: 0 },
       ]),
     ).toEqual([{ featSlug: "magic-initiate", instanceIndex: 0 }]);

@@ -12,6 +12,8 @@ import { useClampCatalogPage } from "@/shared/lib/use-clamp-catalog-page";
 import { CatalogFilters } from "@/shared/ui/catalog-filters";
 import { CatalogPagination } from "@/shared/ui/catalog-pagination";
 import { CatalogSearch } from "@/shared/ui/catalog-search";
+import { motion } from "@/shared/lib/motion";
+import { cn } from "@/shared/lib/utils";
 
 export function SpellsGrid() {
   const {
@@ -82,9 +84,14 @@ export function SpellsGrid() {
       ) : (
         <>
           <div
-            className={isFetching ? "opacity-70 transition-opacity" : undefined}
+            className={cn(isFetching && "opacity-70 transition-opacity")}
           >
-            <ul className="divide-y-0 border-t border-border">
+            <ul
+              className={cn(
+                "divide-y-0 border-t border-border",
+                motion.stagger,
+              )}
+            >
               {data.data.map((spell) => (
                 <li key={spell.slug}>
                   <SpellCard spell={spell} listPath={listPath} />

@@ -117,9 +117,11 @@ Ordem de implementação. Features de regra (ASI, picker de condições) ficam n
 
 ### Fase 5 — Ficha (leitura vs mesa)
 
-- [x] Hierarquia clara: bloco identidade → combate/atributos → seções PHB → mesa
-- [x] Separar visualmente **leitura/edição** de **mesa** (PV, slots, descanso)
-- [x] Densidade: menos “parede de cards”; seções colapsáveis com motion leve
+- [x] Hierarquia clara: identidade → atributos → combate/perícias → abas
+- [x] Separar visualmente **leitura** de **mesa** (hub PV + aba Mesa)
+- [x] Densidade: dashboard estilo Beyond; abas em vez de scroll infinito de cards
+- [x] Layout canônico documentado na rule `32-ui-character-sheet`
+- [ ] Aba Ações com ataques (acerto/dano) quando a API expor o dado
 - [ ] Alinhar polish visual ao picker de condições / ASI quando forem implementados (roadmap funcional)
 
 ### Fase 6 — Polish final
@@ -158,8 +160,9 @@ Ordem de implementação. Features de regra (ASI, picker de condições) ficam n
 
 ### Fase 5
 
-- [x] Em 5s dá para achar PV / atributos / magias na ficha
+- [x] Em 5s dá para achar PV / perícias / magias na ficha
 - [x] Mesa não compete visualmente com seções de leitura no mesmo peso
+- [x] Desktop: grid 3 colunas; mobile: vitais primeiro
 
 ### Fase 6
 
@@ -180,8 +183,10 @@ Ordem de implementação. Features de regra (ASI, picker de condições) ficam n
 | Catalog shell / busca | `src/widgets/catalog-shell/`, `src/shared/ui/catalog-*`   |
 | Largura de conteúdo   | `src/shared/ui/page-main.tsx` (`max-w-6xl` / `max-w-7xl`) |
 | Wizard                | `src/features/create-character/`                          |
-| Ficha                 | `src/features/character-sheet/`                           |
-| Layout ficha          | `src/widgets/character-sheet-layout/`                     |
+| Ficha                 | `src/features/character-sheet/` (+ `ui/beyond/`)          |
+| Layout ficha (legado) | `src/widgets/character-sheet-layout/` (âncoras; preferir beyond) |
+| Qualidade de tela     | `.cursor/rules/31-ui-screen-quality.mdc`                  |
+| Rule ficha            | `.cursor/rules/32-ui-character-sheet.mdc`                 |
 | Cores (doc)           | [COLORS.md](./COLORS.md)                                  |
 
 ---

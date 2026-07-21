@@ -9,10 +9,16 @@ import {
 } from "@/features/characters/api/characters.api";
 import { useGameAuth } from "@/features/character-sheet/api/use-game-auth";
 
-export function useDeleteCharacter() {
+type UseDeleteCharacterOptions = {
+  /** Quando true, só invalida a lista (já em /characters). */
+  stayOnList?: boolean;
+};
+
+export function useDeleteCharacter(options: UseDeleteCharacterOptions = {}) {
   const queryClient = useQueryClient();
   const router = useRouter();
   const { requireToken, handleUnauthorized } = useGameAuth("/characters");
+  const stayOnList = options.stayOnList ?? false;
 
   return useMutation({
     mutationFn: async (characterId: string) => {
@@ -26,7 +32,9 @@ export function useDeleteCharacter() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: charactersKeys.all });
-      router.push("/characters");
+      if (!stayOnList) {
+        router.push("/characters");
+      }
     },
   });
 }

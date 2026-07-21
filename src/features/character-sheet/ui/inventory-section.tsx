@@ -28,9 +28,14 @@ const SLOT_LABELS: Record<string, string> = {
 
 type InventorySectionProps = {
   characterId: string;
+  /** Só lista itens equipados (aba Ações) — sem formulário de adicionar. */
+  equippedOnly?: boolean;
 };
 
-export function InventorySection({ characterId }: InventorySectionProps) {
+export function InventorySection({
+  characterId,
+  equippedOnly = false,
+}: InventorySectionProps) {
   const inventory = useCharacterInventory(characterId);
   const addItem = useAddInventoryItem(characterId);
   const patchItem = usePatchInventoryItem(characterId);
@@ -57,6 +62,32 @@ export function InventorySection({ characterId }: InventorySectionProps) {
   if (inventory.isPending) {
     return (
       <p className="text-sm text-muted-foreground">Carregando inventário…</p>
+    );
+  }
+
+  if (equippedOnly) {
+    return (
+      <div className="space-y-3">
+        <InventoryGroup
+          title="Em mãos / corpo"
+          items={equipped}
+          onToggleLocation={(slug, current) =>
+            patchItem.mutate({
+              itemSlug: slug,
+              payload: {
+                location: current === "equipped" ? "backpack" : "equipped",
+              },
+            })
+          }
+          onRemove={(slug) => removeItem.mutate(slug)}
+          isPending={patchItem.isPending || removeItem.isPending}
+        />
+        {equipped.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            Nada equipado. Use a aba Inventário para vestir itens.
+          </p>
+        ) : null}
+      </div>
     );
   }
 

@@ -17,12 +17,6 @@ export function classSpellcastingMode(classSlug: string): ClassSpellcastingMode 
   return "known";
 }
 
-export function leveledSpellQuotaLabel(mode: ClassSpellcastingMode): string {
-  if (mode === "known") return "Magias conhecidas";
-  if (mode === "wizard") return "Magias preparadas";
-  return "Magias preparadas";
-}
-
 export function countSpellsByType(
   characterSpells: CharacterSpell[],
   catalog: ClassSpellOption[],

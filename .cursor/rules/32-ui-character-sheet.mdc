@@ -1,0 +1,48 @@
+---
+description: Ficha de personagem — layout estilo Beyond + tema Taverna
+globs: src/features/character-sheet/**/*.tsx,src/widgets/character-sheet-layout/**/*.tsx,src/app/characters/**/*.tsx
+alwaysApply: false
+---
+
+# Ficha (`/characters/[id]`)
+
+Inspiração de **layout**: D&D Beyond (dashboard denso). Visual: **Taverna/Masmorra** (não copiar ciano Beyond).
+
+## Estrutura canônica
+
+1. **Header** — nome (hero tipográfico), chips espécie/classe/nível, Identidade / Excluir  
+2. **Fila de atributos** — mod grande + score; clique → editar  
+3. **Grid desktop** — esq. salvaguardas/sentidos/profs · meio perícias · dir. hub combate + **abas**  
+4. **Abas** — Ações · Magias · Inventário · Traços · Mesa · Ajustes  
+
+Mobile (`order-*`): **combate + abas** → perícias → proficiências.
+
+## Componentes
+
+- Primitivos em `features/character-sheet/ui/beyond/` (`BeyondPanel`, hub, tabs, colunas)
+- Leitura: `sheet-read-sections.tsx` · edição: `sheet-edit-forms.tsx`
+- Vitais: `useCharacterState` + patch de PV; descansos via API de sessão
+
+## Regras de UX
+
+- PV / CA / iniciativa visíveis **sem abrir aba**
+- Magias e inventário só nas abas (não duplicar no header)
+- Aba **Ações**: equipado agora + pacote inicial — sem “em breve” como foco
+- Aba **Ajustes**: atalhos de edição (nunca “Notas” / “Editar” genérico)
+- Edição: painel dedicado com “Voltar à ficha”; um `editing` por vez
+- Inventário ≠ equipamento inicial (`InventorySection` vs `EquipmentSection`)
+
+## Checklist rápido (antes de merge)
+
+- [ ] Mobile: PV/CA aparecem antes de scroll longo de perícias
+- [ ] Painéis sem `ring`+`shadow`+`border` empilhados
+- [ ] Abas sem microcopy de roadmap
+- [ ] Tema light/dark legível nos tiles de atributo e hub
+
+## Não fazer
+
+- Nav lateral de âncoras longa (substituída pelo dashboard)
+- Esperar catálogo inteiro para mostrar a ficha (`isPending` só do personagem)
+- Duplicar inventário completo na aba Ações (usar `equippedOnly`)
+
+Plano: [docs/UX-UI-PLAN.md](docs/UX-UI-PLAN.md) § Fase 5 · [docs/CHARACTER-SHEET-PLAN.md](docs/CHARACTER-SHEET-PLAN.md)

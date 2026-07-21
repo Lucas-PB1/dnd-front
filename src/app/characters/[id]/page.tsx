@@ -12,7 +12,7 @@ export default async function CharacterDetailPage({ params }: PageProps) {
   return (
     <div className="flex flex-1 flex-col bg-background text-foreground">
       <AppHeader />
-      <PageMain width="wide" className="gap-0">
+      <PageMain width="sheet" className="gap-0">
         <CharacterSheetView id={id} />
       </PageMain>
     </div>

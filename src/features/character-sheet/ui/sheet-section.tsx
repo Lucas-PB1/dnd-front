@@ -47,15 +47,15 @@ export function SheetSection({
     <section
       id={id}
       className={cn(
-        "scroll-mt-24 space-y-4 rounded-lg border p-4 transition-colors sm:p-5",
+        "scroll-mt-28 space-y-3 rounded-xl border p-4 transition-colors",
         isTable
-          ? "border-primary/35 bg-primary/5 shadow-sm dark:bg-primary/10"
-          : "border-border bg-card/40",
+          ? "border-primary/40 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent shadow-sm dark:from-primary/15 dark:via-primary/8"
+          : "border-border/80 bg-card/40",
         className,
       )}
     >
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0 flex-1 space-y-1">
+        <div className="min-w-0 flex-1">
           {collapsible && !isEditing ? (
             <button
               type="button"
@@ -64,8 +64,8 @@ export function SheetSection({
               onClick={() => setOpen((value) => !value)}
               className="flex w-full items-start justify-between gap-3 text-left"
             >
-              <span className="space-y-1">
-                <span className="font-heading block text-xl font-semibold tracking-tight">
+              <span className="space-y-0.5">
+                <span className="font-heading block text-base font-semibold tracking-tight">
                   {title}
                 </span>
                 {description ? (
@@ -76,25 +76,25 @@ export function SheetSection({
               </span>
               <ChevronDownIcon
                 className={cn(
-                  "mt-1 size-5 shrink-0 text-muted-foreground transition-transform duration-200",
+                  "mt-0.5 size-4 shrink-0 text-muted-foreground transition-transform duration-200",
                   open && "rotate-180",
                 )}
                 aria-hidden
               />
             </button>
           ) : (
-            <>
-              <h2 className="font-heading text-xl font-semibold tracking-tight">
+            <div className={description ? "space-y-0.5" : undefined}>
+              <h2 className="font-heading text-base font-semibold tracking-tight">
                 {title}
               </h2>
               {description ? (
                 <p className="text-sm text-muted-foreground">{description}</p>
               ) : null}
-            </>
+            </div>
           )}
         </div>
         {canEdit ? (
-          <div className="flex shrink-0 gap-2">
+          <div className="flex shrink-0 gap-1.5">
             {isEditing && onCancel ? (
               <Button
                 type="button"
@@ -127,7 +127,7 @@ export function SheetSection({
           id={panelId}
           className={cn(
             collapsible &&
-              "animate-in fade-in-0 slide-in-from-top-1 duration-200",
+              "animate-in fade-in-0 slide-in-from-top-1 duration-200 fill-mode-both",
           )}
         >
           {isEditing && editContent ? editContent : children}

@@ -10,11 +10,17 @@ import {
   usePatchCharacterState,
   useTakeRest,
 } from "@/features/character-sheet/api/use-character-state";
+import {
+  SheetChip,
+  SheetHpBar,
+  SheetSlotPips,
+} from "@/features/character-sheet/ui/sheet-ui";
 import { useConditions } from "@/features/reference-catalog/api/use-reference";
 import { Button } from "@/shared/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/shared/ui/field";
 import { Input } from "@/shared/ui/input";
 import { nativeSelectClassName } from "@/shared/ui/native-select";
+import { cn } from "@/shared/lib/utils";
 
 const SLOT_LEVELS = ["1", "2", "3", "4", "5", "6", "7", "8", "9"] as const;
 
@@ -110,79 +116,77 @@ export function TableStateSection({
   }
 
   return (
-    <div className="space-y-6">
-      <dl className="grid gap-4 sm:grid-cols-4">
-        <div>
-          <dt className="text-xs font-medium text-muted-foreground">
+    <div className="space-y-5">
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="rounded-xl border border-border/70 bg-background/50 px-3 py-3">
+          <p className="text-[0.65rem] tracking-wide text-muted-foreground uppercase">
             Pontos de vida
-          </dt>
-          <dd className="text-lg">
-            {hpCurrent ?? "—"} / {hpMax ?? "—"}
-          </dd>
+          </p>
+          <div className="mt-1.5">
+            <SheetHpBar
+              current={hpCurrent}
+              max={hpMax}
+              temp={state.tempHp}
+            />
+          </div>
         </div>
-        <div>
-          <dt className="text-xs font-medium text-muted-foreground">
-            PV temporários
-          </dt>
-          <dd className="text-lg">{state.tempHp}</dd>
+        <div className="space-y-3 rounded-xl border border-border/70 bg-background/50 px-3 py-3">
+          <div>
+            <p className="text-[0.65rem] tracking-wide text-muted-foreground uppercase">
+              Concentração
+            </p>
+            <p className="mt-0.5 text-sm font-medium">
+              {state.concentratingOn
+                ? labels.resolveSpell(state.concentratingOn)
+                : "—"}
+            </p>
+          </div>
+          <div>
+            <p className="text-[0.65rem] tracking-wide text-muted-foreground uppercase">
+              Condições
+            </p>
+            <div className="mt-1.5 flex flex-wrap gap-1.5">
+              {state.conditions.length > 0 ? (
+                state.conditions.map((slug) => (
+                  <SheetChip key={slug} active>
+                    {conditionNameBySlug.get(slug) ?? slug}
+                  </SheetChip>
+                ))
+              ) : (
+                <span className="text-sm text-muted-foreground">Nenhuma</span>
+              )}
+            </div>
+          </div>
         </div>
-        <div>
-          <dt className="text-xs font-medium text-muted-foreground">
-            Concentração
-          </dt>
-          <dd className="text-sm">
-            {state.concentratingOn
-              ? labels.resolveSpell(state.concentratingOn)
-              : "—"}
-          </dd>
-        </div>
-        <div>
-          <dt className="text-xs font-medium text-muted-foreground">
-            Condições
-          </dt>
-          <dd className="text-sm">
-            {state.conditions.length > 0
-              ? state.conditions
-                  .map((slug) => conditionNameBySlug.get(slug) ?? slug)
-                  .join(", ")
-              : "—"}
-          </dd>
-        </div>
-      </dl>
+      </div>
 
       {hasSpellSlots ? (
         <div className="space-y-2">
-          <p className="text-sm font-medium">Slots de magia</p>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[360px] text-sm">
-              <thead>
-                <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                  <th className="pb-2 pr-4">Círculo</th>
-                  <th className="pb-2 pr-4">Máx</th>
-                  <th className="pb-2 pr-4">Usados</th>
-                  <th className="pb-2">Restantes</th>
-                </tr>
-              </thead>
-              <tbody>
-                {SLOT_LEVELS.map((level) => {
-                  const max = state.spellSlotsMax[level] ?? 0;
-                  if (max === 0) return null;
-                  return (
-                    <tr key={level} className="border-b border-border/60">
-                      <td className="py-2 pr-4">{level}º</td>
-                      <td className="py-2 pr-4 font-mono">{max}</td>
-                      <td className="py-2 pr-4 font-mono">
-                        {state.spellSlotsUsed[level] ?? 0}
-                      </td>
-                      <td className="py-2 font-mono">
-                        {state.spellSlotsRemaining[level] ?? 0}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <p className="text-[0.65rem] font-medium tracking-wider text-muted-foreground uppercase">
+            Slots de magia
+          </p>
+          <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {SLOT_LEVELS.map((level) => {
+              const max = state.spellSlotsMax[level] ?? 0;
+              if (max === 0) return null;
+              const used = state.spellSlotsUsed[level] ?? 0;
+              const remaining = state.spellSlotsRemaining[level] ?? 0;
+              return (
+                <li
+                  key={level}
+                  className="rounded-xl border border-border/70 bg-background/40 px-3 py-2.5"
+                >
+                  <div className="mb-1.5 flex items-baseline justify-between gap-2">
+                    <span className="text-sm font-medium">{level}º círculo</span>
+                    <span className="font-mono text-xs tabular-nums text-muted-foreground">
+                      {remaining}/{max}
+                    </span>
+                  </div>
+                  <SheetSlotPips max={max} used={used} />
+                </li>
+              );
+            })}
+          </ul>
         </div>
       ) : null}
 
@@ -211,7 +215,7 @@ export function TableStateSection({
       </div>
 
       {showStateForm ? (
-        <FieldGroup className="rounded-lg border border-border p-4">
+        <FieldGroup className="rounded-xl border border-border/80 bg-background/40 p-4">
           <Field>
             <FieldLabel>Condições</FieldLabel>
             {conditionsCatalog.isPending ? (
@@ -219,21 +223,23 @@ export function TableStateSection({
                 Carregando condições…
               </p>
             ) : (
-              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="flex flex-wrap gap-1.5">
                 {(conditionsCatalog.data ?? []).map((condition) => {
                   const checked = selectedConditions.includes(condition.slug);
                   return (
-                    <label
+                    <button
                       key={condition.slug}
-                      className="flex items-center gap-2 rounded-md border border-border px-2 py-1.5 text-sm"
+                      type="button"
+                      onClick={() => toggleCondition(condition.slug)}
+                      className={cn(
+                        "rounded-md border px-2 py-1 text-xs transition-colors",
+                        checked
+                          ? "border-primary/50 bg-primary/15 font-medium text-primary"
+                          : "border-border/80 bg-muted/20 text-muted-foreground hover:text-foreground",
+                      )}
                     >
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        onChange={() => toggleCondition(condition.slug)}
-                      />
-                      <span>{condition.name}</span>
-                    </label>
+                      {condition.name}
+                    </button>
                   );
                 })}
               </div>
@@ -277,7 +283,7 @@ export function TableStateSection({
       ) : null}
 
       {character.characterSpells.length > 0 ? (
-        <div className="space-y-3 rounded-lg border border-border p-4">
+        <div className="space-y-3 rounded-xl border border-border/70 bg-background/40 p-4">
           <p className="text-sm font-medium">Conjurar magia</p>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
             <Field className="flex-1">

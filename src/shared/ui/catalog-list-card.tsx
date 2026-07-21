@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { motion } from "@/shared/lib/motion";
 import { cn } from "@/shared/lib/utils";
 
 type CatalogListCardProps = {
@@ -27,13 +28,14 @@ export function CatalogListCard({
     <Link
       href={href}
       className={cn(
-        "group flex flex-col gap-1.5 border-b border-border px-1 py-3 transition-colors hover:bg-muted/30 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4",
+        "group flex flex-col gap-1.5 border-b border-border px-1 py-3 hover:bg-muted/30 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4",
+        motion.hoverRow,
         className,
       )}
     >
       <div className="min-w-0 flex-1 space-y-1">
         <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-          <h2 className="font-heading text-base font-semibold tracking-tight group-hover:text-primary sm:text-lg">
+          <h2 className="font-heading text-base font-semibold tracking-tight transition-colors duration-150 group-hover:text-primary sm:text-lg">
             {title}
           </h2>
           {titleExtra}
@@ -78,13 +80,14 @@ export function CatalogTileCard({
     <Link
       href={href}
       className={cn(
-        "group flex flex-col gap-3 rounded-lg border border-border bg-card p-4 transition-colors hover:border-ring hover:bg-muted/30",
+        "group flex flex-col gap-3 rounded-lg border border-border bg-card p-4 hover:border-ring hover:bg-muted/30",
+        motion.hoverLift,
         className,
       )}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 space-y-0.5">
-          <h2 className="font-heading text-lg font-semibold tracking-tight group-hover:text-primary">
+          <h2 className="font-heading text-lg font-semibold tracking-tight transition-colors duration-150 group-hover:text-primary">
             {title}
           </h2>
           {eyebrow ? (

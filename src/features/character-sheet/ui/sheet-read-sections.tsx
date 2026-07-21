@@ -41,11 +41,20 @@ import { FeatBenefits } from "@/features/feat-catalog/ui/feat-benefits";
 import { FeatOptionsReadList } from "@/features/feat-catalog/ui/feat-options-read-list";
 import {
   BACKGROUND_GOLD_PACKAGE_SLUG,
+  backgroundEquipmentLines,
+  classEquipmentLines,
   groupEquipmentPackages,
 } from "@/features/create-character/lib/equipment-selection";
+import { toolNameForSlug } from "@/features/create-character/lib/equipment-choice-resolve";
+import { useSpells } from "@/features/spell-catalog/api/use-spells";
 import { useMemo } from "react";
 import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
+import {
+  SheetChip,
+  SheetMetaField,
+  SheetStatTile,
+} from "@/features/character-sheet/ui/sheet-ui";
 
 const SPELL_LIST_LABELS: Record<string, string> = {
   known: "Conhecida",
@@ -64,53 +73,31 @@ type SkillsSectionProps = SectionProps & {
 
 export function CombatSection({ character }: SectionProps) {
   return (
-    <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      <div>
-        <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-          Bônus de proficiência
-        </dt>
-        <dd className="font-heading text-2xl font-semibold font-mono">
-          +{character.proficiencyBonus}
-        </dd>
-      </div>
-      <div>
-        <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-          Classe de armadura
-        </dt>
-        <dd className="font-heading text-2xl font-semibold font-mono">
-          {character.armorClass}
-        </dd>
-        <p className="text-xs text-muted-foreground">
-          {character.armorClassNote ?? "sem armadura"}
-        </p>
-      </div>
-      <div>
-        <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-          Percepção passiva
-        </dt>
-        <dd className="font-heading text-2xl font-semibold font-mono">
-          {character.passivePerception}
-        </dd>
-      </div>
-      {character.hitPointsMax != null ? (
-        <div>
-          <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-            Pontos de vida
-          </dt>
-          <dd className="font-heading text-2xl font-semibold">
-            {character.hitPointsCurrent ?? character.hitPointsMax} /{" "}
-            {character.hitPointsMax}
-          </dd>
-        </div>
-      ) : (
-        <div>
-          <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-            Pontos de vida
-          </dt>
-          <dd className="text-sm text-muted-foreground">Não definidos</dd>
-        </div>
-      )}
-    </dl>
+    <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+      <SheetStatTile
+        label="Proficiência"
+        value={`+${character.proficiencyBonus}`}
+      />
+      <SheetStatTile
+        label="Classe de armadura"
+        value={character.armorClass}
+        hint={character.armorClassNote ?? "sem armadura"}
+        emphasize
+      />
+      <SheetStatTile
+        label="Percepção passiva"
+        value={character.passivePerception}
+      />
+      <SheetStatTile
+        label="Pontos de vida"
+        value={
+          character.hitPointsMax != null
+            ? `${character.hitPointsCurrent ?? character.hitPointsMax} / ${character.hitPointsMax}`
+            : "—"
+        }
+        hint={character.hitPointsMax == null ? "Não definidos" : undefined}
+      />
+    </div>
   );
 }
 
@@ -142,8 +129,10 @@ export function SavingThrowsSection({ character }: SectionProps) {
             <li
               key={slug}
               className={cn(
-                "flex items-center justify-between rounded-lg border px-3 py-2",
-                isProficient ? "border-primary/40 bg-primary/5" : "border-border",
+                "flex items-center justify-between rounded-xl border px-3 py-2",
+                isProficient
+                  ? "border-primary/40 bg-primary/8"
+                  : "border-border/70 bg-background/40",
               )}
             >
               <span className="text-sm font-medium">
@@ -201,22 +190,16 @@ export function AbilitiesSection({ character }: SectionProps) {
   return (
     <div className="space-y-3">
       {boostNote ? (
-        <p className="text-sm text-muted-foreground">{boostNote}</p>
+        <p className="text-xs text-muted-foreground">{boostNote}</p>
       ) : null}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
         {abilities.map(([key, score]) => (
-          <div
+          <SheetStatTile
             key={key}
-            className="rounded-lg border border-border px-3 py-2 text-center"
-          >
-            <p className="text-xs text-muted-foreground">
-              {ABILITY_LABELS_PT[key]}
-            </p>
-            <p className="text-xl font-semibold">{score}</p>
-            <p className="font-mono text-sm text-muted-foreground">
-              {abilityModifier(score)}
-            </p>
-          </div>
+            label={ABILITY_LABELS_PT[key]}
+            value={score}
+            hint={abilityModifier(score)}
+          />
         ))}
       </div>
     </div>
@@ -229,68 +212,63 @@ export function SkillsSection({ character, skills }: SkillsSectionProps) {
     ...character.backgroundSkillSlugs,
   ]);
 
-  const sorted = [...skills].sort((a, b) => a.name.localeCompare(b.name, "pt"));
+  const sorted = [...skills].sort((a, b) => {
+    const aProf = proficient.has(a.slug) ? 0 : 1;
+    const bProf = proficient.has(b.slug) ? 0 : 1;
+    if (aProf !== bProf) return aProf - bProf;
+    return a.name.localeCompare(b.name, "pt");
+  });
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full min-w-[320px] text-sm">
-        <thead>
-          <tr className="border-b border-border text-left text-xs text-muted-foreground">
-            <th className="pb-2 pr-4 font-medium">Perícia</th>
-            <th className="pb-2 pr-4 font-medium">Bônus</th>
-            <th className="pb-2 font-medium">Proficiência</th>
-          </tr>
-        </thead>
-        <tbody>
-          {sorted.map((skill) => {
-            const abilityKey = skill.abilitySlug as keyof AbilityScores;
-            const score = character.abilityScores[abilityKey] ?? 10;
-            const isProficient = proficient.has(skill.slug);
-            const bonus = skillBonus(
-              score,
-              isProficient,
-              character.proficiencyBonus,
-            );
-            const source =
-              character.classSkillSlugs.includes(skill.slug) &&
-              character.backgroundSkillSlugs.includes(skill.slug)
-                ? "classe e antecedente"
-                : character.classSkillSlugs.includes(skill.slug)
-                  ? "classe"
-                  : character.backgroundSkillSlugs.includes(skill.slug)
-                    ? "antecedente"
-                    : null;
+    <ul className="grid gap-1.5 sm:grid-cols-2">
+      {sorted.map((skill) => {
+        const abilityKey = skill.abilitySlug as keyof AbilityScores;
+        const score = character.abilityScores[abilityKey] ?? 10;
+        const isProficient = proficient.has(skill.slug);
+        const bonus = skillBonus(
+          score,
+          isProficient,
+          character.proficiencyBonus,
+        );
+        const source =
+          character.classSkillSlugs.includes(skill.slug) &&
+          character.backgroundSkillSlugs.includes(skill.slug)
+            ? "Classe + ant."
+            : character.classSkillSlugs.includes(skill.slug)
+              ? "Classe"
+              : character.backgroundSkillSlugs.includes(skill.slug)
+                ? "Antecedente"
+                : null;
 
-            return (
-              <tr
-                key={skill.slug}
-                className={cn(
-                  "border-b border-border/60",
-                  isProficient && "bg-primary/5",
-                )}
-              >
-                <td className="py-2 pr-4">{skill.name}</td>
-                <td className="py-2 pr-4 font-mono">
-                  {formatSkillBonus(bonus)}
-                </td>
-                <td className="py-2 text-muted-foreground">
-                  {isProficient ? (
-                    <span>
-                      Sim
-                      {source ? (
-                        <span className="ml-1 text-xs">({source})</span>
-                      ) : null}
-                    </span>
-                  ) : (
-                    "—"
-                  )}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
+        return (
+          <li
+            key={skill.slug}
+            className={cn(
+              "flex items-center justify-between gap-3 rounded-lg border px-3 py-2",
+              isProficient
+                ? "border-primary/35 bg-primary/6"
+                : "border-border/70 bg-background/40",
+            )}
+          >
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium">{skill.name}</p>
+              <p className="text-[11px] text-muted-foreground">
+                {ABILITY_LABELS_PT[abilityKey] ?? skill.abilitySlug}
+                {source ? ` · ${source}` : null}
+              </p>
+            </div>
+            <span
+              className={cn(
+                "font-mono text-sm font-semibold tabular-nums",
+                isProficient ? "text-primary" : "text-muted-foreground",
+              )}
+            >
+              {formatSkillBonus(bonus)}
+            </span>
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 
@@ -344,21 +322,28 @@ export function BackgroundTraitsSection({
   return (
     <dl className="grid gap-3 text-sm sm:grid-cols-2">
       {originFeat ? (
-        <div className="sm:col-span-2">
-          <dt className="text-muted-foreground">Talento de origem</dt>
-          <dd className="font-medium">{originFeat}</dd>
-        </div>
+        <SheetMetaField label="Talento de origem">{originFeat}</SheetMetaField>
       ) : null}
       {backgroundSkills.length > 0 ? (
         <div className="sm:col-span-2">
-          <dt className="text-muted-foreground">Perícias do antecedente</dt>
-          <dd className="font-medium">{backgroundSkills.join(", ")}</dd>
+          <dt className="text-[0.65rem] font-medium tracking-wider text-muted-foreground uppercase">
+            Perícias do antecedente
+          </dt>
+          <dd className="mt-1.5 flex flex-wrap gap-1.5">
+            {backgroundSkills.map((name) => (
+              <SheetChip key={name} active>
+                {name}
+              </SheetChip>
+            ))}
+          </dd>
         </div>
       ) : null}
       {toolName || bg?.toolProficiencyKind === "choice" ? (
         <div className="sm:col-span-2">
           <div className="flex items-center justify-between gap-2">
-            <dt className="text-muted-foreground">Ferramenta</dt>
+            <dt className="text-[0.65rem] font-medium tracking-wider text-muted-foreground uppercase">
+              Ferramenta
+            </dt>
             {bg?.toolProficiencyKind === "choice" && onEditTool ? (
               <Button
                 type="button"
@@ -371,7 +356,7 @@ export function BackgroundTraitsSection({
               </Button>
             ) : null}
           </div>
-          <dd className="font-medium">{toolName ?? "—"}</dd>
+          <dd className="mt-0.5 text-sm font-medium">{toolName ?? "—"}</dd>
         </div>
       ) : null}
     </dl>
@@ -724,28 +709,84 @@ export function SubclassMechanicsSection({ character }: SectionProps) {
 }
 
 export function SpellsSection({ character, labels }: SectionProps) {
+  const spellsCatalog = useSpells();
+  const levelBySlug = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const spell of spellsCatalog.data?.data ?? []) {
+      map.set(spell.slug, spell.level);
+    }
+    return map;
+  }, [spellsCatalog.data?.data]);
+
   if (character.characterSpells.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">Nenhuma magia registrada.</p>
     );
   }
 
+  const cantrips = character.characterSpells.filter(
+    (s) => (levelBySlug.get(s.spellSlug) ?? -1) === 0,
+  );
+  const leveled = character.characterSpells.filter(
+    (s) => (levelBySlug.get(s.spellSlug) ?? 1) > 0,
+  );
+  const unknownLevel =
+    spellsCatalog.isPending &&
+    cantrips.length === 0 &&
+    leveled.length === 0;
+
+  function spellChip(spell: (typeof character.characterSpells)[number]) {
+    const level = levelBySlug.get(spell.spellSlug);
+    const listHint = SPELL_LIST_LABELS[spell.listType] ?? spell.listType;
+    const levelHint =
+      level == null
+        ? listHint
+        : level === 0
+          ? listHint
+          : `${level}º · ${listHint}`;
+    return (
+      <li key={`${spell.spellSlug}-${spell.listType}`}>
+        <SheetChip hint={levelHint}>
+          {labels.resolveSpell(spell.spellSlug)}
+        </SheetChip>
+      </li>
+    );
+  }
+
+  if (unknownLevel) {
+    return (
+      <p className="text-sm text-muted-foreground">Carregando magias…</p>
+    );
+  }
+
+  // Catálogo ainda carregando: mostra lista plana; depois agrupa.
+  if (spellsCatalog.isPending || levelBySlug.size === 0) {
+    return (
+      <ul className="flex flex-wrap gap-1.5">
+        {character.characterSpells.map(spellChip)}
+      </ul>
+    );
+  }
+
   return (
-    <ul className="grid gap-2 sm:grid-cols-2">
-      {character.characterSpells.map((spell) => (
-        <li
-          key={spell.spellSlug}
-          className="rounded-lg border border-border px-3 py-2 text-sm"
-        >
-          <span className="font-medium">
-            {labels.resolveSpell(spell.spellSlug)}
-          </span>
-          <span className="ml-2 text-xs text-muted-foreground">
-            {SPELL_LIST_LABELS[spell.listType] ?? spell.listType}
-          </span>
-        </li>
-      ))}
-    </ul>
+    <div className="space-y-3">
+      {cantrips.length > 0 ? (
+        <div className="space-y-1.5">
+          <p className="text-[0.65rem] font-medium tracking-wider text-muted-foreground uppercase">
+            Truques
+          </p>
+          <ul className="flex flex-wrap gap-1.5">{cantrips.map(spellChip)}</ul>
+        </div>
+      ) : null}
+      {leveled.length > 0 ? (
+        <div className="space-y-1.5">
+          <p className="text-[0.65rem] font-medium tracking-wider text-muted-foreground uppercase">
+            Magias
+          </p>
+          <ul className="flex flex-wrap gap-1.5">{leveled.map(spellChip)}</ul>
+        </div>
+      ) : null}
+    </div>
   );
 }
 
@@ -783,6 +824,9 @@ export function EquipmentSection({ character }: SectionProps) {
 
   const classRows = classEquipment.data?.data ?? [];
   const backgroundRows = backgroundEquipment.data?.data ?? [];
+  const resolveCtx = {
+    backgroundToolItemSlug: character.backgroundToolItemSlug ?? undefined,
+  };
 
   const bySource = {
     class: character.equipment.filter((e) => e.source === "class"),
@@ -794,13 +838,12 @@ export function EquipmentSection({ character }: SectionProps) {
     packageSlug: string,
     itemSlug?: string,
   ) {
+    if (!itemSlug) return null;
     const rows = source === "class" ? classRows : backgroundRows;
     const row = rows.find(
-      (r) =>
-        r.packageSlug === packageSlug &&
-        (itemSlug ? r.itemSlug === itemSlug : true),
+      (r) => r.packageSlug === packageSlug && r.itemSlug === itemSlug,
     );
-    return row?.itemName ?? itemSlug ?? packageSlug;
+    return row?.itemName ?? toolNameForSlug(itemSlug) ?? itemSlug;
   }
 
   function resolvePackageLabel(
@@ -819,41 +862,95 @@ export function EquipmentSection({ character }: SectionProps) {
     return pkg?.packageLabel ?? packageSlug;
   }
 
+  function linesForSource(source: "class" | "background") {
+    const items = bySource[source];
+    if (items.length === 0) return null;
+
+    const packageSlug = items[0]?.packageSlug ?? "";
+    const storedItems = items.filter((e) => e.itemSlug);
+    const packages = source === "class" ? classPackages : backgroundPackages;
+    const pkg = packages.find((p) => p.packageSlug === packageSlug);
+
+    const catalogLines = pkg
+      ? source === "class"
+        ? classEquipmentLines(pkg, resolveCtx)
+        : backgroundEquipmentLines(pkg, resolveCtx)
+      : [];
+
+    // Catálogo do pacote é a fonte de verdade na leitura (marcadores TEMP
+    // e choice_text resolvem aqui). Persistidos cobrem fallback sem catálogo.
+    const displayLines =
+      catalogLines.length > 0
+        ? catalogLines.map((line, index) => ({
+            key: `${line.kind}-${line.itemSlug ?? line.label}-${index}`,
+            label: line.label,
+            quantity: line.quantity,
+            kind: line.kind,
+          }))
+        : storedItems.map((item) => ({
+            key: `${item.itemSlug}-${item.sortOrder ?? 0}`,
+            label:
+              resolveItemName(source, item.packageSlug, item.itemSlug) ??
+              item.itemSlug!,
+            quantity: item.quantity,
+            kind: "item" as const,
+          }));
+
+    return {
+      packageSlug,
+      displayLines,
+      sourceLabel:
+        source === "class"
+          ? (classDetail.data?.name ?? "Classe")
+          : (backgroundDetail.data?.name ?? "Antecedente"),
+    };
+  }
+
   return (
-    <div className="space-y-4">
+    <div className="grid gap-3 sm:grid-cols-2">
       {(["class", "background"] as const).map((source) => {
-        const items = bySource[source];
-        if (items.length === 0) return null;
-
-        const sourceLabel =
-          source === "class"
-            ? (classDetail.data?.name ?? "Classe")
-            : (backgroundDetail.data?.name ?? "Antecedente");
-
-        const packageSlug = items[0]?.packageSlug;
-        const packageItems = items.filter((e) => e.itemSlug);
-        const packageOnly = items.filter((e) => !e.itemSlug);
+        const block = linesForSource(source);
+        if (!block) return null;
 
         return (
-          <div key={source} className="space-y-2">
-            <p className="text-sm font-medium">{sourceLabel}</p>
-            {packageOnly.length > 0 && packageSlug ? (
-              <p className="text-sm text-muted-foreground">
-                Pacote: {resolvePackageLabel(source, packageSlug)}
+          <div
+            key={source}
+            className="space-y-2 rounded-xl border border-border/70 bg-background/40 p-3"
+          >
+            <div>
+              <p className="text-sm font-medium">{block.sourceLabel}</p>
+              <p className="text-xs text-muted-foreground">
+                Pacote {resolvePackageLabel(source, block.packageSlug)}
               </p>
-            ) : null}
-            {packageItems.length > 0 ? (
-              <ul className="list-inside list-disc text-sm">
-                {packageItems.map((item, index) => (
-                  <li key={`${item.itemSlug}-${index}`}>
-                    {resolveItemName(source, item.packageSlug, item.itemSlug)}
-                    {item.quantity && item.quantity > 1
-                      ? ` × ${item.quantity}`
-                      : null}
+            </div>
+            {block.displayLines.length > 0 ? (
+              <ul className="flex flex-wrap gap-1.5">
+                {block.displayLines.map((line) => (
+                  <li key={line.key}>
+                    <SheetChip
+                      hint={
+                        line.kind === "gold"
+                          ? "ouro"
+                          : line.kind === "text" || line.kind === "pick-tool"
+                            ? "escolha"
+                            : line.kind === "mirror-tool"
+                              ? "ferramenta"
+                              : undefined
+                      }
+                    >
+                      {line.quantity && line.quantity > 1
+                        ? `${line.quantity}× `
+                        : null}
+                      {line.label}
+                    </SheetChip>
                   </li>
                 ))}
               </ul>
-            ) : null}
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                Sem itens catalogados neste pacote.
+              </p>
+            )}
           </div>
         );
       })}
@@ -898,7 +995,7 @@ export function FeatsSection({ character, labels }: SectionProps) {
         const key = featInstanceKey(feat.featSlug, feat.instanceIndex);
         const options = optionsByInstance[key] ?? [];
         return (
-          <li key={key} className="rounded-md border border-border px-3 py-2">
+          <li key={key} className="rounded-xl border border-border/80 px-3 py-2.5">
             <p className="text-sm font-medium">
               {formatCharacterFeatLabel(
                 feat,
@@ -939,13 +1036,10 @@ export function LanguagesSection({ character, labels }: SectionProps) {
   }
 
   return (
-    <ul className="flex flex-wrap gap-2">
+    <ul className="flex flex-wrap gap-1.5">
       {character.languageSlugs.map((language) => (
-        <li
-          key={language}
-          className="rounded-md border border-border px-2 py-1 text-sm"
-        >
-          {labels.resolveLanguage(language)}
+        <li key={language}>
+          <SheetChip>{labels.resolveLanguage(language)}</SheetChip>
         </li>
       ))}
     </ul>

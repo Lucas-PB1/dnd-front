@@ -37,20 +37,3 @@ export function resolveCreateCharacterFeats(
 
   return feats;
 }
-
-/** @deprecated Use resolveCreateCharacterFeats */
-export function previewCreateCharacterFeats(
-  backgroundOriginSlug: string | null | undefined,
-  asiFeats: CharacterFeat[],
-): CharacterFeat[] {
-  return resolveCreateCharacterFeats(backgroundOriginSlug, asiFeats, []);
-}
-
-export function humanOriginFeatFromSpeciesChoices(
-  speciesChoices: SpeciesChoice[],
-): string | null {
-  return (
-    speciesChoices.find((c) => c.choiceKind === HUMAN_ORIGIN_FEAT_KIND)
-      ?.choiceSlug ?? null
-  );
-}

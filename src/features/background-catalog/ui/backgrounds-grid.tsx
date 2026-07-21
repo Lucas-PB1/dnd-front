@@ -5,6 +5,8 @@ import { BackgroundCard } from "@/features/background-catalog/ui/background-card
 import { useCatalogListState } from "@/shared/lib/use-catalog-list-state";
 import { CatalogPagination } from "@/shared/ui/catalog-pagination";
 import { CatalogSearch } from "@/shared/ui/catalog-search";
+import { motion } from "@/shared/lib/motion";
+import { cn } from "@/shared/lib/utils";
 
 export function BackgroundsGrid() {
   const {
@@ -59,9 +61,9 @@ export function BackgroundsGrid() {
       ) : (
         <>
           <div
-            className={isFetching ? "opacity-70 transition-opacity" : undefined}
+            className={cn(isFetching && "opacity-70 transition-opacity")}
           >
-            <ul className="border-t border-border">
+            <ul className={cn("border-t border-border", motion.stagger)}>
               {data.data.map((background) => (
                 <li key={background.slug}>
                   <BackgroundCard background={background} listPath={listPath} />

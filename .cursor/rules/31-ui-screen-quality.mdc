@@ -1,0 +1,44 @@
+---
+description: Qualidade de tela — hierarquia, densidade, tema Taverna/Masmorra
+globs: src/features/**/ui/**/*.tsx,src/widgets/**/*.tsx,src/app/**/*.tsx
+alwaysApply: false
+---
+
+# Qualidade de tela (dnd-front)
+
+Tema: **Taverna** (light) / **Masmorra** (dark). Tokens em `globals.css` — sem paleta paralela.
+
+## Hierarquia
+
+- Em ~5s o usuário acha a ação principal da tela (PV, CTA, próximo passo)
+- **Uma job por seção**: um título + no máximo uma frase de apoio
+- Nome / brand em **display** (`font-heading`); números densos em `tabular-nums` / `font-mono`
+- Header limpo: sem “card hero” com gradiente + borda + sombra — identidade no fluxo tipográfico
+
+## Densidade
+
+- Preferir **tiles e listas** a “parede de cards”
+- Card/borda só quando há **interação** (aba, botão, linha clicável, painel colapsável)
+- Evitar `ring` + `shadow` + `border` juntos no mesmo bloco
+- Preferir `border-border/70` + `bg-card/60` a gradientes decorativos em painéis
+
+## Layout
+
+- Desktop: grid estável; mobile: **reordenar** para o essencial primeiro (vitais → atributos → conteúdo)
+- Sticky só para vitais/ações de mesa — com `scroll-mt` compatível
+- Largura: `PageMain` (`page` / `wide` / `sheet`) — não inventar `max-w-*` soltos
+
+## Anti-padrões
+
+- Glow / purple-on-white / pills genéricos de AI
+- Overlay de badges sobre mídia
+- Microcopy técnica em inglês na UI (`null`, stack traces, “PATCH”)
+- Placeholder “próxima iteração” / “em breve” como conteúdo principal de aba
+- Score de atributo em “bolinha” decorativa se o número já está claro abaixo do mod
+
+## Motion
+
+- Só `motion.*` / `animate-in` com propósito (entrada, expand, hover de linha)
+- Respeitar `prefers-reduced-motion` (já em `globals.css`)
+
+Docs: [docs/UX-UI-PLAN.md](docs/UX-UI-PLAN.md) · [docs/COLORS.md](docs/COLORS.md)

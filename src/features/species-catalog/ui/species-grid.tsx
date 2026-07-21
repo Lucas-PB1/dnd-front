@@ -7,6 +7,8 @@ import { isCatalogPageOutOfRange } from "@/shared/lib/catalog-query";
 import { useClampCatalogPage } from "@/shared/lib/use-clamp-catalog-page";
 import { CatalogPagination } from "@/shared/ui/catalog-pagination";
 import { CatalogSearch } from "@/shared/ui/catalog-search";
+import { motion } from "@/shared/lib/motion";
+import { cn } from "@/shared/lib/utils";
 
 export function SpeciesGrid() {
   const {
@@ -62,11 +64,11 @@ export function SpeciesGrid() {
       ) : (
         <>
           <div
-            className={
-              isFetching
-                ? "grid gap-3 opacity-70 transition-opacity sm:grid-cols-2 lg:grid-cols-3"
-                : "grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
-            }
+            className={cn(
+              "grid gap-3 sm:grid-cols-2 lg:grid-cols-3",
+              motion.stagger,
+              isFetching && "opacity-70 transition-opacity",
+            )}
           >
             {data.data.map((species) => (
               <SpeciesCard
