@@ -70,7 +70,20 @@ export type ClassSpellSlots = {
   classLevel: number;
   patternSlug: string;
   patternName: string;
+  proficiencyBonus?: number;
+  cantrips?: number | null;
+  preparedSpells?: number | null;
+  channelDivinity?: number | null;
   spellSlots: Record<string, number>;
+};
+
+/** Espelha ClassProgressionResponseDto */
+export type ClassProgressionRow = {
+  level: number;
+  proficiencyBonus: number;
+  cantrips: number | null;
+  preparedSpells: number | null;
+  channelDivinity: number | null;
 };
 
 /** Espelha ClassFeatureResponseDto */

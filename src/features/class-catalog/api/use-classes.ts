@@ -9,6 +9,7 @@ import {
   fetchClassFeatures,
   fetchClassSkills,
   fetchClassSpellSlots,
+  fetchClassProgression,
   fetchClassSpells,
   fetchClasses,
   fetchClassesPage,
@@ -111,6 +112,15 @@ export function useClassSpellSlots(slug: string, enabled = true) {
     slug,
     queryKey: classKeys.spellSlots(slug),
     queryFn: () => fetchClassSpellSlots(slug),
+    enabled,
+  });
+}
+
+export function useClassProgression(slug: string, enabled = true) {
+  return useCatalogDetailQuery({
+    slug,
+    queryKey: classKeys.progression(slug),
+    queryFn: () => fetchClassProgression(slug),
     enabled,
   });
 }

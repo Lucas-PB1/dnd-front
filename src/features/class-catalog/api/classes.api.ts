@@ -7,6 +7,7 @@ import type {
   ClassSpellSlots,
   ClassFeature,
   ClassSummary,
+  ClassProgressionRow,
   SubclassListResponse,
   SubclassMechanic,
   SubclassOptionGroup,
@@ -30,6 +31,8 @@ export const classKeys = {
   equipment: (slug: string) => [...classKeys.all, "equipment", slug] as const,
   spellSlots: (slug: string) =>
     [...classKeys.all, "spell-slots", slug] as const,
+  progression: (slug: string) =>
+    [...classKeys.all, "progression", slug] as const,
   features: (slug: string, maxLevel?: number) =>
     [...classKeys.all, "features", slug, maxLevel ?? "all"] as const,
   spells: (slug: string, maxLevel?: number) =>
@@ -114,21 +117,39 @@ export async function fetchClassSpells(
   maxLevel?: number,
   limit = 100,
 ) {
-  const params = new URLSearchParams({ limit: String(limit) });
-  if (maxLevel !== undefined) {
-    params.set("maxLevel", String(maxLevel));
-  }
-  return catalogFetch<PaginatedResponse<ClassSpellOption>>(
-    `/classes/${slug}/spells?${params}`,
-    CATALOG_FETCH_INIT,
-  );
+  return fetchAllCatalogPages<ClassSpellOption>(({ page, limit: pageLimit }) => {
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(pageLimit),
+    });
+    if (maxLevel !== undefined) {
+      params.set("maxLevel", String(maxLevel));
+    }
+    return catalogFetch<PaginatedResponse<ClassSpellOption>>(
+      `/classes/${slug}/spells?${params}`,
+      CATALOG_FETCH_INIT,
+    );
+  }, limit);
 }
 
-export async function fetchClassSpellSlots(slug: string, limit = 20) {
-  return catalogFetch<PaginatedResponse<ClassSpellSlots>>(
-    `/classes/${slug}/spell-slots?limit=${limit}`,
-    CATALOG_FETCH_INIT,
-  );
+export async function fetchClassSpellSlots(slug: string) {
+  return fetchAllCatalogPages<ClassSpellSlots>(({ page, limit }) => {
+    const search = buildCatalogSearchParams({ page, limit });
+    return catalogFetch<PaginatedResponse<ClassSpellSlots>>(
+      `/classes/${slug}/spell-slots?${search}`,
+      CATALOG_FETCH_INIT,
+    );
+  });
+}
+
+export async function fetchClassProgression(slug: string) {
+  return fetchAllCatalogPages<ClassProgressionRow>(({ page, limit }) => {
+    const search = buildCatalogSearchParams({ page, limit });
+    return catalogFetch<PaginatedResponse<ClassProgressionRow>>(
+      `/classes/${slug}/progression?${search}`,
+      CATALOG_FETCH_INIT,
+    );
+  });
 }
 
 export async function fetchSubclassMechanics(slug: string, limit = 50) {
