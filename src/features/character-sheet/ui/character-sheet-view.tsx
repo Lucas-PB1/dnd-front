@@ -5,7 +5,10 @@ import { useCallback, useState, type ReactNode } from "react";
 
 import { useCharacterDetail } from "@/features/characters/api/use-character-detail";
 import { useCharacterCatalogLabels } from "@/features/character-sheet/api/use-character-catalog-labels";
-import { BeyondAbilityRow } from "@/features/character-sheet/ui/beyond/beyond-ability-row";
+import {
+  BeyondCharacterStatsBar,
+  BeyondRestActions,
+} from "@/features/character-sheet/ui/beyond/beyond-ability-row";
 import { BeyondCombatHub } from "@/features/character-sheet/ui/beyond/beyond-combat-hub";
 import { BeyondLeftColumn } from "@/features/character-sheet/ui/beyond/beyond-left-column";
 import {
@@ -14,7 +17,10 @@ import {
 } from "@/features/character-sheet/ui/beyond/beyond-main-tabs";
 import { BeyondPanel } from "@/features/character-sheet/ui/beyond/beyond-panel";
 import { BeyondSkillsColumn } from "@/features/character-sheet/ui/beyond/beyond-skills-column";
+import { BeyondActionsTab } from "@/features/character-sheet/ui/beyond/beyond-actions-tab";
+import { BeyondInventoryTab } from "@/features/character-sheet/ui/beyond/beyond-inventory-tab";
 import { BeyondTraitsTab } from "@/features/character-sheet/ui/beyond/beyond-traits-tab";
+import { BeyondSpellsTab } from "@/features/character-sheet/ui/beyond/beyond-spells-tab";
 import { DeleteCharacterButton } from "@/features/character-sheet/ui/delete-character-button";
 import {
   EditAbilitiesForm,
@@ -30,18 +36,15 @@ import {
   EditSubclassOptionsForm,
 } from "@/features/character-sheet/ui/sheet-edit-forms";
 import {
-  EquipmentSection,
-  LanguagesSection,
-  SpellsSection,
-} from "@/features/character-sheet/ui/sheet-read-sections";
-import { InventorySection } from "@/features/character-sheet/ui/inventory-section";
+  SheetEditDialog,
+  type SheetEditDialogConfig,
+} from "@/features/character-sheet/ui/sheet-edit-dialog";
+import { LanguagesSection } from "@/features/character-sheet/ui/sheet-read-sections";
 import { LevelUpSection } from "@/features/character-sheet/ui/level-up-section";
 import { SheetChip } from "@/features/character-sheet/ui/sheet-ui";
-import { TableStateSection } from "@/features/character-sheet/ui/table-state-section";
 import { useSkills } from "@/features/reference-catalog/api/use-reference";
 import { BackLink } from "@/shared/ui/back-link";
 import { buttonVariants } from "@/shared/ui/button";
-import { contentWidthClass } from "@/shared/ui/page-main";
 import { motion } from "@/shared/lib/motion";
 import { cn } from "@/shared/lib/utils";
 
@@ -126,81 +129,93 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
     </button>
   );
 
-  if (editing) {
-    const editors: Record<Exclude<SheetEditId, null>, ReactNode> = {
-      identity: <EditIdentityForm character={data} onSuccess={closeEdit} />,
-      "background-tool": (
-        <EditBackgroundToolForm character={data} onSuccess={closeEdit} />
-      ),
-      combat: <EditCombatForm character={data} onSuccess={closeEdit} />,
-      abilities: <EditAbilitiesForm character={data} onSuccess={closeEdit} />,
-      skills: <EditClassSkillsForm character={data} onSuccess={closeEdit} />,
-      species: (
-        <EditSpeciesChoicesForm character={data} onSuccess={closeEdit} />
-      ),
-      subclass: (
-        <EditSubclassOptionsForm character={data} onSuccess={closeEdit} />
-      ),
-      spells: <EditSpellsForm character={data} onSuccess={closeEdit} />,
-      equipment: <EditEquipmentForm character={data} onSuccess={closeEdit} />,
-      feats: <EditFeatsForm character={data} onSuccess={closeEdit} />,
-      languages: <EditLanguagesForm character={data} onSuccess={closeEdit} />,
-    };
-
-    return (
-      <div className={cn(contentWidthClass.hero, "space-y-4", motion.enter)}>
-        <button
-          type="button"
-          onClick={closeEdit}
-          className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          ← Voltar à ficha
-        </button>
-        <BeyondPanel
-          title="Editar ficha"
-          headerRight={
-            <button
-              type="button"
-              onClick={closeEdit}
-              className="text-xs text-muted-foreground hover:text-foreground"
-            >
-              Cancelar
-            </button>
-          }
-        >
-          {editors[editing]}
-        </BeyondPanel>
-      </div>
-    );
-  }
+  const editForms = {
+    character: data,
+    onSuccess: closeEdit,
+    onCancel: closeEdit,
+  };
+  const editDialogs: Record<NonNullable<SheetEditId>, SheetEditDialogConfig> = {
+    identity: {
+      title: "Identidade",
+      description: "Nome, nível, classe, espécie, antecedente e alinhamento.",
+      width: "md",
+      content: <EditIdentityForm {...editForms} />,
+    },
+    "background-tool": {
+      title: "Ferramenta do antecedente",
+      description: "Escolha a ferramenta concedida pelo antecedente.",
+      width: "sm",
+      content: <EditBackgroundToolForm {...editForms} />,
+    },
+    combat: {
+      title: "Pontos de vida",
+      description: "Ajuste os PV máximos e atuais da ficha.",
+      width: "sm",
+      content: <EditCombatForm {...editForms} />,
+    },
+    abilities: {
+      title: "Atributos",
+      description:
+        "Edite os valores base; a API recalcula os finais ao salvar.",
+      width: "md",
+      content: <EditAbilitiesForm {...editForms} />,
+    },
+    skills: {
+      title: "Perícias",
+      description: "Escolha as perícias concedidas pela classe.",
+      width: "md",
+      content: <EditClassSkillsForm {...editForms} />,
+    },
+    species: {
+      title: "Espécie",
+      description: "Ajuste as escolhas abertas pela espécie.",
+      width: "md",
+      content: <EditSpeciesChoicesForm {...editForms} />,
+    },
+    subclass: {
+      title: "Subclasse",
+      description: "Ajuste as opções abertas pela subclasse.",
+      width: "md",
+      content: <EditSubclassOptionsForm {...editForms} />,
+    },
+    spells: {
+      title: "Magias",
+      description: "Escolha truques e magias respeitando as cotas da classe.",
+      width: "lg",
+      content: <EditSpellsForm {...editForms} />,
+    },
+    equipment: {
+      title: "Equipamento inicial",
+      description: "Pacotes escolhidos na criação — viram itens no inventário.",
+      width: "lg",
+      content: <EditEquipmentForm {...editForms} />,
+    },
+    feats: {
+      title: "Talentos",
+      description: "Adicione, remova e configure as opções dos talentos.",
+      width: "lg",
+      content: <EditFeatsForm {...editForms} />,
+    },
+    languages: {
+      title: "Idiomas",
+      description: "Selecione os idiomas que o personagem conhece.",
+      width: "md",
+      content: <EditLanguagesForm {...editForms} />,
+    },
+  };
+  const activeEdit = editing ? editDialogs[editing] : null;
 
   const tabPanels: Record<BeyondTabId, ReactNode> = {
-    actions: (
-      <div className="space-y-5">
-        <TabSection title="Equipado agora">
-          <InventorySection characterId={id} equippedOnly />
-        </TabSection>
-        <TabSection
-          title="Pacote inicial"
-          action={editButton("equipment")}
-        >
-          <EquipmentSection {...sectionProps} />
-        </TabSection>
-      </div>
-    ),
+    actions: <BeyondActionsTab />,
     spells: (
-      <TabSection
-        title="Magias conhecidas / preparadas"
-        action={editButton("spells")}
-      >
-        <SpellsSection {...sectionProps} />
-      </TabSection>
+      <BeyondSpellsTab
+        characterId={id}
+        character={data}
+        labels={labels}
+        onEdit={() => setEditing("spells")}
+      />
     ),
-    inventory: (
-      <TabSection title="Inventário de jogo">
-        <InventorySection characterId={id} />
-      </TabSection>
-    ),
+    inventory: <BeyondInventoryTab characterId={id} />,
     features: (
       <BeyondTraitsTab
         character={data}
@@ -211,51 +226,11 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
         }}
       />
     ),
-    table: (
-      <div className="space-y-4">
-        <TabSection title="Estado ao vivo">
-          <TableStateSection
-            characterId={id}
-            character={data}
-            labels={labels}
-          />
-        </TabSection>
+    settings: (
+      <div className="space-y-5">
         <TabSection title="Subir de nível">
           <LevelUpSection characterId={id} character={data} />
         </TabSection>
-      </div>
-    ),
-    settings: (
-      <div className="space-y-3">
-        <p className="text-sm text-muted-foreground">
-          Escolha o que deseja alterar na ficha.
-        </p>
-        <ul className="grid gap-2 sm:grid-cols-2">
-          {(
-            [
-              ["identity", "Identidade"],
-              ["abilities", "Atributos"],
-              ["skills", "Perícias"],
-              ["combat", "PV máximos"],
-              ["spells", "Magias"],
-              ["equipment", "Equipamento inicial"],
-              ["feats", "Talentos"],
-              ["languages", "Idiomas"],
-              ["species", "Espécie"],
-              ["subclass", "Subclasse"],
-            ] as const
-          ).map(([key, label]) => (
-            <li key={key}>
-              <button
-                type="button"
-                onClick={() => setEditing(key)}
-                className="w-full rounded-lg border border-border/70 bg-background/40 px-3 py-2 text-left text-sm transition-colors hover:border-primary/40 hover:bg-primary/5"
-              >
-                {label}
-              </button>
-            </li>
-          ))}
-        </ul>
         <TabSection title="Idiomas" action={editButton("languages")}>
           <LanguagesSection {...sectionProps} />
         </TabSection>
@@ -264,22 +239,24 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
   };
 
   return (
-    <div className={cn("space-y-3 pb-8 sm:space-y-4", motion.enter)}>
-      <header className="flex flex-col gap-3 border-b border-border/60 pb-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0 space-y-2">
-          <BackLink href="/characters">Minhas fichas</BackLink>
-          <div className="flex flex-wrap items-end gap-3">
+    <div className={cn("flex flex-col gap-2.5 pb-6 sm:gap-3 sm:pb-8", motion.enter)}>
+      <header className="flex shrink-0 flex-col gap-2 border-b border-border/60 pb-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <div className="mb-1 flex items-center gap-2">
+            <BackLink href="/characters">Minhas fichas</BackLink>
+          </div>
+          <div className="flex flex-wrap items-center gap-2.5">
             <div
               aria-hidden
-              className="flex size-12 shrink-0 items-center justify-center rounded-full border border-primary/35 bg-primary/12 font-heading text-lg font-semibold text-primary sm:size-14 sm:text-xl"
+              className="flex size-8 shrink-0 items-center justify-center rounded-full border border-primary/35 bg-primary/12 font-heading text-sm font-semibold text-primary"
             >
               {data.name.trim().charAt(0).toUpperCase() || "?"}
             </div>
             <div className="min-w-0">
-              <h1 className="font-heading text-2xl font-semibold tracking-tight sm:text-3xl">
+              <h1 className="font-heading truncate text-lg font-semibold tracking-tight sm:text-xl">
                 {data.name}
               </h1>
-              <div className="mt-1.5 flex flex-wrap gap-1.5">
+              <div className="mt-0.5 flex flex-wrap gap-1">
                 <SheetChip active>Nv. {data.level}</SheetChip>
                 {labels.identity.speciesName ? (
                   <SheetChip>{labels.identity.speciesName}</SheetChip>
@@ -298,6 +275,7 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+          <BeyondRestActions characterId={id} />
           <button
             type="button"
             onClick={() => setEditing("identity")}
@@ -309,30 +287,34 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
         </div>
       </header>
 
-      <BeyondAbilityRow
-        scores={data.abilityScores}
-        onEdit={() => setEditing("abilities")}
-      />
+      <div className="shrink-0">
+        <BeyondCharacterStatsBar
+          characterId={id}
+          character={data}
+          onEditAbilities={() => setEditing("abilities")}
+        />
+      </div>
 
       {/*
         Mobile order: combate → perícias → proffs
-        Desktop: proffs | perícias | combate+abas
+        Desktop: salvaguardas | perícias | combate+abas
+        A página pode crescer além da viewport (scroll externo).
       */}
       <div
         className={cn(
           "grid gap-3",
           "grid-cols-1",
-          "lg:grid-cols-[12.5rem_minmax(18rem,22rem)_minmax(0,1fr)]",
-          "xl:grid-cols-[13rem_minmax(20rem,24rem)_minmax(0,1fr)]",
+          "lg:grid-cols-[minmax(12rem,0.9fr)_minmax(17rem,1fr)_minmax(26rem,2.15fr)]",
+          "xl:grid-cols-[14rem_20rem_minmax(0,1fr)]",
         )}
       >
         <div className="order-3 min-w-0 lg:order-1">
           <BeyondLeftColumn character={data} languageNames={languageNames} />
         </div>
 
-        <div className="order-2 min-h-0 min-w-0 lg:order-2 lg:h-auto lg:self-stretch">
+        <div className="order-2 min-w-0 lg:order-2">
           {skillsQuery.isPending ? (
-            <BeyondPanel title="Perícias" className="h-full">
+            <BeyondPanel title="Perícias">
               <p className="text-sm text-muted-foreground">Carregando…</p>
             </BeyondPanel>
           ) : (
@@ -344,11 +326,22 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
           )}
         </div>
 
-        <div className="order-1 flex min-w-0 flex-col gap-3 lg:order-3">
+        <div className="order-1 flex min-w-0 flex-col gap-2.5 lg:order-3">
           <BeyondCombatHub characterId={id} character={data} />
           <BeyondMainTabs panels={tabPanels} />
         </div>
       </div>
+
+      {activeEdit ? (
+        <SheetEditDialog
+          onClose={closeEdit}
+          title={activeEdit.title}
+          description={activeEdit.description}
+          width={activeEdit.width}
+        >
+          {activeEdit.content}
+        </SheetEditDialog>
+      ) : null}
     </div>
   );
 }

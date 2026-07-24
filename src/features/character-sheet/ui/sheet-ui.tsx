@@ -107,60 +107,8 @@ export function SheetChip({
   );
 }
 
-/** Barra de PV visual. */
-export function SheetHpBar({
-  current,
-  max,
-  temp = 0,
-}: {
-  current: number | null | undefined;
-  max: number | null | undefined;
-  temp?: number;
-}) {
-  if (max == null || max <= 0) {
-    return (
-      <p className="text-sm text-muted-foreground">PV não definidos</p>
-    );
-  }
-
-  const cur = Math.max(0, current ?? max);
-  const ratio = Math.min(1, cur / max);
-  const low = ratio <= 0.35;
-
-  return (
-    <div className="space-y-1.5">
-      <div className="flex items-baseline justify-between gap-2">
-        <p className="font-heading text-xl font-semibold tabular-nums">
-          {cur}
-          <span className="text-muted-foreground"> / {max}</span>
-        </p>
-        {temp > 0 ? (
-          <p className="text-xs font-medium text-secondary-foreground">
-            +{temp} temp
-          </p>
-        ) : null}
-      </div>
-      <div className="h-2 overflow-hidden rounded-full bg-muted">
-        <div
-          className={cn(
-            "h-full rounded-full transition-[width] duration-300",
-            low ? "bg-destructive" : "bg-primary",
-          )}
-          style={{ width: `${ratio * 100}%` }}
-        />
-      </div>
-    </div>
-  );
-}
-
 /** Pip de slot de magia. */
-export function SheetSlotPips({
-  max,
-  used,
-}: {
-  max: number;
-  used: number;
-}) {
+export function SheetSlotPips({ max, used }: { max: number; used: number }) {
   return (
     <div className="flex flex-wrap gap-1" aria-hidden>
       {Array.from({ length: max }, (_, i) => {

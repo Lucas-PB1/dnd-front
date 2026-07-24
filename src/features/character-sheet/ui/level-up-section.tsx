@@ -7,10 +7,7 @@ import {
   canAddCharacterFeat,
 } from "@/entities/character/lib/character-feat";
 import type { CharacterDetail } from "@/entities/character/types";
-import type {
-  CharacterSpell,
-  FeatOption,
-} from "@/entities/character/sheet-types";
+import type { FeatOption } from "@/entities/character/sheet-types";
 import { useClassSubclasses } from "@/features/class-catalog/api/use-classes";
 import {
   useLevelUp,
@@ -22,7 +19,6 @@ import { useFeatOptions } from "@/features/feat-catalog/api/use-feat-options";
 import { FeatOptionsEditor } from "@/features/feat-catalog/ui/feat-options-editor";
 import { useFeats } from "@/features/reference-catalog/api/use-reference";
 import { Button } from "@/shared/ui/button";
-import { cn } from "@/shared/lib/utils";
 
 type LevelUpSectionProps = {
   characterId: string;
@@ -41,7 +37,6 @@ export function LevelUpSection({
   const [subclassSlug, setSubclassSlug] = useState(
     character.subclassSlug ?? "",
   );
-  const [selectedSpells, setSelectedSpells] = useState<CharacterSpell[]>([]);
   const [selectedFeatSlug, setSelectedFeatSlug] = useState("");
   const [levelUpFeatOptions, setLevelUpFeatOptions] = useState<FeatOption[]>(
     [],
@@ -97,21 +92,6 @@ export function LevelUpSection({
     );
   }
 
-  function toggleSpell(slug: string, spellLevel: number) {
-    const exists = selectedSpells.some((s) => s.spellSlug === slug);
-    if (exists) {
-      setSelectedSpells(selectedSpells.filter((s) => s.spellSlug !== slug));
-      return;
-    }
-    setSelectedSpells([
-      ...selectedSpells,
-      {
-        spellSlug: slug,
-        listType: spellLevel === 0 ? "known" : "known",
-      },
-    ]);
-  }
-
   async function handleLevelUp() {
     if (!data) return;
     setLevelUpError(undefined);
@@ -119,15 +99,6 @@ export function LevelUpSection({
     const payload: Parameters<typeof levelUp.mutateAsync>[0] = {};
     if (data.subclassRequired && subclassSlug) {
       payload.subclassSlug = subclassSlug;
-    }
-    if (selectedSpells.length > 0) {
-      const merged = [
-        ...character.characterSpells.filter(
-          (s) => !selectedSpells.some((n) => n.spellSlug === s.spellSlug),
-        ),
-        ...selectedSpells,
-      ];
-      payload.characterSpells = merged;
     }
     if (data.isAsiOrFeatLevel && selectedFeatSlug && newFeatInstance) {
       const feat = (feats.data?.data ?? []).find(
@@ -167,7 +138,6 @@ export function LevelUpSection({
       }
     }
     await levelUp.mutateAsync(payload);
-    setSelectedSpells([]);
     setSelectedFeatSlug("");
     setLevelUpFeatOptions([]);
   }
@@ -275,38 +245,20 @@ export function LevelUpSection({
       ) : null}
 
       {data.newSpellOptions.length > 0 ? (
-        <div className="space-y-2">
-          <p className="text-sm font-medium">Novas magias disponíveis</p>
-          <ul className="grid gap-2 sm:grid-cols-2">
-            {data.newSpellOptions.map((spell) => (
-              <li key={spell.spellSlug}>
-                <label
-                  className={cn(
-                    "flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm",
-                    selectedSpells.some(
-                      (s) => s.spellSlug === spell.spellSlug,
-                    ) && "border-primary bg-primary/5",
-                  )}
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedSpells.some(
-                      (s) => s.spellSlug === spell.spellSlug,
-                    )}
-                    onChange={() =>
-                      toggleSpell(spell.spellSlug, spell.spellLevel)
-                    }
-                  />
-                  <span>
-                    {spell.spellName}
-                    <span className="ml-1 text-xs text-muted-foreground">
-                      (círculo {spell.spellLevel})
-                    </span>
-                  </span>
-                </label>
-              </li>
-            ))}
-          </ul>
+        <div className="flex items-start gap-3 rounded-md border border-border bg-muted/30 px-3 py-3 text-sm">
+          <span
+            aria-hidden
+            className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/15 font-mono text-xs font-semibold text-primary tabular-nums"
+          >
+            {data.newSpellOptions.length}
+          </span>
+          <div className="space-y-0.5">
+            <p className="font-medium">Novas magias disponíveis</p>
+            <p className="text-muted-foreground">
+              Depois de subir de nível, escolha na aba{" "}
+              <span className="font-medium text-foreground">Magias</span>.
+            </p>
+          </div>
         </div>
       ) : null}
 

@@ -60,6 +60,7 @@ import {
 import { useSpecies } from "@/features/species-catalog/api/use-species";
 import { ApiError } from "@/shared/api/dnd-api/api-error";
 import { Button } from "@/shared/ui/button";
+import { DialogFooter } from "@/shared/ui/dialog";
 import {
   Field,
   FieldDescription,
@@ -73,6 +74,7 @@ import { cn } from "@/shared/lib/utils";
 type EditFormProps = {
   character: CharacterDetail;
   onSuccess: () => void;
+  onCancel: () => void;
 };
 
 function useSectionPatch(character: CharacterDetail, onSuccess: () => void) {
@@ -98,27 +100,6 @@ function useSectionPatch(character: CharacterDetail, onSuccess: () => void) {
   return { patch, formError, submit };
 }
 
-function FormActions({
-  isPending,
-  onCancel,
-}: {
-  isPending: boolean;
-  onCancel?: () => void;
-}) {
-  return (
-    <div className="flex flex-wrap gap-2 pt-2">
-      <Button type="submit" disabled={isPending}>
-        {isPending ? "Salvando…" : "Salvar"}
-      </Button>
-      {onCancel ? (
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancelar
-        </Button>
-      ) : null}
-    </div>
-  );
-}
-
 function FormAlert({ message }: { message: string | null }) {
   if (!message) return null;
   return (
@@ -128,9 +109,56 @@ function FormAlert({ message }: { message: string | null }) {
   );
 }
 
+/**
+ * Casca comum das edições: as seções só descrevem os campos; o scroll do corpo
+ * e o rodapé fixo com Cancelar/Salvar vivem aqui (a ficha edita sempre em modal).
+ */
+function EditFormShell({
+  isPending,
+  formError,
+  onSubmit,
+  onCancel,
+  children,
+}: {
+  isPending: boolean;
+  formError: string | null;
+  onSubmit: React.FormEventHandler<HTMLFormElement>;
+  onCancel: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <form
+      className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden"
+      onSubmit={onSubmit}
+    >
+      <div className="-mr-1 min-h-0 flex-1 space-y-4 overflow-y-auto pr-1">
+        {children}
+      </div>
+      <FormAlert message={formError} />
+      <DialogFooter>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          disabled={isPending}
+        >
+          Cancelar
+        </Button>
+        <Button type="submit" disabled={isPending}>
+          {isPending ? "Salvando…" : "Salvar"}
+        </Button>
+      </DialogFooter>
+    </form>
+  );
+}
+
 type IdentityEditInput = z.infer<typeof identityStepSchema>;
 
-export function EditIdentityForm({ character, onSuccess }: EditFormProps) {
+export function EditIdentityForm({
+  character,
+  onSuccess,
+  onCancel,
+}: EditFormProps) {
   const { patch, formError, submit } = useSectionPatch(character, onSuccess);
   const classes = useClasses();
   const species = useSpecies();
@@ -176,8 +204,10 @@ export function EditIdentityForm({ character, onSuccess }: EditFormProps) {
     watchedIdentity.backgroundSlug !== character.backgroundSlug;
 
   return (
-    <form
-      className="space-y-4"
+    <EditFormShell
+      isPending={patch.isPending}
+      formError={formError}
+      onCancel={onCancel}
       onSubmit={form.handleSubmit((values) => {
         const payload: UpdateCharacterPayload = {
           name: values.name,
@@ -282,10 +312,7 @@ export function EditIdentityForm({ character, onSuccess }: EditFormProps) {
           onChange={(e) => setAlignmentSlug(e.target.value)}
         />
       </FieldGroup>
-
-      <FormAlert message={formError} />
-      <FormActions isPending={patch.isPending} />
-    </form>
+    </EditFormShell>
   );
 }
 
@@ -296,7 +323,11 @@ const combatSchema = z.object({
 
 type CombatFormValues = z.infer<typeof combatSchema>;
 
-export function EditCombatForm({ character, onSuccess }: EditFormProps) {
+export function EditCombatForm({
+  character,
+  onSuccess,
+  onCancel,
+}: EditFormProps) {
   const { patch, formError, submit } = useSectionPatch(character, onSuccess);
 
   const form = useForm<CombatFormValues>({
@@ -308,8 +339,10 @@ export function EditCombatForm({ character, onSuccess }: EditFormProps) {
   });
 
   return (
-    <form
-      className="space-y-4"
+    <EditFormShell
+      isPending={patch.isPending}
+      formError={formError}
+      onCancel={onCancel}
       onSubmit={form.handleSubmit((values) => {
         const payload: UpdateCharacterPayload = {};
         if (values.hitPointsMax != null) {
@@ -341,9 +374,7 @@ export function EditCombatForm({ character, onSuccess }: EditFormProps) {
           />
         </Field>
       </FieldGroup>
-      <FormAlert message={formError} />
-      <FormActions isPending={patch.isPending} />
-    </form>
+    </EditFormShell>
   );
 }
 
@@ -371,7 +402,11 @@ function toAbilityScores(values: AbilitiesEditInput): AbilityScores {
   };
 }
 
-export function EditAbilitiesForm({ character, onSuccess }: EditFormProps) {
+export function EditAbilitiesForm({
+  character,
+  onSuccess,
+  onCancel,
+}: EditFormProps) {
   const { patch, formError, submit } = useSectionPatch(character, onSuccess);
   const [boostError, setBoostError] = useState<string | null>(null);
 
@@ -457,8 +492,10 @@ export function EditAbilitiesForm({ character, onSuccess }: EditFormProps) {
       : null;
 
   return (
-    <form
-      className="space-y-4"
+    <EditFormShell
+      isPending={patch.isPending}
+      formError={boostError ?? formError}
+      onCancel={onCancel}
       onSubmit={form.handleSubmit((values) => {
         setBoostError(null);
         const base = toAbilityScores(values);
@@ -577,16 +614,14 @@ export function EditAbilitiesForm({ character, onSuccess }: EditFormProps) {
           ) : null}
         </FieldGroup>
       ) : null}
-
-      <FormAlert message={boostError ?? formError} />
-      <FormActions isPending={patch.isPending} />
-    </form>
+    </EditFormShell>
   );
 }
 
 function SheetStepForm({
   character,
   onSuccess,
+  onCancel,
   children,
   toPayload,
 }: EditFormProps & {
@@ -628,14 +663,14 @@ function SheetStepForm({
   const form = useForm<CreateCharacterInput>({ defaultValues });
 
   return (
-    <form
-      className="space-y-4"
+    <EditFormShell
+      isPending={patch.isPending}
+      formError={formError}
+      onCancel={onCancel}
       onSubmit={form.handleSubmit((values) => submit(toPayload(values)))}
     >
       {children(form)}
-      <FormAlert message={formError} />
-      <FormActions isPending={patch.isPending} />
-    </form>
+    </EditFormShell>
   );
 }
 
@@ -699,7 +734,11 @@ export function EditEquipmentForm(props: EditFormProps) {
   );
 }
 
-export function EditFeatsForm({ character, onSuccess }: EditFormProps) {
+export function EditFeatsForm({
+  character,
+  onSuccess,
+  onCancel,
+}: EditFormProps) {
   const { patch, formError, submit } = useSectionPatch(character, onSuccess);
   const feats = useFeats();
   const [characterFeats, setCharacterFeats] = useState<CharacterFeat[]>(
@@ -748,8 +787,10 @@ export function EditFeatsForm({ character, onSuccess }: EditFormProps) {
   );
 
   return (
-    <form
-      className="space-y-4"
+    <EditFormShell
+      isPending={patch.isPending}
+      formError={formError}
+      onCancel={onCancel}
       onSubmit={(e) => {
         e.preventDefault();
         const validKeys = new Set(
@@ -839,15 +880,14 @@ export function EditFeatsForm({ character, onSuccess }: EditFormProps) {
           />
         </div>
       ) : null}
-      <FormAlert message={formError} />
-      <FormActions isPending={patch.isPending} />
-    </form>
+    </EditFormShell>
   );
 }
 
 export function EditBackgroundToolForm({
   character,
   onSuccess,
+  onCancel,
 }: EditFormProps) {
   const { patch, formError, submit } = useSectionPatch(character, onSuccess);
   const backgroundDetail = useBackgroundDetail(character.backgroundSlug, true);
@@ -881,8 +921,10 @@ export function EditBackgroundToolForm({
   }));
 
   return (
-    <form
-      className="space-y-4"
+    <EditFormShell
+      isPending={patch.isPending}
+      formError={formError}
+      onCancel={onCancel}
       onSubmit={(e) => {
         e.preventDefault();
         if (!selected) return;
@@ -897,13 +939,15 @@ export function EditBackgroundToolForm({
         value={selected}
         onChange={(e) => setSelected(e.target.value)}
       />
-      <FormAlert message={formError} />
-      <FormActions isPending={patch.isPending} />
-    </form>
+    </EditFormShell>
   );
 }
 
-export function EditLanguagesForm({ character, onSuccess }: EditFormProps) {
+export function EditLanguagesForm({
+  character,
+  onSuccess,
+  onCancel,
+}: EditFormProps) {
   const { patch, formError, submit } = useSectionPatch(character, onSuccess);
   const languages = useLanguages();
   const [selected, setSelected] = useState<string[]>(character.languageSlugs);
@@ -915,8 +959,10 @@ export function EditLanguagesForm({ character, onSuccess }: EditFormProps) {
   }
 
   return (
-    <form
-      className="space-y-4"
+    <EditFormShell
+      isPending={patch.isPending}
+      formError={formError}
+      onCancel={onCancel}
       onSubmit={(e) => {
         e.preventDefault();
         submit({ languageSlugs: selected });
@@ -946,8 +992,6 @@ export function EditLanguagesForm({ character, onSuccess }: EditFormProps) {
           ))}
         </ul>
       )}
-      <FormAlert message={formError} />
-      <FormActions isPending={patch.isPending} />
-    </form>
+    </EditFormShell>
   );
 }

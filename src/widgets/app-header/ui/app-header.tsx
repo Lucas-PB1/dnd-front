@@ -45,12 +45,12 @@ function NavLink({
   );
 }
 
-export function AppHeader() {
+export function AppHeader({ className }: { className?: string }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <header className="border-b border-border/80">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
+    <header className={cn("border-b border-border/80", className)}>
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2.5 sm:px-6 sm:py-3">
         <div className="flex min-w-0 items-center gap-4 sm:gap-6">
           <Link
             href="/"

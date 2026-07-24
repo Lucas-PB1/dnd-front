@@ -10,28 +10,37 @@ Inspiração de **layout**: D&D Beyond (dashboard denso). Visual: **Taverna/Masm
 
 ## Estrutura canônica
 
-1. **Header** — nome (hero tipográfico), chips espécie/classe/nível, Identidade / Excluir  
-2. **Fila de atributos** — mod grande + score; clique → editar  
-3. **Grid desktop** — esq. salvaguardas/sentidos/profs · meio perícias · dir. hub combate + **abas**  
-4. **Abas** — Ações · Magias · Inventário · Traços · Mesa · Ajustes  
+1. **Header compacto** — nome, chips, descansos, Identidade / Excluir (sem hero grande)  
+2. **Faixa de estatísticas** — 6 atributos + proficiência + deslocamento + PV/curar/dano  
+3. **Grid desktop** — esq. salvaguardas/sentidos/profs · meio perícias · dir. iniciativa/CA/defesas/condições + **abas**  
+4. **Abas** — Ações · Magias · Inventário · Traços · Ajustes  
 
-Mobile (`order-*`): **combate + abas** → perícias → proficiências.
+A ficha **pode crescer** além da viewport; a página rola normalmente (sem `h-dvh` / scroll interno forçado nas colunas).  
+Mobile (`order-*`): combate + abas → perícias → proficiências.
 
 ## Componentes
 
 - Primitivos em `features/character-sheet/ui/beyond/` (`BeyondPanel`, hub, tabs, colunas)
 - Leitura: `sheet-read-sections.tsx` · edição: `sheet-edit-forms.tsx`
-- Vitais: `useCharacterState` + patch de PV; descansos via API de sessão
+- Vitais / condições / descanso: hub de combate (`BeyondCombatHub`)
+- Slots / conjurar / concentração: aba Magias (`BeyondSpellsTab` — lista por círculo + cast na linha)
+- Economia de ação: aba Ações (`BeyondActionsTab` — Ação · Bônus · Reação · Livre; sem inventário)
+- Inventário: aba Inventário (`BeyondInventoryTab` — só itens Equipado/Mochila; add colapsável)
+- Subir de nível: aba Ajustes (`LevelUpSection`)
 
 ## Regras de UX
 
-- PV / CA / iniciativa visíveis **sem abrir aba** (hub no fluxo normal — sem sticky)
-- Magias e inventário só nas abas (não duplicar no header)
-- Aba **Ações**: equipado agora + pacote inicial — sem “em breve” como foco
-- Aba **Ajustes**: atalhos de edição (tab id `settings`; nunca “Notas”)
+- Layout-base inspirado na ficha Beyond: faixa superior de stats e grid 3 colunas; preservar tema Taverna (não copiar cores/molduras proprietárias)
+- PV / CA / iniciativa / condições visíveis **sem abrir aba** (sem sticky)
+- Magias: slots no topo + lista acionável (sem chips + selects duplicados); inventário só na aba
+- Sem aba **Mesa** — cada função fica na seção respectiva
+- Aba **Ações**: só economia de ação (vazia até API `kind`); **sem** inventário / Desequipar / pacote inicial
+- Aba **Inventário**: itens (Equipado/Mochila); Adicionar em **modal**; pacotes de criação viram itens na API (seed); escolha de pacote só em Ajustes
+- Aba **Ajustes**: level-up + Idiomas (tab id `settings`); sem grid de atalhos (cada seção edita no próprio lugar)
+- Level-up: subclasse e ASI/talento escolhidos ali; magias **só indicadas** (contador) — jogador escolhe depois na aba Magias
 - Aba **Traços**: subnavegação (Classe/Espécie/Subclasse/Talentos/Antecedente) + `CollapsibleCard` compacto + `PhbProse`
-- Edição: painel dedicado com “Voltar à ficha”; um `editing` por vez
-- Inventário ≠ equipamento inicial (`InventorySection` vs `EquipmentSection`)
+- Edição: **sempre em modal** (`SheetEditDialog` + `EditFormShell` — corpo rola, rodapé fixo com Cancelar/Salvar); um `editing` por vez, título/descrição/largura vêm de `editDialogs`
+- Catálogos de classe sem magia respondem 404: gate de carregamento por `isLoading` (nunca `isPending`) para não travar em “Carregando…”
 
 ## Checklist rápido (antes de merge)
 
@@ -44,6 +53,11 @@ Mobile (`order-*`): **combate + abas** → perícias → proficiências.
 
 - Nav lateral de âncoras longa (removida; usar dashboard Beyond)
 - Esperar catálogo inteiro para mostrar a ficha (`isPending` só do personagem)
-- Duplicar inventário completo na aba Ações (usar `equippedOnly`)
+- Mostrar inventário, Desequipar ou pacote inicial na aba Ações
+- Duplicar magias por `castingTime` na aba Ações (permanecem na aba Magias)
+- Mostrar “pacotes” de criação na aba Inventário (após a escolha, só itens)
+- Parede de cards no inventário; ItemPicker sempre aberto no topo da aba
+- Tirar o usuário da ficha para editar (painel de página com “Voltar à ficha” foi removido)
+- Travar a ficha em `h-dvh` com scroll só interno (deixar a página crescer)
 
 Plano: [docs/UX-UI-PLAN.md](docs/UX-UI-PLAN.md) § Fase 5 · [docs/CHARACTER-SHEET-PLAN.md](docs/CHARACTER-SHEET-PLAN.md)

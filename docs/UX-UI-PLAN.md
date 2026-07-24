@@ -118,7 +118,7 @@ Ordem de implementação. Features de regra (ASI, picker de condições) ficam n
 ### Fase 5 — Ficha (leitura vs mesa)
 
 - [x] Hierarquia clara: identidade → atributos → combate/perícias → abas
-- [x] Separar visualmente **leitura** de **mesa** (hub PV + aba Mesa)
+- [x] Separar visualmente **leitura** de **mesa** (hub PV/condições; magias na aba Magias — sem aba Mesa)
 - [x] Densidade: dashboard estilo Beyond; abas em vez de scroll infinito de cards
 - [x] Layout canônico documentado na rule `32-ui-character-sheet`
 - [ ] Aba Ações com ataques (acerto/dano) quando a API expor o dado

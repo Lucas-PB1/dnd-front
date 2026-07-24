@@ -28,12 +28,12 @@ export function BeyondLeftColumn({
   const pb = character.proficiencyBonus;
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-2.5">
       <BeyondPanel title="Salvaguardas">
         {classDetail.isPending ? (
           <p className="text-sm text-muted-foreground">Carregando…</p>
         ) : (
-          <ul className="space-y-1">
+          <ul className="space-y-0.5">
             {ORDER.map((slug) => {
               const mod = abilityModifierValue(character.abilityScores[slug]);
               const isProficient = proficient.has(slug);
@@ -42,18 +42,18 @@ export function BeyondLeftColumn({
                 <li
                   key={slug}
                   className={cn(
-                    "flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm",
+                    "flex items-center gap-2 rounded-md px-2 py-1 text-sm",
                     isProficient ? "bg-primary/10" : "hover:bg-muted/40",
                   )}
                 >
                   <span
                     className={cn(
-                      "size-2 shrink-0 rounded-full",
+                      "size-1.5 shrink-0 rounded-full",
                       isProficient ? "bg-primary" : "bg-border",
                     )}
                     aria-hidden
                   />
-                  <span className="w-8 text-[0.65rem] font-semibold tracking-wide text-muted-foreground uppercase">
+                  <span className="w-7 text-[0.65rem] font-semibold tracking-wide text-muted-foreground uppercase">
                     {ABILITY_SHORT[slug]}
                   </span>
                   <span className="min-w-0 flex-1 truncate font-medium">
@@ -70,19 +70,19 @@ export function BeyondLeftColumn({
       </BeyondPanel>
 
       <BeyondPanel title="Sentidos">
-        <ul className="space-y-2 text-sm">
-          <li className="flex items-center justify-between gap-2 rounded-lg bg-muted/30 px-2 py-1.5">
+        <ul className="space-y-1.5 text-sm">
+          <li className="flex items-center justify-between gap-2 rounded-md bg-muted/30 px-2 py-1.5">
             <span className="text-muted-foreground">Percepção passiva</span>
             <span className="font-mono font-semibold tabular-nums">
               {character.passivePerception}
             </span>
           </li>
           {speciesDetail.isPending ? (
-            <li className="rounded-lg bg-muted/30 px-2 py-1.5 text-muted-foreground">
+            <li className="rounded-md bg-muted/30 px-2 py-1.5 text-muted-foreground">
               Carregando deslocamento…
             </li>
           ) : speciesDetail.data?.speed ? (
-            <li className="flex items-center justify-between gap-2 rounded-lg bg-muted/30 px-2 py-1.5">
+            <li className="flex items-center justify-between gap-2 rounded-md bg-muted/30 px-2 py-1.5">
               <span className="text-muted-foreground">Deslocamento</span>
               <span className="font-medium">{speciesDetail.data.speed}</span>
             </li>
@@ -94,7 +94,7 @@ export function BeyondLeftColumn({
         {classDetail.isPending ? (
           <p className="text-sm text-muted-foreground">Carregando…</p>
         ) : (
-          <dl className="space-y-3 text-sm">
+          <dl className="space-y-2.5 text-sm">
             {classDetail.data?.armorTrainingNames?.length ? (
               <div>
                 <dt className="text-[0.65rem] font-semibold tracking-wider text-muted-foreground uppercase">

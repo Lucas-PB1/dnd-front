@@ -40,8 +40,7 @@ export function useClassesCatalog(params: { page: number; q?: string }) {
     filters: { q: params.q },
     queryKey: (p) =>
       classKeys.listPage({ page: p.page, limit: p.limit, q: p.q ?? "" }),
-    queryFn: (p) =>
-      fetchClassesPage({ page: p.page, limit: p.limit, q: p.q }),
+    queryFn: (p) => fetchClassesPage({ page: p.page, limit: p.limit, q: p.q }),
   });
 }
 
@@ -104,6 +103,8 @@ export function useClassSpells(
     queryKey: classKeys.spells(slug, maxLevel),
     queryFn: () => fetchClassSpells(slug, maxLevel),
     enabled,
+    // Classe sem magia responde 404: sem retry para a UI resolver o estado na hora.
+    retry: false,
   });
 }
 
@@ -113,6 +114,7 @@ export function useClassSpellSlots(slug: string, enabled = true) {
     queryKey: classKeys.spellSlots(slug),
     queryFn: () => fetchClassSpellSlots(slug),
     enabled,
+    retry: false,
   });
 }
 
@@ -122,6 +124,7 @@ export function useClassProgression(slug: string, enabled = true) {
     queryKey: classKeys.progression(slug),
     queryFn: () => fetchClassProgression(slug),
     enabled,
+    retry: false,
   });
 }
 
@@ -140,6 +143,7 @@ export function useSubclassSpells(slug: string, enabled = true) {
     queryKey: subclassKeys.spells(slug),
     queryFn: () => fetchSubclassSpells(slug),
     enabled,
+    retry: false,
   });
 }
 

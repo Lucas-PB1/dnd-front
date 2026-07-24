@@ -10,7 +10,6 @@ export type BeyondTabId =
   | "spells"
   | "inventory"
   | "features"
-  | "table"
   | "settings";
 
 const TABS: { id: BeyondTabId; label: string }[] = [
@@ -18,18 +17,19 @@ const TABS: { id: BeyondTabId; label: string }[] = [
   { id: "spells", label: "Magias" },
   { id: "inventory", label: "Inventário" },
   { id: "features", label: "Traços" },
-  { id: "table", label: "Mesa" },
   { id: "settings", label: "Ajustes" },
 ];
 
 type BeyondMainTabsProps = {
   panels: Record<BeyondTabId, ReactNode>;
   defaultTab?: BeyondTabId;
+  className?: string;
 };
 
 export function BeyondMainTabs({
   panels,
   defaultTab = "actions",
+  className,
 }: BeyondMainTabsProps) {
   const baseId = useId();
   const [tab, setTab] = useState<BeyondTabId>(defaultTab);
@@ -43,7 +43,12 @@ export function BeyondMainTabs({
   }
 
   function onTabKeyDown(event: KeyboardEvent<HTMLButtonElement>, index: number) {
-    if (event.key !== "ArrowRight" && event.key !== "ArrowLeft" && event.key !== "Home" && event.key !== "End") {
+    if (
+      event.key !== "ArrowRight" &&
+      event.key !== "ArrowLeft" &&
+      event.key !== "Home" &&
+      event.key !== "End"
+    ) {
       return;
     }
     event.preventDefault();
@@ -59,8 +64,11 @@ export function BeyondMainTabs({
   const panelId = `${baseId}-panel-${tab}`;
 
   return (
-    <BeyondPanel flush className="flex min-h-[22rem] flex-col">
-      <div className="overflow-x-auto border-b border-border/60 bg-muted/25">
+    <BeyondPanel
+      flush
+      className={cn("flex min-h-[18rem] flex-col", className)}
+    >
+      <div className="shrink-0 overflow-x-auto border-b border-border/60 bg-muted/25">
         <div
           className="flex min-w-max"
           role="tablist"
@@ -84,7 +92,7 @@ export function BeyondMainTabs({
                 onClick={() => setTab(item.id)}
                 onKeyDown={(event) => onTabKeyDown(event, index)}
                 className={cn(
-                  "px-3.5 py-2.5 text-xs font-semibold tracking-wide uppercase transition-colors",
+                  "px-3 py-2 text-xs font-semibold tracking-wide uppercase transition-colors",
                   "border-b-2",
                   active
                     ? "border-primary text-primary"
@@ -101,7 +109,7 @@ export function BeyondMainTabs({
         id={panelId}
         role="tabpanel"
         aria-labelledby={`${baseId}-tab-${tab}`}
-        className="flex-1 overflow-y-auto bg-card/40 p-3"
+        className="flex-1 bg-card/40 p-3.5 sm:p-4"
       >
         {panels[tab]}
       </div>

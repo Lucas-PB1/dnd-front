@@ -128,8 +128,7 @@ export function StepSpells({ control, setValue }: StepSpellsProps) {
     [characterSpells, availableClass],
   );
 
-  const atCantripLimit =
-    cantripMax != null && counts.cantrips >= cantripMax;
+  const atCantripLimit = cantripMax != null && counts.cantrips >= cantripMax;
   const atLeveledKnownLimit =
     leveledKnownMax != null && counts.leveledKnown >= leveledKnownMax;
   const atLeveledPreparedLimit =
@@ -292,18 +291,29 @@ export function StepSpells({ control, setValue }: StepSpellsProps) {
     ];
   }
 
+  // isLoading (e não isPending) para não travar em "carregando" quando a query
+  // está desabilitada ou já falhou — classe sem magia responde 404.
   if (
-    classSpells.isPending ||
-    spellSlotsQuery.isPending ||
-    progressionQuery.isPending
+    classSpells.isLoading ||
+    spellSlotsQuery.isLoading ||
+    progressionQuery.isLoading ||
+    subclassSpells.isLoading
   ) {
     return <p className="text-sm text-muted-foreground">Carregando magias…</p>;
+  }
+
+  if (!classSlug) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        Escolha uma classe para ver a lista de magias.
+      </p>
+    );
   }
 
   if (availableClass.length === 0 && availableSubclass.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
-        Esta combinação classe/nível não exige escolha de magias na criação.
+        Esta combinação de classe e nível não tem escolha de magias.
       </p>
     );
   }
@@ -498,10 +508,7 @@ export function StepSpells({ control, setValue }: StepSpellsProps) {
                         : atLeveledPreparedLimit)
                     }
                     onToggle={() =>
-                      onLeveled(
-                        spell,
-                        mode === "known" ? "known" : "prepared",
-                      )
+                      onLeveled(spell, mode === "known" ? "known" : "prepared")
                     }
                     onPreview={() =>
                       setPreview({ slug: spell.slug, kind: "leveled" })
@@ -533,19 +540,19 @@ export function StepSpells({ control, setValue }: StepSpellsProps) {
                   )}
                 >
                   <label className="flex min-w-0 flex-1 cursor-pointer items-start gap-2">
-                    <input
-                      type="checkbox"
+                  <input
+                    type="checkbox"
                       className="mt-1"
-                      checked={selectedSlugs.has(spell.slug)}
+                    checked={selectedSlugs.has(spell.slug)}
                       onChange={() => onSubclass(spell.slug)}
-                    />
-                    <span>
-                      {spell.name}
+                  />
+                  <span>
+                    {spell.name}
                       <span className="mt-0.5 block text-xs text-muted-foreground">
                         Desbloqueio nv. {spell.unlockLevel}
                       </span>
-                    </span>
-                  </label>
+                  </span>
+                </label>
                   <PreviewButton
                     onClick={() =>
                       setPreview({ slug: spell.slug, kind: "subclass" })
@@ -629,7 +636,9 @@ function SpellResourcesPanel({
               max={leveledPreparedMax}
             />
           ) : null}
-          {profile.extraResourceLabel && channelMax != null && channelMax > 0 ? (
+          {profile.extraResourceLabel &&
+          channelMax != null &&
+          channelMax > 0 ? (
             <p className="text-[11px] text-muted-foreground sm:col-span-2">
               {profile.extraResourceLabel}: {channelMax}/descanso
             </p>
@@ -659,7 +668,9 @@ function SpellResourcesPanel({
             ))}
           </div>
         ) : (
-          <p className="text-xs text-muted-foreground">Sem espaços neste nível.</p>
+          <p className="text-xs text-muted-foreground">
+            Sem espaços neste nível.
+          </p>
         )}
       </div>
     </div>
@@ -804,8 +815,7 @@ function WizardSpellRow({
   onPrepared: () => void;
   onPreview: () => void;
 }) {
-  const inBook =
-    entry?.listType === "known" || entry?.listType === "prepared";
+  const inBook = entry?.listType === "known" || entry?.listType === "prepared";
   const prepared = entry?.listType === "prepared";
 
   return (

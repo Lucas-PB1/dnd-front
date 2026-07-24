@@ -60,7 +60,7 @@ export function BeyondSkillsColumn({
   return (
     <BeyondPanel
       title="Perícias"
-      className="h-full min-w-0"
+      className="min-w-0"
       headerRight={
         onEdit ? (
           <button
@@ -74,15 +74,7 @@ export function BeyondSkillsColumn({
       }
       flush
     >
-      <ul
-        className={cn(
-          "h-full min-h-0 overflow-y-auto overscroll-contain pb-1",
-          "[scrollbar-width:thin] [scrollbar-color:var(--border)_transparent]",
-          "[&::-webkit-scrollbar]:w-1.5",
-          "[&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border",
-          "[&::-webkit-scrollbar-track]:bg-transparent",
-        )}
-      >
+      <ul className="pb-1">
         {rows.map((row, index) => {
           const showDivider =
             index === proficientRows.length &&

@@ -1,12 +1,14 @@
 "use client";
 
-import type {
-  CharacterDetail,
-} from "@/entities/character/types";
+import type { CharacterDetail } from "@/entities/character/types";
 import type { CharacterCatalogLabels } from "@/features/character-sheet/api/use-character-catalog-labels";
 import type { ClassFeature } from "@/entities/class/types";
 import type { SubclassMechanic } from "@/entities/subclass/types";
-import { useSpeciesTraitChoices, useSpeciesDetail, useSpeciesTraits } from "@/features/species-catalog/api/use-species";
+import {
+  useSpeciesTraitChoices,
+  useSpeciesDetail,
+  useSpeciesTraits,
+} from "@/features/species-catalog/api/use-species";
 import {
   useSubclassMechanics,
   useSubclassOptions,
@@ -37,19 +39,12 @@ import {
   groupEquipmentPackages,
 } from "@/features/create-character/lib/equipment-selection";
 import { toolNameForSlug } from "@/features/create-character/lib/equipment-choice-resolve";
-import { useSpells } from "@/features/spell-catalog/api/use-spells";
 import { useMemo } from "react";
 import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
 import { SheetChip } from "@/features/character-sheet/ui/sheet-ui";
 import { CollapsibleCard } from "@/shared/ui/collapsible-card";
 import { PhbProse } from "@/shared/ui/phb-prose";
-
-const SPELL_LIST_LABELS: Record<string, string> = {
-  known: "Conhecida",
-  prepared: "Preparada",
-  always_prepared: "Sempre preparada",
-};
 
 type SectionProps = {
   character: CharacterDetail;
@@ -261,7 +256,9 @@ export function SpeciesChoicesSection({ character }: SectionProps) {
                 {trait.description ? (
                   <PhbProse text={trait.description} />
                 ) : (
-                  <p className="text-sm text-muted-foreground">Sem descrição.</p>
+                  <p className="text-sm text-muted-foreground">
+                    Sem descrição.
+                  </p>
                 )}
               </CollapsibleCard>
             ))}
@@ -516,11 +513,13 @@ export function SubclassMechanicsSection({ character }: SectionProps) {
                 selectedOptionKeys.has(mechanic.optionKey);
 
               return (
-                <li key={`${level}-${mechanic.featureName}-${mechanic.optionKey ?? ""}`}>
+                <li
+                  key={`${level}-${mechanic.featureName}-${mechanic.optionKey ?? ""}`}
+                >
                   <CollapsibleCard
                     title={mechanic.featureName}
                     subtitle={
-                      matchesOption ? "Opção escolhida" : detail ?? undefined
+                      matchesOption ? "Opção escolhida" : (detail ?? undefined)
                     }
                     size="compact"
                     defaultOpen={false}
@@ -543,88 +542,6 @@ export function SubclassMechanicsSection({ character }: SectionProps) {
           </ul>
         </section>
       ))}
-    </div>
-  );
-}
-
-export function SpellsSection({ character, labels }: SectionProps) {
-  const spellsCatalog = useSpells();
-  const levelBySlug = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const spell of spellsCatalog.data?.data ?? []) {
-      map.set(spell.slug, spell.level);
-    }
-    return map;
-  }, [spellsCatalog.data?.data]);
-
-  if (character.characterSpells.length === 0) {
-    return (
-      <p className="text-sm text-muted-foreground">Nenhuma magia registrada.</p>
-    );
-  }
-
-  const cantrips = character.characterSpells.filter(
-    (s) => (levelBySlug.get(s.spellSlug) ?? -1) === 0,
-  );
-  const leveled = character.characterSpells.filter(
-    (s) => (levelBySlug.get(s.spellSlug) ?? 1) > 0,
-  );
-  const unknownLevel =
-    spellsCatalog.isPending &&
-    cantrips.length === 0 &&
-    leveled.length === 0;
-
-  function spellChip(spell: (typeof character.characterSpells)[number]) {
-    const level = levelBySlug.get(spell.spellSlug);
-    const listHint = SPELL_LIST_LABELS[spell.listType] ?? spell.listType;
-    const levelHint =
-      level == null
-        ? listHint
-        : level === 0
-          ? listHint
-          : `${level}º · ${listHint}`;
-    return (
-      <li key={`${spell.spellSlug}-${spell.listType}`}>
-        <SheetChip hint={levelHint}>
-          {labels.resolveSpell(spell.spellSlug)}
-        </SheetChip>
-      </li>
-    );
-  }
-
-  if (unknownLevel) {
-    return (
-      <p className="text-sm text-muted-foreground">Carregando magias…</p>
-    );
-  }
-
-  // Catálogo ainda carregando: mostra lista plana; depois agrupa.
-  if (spellsCatalog.isPending || levelBySlug.size === 0) {
-    return (
-      <ul className="flex flex-wrap gap-1.5">
-        {character.characterSpells.map(spellChip)}
-      </ul>
-    );
-  }
-
-  return (
-    <div className="space-y-3">
-      {cantrips.length > 0 ? (
-        <div className="space-y-1.5">
-          <p className="text-[0.65rem] font-medium tracking-wider text-muted-foreground uppercase">
-            Truques
-          </p>
-          <ul className="flex flex-wrap gap-1.5">{cantrips.map(spellChip)}</ul>
-        </div>
-      ) : null}
-      {leveled.length > 0 ? (
-        <div className="space-y-1.5">
-          <p className="text-[0.65rem] font-medium tracking-wider text-muted-foreground uppercase">
-            Magias
-          </p>
-          <ul className="flex flex-wrap gap-1.5">{leveled.map(spellChip)}</ul>
-        </div>
-      ) : null}
     </div>
   );
 }
@@ -707,14 +624,20 @@ export function EquipmentSection({ character }: SectionProps) {
 
     const packageSlug = items[0]?.packageSlug ?? "";
     const storedItems = items.filter((e) => e.itemSlug);
-    const packages = source === "class" ? classPackages : backgroundPackages;
-    const pkg = packages.find((p) => p.packageSlug === packageSlug);
+    const classPkg =
+      source === "class"
+        ? classPackages.find((p) => p.packageSlug === packageSlug)
+        : undefined;
+    const backgroundPkg =
+      source === "background"
+        ? backgroundPackages.find((p) => p.packageSlug === packageSlug)
+        : undefined;
 
-    const catalogLines = pkg
-      ? source === "class"
-        ? classEquipmentLines(pkg, resolveCtx)
-        : backgroundEquipmentLines(pkg, resolveCtx)
-      : [];
+    const catalogLines = classPkg
+      ? classEquipmentLines(classPkg, resolveCtx)
+      : backgroundPkg
+        ? backgroundEquipmentLines(backgroundPkg, resolveCtx)
+        : [];
 
     // Catálogo do pacote é a fonte de verdade na leitura (marcadores TEMP
     // e choice_text resolvem aqui). Persistidos cobrem fallback sem catálogo.
@@ -801,14 +724,17 @@ export function FeatsSection({ character, labels }: SectionProps) {
   const featDetailSlugs = character.characterFeats.map((feat) => feat.featSlug);
   const { featBySlug, isLoading: featDetailsLoading } =
     useFeatDetails(featDetailSlugs);
-  const { resolveFeatOption, featOptionDefsFor, isLoading: featOptionsLoading } =
-    useFeatOptionLabels({
-      characterFeats: character.characterFeats,
-      labelContext: {
-        resolveSpell: labels.resolveSpell,
-        resolveSkill: labels.resolveSkill,
-      },
-    });
+  const {
+    resolveFeatOption,
+    featOptionDefsFor,
+    isLoading: featOptionsLoading,
+  } = useFeatOptionLabels({
+    characterFeats: character.characterFeats,
+    labelContext: {
+      resolveSpell: labels.resolveSpell,
+      resolveSkill: labels.resolveSkill,
+    },
+  });
 
   if (character.characterFeats.length === 0) {
     return (
