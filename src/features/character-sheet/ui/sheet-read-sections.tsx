@@ -1,18 +1,9 @@
 "use client";
 
 import type {
-  AbilityScores,
   CharacterDetail,
 } from "@/entities/character/types";
-import {
-  ABILITY_LABELS_PT,
-  abilityModifier,
-  abilityModifierValue,
-  formatSkillBonus,
-  skillBonus,
-} from "@/entities/character";
 import type { CharacterCatalogLabels } from "@/features/character-sheet/api/use-character-catalog-labels";
-import type { SkillSummary } from "@/entities/skill/types";
 import type { ClassFeature } from "@/entities/class/types";
 import type { SubclassMechanic } from "@/entities/subclass/types";
 import { useSpeciesTraitChoices, useSpeciesDetail, useSpeciesTraits } from "@/features/species-catalog/api/use-species";
@@ -50,10 +41,7 @@ import { useSpells } from "@/features/spell-catalog/api/use-spells";
 import { useMemo } from "react";
 import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
-import {
-  SheetChip,
-  SheetStatTile,
-} from "@/features/character-sheet/ui/sheet-ui";
+import { SheetChip } from "@/features/character-sheet/ui/sheet-ui";
 import { CollapsibleCard } from "@/shared/ui/collapsible-card";
 import { PhbProse } from "@/shared/ui/phb-prose";
 
@@ -67,211 +55,6 @@ type SectionProps = {
   character: CharacterDetail;
   labels: CharacterCatalogLabels;
 };
-
-type SkillsSectionProps = SectionProps & {
-  skills: SkillSummary[];
-};
-
-export function CombatSection({ character }: SectionProps) {
-  return (
-    <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-      <SheetStatTile
-        label="Proficiência"
-        value={`+${character.proficiencyBonus}`}
-      />
-      <SheetStatTile
-        label="Classe de armadura"
-        value={character.armorClass}
-        hint={character.armorClassNote ?? "sem armadura"}
-        emphasize
-      />
-      <SheetStatTile
-        label="Percepção passiva"
-        value={character.passivePerception}
-      />
-      <SheetStatTile
-        label="Pontos de vida"
-        value={
-          character.hitPointsMax != null
-            ? `${character.hitPointsCurrent ?? character.hitPointsMax} / ${character.hitPointsMax}`
-            : "—"
-        }
-        hint={character.hitPointsMax == null ? "Não definidos" : undefined}
-      />
-    </div>
-  );
-}
-
-const ABILITY_ORDER = Object.keys(ABILITY_LABELS_PT) as (keyof AbilityScores)[];
-
-/** Salvaguardas no estilo Beyond: todas as 6, com proficiência da classe. */
-export function SavingThrowsSection({ character }: SectionProps) {
-  const classDetail = useClassDetail(
-    character.classSlug,
-    !!character.classSlug,
-  );
-  const proficient = new Set(classDetail.data?.savingThrowSlugs ?? []);
-  const pb = character.proficiencyBonus;
-
-  if (classDetail.isPending) {
-    return (
-      <p className="text-sm text-muted-foreground">Carregando salvaguardas…</p>
-    );
-  }
-
-  return (
-    <div className="space-y-3">
-      <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-        {ABILITY_ORDER.map((slug) => {
-          const mod = abilityModifierValue(character.abilityScores[slug]);
-          const isProficient = proficient.has(slug);
-          const total = mod + (isProficient ? pb : 0);
-          return (
-            <li
-              key={slug}
-              className={cn(
-                "flex items-center justify-between rounded-xl border px-3 py-2",
-                isProficient
-                  ? "border-primary/40 bg-primary/8"
-                  : "border-border/70 bg-background/40",
-              )}
-            >
-              <span className="text-sm font-medium">
-                {ABILITY_LABELS_PT[slug]}
-                {isProficient ? (
-                  <span className="ml-1.5 text-[0.65rem] tracking-wide text-primary uppercase">
-                    Prof.
-                  </span>
-                ) : null}
-              </span>
-              <span className="font-mono text-base font-semibold">
-                {formatSkillBonus(total)}
-              </span>
-            </li>
-          );
-        })}
-      </ul>
-      {(classDetail.data?.armorTrainingNames?.length ||
-        classDetail.data?.weaponProficiencyNames?.length) ? (
-        <dl className="grid gap-3 border-t border-border pt-3 text-sm sm:grid-cols-2">
-          {classDetail.data?.armorTrainingNames?.length ? (
-            <div>
-              <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                Armaduras
-              </dt>
-              <dd>{classDetail.data.armorTrainingNames.join(", ")}</dd>
-            </div>
-          ) : null}
-          {classDetail.data?.weaponProficiencyNames?.length ? (
-            <div>
-              <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                Armas
-              </dt>
-              <dd>{classDetail.data.weaponProficiencyNames.join(", ")}</dd>
-            </div>
-          ) : null}
-        </dl>
-      ) : null}
-    </div>
-  );
-}
-
-export function AbilitiesSection({ character }: SectionProps) {
-  const abilities = Object.entries(character.abilityScores) as [
-    keyof AbilityScores,
-    number,
-  ][];
-
-  const boostNote =
-    character.backgroundAbilityBoostPlus2Slug &&
-    character.backgroundAbilityBoostPlus1Slug
-      ? `Antecedente: +2 ${ABILITY_LABELS_PT[character.backgroundAbilityBoostPlus2Slug as keyof AbilityScores] ?? character.backgroundAbilityBoostPlus2Slug}, +1 ${ABILITY_LABELS_PT[character.backgroundAbilityBoostPlus1Slug as keyof AbilityScores] ?? character.backgroundAbilityBoostPlus1Slug}`
-      : null;
-
-  return (
-    <div className="space-y-3">
-      {boostNote ? (
-        <p className="text-xs text-muted-foreground">{boostNote}</p>
-      ) : null}
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
-        {abilities.map(([key, score]) => (
-          <SheetStatTile
-            key={key}
-            label={ABILITY_LABELS_PT[key]}
-            value={score}
-            hint={abilityModifier(score)}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-export function SkillsSection({ character, skills }: SkillsSectionProps) {
-  const proficient = new Set([
-    ...character.classSkillSlugs,
-    ...character.backgroundSkillSlugs,
-  ]);
-
-  const sorted = [...skills].sort((a, b) => {
-    const aProf = proficient.has(a.slug) ? 0 : 1;
-    const bProf = proficient.has(b.slug) ? 0 : 1;
-    if (aProf !== bProf) return aProf - bProf;
-    return a.name.localeCompare(b.name, "pt");
-  });
-
-  return (
-    <ul className="grid gap-1.5 sm:grid-cols-2">
-      {sorted.map((skill) => {
-        const abilityKey = skill.abilitySlug as keyof AbilityScores;
-        const score = character.abilityScores[abilityKey] ?? 10;
-        const isProficient = proficient.has(skill.slug);
-        const bonus = skillBonus(
-          score,
-          isProficient,
-          character.proficiencyBonus,
-        );
-        const source =
-          character.classSkillSlugs.includes(skill.slug) &&
-          character.backgroundSkillSlugs.includes(skill.slug)
-            ? "Classe + ant."
-            : character.classSkillSlugs.includes(skill.slug)
-              ? "Classe"
-              : character.backgroundSkillSlugs.includes(skill.slug)
-                ? "Antecedente"
-                : null;
-
-        return (
-          <li
-            key={skill.slug}
-            className={cn(
-              "flex items-center justify-between gap-3 rounded-lg border px-3 py-2",
-              isProficient
-                ? "border-primary/35 bg-primary/6"
-                : "border-border/70 bg-background/40",
-            )}
-          >
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium">{skill.name}</p>
-              <p className="text-[11px] text-muted-foreground">
-                {ABILITY_LABELS_PT[abilityKey] ?? skill.abilitySlug}
-                {source ? ` · ${source}` : null}
-              </p>
-            </div>
-            <span
-              className={cn(
-                "font-mono text-sm font-semibold tabular-nums",
-                isProficient ? "text-primary" : "text-muted-foreground",
-              )}
-            >
-              {formatSkillBonus(bonus)}
-            </span>
-          </li>
-        );
-      })}
-    </ul>
-  );
-}
 
 export function BackgroundTraitsSection({
   character,

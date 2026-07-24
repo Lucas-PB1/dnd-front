@@ -175,6 +175,13 @@ export function BeyondCombatHub({
             Condições: {state.conditions.join(", ")}
           </p>
         ) : null}
+        {(patch.error ?? takeRest.error) ? (
+          <p className="mt-2 text-sm text-destructive" role="alert">
+            {(patch.error ?? takeRest.error) instanceof Error
+              ? (patch.error ?? takeRest.error)?.message
+              : "Não foi possível atualizar o combate"}
+          </p>
+        ) : null}
       </div>
     </div>
   );

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import type { PatchInventoryItemPayload } from "@/entities/character/session-types";
 import {
   useAddInventoryItem,
   useCharacterInventory,
@@ -19,11 +20,25 @@ const LOCATION_LABELS = {
   backpack: "Mochila",
 } as const;
 
-const SLOT_LABELS: Record<string, string> = {
-  armor: "Armadura",
-  shield: "Escudo",
-  main_hand: "Mão principal",
-  off_hand: "Mão secundária",
+const SLOT_OPTIONS = [
+  { value: "armor", label: "Armadura" },
+  { value: "shield", label: "Escudo" },
+  { value: "main_hand", label: "Mão principal" },
+  { value: "off_hand", label: "Mão secundária" },
+] as const;
+
+type EquipmentSlot = (typeof SLOT_OPTIONS)[number]["value"];
+
+const SLOT_LABELS: Record<string, string> = Object.fromEntries(
+  SLOT_OPTIONS.map((o) => [o.value, o.label]),
+);
+
+type InventoryItemRow = {
+  itemSlug: string;
+  itemName: string;
+  quantity: number;
+  location: "equipped" | "backpack";
+  equipmentSlot: string | null;
 };
 
 type InventorySectionProps = {
@@ -59,11 +74,29 @@ export function InventorySection({
     setNewQty("1");
   }
 
+  function patchItemFields(
+    slug: string,
+    payload: PatchInventoryItemPayload,
+  ) {
+    patchItem.mutate({ itemSlug: slug, payload });
+  }
+
   if (inventory.isPending) {
     return (
       <p className="text-sm text-muted-foreground">Carregando inventário…</p>
     );
   }
+
+  const groupProps = {
+    onToggleLocation: (slug: string, current: "equipped" | "backpack") =>
+      patchItemFields(slug, {
+        location: current === "equipped" ? "backpack" : "equipped",
+      }),
+    onPatch: patchItemFields,
+    onRemove: (slug: string) => removeItem.mutate(slug),
+    isPending: patchItem.isPending || removeItem.isPending,
+    allowEdit: !equippedOnly,
+  };
 
   if (equippedOnly) {
     return (
@@ -71,16 +104,8 @@ export function InventorySection({
         <InventoryGroup
           title="Em mãos / corpo"
           items={equipped}
-          onToggleLocation={(slug, current) =>
-            patchItem.mutate({
-              itemSlug: slug,
-              payload: {
-                location: current === "equipped" ? "backpack" : "equipped",
-              },
-            })
-          }
-          onRemove={(slug) => removeItem.mutate(slug)}
-          isPending={patchItem.isPending || removeItem.isPending}
+          {...groupProps}
+          allowEdit={false}
         />
         {equipped.length === 0 ? (
           <p className="text-sm text-muted-foreground">
@@ -124,35 +149,8 @@ export function InventorySection({
         </div>
       </form>
 
-      <InventoryGroup
-        title="Equipado"
-        items={equipped}
-        onToggleLocation={(slug, current) =>
-          patchItem.mutate({
-            itemSlug: slug,
-            payload: {
-              location: current === "equipped" ? "backpack" : "equipped",
-            },
-          })
-        }
-        onRemove={(slug) => removeItem.mutate(slug)}
-        isPending={patchItem.isPending || removeItem.isPending}
-      />
-
-      <InventoryGroup
-        title="Mochila"
-        items={backpack}
-        onToggleLocation={(slug, current) =>
-          patchItem.mutate({
-            itemSlug: slug,
-            payload: {
-              location: current === "equipped" ? "backpack" : "equipped",
-            },
-          })
-        }
-        onRemove={(slug) => removeItem.mutate(slug)}
-        isPending={patchItem.isPending || removeItem.isPending}
-      />
+      <InventoryGroup title="Equipado" items={equipped} {...groupProps} />
+      <InventoryGroup title="Mochila" items={backpack} {...groupProps} />
 
       {items.length === 0 ? (
         <p className="text-sm text-muted-foreground">Inventário vazio.</p>
@@ -174,20 +172,18 @@ function InventoryGroup({
   title,
   items,
   onToggleLocation,
+  onPatch,
   onRemove,
   isPending,
+  allowEdit,
 }: {
   title: string;
-  items: {
-    itemSlug: string;
-    itemName: string;
-    quantity: number;
-    location: "equipped" | "backpack";
-    equipmentSlot: string | null;
-  }[];
+  items: InventoryItemRow[];
   onToggleLocation: (slug: string, location: "equipped" | "backpack") => void;
+  onPatch: (slug: string, payload: PatchInventoryItemPayload) => void;
   onRemove: (slug: string) => void;
   isPending: boolean;
+  allowEdit: boolean;
 }) {
   if (items.length === 0) return null;
 
@@ -196,12 +192,55 @@ function InventoryGroup({
       <p className="text-sm font-medium">{title}</p>
       <ul className="space-y-2">
         {items.map((item) => (
-          <li
-            key={item.itemSlug}
-            className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border px-3 py-2 text-sm"
-          >
-            <div>
-              <span className="font-medium">{item.itemName}</span>
+          <InventoryItemCard
+            key={`${item.itemSlug}-${item.quantity}-${item.equipmentSlot ?? "none"}`}
+            item={item}
+            allowEdit={allowEdit}
+            isPending={isPending}
+            onToggleLocation={onToggleLocation}
+            onPatch={onPatch}
+            onRemove={onRemove}
+          />
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function InventoryItemCard({
+  item,
+  allowEdit,
+  isPending,
+  onToggleLocation,
+  onPatch,
+  onRemove,
+}: {
+  item: InventoryItemRow;
+  allowEdit: boolean;
+  isPending: boolean;
+  onToggleLocation: (slug: string, location: "equipped" | "backpack") => void;
+  onPatch: (slug: string, payload: PatchInventoryItemPayload) => void;
+  onRemove: (slug: string) => void;
+}) {
+  const [qtyDraft, setQtyDraft] = useState(String(item.quantity));
+  const qtyId = `qty-${item.itemSlug}`;
+  const slotId = `slot-${item.itemSlug}`;
+
+  function commitQuantity() {
+    const next = Math.max(1, Math.trunc(Number(qtyDraft)) || 1);
+    setQtyDraft(String(next));
+    if (next !== item.quantity) {
+      onPatch(item.itemSlug, { quantity: next });
+    }
+  }
+
+  return (
+    <li className="space-y-2 rounded-lg border border-border px-3 py-2 text-sm">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="min-w-0">
+          <span className="font-medium">{item.itemName}</span>
+          {!allowEdit ? (
+            <>
               <span className="ml-2 text-muted-foreground">
                 × {item.quantity}
               </span>
@@ -210,34 +249,88 @@ function InventoryGroup({
                   ({SLOT_LABELS[item.equipmentSlot] ?? item.equipmentSlot})
                 </span>
               ) : null}
-            </div>
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="xs"
+            </>
+          ) : null}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="xs"
+            disabled={isPending}
+            onClick={() => onToggleLocation(item.itemSlug, item.location)}
+          >
+            Mover para{" "}
+            {item.location === "equipped"
+              ? LOCATION_LABELS.backpack
+              : LOCATION_LABELS.equipped}
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="xs"
+            className={cn("text-destructive")}
+            disabled={isPending}
+            onClick={() => onRemove(item.itemSlug)}
+          >
+            Remover
+          </Button>
+        </div>
+      </div>
+
+      {allowEdit ? (
+        <div className="flex flex-wrap items-end gap-3 border-t border-border/50 pt-2">
+          <Field className="w-20">
+            <FieldLabel htmlFor={qtyId}>Qtd</FieldLabel>
+            <Input
+              id={qtyId}
+              type="number"
+              min={1}
+              value={qtyDraft}
+              disabled={isPending}
+              onChange={(e) => setQtyDraft(e.target.value)}
+              onBlur={commitQuantity}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  commitQuantity();
+                }
+              }}
+            />
+          </Field>
+          {item.location === "equipped" ? (
+            <Field className="min-w-[10rem] flex-1">
+              <FieldLabel htmlFor={slotId}>Slot</FieldLabel>
+              <select
+                id={slotId}
+                className={cn(
+                  "border-input bg-background h-8 w-full rounded-md border px-2 text-sm",
+                  "focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none",
+                  "disabled:cursor-not-allowed disabled:opacity-50",
+                )}
+                value={item.equipmentSlot ?? ""}
                 disabled={isPending}
-                onClick={() => onToggleLocation(item.itemSlug, item.location)}
+                onChange={(e) => {
+                  const value = e.target.value as EquipmentSlot;
+                  if (!value) return;
+                  onPatch(item.itemSlug, { equipmentSlot: value });
+                }}
               >
-                Mover para{" "}
-                {item.location === "equipped"
-                  ? LOCATION_LABELS.backpack
-                  : LOCATION_LABELS.equipped}
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="xs"
-                className={cn("text-destructive")}
-                disabled={isPending}
-                onClick={() => onRemove(item.itemSlug)}
-              >
-                Remover
-              </Button>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </div>
+                {!item.equipmentSlot ? (
+                  <option value="" disabled>
+                    Escolher slot
+                  </option>
+                ) : null}
+                {SLOT_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          ) : null}
+        </div>
+      ) : null}
+    </li>
   );
 }

@@ -1,6 +1,6 @@
 ---
 description: Ficha de personagem — layout estilo Beyond + tema Taverna
-globs: src/features/character-sheet/**/*.tsx,src/widgets/character-sheet-layout/**/*.tsx,src/app/characters/**/*.tsx
+globs: src/features/character-sheet/**/*.tsx,src/app/characters/**/*.tsx
 alwaysApply: false
 ---
 
@@ -28,7 +28,7 @@ Mobile (`order-*`): **combate + abas** → perícias → proficiências.
 - PV / CA / iniciativa visíveis **sem abrir aba** (hub no fluxo normal — sem sticky)
 - Magias e inventário só nas abas (não duplicar no header)
 - Aba **Ações**: equipado agora + pacote inicial — sem “em breve” como foco
-- Aba **Ajustes**: atalhos de edição (nunca “Notas” / “Editar” genérico)
+- Aba **Ajustes**: atalhos de edição (tab id `settings`; nunca “Notas”)
 - Aba **Traços**: subnavegação (Classe/Espécie/Subclasse/Talentos/Antecedente) + `CollapsibleCard` compacto + `PhbProse`
 - Edição: painel dedicado com “Voltar à ficha”; um `editing` por vez
 - Inventário ≠ equipamento inicial (`InventorySection` vs `EquipmentSection`)
@@ -42,7 +42,7 @@ Mobile (`order-*`): **combate + abas** → perícias → proficiências.
 
 ## Não fazer
 
-- Nav lateral de âncoras longa (substituída pelo dashboard)
+- Nav lateral de âncoras longa (removida; usar dashboard Beyond)
 - Esperar catálogo inteiro para mostrar a ficha (`isPending` só do personagem)
 - Duplicar inventário completo na aba Ações (usar `equippedOnly`)
 

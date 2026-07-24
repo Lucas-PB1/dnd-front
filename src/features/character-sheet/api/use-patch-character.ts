@@ -2,12 +2,21 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import type { CharacterState } from "@/entities/character/session-types";
 import type { UpdateCharacterPayload } from "@/entities/character/types";
 import {
   charactersKeys,
   patchCharacter,
 } from "@/features/characters/api/characters.api";
+import { sessionKeys } from "@/features/character-sheet/api/character-session.api";
 import { useGameAuth } from "@/features/character-sheet/api/use-game-auth";
+
+function payloadTouchesHitPoints(payload: UpdateCharacterPayload) {
+  return (
+    payload.hitPointsCurrent !== undefined ||
+    payload.hitPointsMax !== undefined
+  );
+}
 
 export function usePatchCharacter(characterId: string) {
   const queryClient = useQueryClient();
@@ -24,9 +33,32 @@ export function usePatchCharacter(characterId: string) {
         return handleUnauthorized(error);
       }
     },
-    onSuccess: (data) => {
+    onSuccess: (data, variables) => {
       queryClient.setQueryData(charactersKeys.detail(characterId), data);
       queryClient.invalidateQueries({ queryKey: charactersKeys.all });
+
+      if (!payloadTouchesHitPoints(variables)) return;
+
+      queryClient.setQueryData<CharacterState>(
+        sessionKeys.state(characterId),
+        (prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            hitPointsCurrent:
+              variables.hitPointsCurrent !== undefined
+                ? (data.hitPointsCurrent ?? variables.hitPointsCurrent)
+                : prev.hitPointsCurrent,
+            hitPointsMax:
+              variables.hitPointsMax !== undefined
+                ? (data.hitPointsMax ?? variables.hitPointsMax)
+                : prev.hitPointsMax,
+          };
+        },
+      );
+      void queryClient.invalidateQueries({
+        queryKey: sessionKeys.state(characterId),
+      });
     },
   });
 }

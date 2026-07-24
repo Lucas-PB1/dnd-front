@@ -184,7 +184,6 @@ Ordem de implementação. Features de regra (ASI, picker de condições) ficam n
 | Largura de conteúdo   | `src/shared/ui/page-main.tsx` (`max-w-6xl` / `max-w-7xl`) |
 | Wizard                | `src/features/create-character/`                          |
 | Ficha                 | `src/features/character-sheet/` (+ `ui/beyond/`)          |
-| Layout ficha (legado) | `src/widgets/character-sheet-layout/` (âncoras; preferir beyond) |
 | Qualidade de tela     | `.cursor/rules/31-ui-screen-quality.mdc`                  |
 | Rule ficha            | `.cursor/rules/32-ui-character-sheet.mdc`                 |
 | Cores (doc)           | [COLORS.md](./COLORS.md)                                  |

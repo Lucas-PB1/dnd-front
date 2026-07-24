@@ -1,6 +1,12 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import {
+  useId,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type ReactNode,
+} from "react";
 
 import type { CharacterDetail } from "@/entities/character/types";
 import type { CharacterCatalogLabels } from "@/features/character-sheet/api/use-character-catalog-labels";
@@ -40,8 +46,13 @@ export function BeyondTraitsTab({
   labels,
   onEdit,
 }: BeyondTraitsTabProps) {
+  const baseId = useId();
   const [section, setSection] = useState<TraitsSectionId>("class");
+  const tabRefs = useRef<
+    Partial<Record<TraitsSectionId, HTMLButtonElement | null>>
+  >({});
   const sectionProps = { character, labels };
+  const panelId = `${baseId}-panel-${section}`;
 
   const editLink = (id: Exclude<TraitsSectionId, "class">, label = "Editar") =>
     onEdit ? (
@@ -53,6 +64,33 @@ export function BeyondTraitsTab({
         {label}
       </button>
     ) : null;
+
+  function focusSection(id: TraitsSectionId) {
+    setSection(id);
+    tabRefs.current[id]?.focus();
+  }
+
+  function onTabKeyDown(
+    event: KeyboardEvent<HTMLButtonElement>,
+    index: number,
+  ) {
+    if (
+      event.key !== "ArrowRight" &&
+      event.key !== "ArrowLeft" &&
+      event.key !== "Home" &&
+      event.key !== "End"
+    ) {
+      return;
+    }
+    event.preventDefault();
+    const last = SECTIONS.length - 1;
+    let nextIndex = index;
+    if (event.key === "ArrowRight") nextIndex = index === last ? 0 : index + 1;
+    if (event.key === "ArrowLeft") nextIndex = index === 0 ? last : index - 1;
+    if (event.key === "Home") nextIndex = 0;
+    if (event.key === "End") nextIndex = last;
+    focusSection(SECTIONS[nextIndex].id);
+  }
 
   const panels: Record<TraitsSectionId, ReactNode> = {
     class: (
@@ -106,15 +144,23 @@ export function BeyondTraitsTab({
         role="tablist"
         aria-label="Seções de traços"
       >
-        {SECTIONS.map((item) => {
+        {SECTIONS.map((item, index) => {
           const active = section === item.id;
+          const tabId = `${baseId}-tab-${item.id}`;
           return (
             <button
               key={item.id}
+              ref={(node) => {
+                tabRefs.current[item.id] = node;
+              }}
               type="button"
               role="tab"
+              id={tabId}
               aria-selected={active}
+              aria-controls={panelId}
+              tabIndex={active ? 0 : -1}
               onClick={() => setSection(item.id)}
+              onKeyDown={(event) => onTabKeyDown(event, index)}
               className={cn(
                 "rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors",
                 active
@@ -127,7 +173,13 @@ export function BeyondTraitsTab({
           );
         })}
       </div>
-      <div role="tabpanel">{panels[section]}</div>
+      <div
+        id={panelId}
+        role="tabpanel"
+        aria-labelledby={`${baseId}-tab-${section}`}
+      >
+        {panels[section]}
+      </div>
     </div>
   );
 }

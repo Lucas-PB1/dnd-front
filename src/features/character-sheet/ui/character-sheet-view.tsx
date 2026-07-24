@@ -41,6 +41,7 @@ import { TableStateSection } from "@/features/character-sheet/ui/table-state-sec
 import { useSkills } from "@/features/reference-catalog/api/use-reference";
 import { BackLink } from "@/shared/ui/back-link";
 import { buttonVariants } from "@/shared/ui/button";
+import { contentWidthClass } from "@/shared/ui/page-main";
 import { motion } from "@/shared/lib/motion";
 import { cn } from "@/shared/lib/utils";
 
@@ -147,8 +148,14 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
     };
 
     return (
-      <div className={cn("mx-auto w-full max-w-3xl space-y-4", motion.enter)}>
-        <BackLink href={`/characters/${id}`}>Voltar à ficha</BackLink>
+      <div className={cn(contentWidthClass.hero, "space-y-4", motion.enter)}>
+        <button
+          type="button"
+          onClick={closeEdit}
+          className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          ← Voltar à ficha
+        </button>
         <BeyondPanel
           title="Editar ficha"
           headerRight={
@@ -218,7 +225,7 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
         </TabSection>
       </div>
     ),
-    notes: (
+    settings: (
       <div className="space-y-3">
         <p className="text-sm text-muted-foreground">
           Escolha o que deseja alterar na ficha.
