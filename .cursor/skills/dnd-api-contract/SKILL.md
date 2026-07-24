@@ -1,45 +1,44 @@
 ---
 name: dnd-api-contract
-description: Contrato REST da API Nest dnd-api — endpoints catálogo e game, slugs, erros, auth Bearer. Use ao integrar features, tipar respostas ou consultar rotas disponíveis.
+description: Contrato REST e cliente HTTP da dnd-api — endpoints, catalogFetch/gameFetch, erros, auth. Use ao integrar features ou tipar respostas.
 ---
 
-# Contrato dnd-api
+# Contrato + client dnd-api
 
-Repo da API: **`dnd-work/dnd-api/`** (NestJS + Postgres PHB 2024).
-
-## Env no front
+Repo API: **`dnd-work/dnd-api/`**. Swagger: `{API_URL}/api`
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:3000
 ```
 
-Swagger local: `{API_URL}/api`
+## Catálogo vs game
 
-## Divisão catálogo vs game
+| Tipo | Auth | Client |
+|------|------|--------|
+| Catálogo | Nenhum | `catalogFetch` |
+| Game | Bearer | `gameFetch(path, accessToken)` |
 
-| Tipo     | Auth   | Exemplos                               |
-| -------- | ------ | -------------------------------------- |
-| Catálogo | Nenhum | `/classes`, `/spells`, `/species`      |
-| Game     | Bearer | `/characters`, `/characters/:id/state` |
+Código: `src/shared/api/dnd-api/` (`api-client.ts`, `api-error.ts`, `env.ts`)
 
-## Regras de integração
+## Regras
 
-1. Slugs em inglês no banco (`fighter`, `dwarf`) — nomes PT no campo `name`
-2. Erros JSON: `{ statusCode, message, path, timestamp }`
-3. **Nunca** recalcular HP, PB, spell slots, proficiency no front
-4. Catálogo: `catalogFetch` em RSC ou TanStack Query
-5. Game: `gameFetch(path, session.access_token)`
+1. Slugs EN no path (`fighter`); `name` em PT
+2. Erros: `{ statusCode, message, path, timestamp }` — 401 → login
+3. **Nunca** recalcular HP, PB, spell slots no front
+4. Catálogo: RSC ou TanStack Query; game: token de `features/auth`
 
 ## Referências
 
-- [api-endpoints.md](references/api-endpoints.md) — tabela completa de rotas
-- [auth-flow.md](references/auth-flow.md) — JWT Supabase → API
-- [errors.md](references/errors.md) — tratamento no front
+- [api-endpoints.md](references/api-endpoints.md)
+- [auth-flow.md](references/auth-flow.md)
+- [errors.md](references/errors.md)
 
-## Skills relacionadas (repo API)
+## Exemplo
 
-No `dnd-api/.cursor/skills/`: `cqrs-catalog-vs-game`, `nest-phb-api`, `supabase-auth`
+```typescript
+import { catalogFetch } from "@/shared/api/dnd-api/api-client";
 
-## Plano mestre
-
-`dnd-api/docs/rpg-web-plan.md` · `dnd-api/docs/product-roadmap.md`
+const cls = await catalogFetch("/classes/fighter", {
+  next: { revalidate: 3600 },
+});
+```

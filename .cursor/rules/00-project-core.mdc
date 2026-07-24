@@ -6,16 +6,22 @@ alwaysApply: true
 # Projeto dnd-front
 
 - Responder em **português**; código e identificadores em **inglês**
-- Arquitetura: **Feature-Sliced Design** — [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
-- API irmã: **dnd-api** (NestJS) — [docs/API-INTEGRATION.md](docs/API-INTEGRATION.md)
-- Stack: [docs/STACK-OPTIONS.md](docs/STACK-OPTIONS.md)
+- FSD: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — layers `app/` → `widgets/` → `features/` → `entities/` → `shared/`
+- API irmã: **dnd-api** — skill `dnd-api-contract` · [docs/API-INTEGRATION.md](docs/API-INTEGRATION.md)
+- Genérico: shared-ai (`nextjs`, `feature-sliced`, `shadcn`, `tanstack-query`, `supabase`, `zod`, `react-hook-form`, `vitest`, `cypress`)
 
-## Antes de implementar
+## Stack local (deltas)
 
-Tarefas não triviais: ler `.cursor/skills/dnd-router/SKILL.md` e carregar a skill indicada.
+- Proxy: `src/proxy.ts` (**não** `middleware.ts`); key `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+- Fetch: `catalogFetch` (público) · `gameFetch(path, token)` (Bearer) · nunca recalcular HP/PB/slots
+- Auth front: login/sessão Supabase; sem `service_role`
+- UI: shadcn em `src/shared/ui/`; ícones **Heroicons** outline; voltar via `BackLink`
+- Query: keys em `features/*/api`; catálogo `CATALOG_*_STALE_MS` em `shared/lib/catalog-query.ts`
 
-## Scripts
+## Skills locais
 
-`pnpm lint` · `pnpm format:check` · `pnpm test:run` · `pnpm build`
+`dnd-api-contract` · `ui-catalog` · rules `31-ui-screen-quality` · `32-ui-character-sheet`
 
-Após mudanças em `src/`, ver regra **51-front-verify** — rodar `pnpm lint` antes de concluir.
+## Verificação
+
+Após mudar `src/`: `pnpm lint` (obrigatório) · `pnpm test` · `pnpm build`

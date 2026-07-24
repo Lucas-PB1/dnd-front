@@ -55,10 +55,7 @@ Dados de apresentação vêm da **API** — não hardcodar no front.
 
 **Equipamento:** stats mecânicos (dano, CA, custo, propriedades); labels de propriedades/maestria podem ser mapeadas no front a partir dos IDs da API.
 
-## Ícones
+## Ícones / tema
 
-Skill `ui-icons`. Headers de catálogo já usam `BackLink` via `CatalogPageHeader`.
-
-## Tema / primitivos
-
-Skills `ui-theme` · `ui-shadcn`. Plano visual: [docs/UX-UI-PLAN.md](docs/UX-UI-PLAN.md).
+Heroicons outline (`@heroicons/react/24/outline`); shadcn em `src/shared/ui/` (skill global `shadcn`).  
+Plano visual: [docs/UX-UI-PLAN.md](docs/UX-UI-PLAN.md).
