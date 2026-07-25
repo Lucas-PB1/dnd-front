@@ -206,7 +206,7 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
   const activeEdit = editing ? editDialogs[editing] : null;
 
   const tabPanels: Record<BeyondTabId, ReactNode> = {
-    actions: <BeyondActionsTab />,
+    actions: <BeyondActionsTab character={data} />,
     spells: (
       <BeyondSpellsTab
         characterId={id}

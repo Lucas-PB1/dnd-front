@@ -57,8 +57,23 @@ export type CharacterDetail = {
   passivePerception: number;
   armorClass: number;
   armorClassNote: string;
+  weaponAttacks: WeaponAttackSummary[];
   createdAt: string;
   updatedAt: string;
+};
+
+export type WeaponAttackSummary = {
+  itemSlug: string;
+  itemName: string;
+  mode: "melee" | "ranged";
+  attackBonus: number;
+  abilitySlug: "forca" | "destreza";
+  proficient: boolean;
+  damageDice: string;
+  damageBonus: number;
+  damageType: string | null;
+  attackNote: string;
+  damageNote: string;
 };
 
 /** Lista resumida (mesmos campos base do detail) */
