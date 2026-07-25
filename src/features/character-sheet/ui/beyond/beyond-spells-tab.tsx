@@ -28,6 +28,13 @@ const LIST_TYPE_LABELS: Record<CharacterSpell["listType"], string> = {
   always_prepared: "Sempre preparada",
 };
 
+const SOURCE_LABELS: Record<NonNullable<CharacterSpell["source"]>, string> = {
+  class: "Classe",
+  subclass: "Subclasse",
+  feat: "Talento",
+  species: "Espécie",
+};
+
 type BeyondSpellsTabProps = {
   characterId: string;
   character: CharacterDetail;
@@ -284,9 +291,13 @@ function SpellRow({
       (state?.spellSlotsRemaining[String(selectedSlot)] ?? 0) > 0);
 
   const listLabel = LIST_TYPE_LABELS[row.spell.listType];
+  const sourceLabel = row.spell.source
+    ? SOURCE_LABELS[row.spell.source]
+    : undefined;
   const metaParts = [
     row.detail?.schoolName,
     listLabel,
+    sourceLabel,
     row.detail?.castingTime,
   ].filter(Boolean);
 

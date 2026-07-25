@@ -24,6 +24,7 @@ export type FeatOption = {
 export type CharacterSpell = {
   spellSlug: string;
   listType: "known" | "prepared" | "always_prepared";
+  source?: "class" | "subclass" | "feat" | "species";
 };
 
 export type CharacterEquipment = {
