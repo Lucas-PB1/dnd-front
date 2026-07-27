@@ -13,7 +13,12 @@ import {
   fetchCampaigns,
   joinCampaign,
   linkCampaignCharacter,
+  removeCampaignMember,
+  rotateCampaignInvite,
   unlinkCampaignCharacter,
+  updateCampaign,
+  updateCampaignMemberRole,
+  type CampaignRole,
 } from "@/features/campaigns/api/campaigns.api";
 
 function useCampaignAuth(nextPath: string) {
@@ -156,6 +161,89 @@ export function useDeleteCampaign() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: campaignsKeys.all });
       router.push("/campaigns");
+    },
+  });
+}
+
+export function useUpdateCampaign(campaignId: string) {
+  const queryClient = useQueryClient();
+  const { accessToken } = useCampaignAuth(`/campaigns/${campaignId}`);
+
+  return useMutation({
+    mutationFn: async (payload: {
+      name?: string;
+      description?: string | null;
+    }) => {
+      if (!accessToken) throw new Error("Sessão expirada");
+      return updateCampaign(accessToken, campaignId, payload);
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: campaignsKeys.all });
+      void queryClient.invalidateQueries({
+        queryKey: campaignsKeys.detail(campaignId),
+      });
+    },
+  });
+}
+
+export function useRotateCampaignInvite(campaignId: string) {
+  const queryClient = useQueryClient();
+  const { accessToken } = useCampaignAuth(`/campaigns/${campaignId}`);
+
+  return useMutation({
+    mutationFn: async () => {
+      if (!accessToken) throw new Error("Sessão expirada");
+      return rotateCampaignInvite(accessToken, campaignId);
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: campaignsKeys.detail(campaignId),
+      });
+      void queryClient.invalidateQueries({ queryKey: campaignsKeys.all });
+    },
+  });
+}
+
+export function useUpdateCampaignMemberRole(campaignId: string) {
+  const queryClient = useQueryClient();
+  const { accessToken } = useCampaignAuth(`/campaigns/${campaignId}`);
+
+  return useMutation({
+    mutationFn: async (input: { userId: string; role: CampaignRole }) => {
+      if (!accessToken) throw new Error("Sessão expirada");
+      return updateCampaignMemberRole(
+        accessToken,
+        campaignId,
+        input.userId,
+        input.role,
+      );
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: campaignsKeys.detail(campaignId),
+      });
+    },
+  });
+}
+
+export function useRemoveCampaignMember(campaignId: string) {
+  const queryClient = useQueryClient();
+  const { accessToken, router } = useCampaignAuth(`/campaigns/${campaignId}`);
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async (userId: string) => {
+      if (!accessToken) throw new Error("Sessão expirada");
+      return removeCampaignMember(accessToken, campaignId, userId);
+    },
+    onSuccess: (_data, removedUserId) => {
+      void queryClient.invalidateQueries({ queryKey: campaignsKeys.all });
+      void queryClient.invalidateQueries({
+        queryKey: campaignsKeys.detail(campaignId),
+      });
+      if (user?.id && removedUserId === user.id) {
+        router.push("/campaigns");
+      }
     },
   });
 }

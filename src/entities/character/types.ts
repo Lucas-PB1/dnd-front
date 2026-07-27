@@ -60,8 +60,14 @@ export type CharacterDetail = {
   armorClass: number;
   armorClassNote: string;
   weaponAttacks: WeaponAttackSummary[];
+  campaigns: CharacterCampaignRef[];
   createdAt: string;
   updatedAt: string;
+};
+
+export type CharacterCampaignRef = {
+  id: string;
+  name: string;
 };
 
 export type WeaponAttackSummary = {
@@ -88,6 +94,7 @@ export type CharacterSummary = Pick<
   | "speciesSlug"
   | "backgroundSlug"
   | "subclassSlug"
+  | "campaigns"
   | "createdAt"
   | "updatedAt"
 >;

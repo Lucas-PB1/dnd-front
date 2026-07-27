@@ -72,6 +72,22 @@ export function CharactersList() {
               Nv. {character.level} · {character.speciesSlug} ·{" "}
               {character.classSlug}
             </p>
+            {character.campaigns?.length ? (
+              <p className="mt-1 text-xs text-muted-foreground">
+                Campanhas:{" "}
+                {character.campaigns.map((campaign, index) => (
+                  <span key={campaign.id}>
+                    {index > 0 ? ", " : null}
+                    <Link
+                      href={`/campaigns/${campaign.id}`}
+                      className="underline underline-offset-2 hover:text-foreground"
+                    >
+                      {campaign.name}
+                    </Link>
+                  </span>
+                ))}
+              </p>
+            ) : null}
           </div>
           <div className="flex shrink-0 flex-wrap items-center gap-2">
             <DeleteCharacterButton

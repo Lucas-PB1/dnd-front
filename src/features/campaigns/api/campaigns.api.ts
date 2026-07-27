@@ -98,6 +98,56 @@ export async function deleteCampaign(accessToken: string, campaignId: string) {
   });
 }
 
+export async function updateCampaign(
+  accessToken: string,
+  campaignId: string,
+  payload: { name?: string; description?: string | null },
+) {
+  return gameFetch<CampaignSummary>(`/campaigns/${campaignId}`, accessToken, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function rotateCampaignInvite(
+  accessToken: string,
+  campaignId: string,
+) {
+  return gameFetch<CampaignSummary>(
+    `/campaigns/${campaignId}/invite-code/rotate`,
+    accessToken,
+    { method: "POST" },
+  );
+}
+
+export async function updateCampaignMemberRole(
+  accessToken: string,
+  campaignId: string,
+  userId: string,
+  role: CampaignRole,
+) {
+  return gameFetch<{ userId: string; role: CampaignRole; joinedAt: string }>(
+    `/campaigns/${campaignId}/members/${userId}`,
+    accessToken,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ role }),
+    },
+  );
+}
+
+export async function removeCampaignMember(
+  accessToken: string,
+  campaignId: string,
+  userId: string,
+) {
+  return gameFetch<void>(
+    `/campaigns/${campaignId}/members/${userId}`,
+    accessToken,
+    { method: "DELETE" },
+  );
+}
+
 export function campaignRoleLabel(role: CampaignRole): string {
   if (role === "dm") return "Mestre";
   if (role === "assistant") return "Auxiliar";
