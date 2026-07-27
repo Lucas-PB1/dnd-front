@@ -14,6 +14,7 @@ import {
   isClassWeaponMasteryOptionKey,
   parseWeaponMasteryEligibility,
 } from "@/entities/character/lib/class-weapon-mastery-slots";
+import { isWeaponProficient } from "@/entities/character/lib/weapon-proficiency";
 import { skillChoiceKinds } from "@/features/create-character/lib/granted-proficiencies";
 import {
   useClassDetail,
@@ -148,6 +149,9 @@ export function StepClassSkills({
       .sort((a, b) => a.label.localeCompare(b.label, "pt"));
   }, [proficientSlugs, skillNameBySlug, whitelist]);
 
+  const weaponProficiencySlugs =
+    classDetail.data?.weaponProficiencySlugs ?? [];
+
   const masteryCandidates = useMemo(() => {
     const items = weapons.data?.data ?? [];
     return items
@@ -157,12 +161,22 @@ export function StepClassSkills({
         const props = weapon.propertyDetails.map((p) => p.slug);
         return !(props.includes("ammunition") && !props.includes("thrown"));
       })
+      .filter((weapon) =>
+        isWeaponProficient(
+          {
+            itemSlug: weapon.slug,
+            category: weapon.category,
+            propertySlugs: weapon.propertyDetails.map((p) => p.slug),
+          },
+          weaponProficiencySlugs,
+        ),
+      )
       .map((weapon) => ({
         value: weapon.slug,
         label: `${weapon.name}${weapon.mastery ? ` · ${weapon.mastery.name}` : ""}`,
       }))
       .sort((a, b) => a.label.localeCompare(b.label, "pt"));
-  }, [weapons.data?.data, masteryEligibility]);
+  }, [weapons.data?.data, masteryEligibility, weaponProficiencySlugs]);
 
   function toggleSkill(slug: string) {
     if (backgroundSkillSlugs.has(slug)) return;
