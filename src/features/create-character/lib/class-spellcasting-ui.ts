@@ -106,6 +106,15 @@ const CLASS_COPY: Partial<
     leveledSectionHint: "Marque o que está pronto para conjurar hoje.",
     listAccessNote: "Lista completa de paladino",
   },
+  spellslinger: {
+    archetypeTitle: "Spellslinger (preparada)",
+    guide:
+      "Creed conjuradora: prepare magias da lista de mago com Inteligência. Finger Guns vem com Bang, You're Dead! e não conta na cota de truques Wizard.",
+    leveledSectionTitle: "Magias preparadas (Wizard)",
+    leveledSectionHint:
+      "Escolha magias de círculos para os quais você tem espaços de Spellslinger.",
+    listAccessNote: "Lista completa do mago + Finger Guns",
+  },
 };
 
 function slotPatternNote(
@@ -114,6 +123,9 @@ function slotPatternNote(
 ): string | null {
   if (patternSlug === "pact" || classSlug === "warlock") {
     return "Espaços de pacto: poucos slots, mesmo círculo, recuperam em descanso curto.";
+  }
+  if (patternSlug === "third") {
+    return "Conjurador de um terço: espaços a partir do nível 3; círculos sobem lentamente.";
   }
   if (patternSlug === "half") {
     return "Conjurador parcial: menos espaços e acesso a círculos altos mais tarde.";
@@ -129,8 +141,9 @@ export function resolveSpellcastingUiProfile(
   patternSlug: SpellSlotPatternSlug | undefined,
   mode: ClassSpellcastingMode,
   progression: ClassProgressionRow | undefined,
+  profileKey?: string,
 ): ClassSpellcastingUiProfile {
-  const custom = CLASS_COPY[classSlug];
+  const custom = CLASS_COPY[profileKey ?? classSlug] ?? CLASS_COPY[classSlug];
   const cantrips = progression?.cantrips ?? null;
   const prepared = progression?.preparedSpells ?? null;
   const channel = progression?.channelDivinity ?? null;

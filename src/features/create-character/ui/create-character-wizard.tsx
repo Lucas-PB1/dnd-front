@@ -76,6 +76,7 @@ const DEFAULT_VALUES: CreateCharacterInput = {
   classOptions: [],
   featOptions: [],
   asiFeatSlotSlugs: [],
+  fightingStyleFeatSlug: "",
   alignmentSlug: "",
   languageSlugs: [],
   equipment: [],
@@ -139,7 +140,10 @@ export function CreateCharacterWizard() {
   );
   const originFeatSlug = backgroundDetail.data?.originFeatSlug ?? "";
   const asiSlotCount = countAsiFeatSlots(classSlug, level);
-  const hasFeatsStep = !!originFeatSlug || asiSlotCount > 0;
+  const hasFightingStylePick =
+    (classDetail.data?.fightingStyleSlugs?.length ?? 0) > 0;
+  const hasFeatsStep =
+    !!originFeatSlug || asiSlotCount > 0 || hasFightingStylePick;
   const { hasSpellStep } = useWizardHasSpellStep(
     classSlug,
     subclassSlug ?? "",
@@ -194,6 +198,7 @@ export function CreateCharacterWizard() {
         (getValues("equipment") ?? []).filter((e) => e.source !== "class"),
       );
       setValue("characterSpells", []);
+      setValue("fightingStyleFeatSlug", "");
       prevClassSlugRef.current = classSlug;
     }
   }, [classSlug, setValue, getValues]);
@@ -386,9 +391,26 @@ export function CreateCharacterWizard() {
 
     if (step === "feats") {
       const values = getValues();
+      const fightingStyle = values.fightingStyleFeatSlug?.trim() ?? "";
+      if (hasFightingStylePick && !fightingStyle) {
+        setFeatsError("Escolha um Estilo de Luta.");
+        return;
+      }
+      if (
+        fightingStyle &&
+        !(classDetail.data?.fightingStyleSlugs ?? []).includes(fightingStyle)
+      ) {
+        setFeatsError("Estilo de Luta inválido para esta classe.");
+        return;
+      }
       const previewFeats = resolveCreateCharacterFeats(
         originFeatSlug || null,
-        asiFeatSlotsToCharacterFeats(values.asiFeatSlotSlugs ?? []),
+        [
+          ...asiFeatSlotsToCharacterFeats(values.asiFeatSlotSlugs ?? []),
+          ...(fightingStyle
+            ? [{ featSlug: fightingStyle, instanceIndex: 0 }]
+            : []),
+        ],
         values.speciesChoices ?? [],
       );
       if (previewFeats.length > 0) {

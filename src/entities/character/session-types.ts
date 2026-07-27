@@ -7,6 +7,8 @@ export type ClassResourceState = {
   max: number;
   used: number;
   remaining: number;
+  dieFaces?: number | null;
+  dieLabel?: string | null;
 };
 
 export type CharacterState = {

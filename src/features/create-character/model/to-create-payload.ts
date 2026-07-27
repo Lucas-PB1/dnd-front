@@ -56,8 +56,16 @@ export function toCreateCharacterPayload(
     payload.featOptions = values.featOptions;
   }
   const asiFeats = asiFeatSlotsToCharacterFeats(values.asiFeatSlotSlugs ?? []);
-  if (asiFeats.length > 0) {
-    payload.characterFeats = asiFeats;
+  const fightingStyle = values.fightingStyleFeatSlug?.trim();
+  const characterFeats = [...asiFeats];
+  if (
+    fightingStyle &&
+    !characterFeats.some((feat) => feat.featSlug === fightingStyle)
+  ) {
+    characterFeats.push({ featSlug: fightingStyle, instanceIndex: 0 });
+  }
+  if (characterFeats.length > 0) {
+    payload.characterFeats = characterFeats;
   }
   if (values.alignmentSlug?.trim()) {
     payload.alignmentSlug = values.alignmentSlug.trim();

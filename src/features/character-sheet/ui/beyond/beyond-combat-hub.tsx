@@ -218,6 +218,7 @@ export function BeyondCombatHub({
                   {resource.name}{" "}
                   <span className="tabular-nums text-muted-foreground">
                     {resource.remaining}/{resource.max}
+                    {resource.dieLabel ? ` · ${resource.dieLabel}` : ""}
                   </span>
                 </span>
                 <Button

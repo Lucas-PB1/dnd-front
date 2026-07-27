@@ -256,9 +256,15 @@ export function StepReview({ control }: StepReviewProps) {
 
   const originFeatSlug = backgroundDetail.data?.originFeatSlug ?? "";
   const allFeats = useFeats();
+  const fightingStyle = values.fightingStyleFeatSlug?.trim() ?? "";
   const previewFeats = resolveCreateCharacterFeats(
     originFeatSlug || null,
-    asiFeatSlotsToCharacterFeats(values.asiFeatSlotSlugs ?? []),
+    [
+      ...asiFeatSlotsToCharacterFeats(values.asiFeatSlotSlugs ?? []),
+      ...(fightingStyle
+        ? [{ featSlug: fightingStyle, instanceIndex: 0 }]
+        : []),
+    ],
     values.speciesChoices ?? [],
   );
   const featNameBySlug = Object.fromEntries(

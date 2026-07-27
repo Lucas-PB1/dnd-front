@@ -8,6 +8,8 @@ import {
 import {
   useClassSpells,
   useClassSpellSlots,
+  useSubclassSpellcasting,
+  useSubclassSpellSlots,
   useSubclassSpells,
 } from "@/features/class-catalog/api/use-classes";
 
@@ -18,14 +20,35 @@ export function useWizardHasSpellStep(
 ) {
   const needsSubclass = isSubclassRequired(level) && !!subclassSlug;
 
-  const spellSlots = useClassSpellSlots(classSlug, !!classSlug);
-  const slotRow = (spellSlots.data?.data ?? []).find(
-    (row) => row.classLevel === level,
+  const classSpellSlots = useClassSpellSlots(classSlug, !!classSlug);
+  const subclassSpellSlots = useSubclassSpellSlots(
+    subclassSlug,
+    needsSubclass,
   );
-  const maxSpellLevel = maxSpellLevelFromSlots(slotRow?.spellSlots);
-  const slotsReady = !!classSlug && !spellSlots.isPending;
+  const subclassSpellcasting = useSubclassSpellcasting(
+    subclassSlug,
+    needsSubclass,
+  );
 
-  const classSpells = useClassSpells(classSlug, maxSpellLevel, slotsReady);
+  const spellListClassSlug =
+    subclassSpellcasting.data?.spellListClassSlug ?? classSlug;
+
+  const slotRow =
+    (subclassSpellSlots.data?.data ?? []).find(
+      (row) => row.classLevel === level,
+    ) ??
+    (classSpellSlots.data?.data ?? []).find((row) => row.classLevel === level);
+
+  const maxSpellLevel = maxSpellLevelFromSlots(slotRow?.spellSlots);
+  const slotsReady =
+    (!!classSlug && !classSpellSlots.isPending) ||
+    (needsSubclass && !subclassSpellSlots.isPending);
+
+  const classSpells = useClassSpells(
+    spellListClassSlug,
+    maxSpellLevel,
+    slotsReady && !!spellListClassSlug,
+  );
   const subclassSpells = useSubclassSpells(subclassSlug, needsSubclass);
 
   const subclassSpellCount = (subclassSpells.data?.data ?? []).filter(
@@ -33,14 +56,20 @@ export function useWizardHasSpellStep(
   ).length;
 
   const hasSpellStep = computeWizardHasSpellStep({
-    classSpellSlotCount: spellSlots.data?.data?.length ?? 0,
+    classSpellSlotCount: classSpellSlots.data?.data?.length ?? 0,
     classSpellCount: classSpells.data?.data?.length ?? 0,
     subclassSpellCount,
+    subclassSpellSlotCount: subclassSpellSlots.data?.data?.length ?? 0,
   });
 
   const isLoading =
-    (!!classSlug && (spellSlots.isPending || classSpells.isPending)) ||
-    (needsSubclass && subclassSpells.isPending);
+    (!!classSlug &&
+      (classSpellSlots.isPending ||
+        (slotsReady && classSpells.isPending))) ||
+    (needsSubclass &&
+      (subclassSpellSlots.isPending ||
+        subclassSpellcasting.isPending ||
+        subclassSpells.isPending));
 
   return { hasSpellStep, isLoading };
 }

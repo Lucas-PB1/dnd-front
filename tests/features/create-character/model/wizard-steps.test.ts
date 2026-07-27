@@ -50,6 +50,17 @@ describe("computeWizardHasSpellStep", () => {
       }),
     ).toBe(true);
   });
+
+  it("is true when subclass has spell slots (Spellslinger)", () => {
+    expect(
+      computeWizardHasSpellStep({
+        classSpellSlotCount: 0,
+        classSpellCount: 0,
+        subclassSpellCount: 0,
+        subclassSpellSlotCount: 18,
+      }),
+    ).toBe(true);
+  });
 });
 
 describe("wizard step navigation", () => {

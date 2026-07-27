@@ -78,6 +78,23 @@ export type ClassSpellSlots = {
   spellSlots: Record<string, number>;
 };
 
+/** Espelha SubclassSpellSlotsResponseDto */
+export type SubclassSpellSlots = ClassSpellSlots & {
+  spellListClassSlug: string;
+};
+
+/** Espelha SubclassSpellcastingResponseDto */
+export type SubclassSpellcasting = {
+  subclassSlug: string;
+  castingType: string;
+  abilitySlug: string | null;
+  focusLabel: string | null;
+  spellListClassSlug: string;
+  spellSlotPatternSlug: string;
+  ritual: boolean;
+  spellcastingMode: "prepared" | "known" | "wizard";
+};
+
 /** Espelha ClassProgressionResponseDto */
 export type ClassProgressionRow = {
   level: number;

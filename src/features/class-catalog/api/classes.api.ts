@@ -12,6 +12,8 @@ import type {
   SubclassMechanic,
   SubclassOptionGroup,
   SubclassSpellOption,
+  SubclassSpellSlots,
+  SubclassSpellcasting,
 } from "@/entities/class/types";
 import type { PaginatedResponse } from "@/shared/api/dnd-api/types";
 import {
@@ -44,6 +46,10 @@ export const subclassKeys = {
   mechanics: (slug: string) =>
     [...subclassKeys.all, "mechanics", slug] as const,
   spells: (slug: string) => [...subclassKeys.all, "spells", slug] as const,
+  spellSlots: (slug: string) =>
+    [...subclassKeys.all, "spell-slots", slug] as const,
+  spellcasting: (slug: string) =>
+    [...subclassKeys.all, "spellcasting", slug] as const,
   options: (slug: string, level: number) =>
     [...subclassKeys.all, "options", slug, level] as const,
 };
@@ -162,6 +168,20 @@ export async function fetchSubclassMechanics(slug: string, limit = 50) {
 export async function fetchSubclassSpells(slug: string) {
   return catalogFetch<PaginatedResponse<SubclassSpellOption>>(
     `/subclasses/${slug}/spells`,
+    CATALOG_FETCH_INIT,
+  );
+}
+
+export async function fetchSubclassSpellSlots(slug: string, limit = 20) {
+  return catalogFetch<PaginatedResponse<SubclassSpellSlots>>(
+    `/subclasses/${slug}/spell-slots?limit=${limit}`,
+    CATALOG_FETCH_INIT,
+  );
+}
+
+export async function fetchSubclassSpellcasting(slug: string) {
+  return catalogFetch<SubclassSpellcasting>(
+    `/subclasses/${slug}/spellcasting`,
     CATALOG_FETCH_INIT,
   );
 }

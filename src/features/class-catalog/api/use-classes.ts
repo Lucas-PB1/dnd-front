@@ -17,6 +17,8 @@ import {
   fetchSubclassMechanics,
   fetchSubclassOptions,
   fetchSubclassSpells,
+  fetchSubclassSpellSlots,
+  fetchSubclassSpellcasting,
   subclassKeys,
 } from "@/features/class-catalog/api/classes.api";
 import { CATALOG_DETAIL_STALE_MS } from "@/shared/lib/catalog-query";
@@ -142,6 +144,26 @@ export function useSubclassSpells(slug: string, enabled = true) {
     slug,
     queryKey: subclassKeys.spells(slug),
     queryFn: () => fetchSubclassSpells(slug),
+    enabled,
+    retry: false,
+  });
+}
+
+export function useSubclassSpellSlots(slug: string, enabled = true) {
+  return useCatalogDetailQuery({
+    slug,
+    queryKey: subclassKeys.spellSlots(slug),
+    queryFn: () => fetchSubclassSpellSlots(slug),
+    enabled,
+    retry: false,
+  });
+}
+
+export function useSubclassSpellcasting(slug: string, enabled = true) {
+  return useCatalogDetailQuery({
+    slug,
+    queryKey: subclassKeys.spellcasting(slug),
+    queryFn: () => fetchSubclassSpellcasting(slug),
     enabled,
     retry: false,
   });

@@ -71,6 +71,11 @@ export function StepFeats({ control, setValue, error }: StepFeatsProps) {
     name: "featOptions",
     defaultValue: [],
   });
+  const fightingStyleFeatSlug = useWatch({
+    control,
+    name: "fightingStyleFeatSlug",
+    defaultValue: "",
+  });
   const speciesChoices = useWatch({
     control,
     name: "speciesChoices",
@@ -121,10 +126,54 @@ export function StepFeats({ control, setValue, error }: StepFeatsProps) {
     () => asiFeatSlotsToCharacterFeats(asiFeatSlotSlugs),
     [asiFeatSlotSlugs],
   );
-  const previewFeats = useMemo(
-    () => resolveCreateCharacterFeats(originFeatSlug, asiFeats, speciesChoices),
-    [originFeatSlug, asiFeats, speciesChoices],
-  );
+  const fightingStyleFeatSlugs = useMemo(() => {
+    return new Set(
+      (feats.data?.data ?? [])
+        .filter((feat) => feat.categorySlug === FIGHTING_STYLE_FEAT_CATEGORY)
+        .map((feat) => feat.slug),
+    );
+  }, [feats.data?.data]);
+  const fightingStyleSlug = fightingStyleFeatSlug?.trim() ?? "";
+  const previewFeats = useMemo(() => {
+    const withStyle =
+      fightingStyleSlug &&
+      !asiFeats.some((feat) => feat.featSlug === fightingStyleSlug)
+        ? [...asiFeats, { featSlug: fightingStyleSlug, instanceIndex: 0 }]
+        : asiFeats;
+    return resolveCreateCharacterFeats(
+      originFeatSlug,
+      withStyle,
+      speciesChoices,
+    );
+  }, [originFeatSlug, asiFeats, speciesChoices, fightingStyleSlug]);
+
+  const classFightingStyleSlugs = classDetail.data?.fightingStyleSlugs ?? [];
+  const showFightingStyleSection = classFightingStyleSlugs.length > 0;
+
+  const fightingStyleOptions = useMemo(() => {
+    const allowed = new Set(classFightingStyleSlugs);
+    const takenElsewhere = collectTakenFightingStyleSlugs({
+      characterFeatSlugs: asiFeats.map((feat) => feat.featSlug),
+      fightingStyleFeatSlugs,
+      subclassOptions,
+    }).filter((slug) => slug !== fightingStyleSlug);
+
+    return (feats.data?.data ?? [])
+      .filter(
+        (feat) =>
+          feat.categorySlug === FIGHTING_STYLE_FEAT_CATEGORY &&
+          allowed.has(feat.slug) &&
+          !takenElsewhere.includes(feat.slug),
+      )
+      .sort((a, b) => a.name.localeCompare(b.name, "pt"));
+  }, [
+    classFightingStyleSlugs,
+    asiFeats,
+    fightingStyleFeatSlugs,
+    subclassOptions,
+    fightingStyleSlug,
+    feats.data?.data,
+  ]);
 
   useEffect(() => {
     if (asiFeatSlotSlugs.length < asiSlotCount) {
@@ -140,21 +189,18 @@ export function StepFeats({ control, setValue, error }: StepFeatsProps) {
     nextSlots[index] = slug;
     setValue("asiFeatSlotSlugs", nextSlots);
 
+    const styleFeat =
+      fightingStyleSlug &&
+      !nextSlots.includes(fightingStyleSlug)
+        ? [{ featSlug: fightingStyleSlug, instanceIndex: 0 as const }]
+        : [];
     const nextPreview = resolveCreateCharacterFeats(
       originFeatSlug,
-      asiFeatSlotsToCharacterFeats(nextSlots),
+      [...asiFeatSlotsToCharacterFeats(nextSlots), ...styleFeat],
       speciesChoices,
     );
     setValue("featOptions", pruneFeatOptions(nextPreview, featOptions));
   }
-
-  const fightingStyleFeatSlugs = useMemo(() => {
-    return new Set(
-      (feats.data?.data ?? [])
-        .filter((feat) => feat.categorySlug === FIGHTING_STYLE_FEAT_CATEGORY)
-        .map((feat) => feat.slug),
-    );
-  }, [feats.data?.data]);
 
   const skillKinds = useMemo(() => skillChoiceKinds(), []);
   const grantedSkillSlugs = useMemo(() => {
@@ -187,7 +233,10 @@ export function StepFeats({ control, setValue, error }: StepFeatsProps) {
     );
     const currentSlotSlug = asiFeatSlotSlugs[slotIndex] ?? "";
     const takenStyles = collectTakenFightingStyleSlugs({
-      characterFeatSlugs: previewWithoutSlot.map((feat) => feat.featSlug),
+      characterFeatSlugs: [
+        ...previewWithoutSlot.map((feat) => feat.featSlug),
+        ...(fightingStyleSlug ? [fightingStyleSlug] : []),
+      ],
       fightingStyleFeatSlugs: fightingStyleFeatSlugs,
       subclassOptions,
     });
@@ -235,7 +284,7 @@ export function StepFeats({ control, setValue, error }: StepFeatsProps) {
   const showOriginSection = !!originFeatSlug;
   const showAsiSection = asiSlotCount > 0;
 
-  if (!showOriginSection && !showAsiSection) {
+  if (!showOriginSection && !showAsiSection && !showFightingStyleSection) {
     return (
       <p className="text-sm text-muted-foreground">
         Nenhum talento para configurar neste nível.
@@ -245,6 +294,30 @@ export function StepFeats({ control, setValue, error }: StepFeatsProps) {
 
   return (
     <div className="space-y-3">
+      {showFightingStyleSection ? (
+        <WizardFormSection title="Estilo de Luta" compact>
+          {feats.isPending || classDetail.isPending ? (
+            <p className="text-sm text-muted-foreground">Carregando…</p>
+          ) : (
+            <CatalogSelect
+              id="fighting-style-feat"
+              label="Estilo (nível 1)"
+              options={[
+                { value: "", label: "Escolha…" },
+                ...fightingStyleOptions.map((feat) => ({
+                  value: feat.slug,
+                  label: feat.name,
+                })),
+              ]}
+              value={fightingStyleSlug}
+              onChange={(e) =>
+                setValue("fightingStyleFeatSlug", e.target.value)
+              }
+            />
+          )}
+        </WizardFormSection>
+      ) : null}
+
       {showAsiSection ? (
         <WizardFormSection title="ASI / talentos" compact>
           {feats.isPending ? (

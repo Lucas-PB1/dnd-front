@@ -11,7 +11,11 @@ export const PREPARED_SPELL_CLASS_SLUGS = new Set([
 
 export type ClassSpellcastingMode = "prepared" | "known" | "wizard";
 
-export function classSpellcastingMode(classSlug: string): ClassSpellcastingMode {
+export function classSpellcastingMode(
+  classSlug: string,
+  override?: ClassSpellcastingMode | null,
+): ClassSpellcastingMode {
+  if (override) return override;
   if (classSlug === "wizard") return "wizard";
   if (PREPARED_SPELL_CLASS_SLUGS.has(classSlug)) return "prepared";
   return "known";

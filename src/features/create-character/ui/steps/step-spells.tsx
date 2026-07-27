@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Control, UseFormSetValue } from "react-hook-form";
 import { useWatch } from "react-hook-form";
 import { BookOpenIcon, XMarkIcon } from "@heroicons/react/24/outline";
@@ -37,6 +37,8 @@ import {
   useClassProgression,
   useClassSpells,
   useClassSpellSlots,
+  useSubclassSpellcasting,
+  useSubclassSpellSlots,
   useSubclassSpells,
 } from "@/features/class-catalog/api/use-classes";
 import { CatalogFilters } from "@/shared/ui/catalog-filters";
@@ -82,27 +84,69 @@ export function StepSpells({ control, setValue }: StepSpellsProps) {
   const [hint, setHint] = useState<string | null>(null);
   const [preview, setPreview] = useState<PreviewTarget | null>(null);
 
-  const mode = classSpellcastingMode(classSlug);
-
   const classDetail = useClassDetail(classSlug, !!classSlug);
-  const spellSlotsQuery = useClassSpellSlots(classSlug, !!classSlug);
+  const classSpellSlotsQuery = useClassSpellSlots(classSlug, !!classSlug);
+  const subclassSpellSlotsQuery = useSubclassSpellSlots(
+    subclassSlug ?? "",
+    isSubclassRequired(level) && !!subclassSlug,
+  );
+  const subclassSpellcasting = useSubclassSpellcasting(
+    subclassSlug ?? "",
+    isSubclassRequired(level) && !!subclassSlug,
+  );
   const progressionQuery = useClassProgression(classSlug, !!classSlug);
   const subclassSpells = useSubclassSpells(
     subclassSlug ?? "",
     isSubclassRequired(level) && !!subclassSlug,
   );
 
-  const slotRow = (spellSlotsQuery.data?.data ?? []).find(
-    (row) => row.classLevel === level,
-  );
+  const modeOverride = subclassSpellcasting.data?.spellcastingMode ?? null;
+  const mode = classSpellcastingMode(classSlug, modeOverride);
+
+  const spellListClassSlug =
+    subclassSpellcasting.data?.spellListClassSlug ?? classSlug;
+
+  const slotRow =
+    (subclassSpellSlotsQuery.data?.data ?? []).find(
+      (row) => row.classLevel === level,
+    ) ??
+    (classSpellSlotsQuery.data?.data ?? []).find(
+      (row) => row.classLevel === level,
+    );
   const maxLevel = maxSpellLevelFromSlots(slotRow?.spellSlots);
-  const slotsReady = !!classSlug && !spellSlotsQuery.isPending;
-  const classSpells = useClassSpells(classSlug, maxLevel, slotsReady);
+  const slotsReady =
+    (!!classSlug && !classSpellSlotsQuery.isPending) ||
+    (!!subclassSlug && !subclassSpellSlotsQuery.isPending);
+  const classSpells = useClassSpells(
+    spellListClassSlug,
+    maxLevel,
+    slotsReady && !!spellListClassSlug,
+  );
 
   const availableClass = classSpells.data?.data ?? [];
   const availableSubclass = (subclassSpells.data?.data ?? []).filter(
     (s) => s.unlockLevel <= level,
   );
+
+  useEffect(() => {
+    if (availableSubclass.length === 0) return;
+    const missing = availableSubclass.filter(
+      (spell) =>
+        !characterSpells.some(
+          (entry) =>
+            entry.spellSlug === spell.slug &&
+            entry.listType === "always_prepared",
+        ),
+    );
+    if (missing.length === 0) return;
+    setValue("characterSpells", [
+      ...characterSpells,
+      ...missing.map((spell) => ({
+        spellSlug: spell.slug,
+        listType: "always_prepared" as const,
+      })),
+    ]);
+  }, [availableSubclass, characterSpells, setValue]);
 
   const progressionRow = resolveLevelProgression(
     level,
@@ -116,6 +160,7 @@ export function StepSpells({ control, setValue }: StepSpellsProps) {
     slotRow?.patternSlug,
     mode,
     progressionRow,
+    subclassSlug || undefined,
   );
 
   const cantripMax = progressionRow?.cantrips ?? null;

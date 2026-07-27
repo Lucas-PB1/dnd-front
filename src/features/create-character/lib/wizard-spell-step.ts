@@ -36,6 +36,7 @@ export type WizardSpellStepInput = {
   classSpellSlotCount: number;
   classSpellCount: number;
   subclassSpellCount: number;
+  subclassSpellSlotCount?: number;
 };
 
 export function computeWizardHasSpellStep(
@@ -44,6 +45,7 @@ export function computeWizardHasSpellStep(
   return (
     input.classSpellSlotCount > 0 ||
     input.classSpellCount > 0 ||
-    input.subclassSpellCount > 0
+    input.subclassSpellCount > 0 ||
+    (input.subclassSpellSlotCount ?? 0) > 0
   );
 }
