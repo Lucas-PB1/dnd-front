@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useMemo, useState } from "react";
+import { KeyIcon } from "@heroicons/react/24/outline";
 
 import { useAuth } from "@/features/auth/model/use-auth";
 import { useCharacters } from "@/features/characters/api/use-characters";
@@ -144,7 +145,8 @@ export function CampaignDetailView({ campaignId }: { campaignId: string }) {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 rounded-md border border-dashed border-border px-3 py-2 text-sm">
+        <div className="flex flex-wrap items-center gap-2 rounded-md border border-dashed border-secondary/35 bg-secondary/5 px-3 py-2 text-sm">
+          <KeyIcon className="size-4 shrink-0 text-secondary" aria-hidden />
           <span>
             Código:{" "}
             <span className="font-mono font-semibold tracking-wide">

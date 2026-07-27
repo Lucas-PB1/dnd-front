@@ -1,42 +1,53 @@
-# Cores — tema Taverna / Masmorra
+# Cores — tema Grimoire / Couro
 
-Tokens em `src/app/globals.css` (shadcn + Tailwind 4). **Light = Taverna** (pergaminho). **Dark = Masmorra** (classe `.dark` no `<html>`).
+Tokens em `src/app/globals.css` (shadcn + Tailwind 4).  
+**Light = Grimoire** (papel frio, tinta). **Dark = Couro** (mesa noturna; classe `.dark` no `<html>`).
+
+Linguagem visual: grimório PHB — tipografia forte, vermelho-selo, azul-anotação. Sem ouro/carmesim/roxo do tema anterior.
 
 ## Papéis semânticos
 
-| Token         | Light            | Dark           | Uso                   |
-| ------------- | ---------------- | -------------- | --------------------- |
-| `background`  | Pergaminho       | Pedra escura   | Fundo da página       |
-| `foreground`  | Marrom escuro    | Texto claro    | Texto principal       |
-| `primary`     | Carmesim D&D     | Carmesim claro | CTAs, links, destaque |
-| `secondary`   | Ouro             | Ouro/tocha     | Badges, XP, tesouro   |
-| `accent`      | Roxo arcano      | Roxo brilhante | Magia, itens raros    |
-| `muted`       | Bege suave       | Cinza masmorra | Fundos secundários    |
-| `destructive` | Vermelho         | Vermelho       | Dano, excluir, erro   |
-| `card`        | Pergaminho claro | Card pedra     | Fichas, painéis       |
-| `border`      | Borda quente     | Borda sutil    | Divisórias            |
+| Token         | Light (Grimoire) | Dark (Couro)     | Uso                         |
+| ------------- | ---------------- | ---------------- | --------------------------- |
+| `background`  | Papel frio       | Couro escuro     | Fundo da página             |
+| `foreground`  | Preto-tinta      | Marfim           | Texto principal             |
+| `primary`     | Preto-tinta      | Marfim           | CTAs sólidos, tipografia    |
+| `secondary`   | Vermelho-selo    | Vermelho-selo    | Carimbos, badges PHB, CTAs  |
+| `accent`      | Azul-anotação    | Azul-giz         | Focus, magia, anotações     |
+| `muted`       | Papel suave      | Couro médio      | Fundos secundários          |
+| `destructive` | Vermelho-selo    | Vermelho         | Excluir, erro               |
+| `card`        | Papel claro      | Couro elevado    | Fichas, painéis             |
+| `border`      | Borda papel      | Borda sutil      | Divisórias                  |
+| `ring`        | Azul-anotação    | Azul-giz         | Focus visible               |
 
 ## Charts (dados na ficha)
 
-| Token     | Significado             |
-| --------- | ----------------------- |
-| `chart-1` | HP / combate (carmesim) |
-| `chart-2` | Ouro / recursos         |
-| `chart-3` | Natureza / cura (verde) |
-| `chart-4` | Magia (roxo)            |
-| `chart-5` | Frio / água (azul)      |
+| Token     | Significado                    |
+| --------- | ------------------------------ |
+| `chart-1` | Combate / selo (vermelho)      |
+| `chart-2` | Recursos (âmbar contido)       |
+| `chart-3` | Natureza / cura (verde)        |
+| `chart-4` | Magia / anotação (azul)        |
+| `chart-5` | Frio / água (azul-acinzentado) |
+
+## Tipografia
+
+| Papel    | Fonte            |
+| -------- | ---------------- |
+| Heading  | Source Serif 4   |
+| Body     | Source Sans 3    |
+| Mono     | Geist Mono       |
 
 ## Uso no código
 
 ```tsx
-// Tailwind — preferir tokens semânticos
 <div className="bg-background text-foreground" />
 <button className="bg-primary text-primary-foreground" />
-<span className="text-muted-foreground" />
-<div className="border-border bg-card" />
+<span className="text-secondary" /> {/* selo / carimbo */}
+<span className="text-accent" /> {/* anotação / focus */}
 ```
 
-**Evitar:** cores hardcoded (`bg-red-500`). Ajustes só em `globals.css`.
+**Evitar:** cores hardcoded (`bg-red-500`), purple-glow, cream+terracotta genérico. Ajustes só em `globals.css`.
 
 ## Modo escuro
 
@@ -45,7 +56,3 @@ Adicionar `className="dark"` no `<html>` ou usar o **ThemeToggle** (`next-themes
 ## Ícones
 
 **Heroicons** (`@heroicons/react`) no app. Componentes shadcn podem usar Lucide internamente — ok manter os dois.
-
-```tsx
-import { SparklesIcon } from "@heroicons/react/24/outline";
-```

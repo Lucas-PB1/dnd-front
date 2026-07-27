@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { motion } from "@/shared/lib/motion";
 import { cn } from "@/shared/lib/utils";
 import { BackLink } from "@/shared/ui/back-link";
+import { MarginCorner } from "@/shared/ui/brand-marks";
 import { buttonVariants } from "@/shared/ui/button";
 
 export type CatalogDetailStat = {
@@ -58,8 +59,13 @@ export function CatalogDetailHero({
       )}
     >
       <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,color-mix(in_oklch,var(--primary)_22%,transparent),transparent_55%),radial-gradient(ellipse_at_bottom_right,color-mix(in_oklch,var(--secondary)_14%,transparent),transparent_50%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,color-mix(in_oklch,var(--muted)_75%,transparent),transparent_55%),radial-gradient(ellipse_at_bottom_right,color-mix(in_oklch,var(--secondary)_16%,transparent),transparent_50%),radial-gradient(ellipse_at_bottom_left,color-mix(in_oklch,var(--accent)_10%,transparent),transparent_45%)]"
         aria-hidden
+      />
+      <MarginCorner className="pointer-events-none absolute top-3 left-3 size-9 sm:size-11" />
+      <MarginCorner
+        mirror
+        className="pointer-events-none absolute right-3 bottom-3 size-9 sm:size-11"
       />
       <div className="relative space-y-6 p-5 sm:p-8">
         <BackLink href={backHref}>{backLabel}</BackLink>
@@ -72,7 +78,7 @@ export function CatalogDetailHero({
             {titleExtra}
           </div>
           {eyebrow ? (
-            <p className="max-w-xl text-sm font-medium tracking-wide text-primary uppercase sm:text-base">
+            <p className="max-w-xl text-sm font-medium tracking-wide text-secondary uppercase sm:text-base">
               {eyebrow}
             </p>
           ) : null}

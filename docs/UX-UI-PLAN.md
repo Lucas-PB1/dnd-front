@@ -14,11 +14,13 @@ Não substitui [CHARACTER-SHEET-PLAN.md](./CHARACTER-SHEET-PLAN.md) (fluxo de fi
 | --------------------------------------------------------------------------------- | --------------------------------------------- |
 | Branding, tipografia, layout, hierarquia, microcopy, motion, empty states, mobile | Troca de Auth/banco (Neon, Clerk, etc.)       |
 | Polish das telas já existentes                                                    | Novas regras D&D no front                     |
-| Critérios de aceite por fase de UX                                                | Redesign que ignore o tema Taverna / Masmorra |
+| Critérios de aceite por fase de UX                                                | Redesign que ignore o tema Grimoire / Couro   |
 
-**Tema:** Light = **Taverna** (pergaminho), Dark = **Masmorra** (pedra). Tokens em [`src/app/globals.css`](../src/app/globals.css) — ver [COLORS.md](./COLORS.md).
+**Tema:** Light = **Grimoire** (papel frio + tinta), Dark = **Couro** (mesa noturna). Tokens em [`src/app/globals.css`](../src/app/globals.css) — ver [COLORS.md](./COLORS.md).
 
 **Stack visual:** Next.js 16 · shadcn / Base UI · Tailwind 4 · Heroicons · `next-themes`.
+
+**Tipografia:** Source Serif 4 (heading) · Source Sans 3 (body) · Geist Mono.
 
 **Nome de produto (provisório):** **Taverna** — usar na UI no lugar de `dnd-front` até decisão final de marca. Evitar expor nomes de repo (`dnd-front`, `dnd-api`) como brand.
 
@@ -30,7 +32,7 @@ Não substitui [CHARACTER-SHEET-PLAN.md](./CHARACTER-SHEET-PLAN.md) (fluxo de fi
 | ---------- | --------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
 | Home       | [`src/app/page.tsx`](../src/app/page.tsx) — “Campanhas & fichas” + status de health                       | Parece bootstrap/dev, não produto                         |
 | Header     | [`app-header.tsx`](../src/widgets/app-header/ui/app-header.tsx) — brand `dnd-front`                       | Branding fraco; sem nav Compêndio / Fichas                |
-| Tipografia | Geist / Geist Mono em [`layout.tsx`](../src/app/layout.tsx)                                               | Default genérico; falta display expressivo                |
+| Tipografia | Source Serif 4 + Source Sans 3 em [`layout.tsx`](../src/app/layout.tsx)                                    | —                                                         |
 | Compêndio  | Hub + grids/cards (`compendium-hub`, `*-catalog`)                                                         | Funcional; visual homogêneo e pouco hierárquico           |
 | Wizard     | [`create-character-wizard.tsx`](../src/features/create-character/ui/create-character-wizard.tsx)          | Fluxo longo; progresso/skip/revisão podem ser mais claros |
 | Ficha      | [`character-sheet-view.tsx`](../src/features/character-sheet/ui/character-sheet-view.tsx) + layout widget | Densidade alta; leitura vs mesa pouco separados           |
@@ -44,11 +46,11 @@ Não substitui [CHARACTER-SHEET-PLAN.md](./CHARACTER-SHEET-PLAN.md) (fluxo de fi
 1. **Uma composição por viewport** — a home não é dashboard; hero com um job claro.
 2. **Brand hero-level** — nome do produto (Taverna) deve sobreviver ao teste “sem nav, ainda é o mesmo app?”.
 3. **Tipografia expressiva** — display para títulos/brand; body legível; evitar só stack system/Geist.
-4. **Atmosfera** — gradientes/textura sutis com tokens Taverna/Masmorra; fundo flat único não basta.
+4. **Atmosfera** — gradientes/textura sutis com tokens Grimoire/Couro; fundo flat único não basta.
 5. **Cards só com interação** — listagens clicáveis, pickers, seções expansíveis; não cardificar texto estático.
 6. **Uma job por seção** — um headline + uma frase de apoio; evitar painéis concorrentes.
 7. **Motion intencional** — pelo menos 2–3: toggle de tema, transição de passo do wizard, expand/collapse na ficha.
-8. **Tokens semânticos** — `primary` (carmesim), `secondary` (ouro), `accent` (arcano). Sem `bg-red-500` hardcoded.
+8. **Tokens semânticos** — `primary` (tinta/marfim), `secondary` (selo), `accent` (anotação). Sem `bg-red-500` hardcoded.
 9. **Ícones** — preferir Heroicons no app; Lucide ok dentro de shadcn.
 10. **PT-BR** — microcopy consistente; nomes de catálogo vêm da API.
 
@@ -58,8 +60,8 @@ Não substitui [CHARACTER-SHEET-PLAN.md](./CHARACTER-SHEET-PLAN.md) (fluxo de fi
 - Stats/health/status no hero
 - Overlay de badges flutuantes sobre mídia
 - Purple-on-white / glow / pills genéricos de AI
-- Quebrar o tema Taverna/Masmorra com paleta paralela
-
+- Quebrar o tema Grimoire/Couro com paleta paralela
+- Cream quente + terracotta + serif “default fantasy AI”
 ---
 
 ## 4. Inventário de superfícies

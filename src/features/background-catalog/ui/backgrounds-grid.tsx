@@ -5,6 +5,7 @@ import { BackgroundCard } from "@/features/background-catalog/ui/background-card
 import { useCatalogListState } from "@/shared/lib/use-catalog-list-state";
 import { CatalogPagination } from "@/shared/ui/catalog-pagination";
 import { CatalogSearch } from "@/shared/ui/catalog-search";
+import { CatalogEmptyMessage } from "@/shared/ui/catalog-empty-message";
 import { motion } from "@/shared/lib/motion";
 import { cn } from "@/shared/lib/utils";
 
@@ -53,11 +54,13 @@ export function BackgroundsGrid() {
         resultCount={total}
       />
       {!data?.data.length ? (
-        <p className="text-sm text-muted-foreground">
-          {debouncedQuery
+        <CatalogEmptyMessage
+          message={
+            debouncedQuery
             ? "Nenhum antecedente corresponde à busca."
-            : "Nenhum antecedente encontrado."}
-        </p>
+            : "Nenhum antecedente encontrado."
+          }
+        />
       ) : (
         <>
           <div

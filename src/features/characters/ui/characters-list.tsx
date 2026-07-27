@@ -1,13 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRightIcon } from "@heroicons/react/24/outline";
+import { ArrowRightIcon, PlusIcon } from "@heroicons/react/24/outline";
 
 import { useCharacters } from "@/features/characters/api/use-characters";
 import { DeleteCharacterButton } from "@/features/character-sheet/ui/delete-character-button";
 import { motion } from "@/shared/lib/motion";
 import { cn } from "@/shared/lib/utils";
+import { EmptyScrollMark } from "@/shared/ui/brand-marks";
 import { buttonVariants } from "@/shared/ui/button";
+import { EmptyState } from "@/shared/ui/empty-state";
 
 export function CharactersList() {
   const { data, isPending, isError, error } = useCharacters();
@@ -26,28 +28,24 @@ export function CharactersList() {
 
   if (!data?.length) {
     return (
-      <div
-        className={cn(
-          "flex flex-col items-center gap-4 rounded-lg border border-dashed border-border px-6 py-12 text-center",
-          motion.enter,
-        )}
-      >
-        <div className="space-y-2">
-          <p className="font-heading text-lg font-semibold tracking-tight">
-            Ainda sem fichas
-          </p>
-          <p className="max-w-sm text-sm text-muted-foreground">
-            Crie seu primeiro personagem do PHB 2024. Depois ele fica aqui para
-            editar e usar na mesa.
-          </p>
-        </div>
-        <Link
-          href="/characters/new"
-          className={cn(buttonVariants({ size: "lg" }), motion.hoverLift)}
-        >
-          Criar personagem
-        </Link>
-      </div>
+      <EmptyState
+        icon={<EmptyScrollMark className="size-16" />}
+        title="Ainda sem fichas"
+        description="Crie seu primeiro personagem do PHB 2024. Depois ele fica aqui para editar e usar na mesa."
+        action={
+          <Link
+            href="/characters/new"
+            className={cn(
+              buttonVariants({ size: "lg" }),
+              "inline-flex items-center gap-2",
+              motion.hoverLift,
+            )}
+          >
+            <PlusIcon className="size-4" aria-hidden />
+            Criar personagem
+          </Link>
+        }
+      />
     );
   }
 

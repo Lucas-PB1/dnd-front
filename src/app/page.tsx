@@ -1,7 +1,14 @@
 import Link from "next/link";
+import {
+  BookOpenIcon,
+  PlusIcon,
+  UserGroupIcon,
+} from "@heroicons/react/24/outline";
 
 import { BRAND_NAME } from "@/shared/config/brand";
 import { cn } from "@/shared/lib/utils";
+import { Atmosphere } from "@/shared/ui/atmosphere";
+import { InkFlourish, SealMark } from "@/shared/ui/brand-marks";
 import { buttonVariants } from "@/shared/ui/button";
 import { AppHeader } from "@/widgets/app-header/ui/app-header";
 import { DndApiStatus } from "@/widgets/system-status/ui/dnd-api-status";
@@ -12,16 +19,20 @@ export default function Home() {
 
   return (
     <div className="relative flex flex-1 flex-col overflow-hidden bg-background text-foreground">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_oklch(0.78_0.14_85_/_0.22),_transparent_55%),radial-gradient(ellipse_at_bottom_right,_oklch(0.45_0.18_25_/_0.12),_transparent_50%)] dark:bg-[radial-gradient(ellipse_at_top,_oklch(0.68_0.12_85_/_0.12),_transparent_55%),radial-gradient(ellipse_at_bottom_right,_oklch(0.62_0.18_290_/_0.14),_transparent_50%)]"
-      />
+      <Atmosphere />
 
       <AppHeader />
 
       <main className="relative mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center gap-5 px-6 py-16 text-center sm:gap-6">
-        <p className="motion-brand font-heading text-5xl font-semibold tracking-tight text-foreground sm:text-6xl md:text-7xl">
-          {BRAND_NAME}
+        <SealMark className="motion-brand size-14 sm:size-16" title="Selo Taverna" />
+        <div className="space-y-2">
+          <p className="motion-brand font-heading text-5xl font-semibold tracking-tight text-foreground sm:text-6xl md:text-7xl">
+            {BRAND_NAME}
+          </p>
+          <InkFlourish className="motion-enter motion-delay-1 mx-auto h-4 w-44 sm:w-56" />
+        </div>
+        <p className="motion-enter motion-delay-1 font-heading text-sm font-medium tracking-[0.2em] text-secondary uppercase">
+          Grimoire · PHB 2024
         </p>
         <h1 className="motion-enter motion-delay-1 max-w-lg font-sans text-lg font-medium text-foreground/90 sm:text-xl">
           Fichas prontas para a mesa
@@ -35,27 +46,30 @@ export default function Home() {
             href="/compendium"
             className={cn(
               buttonVariants({ size: "lg" }),
-              "motion-hover-lift",
+              "motion-hover-lift inline-flex items-center gap-2",
             )}
           >
+            <BookOpenIcon className="size-4" aria-hidden />
             Abrir compêndio
           </Link>
           <Link
             href="/characters"
             className={cn(
               buttonVariants({ variant: "outline", size: "lg" }),
-              "motion-hover-lift",
+              "motion-hover-lift inline-flex items-center gap-2",
             )}
           >
+            <UserGroupIcon className="size-4" aria-hidden />
             Minhas fichas
           </Link>
           <Link
             href="/characters/new"
             className={cn(
               buttonVariants({ variant: "secondary", size: "lg" }),
-              "motion-hover-lift",
+              "motion-hover-lift inline-flex items-center gap-2",
             )}
           >
+            <PlusIcon className="size-4" aria-hidden />
             Criar personagem
           </Link>
         </div>

@@ -9,6 +9,7 @@ import { RARE_FILTER } from "@/shared/lib/catalog-filter-options";
 import { CatalogFilters } from "@/shared/ui/catalog-filters";
 import { CatalogPagination } from "@/shared/ui/catalog-pagination";
 import { CatalogSearch } from "@/shared/ui/catalog-search";
+import { CatalogEmptyMessage } from "@/shared/ui/catalog-empty-message";
 import { motion } from "@/shared/lib/motion";
 import { cn } from "@/shared/lib/utils";
 
@@ -70,11 +71,13 @@ export function LanguagesGrid() {
       {outOfRange ? (
         <p className="text-sm text-muted-foreground">Ajustando página…</p>
       ) : !data?.data.length ? (
-        <p className="text-sm text-muted-foreground">
-          {debouncedQuery || rare
+        <CatalogEmptyMessage
+          message={
+            debouncedQuery || rare
             ? "Nenhum idioma corresponde aos filtros."
-            : "Nenhum idioma encontrado."}
-        </p>
+            : "Nenhum idioma encontrado."
+          }
+        />
       ) : (
         <>
           <div

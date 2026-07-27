@@ -9,6 +9,7 @@ import { ABILITY_FILTER } from "@/shared/lib/catalog-filter-options";
 import { CatalogFilters } from "@/shared/ui/catalog-filters";
 import { CatalogPagination } from "@/shared/ui/catalog-pagination";
 import { CatalogSearch } from "@/shared/ui/catalog-search";
+import { CatalogEmptyMessage } from "@/shared/ui/catalog-empty-message";
 import { motion } from "@/shared/lib/motion";
 import { cn } from "@/shared/lib/utils";
 
@@ -70,11 +71,13 @@ export function SkillsGrid() {
       {outOfRange ? (
         <p className="text-sm text-muted-foreground">Ajustando página…</p>
       ) : !data?.data.length ? (
-        <p className="text-sm text-muted-foreground">
-          {debouncedQuery || ability
+        <CatalogEmptyMessage
+          message={
+            debouncedQuery || ability
             ? "Nenhuma perícia corresponde aos filtros."
-            : "Nenhuma perícia encontrada."}
-        </p>
+            : "Nenhuma perícia encontrada."
+          }
+        />
       ) : (
         <>
           <div

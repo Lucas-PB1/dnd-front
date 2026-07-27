@@ -1,6 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import {
+  KeyIcon,
+  PlusCircleIcon,
+  ArrowRightIcon,
+} from "@heroicons/react/24/outline";
 import { FormEvent, useState } from "react";
 
 import {
@@ -13,7 +18,9 @@ import {
   useJoinCampaign,
 } from "@/features/campaigns/api/use-campaigns";
 import { cn } from "@/shared/lib/utils";
+import { EmptyMapMark } from "@/shared/ui/brand-marks";
 import { Button, buttonVariants } from "@/shared/ui/button";
+import { EmptyState } from "@/shared/ui/empty-state";
 import { Input } from "@/shared/ui/input";
 
 function CampaignRow({ campaign }: { campaign: CampaignSummary }) {
@@ -27,9 +34,13 @@ function CampaignRow({ campaign }: { campaign: CampaignSummary }) {
       </div>
       <Link
         href={`/campaigns/${campaign.id}`}
-        className={cn(buttonVariants({ size: "sm", variant: "outline" }))}
+        className={cn(
+          buttonVariants({ size: "sm", variant: "outline" }),
+          "inline-flex items-center gap-1",
+        )}
       >
         Abrir
+        <ArrowRightIcon className="size-3.5" aria-hidden />
       </Link>
     </li>
   );
@@ -62,7 +73,10 @@ export function CampaignsHome() {
           onSubmit={onCreate}
           className="space-y-3 rounded-xl border border-border p-4"
         >
-          <h2 className="font-heading text-lg font-semibold">Nova campanha</h2>
+          <h2 className="inline-flex items-center gap-2 font-heading text-lg font-semibold">
+            <PlusCircleIcon className="size-5 text-secondary" aria-hidden />
+            Nova campanha
+          </h2>
           <p className="text-sm text-muted-foreground">
             Você entra como mestre e recebe um código de convite.
           </p>
@@ -89,7 +103,10 @@ export function CampaignsHome() {
           onSubmit={onJoin}
           className="space-y-3 rounded-xl border border-border p-4"
         >
-          <h2 className="font-heading text-lg font-semibold">Entrar com código</h2>
+          <h2 className="inline-flex items-center gap-2 font-heading text-lg font-semibold">
+            <KeyIcon className="size-5 text-accent" aria-hidden />
+            Entrar com código
+          </h2>
           <Input
             value={inviteCode}
             onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
@@ -138,9 +155,11 @@ export function CampaignsHome() {
           </p>
         ) : null}
         {!isPending && !isError && !data?.length ? (
-          <p className="text-sm text-muted-foreground">
-            Nenhuma campanha ainda. Crie uma ou entre com um código.
-          </p>
+          <EmptyState
+            icon={<EmptyMapMark className="size-16" />}
+            title="Nenhuma campanha ainda"
+            description="Crie uma mesa como mestre ou entre com o código de convite de outra pessoa."
+          />
         ) : null}
         {data?.length ? (
           <ul className="divide-y divide-border rounded-xl border border-border">

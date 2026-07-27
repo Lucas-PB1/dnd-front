@@ -1,29 +1,44 @@
 "use client";
 
-import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  Bars3Icon,
+  BookOpenIcon,
+  MapIcon,
+  UserGroupIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, type ComponentType, type SVGProps } from "react";
 
 import { AuthNav } from "@/features/auth/ui/auth-nav";
 import { BRAND_NAME } from "@/shared/config/brand";
 import { cn } from "@/shared/lib/utils";
+import { SealMark } from "@/shared/ui/brand-marks";
 import { Button } from "@/shared/ui/button";
 import { ThemeToggle } from "@/widgets/app-header/ui/theme-toggle";
 
-const NAV_LINKS = [
-  { href: "/compendium", label: "Compêndio" },
-  { href: "/characters", label: "Fichas" },
-  { href: "/campaigns", label: "Campanhas" },
-] as const;
+type NavIcon = ComponentType<SVGProps<SVGSVGElement>>;
+
+const NAV_LINKS: ReadonlyArray<{
+  href: string;
+  label: string;
+  icon: NavIcon;
+}> = [
+  { href: "/compendium", label: "Compêndio", icon: BookOpenIcon },
+  { href: "/characters", label: "Fichas", icon: UserGroupIcon },
+  { href: "/campaigns", label: "Campanhas", icon: MapIcon },
+];
 
 function NavLink({
   href,
   label,
+  icon: Icon,
   onNavigate,
 }: {
   href: string;
   label: string;
+  icon: NavIcon;
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
@@ -35,12 +50,13 @@ function NavLink({
       href={href}
       onClick={onNavigate}
       className={cn(
-        "rounded-md px-3 py-2 text-sm font-medium transition-colors",
+        "inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors",
         active
           ? "bg-muted text-foreground"
           : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
       )}
     >
+      <Icon className="size-4 shrink-0 opacity-80" aria-hidden />
       {label}
     </Link>
   );
@@ -55,9 +71,10 @@ export function AppHeader({ className }: { className?: string }) {
         <div className="flex min-w-0 items-center gap-4 sm:gap-6">
           <Link
             href="/"
-            className="font-heading shrink-0 text-xl font-semibold tracking-tight text-foreground transition-colors hover:text-primary"
+            className="inline-flex shrink-0 items-center gap-2 font-heading text-xl font-semibold tracking-tight text-foreground transition-colors hover:text-secondary"
             onClick={() => setMenuOpen(false)}
           >
+            <SealMark className="size-6" />
             {BRAND_NAME}
           </Link>
           <nav

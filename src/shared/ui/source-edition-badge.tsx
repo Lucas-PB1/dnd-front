@@ -8,6 +8,7 @@ import {
   fetchEditions,
 } from "@/entities/edition/api";
 import { cn } from "@/shared/lib/utils";
+import { SealMark } from "@/shared/ui/brand-marks";
 
 type SourceEditionBadgeProps = {
   className?: string;
@@ -15,6 +16,7 @@ type SourceEditionBadgeProps = {
   live?: boolean;
 };
 
+/** Carimbo tipográfico — fonte do livro ativo (Grimoire). */
 export function SourceEditionBadge({
   className,
   live = false,
@@ -33,12 +35,14 @@ export function SourceEditionBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-md border border-border/80 bg-muted/40 px-2 py-0.5 text-xs font-medium text-muted-foreground",
+        "inline-flex items-center gap-1.5 border border-secondary/50 bg-secondary/10 px-2 py-0.5 font-heading text-[0.7rem] font-semibold tracking-[0.04em] text-secondary uppercase",
+        "rounded-sm shadow-[inset_0_0_0_1px_color-mix(in_oklch,var(--secondary)_18%,transparent)]",
         className,
       )}
       title={edition ? `${edition.label} · ${edition.language}` : undefined}
     >
-      Fonte: {label}
+      <SealMark className="size-3.5" />
+      Fonte · {label}
     </span>
   );
 }

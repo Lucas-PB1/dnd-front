@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
-import { Fraunces, Geist_Mono, Source_Sans_3 } from "next/font/google";
+import { Geist_Mono, Source_Sans_3, Source_Serif_4 } from "next/font/google";
 
 import { AppProviders } from "@/app/providers/app-providers";
 import { BRAND_DESCRIPTION, BRAND_NAME } from "@/shared/config/brand";
 
 import "./globals.css";
 
-const fontHeading = Fraunces({
+const fontHeading = Source_Serif_4({
   variable: "--font-heading",
   subsets: ["latin"],
-  axes: ["SOFT", "WONK", "opsz"],
 });
 
 const fontSans = Source_Sans_3({

@@ -9,6 +9,7 @@ import { useClampCatalogPage } from "@/shared/lib/use-clamp-catalog-page";
 import { CatalogFilters } from "@/shared/ui/catalog-filters";
 import { CatalogPagination } from "@/shared/ui/catalog-pagination";
 import { CatalogSearch } from "@/shared/ui/catalog-search";
+import { CatalogEmptyMessage } from "@/shared/ui/catalog-empty-message";
 import { motion } from "@/shared/lib/motion";
 import { cn } from "@/shared/lib/utils";
 
@@ -68,11 +69,13 @@ export function WeaponsGrid() {
       {outOfRange ? (
         <p className="text-sm text-muted-foreground">Ajustando página…</p>
       ) : !data?.data.length ? (
-        <p className="text-sm text-muted-foreground">
-          {debouncedQuery || category
+        <CatalogEmptyMessage
+          message={
+            debouncedQuery || category
             ? "Nenhuma arma corresponde aos filtros."
-            : "Nenhuma arma encontrada."}
-        </p>
+            : "Nenhuma arma encontrada."
+          }
+        />
       ) : (
         <>
           <div
