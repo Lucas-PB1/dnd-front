@@ -16,6 +16,7 @@ import {
   BeyondPanel,
   ABILITY_SHORT,
 } from "@/features/character-sheet/ui/beyond/beyond-panel";
+import { useSheetRolls } from "@/features/character-sheet/ui/beyond/sheet-rolls";
 import { SheetEditAction } from "@/features/character-sheet/ui/sheet-ui";
 import { cn } from "@/shared/lib/utils";
 
@@ -37,6 +38,7 @@ export function BeyondSkillsColumn({
   skills,
   onEdit,
 }: BeyondSkillsColumnProps) {
+  const rolls = useSheetRolls();
   const proficient = new Set([
     ...character.classSkillSlugs,
     ...character.backgroundSkillSlugs,
@@ -93,7 +95,11 @@ export function BeyondSkillsColumn({
                   aria-hidden
                 />
               ) : null}
-              <SkillRow {...row} />
+              <SkillRow
+                {...row}
+                pending={rolls.skill.isPending}
+                onRoll={() => rolls.skill.mutate({ skillSlug: row.skill.slug })}
+              />
             </li>
           );
         })}
@@ -107,20 +113,25 @@ function SkillRow({
   abilityKey,
   isProficient,
   bonus,
-}: SkillRowData) {
+  pending,
+  onRoll,
+}: SkillRowData & { pending: boolean; onRoll: () => void }) {
   const abilityLabel =
     ABILITY_SHORT[abilityKey] ??
     ABILITY_LABELS_PT[abilityKey]?.slice(0, 3) ??
     "—";
 
   return (
-    <div
+    <button
+      type="button"
+      disabled={pending}
+      onClick={onRoll}
       className={cn(
-        "grid grid-cols-[auto_2.25rem_minmax(0,1fr)_2.5rem] items-baseline gap-x-2 px-3 py-1.5 text-sm",
-        "hover:bg-muted/30",
+        "grid w-full grid-cols-[auto_2.25rem_minmax(0,1fr)_2.5rem] items-baseline gap-x-2 px-3 py-1.5 text-left text-sm",
+        "hover:bg-muted/30 disabled:opacity-60",
         isProficient && "bg-primary/[0.07]",
       )}
-      title={`${skill.name} (${ABILITY_LABELS_PT[abilityKey]})`}
+      title={`Rolar ${skill.name} (${ABILITY_LABELS_PT[abilityKey]})`}
     >
       <span
         className={cn(
@@ -155,6 +166,6 @@ function SkillRow({
       >
         {formatSkillBonus(bonus)}
       </span>
-    </div>
+    </button>
   );
 }

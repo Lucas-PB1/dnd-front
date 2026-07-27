@@ -14,6 +14,7 @@ import {
 } from "@/entities/character";
 import { useClassDetail } from "@/features/class-catalog/api/use-classes";
 import { BeyondPanel, ABILITY_SHORT } from "@/features/character-sheet/ui/beyond/beyond-panel";
+import { useSheetRolls } from "@/features/character-sheet/ui/beyond/sheet-rolls";
 import { useSpeciesDetail } from "@/features/species-catalog/api/use-species";
 import { cn } from "@/shared/lib/utils";
 
@@ -30,6 +31,7 @@ export function BeyondLeftColumn({
 }: BeyondLeftColumnProps) {
   const classDetail = useClassDetail(character.classSlug, true);
   const speciesDetail = useSpeciesDetail(character.speciesSlug, true);
+  const rolls = useSheetRolls();
   const proficient = new Set(classDetail.data?.savingThrowSlugs ?? []);
   const pb = character.proficiencyBonus;
 
@@ -45,29 +47,37 @@ export function BeyondLeftColumn({
               const isProficient = proficient.has(slug);
               const total = mod + (isProficient ? pb : 0);
               return (
-                <li
-                  key={slug}
-                  className={cn(
-                    "flex items-center gap-2 rounded-md px-2 py-1 text-sm",
-                    isProficient ? "bg-primary/10" : "hover:bg-muted/40",
-                  )}
-                >
-                  <span
+                <li key={slug}>
+                  <button
+                    type="button"
+                    disabled={rolls.savingThrow.isPending}
+                    onClick={() =>
+                      rolls.savingThrow.mutate({ abilitySlug: slug })
+                    }
                     className={cn(
-                      "size-1.5 shrink-0 rounded-full",
-                      isProficient ? "bg-primary" : "bg-border",
+                      "flex w-full items-center gap-2 rounded-md px-2 py-1 text-left text-sm",
+                      isProficient ? "bg-primary/10" : "hover:bg-muted/40",
+                      "disabled:opacity-60",
                     )}
-                    aria-hidden
-                  />
-                  <span className="w-7 text-[0.65rem] font-semibold tracking-wide text-muted-foreground uppercase">
-                    {ABILITY_SHORT[slug]}
-                  </span>
-                  <span className="min-w-0 flex-1 truncate font-medium">
-                    {ABILITY_LABELS_PT[slug]}
-                  </span>
-                  <span className="font-mono text-sm font-semibold tabular-nums">
-                    {formatSkillBonus(total)}
-                  </span>
+                    title={`Rolar salvaguarda de ${ABILITY_LABELS_PT[slug]}`}
+                  >
+                    <span
+                      className={cn(
+                        "size-1.5 shrink-0 rounded-full",
+                        isProficient ? "bg-primary" : "bg-border",
+                      )}
+                      aria-hidden
+                    />
+                    <span className="w-7 text-[0.65rem] font-semibold tracking-wide text-muted-foreground uppercase">
+                      {ABILITY_SHORT[slug]}
+                    </span>
+                    <span className="min-w-0 flex-1 truncate font-medium">
+                      {ABILITY_LABELS_PT[slug]}
+                    </span>
+                    <span className="font-mono text-sm font-semibold tabular-nums">
+                      {formatSkillBonus(total)}
+                    </span>
+                  </button>
                 </li>
               );
             })}

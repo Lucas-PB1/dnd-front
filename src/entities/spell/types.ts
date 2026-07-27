@@ -21,6 +21,8 @@ export type SpellSummary = {
   higherLevels: string | null;
   sourceChapter: number | null;
   editionSlug: string | null;
+  saveAbilitySlug: string | null;
+  requiresAttackRoll: boolean;
 };
 
 export type SpellListResponse = PaginatedResponse<SpellSummary>;

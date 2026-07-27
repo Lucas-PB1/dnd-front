@@ -14,6 +14,7 @@ import {
   useCharacterState,
   usePatchCharacterState,
 } from "@/features/character-sheet/api/use-character-state";
+import { useSheetRolls } from "@/features/character-sheet/ui/beyond/sheet-rolls";
 import { SheetChip } from "@/features/character-sheet/ui/sheet-ui";
 import { useConditions } from "@/features/reference-catalog/api/use-reference";
 import { Button } from "@/shared/ui/button";
@@ -32,22 +33,27 @@ function CombatMetric({
   hint,
   icon: Icon,
   emphasize = false,
+  onClick,
+  disabled,
 }: {
   label: string;
   value: ReactNode;
   hint?: ReactNode;
   icon?: ComponentType<{ className?: string }>;
   emphasize?: boolean;
+  onClick?: () => void;
+  disabled?: boolean;
 }) {
-  return (
-    <div
-      className={cn(
-        "flex min-w-0 flex-col items-center justify-center rounded-lg border px-3 py-2 text-center",
-        emphasize
-          ? "border-primary/45 bg-primary/8"
-          : "border-border/70 bg-card/70",
-      )}
-    >
+  const className = cn(
+    "flex min-w-0 flex-col items-center justify-center rounded-lg border px-3 py-2 text-center",
+    emphasize
+      ? "border-primary/45 bg-primary/8"
+      : "border-border/70 bg-card/70",
+    onClick && "hover:border-primary/50 hover:bg-primary/10 disabled:opacity-60",
+  );
+
+  const body = (
+    <>
       <span className="inline-flex items-center gap-1 text-[0.58rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
         {Icon ? <Icon className="size-3 text-secondary" aria-hidden /> : null}
         {label}
@@ -60,8 +66,24 @@ function CombatMetric({
           {hint}
         </span>
       ) : null}
-    </div>
+    </>
   );
+
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        className={className}
+        onClick={onClick}
+        disabled={disabled}
+        title={`Rolar ${label.toLowerCase()}`}
+      >
+        {body}
+      </button>
+    );
+  }
+
+  return <div className={className}>{body}</div>;
 }
 
 export function BeyondCombatHub({
@@ -71,6 +93,7 @@ export function BeyondCombatHub({
   const stateQuery = useCharacterState(characterId);
   const patchState = usePatchCharacterState(characterId);
   const conditionsCatalog = useConditions();
+  const rolls = useSheetRolls();
 
   const [editingStatus, setEditingStatus] = useState(false);
   const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
@@ -116,6 +139,8 @@ export function BeyondCombatHub({
           label="Iniciativa"
           value={formatSkillBonus(initiative)}
           icon={BoltIcon}
+          onClick={() => rolls.initiative.mutate({})}
+          disabled={rolls.initiative.isPending}
         />
         <CombatMetric
           label="CA"

@@ -63,6 +63,9 @@ export type CharacterDetail = {
   equipmentWarnings?: EquipmentWarning[];
   cannotCastSpellsInArmor?: boolean;
   speedPenaltyMeters?: 0 | 3;
+  spellcastingAbilitySlug?: string | null;
+  spellSaveDc?: number | null;
+  spellAttackBonus?: number | null;
   campaigns: CharacterCampaignRef[];
   createdAt: string;
   updatedAt: string;

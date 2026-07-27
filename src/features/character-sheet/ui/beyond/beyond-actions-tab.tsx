@@ -11,11 +11,13 @@ import type { ComponentType, SVGProps } from "react";
 
 import type { CharacterDetail } from "@/entities/character/types";
 import { formatSkillBonus } from "@/entities/character";
+import { useSheetRolls } from "@/features/character-sheet/ui/beyond/sheet-rolls";
 import {
   SheetEmptyHint,
   SheetSectionHeader,
   SheetSubheader,
 } from "@/features/character-sheet/ui/sheet-ui";
+import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
 
 type BeyondActionsTabProps = {
@@ -60,6 +62,8 @@ const SECTIONS: {
 /** Economia de ação na mesa — ataques de arma vêm da ficha (`weaponAttacks`). */
 export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
   const attacks = character.weaponAttacks ?? [];
+  const rolls = useSheetRolls();
+  const busy = rolls.attack.isPending || rolls.damage.isPending;
 
   return (
     <div className="space-y-5">
@@ -125,6 +129,51 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
                     {attack.attackNote}
                     {attack.proficient ? "" : " · sem proficiência"}
                   </p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="secondary"
+                      disabled={busy}
+                      onClick={() =>
+                        rolls.attack.mutate({
+                          itemSlug: attack.itemSlug,
+                          mode: attack.mode,
+                        })
+                      }
+                    >
+                      Atacar
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      disabled={busy}
+                      onClick={() =>
+                        rolls.damage.mutate({
+                          itemSlug: attack.itemSlug,
+                          mode: attack.mode,
+                        })
+                      }
+                    >
+                      Dano
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      disabled={busy}
+                      onClick={() =>
+                        rolls.damage.mutate({
+                          itemSlug: attack.itemSlug,
+                          mode: attack.mode,
+                          critical: true,
+                        })
+                      }
+                    >
+                      Crítico
+                    </Button>
+                  </div>
                 </div>
               </li>
             ))}

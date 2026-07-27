@@ -17,6 +17,7 @@ import {
 } from "@/features/character-sheet/ui/beyond/beyond-ability-row";
 import { BeyondCombatHub } from "@/features/character-sheet/ui/beyond/beyond-combat-hub";
 import { BeyondLeftColumn } from "@/features/character-sheet/ui/beyond/beyond-left-column";
+import { SheetRollsProvider } from "@/features/character-sheet/ui/beyond/sheet-rolls";
 import {
   BeyondMainTabs,
   type BeyondTabId,
@@ -255,6 +256,7 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
   };
 
   return (
+    <SheetRollsProvider characterId={id}>
     <div className={cn("flex flex-col gap-2.5 pb-6 sm:gap-3 sm:pb-8", motion.enter)}>
       <header className="flex shrink-0 flex-col gap-2 border-b border-border/60 pb-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
@@ -363,5 +365,6 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
         </SheetEditDialog>
       ) : null}
     </div>
+    </SheetRollsProvider>
   );
 }

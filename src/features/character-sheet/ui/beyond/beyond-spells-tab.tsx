@@ -9,7 +9,12 @@ import {
 } from "@heroicons/react/24/outline";
 
 import type { CharacterSpell } from "@/entities/character/sheet-types";
-import type { CharacterDetail } from "@/entities/character/types";
+import {
+  ABILITY_LABELS_PT,
+  formatSkillBonus,
+  type AbilityScores,
+  type CharacterDetail,
+} from "@/entities/character";
 import type { CharacterState } from "@/entities/character/session-types";
 import type { SpellSummary } from "@/entities/spell/types";
 import type { CharacterCatalogLabels } from "@/features/character-sheet/api/use-character-catalog-labels";
@@ -29,6 +34,15 @@ import { Button } from "@/shared/ui/button";
 import { nativeSelectClassName } from "@/shared/ui/native-select";
 import { PhbProse } from "@/shared/ui/phb-prose";
 import { cn } from "@/shared/lib/utils";
+
+const ABILITY_SHORT: Record<keyof AbilityScores, string> = {
+  forca: "FOR",
+  destreza: "DES",
+  constituicao: "CON",
+  inteligencia: "INT",
+  sabedoria: "SAB",
+  carisma: "CAR",
+};
 
 const SLOT_LEVELS = ["1", "2", "3", "4", "5", "6", "7", "8", "9"] as const;
 
@@ -153,6 +167,37 @@ export function BeyondSpellsTab({
     <div className="space-y-4">
       <SpellsTabHeader onEdit={onEdit} />
 
+      {character.spellSaveDc != null || character.spellAttackBonus != null ? (
+        <p className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+          {character.spellSaveDc != null ? (
+            <span>
+              <span className="font-semibold text-foreground">CD </span>
+              <span className="font-mono tabular-nums text-foreground">
+                {character.spellSaveDc}
+              </span>
+              {character.spellcastingAbilitySlug ? (
+                <span>
+                  {" "}
+                  (
+                  {ABILITY_LABELS_PT[
+                    character.spellcastingAbilitySlug as keyof AbilityScores
+                  ] ?? character.spellcastingAbilitySlug}
+                  )
+                </span>
+              ) : null}
+            </span>
+          ) : null}
+          {character.spellAttackBonus != null ? (
+            <span>
+              <span className="font-semibold text-foreground">Ataque </span>
+              <span className="font-mono tabular-nums text-foreground">
+                {formatSkillBonus(character.spellAttackBonus)}
+              </span>
+            </span>
+          ) : null}
+        </p>
+      ) : null}
+
       {stateQuery.isPending ? (
         <p className="text-sm text-muted-foreground">Carregando slots…</p>
       ) : (
@@ -244,6 +289,8 @@ export function BeyondSpellsTab({
                     state={state}
                     casting={castSpell.isPending}
                     cannotCastSpellsInArmor={cannotCastSpellsInArmor}
+                    spellSaveDc={character.spellSaveDc ?? null}
+                    spellAttackBonus={character.spellAttackBonus ?? null}
                     onCast={handleCast}
                   />
                 ))}
@@ -286,12 +333,16 @@ function SpellRow({
   state,
   casting,
   cannotCastSpellsInArmor,
+  spellSaveDc,
+  spellAttackBonus,
   onCast,
 }: {
   row: SpellRowModel;
   state: CharacterState | undefined;
   casting: boolean;
   cannotCastSpellsInArmor: boolean;
+  spellSaveDc: number | null;
+  spellAttackBonus: number | null;
   onCast: (spellSlug: string, slotLevel?: number) => Promise<void>;
 }) {
   const [open, setOpen] = useState(false);
@@ -328,6 +379,19 @@ function SpellRow({
     sourceLabel,
     row.detail?.castingTime,
   ].filter(Boolean);
+
+  const saveAbility = row.detail?.saveAbilitySlug as
+    | keyof AbilityScores
+    | null
+    | undefined;
+  const saveBadge =
+    saveAbility && spellSaveDc != null
+      ? `CD ${spellSaveDc} · ${ABILITY_SHORT[saveAbility] ?? saveAbility}`
+      : null;
+  const attackBadge =
+    row.detail?.requiresAttackRoll && spellAttackBonus != null
+      ? `ataque ${formatSkillBonus(spellAttackBonus)}`
+      : null;
 
   async function cast() {
     if (isCantrip) {
@@ -373,6 +437,16 @@ function SpellRow({
                   title="Ritual"
                 >
                   R
+                </span>
+              ) : null}
+              {saveBadge ? (
+                <span className="rounded border border-secondary/40 bg-secondary/10 px-1.5 py-px font-mono text-[0.65rem] tabular-nums text-secondary">
+                  {saveBadge}
+                </span>
+              ) : null}
+              {attackBadge ? (
+                <span className="rounded border border-primary/35 bg-primary/8 px-1.5 py-px font-mono text-[0.65rem] tabular-nums text-primary">
+                  {attackBadge}
                 </span>
               ) : null}
             </span>
