@@ -146,6 +146,7 @@ function previewCharacter(
     armorClass: 10 + abilityModifierValue(finalScores.destreza),
     armorClassNote: "Sem armadura",
     weaponAttacks: [],
+    campaigns: [],
     createdAt: "",
     updatedAt: "",
   };
