@@ -1,6 +1,7 @@
 import type {
   CharacterEquipment,
   CharacterSpell,
+  CharacterSheetInput,
   SpeciesChoice,
   SubclassOption,
   ClassOption,

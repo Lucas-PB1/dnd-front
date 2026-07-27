@@ -14,6 +14,7 @@ describe("class-spellcasting-ui", () => {
         cantrips: 3,
         preparedSpells: 4,
         channelDivinity: 0,
+        weaponMastery: null,
       },
     );
     expect(profile.archetypeTitle).toContain("divina");
@@ -32,6 +33,7 @@ describe("class-spellcasting-ui", () => {
         cantrips: null,
         preparedSpells: 2,
         channelDivinity: null,
+        weaponMastery: null,
       },
     );
     expect(profile.showCantripPicker).toBe(false);
@@ -49,6 +51,7 @@ describe("class-spellcasting-ui", () => {
         cantrips: 2,
         preparedSpells: 2,
         channelDivinity: null,
+        weaponMastery: null,
       },
     );
     expect(profile.slotPatternNote).toContain("pacto");

@@ -116,6 +116,7 @@ function previewCharacter(
     backgroundSkillSlugs: [],
     speciesChoices: values.speciesChoices,
     subclassOptions: values.subclassOptions,
+    classOptions: values.classOptions ?? [],
     characterFeats: [],
     featOptions: values.featOptions,
     characterSpells: values.characterSpells,
