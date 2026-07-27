@@ -47,6 +47,7 @@ export function useCharacterRolls(
       itemSlug: string;
       mode: "melee" | "ranged";
       critical?: boolean;
+      grazeMiss?: boolean;
     }) => run(rollCharacterDamage, args),
     onSuccess: onResult,
   });

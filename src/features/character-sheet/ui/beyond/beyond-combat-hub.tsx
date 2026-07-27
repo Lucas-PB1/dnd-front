@@ -9,10 +9,15 @@ import {
 import { useMemo, useState, type ComponentType, type ReactNode } from "react";
 
 import type { CharacterDetail } from "@/entities/character/types";
-import { abilityModifierValue, formatSkillBonus } from "@/entities/character";
+import {
+  abilityModifierValue,
+  formatSkillBonus,
+  initiativeBonus,
+} from "@/entities/character";
 import {
   useCharacterState,
   usePatchCharacterState,
+  useSpendClassResource,
 } from "@/features/character-sheet/api/use-character-state";
 import { useSheetRolls } from "@/features/character-sheet/ui/beyond/sheet-rolls";
 import { SheetChip } from "@/features/character-sheet/ui/sheet-ui";
@@ -92,6 +97,7 @@ export function BeyondCombatHub({
 }: BeyondCombatHubProps) {
   const stateQuery = useCharacterState(characterId);
   const patchState = usePatchCharacterState(characterId);
+  const spendResource = useSpendClassResource(characterId);
   const conditionsCatalog = useConditions();
   const rolls = useSheetRolls();
 
@@ -100,7 +106,12 @@ export function BeyondCombatHub({
   const [tempHpDraft, setTempHpDraft] = useState("");
 
   const state = stateQuery.data;
-  const initiative = abilityModifierValue(character.abilityScores.destreza);
+  const classResources = state?.classResources ?? [];
+  const initiative = initiativeBonus(
+    abilityModifierValue(character.abilityScores.destreza),
+    character.proficiencyBonus,
+    character.characterFeats,
+  );
 
   const conditionNameBySlug = useMemo(() => {
     const names = new Map<string, string>();
@@ -191,6 +202,49 @@ export function BeyondCombatHub({
           </div>
         </div>
       </div>
+
+      {classResources.length > 0 ? (
+        <div className="mt-2 rounded-lg border border-border/70 bg-card/70 px-3 py-2">
+          <p className="text-[0.58rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
+            Recursos de classe
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {classResources.map((resource) => (
+              <div
+                key={resource.slug}
+                className="inline-flex items-center gap-2 rounded-md border border-border/80 bg-background/60 px-2 py-1"
+              >
+                <span className="text-sm">
+                  {resource.name}{" "}
+                  <span className="tabular-nums text-muted-foreground">
+                    {resource.remaining}/{resource.max}
+                  </span>
+                </span>
+                <Button
+                  type="button"
+                  size="xs"
+                  variant="outline"
+                  disabled={
+                    resource.remaining <= 0 || spendResource.isPending
+                  }
+                  onClick={() =>
+                    spendResource.mutate({ resourceSlug: resource.slug })
+                  }
+                >
+                  Usar
+                </Button>
+              </div>
+            ))}
+          </div>
+          {spendResource.isError ? (
+            <p className="mt-2 text-sm text-destructive" role="alert">
+              {spendResource.error instanceof Error
+                ? spendResource.error.message
+                : "Não foi possível gastar o recurso"}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
 
       {editingStatus ? (
         <div className="mt-2 space-y-2 rounded-lg border border-border/60 bg-background/50 p-2.5">

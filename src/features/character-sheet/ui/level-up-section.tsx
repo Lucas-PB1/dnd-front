@@ -7,12 +7,21 @@ import {
   canAddCharacterFeat,
 } from "@/entities/character/lib/character-feat";
 import type { CharacterDetail } from "@/entities/character/types";
+import type { ClassOption } from "@/entities/character/sheet-types";
 import type { FeatOption } from "@/entities/character/sheet-types";
 import { useClassSubclasses } from "@/features/class-catalog/api/use-classes";
 import {
   useLevelUp,
   useLevelUpPreview,
 } from "@/features/character-sheet/api/use-character-progression";
+import {
+  LevelUpClassExpertise,
+  levelUpExpertiseComplete,
+} from "@/features/character-sheet/ui/level-up-class-expertise";
+import {
+  LevelUpWeaponMastery,
+  levelUpWeaponMasteryComplete,
+} from "@/features/character-sheet/ui/level-up-weapon-mastery";
 import { findIncompleteCreateFeatOptions } from "@/features/create-character/lib/validate-create-feat-options";
 import { CatalogSelect } from "@/features/create-character/ui/catalog-select";
 import { useFeatOptions } from "@/features/feat-catalog/api/use-feat-options";
@@ -40,6 +49,9 @@ export function LevelUpSection({
   const [selectedFeatSlug, setSelectedFeatSlug] = useState("");
   const [levelUpFeatOptions, setLevelUpFeatOptions] = useState<FeatOption[]>(
     [],
+  );
+  const [levelUpClassOptions, setLevelUpClassOptions] = useState<ClassOption[]>(
+    () => character.classOptions ?? [],
   );
   const [levelUpError, setLevelUpError] = useState<string | undefined>();
 
@@ -92,6 +104,17 @@ export function LevelUpSection({
     );
   }
 
+  const newExpertiseSlots = data.newClassExpertiseSlots ?? [];
+  const newMasterySlots = data.newWeaponMasterySlots ?? [];
+  const expertiseComplete = levelUpExpertiseComplete(
+    newExpertiseSlots,
+    levelUpClassOptions,
+  );
+  const masteryComplete = levelUpWeaponMasteryComplete(
+    newMasterySlots,
+    levelUpClassOptions,
+  );
+
   async function handleLevelUp() {
     if (!data) return;
     setLevelUpError(undefined);
@@ -137,9 +160,15 @@ export function LevelUpSection({
         }
       }
     }
-    await levelUp.mutateAsync(payload);
+    if (newExpertiseSlots.length > 0 || newMasterySlots.length > 0) {
+      payload.classOptions = levelUpClassOptions;
+    }
+    const updated = await levelUp.mutateAsync(payload);
     setSelectedFeatSlug("");
     setLevelUpFeatOptions([]);
+    if (updated) {
+      setLevelUpClassOptions(updated.classOptions ?? []);
+    }
   }
 
   return (
@@ -262,6 +291,24 @@ export function LevelUpSection({
         </div>
       ) : null}
 
+      {newExpertiseSlots.length > 0 ? (
+        <LevelUpClassExpertise
+          character={character}
+          newSlots={newExpertiseSlots}
+          value={levelUpClassOptions}
+          onChange={setLevelUpClassOptions}
+        />
+      ) : null}
+
+      {newMasterySlots.length > 0 ? (
+        <LevelUpWeaponMastery
+          character={character}
+          newSlots={newMasterySlots}
+          value={levelUpClassOptions}
+          onChange={setLevelUpClassOptions}
+        />
+      ) : null}
+
       {levelUpError ? (
         <p className="text-sm text-destructive" role="alert">
           {levelUpError}
@@ -270,7 +317,12 @@ export function LevelUpSection({
 
       <Button
         type="button"
-        disabled={levelUp.isPending || (data.subclassRequired && !subclassSlug)}
+        disabled={
+          levelUp.isPending ||
+          (data.subclassRequired && !subclassSlug) ||
+          (newExpertiseSlots.length > 0 && !expertiseComplete) ||
+          (newMasterySlots.length > 0 && !masteryComplete)
+        }
         onClick={handleLevelUp}
       >
         {levelUp.isPending

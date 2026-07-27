@@ -37,9 +37,6 @@ function ItemHero({ item, backHref }: { item: ItemSummary; backHref: string }) {
       title={item.name}
       eyebrow={typeLabel}
       stats={stats}
-      statsClassName={
-        stats.length >= 3 ? "grid-cols-2 sm:grid-cols-3" : undefined
-      }
     />
   );
 }

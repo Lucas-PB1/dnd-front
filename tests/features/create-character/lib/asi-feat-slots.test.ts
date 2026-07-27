@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  ASI_FEAT_LEVELS,
+  BASE_ASI_FEAT_LEVELS,
+  asiFeatLevelsForClass,
   asiFeatLevelsUpTo,
   countAsiFeatSlots,
 } from "@/features/create-character/lib/asi-feat-slots";
@@ -9,17 +10,30 @@ import { asiFeatSlotsToCharacterFeats } from "@/features/create-character/lib/as
 import { resolveCreateCharacterFeats } from "@/features/create-character/lib/preview-create-character-feats";
 
 describe("asi-feat-slots", () => {
-  it("counts slots up to character level", () => {
-    expect(countAsiFeatSlots(1)).toBe(0);
-    expect(countAsiFeatSlots(4)).toBe(1);
-    expect(countAsiFeatSlots(5)).toBe(1);
-    expect(countAsiFeatSlots(8)).toBe(2);
-    expect(countAsiFeatSlots(20)).toBe(ASI_FEAT_LEVELS.length);
+  it("counts slots up to character level (base classes)", () => {
+    expect(countAsiFeatSlots("wizard", 1)).toBe(0);
+    expect(countAsiFeatSlots("wizard", 4)).toBe(1);
+    expect(countAsiFeatSlots("wizard", 5)).toBe(1);
+    expect(countAsiFeatSlots("wizard", 8)).toBe(2);
+    expect(countAsiFeatSlots("wizard", 20)).toBe(BASE_ASI_FEAT_LEVELS.length);
   });
 
   it("lists ASI levels reached", () => {
-    expect(asiFeatLevelsUpTo(7)).toEqual([4]);
-    expect(asiFeatLevelsUpTo(12)).toEqual([4, 8, 12]);
+    expect(asiFeatLevelsUpTo("wizard", 7)).toEqual([4]);
+    expect(asiFeatLevelsUpTo("wizard", 12)).toEqual([4, 8, 12]);
+  });
+
+  it("includes Fighter extra ASI at 6 and 14", () => {
+    expect(asiFeatLevelsForClass("fighter")).toEqual([
+      4, 6, 8, 12, 14, 16, 19,
+    ]);
+    expect(countAsiFeatSlots("fighter", 6)).toBe(2);
+    expect(asiFeatLevelsUpTo("fighter", 14)).toEqual([4, 6, 8, 12, 14]);
+  });
+
+  it("includes Rogue extra ASI at 10", () => {
+    expect(asiFeatLevelsForClass("rogue")).toEqual([4, 8, 10, 12, 16, 19]);
+    expect(countAsiFeatSlots("rogue", 10)).toBe(3);
   });
 });
 

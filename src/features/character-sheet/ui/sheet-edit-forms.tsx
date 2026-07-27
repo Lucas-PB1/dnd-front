@@ -781,6 +781,7 @@ function SheetStepForm({
     languageSlugs: character.languageSlugs,
     speciesChoices: character.speciesChoices,
     subclassOptions: character.subclassOptions,
+    classOptions: character.classOptions ?? [],
     featOptions: character.featOptions,
     // Hidrata slots com os feats já na ficha para o editor não podar featOptions.
     asiFeatSlotSlugs: character.characterFeats.map((feat) => feat.featSlug),
@@ -806,7 +807,10 @@ export function EditClassSkillsForm(props: EditFormProps) {
   return (
     <SheetStepForm
       {...props}
-      toPayload={(v) => ({ classSkillSlugs: v.classSkillSlugs })}
+      toPayload={(v) => ({
+        classSkillSlugs: v.classSkillSlugs,
+        classOptions: v.classOptions,
+      })}
     >
       {(form) => (
         <StepClassSkills control={form.control} setValue={form.setValue} />

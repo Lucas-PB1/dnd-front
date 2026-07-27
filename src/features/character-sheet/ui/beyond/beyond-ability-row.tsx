@@ -143,6 +143,13 @@ export function BeyondCharacterStatsBar({
           </span>
           <span className="text-[0.65rem] text-muted-foreground">
             {tempHp > 0 ? `+${tempHp} temp` : "sem temp"}
+            {state?.hitDiceMax != null ? (
+              <>
+                {" · "}
+                {state.hitDiceCurrent}/{state.hitDiceMax}{" "}
+                {state.hitDie ?? "DV"}
+              </>
+            ) : null}
           </span>
         </div>
         <div className="mt-1.5 flex items-center gap-1">
@@ -184,17 +191,60 @@ export function BeyondCharacterStatsBar({
 }
 
 export function BeyondRestActions({ characterId }: { characterId: string }) {
+  const stateQuery = useCharacterState(characterId);
   const takeRest = useTakeRest(characterId);
+  const [hitDiceSpent, setHitDiceSpent] = useState(1);
+  const [lastHeal, setLastHeal] = useState<string | null>(null);
+
+  const hitDiceCurrent = stateQuery.data?.hitDiceCurrent ?? 0;
+  const hitDie = stateQuery.data?.hitDie ?? "DV";
+  const maxSpend = Math.max(0, hitDiceCurrent);
+  const spend = Math.min(Math.max(0, hitDiceSpent), maxSpend);
+
+  async function shortRest() {
+    const result = await takeRest.mutateAsync({
+      type: "short",
+      hitDiceSpent: spend,
+    });
+    if (result?.hitPointsHealed != null && result.hitPointsHealed > 0) {
+      const rolls = result.hitDiceRolls?.join(", ") ?? "";
+      setLastHeal(`+${result.hitPointsHealed} PV${rolls ? ` (${rolls})` : ""}`);
+    } else {
+      setLastHeal(spend > 0 ? "Sem cura efetiva" : null);
+    }
+  }
 
   return (
-    <div className="flex items-center gap-1.5">
+    <div className="flex flex-wrap items-center gap-1.5">
+      <div className="flex items-center gap-1 rounded-md border border-border/70 bg-card/60 px-1.5 py-0.5">
+        <label
+          htmlFor={`hit-dice-${characterId}`}
+          className="text-[0.65rem] whitespace-nowrap text-muted-foreground"
+        >
+          {hitDie}
+        </label>
+        <Input
+          id={`hit-dice-${characterId}`}
+          type="number"
+          min={0}
+          max={maxSpend}
+          value={spend}
+          onChange={(event) => setHitDiceSpent(Number(event.target.value) || 0)}
+          aria-label="Dados de vida a gastar no descanso curto"
+          className="h-7 w-14 px-2"
+          disabled={takeRest.isPending || maxSpend === 0}
+        />
+        <span className="text-[0.65rem] text-muted-foreground">
+          / {hitDiceCurrent}
+        </span>
+      </div>
       <Button
         type="button"
         size="sm"
         variant="outline"
         className="gap-1"
         disabled={takeRest.isPending}
-        onClick={() => takeRest.mutate({ type: "short" })}
+        onClick={() => void shortRest()}
       >
         <SunIcon className="size-3.5" aria-hidden />
         Descanso curto
@@ -205,11 +255,19 @@ export function BeyondRestActions({ characterId }: { characterId: string }) {
         variant="outline"
         className="gap-1"
         disabled={takeRest.isPending}
-        onClick={() => takeRest.mutate({ type: "long" })}
+        onClick={() => {
+          setLastHeal(null);
+          takeRest.mutate({ type: "long" });
+        }}
       >
         <MoonIcon className="size-3.5" aria-hidden />
         Descanso longo
       </Button>
+      {lastHeal ? (
+        <span className="text-xs text-muted-foreground" role="status">
+          {lastHeal}
+        </span>
+      ) : null}
     </div>
   );
 }

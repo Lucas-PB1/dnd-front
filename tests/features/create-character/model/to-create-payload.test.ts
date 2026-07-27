@@ -49,6 +49,7 @@ describe("toCreateCharacterPayload", () => {
     abilityRawValues: [15, 14, 13, 12, 10, 8],
     speciesChoices: [],
     subclassOptions: [],
+    classOptions: [],
     featOptions: [],
     asiFeatSlotSlugs: [],
     alignmentSlug: "",

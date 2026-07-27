@@ -363,7 +363,7 @@ export function StepReview({ control }: StepReviewProps) {
     return acc;
   }, {});
 
-  const asiLevels = asiFeatLevelsUpTo(values.level);
+  const asiLevels = asiFeatLevelsUpTo(values.classSlug, values.level);
   const asiLevelByFeatKey = useMemo(() => {
     const map = new Map<string, number>();
     let built: ReturnType<typeof asiFeatSlotsToCharacterFeats> = [];

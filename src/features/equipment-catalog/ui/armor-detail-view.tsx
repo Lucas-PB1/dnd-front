@@ -47,9 +47,6 @@ function ArmorHero({
       title={armor.name}
       eyebrow={armor.categoryName}
       stats={stats}
-      statsClassName={
-        stats.length >= 3 ? "grid-cols-2 sm:grid-cols-4" : undefined
-      }
     />
   );
 }

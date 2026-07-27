@@ -102,10 +102,15 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
                           ? "à distância"
                           : "corpo a corpo"}
                         {attack.role === "light_bonus"
-                          ? " · adicional (Leve)"
+                          ? attack.nickUsesAttackAction
+                            ? " · adicional (Ágil)"
+                            : " · adicional (Leve)"
                           : null}
                         {attack.role === "dual_bonus"
                           ? " · adicional (Ambidestro)"
+                          : null}
+                        {attack.masteryActive && attack.masteryName
+                          ? ` · ${attack.masteryName}`
                           : null}
                       </span>
                     </p>
@@ -173,6 +178,23 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
                     >
                       Crítico
                     </Button>
+                    {attack.grazeOnMissDamage != null ? (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        disabled={busy}
+                        onClick={() =>
+                          rolls.damage.mutate({
+                            itemSlug: attack.itemSlug,
+                            mode: attack.mode,
+                            grazeMiss: true,
+                          })
+                        }
+                      >
+                        Erro (Garantido)
+                      </Button>
+                    ) : null}
                   </div>
                 </div>
               </li>

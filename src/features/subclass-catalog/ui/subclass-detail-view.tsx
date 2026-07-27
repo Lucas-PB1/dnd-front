@@ -47,9 +47,6 @@ function SubclassHero({
       title={subclass.name}
       eyebrow={subclass.tagline ?? subclass.className}
       stats={stats}
-      statsClassName={
-        stats.length >= 3 ? "grid-cols-2 sm:grid-cols-3" : undefined
-      }
     />
   );
 }

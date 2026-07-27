@@ -10,6 +10,7 @@ import type { AbilityScores, CharacterDetail } from "@/entities/character/types"
 import {
   ABILITY_LABELS_PT,
   abilityModifierValue,
+  collectSaveProficiencyAbilities,
   formatSkillBonus,
 } from "@/entities/character";
 import { useClassDetail } from "@/features/class-catalog/api/use-classes";
@@ -32,7 +33,12 @@ export function BeyondLeftColumn({
   const classDetail = useClassDetail(character.classSlug, true);
   const speciesDetail = useSpeciesDetail(character.speciesSlug, true);
   const rolls = useSheetRolls();
-  const proficient = new Set(classDetail.data?.savingThrowSlugs ?? []);
+  const proficient = new Set(
+    collectSaveProficiencyAbilities(
+      classDetail.data?.savingThrowSlugs ?? [],
+      character.featOptions,
+    ),
+  );
   const pb = character.proficiencyBonus;
 
   return (

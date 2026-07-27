@@ -37,6 +37,7 @@ export async function rollCharacterDamage(
     itemSlug: string;
     mode: "melee" | "ranged";
     critical?: boolean;
+    grazeMiss?: boolean;
   },
 ) {
   return gameFetch<CharacterRollResult>(

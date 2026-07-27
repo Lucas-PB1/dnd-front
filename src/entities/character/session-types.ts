@@ -1,21 +1,38 @@
 /** Espelha CharacterStateResponseDto da dnd-api */
 export type SpellSlotsMap = Record<string, number>;
 
+export type ClassResourceState = {
+  slug: string;
+  name: string;
+  max: number;
+  used: number;
+  remaining: number;
+};
+
 export type CharacterState = {
   spellSlotsMax: SpellSlotsMap;
   spellSlotsUsed: SpellSlotsMap;
   spellSlotsRemaining: SpellSlotsMap;
+  classResources: ClassResourceState[];
   concentratingOn: string | null;
   conditions: string[];
   tempHp: number;
   hitPointsCurrent: number | null;
   hitPointsMax: number | null;
+  hitDiceCurrent: number;
+  hitDiceMax: number;
+  hitDie: string | null;
 };
 
 export type PatchCharacterStatePayload = {
   conditions?: string[];
   tempHp?: number;
   concentratingOn?: string | null;
+};
+
+export type UseClassResourcePayload = {
+  resourceSlug: string;
+  amount?: number;
 };
 
 export type CastSpellPayload = {
@@ -33,11 +50,15 @@ export type RestType = "short" | "long";
 
 export type RestPayload = {
   type: RestType;
+  hitDiceSpent?: number;
 };
 
 export type RestResult = {
   type: RestType;
   state: CharacterState;
+  hitDiceSpent?: number;
+  hitDiceRolls?: number[];
+  hitPointsHealed?: number;
 };
 
 /** Espelha InventoryItemResponseDto */
@@ -66,6 +87,16 @@ export type PatchInventoryItemPayload = {
 };
 
 /** Espelha LevelUpPreviewDto */
+export type LevelUpClassExpertiseSlot = {
+  optionKey: string;
+  unlockLevel: number;
+};
+
+export type LevelUpWeaponMasterySlot = {
+  optionKey: string;
+  unlockLevel: number;
+};
+
 export type LevelUpSpellOption = {
   spellSlug: string;
   spellName: string;
@@ -83,6 +114,8 @@ export type LevelUpPreview = {
   subclassUnlockLevel?: number;
   isAsiOrFeatLevel: boolean;
   newSpellOptions: LevelUpSpellOption[];
+  newClassExpertiseSlots: LevelUpClassExpertiseSlot[];
+  newWeaponMasterySlots: LevelUpWeaponMasterySlot[];
 };
 
 export type LevelUpPayload = {
@@ -90,6 +123,7 @@ export type LevelUpPayload = {
   classSkillSlugs?: string[];
   speciesChoices?: import("@/entities/character/sheet-types").SpeciesChoice[];
   subclassOptions?: import("@/entities/character/sheet-types").SubclassOption[];
+  classOptions?: import("@/entities/character/sheet-types").ClassOption[];
   characterFeats?: import("@/entities/character/sheet-types").CharacterFeat[];
   featOptions?: import("@/entities/character/sheet-types").FeatOption[];
   characterSpells?: import("@/entities/character/sheet-types").CharacterSpell[];

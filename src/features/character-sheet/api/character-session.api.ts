@@ -6,6 +6,7 @@ import type {
   PatchCharacterStatePayload,
   RestPayload,
   RestResult,
+  UseClassResourcePayload,
 } from "@/entities/character/session-types";
 
 export const sessionKeys = {
@@ -63,4 +64,19 @@ export async function takeCharacterRest(
     method: "POST",
     body: JSON.stringify(payload),
   });
+}
+
+export async function spendClassResource(
+  accessToken: string,
+  characterId: string,
+  payload: UseClassResourcePayload,
+) {
+  return gameFetch<CharacterState>(
+    `/characters/${characterId}/resources/use`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+  );
 }

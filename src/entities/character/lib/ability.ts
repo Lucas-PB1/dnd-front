@@ -10,15 +10,16 @@ export function abilityModifier(score: number): string {
   return formatAbilityModifier(abilityModifierValue(score));
 }
 
-/** Bônus total de perícia: mod do atributo + PB se proficiente */
 export function skillBonus(
   abilityScore: number,
   proficient: boolean,
   proficiencyBonus: number,
+  expertise = false,
 ): number {
-  return (
-    abilityModifierValue(abilityScore) + (proficient ? proficiencyBonus : 0)
-  );
+  const mod = abilityModifierValue(abilityScore);
+  if (expertise) return mod + proficiencyBonus * 2;
+  if (proficient) return mod + proficiencyBonus;
+  return mod;
 }
 
 export function formatSkillBonus(bonus: number): string {

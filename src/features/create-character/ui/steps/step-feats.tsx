@@ -106,8 +106,8 @@ export function StepFeats({ control, setValue, error }: StepFeatsProps) {
   const originFeatSlug = backgroundDetail.data?.originFeatSlug ?? null;
   const originFeatName = backgroundDetail.data?.originFeatName ?? null;
 
-  const asiSlotCount = countAsiFeatSlots(level);
-  const asiLevels = asiFeatLevelsUpTo(level);
+  const asiSlotCount = countAsiFeatSlots(classSlug, level);
+  const asiLevels = asiFeatLevelsUpTo(classSlug, level);
 
   const featNameBySlug = useMemo(
     () =>

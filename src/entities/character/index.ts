@@ -18,6 +18,13 @@ export {
   skillBonus,
 } from "@/entities/character/lib/ability";
 export {
+  collectSaveProficiencyAbilities,
+  initiativeBonus,
+  skillCheckBonus,
+  skillProficiencyRank,
+} from "@/entities/character/lib/check-bonuses";
+export type { SkillProficiencyRank } from "@/entities/character/lib/check-bonuses";
+export {
   isSubclassRequired,
   SUBCLASS_UNLOCK_LEVEL_DEFAULT,
 } from "@/entities/character/lib/subclass";

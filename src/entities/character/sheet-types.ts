@@ -14,6 +14,11 @@ export type SubclassOption = {
   valueId: string;
 };
 
+export type ClassOption = {
+  optionKey: string;
+  valueId: string;
+};
+
 export type FeatOption = {
   featSlug: string;
   instanceIndex: number;
@@ -39,6 +44,7 @@ export type CharacterSheetInput = {
   classSkillSlugs?: string[];
   speciesChoices?: SpeciesChoice[];
   subclassOptions?: SubclassOption[];
+  classOptions?: ClassOption[];
   characterFeats?: CharacterFeat[];
   featOptions?: FeatOption[];
   characterSpells?: CharacterSpell[];

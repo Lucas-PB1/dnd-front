@@ -61,9 +61,6 @@ function WeaponHero({
       title={weapon.name}
       eyebrow={weaponCategoryLabel(weapon.category)}
       stats={stats}
-      statsClassName={
-        stats.length >= 3 ? "grid-cols-2 sm:grid-cols-4" : undefined
-      }
     />
   );
 }

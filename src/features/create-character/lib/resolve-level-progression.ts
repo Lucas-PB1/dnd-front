@@ -22,5 +22,6 @@ export function resolveLevelProgression(
     cantrips: slotRow.cantrips ?? null,
     preparedSpells: slotRow.preparedSpells ?? null,
     channelDivinity: slotRow.channelDivinity ?? null,
+    weaponMastery: null,
   };
 }

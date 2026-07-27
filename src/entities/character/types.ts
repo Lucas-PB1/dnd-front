@@ -1,9 +1,9 @@
-import type { CharacterSheetInput } from "@/entities/character/sheet-types";
 import type {
   CharacterEquipment,
   CharacterSpell,
   SpeciesChoice,
   SubclassOption,
+  ClassOption,
   FeatOption,
   CharacterFeat,
 } from "@/entities/character/sheet-types";
@@ -14,6 +14,7 @@ export type {
   CharacterSheetInput,
   SpeciesChoice,
   SubclassOption,
+  ClassOption,
   FeatOption,
   CharacterFeat,
 } from "@/entities/character/sheet-types";
@@ -44,6 +45,7 @@ export type CharacterDetail = {
   backgroundSkillSlugs: string[];
   speciesChoices: SpeciesChoice[];
   subclassOptions: SubclassOption[];
+  classOptions: ClassOption[];
   characterFeats: CharacterFeat[];
   featOptions: FeatOption[];
   characterSpells: CharacterSpell[];
@@ -91,6 +93,12 @@ export type WeaponAttackSummary = {
   role?: "main" | "light_bonus" | "dual_bonus";
   attackDisadvantage?: boolean;
   omitsAbilityDamage?: boolean;
+  greatWeaponFighting?: boolean;
+  masteryActive?: boolean;
+  masterySlug?: string | null;
+  masteryName?: string | null;
+  nickUsesAttackAction?: boolean;
+  grazeOnMissDamage?: number | null;
 };
 
 export type EquipmentWarning = {

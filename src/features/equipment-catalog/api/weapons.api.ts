@@ -6,6 +6,7 @@ import type {
 import {
   buildCatalogSearchParams,
   CATALOG_FETCH_INIT,
+  fetchAllCatalogPages,
 } from "@/shared/lib/catalog-query";
 import { CATALOG_PAGE_SIZE } from "@/shared/lib/catalog-pagination";
 
@@ -18,6 +19,7 @@ export const weaponKeys = {
     category: string;
   }) => [...weaponKeys.all, "list", "page", params] as const,
   detail: (slug: string) => [...weaponKeys.all, "detail", slug] as const,
+  allMastery: () => [...weaponKeys.all, "all-mastery"] as const,
 };
 
 export async function fetchWeaponsPage(params?: {
@@ -44,4 +46,15 @@ export async function fetchWeaponBySlug(slug: string) {
     `/weapons/${encodeURIComponent(slug)}`,
     CATALOG_FETCH_INIT,
   );
+}
+
+/** Todas as armas do catálogo (para escolha de Maestria em Arma). */
+export async function fetchAllWeapons() {
+  return fetchAllCatalogPages<WeaponSummary>(({ page, limit }) => {
+    const search = buildCatalogSearchParams({ page, limit });
+    return catalogFetch<WeaponListResponse>(
+      `/weapons?${search}`,
+      CATALOG_FETCH_INIT,
+    );
+  });
 }

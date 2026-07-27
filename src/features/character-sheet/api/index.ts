@@ -23,6 +23,7 @@ export {
   patchCharacterState,
   castCharacterSpell,
   takeCharacterRest,
+  spendClassResource,
 } from "@/features/character-sheet/api/character-session.api";
 export {
   inventoryKeys,
@@ -42,6 +43,7 @@ export {
   usePatchCharacterState,
   useCastSpell,
   useTakeRest,
+  useSpendClassResource,
 } from "@/features/character-sheet/api/use-character-state";
 export {
   useCharacterInventory,

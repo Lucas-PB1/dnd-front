@@ -12,13 +12,6 @@ export type CatalogDetailStat = {
   value: ReactNode;
 };
 
-function defaultStatsGridClass(count: number): string {
-  if (count >= 5) return "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5";
-  if (count >= 4) return "grid-cols-2 sm:grid-cols-4";
-  if (count === 3) return "grid-cols-1 sm:grid-cols-3";
-  return "grid-cols-1 sm:grid-cols-2";
-}
-
 type CatalogDetailHeroProps = {
   backHref: string;
   backLabel: string;
@@ -28,8 +21,6 @@ type CatalogDetailHeroProps = {
   badges?: string[];
   summary?: ReactNode;
   stats?: CatalogDetailStat[];
-  /** Override do grid de stats (senão deriva da quantidade). */
-  statsClassName?: string;
   children?: ReactNode;
   className?: string;
 };
@@ -44,7 +35,6 @@ export function CatalogDetailHero({
   badges,
   summary,
   stats,
-  statsClassName,
   children,
   className,
 }: CatalogDetailHeroProps) {
@@ -103,20 +93,20 @@ export function CatalogDetailHero({
 
         {hasStats ? (
           <dl
-            className={cn(
-              "grid gap-px overflow-hidden rounded-lg border border-border bg-border",
-              statsClassName ?? defaultStatsGridClass(stats!.length),
-            )}
+            className="grid gap-px overflow-x-auto rounded-lg border border-border bg-border"
+            style={{
+              gridTemplateColumns: `repeat(${stats!.length}, minmax(0, 1fr))`,
+            }}
           >
             {stats!.map((stat) => (
               <div
                 key={stat.label}
-                className="bg-card/80 px-3 py-3 backdrop-blur-sm sm:px-4"
+                className="min-w-0 bg-card/80 px-2 py-3 backdrop-blur-sm sm:px-4"
               >
                 <dt className="text-[0.65rem] font-medium tracking-wider text-muted-foreground uppercase">
                   {stat.label}
                 </dt>
-                <dd className="mt-1 font-heading text-base font-semibold leading-tight sm:text-lg">
+                <dd className="mt-1 font-heading text-sm font-semibold leading-tight sm:text-lg">
                   {stat.value}
                 </dd>
               </div>

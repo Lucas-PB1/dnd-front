@@ -80,7 +80,6 @@ function ClassHero({
       eyebrow={cls.tagline}
       summary={cls.summary}
       stats={stats}
-      statsClassName="grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"
     >
       {(cls.armorTrainingNames?.length || cls.weaponProficiencyNames?.length) ? (
         <dl className="grid gap-3 text-sm sm:grid-cols-2">

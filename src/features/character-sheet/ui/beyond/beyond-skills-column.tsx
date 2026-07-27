@@ -9,7 +9,9 @@ import type { AbilityScores, CharacterDetail } from "@/entities/character/types"
 import {
   ABILITY_LABELS_PT,
   formatSkillBonus,
-  skillBonus,
+  skillCheckBonus,
+  skillProficiencyRank,
+  abilityModifierValue,
 } from "@/entities/character";
 import type { SkillSummary } from "@/entities/skill/types";
 import {
@@ -30,6 +32,8 @@ type SkillRowData = {
   skill: SkillSummary;
   abilityKey: keyof AbilityScores;
   isProficient: boolean;
+  isExpertise: boolean;
+  isJack: boolean;
   bonus: number;
 };
 
@@ -39,20 +43,34 @@ export function BeyondSkillsColumn({
   onEdit,
 }: BeyondSkillsColumnProps) {
   const rolls = useSheetRolls();
-  const proficient = new Set([
-    ...character.classSkillSlugs,
-    ...character.backgroundSkillSlugs,
-  ]);
+  const skillSources = {
+    classSkillSlugs: character.classSkillSlugs,
+    backgroundSkillSlugs: character.backgroundSkillSlugs,
+    speciesChoices: character.speciesChoices,
+    featOptions: character.featOptions,
+    classOptions: character.classOptions,
+    classSlug: character.classSlug,
+    level: character.level,
+  };
 
   const withBonus: SkillRowData[] = skills.map((skill) => {
     const abilityKey = skill.abilitySlug as keyof AbilityScores;
     const score = character.abilityScores[abilityKey] ?? 10;
-    const isProficient = proficient.has(skill.slug);
+    const rank = skillProficiencyRank(skill.slug, skillSources);
+    const isProficient = rank === "proficient" || rank === "expertise";
+    const isExpertise = rank === "expertise";
+    const isJack = rank === "jack";
     return {
       skill,
       abilityKey,
       isProficient,
-      bonus: skillBonus(score, isProficient, character.proficiencyBonus),
+      isExpertise,
+      isJack,
+      bonus: skillCheckBonus(
+        abilityModifierValue(score),
+        character.proficiencyBonus,
+        rank,
+      ),
     };
   });
 
@@ -112,6 +130,8 @@ function SkillRow({
   skill,
   abilityKey,
   isProficient,
+  isExpertise,
+  isJack,
   bonus,
   pending,
   onRoll,
@@ -131,15 +151,29 @@ function SkillRow({
         "hover:bg-muted/30 disabled:opacity-60",
         isProficient && "bg-primary/[0.07]",
       )}
-      title={`Rolar ${skill.name} (${ABILITY_LABELS_PT[abilityKey]})`}
+      title={`Rolar ${skill.name} (${ABILITY_LABELS_PT[abilityKey]})${isExpertise ? " · Especialização" : isJack ? " · Pau pra Toda Obra" : ""}`}
     >
       <span
         className={cn(
           "mt-0.5 size-1.5 shrink-0 self-center rounded-full",
-          isProficient ? "bg-primary" : "bg-border",
+          isExpertise
+            ? "bg-primary ring-1 ring-primary/40 ring-offset-1 ring-offset-background"
+            : isProficient
+              ? "bg-primary"
+              : isJack
+                ? "bg-primary/50"
+                : "bg-border",
         )}
-        aria-label={isProficient ? "Proficiente" : undefined}
-        aria-hidden={!isProficient}
+        aria-label={
+          isExpertise
+            ? "Especialização"
+            : isProficient
+              ? "Proficiente"
+              : isJack
+                ? "Pau pra Toda Obra"
+                : undefined
+        }
+        aria-hidden={!isProficient && !isJack}
       />
 
       <span
@@ -156,6 +190,15 @@ function SkillRow({
         )}
       >
         {skill.name}
+        {isExpertise ? (
+          <span className="ml-1 text-[0.65rem] font-normal text-primary">
+            ×2
+          </span>
+        ) : isJack ? (
+          <span className="ml-1 text-[0.65rem] font-normal text-muted-foreground">
+            ½
+          </span>
+        ) : null}
       </span>
 
       <span

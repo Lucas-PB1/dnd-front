@@ -76,13 +76,6 @@ function BackgroundHero({
       eyebrow={background.tagline}
       summary={background.summary}
       stats={stats}
-      statsClassName={
-        stats.length > 0
-          ? stats.length >= 4
-            ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"
-            : "grid-cols-1 sm:grid-cols-3"
-          : undefined
-      }
     />
   );
 }

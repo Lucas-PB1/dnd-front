@@ -71,6 +71,12 @@ export const TEMP_TEST_PRESETS: TempTestPreset[] = [
       abilityRawValues: undefined,
       speciesChoices: [],
       subclassOptions: [],
+      classOptions: [
+        { optionKey: "masteryWeapon1", valueId: "longsword" },
+        { optionKey: "masteryWeapon2", valueId: "greataxe" },
+        { optionKey: "masteryWeapon3", valueId: "shortbow" },
+        { optionKey: "masteryWeapon4", valueId: "handaxe" },
+      ],
       asiFeatSlotSlugs: ["ability-score-improvement"],
       featOptions: [...ASI_PLUS2("forca")],
       languageSlugs: ["common", "dwarvish"],
@@ -107,6 +113,11 @@ export const TEMP_TEST_PRESETS: TempTestPreset[] = [
       abilityRawValues: undefined,
       speciesChoices: [],
       subclassOptions: [],
+      classOptions: [
+        { optionKey: "masteryWeapon1", valueId: "greataxe" },
+        { optionKey: "masteryWeapon2", valueId: "handaxe" },
+        { optionKey: "masteryWeapon3", valueId: "greatsword" },
+      ],
       asiFeatSlotSlugs: ["ability-score-improvement"],
       featOptions: [...ASI_PLUS2("forca")],
       languageSlugs: ["common", "orc"],
@@ -148,6 +159,12 @@ export const TEMP_TEST_PRESETS: TempTestPreset[] = [
       abilityRawValues: undefined,
       speciesChoices: [],
       subclassOptions: [],
+      classOptions: [
+        { optionKey: "expertiseSkill1", valueId: "perception" },
+        { optionKey: "expertiseSkill2", valueId: "acrobatics" },
+        { optionKey: "masteryWeapon1", valueId: "shortsword" },
+        { optionKey: "masteryWeapon2", valueId: "dagger" },
+      ],
       asiFeatSlotSlugs: ["ability-score-improvement"],
       featOptions: [...ASI_PLUS2("destreza")],
       languageSlugs: ["common", "dwarvish"],
@@ -185,6 +202,7 @@ export const TEMP_TEST_PRESETS: TempTestPreset[] = [
       abilityRawValues: undefined,
       speciesChoices: [{ choiceKind: "dragon_ancestry", choiceSlug: "red" }],
       subclassOptions: [{ optionKey: "elementalAffinity", valueId: "fire" }],
+      classOptions: [],
       asiFeatSlotSlugs: ["ability-score-improvement"],
       featOptions: [
         {
@@ -250,6 +268,7 @@ export const TEMP_TEST_PRESETS: TempTestPreset[] = [
       abilityRawValues: undefined,
       speciesChoices: [],
       subclassOptions: [],
+      classOptions: [],
       asiFeatSlotSlugs: [],
       featOptions: [
         {

@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { isSubclassRequired } from "@/entities/character/lib/subclass";
 import {
   useClassDetail,
+  useClassProgression,
   useSubclassOptions,
 } from "@/features/class-catalog/api/use-classes";
 import { useCreateCharacter } from "@/features/create-character/api/use-create-character";
@@ -44,6 +45,8 @@ import { useSpeciesTraitChoices } from "@/features/species-catalog/api/use-speci
 import { useBackgroundDetail } from "@/features/background-catalog/api/use-backgrounds";
 import { syncLanguagesForSpecies } from "@/features/create-character/lib/language-selection";
 import { countAsiFeatSlots } from "@/features/create-character/lib/asi-feat-slots";
+import { classExpertiseSlotsAtLevel } from "@/entities/character/lib/class-expertise-slots";
+import { classWeaponMasterySlotsAtLevel } from "@/entities/character/lib/class-weapon-mastery-slots";
 import { asiFeatSlotsToCharacterFeats } from "@/features/create-character/lib/asi-feat-slots-to-feats";
 import { resolveCreateCharacterFeats } from "@/features/create-character/lib/preview-create-character-feats";
 import { ritualSpellSlotIndex } from "@/features/create-character/lib/feat-option-requirements";
@@ -70,6 +73,7 @@ const DEFAULT_VALUES: CreateCharacterInput = {
   abilityRawValues: [...STANDARD_ARRAY_VALUES],
   speciesChoices: [],
   subclassOptions: [],
+  classOptions: [],
   featOptions: [],
   asiFeatSlotSlugs: [],
   alignmentSlug: "",
@@ -122,6 +126,7 @@ export function CreateCharacterWizard() {
   const level = useWatch({ control, name: "level", defaultValue: 1 });
 
   const classDetail = useClassDetail(classSlug, !!classSlug);
+  const classProgression = useClassProgression(classSlug, !!classSlug);
   const backgroundDetail = useBackgroundDetail(
     backgroundSlug,
     !!backgroundSlug,
@@ -133,7 +138,7 @@ export function CreateCharacterWizard() {
     isSubclassRequired(level) && !!subclassSlug,
   );
   const originFeatSlug = backgroundDetail.data?.originFeatSlug ?? "";
-  const asiSlotCount = countAsiFeatSlots(level);
+  const asiSlotCount = countAsiFeatSlots(classSlug, level);
   const hasFeatsStep = !!originFeatSlug || asiSlotCount > 0;
   const { hasSpellStep } = useWizardHasSpellStep(
     classSlug,
@@ -181,6 +186,7 @@ export function CreateCharacterWizard() {
   useEffect(() => {
     if (prevClassSlugRef.current !== classSlug) {
       setValue("classSkillSlugs", []);
+      setValue("classOptions", []);
       setValue("subclassSlug", "");
       setValue("subclassOptions", []);
       setValue(
@@ -211,7 +217,7 @@ export function CreateCharacterWizard() {
   }, [subclassSlug, setValue]);
 
   useEffect(() => {
-    const count = countAsiFeatSlots(level);
+    const count = countAsiFeatSlots(classSlug, level);
     const slots = getValues("asiFeatSlotSlugs") ?? [];
     if (slots.length > count) {
       setValue("asiFeatSlotSlugs", slots.slice(0, count));
@@ -235,7 +241,7 @@ export function CreateCharacterWizard() {
         }),
       );
     }
-  }, [level, setValue, getValues, backgroundDetail.data?.originFeatSlug]);
+  }, [level, classSlug, setValue, getValues, backgroundDetail.data?.originFeatSlug]);
 
   async function goNext() {
     setSkillsError(undefined);
@@ -297,6 +303,46 @@ export function CreateCharacterWizard() {
       if (required > 0 && values.classSkillSlugs.length !== required) {
         setSkillsError(`Escolha exatamente ${required} perícia(s).`);
         return;
+      }
+      const expertiseSlots = classExpertiseSlotsAtLevel(
+        values.classSlug,
+        values.level,
+      );
+      if (expertiseSlots.length > 0) {
+        const filled = new Set(
+          (values.classOptions ?? [])
+            .filter((option) => option.valueId)
+            .map((option) => option.optionKey),
+        );
+        const missing = expertiseSlots.filter(
+          (slot) => !filled.has(slot.optionKey),
+        );
+        if (missing.length > 0) {
+          setSkillsError(
+            `Escolha ${expertiseSlots.length} especialização(ões) de perícia.`,
+          );
+          return;
+        }
+      }
+      const masterySlots = classWeaponMasterySlotsAtLevel(
+        classProgression.data?.data ?? [],
+        values.level,
+      );
+      if (masterySlots.length > 0) {
+        const filled = new Set(
+          (values.classOptions ?? [])
+            .filter((option) => option.valueId)
+            .map((option) => option.optionKey),
+        );
+        const missing = masterySlots.filter(
+          (slot) => !filled.has(slot.optionKey),
+        );
+        if (missing.length > 0) {
+          setSkillsError(
+            `Escolha ${masterySlots.length} maestria(s) em arma.`,
+          );
+          return;
+        }
       }
       setStep("background");
       return;

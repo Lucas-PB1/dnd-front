@@ -6,6 +6,7 @@ import type {
   CastSpellPayload,
   PatchCharacterStatePayload,
   RestPayload,
+  UseClassResourcePayload,
 } from "@/entities/character/session-types";
 import {
   castCharacterSpell,
@@ -13,8 +14,10 @@ import {
   patchCharacterState,
   sessionKeys,
   takeCharacterRest,
+  spendClassResource,
 } from "@/features/character-sheet/api/character-session.api";
 import { useGameAuth } from "@/features/character-sheet/api/use-game-auth";
+import { charactersKeys } from "@/features/characters/api/characters.api";
 
 export function useCharacterState(characterId: string) {
   const { accessToken, handleUnauthorized } = useGameAuth(
@@ -86,6 +89,7 @@ export function useTakeRest(characterId: string) {
   const { requireToken, handleUnauthorized } = useGameAuth(
     `/characters/${characterId}`,
   );
+  const queryClient = useQueryClient();
   const setState = useInvalidateState(characterId);
 
   return useMutation({
@@ -97,7 +101,29 @@ export function useTakeRest(characterId: string) {
       }
     },
     onSuccess: (result) => {
-      if (result) setState(result.state);
+      if (!result) return;
+      setState(result.state);
+      queryClient.invalidateQueries({
+        queryKey: charactersKeys.detail(characterId),
+      });
     },
+  });
+}
+
+export function useSpendClassResource(characterId: string) {
+  const { requireToken, handleUnauthorized } = useGameAuth(
+    `/characters/${characterId}`,
+  );
+  const setState = useInvalidateState(characterId);
+
+  return useMutation({
+    mutationFn: async (payload: UseClassResourcePayload) => {
+      try {
+        return await spendClassResource(requireToken(), characterId, payload);
+      } catch (error) {
+        return handleUnauthorized(error);
+      }
+    },
+    onSuccess: setState,
   });
 }

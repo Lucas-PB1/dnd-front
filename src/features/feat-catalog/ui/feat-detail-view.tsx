@@ -43,9 +43,6 @@ function FeatHero({ feat, backHref }: { feat: FeatSummary; backHref: string }) {
       title={feat.name}
       eyebrow={feat.categoryTypeLabel || feat.categoryName}
       stats={stats}
-      statsClassName={
-        stats.length >= 3 ? "grid-cols-2 sm:grid-cols-4" : undefined
-      }
     />
   );
 }

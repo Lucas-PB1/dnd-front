@@ -43,6 +43,9 @@ export function toCreateCharacterPayload(
   if (values.subclassOptions.length > 0) {
     payload.subclassOptions = values.subclassOptions;
   }
+  if (values.classOptions.length > 0) {
+    payload.classOptions = values.classOptions;
+  }
   if (values.equipment.length > 0) {
     payload.equipment = values.equipment;
   }

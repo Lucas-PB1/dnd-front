@@ -22,6 +22,7 @@ export type ClassSummary = {
   hpFixedPerLevel: number | null;
   skillChoiceCount: number | null;
   skillChoiceFrom: string | null;
+  weaponMasteryEligibility?: "any" | "melee" | null;
   sourceChapter: number | null;
   editionSlug: string | null;
   savingThrowSlugs?: string[];
@@ -84,6 +85,7 @@ export type ClassProgressionRow = {
   cantrips: number | null;
   preparedSpells: number | null;
   channelDivinity: number | null;
+  weaponMastery: number | null;
 };
 
 /** Espelha ClassFeatureResponseDto */
