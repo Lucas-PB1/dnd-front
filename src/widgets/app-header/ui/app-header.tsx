@@ -14,6 +14,7 @@ import { ThemeToggle } from "@/widgets/app-header/ui/theme-toggle";
 const NAV_LINKS = [
   { href: "/compendium", label: "Compêndio" },
   { href: "/characters", label: "Fichas" },
+  { href: "/campaigns", label: "Campanhas" },
 ] as const;
 
 function NavLink({

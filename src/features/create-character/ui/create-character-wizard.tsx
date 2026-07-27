@@ -11,7 +11,7 @@ import {
   useSubclassOptions,
 } from "@/features/class-catalog/api/use-classes";
 import { useCreateCharacter } from "@/features/create-character/api/use-create-character";
-import { DEFAULT_ABILITY_SCORES } from "@/features/create-character/lib/point-buy";
+import { STANDARD_ARRAY_VALUES, UNASSIGNED_ABILITY_SCORES } from "@/features/create-character/lib/ability-pool";
 import {
   abilitiesStepSchema,
   createCharacterSchema,
@@ -60,12 +60,14 @@ const DEFAULT_VALUES: CreateCharacterInput = {
   backgroundSlug: "",
   subclassSlug: "",
   abilityGenerationMethodSlug: "standard-array",
-  abilityScores: { ...DEFAULT_ABILITY_SCORES },
+  abilityScores: { ...UNASSIGNED_ABILITY_SCORES },
+  backgroundAbilityBoostMode: "plus2plus1",
   backgroundAbilityBoostPlus2Slug: "",
   backgroundAbilityBoostPlus1Slug: "",
+  backgroundAbilityBoostPlus1Slugs: ["", "", ""],
   backgroundToolItemSlug: "",
   classSkillSlugs: [],
-  abilityRawValues: undefined,
+  abilityRawValues: [...STANDARD_ARRAY_VALUES],
   speciesChoices: [],
   subclassOptions: [],
   featOptions: [],
@@ -164,8 +166,10 @@ export function CreateCharacterWizard() {
 
   useEffect(() => {
     if (prevBackgroundSlugRef.current !== backgroundSlug) {
+      setValue("backgroundAbilityBoostMode", "plus2plus1");
       setValue("backgroundAbilityBoostPlus2Slug", "");
       setValue("backgroundAbilityBoostPlus1Slug", "");
+      setValue("backgroundAbilityBoostPlus1Slugs", ["", "", ""]);
       setValue("backgroundToolItemSlug", "");
       setValue("featOptions", []);
       setValue("asiFeatSlotSlugs", []);
@@ -258,24 +262,28 @@ export function CreateCharacterWizard() {
 
     if (step === "abilities") {
       const values = getValues();
-      if (!abilitiesStepSchema.safeParse(values).success) return;
+      const parsed = abilitiesStepSchema.safeParse(values);
+      if (!parsed.success) {
+        setAbilitiesError(
+          parsed.error.issues[0]?.message ??
+            "Complete os atributos antes de continuar.",
+        );
+        return;
+      }
 
-      if (values.abilityGenerationMethodSlug !== "point-buy") {
-        if (!values.abilityRawValues?.length) {
-          setAbilitiesError("Gere os valores antes de continuar.");
-          return;
-        }
-      } else {
+      if (values.abilityGenerationMethodSlug === "point-buy") {
         const ok = await trigger("abilityScores");
         if (!ok) return;
       }
 
       const boostOk = await trigger([
+        "backgroundAbilityBoostMode",
         "backgroundAbilityBoostPlus2Slug",
         "backgroundAbilityBoostPlus1Slug",
+        "backgroundAbilityBoostPlus1Slugs",
       ]);
       if (!boostOk) {
-        setAbilitiesError("Escolha os bônus +2 e +1 do antecedente.");
+        setAbilitiesError("Escolha a distribuição e os bônus do antecedente.");
         return;
       }
 

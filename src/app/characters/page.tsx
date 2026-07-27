@@ -5,6 +5,7 @@ import { TempTestPresetsPanel } from "@/features/create-character/ui/temp-test-p
 import { cn } from "@/shared/lib/utils";
 import { buttonVariants } from "@/shared/ui/button";
 import { PageMain } from "@/shared/ui/page-main";
+import { SourceEditionBadge } from "@/shared/ui/source-edition-badge";
 import { AppHeader } from "@/widgets/app-header/ui/app-header";
 
 export default function CharactersPage() {
@@ -15,11 +16,14 @@ export default function CharactersPage() {
       <PageMain>
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="space-y-1">
-            <h1 className="font-heading text-2xl font-semibold tracking-tight sm:text-3xl">
-              Minhas fichas
-            </h1>
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="font-heading text-2xl font-semibold tracking-tight sm:text-3xl">
+                Minhas fichas
+              </h1>
+              <SourceEditionBadge live />
+            </div>
             <p className="text-sm text-muted-foreground">
-              Personagens salvos na sua conta.
+              Personagens salvos na sua conta — também podem entrar em campanhas.
             </p>
           </div>
           <Link

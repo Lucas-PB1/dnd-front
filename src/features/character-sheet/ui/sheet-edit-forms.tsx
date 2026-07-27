@@ -16,9 +16,13 @@ import {
   isBackgroundAbilityBoostAllowed,
 } from "@/entities/background/lib/background-ability-options";
 import {
+  BACKGROUND_BOOST_MODE_PLUS1X3,
+  BACKGROUND_BOOST_MODE_PLUS2_PLUS1,
   previewBackgroundAbilityBoosts,
   stripBackgroundAbilityBoosts,
 } from "@/entities/character/lib/background-boost";
+import { nativeSelectClassName } from "@/shared/ui/native-select";
+import { cn } from "@/shared/lib/utils";
 import { usePatchCharacter } from "@/features/character-sheet/api/use-patch-character";
 import {
   useBackgroundDetail,
@@ -69,7 +73,6 @@ import {
   FieldLabel,
 } from "@/shared/ui/field";
 import { Input } from "@/shared/ui/input";
-import { cn } from "@/shared/lib/utils";
 
 type EditFormProps = {
   character: CharacterDetail;
@@ -385,8 +388,10 @@ const abilitiesEditSchema = z.object({
   inteligencia: z.number().int().min(1).max(30),
   sabedoria: z.number().int().min(1).max(30),
   carisma: z.number().int().min(1).max(30),
+  backgroundAbilityBoostMode: z.enum(["plus2plus1", "plus1x3"]),
   backgroundAbilityBoostPlus2Slug: z.string().optional(),
   backgroundAbilityBoostPlus1Slug: z.string().optional(),
+  backgroundAbilityBoostPlus1Slugs: z.array(z.string()).length(3).optional(),
 });
 
 type AbilitiesEditInput = z.infer<typeof abilitiesEditSchema>;
@@ -443,11 +448,12 @@ export function EditAbilitiesForm({
 
   const baseScores = useMemo(
     () =>
-      stripBackgroundAbilityBoosts(
-        character.abilityScores,
-        character.backgroundAbilityBoostPlus2Slug,
-        character.backgroundAbilityBoostPlus1Slug,
-      ),
+      stripBackgroundAbilityBoosts(character.abilityScores, {
+        mode: character.backgroundAbilityBoostMode,
+        plus2Slug: character.backgroundAbilityBoostPlus2Slug,
+        plus1Slug: character.backgroundAbilityBoostPlus1Slug,
+        plus1Slugs: character.backgroundAbilityBoostPlus1Slugs,
+      }),
     [character],
   );
 
@@ -455,16 +461,25 @@ export function EditAbilitiesForm({
     resolver: zodResolver(abilitiesEditSchema),
     defaultValues: {
       ...baseScores,
+      backgroundAbilityBoostMode:
+        character.backgroundAbilityBoostMode ?? BACKGROUND_BOOST_MODE_PLUS2_PLUS1,
       backgroundAbilityBoostPlus2Slug:
         character.backgroundAbilityBoostPlus2Slug ?? "",
       backgroundAbilityBoostPlus1Slug:
         character.backgroundAbilityBoostPlus1Slug ?? "",
+      backgroundAbilityBoostPlus1Slugs:
+        character.backgroundAbilityBoostPlus1Slugs?.length === 3
+          ? character.backgroundAbilityBoostPlus1Slugs
+          : ["", "", ""],
     },
   });
 
   const scores = useWatch({ control: form.control }) as AbilitiesEditInput;
+  const boostMode =
+    scores.backgroundAbilityBoostMode ?? BACKGROUND_BOOST_MODE_PLUS2_PLUS1;
   const boostPlus2 = scores.backgroundAbilityBoostPlus2Slug ?? "";
   const boostPlus1 = scores.backgroundAbilityBoostPlus1Slug ?? "";
+  const boostPlus1Slugs = scores.backgroundAbilityBoostPlus1Slugs ?? ["", "", ""];
   const boostPlus2Value = isBackgroundAbilityBoostAllowed(
     boostPlus2,
     allowedSlugs,
@@ -478,18 +493,50 @@ export function EditAbilitiesForm({
     ? boostPlus1
     : "";
   const hasBackgroundBoosts = boostOptions.length > 0;
+  const plus1x3Complete =
+    boostPlus1Slugs.filter((slug) => !!slug?.trim()).length === 3 &&
+    new Set(boostPlus1Slugs.filter((slug) => !!slug?.trim())).size === 3;
 
   const previewScores =
-    hasBackgroundBoosts &&
-    boostPlus2Value &&
-    boostPlus1Value &&
-    boostPlus2Value !== boostPlus1Value
-      ? previewBackgroundAbilityBoosts(
-          toAbilityScores(scores),
-          boostPlus2Value as keyof AbilityScores,
-          boostPlus1Value as keyof AbilityScores,
-        )
-      : null;
+    !hasBackgroundBoosts
+      ? null
+      : boostMode === BACKGROUND_BOOST_MODE_PLUS1X3
+        ? plus1x3Complete
+          ? previewBackgroundAbilityBoosts(toAbilityScores(scores), {
+              mode: BACKGROUND_BOOST_MODE_PLUS1X3,
+              plus1Slugs: boostPlus1Slugs as (keyof AbilityScores)[],
+            })
+          : null
+        : boostPlus2Value &&
+            boostPlus1Value &&
+            boostPlus2Value !== boostPlus1Value
+          ? previewBackgroundAbilityBoosts(toAbilityScores(scores), {
+              mode: BACKGROUND_BOOST_MODE_PLUS2_PLUS1,
+              plus2Slug: boostPlus2Value as keyof AbilityScores,
+              plus1Slug: boostPlus1Value as keyof AbilityScores,
+            })
+          : null;
+
+  function applyBoostMode(next: "plus2plus1" | "plus1x3") {
+    form.setValue("backgroundAbilityBoostMode", next);
+    if (next === BACKGROUND_BOOST_MODE_PLUS1X3) {
+      form.setValue("backgroundAbilityBoostPlus2Slug", "");
+      form.setValue("backgroundAbilityBoostPlus1Slug", "");
+      form.setValue(
+        "backgroundAbilityBoostPlus1Slugs",
+        allowedSlugs.length === 3 ? [...allowedSlugs] : ["", "", ""],
+      );
+      return;
+    }
+    form.setValue("backgroundAbilityBoostPlus1Slugs", ["", "", ""]);
+  }
+
+  function setPlus1x3Slug(index: number, value: string) {
+    const current = [...boostPlus1Slugs];
+    while (current.length < 3) current.push("");
+    current[index] = value;
+    form.setValue("backgroundAbilityBoostPlus1Slugs", current);
+  }
 
   return (
     <EditFormShell
@@ -499,10 +546,26 @@ export function EditAbilitiesForm({
       onSubmit={form.handleSubmit((values) => {
         setBoostError(null);
         const base = toAbilityScores(values);
-        const plus2 = values.backgroundAbilityBoostPlus2Slug?.trim();
-        const plus1 = values.backgroundAbilityBoostPlus1Slug?.trim();
+        const mode = values.backgroundAbilityBoostMode ?? "plus2plus1";
 
         if (hasBackgroundBoosts) {
+          if (mode === BACKGROUND_BOOST_MODE_PLUS1X3) {
+            const slugs = (values.backgroundAbilityBoostPlus1Slugs ?? [])
+              .map((slug) => slug?.trim())
+              .filter((slug): slug is string => !!slug);
+            if (slugs.length !== 3 || new Set(slugs).size !== 3) {
+              setBoostError("Escolha três atributos diferentes para +1.");
+              return;
+            }
+            return submit({
+              abilityScores: base,
+              backgroundAbilityBoostMode: mode,
+              backgroundAbilityBoostPlus1Slugs: slugs,
+            });
+          }
+
+          const plus2 = values.backgroundAbilityBoostPlus2Slug?.trim();
+          const plus1 = values.backgroundAbilityBoostPlus1Slug?.trim();
           if (!plus2 || !plus1) {
             setBoostError("Escolha os bônus +2 e +1 do antecedente.");
             return;
@@ -513,6 +576,7 @@ export function EditAbilitiesForm({
           }
           return submit({
             abilityScores: base,
+            backgroundAbilityBoostMode: mode,
             backgroundAbilityBoostPlus2Slug: plus2,
             backgroundAbilityBoostPlus1Slug: plus1,
           });
@@ -557,7 +621,7 @@ export function EditAbilitiesForm({
           <Field>
             <FieldLabel>Bônus do antecedente (PHB 2024)</FieldLabel>
             <FieldDescription>
-              {selectedBackground?.name ?? "Antecedente"} permite +2 e +1 apenas
+              {selectedBackground?.name ?? "Antecedente"} permite bônus apenas
               em:{" "}
               <span className="font-medium text-foreground">
                 {boostOptions.map((o) => o.label).join(", ")}
@@ -566,34 +630,94 @@ export function EditAbilitiesForm({
             </FieldDescription>
           </Field>
 
-          <div className="grid gap-3 sm:grid-cols-2">
-            <CatalogSelect
-              id="edit-background-boost-plus2"
-              label="Atributo +2"
-              options={boostOptions}
-              isLoading={
-                backgroundDetail.isPending && boostOptions.length === 0
-              }
-              value={boostPlus2Value}
+          <Field>
+            <FieldLabel htmlFor="edit-background-boost-mode">
+              Distribuição
+            </FieldLabel>
+            <select
+              id="edit-background-boost-mode"
+              className={cn(nativeSelectClassName)}
+              value={boostMode}
               onChange={(e) =>
-                form.setValue("backgroundAbilityBoostPlus2Slug", e.target.value)
+                applyBoostMode(e.target.value as "plus2plus1" | "plus1x3")
               }
-              error={form.formState.errors.backgroundAbilityBoostPlus2Slug}
-            />
-            <CatalogSelect
-              id="edit-background-boost-plus1"
-              label="Atributo +1"
-              options={boostOptions.filter((o) => o.value !== boostPlus2Value)}
-              isLoading={
-                backgroundDetail.isPending && boostOptions.length === 0
-              }
-              value={boostPlus1Value}
-              onChange={(e) =>
-                form.setValue("backgroundAbilityBoostPlus1Slug", e.target.value)
-              }
-              error={form.formState.errors.backgroundAbilityBoostPlus1Slug}
-            />
-          </div>
+            >
+              <option value={BACKGROUND_BOOST_MODE_PLUS2_PLUS1}>
+                +2 em um e +1 em outro
+              </option>
+              <option value={BACKGROUND_BOOST_MODE_PLUS1X3}>
+                +1 em três atributos
+              </option>
+            </select>
+          </Field>
+
+          {boostMode === BACKGROUND_BOOST_MODE_PLUS1X3 ? (
+            <div className="grid gap-3 sm:grid-cols-3">
+              {[0, 1, 2].map((index) => {
+                const selected = boostPlus1Slugs[index] ?? "";
+                const taken = new Set(
+                  boostPlus1Slugs.filter((slug, i) => i !== index && !!slug),
+                );
+                return (
+                  <CatalogSelect
+                    key={`edit-plus1x3-${index}`}
+                    id={`edit-background-boost-plus1-${index}`}
+                    label={`+1 (${index + 1})`}
+                    options={boostOptions.filter(
+                      (option) =>
+                        option.value === selected || !taken.has(option.value),
+                    )}
+                    isLoading={
+                      backgroundDetail.isPending && boostOptions.length === 0
+                    }
+                    value={
+                      isBackgroundAbilityBoostAllowed(selected, allowedSlugs)
+                        ? selected
+                        : ""
+                    }
+                    onChange={(e) => setPlus1x3Slug(index, e.target.value)}
+                  />
+                );
+              })}
+            </div>
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2">
+              <CatalogSelect
+                id="edit-background-boost-plus2"
+                label="Atributo +2"
+                options={boostOptions}
+                isLoading={
+                  backgroundDetail.isPending && boostOptions.length === 0
+                }
+                value={boostPlus2Value}
+                onChange={(e) =>
+                  form.setValue(
+                    "backgroundAbilityBoostPlus2Slug",
+                    e.target.value,
+                  )
+                }
+                error={form.formState.errors.backgroundAbilityBoostPlus2Slug}
+              />
+              <CatalogSelect
+                id="edit-background-boost-plus1"
+                label="Atributo +1"
+                options={boostOptions.filter(
+                  (o) => o.value !== boostPlus2Value,
+                )}
+                isLoading={
+                  backgroundDetail.isPending && boostOptions.length === 0
+                }
+                value={boostPlus1Value}
+                onChange={(e) =>
+                  form.setValue(
+                    "backgroundAbilityBoostPlus1Slug",
+                    e.target.value,
+                  )
+                }
+                error={form.formState.errors.backgroundAbilityBoostPlus1Slug}
+              />
+            </div>
+          )}
 
           {previewScores ? (
             <div className="rounded-lg border border-border p-3">
@@ -643,10 +767,14 @@ function SheetStepForm({
       (character.abilityGenerationMethodSlug as CreateCharacterInput["abilityGenerationMethodSlug"]) ??
       "standard-array",
     abilityScores: character.abilityScores,
+    backgroundAbilityBoostMode:
+      character.backgroundAbilityBoostMode ?? "plus2plus1",
     backgroundAbilityBoostPlus2Slug:
       character.backgroundAbilityBoostPlus2Slug ?? undefined,
     backgroundAbilityBoostPlus1Slug:
       character.backgroundAbilityBoostPlus1Slug ?? undefined,
+    backgroundAbilityBoostPlus1Slugs:
+      character.backgroundAbilityBoostPlus1Slugs ?? undefined,
     backgroundToolItemSlug: character.backgroundToolItemSlug ?? undefined,
     classSkillSlugs: character.classSkillSlugs,
     alignmentSlug: character.alignmentSlug ?? "",

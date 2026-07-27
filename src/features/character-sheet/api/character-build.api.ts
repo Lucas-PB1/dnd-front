@@ -12,6 +12,8 @@ export type RollAbilitiesResult = {
   method: string;
   abilityScores: AbilityScores;
   rawValues?: number[];
+  /** Três conjuntos (soma 72–80) quando method === "roll" */
+  rawValueOptions?: number[][];
 };
 
 export const characterBuildKeys = {

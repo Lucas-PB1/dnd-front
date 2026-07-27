@@ -5,7 +5,11 @@ import { useWatch } from "react-hook-form";
 import type { Control } from "react-hook-form";
 
 import { ABILITY_LABELS_PT, abilityModifier } from "@/entities/character/types";
-import { previewBackgroundAbilityBoosts } from "@/entities/character/lib/background-boost";
+import {
+  BACKGROUND_BOOST_MODE_PLUS1X3,
+  BACKGROUND_BOOST_MODE_PLUS2_PLUS1,
+  previewBackgroundAbilityBoosts,
+} from "@/entities/character/lib/background-boost";
 import { previewFeatAbilityBoosts } from "@/entities/character/lib/feat-ability-boost";
 import { epicBoonFeatSlugsFromCatalog } from "@/entities/character/lib/epic-boon-feat-options";
 import { resolveCreateCharacterFeats } from "@/features/create-character/lib/preview-create-character-feats";
@@ -65,16 +69,28 @@ function previewCharacter(
   values: CreateCharacterInput,
   epicBoonFeatSlugs: ReadonlySet<string>,
 ): CharacterDetail {
+  const mode = values.backgroundAbilityBoostMode ?? BACKGROUND_BOOST_MODE_PLUS2_PLUS1;
   const plus2 = values.backgroundAbilityBoostPlus2Slug;
   const plus1 = values.backgroundAbilityBoostPlus1Slug;
+  const plus1Slugs = values.backgroundAbilityBoostPlus1Slugs ?? [];
   const afterBackground =
-    plus2 && plus1 && plus2 !== plus1
-      ? previewBackgroundAbilityBoosts(
-          values.abilityScores,
-          plus2 as keyof typeof values.abilityScores,
-          plus1 as keyof typeof values.abilityScores,
-        )
-      : values.abilityScores;
+    mode === BACKGROUND_BOOST_MODE_PLUS1X3 &&
+    plus1Slugs.filter(Boolean).length === 3 &&
+    new Set(plus1Slugs.filter(Boolean)).size === 3
+      ? previewBackgroundAbilityBoosts(values.abilityScores, {
+          mode: BACKGROUND_BOOST_MODE_PLUS1X3,
+          plus1Slugs: plus1Slugs as (keyof typeof values.abilityScores)[],
+        })
+      : mode === BACKGROUND_BOOST_MODE_PLUS2_PLUS1 &&
+          plus2 &&
+          plus1 &&
+          plus2 !== plus1
+        ? previewBackgroundAbilityBoosts(values.abilityScores, {
+            mode: BACKGROUND_BOOST_MODE_PLUS2_PLUS1,
+            plus2Slug: plus2 as keyof typeof values.abilityScores,
+            plus1Slug: plus1 as keyof typeof values.abilityScores,
+          })
+        : values.abilityScores;
   const finalScores = previewFeatAbilityBoosts(
     afterBackground,
     values.featOptions ?? [],
@@ -106,10 +122,15 @@ function previewCharacter(
     equipment: values.equipment,
     languageSlugs: values.languageSlugs,
     abilityGenerationMethodSlug: values.abilityGenerationMethodSlug,
+    backgroundAbilityBoostMode: mode,
     backgroundAbilityBoostPlus2Slug:
       values.backgroundAbilityBoostPlus2Slug ?? null,
     backgroundAbilityBoostPlus1Slug:
       values.backgroundAbilityBoostPlus1Slug ?? null,
+    backgroundAbilityBoostPlus1Slugs:
+      mode === BACKGROUND_BOOST_MODE_PLUS1X3
+        ? (values.backgroundAbilityBoostPlus1Slugs ?? null)
+        : null,
     backgroundToolItemSlug: values.backgroundToolItemSlug?.trim()
       ? values.backgroundToolItemSlug.trim()
       : null,
@@ -180,8 +201,11 @@ export function StepReview({ control }: StepReviewProps) {
     () => epicBoonFeatSlugsFromCatalog(featsQuery.data?.data ?? []),
     [featsQuery.data?.data],
   );
+  const boostMode =
+    values.backgroundAbilityBoostMode ?? BACKGROUND_BOOST_MODE_PLUS2_PLUS1;
   const plus2 = values.backgroundAbilityBoostPlus2Slug;
   const plus1 = values.backgroundAbilityBoostPlus1Slug;
+  const plus1Slugs = values.backgroundAbilityBoostPlus1Slugs ?? [];
   const preview = useMemo(
     () => previewCharacter(values, epicBoonFeatSlugs),
     [values, epicBoonFeatSlugs],
@@ -394,7 +418,19 @@ export function StepReview({ control }: StepReviewProps) {
             )}
           </Field>
           <Field label="Atributos">{methodLabel}</Field>
-          {plus2 && plus1 && plus2 !== plus1 ? (
+          {boostMode === BACKGROUND_BOOST_MODE_PLUS1X3 &&
+          plus1Slugs.filter(Boolean).length === 3 ? (
+            <Field label="Bônus do antecedente">
+              +1{" "}
+              {plus1Slugs
+                .map(
+                  (slug) =>
+                    ABILITY_LABELS_PT[slug as keyof typeof ABILITY_LABELS_PT] ??
+                    slug,
+                )
+                .join(", ")}
+            </Field>
+          ) : plus2 && plus1 && plus2 !== plus1 ? (
             <Field label="Bônus do antecedente">
               +2 {ABILITY_LABELS_PT[plus2 as keyof typeof ABILITY_LABELS_PT]}, +1{" "}
               {ABILITY_LABELS_PT[plus1 as keyof typeof ABILITY_LABELS_PT]}

@@ -55,8 +55,10 @@ describe("toCreateCharacterPayload", () => {
     languageSlugs: [],
     equipment: [],
     characterSpells: [],
+    backgroundAbilityBoostMode: "plus2plus1",
     backgroundAbilityBoostPlus2Slug: "sabedoria",
     backgroundAbilityBoostPlus1Slug: "carisma",
+    backgroundAbilityBoostPlus1Slugs: ["", "", ""],
   };
 
   it("includes sheet fields and subclass at level 5", () => {
@@ -64,8 +66,31 @@ describe("toCreateCharacterPayload", () => {
     expect(payload.subclassSlug).toBe("champion");
     expect(payload.classSkillSlugs).toEqual(["athletics", "perception"]);
     expect(payload.abilityGenerationMethodSlug).toBe("standard-array");
+    expect(payload.backgroundAbilityBoostMode).toBe("plus2plus1");
     expect(payload.backgroundAbilityBoostPlus2Slug).toBe("sabedoria");
     expect(payload.backgroundAbilityBoostPlus1Slug).toBe("carisma");
+  });
+
+  it("sends plus1x3 slugs without plus2/plus1", () => {
+    const payload = toCreateCharacterPayload({
+      ...base,
+      backgroundAbilityBoostMode: "plus1x3",
+      backgroundAbilityBoostPlus2Slug: "",
+      backgroundAbilityBoostPlus1Slug: "",
+      backgroundAbilityBoostPlus1Slugs: [
+        "sabedoria",
+        "carisma",
+        "inteligencia",
+      ],
+    });
+    expect(payload.backgroundAbilityBoostMode).toBe("plus1x3");
+    expect(payload.backgroundAbilityBoostPlus1Slugs).toEqual([
+      "sabedoria",
+      "carisma",
+      "inteligencia",
+    ]);
+    expect(payload.backgroundAbilityBoostPlus2Slug).toBeUndefined();
+    expect(payload.backgroundAbilityBoostPlus1Slug).toBeUndefined();
   });
 
   it("omits subclass below level 3", () => {

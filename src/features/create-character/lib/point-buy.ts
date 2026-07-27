@@ -16,6 +16,8 @@ export const POINT_BUY_BUDGET = 27;
 export const POINT_BUY_MIN = 8;
 export const POINT_BUY_MAX = 15;
 
+export const POINT_BUY_SCORE_OPTIONS = [8, 9, 10, 11, 12, 13, 14, 15] as const;
+
 export const ABILITY_KEYS: (keyof AbilityScores)[] = [
   "forca",
   "destreza",
@@ -41,6 +43,24 @@ export function isPointBuyValid(scores: AbilityScores): boolean {
     (key) => scores[key] >= POINT_BUY_MIN && scores[key] <= POINT_BUY_MAX,
   );
   return inRange && pointBuySpent(scores) === POINT_BUY_BUDGET;
+}
+
+/** Scores 8–15 que ainda cabem no orçamento (mantém o valor atual). */
+export function pointBuyAffordableOptions(
+  scores: AbilityScores,
+  key: keyof AbilityScores,
+): number[] {
+  const current = scores[key];
+  const spentOthers = pointBuySpent(scores) - (POINT_BUY_COST[current] ?? 0);
+  return POINT_BUY_SCORE_OPTIONS.filter((score) => {
+    if (score === current) return true;
+    return spentOthers + POINT_BUY_COST[score] <= POINT_BUY_BUDGET;
+  });
+}
+
+export function formatPointBuyOptionLabel(score: number): string {
+  const cost = POINT_BUY_COST[score] ?? 0;
+  return `${score} · ${cost} pts`;
 }
 
 export const DEFAULT_ABILITY_SCORES: AbilityScores = {

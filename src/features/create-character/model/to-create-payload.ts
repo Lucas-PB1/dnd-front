@@ -17,9 +17,18 @@ export function toCreateCharacterPayload(
     abilityScores: values.abilityScores,
     abilityGenerationMethodSlug: values.abilityGenerationMethodSlug,
     classSkillSlugs: values.classSkillSlugs,
-    backgroundAbilityBoostPlus2Slug: values.backgroundAbilityBoostPlus2Slug,
-    backgroundAbilityBoostPlus1Slug: values.backgroundAbilityBoostPlus1Slug,
+    backgroundAbilityBoostMode: values.backgroundAbilityBoostMode ?? "plus2plus1",
   };
+
+  if ((values.backgroundAbilityBoostMode ?? "plus2plus1") === "plus1x3") {
+    payload.backgroundAbilityBoostPlus1Slugs =
+      values.backgroundAbilityBoostPlus1Slugs;
+  } else {
+    payload.backgroundAbilityBoostPlus2Slug =
+      values.backgroundAbilityBoostPlus2Slug;
+    payload.backgroundAbilityBoostPlus1Slug =
+      values.backgroundAbilityBoostPlus1Slug;
+  }
 
   if (values.backgroundToolItemSlug?.trim()) {
     payload.backgroundToolItemSlug = values.backgroundToolItemSlug.trim();

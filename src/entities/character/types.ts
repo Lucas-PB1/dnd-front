@@ -50,8 +50,10 @@ export type CharacterDetail = {
   equipment: CharacterEquipment[];
   languageSlugs: string[];
   abilityGenerationMethodSlug: string | null;
+  backgroundAbilityBoostMode: "plus2plus1" | "plus1x3";
   backgroundAbilityBoostPlus2Slug: string | null;
   backgroundAbilityBoostPlus1Slug: string | null;
+  backgroundAbilityBoostPlus1Slugs: string[] | null;
   backgroundToolItemSlug: string | null;
   abilityModifiers: AbilityScores;
   passivePerception: number;
@@ -100,8 +102,10 @@ export type CreateCharacterPayload = {
   subclassSlug?: string;
   alignmentSlug?: string;
   abilityScores?: AbilityScores;
+  backgroundAbilityBoostMode?: "plus2plus1" | "plus1x3";
   backgroundAbilityBoostPlus2Slug?: string;
   backgroundAbilityBoostPlus1Slug?: string;
+  backgroundAbilityBoostPlus1Slugs?: string[];
   backgroundToolItemSlug?: string;
   hitPointsMax?: number;
   hitPointsCurrent?: number;

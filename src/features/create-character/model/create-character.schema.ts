@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { SUBCLASS_UNLOCK_LEVEL_DEFAULT } from "@/entities/character/lib/subclass";
+import { isAbilityPoolAssigned } from "@/features/create-character/lib/ability-pool";
 import {
   isPointBuyValid,
   POINT_BUY_MAX,
@@ -10,12 +11,12 @@ import {
 const SUBCLASS_UNLOCK_LEVEL = SUBCLASS_UNLOCK_LEVEL_DEFAULT;
 
 const abilityScoresSchema = z.object({
-  forca: z.number().int().min(1).max(30),
-  destreza: z.number().int().min(1).max(30),
-  constituicao: z.number().int().min(1).max(30),
-  inteligencia: z.number().int().min(1).max(30),
-  sabedoria: z.number().int().min(1).max(30),
-  carisma: z.number().int().min(1).max(30),
+  forca: z.number().int().min(0).max(30),
+  destreza: z.number().int().min(0).max(30),
+  constituicao: z.number().int().min(0).max(30),
+  inteligencia: z.number().int().min(0).max(30),
+  sabedoria: z.number().int().min(0).max(30),
+  carisma: z.number().int().min(0).max(30),
 });
 
 const speciesChoiceSchema = z.object({
@@ -54,6 +55,11 @@ export const abilityGenerationMethodSchema = z.enum([
   "point-buy",
 ]);
 
+export const backgroundAbilityBoostModeSchema = z.enum([
+  "plus2plus1",
+  "plus1x3",
+]);
+
 export const createCharacterBaseSchema = z.object({
   name: z.string().min(1, "Informe o nome").max(100),
   level: z.number().int().min(1, "Mínimo nível 1").max(20, "Máximo nível 20"),
@@ -63,8 +69,10 @@ export const createCharacterBaseSchema = z.object({
   subclassSlug: z.string().optional(),
   abilityGenerationMethodSlug: abilityGenerationMethodSchema,
   abilityScores: abilityScoresSchema,
+  backgroundAbilityBoostMode: backgroundAbilityBoostModeSchema,
   backgroundAbilityBoostPlus2Slug: z.string().optional(),
   backgroundAbilityBoostPlus1Slug: z.string().optional(),
+  backgroundAbilityBoostPlus1Slugs: z.array(z.string()).length(3).optional(),
   backgroundToolItemSlug: z.string().optional(),
   classSkillSlugs: z.array(z.string()),
   abilityRawValues: z.array(z.number().int()).length(6).optional(),
@@ -110,18 +118,76 @@ function refinePointBuy(
   }
 }
 
+function refineAbilityPool(
+  data: {
+    abilityGenerationMethodSlug: z.infer<typeof abilityGenerationMethodSchema>;
+    abilityScores: z.infer<typeof abilityScoresSchema>;
+    abilityRawValues?: number[];
+  },
+  ctx: z.RefinementCtx,
+) {
+  if (
+    data.abilityGenerationMethodSlug !== "standard-array" &&
+    data.abilityGenerationMethodSlug !== "roll"
+  ) {
+    return;
+  }
+  if (!data.abilityRawValues || data.abilityRawValues.length !== 6) {
+    ctx.addIssue({
+      code: "custom",
+      message: "Gere ou escolha os valores antes de continuar",
+      path: ["abilityRawValues"],
+    });
+    return;
+  }
+  if (!isAbilityPoolAssigned(data.abilityRawValues, data.abilityScores)) {
+    ctx.addIssue({
+      code: "custom",
+      message: "Atribua cada valor do pool a um atributo (sem repetir além do disponível)",
+      path: ["abilityScores"],
+    });
+  }
+}
+
 export const createCharacterSchema = createCharacterBaseSchema
   .superRefine(refineSubclassRequired)
   .superRefine(refinePointBuy)
+  .superRefine(refineAbilityPool)
   .superRefine(refineBackgroundBoosts);
 
 function refineBackgroundBoosts(
   data: {
+    backgroundAbilityBoostMode?: "plus2plus1" | "plus1x3";
     backgroundAbilityBoostPlus2Slug?: string;
     backgroundAbilityBoostPlus1Slug?: string;
+    backgroundAbilityBoostPlus1Slugs?: string[];
   },
   ctx: z.RefinementCtx,
 ) {
+  const mode = data.backgroundAbilityBoostMode ?? "plus2plus1";
+
+  if (mode === "plus1x3") {
+    const slugs = (data.backgroundAbilityBoostPlus1Slugs ?? [])
+      .map((slug) => slug?.trim())
+      .filter((slug): slug is string => !!slug);
+    if (slugs.length !== 3) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Escolha três atributos diferentes para +1",
+        path: ["backgroundAbilityBoostPlus1Slugs"],
+      });
+      return;
+    }
+    if (new Set(slugs).size !== 3) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Os três atributos +1 devem ser distintos",
+        path: ["backgroundAbilityBoostPlus1Slugs"],
+      });
+    }
+    return;
+  }
+
   const plus2 = data.backgroundAbilityBoostPlus2Slug?.trim();
   const plus1 = data.backgroundAbilityBoostPlus1Slug?.trim();
   if (!plus2) {
@@ -165,10 +231,13 @@ export const abilitiesStepSchema = createCharacterBaseSchema
     abilityGenerationMethodSlug: true,
     abilityScores: true,
     abilityRawValues: true,
+    backgroundAbilityBoostMode: true,
     backgroundAbilityBoostPlus2Slug: true,
     backgroundAbilityBoostPlus1Slug: true,
+    backgroundAbilityBoostPlus1Slugs: true,
   })
   .superRefine(refinePointBuy)
+  .superRefine(refineAbilityPool)
   .superRefine(refineBackgroundBoosts);
 
 export const SUBCLASS_REQUIRED_FROM_LEVEL = SUBCLASS_UNLOCK_LEVEL;
