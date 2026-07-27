@@ -1,11 +1,21 @@
 "use client";
 
 import {
+  BookmarkIcon,
+  GlobeAltIcon,
+  PencilSquareIcon,
+  ShieldCheckIcon,
+  SparklesIcon,
+  Squares2X2Icon,
+} from "@heroicons/react/24/outline";
+import {
   useId,
   useRef,
   useState,
+  type ComponentType,
   type KeyboardEvent,
   type ReactNode,
+  type SVGProps,
 } from "react";
 
 import type { CharacterDetail } from "@/entities/character/types";
@@ -18,6 +28,10 @@ import {
   SubclassMechanicsSection,
   SubclassOptionsSection,
 } from "@/features/character-sheet/ui/sheet-read-sections";
+import {
+  SheetEditAction,
+  SheetSectionHeader,
+} from "@/features/character-sheet/ui/sheet-ui";
 import { cn } from "@/shared/lib/utils";
 
 type TraitsSectionId =
@@ -27,12 +41,14 @@ type TraitsSectionId =
   | "feats"
   | "background";
 
-const SECTIONS: { id: TraitsSectionId; label: string }[] = [
-  { id: "class", label: "Classe" },
-  { id: "species", label: "Espécie" },
-  { id: "subclass", label: "Subclasse" },
-  { id: "feats", label: "Talentos" },
-  { id: "background", label: "Antecedente" },
+type HeroIcon = ComponentType<SVGProps<SVGSVGElement>>;
+
+const SECTIONS: { id: TraitsSectionId; label: string; icon: HeroIcon }[] = [
+  { id: "class", label: "Classe", icon: ShieldCheckIcon },
+  { id: "species", label: "Espécie", icon: GlobeAltIcon },
+  { id: "subclass", label: "Subclasse", icon: Squares2X2Icon },
+  { id: "feats", label: "Talentos", icon: SparklesIcon },
+  { id: "background", label: "Antecedente", icon: BookmarkIcon },
 ];
 
 type BeyondTraitsTabProps = {
@@ -56,13 +72,10 @@ export function BeyondTraitsTab({
 
   const editLink = (id: Exclude<TraitsSectionId, "class">, label = "Editar") =>
     onEdit ? (
-      <button
-        type="button"
-        onClick={() => onEdit(id)}
-        className="text-[0.65rem] font-medium tracking-wide text-primary uppercase hover:underline"
-      >
+      <SheetEditAction onClick={() => onEdit(id)}>
+        <PencilSquareIcon className="size-3" aria-hidden />
         {label}
-      </button>
+      </SheetEditAction>
     ) : null;
 
   function focusSection(id: TraitsSectionId) {
@@ -96,6 +109,7 @@ export function BeyondTraitsTab({
     class: (
       <TraitsBlock
         title={labels.identity.className ?? "Características de classe"}
+        icon={ShieldCheckIcon}
       >
         <ClassFeaturesSection {...sectionProps} />
       </TraitsBlock>
@@ -103,6 +117,7 @@ export function BeyondTraitsTab({
     species: (
       <TraitsBlock
         title={labels.identity.speciesName ?? "Espécie"}
+        icon={GlobeAltIcon}
         action={editLink("species")}
       >
         <SpeciesChoicesSection {...sectionProps} />
@@ -111,6 +126,7 @@ export function BeyondTraitsTab({
     subclass: (
       <TraitsBlock
         title={labels.identity.subclassName ?? "Subclasse"}
+        icon={Squares2X2Icon}
         action={editLink("subclass")}
       >
         <div className="space-y-4">
@@ -120,13 +136,18 @@ export function BeyondTraitsTab({
       </TraitsBlock>
     ),
     feats: (
-      <TraitsBlock title="Talentos" action={editLink("feats")}>
+      <TraitsBlock
+        title="Talentos"
+        icon={SparklesIcon}
+        action={editLink("feats")}
+      >
         <FeatsSection {...sectionProps} />
       </TraitsBlock>
     ),
     background: (
       <TraitsBlock
         title={labels.identity.backgroundName ?? "Antecedente"}
+        icon={BookmarkIcon}
         action={editLink("background", "Ferramenta")}
       >
         <BackgroundTraitsSection
@@ -147,6 +168,7 @@ export function BeyondTraitsTab({
         {SECTIONS.map((item, index) => {
           const active = section === item.id;
           const tabId = `${baseId}-tab-${item.id}`;
+          const Icon = item.icon;
           return (
             <button
               key={item.id}
@@ -162,12 +184,13 @@ export function BeyondTraitsTab({
               onClick={() => setSection(item.id)}
               onKeyDown={(event) => onTabKeyDown(event, index)}
               className={cn(
-                "rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors",
+                "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors",
                 active
                   ? "bg-background text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground",
               )}
             >
+              <Icon className="size-3.5 opacity-80" aria-hidden />
               {item.label}
             </button>
           );
@@ -186,19 +209,18 @@ export function BeyondTraitsTab({
 
 function TraitsBlock({
   title,
+  icon,
   action,
   children,
 }: {
   title: string;
+  icon: HeroIcon;
   action?: ReactNode;
   children: ReactNode;
 }) {
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between gap-2">
-        <h3 className="text-sm font-semibold tracking-tight">{title}</h3>
-        {action}
-      </div>
+      <SheetSectionHeader title={title} icon={icon} action={action} />
       {children}
     </div>
   );

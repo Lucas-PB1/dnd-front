@@ -1,7 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import {
+  ChevronDownIcon,
+  PencilSquareIcon,
+  SparklesIcon,
+  StopCircleIcon,
+} from "@heroicons/react/24/outline";
 
 import type { CharacterSpell } from "@/entities/character/sheet-types";
 import type { CharacterDetail } from "@/entities/character/types";
@@ -13,7 +18,12 @@ import {
   useCharacterState,
   usePatchCharacterState,
 } from "@/features/character-sheet/api/use-character-state";
-import { SheetSlotPips } from "@/features/character-sheet/ui/sheet-ui";
+import {
+  SheetEditAction,
+  SheetEmptyHint,
+  SheetSectionHeader,
+  SheetSlotPips,
+} from "@/features/character-sheet/ui/sheet-ui";
 import { useSpells } from "@/features/spell-catalog/api/use-spells";
 import { Button } from "@/shared/ui/button";
 import { nativeSelectClassName } from "@/shared/ui/native-select";
@@ -40,6 +50,7 @@ type BeyondSpellsTabProps = {
   character: CharacterDetail;
   labels: CharacterCatalogLabels;
   onEdit?: () => void;
+  cannotCastSpellsInArmor?: boolean;
 };
 
 type SpellRowModel = {
@@ -54,6 +65,7 @@ export function BeyondSpellsTab({
   character,
   labels,
   onEdit,
+  cannotCastSpellsInArmor = false,
 }: BeyondSpellsTabProps) {
   const stateQuery = useCharacterState(characterId);
   const patchState = usePatchCharacterState(characterId);
@@ -130,9 +142,9 @@ export function BeyondSpellsTab({
     return (
       <div className="space-y-3">
         <SpellsTabHeader onEdit={onEdit} />
-        <p className="text-sm text-muted-foreground">
+        <SheetEmptyHint>
           Nenhuma magia registrada. Use Editar para adicionar.
-        </p>
+        </SheetEmptyHint>
       </div>
     );
   }
@@ -186,15 +198,27 @@ export function BeyondSpellsTab({
                 type="button"
                 size="sm"
                 variant="outline"
+                className="gap-1"
                 disabled={patchState.isPending}
                 onClick={clearConcentration}
               >
+                <StopCircleIcon className="size-3.5" aria-hidden />
                 {patchState.isPending ? "Limpando…" : "Encerrar"}
               </Button>
             ) : null}
           </div>
         </div>
       )}
+
+      {cannotCastSpellsInArmor ? (
+        <p
+          className="rounded-lg border border-secondary/35 bg-secondary/5 px-3 py-2 text-xs text-secondary"
+          role="status"
+        >
+          Não pode conjurar com armadura ou escudo sem treino. Remova-os ou
+          equipe itens para os quais tenha treino.
+        </p>
+      ) : null}
 
       {spellsCatalog.isPending && spellBySlug.size === 0 ? (
         <p className="text-sm text-muted-foreground">Carregando magias…</p>
@@ -219,6 +243,7 @@ export function BeyondSpellsTab({
                     row={row}
                     state={state}
                     casting={castSpell.isPending}
+                    cannotCastSpellsInArmor={cannotCastSpellsInArmor}
                     onCast={handleCast}
                   />
                 ))}
@@ -241,18 +266,18 @@ export function BeyondSpellsTab({
 
 function SpellsTabHeader({ onEdit }: { onEdit?: () => void }) {
   return (
-    <div className="flex items-center justify-between gap-2">
-      <h3 className="text-sm font-semibold tracking-tight">Magias</h3>
-      {onEdit ? (
-        <button
-          type="button"
-          onClick={onEdit}
-          className="text-[0.65rem] font-medium tracking-wide text-primary uppercase hover:underline"
-        >
-          Editar
-        </button>
-      ) : null}
-    </div>
+    <SheetSectionHeader
+      title="Magias"
+      icon={SparklesIcon}
+      action={
+        onEdit ? (
+          <SheetEditAction onClick={onEdit}>
+            <PencilSquareIcon className="size-3" aria-hidden />
+            Editar
+          </SheetEditAction>
+        ) : null
+      }
+    />
   );
 }
 
@@ -260,11 +285,13 @@ function SpellRow({
   row,
   state,
   casting,
+  cannotCastSpellsInArmor,
   onCast,
 }: {
   row: SpellRowModel;
   state: CharacterState | undefined;
   casting: boolean;
+  cannotCastSpellsInArmor: boolean;
   onCast: (spellSlug: string, slotLevel?: number) => Promise<void>;
 }) {
   const [open, setOpen] = useState(false);
@@ -286,9 +313,10 @@ function SpellRow({
     slotLevel ?? availableUpcastLevels[0] ?? (isCantrip ? undefined : baseLevel);
 
   const canCast =
-    isCantrip ||
-    (selectedSlot != null &&
-      (state?.spellSlotsRemaining[String(selectedSlot)] ?? 0) > 0);
+    !cannotCastSpellsInArmor &&
+    (isCantrip ||
+      (selectedSlot != null &&
+        (state?.spellSlotsRemaining[String(selectedSlot)] ?? 0) > 0));
 
   const listLabel = LIST_TYPE_LABELS[row.spell.listType];
   const sourceLabel = row.spell.source
@@ -384,17 +412,21 @@ function SpellRow({
           <Button
             type="button"
             size="sm"
-            variant="outline"
+            variant="secondary"
+            className="gap-1"
             disabled={casting || !canCast || isUnknownLevel}
             title={
-              isUnknownLevel
-                ? "Aguardando catálogo"
-                : !canCast
-                  ? "Sem espaços disponíveis"
-                  : undefined
+              cannotCastSpellsInArmor
+                ? "Não pode conjurar com armadura/escudo sem treino"
+                : isUnknownLevel
+                  ? "Aguardando catálogo"
+                  : !canCast
+                    ? "Sem espaços disponíveis"
+                    : undefined
             }
             onClick={cast}
           >
+            <SparklesIcon className="size-3.5" aria-hidden />
             Conjurar
           </Button>
         </div>

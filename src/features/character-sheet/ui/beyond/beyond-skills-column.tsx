@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  AcademicCapIcon,
+  PencilSquareIcon,
+} from "@heroicons/react/24/outline";
+
 import type { AbilityScores, CharacterDetail } from "@/entities/character/types";
 import {
   ABILITY_LABELS_PT,
@@ -11,6 +16,7 @@ import {
   BeyondPanel,
   ABILITY_SHORT,
 } from "@/features/character-sheet/ui/beyond/beyond-panel";
+import { SheetEditAction } from "@/features/character-sheet/ui/sheet-ui";
 import { cn } from "@/shared/lib/utils";
 
 type BeyondSkillsColumnProps = {
@@ -60,16 +66,14 @@ export function BeyondSkillsColumn({
   return (
     <BeyondPanel
       title="Perícias"
+      icon={AcademicCapIcon}
       className="min-w-0"
       headerRight={
         onEdit ? (
-          <button
-            type="button"
-            onClick={onEdit}
-            className="text-[0.65rem] font-medium tracking-wide text-primary uppercase hover:underline"
-          >
+          <SheetEditAction onClick={onEdit}>
+            <PencilSquareIcon className="size-3" aria-hidden />
             Editar
-          </button>
+          </SheetEditAction>
         ) : null
       }
       flush

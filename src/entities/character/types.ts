@@ -60,6 +60,9 @@ export type CharacterDetail = {
   armorClass: number;
   armorClassNote: string;
   weaponAttacks: WeaponAttackSummary[];
+  equipmentWarnings?: EquipmentWarning[];
+  cannotCastSpellsInArmor?: boolean;
+  speedPenaltyMeters?: 0 | 3;
   campaigns: CharacterCampaignRef[];
   createdAt: string;
   updatedAt: string;
@@ -82,6 +85,15 @@ export type WeaponAttackSummary = {
   damageType: string | null;
   attackNote: string;
   damageNote: string;
+  role?: "main" | "light_bonus" | "dual_bonus";
+  attackDisadvantage?: boolean;
+  omitsAbilityDamage?: boolean;
+};
+
+export type EquipmentWarning = {
+  code: string;
+  message: string;
+  itemSlug?: string;
 };
 
 /** Lista resumida (mesmos campos base do detail) */

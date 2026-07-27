@@ -1,18 +1,22 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { ComponentType, ReactNode, SVGProps } from "react";
 
 import { cn } from "@/shared/lib/utils";
+
+type HeroIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
 /** Painel no estilo Beyond — borda acentuada, fundo de card. */
 export function BeyondPanel({
   title,
+  icon: Icon,
   children,
   className,
   headerRight,
   flush = false,
 }: {
   title?: string;
+  icon?: HeroIcon;
   children: ReactNode;
   className?: string;
   headerRight?: ReactNode;
@@ -27,7 +31,10 @@ export function BeyondPanel({
     >
       {title ? (
         <header className="flex shrink-0 items-center justify-between gap-2 border-b border-border/60 bg-muted/30 px-3 py-2">
-          <h2 className="text-[0.7rem] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+          <h2 className="inline-flex items-center gap-1.5 text-[0.7rem] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+            {Icon ? (
+              <Icon className="size-3.5 text-secondary" aria-hidden />
+            ) : null}
             {title}
           </h2>
           {headerRight}

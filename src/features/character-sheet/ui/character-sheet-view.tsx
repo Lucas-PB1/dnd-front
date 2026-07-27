@@ -1,7 +1,13 @@
 "use client";
 
+import {
+  ArrowUpCircleIcon,
+  LanguageIcon,
+  PencilSquareIcon,
+  UserIcon,
+} from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { useCallback, useState, type ReactNode } from "react";
+import { useCallback, useState, type ComponentType, type ReactNode, type SVGProps } from "react";
 
 import { useCharacterDetail } from "@/features/characters/api/use-character-detail";
 import { useCharacterCatalogLabels } from "@/features/character-sheet/api/use-character-catalog-labels";
@@ -41,7 +47,11 @@ import {
 } from "@/features/character-sheet/ui/sheet-edit-dialog";
 import { LanguagesSection } from "@/features/character-sheet/ui/sheet-read-sections";
 import { LevelUpSection } from "@/features/character-sheet/ui/level-up-section";
-import { SheetChip } from "@/features/character-sheet/ui/sheet-ui";
+import {
+  SheetChip,
+  SheetEditAction,
+  SheetSectionHeader,
+} from "@/features/character-sheet/ui/sheet-ui";
 import { useSkills } from "@/features/reference-catalog/api/use-reference";
 import { BackLink } from "@/shared/ui/back-link";
 import { buttonVariants } from "@/shared/ui/button";
@@ -68,19 +78,18 @@ type CharacterSheetViewProps = {
 
 function TabSection({
   title,
+  icon,
   action,
   children,
 }: {
   title: string;
+  icon?: ComponentType<SVGProps<SVGSVGElement>>;
   action?: ReactNode;
   children: ReactNode;
 }) {
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between gap-2">
-        <h3 className="text-sm font-semibold tracking-tight">{title}</h3>
-        {action}
-      </div>
+      <SheetSectionHeader title={title} icon={icon} action={action} />
       {children}
     </div>
   );
@@ -120,13 +129,10 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
   );
 
   const editButton = (editId: NonNullable<SheetEditId>, label = "Editar") => (
-    <button
-      type="button"
-      onClick={() => setEditing(editId)}
-      className="text-[0.65rem] font-medium tracking-wide text-primary uppercase hover:underline"
-    >
+    <SheetEditAction onClick={() => setEditing(editId)}>
+      <PencilSquareIcon className="size-3" aria-hidden />
       {label}
-    </button>
+    </SheetEditAction>
   );
 
   const editForms = {
@@ -213,9 +219,15 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
         character={data}
         labels={labels}
         onEdit={() => setEditing("spells")}
+        cannotCastSpellsInArmor={Boolean(data.cannotCastSpellsInArmor)}
       />
     ),
-    inventory: <BeyondInventoryTab characterId={id} />,
+    inventory: (
+      <BeyondInventoryTab
+        characterId={id}
+        equipmentWarnings={data.equipmentWarnings}
+      />
+    ),
     features: (
       <BeyondTraitsTab
         character={data}
@@ -228,10 +240,14 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
     ),
     settings: (
       <div className="space-y-5">
-        <TabSection title="Subir de nível">
+        <TabSection title="Subir de nível" icon={ArrowUpCircleIcon}>
           <LevelUpSection characterId={id} character={data} />
         </TabSection>
-        <TabSection title="Idiomas" action={editButton("languages")}>
+        <TabSection
+          title="Idiomas"
+          icon={LanguageIcon}
+          action={editButton("languages")}
+        >
           <LanguagesSection {...sectionProps} />
         </TabSection>
       </div>
@@ -279,8 +295,12 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
           <button
             type="button"
             onClick={() => setEditing("identity")}
-            className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+            className={cn(
+              buttonVariants({ variant: "outline", size: "sm" }),
+              "inline-flex items-center gap-1.5",
+            )}
           >
+            <UserIcon className="size-3.5" aria-hidden />
             Identidade
           </button>
           <DeleteCharacterButton characterId={id} characterName={data.name} />

@@ -1,6 +1,12 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import {
+  BoltIcon,
+  HeartIcon,
+  PencilSquareIcon,
+  ShieldCheckIcon,
+} from "@heroicons/react/24/outline";
+import { useMemo, useState, type ComponentType, type ReactNode } from "react";
 
 import type { CharacterDetail } from "@/entities/character/types";
 import { abilityModifierValue, formatSkillBonus } from "@/entities/character";
@@ -24,11 +30,13 @@ function CombatMetric({
   label,
   value,
   hint,
+  icon: Icon,
   emphasize = false,
 }: {
   label: string;
   value: ReactNode;
   hint?: ReactNode;
+  icon?: ComponentType<{ className?: string }>;
   emphasize?: boolean;
 }) {
   return (
@@ -40,7 +48,8 @@ function CombatMetric({
           : "border-border/70 bg-card/70",
       )}
     >
-      <span className="text-[0.58rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
+      <span className="inline-flex items-center gap-1 text-[0.58rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
+        {Icon ? <Icon className="size-3 text-secondary" aria-hidden /> : null}
         {label}
       </span>
       <span className="font-heading mt-0.5 text-2xl font-semibold leading-none tabular-nums">
@@ -103,16 +112,22 @@ export function BeyondCombatHub({
   return (
     <div className="rounded-xl border border-border/70 bg-card p-2.5">
       <div className="grid gap-2 sm:grid-cols-[6rem_7rem_minmax(10rem,1fr)_minmax(12rem,1.35fr)]">
-        <CombatMetric label="Iniciativa" value={formatSkillBonus(initiative)} />
         <CombatMetric
-          label="Classe de armadura"
+          label="Iniciativa"
+          value={formatSkillBonus(initiative)}
+          icon={BoltIcon}
+        />
+        <CombatMetric
+          label="CA"
           value={character.armorClass}
           hint={character.armorClassNote}
+          icon={ShieldCheckIcon}
           emphasize
         />
 
         <div className="min-w-0 rounded-lg border border-border/70 bg-card/70 px-3 py-2">
-          <p className="text-[0.58rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
+          <p className="inline-flex items-center gap-1 text-[0.58rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
+            <ShieldCheckIcon className="size-3 text-secondary" aria-hidden />
             Defesas
           </p>
           <p className="mt-1 truncate text-sm">
@@ -122,16 +137,19 @@ export function BeyondCombatHub({
 
         <div className="min-w-0 rounded-lg border border-border/70 bg-card/70 px-3 py-2">
           <div className="flex items-center justify-between gap-2">
-            <p className="text-[0.58rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
+            <p className="inline-flex items-center gap-1 text-[0.58rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
+              <HeartIcon className="size-3 text-secondary" aria-hidden />
               Condições
             </p>
             <Button
               type="button"
               size="xs"
               variant="ghost"
+              className="gap-1"
               disabled={!state}
               onClick={openStatusEditor}
             >
+              <PencilSquareIcon className="size-3" aria-hidden />
               Editar
             </Button>
           </div>
@@ -216,6 +234,30 @@ export function BeyondCombatHub({
             ? patchState.error.message
             : "Não foi possível atualizar as condições"}
         </p>
+      ) : null}
+
+      {character.equipmentWarnings?.length ||
+      (character.speedPenaltyMeters ?? 0) > 0 ||
+      character.cannotCastSpellsInArmor ? (
+        <ul className="mt-2 space-y-1 rounded-lg border border-secondary/35 bg-secondary/5 px-3 py-2 text-xs text-secondary">
+          {(character.equipmentWarnings ?? []).map((warning) => (
+            <li key={`${warning.code}-${warning.itemSlug ?? warning.message}`}>
+              {warning.message}
+            </li>
+          ))}
+          {(character.speedPenaltyMeters ?? 0) > 0 &&
+          !(character.equipmentWarnings ?? []).some(
+            (w) => w.code === "strength_requirement",
+          ) ? (
+            <li>Deslocamento −{character.speedPenaltyMeters} m (Força insuficiente).</li>
+          ) : null}
+          {character.cannotCastSpellsInArmor &&
+          !(character.equipmentWarnings ?? []).some(
+            (w) => w.code === "lacks_armor_training",
+          ) ? (
+            <li>Não pode conjurar com armadura/escudo sem treino.</li>
+          ) : null}
+        </ul>
       ) : null}
     </div>
   );

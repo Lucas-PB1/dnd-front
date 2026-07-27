@@ -1,5 +1,11 @@
 "use client";
 
+import {
+  EyeIcon,
+  LanguageIcon,
+  ShieldCheckIcon,
+} from "@heroicons/react/24/outline";
+
 import type { AbilityScores, CharacterDetail } from "@/entities/character/types";
 import {
   ABILITY_LABELS_PT,
@@ -29,7 +35,7 @@ export function BeyondLeftColumn({
 
   return (
     <div className="flex flex-col gap-2.5">
-      <BeyondPanel title="Salvaguardas">
+      <BeyondPanel title="Salvaguardas" icon={ShieldCheckIcon}>
         {classDetail.isPending ? (
           <p className="text-sm text-muted-foreground">Carregando…</p>
         ) : (
@@ -69,7 +75,7 @@ export function BeyondLeftColumn({
         )}
       </BeyondPanel>
 
-      <BeyondPanel title="Sentidos">
+      <BeyondPanel title="Sentidos" icon={EyeIcon}>
         <ul className="space-y-1.5 text-sm">
           <li className="flex items-center justify-between gap-2 rounded-md bg-muted/30 px-2 py-1.5">
             <span className="text-muted-foreground">Percepção passiva</span>
@@ -90,7 +96,7 @@ export function BeyondLeftColumn({
         </ul>
       </BeyondPanel>
 
-      <BeyondPanel title="Proficiências & idiomas">
+      <BeyondPanel title="Proficiências & idiomas" icon={LanguageIcon}>
         {classDetail.isPending ? (
           <p className="text-sm text-muted-foreground">Carregando…</p>
         ) : (

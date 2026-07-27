@@ -1,5 +1,12 @@
 "use client";
 
+import {
+  ArrowTrendingDownIcon,
+  ArrowTrendingUpIcon,
+  HeartIcon,
+  MoonIcon,
+  SunIcon,
+} from "@heroicons/react/24/outline";
 import { useState, type ReactNode } from "react";
 
 import type {
@@ -126,7 +133,8 @@ export function BeyondCharacterStatsBar({
 
       <div className="col-span-3 rounded-lg border border-primary/45 bg-primary/8 p-2 sm:col-span-6 lg:col-span-2">
         <div className="flex items-center justify-between gap-2">
-          <span className="text-[0.58rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
+          <span className="inline-flex items-center gap-1 text-[0.58rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
+            <HeartIcon className="size-3 text-secondary" aria-hidden />
             Pontos de vida
           </span>
           <span className="font-heading text-xl font-semibold tabular-nums">
@@ -151,18 +159,22 @@ export function BeyondCharacterStatsBar({
             type="button"
             size="xs"
             variant="outline"
+            className="gap-1"
             disabled={patch.isPending || !parsedDelta()}
             onClick={() => applyHp(1)}
           >
+            <ArrowTrendingUpIcon className="size-3.5" aria-hidden />
             Curar
           </Button>
           <Button
             type="button"
             size="xs"
             variant="destructive"
+            className="gap-1"
             disabled={patch.isPending || !parsedDelta()}
             onClick={() => applyHp(-1)}
           >
+            <ArrowTrendingDownIcon className="size-3.5" aria-hidden />
             Dano
           </Button>
         </div>
@@ -180,18 +192,22 @@ export function BeyondRestActions({ characterId }: { characterId: string }) {
         type="button"
         size="sm"
         variant="outline"
+        className="gap-1"
         disabled={takeRest.isPending}
         onClick={() => takeRest.mutate({ type: "short" })}
       >
+        <SunIcon className="size-3.5" aria-hidden />
         Descanso curto
       </Button>
       <Button
         type="button"
         size="sm"
         variant="outline"
+        className="gap-1"
         disabled={takeRest.isPending}
         onClick={() => takeRest.mutate({ type: "long" })}
       >
+        <MoonIcon className="size-3.5" aria-hidden />
         Descanso longo
       </Button>
     </div>

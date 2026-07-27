@@ -1,11 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import {
+  ArchiveBoxIcon,
+  ArrowDownTrayIcon,
+  ArrowUpTrayIcon,
+  CubeIcon,
+  MinusIcon,
+  PlusIcon,
+  ShieldCheckIcon,
+  ShieldExclamationIcon,
+  TrashIcon,
+} from "@heroicons/react/24/outline";
+import { useEffect, useState, type ComponentType, type SVGProps } from "react";
 
 import type {
   InventoryItem,
   PatchInventoryItemPayload,
 } from "@/entities/character/session-types";
+import type { EquipmentWarning } from "@/entities/character/types";
 import {
   useAddInventoryItem,
   useCharacterInventory,
@@ -13,6 +25,11 @@ import {
   useRemoveInventoryItem,
 } from "@/features/character-sheet/api/use-character-inventory";
 import { ItemPicker } from "@/features/item-catalog/ui/item-picker";
+import {
+  SheetEmptyHint,
+  SheetSubheader,
+} from "@/features/character-sheet/ui/sheet-ui";
+import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
 import {
   Dialog,
@@ -25,7 +42,8 @@ import {
 import { FieldLabel } from "@/shared/ui/field";
 import { Input } from "@/shared/ui/input";
 import { nativeSelectClassName } from "@/shared/ui/native-select";
-import { cn } from "@/shared/lib/utils";
+
+type HeroIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
 const SLOT_OPTIONS = [
   { value: "armor", label: "Armadura" },
@@ -40,15 +58,49 @@ const SLOT_LABELS: Record<string, string> = Object.fromEntries(
   SLOT_OPTIONS.map((o) => [o.value, o.label]),
 );
 
+function itemTypeLabel(itemType: string): string {
+  const known: Record<string, string> = {
+    armor: "Armadura",
+    weapon: "Arma",
+    shield: "Escudo",
+    gear: "Item",
+    tool: "Ferramenta",
+    adventuring_gear: "Equipamento",
+    unknown: "Item",
+  };
+  return known[itemType] ?? itemType;
+}
+
+function ItemTypeIcon({
+  item,
+  className,
+}: {
+  item: InventoryItem;
+  className?: string;
+}) {
+  const key = (item.equipmentSlot ?? item.itemType).toLowerCase();
+  let Icon: HeroIcon = CubeIcon;
+  if (key.includes("armor") || key === "armor") Icon = ShieldCheckIcon;
+  else if (key.includes("shield") || key === "shield")
+    Icon = ShieldExclamationIcon;
+  else if (key.includes("weapon") || key.includes("hand")) Icon = CubeIcon;
+
+  return <Icon className={cn("size-4", className)} aria-hidden />;
+}
+
 type BeyondInventoryTabProps = {
   characterId: string;
+  equipmentWarnings?: EquipmentWarning[];
 };
 
 /**
  * Inventário estilo Beyond: só itens (Equipado / Mochila).
  * Pacotes de criação viram itens no inventário (API).
  */
-export function BeyondInventoryTab({ characterId }: BeyondInventoryTabProps) {
+export function BeyondInventoryTab({
+  characterId,
+  equipmentWarnings = [],
+}: BeyondInventoryTabProps) {
   const inventory = useCharacterInventory(characterId);
   const addItem = useAddInventoryItem(characterId);
   const patchItem = usePatchInventoryItem(characterId);
@@ -101,7 +153,9 @@ export function BeyondInventoryTab({ characterId }: BeyondInventoryTabProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-2">
-        <h3 className="text-sm font-semibold tracking-tight">Inventário</h3>
+        <h3 className="font-heading text-sm font-semibold tracking-tight">
+          Inventário
+        </h3>
         <div className="flex items-center gap-2">
           <span className="font-mono text-xs tabular-nums text-muted-foreground">
             {items.length} {items.length === 1 ? "item" : "itens"}
@@ -110,8 +164,10 @@ export function BeyondInventoryTab({ characterId }: BeyondInventoryTabProps) {
             type="button"
             size="xs"
             variant="outline"
+            className="gap-1"
             onClick={() => setAddOpen(true)}
           >
+            <PlusIcon className="size-3.5" aria-hidden />
             Adicionar
           </Button>
         </div>
@@ -120,13 +176,15 @@ export function BeyondInventoryTab({ characterId }: BeyondInventoryTabProps) {
       {inventory.isPending ? (
         <p className="text-sm text-muted-foreground">Carregando inventário…</p>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-5">
           <InventoryLocationSection
             id="equipped"
             title="Equipado"
+            icon={ShieldCheckIcon}
             items={equipped}
-            emptyMessage="Nada equipado."
+            emptyMessage="Nada equipado — equipe algo da mochila."
             isPending={isPending}
+            equipmentWarnings={equipmentWarnings}
             onToggleLocation={toggleLocation}
             onPatch={patchFields}
             onRemove={(slug) => removeItem.mutate(slug)}
@@ -134,9 +192,11 @@ export function BeyondInventoryTab({ characterId }: BeyondInventoryTabProps) {
           <InventoryLocationSection
             id="backpack"
             title="Mochila"
+            icon={ArchiveBoxIcon}
             items={backpack}
-            emptyMessage="Mochila vazia."
+            emptyMessage="Mochila vazia — adicione itens do catálogo."
             isPending={isPending}
+            equipmentWarnings={equipmentWarnings}
             onToggleLocation={toggleLocation}
             onPatch={patchFields}
             onRemove={(slug) => removeItem.mutate(slug)}
@@ -185,40 +245,14 @@ export function BeyondInventoryTab({ characterId }: BeyondInventoryTabProps) {
                 <FieldLabel htmlFor="item-qty" className="shrink-0">
                   Quantidade
                 </FieldLabel>
-                <div className="flex items-center gap-1">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="xs"
-                    aria-label="Diminuir quantidade"
-                    disabled={addItem.isPending || addQuantity <= 1}
-                    onClick={() => setAddQuantity(addQuantity - 1)}
-                  >
-                    −
-                  </Button>
-                  <Input
-                    id="item-qty"
-                    type="number"
-                    min={1}
-                    inputMode="numeric"
-                    aria-label="Quantidade a adicionar"
-                    className="h-8 w-14 px-1 text-center font-mono tabular-nums"
-                    value={newQty}
-                    onChange={(e) => setNewQty(e.target.value)}
-                    onBlur={() => setAddQuantity(addQuantity)}
-                    disabled={addItem.isPending}
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="xs"
-                    aria-label="Aumentar quantidade"
-                    disabled={addItem.isPending}
-                    onClick={() => setAddQuantity(addQuantity + 1)}
-                  >
-                    +
-                  </Button>
-                </div>
+                <QuantityStepper
+                  id="item-qty"
+                  value={newQty}
+                  onChange={setNewQty}
+                  onCommit={setAddQuantity}
+                  disabled={addItem.isPending}
+                  ariaLabel="Quantidade a adicionar"
+                />
               </div>
               <div className="flex w-full flex-wrap justify-end gap-2 sm:w-auto">
                 <Button
@@ -251,46 +285,47 @@ export function BeyondInventoryTab({ characterId }: BeyondInventoryTabProps) {
 function InventoryLocationSection({
   id,
   title,
+  icon: Icon,
   items,
   emptyMessage,
   isPending,
+  equipmentWarnings,
   onToggleLocation,
   onPatch,
   onRemove,
 }: {
   id: string;
   title: string;
+  icon: HeroIcon;
   items: InventoryItem[];
   emptyMessage: string;
   isPending: boolean;
+  equipmentWarnings: EquipmentWarning[];
   onToggleLocation: (item: InventoryItem) => void;
   onPatch: (slug: string, payload: PatchInventoryItemPayload) => void;
   onRemove: (slug: string) => void;
 }) {
   return (
-    <section className="space-y-1.5" aria-labelledby={`inv-${id}`}>
-      <div className="flex items-center gap-2">
-        <h4
-          id={`inv-${id}`}
-          className="text-[0.7rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase"
-        >
-          {title}
-          <span className="ml-1.5 font-mono tabular-nums text-muted-foreground/80">
-            ({items.length})
-          </span>
-        </h4>
-        <span className="h-px flex-1 bg-border/50" aria-hidden />
-      </div>
+    <section className="space-y-2" aria-labelledby={`inv-${id}`}>
+      <SheetSubheader
+        id={`inv-${id}`}
+        title={title}
+        count={items.length}
+        icon={Icon}
+      />
 
       {items.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{emptyMessage}</p>
+        <SheetEmptyHint>{emptyMessage}</SheetEmptyHint>
       ) : (
-        <ul className="divide-y divide-border/40 overflow-hidden rounded-lg border border-border/70 bg-background/40">
+        <ul className="overflow-hidden rounded-lg border border-border/70 bg-card/40 divide-y divide-border/40">
           {items.map((item) => (
             <InventoryItemRow
               key={`${item.itemSlug}-${item.equipmentSlot ?? "none"}`}
               item={item}
               isPending={isPending}
+              warnings={equipmentWarnings.filter(
+                (w) => w.itemSlug === item.itemSlug,
+              )}
               onToggleLocation={onToggleLocation}
               onPatch={onPatch}
               onRemove={onRemove}
@@ -302,15 +337,80 @@ function InventoryLocationSection({
   );
 }
 
+function QuantityStepper({
+  id,
+  value,
+  onChange,
+  onCommit,
+  disabled,
+  ariaLabel,
+}: {
+  id: string;
+  value: string;
+  onChange: (next: string) => void;
+  onCommit: (next: number) => void;
+  disabled?: boolean;
+  ariaLabel: string;
+}) {
+  const numeric = Math.max(1, Math.trunc(Number(value)) || 1);
+
+  return (
+    <div className="inline-flex items-center rounded-md border border-border/80 bg-background/60">
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-xs"
+        className="rounded-none rounded-l-md"
+        aria-label="Diminuir quantidade"
+        disabled={disabled || numeric <= 1}
+        onClick={() => onCommit(numeric - 1)}
+      >
+        <MinusIcon className="size-3.5" aria-hidden />
+      </Button>
+      <Input
+        id={id}
+        type="number"
+        min={1}
+        inputMode="numeric"
+        aria-label={ariaLabel}
+        className="h-7 w-11 rounded-none border-0 border-x border-border/80 bg-transparent px-1 text-center font-mono text-xs tabular-nums shadow-none focus-visible:ring-0"
+        value={value}
+        disabled={disabled}
+        onChange={(e) => onChange(e.target.value)}
+        onBlur={() => onCommit(numeric)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            onCommit(numeric);
+          }
+        }}
+      />
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-xs"
+        className="rounded-none rounded-r-md"
+        aria-label="Aumentar quantidade"
+        disabled={disabled}
+        onClick={() => onCommit(numeric + 1)}
+      >
+        <PlusIcon className="size-3.5" aria-hidden />
+      </Button>
+    </div>
+  );
+}
+
 function InventoryItemRow({
   item,
   isPending,
+  warnings,
   onToggleLocation,
   onPatch,
   onRemove,
 }: {
   item: InventoryItem;
   isPending: boolean;
+  warnings: EquipmentWarning[];
   onToggleLocation: (item: InventoryItem) => void;
   onPatch: (slug: string, payload: PatchInventoryItemPayload) => void;
   onRemove: (slug: string) => void;
@@ -320,89 +420,144 @@ function InventoryItemRow({
   const slotId = `slot-${item.itemSlug}`;
   const equipped = item.location === "equipped";
 
-  function commitQuantity() {
-    const next = Math.max(1, Math.trunc(Number(qtyDraft)) || 1);
+  useEffect(() => {
+    setQtyDraft(String(item.quantity));
+  }, [item.quantity]);
+
+  function commitQuantity(nextRaw: number) {
+    const next = Math.max(1, Math.trunc(nextRaw) || 1);
     setQtyDraft(String(next));
     if (next !== item.quantity) {
       onPatch(item.itemSlug, { quantity: next });
     }
   }
 
+  const typeLabel = itemTypeLabel(item.itemType);
+  const slotLabel =
+    equipped && item.equipmentSlot
+      ? (SLOT_LABELS[item.equipmentSlot] ?? item.equipmentSlot)
+      : null;
+  const meta =
+    slotLabel && slotLabel !== typeLabel
+      ? `${typeLabel} · ${slotLabel}`
+      : (slotLabel ?? typeLabel);
+
   return (
-    <li className="grid gap-2 px-3 py-2 text-sm sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
-      <div className="min-w-0">
-        <p className="truncate font-medium">{item.itemName}</p>
-        {equipped && item.equipmentSlot ? (
-          <p className="text-xs text-muted-foreground">
-            {SLOT_LABELS[item.equipmentSlot] ?? item.equipmentSlot}
+    <li className="flex flex-col gap-3 px-3 py-3 sm:flex-row sm:items-center sm:gap-4">
+      <div className="flex min-w-0 flex-1 items-start gap-3">
+        <span
+          className={cn(
+            "mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-md border",
+            equipped
+              ? "border-secondary/40 bg-secondary/10 text-secondary"
+              : "border-border/80 bg-muted/40 text-muted-foreground",
+          )}
+          aria-hidden
+        >
+          <ItemTypeIcon item={item} className="size-4" />
+        </span>
+        <div className="min-w-0 space-y-0.5">
+          <p className="truncate font-heading text-sm font-semibold tracking-tight">
+            {item.itemName}
           </p>
-        ) : null}
+          <p className="text-xs text-muted-foreground">{meta}</p>
+          {warnings.length > 0 ? (
+            <ul className="space-y-0.5 pt-1">
+              {warnings.map((warning) => (
+                <li
+                  key={`${warning.code}-${warning.message}`}
+                  className="inline-flex max-w-full items-start gap-1 rounded border border-secondary/30 bg-secondary/10 px-1.5 py-0.5 text-[0.65rem] leading-snug text-secondary"
+                >
+                  <ShieldExclamationIcon
+                    className="mt-0.5 size-3 shrink-0"
+                    aria-hidden
+                  />
+                  <span>{warning.message}</span>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-1.5 sm:justify-end">
-        <Input
-          id={qtyId}
-          type="number"
-          min={1}
-          aria-label={`Quantidade de ${item.itemName}`}
-          className="h-7 w-14 px-1.5 text-center font-mono text-xs tabular-nums"
-          value={qtyDraft}
-          disabled={isPending}
-          onChange={(e) => setQtyDraft(e.target.value)}
-          onBlur={commitQuantity}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              commitQuantity();
-            }
-          }}
-        />
+      <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+        <div className="flex items-center gap-1.5">
+          <span className="text-[0.65rem] font-medium tracking-wide text-muted-foreground uppercase">
+            Qtd
+          </span>
+          <QuantityStepper
+            id={qtyId}
+            value={qtyDraft}
+            onChange={setQtyDraft}
+            onCommit={commitQuantity}
+            disabled={isPending}
+            ariaLabel={`Quantidade de ${item.itemName}`}
+          />
+        </div>
 
         {equipped ? (
-          <select
-            id={slotId}
-            aria-label={`Slot de ${item.itemName}`}
-            className={cn(nativeSelectClassName, "h-7 min-w-[8.5rem] py-0 text-xs")}
-            value={item.equipmentSlot ?? ""}
-            disabled={isPending}
-            onChange={(e) => {
-              const value = e.target.value as EquipmentSlot;
-              if (!value) return;
-              onPatch(item.itemSlug, { equipmentSlot: value });
-            }}
-          >
-            {!item.equipmentSlot ? (
-              <option value="" disabled>
-                Slot
-              </option>
-            ) : null}
-            {SLOT_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+          <label className="flex items-center gap-1.5">
+            <span className="text-[0.65rem] font-medium tracking-wide text-muted-foreground uppercase">
+              Slot
+            </span>
+            <select
+              id={slotId}
+              aria-label={`Slot de ${item.itemName}`}
+              className={cn(
+                nativeSelectClassName,
+                "h-7 w-auto min-w-[9rem] py-0 text-xs",
+              )}
+              value={item.equipmentSlot ?? ""}
+              disabled={isPending}
+              onChange={(e) => {
+                const value = e.target.value as EquipmentSlot;
+                if (!value) return;
+                onPatch(item.itemSlug, { equipmentSlot: value });
+              }}
+            >
+              {!item.equipmentSlot ? (
+                <option value="" disabled>
+                  Escolher…
+                </option>
+              ) : null}
+              {SLOT_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
         ) : null}
 
-        <Button
-          type="button"
-          variant="outline"
-          size="xs"
-          disabled={isPending}
-          onClick={() => onToggleLocation(item)}
-        >
-          {equipped ? "Desequipar" : "Equipar"}
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="xs"
-          className="text-destructive"
-          disabled={isPending}
-          onClick={() => onRemove(item.itemSlug)}
-        >
-          Remover
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button
+            type="button"
+            variant={equipped ? "outline" : "secondary"}
+            size="xs"
+            className="gap-1"
+            disabled={isPending}
+            onClick={() => onToggleLocation(item)}
+          >
+            {equipped ? (
+              <ArrowDownTrayIcon className="size-3.5" aria-hidden />
+            ) : (
+              <ArrowUpTrayIcon className="size-3.5" aria-hidden />
+            )}
+            {equipped ? "Desequipar" : "Equipar"}
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+            disabled={isPending}
+            aria-label={`Remover ${item.itemName}`}
+            title="Remover"
+            onClick={() => onRemove(item.itemSlug)}
+          >
+            <TrashIcon className="size-3.5" aria-hidden />
+          </Button>
+        </div>
       </div>
     </li>
   );

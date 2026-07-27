@@ -1,6 +1,21 @@
 "use client";
 
-import { useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import {
+  BookOpenIcon,
+  Cog6ToothIcon,
+  CubeIcon,
+  SparklesIcon,
+  BoltIcon,
+} from "@heroicons/react/24/outline";
+import {
+  useId,
+  useRef,
+  useState,
+  type ComponentType,
+  type KeyboardEvent,
+  type ReactNode,
+  type SVGProps,
+} from "react";
 
 import { BeyondPanel } from "@/features/character-sheet/ui/beyond/beyond-panel";
 import { cn } from "@/shared/lib/utils";
@@ -12,12 +27,14 @@ export type BeyondTabId =
   | "features"
   | "settings";
 
-const TABS: { id: BeyondTabId; label: string }[] = [
-  { id: "actions", label: "Ações" },
-  { id: "spells", label: "Magias" },
-  { id: "inventory", label: "Inventário" },
-  { id: "features", label: "Traços" },
-  { id: "settings", label: "Ajustes" },
+type HeroIcon = ComponentType<SVGProps<SVGSVGElement>>;
+
+const TABS: { id: BeyondTabId; label: string; icon: HeroIcon }[] = [
+  { id: "actions", label: "Ações", icon: BoltIcon },
+  { id: "spells", label: "Magias", icon: SparklesIcon },
+  { id: "inventory", label: "Inventário", icon: CubeIcon },
+  { id: "features", label: "Traços", icon: BookOpenIcon },
+  { id: "settings", label: "Ajustes", icon: Cog6ToothIcon },
 ];
 
 type BeyondMainTabsProps = {
@@ -77,6 +94,7 @@ export function BeyondMainTabs({
           {TABS.map((item, index) => {
             const active = tab === item.id;
             const tabId = `${baseId}-tab-${item.id}`;
+            const Icon = item.icon;
             return (
               <button
                 key={item.id}
@@ -92,13 +110,14 @@ export function BeyondMainTabs({
                 onClick={() => setTab(item.id)}
                 onKeyDown={(event) => onTabKeyDown(event, index)}
                 className={cn(
-                  "px-3 py-2 text-xs font-semibold tracking-wide uppercase transition-colors",
+                  "inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold tracking-wide uppercase transition-colors",
                   "border-b-2",
                   active
                     ? "border-primary text-primary"
                     : "border-transparent text-muted-foreground hover:text-foreground",
                 )}
               >
+                <Icon className="size-3.5 opacity-80" aria-hidden />
                 {item.label}
               </button>
             );
