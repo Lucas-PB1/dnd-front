@@ -2,7 +2,7 @@
 
 Documento de referência visual e de experiência do produto.  
 Complementa [COLORS.md](./COLORS.md) (tokens) e [ARCHITECTURE.md](./ARCHITECTURE.md) (FSD).  
-Não substitui [CHARACTER-SHEET-PLAN.md](./CHARACTER-SHEET-PLAN.md) (fluxo de ficha / regras via API) nem o [product-roadmap](../../dnd-api/docs/product-roadmap.md) (features de produto).
+Não substitui [CHARACTER-SHEET-PLAN.md](./CHARACTER-SHEET-PLAN.md) (fluxo de ficha / regras via API) nem o [product-roadmap](../../dnd-api/docs/plans/product-roadmap.md) (features de produto).
 
 **Princípio de produto:** o front **coleta escolhas** e **exibe**; a API **valida e computa**. Evitar regras PHB no UI (exceto enums explícitos, ex. métodos de atributo no wizard).
 
@@ -86,7 +86,7 @@ Não substitui [CHARACTER-SHEET-PLAN.md](./CHARACTER-SHEET-PLAN.md) (fluxo de fi
 
 ## 5. Backlog por fases
 
-Ordem de implementação. Features de regra (ASI, picker de condições) ficam no [CHARACTER-SHEET-PLAN](./CHARACTER-SHEET-PLAN.md) / [product-roadmap](../../dnd-api/docs/product-roadmap.md); aqui só o lado visual/UX.
+Ordem de implementação. Features de regra (ASI, picker de condições) ficam no [CHARACTER-SHEET-PLAN](./CHARACTER-SHEET-PLAN.md) / [product-roadmap](../../dnd-api/docs/plans/product-roadmap.md); aqui só o lado visual/UX.
 
 ### Fase 1 — Fundação visual
 
@@ -200,6 +200,6 @@ Ordem de implementação. Features de regra (ASI, picker de condições) ficam n
 | [COLORS.md](./COLORS.md)                                         | Tokens e papéis de cor         |
 | [ARCHITECTURE.md](./ARCHITECTURE.md)                             | Camadas FSD e imports          |
 | [CHARACTER-SHEET-PLAN.md](./CHARACTER-SHEET-PLAN.md)             | Wizard/ficha/mesa — funcional  |
-| [dnd-api product-roadmap](../../dnd-api/docs/product-roadmap.md) | Prioridade de produto / deploy |
+| [dnd-api product-roadmap](../../dnd-api/docs/plans/product-roadmap.md) | Prioridade de produto / deploy |
 
 Ao implementar uma fase deste plano, atualizar checklists acima e, se afetar ficha/mesa, uma linha no CHARACTER-SHEET-PLAN.

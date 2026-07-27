@@ -1,6 +1,6 @@
 # Deploy (front)
 
-O guia completo (API + front + Supabase) está em [`dnd-api/docs/DEPLOY.md`](../../dnd-api/docs/DEPLOY.md).
+O guia completo (API + front + Supabase) está em [`dnd-api/docs/deploy/DEPLOY.md`](../../dnd-api/docs/deploy/DEPLOY.md).
 
 ## Variáveis na Vercel (`dnd-front`)
 

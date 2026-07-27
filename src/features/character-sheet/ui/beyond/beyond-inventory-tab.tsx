@@ -5,6 +5,8 @@ import {
   ArrowDownTrayIcon,
   ArrowUpTrayIcon,
   CubeIcon,
+  LinkIcon,
+  LinkSlashIcon,
   MinusIcon,
   PlusIcon,
   ShieldCheckIcon,
@@ -45,6 +47,8 @@ import { nativeSelectClassName } from "@/shared/ui/native-select";
 
 type HeroIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
+const MAX_ATTUNED_ITEMS = 3;
+
 const SLOT_OPTIONS = [
   { value: "armor", label: "Armadura" },
   { value: "shield", label: "Escudo" },
@@ -65,6 +69,7 @@ function itemTypeLabel(itemType: string): string {
     shield: "Escudo",
     gear: "Item",
     tool: "Ferramenta",
+    other: "Item mágico",
     adventuring_gear: "Equipamento",
     unknown: "Item",
   };
@@ -113,6 +118,8 @@ export function BeyondInventoryTab({
   const items = inventory.data?.items ?? [];
   const equipped = items.filter((i) => i.location === "equipped");
   const backpack = items.filter((i) => i.location === "backpack");
+  const attunedCount = items.filter((i) => i.attuned).length;
+  const attunementSlotsFull = attunedCount >= MAX_ATTUNED_ITEMS;
   const isPending = patchItem.isPending || removeItem.isPending;
 
   function resetAddForm() {
@@ -147,6 +154,12 @@ export function BeyondInventoryTab({
     });
   }
 
+  function toggleAttunement(item: InventoryItem) {
+    if (!item.requiresAttunement) return;
+    if (!item.attuned && attunementSlotsFull) return;
+    patchFields(item.itemSlug, { attuned: !item.attuned });
+  }
+
   const mutationError =
     addItem.error ?? patchItem.error ?? removeItem.error ?? inventory.error;
 
@@ -157,6 +170,17 @@ export function BeyondInventoryTab({
           Inventário
         </h3>
         <div className="flex items-center gap-2">
+          <span
+            className={cn(
+              "font-mono text-xs tabular-nums",
+              attunementSlotsFull
+                ? "text-secondary"
+                : "text-muted-foreground",
+            )}
+            title="Itens mágicos sintonizados"
+          >
+            Sintonia {attunedCount}/{MAX_ATTUNED_ITEMS}
+          </span>
           <span className="font-mono text-xs tabular-nums text-muted-foreground">
             {items.length} {items.length === 1 ? "item" : "itens"}
           </span>
@@ -184,8 +208,10 @@ export function BeyondInventoryTab({
             items={equipped}
             emptyMessage="Nada equipado — equipe algo da mochila."
             isPending={isPending}
+            attunementSlotsFull={attunementSlotsFull}
             equipmentWarnings={equipmentWarnings}
             onToggleLocation={toggleLocation}
+            onToggleAttunement={toggleAttunement}
             onPatch={patchFields}
             onRemove={(slug) => removeItem.mutate(slug)}
           />
@@ -196,8 +222,10 @@ export function BeyondInventoryTab({
             items={backpack}
             emptyMessage="Mochila vazia — adicione itens do catálogo."
             isPending={isPending}
+            attunementSlotsFull={attunementSlotsFull}
             equipmentWarnings={equipmentWarnings}
             onToggleLocation={toggleLocation}
+            onToggleAttunement={toggleAttunement}
             onPatch={patchFields}
             onRemove={(slug) => removeItem.mutate(slug)}
           />
@@ -289,8 +317,10 @@ function InventoryLocationSection({
   items,
   emptyMessage,
   isPending,
+  attunementSlotsFull,
   equipmentWarnings,
   onToggleLocation,
+  onToggleAttunement,
   onPatch,
   onRemove,
 }: {
@@ -300,8 +330,10 @@ function InventoryLocationSection({
   items: InventoryItem[];
   emptyMessage: string;
   isPending: boolean;
+  attunementSlotsFull: boolean;
   equipmentWarnings: EquipmentWarning[];
   onToggleLocation: (item: InventoryItem) => void;
+  onToggleAttunement: (item: InventoryItem) => void;
   onPatch: (slug: string, payload: PatchInventoryItemPayload) => void;
   onRemove: (slug: string) => void;
 }) {
@@ -323,10 +355,12 @@ function InventoryLocationSection({
               key={`${item.itemSlug}-${item.equipmentSlot ?? "none"}`}
               item={item}
               isPending={isPending}
+              attunementSlotsFull={attunementSlotsFull}
               warnings={equipmentWarnings.filter(
                 (w) => w.itemSlug === item.itemSlug,
               )}
               onToggleLocation={onToggleLocation}
+              onToggleAttunement={onToggleAttunement}
               onPatch={onPatch}
               onRemove={onRemove}
             />
@@ -403,15 +437,19 @@ function QuantityStepper({
 function InventoryItemRow({
   item,
   isPending,
+  attunementSlotsFull,
   warnings,
   onToggleLocation,
+  onToggleAttunement,
   onPatch,
   onRemove,
 }: {
   item: InventoryItem;
   isPending: boolean;
+  attunementSlotsFull: boolean;
   warnings: EquipmentWarning[];
   onToggleLocation: (item: InventoryItem) => void;
+  onToggleAttunement: (item: InventoryItem) => void;
   onPatch: (slug: string, payload: PatchInventoryItemPayload) => void;
   onRemove: (slug: string) => void;
 }) {
@@ -419,6 +457,8 @@ function InventoryItemRow({
   const qtyId = `qty-${item.itemSlug}`;
   const slotId = `slot-${item.itemSlug}`;
   const equipped = item.location === "equipped";
+  const canAttune =
+    item.requiresAttunement && (item.attuned || !attunementSlotsFull);
 
   useEffect(() => {
     setQtyDraft(String(item.quantity));
@@ -437,10 +477,16 @@ function InventoryItemRow({
     equipped && item.equipmentSlot
       ? (SLOT_LABELS[item.equipmentSlot] ?? item.equipmentSlot)
       : null;
-  const meta =
-    slotLabel && slotLabel !== typeLabel
-      ? `${typeLabel} · ${slotLabel}`
-      : (slotLabel ?? typeLabel);
+  const metaParts = [
+    typeLabel,
+    slotLabel && slotLabel !== typeLabel ? slotLabel : null,
+    item.attuned
+      ? "Sintonizado"
+      : item.requiresAttunement
+        ? "Exige sintonia"
+        : null,
+  ].filter(Boolean);
+  const meta = metaParts.join(" · ");
 
   return (
     <li className="flex flex-col gap-3 px-3 py-3 sm:flex-row sm:items-center sm:gap-4">
@@ -530,6 +576,30 @@ function InventoryItemRow({
         ) : null}
 
         <div className="flex items-center gap-1">
+          {item.requiresAttunement ? (
+            <Button
+              type="button"
+              variant={item.attuned ? "secondary" : "outline"}
+              size="xs"
+              className="gap-1"
+              disabled={isPending || !canAttune}
+              title={
+                !canAttune && !item.attuned
+                  ? `Limite de ${MAX_ATTUNED_ITEMS} sintonias atingido`
+                  : item.attuned
+                    ? "Dessintonizar"
+                    : "Sintonizar"
+              }
+              onClick={() => onToggleAttunement(item)}
+            >
+              {item.attuned ? (
+                <LinkSlashIcon className="size-3.5" aria-hidden />
+              ) : (
+                <LinkIcon className="size-3.5" aria-hidden />
+              )}
+              {item.attuned ? "Dessintonizar" : "Sintonizar"}
+            </Button>
+          ) : null}
           <Button
             type="button"
             variant={equipped ? "outline" : "secondary"}

@@ -69,6 +69,8 @@ export type InventoryItem = {
   quantity: number;
   location: "equipped" | "backpack";
   equipmentSlot: string | null;
+  attuned: boolean;
+  requiresAttunement: boolean;
 };
 
 export type CharacterInventory = {
@@ -84,6 +86,7 @@ export type PatchInventoryItemPayload = {
   location?: "equipped" | "backpack";
   equipmentSlot?: "armor" | "main_hand" | "off_hand" | "shield";
   quantity?: number;
+  attuned?: boolean;
 };
 
 /** Espelha LevelUpPreviewDto */

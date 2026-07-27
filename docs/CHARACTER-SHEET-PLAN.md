@@ -2,9 +2,9 @@
 
 **Marco MVP:** concluído (jul/2026). Wizard PHB, ficha leitura/edição, mesa de jogo.
 
-Roadmap geral do monorepo: [`dnd-api/docs/product-roadmap.md`](../../dnd-api/docs/product-roadmap.md)
+Roadmap geral do monorepo: [`dnd-api/docs/plans/product-roadmap.md`](../../dnd-api/docs/plans/product-roadmap.md)
 
-**Próximo foco (catálogo → ficha):** [`dnd-api/docs/sheet-readiness-plan.md`](../../dnd-api/docs/sheet-readiness-plan.md) — salvaguardas, proficiências, traits de espécie, condições, progressão/magias, ASI no level-up.
+**Próximo foco (catálogo → ficha):** [`dnd-api/docs/plans/sheet-readiness-plan.md`](../../dnd-api/docs/plans/sheet-readiness-plan.md) — salvaguardas, proficiências, traits de espécie, condições, progressão/magias, ASI no level-up.
 
 **Princípio:** o front **coleta escolhas** e **exibe**; a API **valida e computa**. Evitar regras PHB no front.
 
@@ -51,7 +51,7 @@ pnpm lint && pnpm test && pnpm build
 
 ## Lacunas conhecidas (não bloqueiam MVP)
 
-Detalhamento e fases: **[`sheet-readiness-plan.md`](../../dnd-api/docs/sheet-readiness-plan.md)**.
+Detalhamento e fases: **[`sheet-readiness-plan.md`](../../dnd-api/docs/plans/sheet-readiness-plan.md)**.
 
 | Item | Estado | Notas |
 |------|--------|-------|
@@ -84,7 +84,7 @@ Detalhamento e fases: **[`sheet-readiness-plan.md`](../../dnd-api/docs/sheet-rea
 
 | Assunto | Caminho |
 | -------- | ------- |
-| Sheet readiness | [`dnd-api/docs/sheet-readiness-plan.md`](../../dnd-api/docs/sheet-readiness-plan.md) |
+| Sheet readiness | [`dnd-api/docs/plans/sheet-readiness-plan.md`](../../dnd-api/docs/plans/sheet-readiness-plan.md) |
 | UX / UI | [UX-UI-PLAN.md](./UX-UI-PLAN.md) |
 | Wizard | `src/features/create-character/` |
 | Ficha | `src/features/character-sheet/` |
