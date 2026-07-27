@@ -1,4 +1,24 @@
-/** Espelha maxSpellLevelForCharacterLevel em dnd-api level-up.service.ts */
+/**
+ * Highest spell circle with at least one slot.
+ * Mirrors dnd-api `maxSpellLevelFromSlots` (class slot tables = SSOT).
+ */
+export function maxSpellLevelFromSlots(
+  slots: Record<string, number> | null | undefined,
+): number {
+  if (!slots) return 0;
+  let max = 0;
+  for (const [circle, count] of Object.entries(slots)) {
+    if (count <= 0) continue;
+    const level = Number(circle);
+    if (Number.isFinite(level) && level > max) max = level;
+  }
+  return max;
+}
+
+/**
+ * @deprecated Prefer maxSpellLevelFromSlots from the class slot row.
+ * Kept for tests / fallback — full-caster table only.
+ */
 export function wizardMaxSpellLevelForLevel(level: number): number {
   if (level >= 17) return 9;
   if (level >= 15) return 8;

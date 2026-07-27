@@ -3,7 +3,7 @@
 import { isSubclassRequired } from "@/entities/character/lib/subclass";
 import {
   computeWizardHasSpellStep,
-  wizardMaxSpellLevelForLevel,
+  maxSpellLevelFromSlots,
 } from "@/features/create-character/lib/wizard-spell-step";
 import {
   useClassSpells,
@@ -16,11 +16,16 @@ export function useWizardHasSpellStep(
   subclassSlug: string,
   level: number,
 ) {
-  const maxSpellLevel = wizardMaxSpellLevelForLevel(level);
   const needsSubclass = isSubclassRequired(level) && !!subclassSlug;
 
   const spellSlots = useClassSpellSlots(classSlug, !!classSlug);
-  const classSpells = useClassSpells(classSlug, maxSpellLevel, !!classSlug);
+  const slotRow = (spellSlots.data?.data ?? []).find(
+    (row) => row.classLevel === level,
+  );
+  const maxSpellLevel = maxSpellLevelFromSlots(slotRow?.spellSlots);
+  const slotsReady = !!classSlug && !spellSlots.isPending;
+
+  const classSpells = useClassSpells(classSlug, maxSpellLevel, slotsReady);
   const subclassSpells = useSubclassSpells(subclassSlug, needsSubclass);
 
   const subclassSpellCount = (subclassSpells.data?.data ?? []).filter(

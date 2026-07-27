@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   computeWizardHasSpellStep,
+  maxSpellLevelFromSlots,
   wizardMaxSpellLevelForLevel,
 } from "@/features/create-character/lib/wizard-spell-step";
 import {
@@ -11,8 +12,18 @@ import {
   visibleWizardSteps,
 } from "@/features/create-character/model/wizard-steps";
 
+describe("maxSpellLevelFromSlots", () => {
+  it("caps half-caster ranger level 5 at circle 2", () => {
+    expect(maxSpellLevelFromSlots({ "1": 4, "2": 2 })).toBe(2);
+  });
+
+  it("allows full-caster level 5 up to circle 3", () => {
+    expect(maxSpellLevelFromSlots({ "1": 4, "2": 3, "3": 2 })).toBe(3);
+  });
+});
+
 describe("wizardMaxSpellLevelForLevel", () => {
-  it("returns circle 1 at level 1 and scales with level", () => {
+  it("returns full-caster circles (legacy fallback)", () => {
     expect(wizardMaxSpellLevelForLevel(1)).toBe(1);
     expect(wizardMaxSpellLevelForLevel(5)).toBe(3);
     expect(wizardMaxSpellLevelForLevel(20)).toBe(9);

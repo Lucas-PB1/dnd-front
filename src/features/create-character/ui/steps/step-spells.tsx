@@ -22,7 +22,9 @@ import {
   toggleSubclassSpell,
   wizardSpellbookLimitAtLevel,
 } from "@/features/create-character/lib/wizard-spell-selection";
-import { wizardMaxSpellLevelForLevel } from "@/features/create-character/lib/wizard-spell-step";
+import {
+  maxSpellLevelFromSlots,
+} from "@/features/create-character/lib/wizard-spell-step";
 import { resolveLevelProgression } from "@/features/create-character/lib/resolve-level-progression";
 import type { CreateCharacterInput } from "@/features/create-character/model/create-character.schema";
 import {
@@ -80,11 +82,9 @@ export function StepSpells({ control, setValue }: StepSpellsProps) {
   const [hint, setHint] = useState<string | null>(null);
   const [preview, setPreview] = useState<PreviewTarget | null>(null);
 
-  const maxLevel = wizardMaxSpellLevelForLevel(level);
   const mode = classSpellcastingMode(classSlug);
 
   const classDetail = useClassDetail(classSlug, !!classSlug);
-  const classSpells = useClassSpells(classSlug, maxLevel, !!classSlug);
   const spellSlotsQuery = useClassSpellSlots(classSlug, !!classSlug);
   const progressionQuery = useClassProgression(classSlug, !!classSlug);
   const subclassSpells = useSubclassSpells(
@@ -92,14 +92,18 @@ export function StepSpells({ control, setValue }: StepSpellsProps) {
     isSubclassRequired(level) && !!subclassSlug,
   );
 
+  const slotRow = (spellSlotsQuery.data?.data ?? []).find(
+    (row) => row.classLevel === level,
+  );
+  const maxLevel = maxSpellLevelFromSlots(slotRow?.spellSlots);
+  const slotsReady = !!classSlug && !spellSlotsQuery.isPending;
+  const classSpells = useClassSpells(classSlug, maxLevel, slotsReady);
+
   const availableClass = classSpells.data?.data ?? [];
   const availableSubclass = (subclassSpells.data?.data ?? []).filter(
     (s) => s.unlockLevel <= level,
   );
 
-  const slotRow = (spellSlotsQuery.data?.data ?? []).find(
-    (row) => row.classLevel === level,
-  );
   const progressionRow = resolveLevelProgression(
     level,
     (progressionQuery.data?.data ?? []).find((row) => row.level === level),
