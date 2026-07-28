@@ -18,10 +18,9 @@ import {
   LevelUpClassExpertise,
   levelUpExpertiseComplete,
 } from "@/features/character-sheet/ui/level-up-class-expertise";
-import {
-  isLevelUpAsiComplete,
-  LevelUpAsiPicker,
-} from "@/features/character-sheet/ui/level-up-asi-picker";
+import { isLevelUpAsiComplete } from "@/features/character-sheet/ui/level-up-asi-picker";
+import { LevelUpAsiFeatPanel } from "@/features/character-sheet/ui/level-up-asi-feat-panel";
+import { LevelUpPreviewSummary } from "@/features/character-sheet/ui/level-up-preview-summary";
 import {
   LevelUpWeaponMastery,
   levelUpWeaponMasteryComplete,
@@ -29,7 +28,6 @@ import {
 import { findIncompleteCreateFeatOptions } from "@/features/create-character/lib/validate-create-feat-options";
 import { CatalogSelect } from "@/features/create-character/ui/catalog-select";
 import { useFeatOptions } from "@/features/feat-catalog/api/use-feat-options";
-import { FeatOptionsEditor } from "@/features/feat-catalog/ui/feat-options-editor";
 import { useFeats } from "@/features/reference-catalog/api/use-reference";
 import type { LevelUpAsiDistributionMode } from "@/entities/character/session-types";
 import { Button } from "@/shared/ui/button";
@@ -208,107 +206,27 @@ export function LevelUpSection({
 
   return (
     <div className="space-y-4">
-      <dl className="grid gap-3 text-sm sm:grid-cols-2">
-        <div>
-          <dt className="text-muted-foreground">Nível atual → próximo</dt>
-          <dd className="font-medium">
-            {data.currentLevel} → {data.nextLevel}
-          </dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">Bônus de proficiência</dt>
-          <dd className="font-medium">
-            +{data.currentProficiencyBonus} → +{data.nextProficiencyBonus}
-          </dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">PV estimados (máx)</dt>
-          <dd className="font-medium">
-            +{data.estimatedHpGain} → {data.estimatedHitPointsMax}
-          </dd>
-        </div>
-        {data.isAsiOrFeatLevel ? (
-          <div>
-            <dt className="text-muted-foreground">Marco</dt>
-            <dd className="font-medium">Nível de ASI / talento</dd>
-          </div>
-        ) : null}
-      </dl>
+      <LevelUpPreviewSummary {...data} />
 
       {data.isAsiOrFeatLevel ? (
-        <div className="space-y-4 rounded-md border border-border bg-muted/30 px-3 py-3 text-sm">
-          <p className="text-muted-foreground">
-            Neste nível escolha <span className="font-medium text-foreground">ASI</span>{" "}
-            ou um <span className="font-medium text-foreground">talento</span> (não
-            os dois).
-          </p>
-          <LevelUpAsiPicker
-            scores={character.abilityScores}
-            mode={asiMode}
-            primarySlug={asiPrimary}
-            secondarySlug={asiSecondary}
-            disabled={!!selectedFeatSlug}
-            onModeChange={(mode) => {
-              setAsiMode(mode);
-              setLevelUpError(undefined);
-              if (mode) {
-                setSelectedFeatSlug("");
-                setLevelUpFeatOptions([]);
-              }
-            }}
-            onPrimaryChange={setAsiPrimary}
-            onSecondaryChange={setAsiSecondary}
-          />
-          <div className="border-t border-border pt-3 space-y-3">
-            {feats.isPending ? (
-              <p className="text-muted-foreground">Carregando talentos…</p>
-            ) : (
-              <CatalogSelect
-                id="level-up-feat"
-                label="Ou adicionar talento"
-                disabled={!!asiMode}
-                options={[
-                  { value: "", label: "Nenhum talento" },
-                  ...(feats.data?.data ?? [])
-                    .filter((feat) =>
-                      canAddCharacterFeat(
-                        character.characterFeats,
-                        feat.slug,
-                        feat.repeatable,
-                      ),
-                    )
-                    .map((feat) => ({
-                      value: feat.slug,
-                      label: feat.repeatable
-                        ? `${feat.name} (repetível)`
-                        : feat.name,
-                    })),
-                ]}
-                value={selectedFeatSlug}
-                onChange={(e) => {
-                  setSelectedFeatSlug(e.target.value);
-                  setLevelUpFeatOptions([]);
-                  setLevelUpError(undefined);
-                  if (e.target.value) {
-                    setAsiMode("");
-                    setAsiPrimary("");
-                    setAsiSecondary("");
-                  }
-                }}
-              />
-            )}
-            {hasFeatOptions && newFeatInstance ? (
-              <FeatOptionsEditor
-                characterFeats={[newFeatInstance]}
-                featNameBySlug={featNameBySlug}
-                value={levelUpFeatOptions}
-                characterLevel={character.level + 1}
-                classSlug={character.classSlug}
-                onChange={setLevelUpFeatOptions}
-              />
-            ) : null}
-          </div>
-        </div>
+        <LevelUpAsiFeatPanel
+          character={character}
+          featsPending={feats.isPending}
+          feats={feats.data?.data ?? []}
+          featNameBySlug={featNameBySlug}
+          newFeatInstance={newFeatInstance}
+          asiMode={asiMode}
+          asiPrimary={asiPrimary}
+          asiSecondary={asiSecondary}
+          selectedFeatSlug={selectedFeatSlug}
+          levelUpFeatOptions={levelUpFeatOptions}
+          onAsiModeChange={setAsiMode}
+          onAsiPrimaryChange={setAsiPrimary}
+          onAsiSecondaryChange={setAsiSecondary}
+          onSelectedFeatSlugChange={setSelectedFeatSlug}
+          onLevelUpFeatOptionsChange={setLevelUpFeatOptions}
+          onInteraction={() => setLevelUpError(undefined)}
+        />
       ) : null}
 
       {data.subclassRequired ? (
