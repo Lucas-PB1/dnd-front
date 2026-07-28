@@ -50,6 +50,8 @@ function traitChoiceLabel(kind: string, traitName: string): string {
     case "tiefling_size":
     case "human_size":
       return "Tamanho";
+    case "high_elf_cantrip":
+      return "Truque de Alto Elfo (opcional)";
     default:
       return traitName;
   }
@@ -142,7 +144,14 @@ export function StepSpeciesChoices({
       }
     >();
 
+    const elfLineage = speciesChoices.find(
+      (c) => c.choiceKind === "elf_lineage",
+    )?.choiceSlug;
+
     for (const row of traitChoices.data?.data ?? []) {
+      if (row.choiceKind === "high_elf_cantrip" && elfLineage !== "high-elf") {
+        continue;
+      }
       const group = map.get(row.choiceKind) ?? {
         traitName: row.traitName,
         options: [],
@@ -155,7 +164,7 @@ export function StepSpeciesChoices({
     }
 
     return [...map.entries()];
-  }, [traitChoices.data?.data]);
+  }, [speciesChoices, traitChoices.data?.data]);
 
   const featNameBySlug = useMemo(
     () =>
@@ -190,11 +199,14 @@ export function StepSpeciesChoices({
   }, [previewFeats, speciesChoices]);
 
   function setChoice(kind: string, slug: string) {
-    const next: SpeciesChoice[] = speciesChoices.filter(
+    let next: SpeciesChoice[] = speciesChoices.filter(
       (c) => c.choiceKind !== kind,
     );
     if (slug) {
       next.push({ choiceKind: kind, choiceSlug: slug });
+    }
+    if (kind === "elf_lineage" && slug !== "high-elf") {
+      next = next.filter((c) => c.choiceKind !== "high_elf_cantrip");
     }
     setValue("speciesChoices", next);
 

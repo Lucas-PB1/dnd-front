@@ -26,6 +26,7 @@ import {
   maxSpellLevelFromSlots,
 } from "@/features/create-character/lib/wizard-spell-step";
 import { resolveLevelProgression } from "@/features/create-character/lib/resolve-level-progression";
+import { asiFeatSlotsToCharacterFeats } from "@/features/create-character/lib/asi-feat-slots-to-feats";
 import type { CreateCharacterInput } from "@/features/create-character/model/create-character.schema";
 import {
   SpellPreviewDialog,
@@ -41,6 +42,7 @@ import {
   useSubclassSpellSlots,
   useSubclassSpells,
 } from "@/features/class-catalog/api/use-classes";
+import { usePreviewGrantedSpells } from "@/features/create-character/api/use-preview-granted-spells";
 import { CatalogFilters } from "@/shared/ui/catalog-filters";
 import { CatalogSearch } from "@/shared/ui/catalog-search";
 import { Button } from "@/shared/ui/button";
@@ -66,9 +68,34 @@ type PreviewTarget = {
 export function StepSpells({ control, setValue }: StepSpellsProps) {
   const level = useWatch({ control, name: "level", defaultValue: 1 });
   const classSlug = useWatch({ control, name: "classSlug", defaultValue: "" });
+  const speciesSlug = useWatch({
+    control,
+    name: "speciesSlug",
+    defaultValue: "",
+  });
   const subclassSlug = useWatch({
     control,
     name: "subclassSlug",
+    defaultValue: "",
+  });
+  const speciesChoices = useWatch({
+    control,
+    name: "speciesChoices",
+    defaultValue: [],
+  });
+  const featOptions = useWatch({
+    control,
+    name: "featOptions",
+    defaultValue: [],
+  });
+  const asiFeatSlotSlugs = useWatch({
+    control,
+    name: "asiFeatSlotSlugs",
+    defaultValue: [],
+  });
+  const fightingStyleFeatSlug = useWatch({
+    control,
+    name: "fightingStyleFeatSlug",
     defaultValue: "",
   });
   const characterSpells = useWatch({
@@ -100,6 +127,52 @@ export function StepSpells({ control, setValue }: StepSpellsProps) {
     isSubclassRequired(level) && !!subclassSlug,
   );
 
+  const characterFeats = useMemo(() => {
+    const feats = [...asiFeatSlotsToCharacterFeats(asiFeatSlotSlugs ?? [])];
+    const fightingStyle = fightingStyleFeatSlug?.trim();
+    if (
+      fightingStyle &&
+      !feats.some((feat) => feat.featSlug === fightingStyle)
+    ) {
+      feats.push({ featSlug: fightingStyle, instanceIndex: 0 });
+    }
+    for (const option of featOptions ?? []) {
+      if (!feats.some((feat) => feat.featSlug === option.featSlug)) {
+        feats.push({
+          featSlug: option.featSlug,
+          instanceIndex: option.instanceIndex ?? 0,
+        });
+      }
+    }
+    return feats;
+  }, [asiFeatSlotSlugs, fightingStyleFeatSlug, featOptions]);
+
+  const playerPickedSpells = useMemo(
+    () =>
+      (characterSpells ?? []).filter(
+        (spell) => spell.listType !== "always_prepared",
+      ),
+    [characterSpells],
+  );
+
+  const grantedPreview = usePreviewGrantedSpells(
+    speciesSlug
+      ? {
+          speciesSlug,
+          level,
+          subclassSlug:
+            isSubclassRequired(level) && subclassSlug
+              ? subclassSlug
+              : undefined,
+          speciesChoices,
+          featOptions,
+          characterFeats,
+          characterSpells: playerPickedSpells,
+        }
+      : null,
+    !!speciesSlug,
+  );
+
   const modeOverride = subclassSpellcasting.data?.spellcastingMode ?? null;
   const mode = classSpellcastingMode(classSlug, modeOverride);
 
@@ -129,24 +202,28 @@ export function StepSpells({ control, setValue }: StepSpellsProps) {
   );
 
   useEffect(() => {
-    if (availableSubclass.length === 0) return;
-    const missing = availableSubclass.filter(
-      (spell) =>
-        !characterSpells.some(
-          (entry) =>
-            entry.spellSlug === spell.slug &&
-            entry.listType === "always_prepared",
-        ),
-    );
-    if (missing.length === 0) return;
+    const granted = grantedPreview.data?.grantedOnly;
+    if (!granted) return;
+
+    const nextGrantedKey = granted
+      .map((spell) => spell.spellSlug)
+      .sort()
+      .join("|");
+    const currentGrantedKey = (characterSpells ?? [])
+      .filter((spell) => spell.listType === "always_prepared")
+      .map((spell) => spell.spellSlug)
+      .sort()
+      .join("|");
+    if (nextGrantedKey === currentGrantedKey) return;
+
     setValue("characterSpells", [
-      ...characterSpells,
-      ...missing.map((spell) => ({
-        spellSlug: spell.slug,
+      ...playerPickedSpells,
+      ...granted.map((spell) => ({
+        spellSlug: spell.spellSlug,
         listType: "always_prepared" as const,
       })),
     ]);
-  }, [availableSubclass, characterSpells, setValue]);
+  }, [grantedPreview.data, characterSpells, playerPickedSpells, setValue]);
 
   const progressionRow = resolveLevelProgression(
     level,
@@ -344,7 +421,8 @@ export function StepSpells({ control, setValue }: StepSpellsProps) {
   // está desabilitada ou já falhou — classe sem magia responde 404.
   if (
     classSpells.isLoading ||
-    spellSlotsQuery.isLoading ||
+    classSpellSlotsQuery.isLoading ||
+    subclassSpellSlotsQuery.isLoading ||
     progressionQuery.isLoading ||
     subclassSpells.isLoading
   ) {
