@@ -19,12 +19,12 @@ import {
   usePatchCharacterState,
   useSpendClassResource,
 } from "@/features/character/character-sheet/api/use-character-state";
-import { CombatClassResourcesPanel } from "@/features/character/character-sheet/ui/beyond/combat-class-resources-panel";
-import { CombatEquipmentWarnings } from "@/features/character/character-sheet/ui/beyond/combat-equipment-warnings";
-import { CombatMetric } from "@/features/character/character-sheet/ui/beyond/combat-metric";
-import { CombatStatusEditor } from "@/features/character/character-sheet/ui/beyond/combat-status-editor";
-import { DeathSaveTrack } from "@/features/character/character-sheet/ui/beyond/death-save-track";
-import { useSheetRolls } from "@/features/character/character-sheet/ui/beyond/sheet-rolls";
+import { CombatClassResourcesPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-class-resources-panel";
+import { CombatEquipmentWarnings } from "@/features/character/character-sheet/ui/beyond/combat/combat-equipment-warnings";
+import { CombatMetric } from "@/features/character/character-sheet/ui/beyond/combat/combat-metric";
+import { CombatStatusEditor } from "@/features/character/character-sheet/ui/beyond/combat/combat-status-editor";
+import { DeathSaveTrack } from "@/features/character/character-sheet/ui/beyond/combat/death-save-track";
+import { useSheetRolls } from "@/features/character/character-sheet/ui/beyond/layout/sheet-rolls";
 import { SheetChip } from "@/features/character/character-sheet/ui/sheet/sheet-ui";
 import { useConditions } from "@/features/catalog/reference-catalog/api/use-reference";
 import { Button } from "@/shared/ui/button";

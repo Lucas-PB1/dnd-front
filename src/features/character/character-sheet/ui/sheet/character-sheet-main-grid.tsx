@@ -2,15 +2,15 @@
 
 import {
   BeyondCharacterStatsBar,
-} from "@/features/character/character-sheet/ui/beyond/beyond-ability-row";
-import { BeyondCombatHub } from "@/features/character/character-sheet/ui/beyond/beyond-combat-hub";
-import { BeyondLeftColumn } from "@/features/character/character-sheet/ui/beyond/beyond-left-column";
-import { BeyondMainTabs } from "@/features/character/character-sheet/ui/beyond/beyond-main-tabs";
-import { BeyondPanel } from "@/features/character/character-sheet/ui/beyond/beyond-panel";
-import { BeyondSkillsColumn } from "@/features/character/character-sheet/ui/beyond/beyond-skills-column";
+} from "@/features/character/character-sheet/ui/beyond/layout/beyond-ability-row";
+import { BeyondCombatHub } from "@/features/character/character-sheet/ui/beyond/combat/beyond-combat-hub";
+import { BeyondLeftColumn } from "@/features/character/character-sheet/ui/beyond/layout/beyond-left-column";
+import { BeyondMainTabs } from "@/features/character/character-sheet/ui/beyond/layout/beyond-main-tabs";
+import { BeyondPanel } from "@/features/character/character-sheet/ui/beyond/layout/beyond-panel";
+import { BeyondSkillsColumn } from "@/features/character/character-sheet/ui/beyond/layout/beyond-skills-column";
 import type { CharacterDetail } from "@/entities/character/types";
 import type { useSkills } from "@/features/catalog/reference-catalog/api/use-reference";
-import type { BeyondTabId } from "@/features/character/character-sheet/ui/beyond/beyond-main-tabs";
+import type { BeyondTabId } from "@/features/character/character-sheet/ui/beyond/layout/beyond-main-tabs";
 import { cn } from "@/shared/lib/utils";
 import type { ReactNode } from "react";
 

@@ -30,7 +30,6 @@ import {
   type WizardNavOptions,
   type WizardStepId,
 } from "@/features/character/create-character/model/wizard-steps";
-import { TempTestPresetsPanel } from "@/features/character/create-character/ui/temp-test-presets-panel";
 import { WizardFooterNav } from "@/features/character/create-character/ui/wizard/wizard-footer-nav";
 import { WizardStepContent } from "@/features/character/create-character/ui/wizard/wizard-step-content";
 import { WizardStepIndicator } from "@/features/character/create-character/ui/wizard/wizard-step-indicator";
@@ -165,10 +164,6 @@ export function CreateCharacterWizard() {
       })}
     >
       <WizardStepIndicator currentStep={step} navOptions={wizardNav} />
-
-      {process.env.NODE_ENV === "development" ? (
-        <TempTestPresetsPanel wizard={{ setValue, setStep }} />
-      ) : null}
 
       <WizardStepContent
         step={step}

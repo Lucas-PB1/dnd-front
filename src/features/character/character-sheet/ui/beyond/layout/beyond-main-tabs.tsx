@@ -17,7 +17,7 @@ import {
   type SVGProps,
 } from "react";
 
-import { BeyondPanel } from "@/features/character/character-sheet/ui/beyond/beyond-panel";
+import { BeyondPanel } from "@/features/character/character-sheet/ui/beyond/layout/beyond-panel";
 import { cn } from "@/shared/lib/utils";
 
 export type BeyondTabId =

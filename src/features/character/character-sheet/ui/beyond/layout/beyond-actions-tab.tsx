@@ -10,7 +10,7 @@ import {
 import type { ComponentType, SVGProps } from "react";
 
 import type { CharacterDetail } from "@/entities/character/types";
-import { WeaponAttackCard } from "@/features/character/character-sheet/ui/beyond/weapon-attack-card";
+import { WeaponAttackCard } from "@/features/character/character-sheet/ui/beyond/inventory/weapon-attack-card";
 import {
   SheetEmptyHint,
   SheetSectionHeader,

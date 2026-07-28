@@ -17,8 +17,8 @@ import type { SkillSummary } from "@/entities/skill/types";
 import {
   BeyondPanel,
   ABILITY_SHORT,
-} from "@/features/character/character-sheet/ui/beyond/beyond-panel";
-import { useSheetRolls } from "@/features/character/character-sheet/ui/beyond/sheet-rolls";
+} from "@/features/character/character-sheet/ui/beyond/layout/beyond-panel";
+import { useSheetRolls } from "@/features/character/character-sheet/ui/beyond/layout/sheet-rolls";
 import { SheetEditAction } from "@/features/character/character-sheet/ui/sheet/sheet-ui";
 import { cn } from "@/shared/lib/utils";
 

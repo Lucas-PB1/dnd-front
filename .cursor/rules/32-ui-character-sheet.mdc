@@ -20,7 +20,7 @@ Mobile (`order-*`): combate + abas → perícias → proficiências.
 
 ## Componentes
 
-- Primitivos em `features/character/character-sheet/ui/beyond/` (`BeyondPanel`, hub, tabs, colunas)
+- Primitivos em `features/character/character-sheet/ui/beyond/{layout,combat,inventory,spells}/`
 - Leitura: `ui/sections/sheet-read-sections.tsx` · edição: `ui/edit/sheet-edit-forms.tsx`
 - Vitais / condições / descanso: hub de combate (`BeyondCombatHub`)
 - Slots / conjurar / concentração: aba Magias (`BeyondSpellsTab` — lista por círculo + cast na linha)

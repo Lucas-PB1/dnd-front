@@ -5,8 +5,8 @@ import type {
   PatchInventoryItemPayload,
 } from "@/entities/character/session-types";
 import type { EquipmentWarning } from "@/entities/character/types";
-import type { HeroIcon } from "@/features/character/character-sheet/ui/beyond/inventory-item-meta";
-import { InventoryItemRow } from "@/features/character/character-sheet/ui/beyond/inventory-item-row";
+import type { HeroIcon } from "@/features/character/character-sheet/ui/beyond/inventory/inventory-item-meta";
+import { InventoryItemRow } from "@/features/character/character-sheet/ui/beyond/inventory/inventory-item-row";
 import {
   SheetEmptyHint,
   SheetSubheader,

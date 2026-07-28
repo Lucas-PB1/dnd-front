@@ -4,7 +4,7 @@ import { PencilSquareIcon, UserIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import type { CharacterDetail } from "@/entities/character/types";
 import type { useCharacterCatalogLabels } from "@/features/character/character-sheet/api/use-character-catalog-labels";
-import { BeyondRestActions } from "@/features/character/character-sheet/ui/beyond/beyond-ability-row";
+import { BeyondRestActions } from "@/features/character/character-sheet/ui/beyond/layout/beyond-ability-row";
 import { DeleteCharacterButton } from "@/features/character/character-sheet/ui/sheet/delete-character-button";
 import type { SheetEditId } from "@/features/character/character-sheet/lib/edit/sheet-edit-types";
 import { SheetChip, SheetEditAction } from "@/features/character/character-sheet/ui/sheet/sheet-ui";

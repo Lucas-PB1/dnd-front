@@ -23,8 +23,8 @@ import {
   BeyondSpellRow,
   SPELL_SLOT_LEVELS,
   type SpellRowModel,
-} from "@/features/character/character-sheet/ui/beyond/beyond-spell-row";
-import { BeyondSpellSlotsPanel } from "@/features/character/character-sheet/ui/beyond/beyond-spell-slots-panel";
+} from "@/features/character/character-sheet/ui/beyond/spells/beyond-spell-row";
+import { BeyondSpellSlotsPanel } from "@/features/character/character-sheet/ui/beyond/spells/beyond-spell-slots-panel";
 import {
   SheetEditAction,
   SheetEmptyHint,

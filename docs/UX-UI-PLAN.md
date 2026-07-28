@@ -185,7 +185,7 @@ Ordem de implementação. Features de regra (ASI, picker de condições) ficam n
 | Catalog shell / busca | `src/widgets/catalog-shell/`, `src/shared/ui/catalog-*`   |
 | Largura de conteúdo   | `src/shared/ui/page-main.tsx` (`max-w-6xl` / `max-w-7xl`) |
 | Wizard                | `src/features/character/create-character/`                |
-| Ficha                 | `src/features/character/character-sheet/` (+ `ui/beyond/`) |
+| Ficha                 | `src/features/character/character-sheet/` (+ `ui/beyond/{layout,combat,inventory,spells}/`) |
 | Qualidade de tela     | `.cursor/rules/31-ui-screen-quality.mdc`                  |
 | Rule ficha            | `.cursor/rules/32-ui-character-sheet.mdc`                 |
 | Cores (doc)           | [COLORS.md](./COLORS.md)                                  |

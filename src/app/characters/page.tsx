@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 import { CharactersList } from "@/features/character/characters/ui/characters-list";
-import { TempTestPresetsPanel } from "@/features/character/create-character/ui/temp-test-presets-panel";
 import { cn } from "@/shared/lib/utils";
 import { buttonVariants } from "@/shared/ui/button";
 import { PageMain } from "@/shared/ui/page-main";
@@ -33,8 +32,6 @@ export default function CharactersPage() {
             Nova ficha
           </Link>
         </div>
-
-        <TempTestPresetsPanel />
 
         <CharactersList />
       </PageMain>

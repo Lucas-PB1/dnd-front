@@ -1,6 +1,6 @@
 "use client";
 
-import { DeathSaveTrack } from "@/features/character/character-sheet/ui/beyond/death-save-track";
+import { DeathSaveTrack } from "@/features/character/character-sheet/ui/beyond/combat/death-save-track";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
 import { Field, FieldLabel } from "@/shared/ui/field";

@@ -7,7 +7,7 @@ import {
 } from "@/features/character/character-sheet/ui/sheet/character-sheet-header";
 import { CharacterSheetMainGrid } from "@/features/character/character-sheet/ui/sheet/character-sheet-main-grid";
 import { buildCharacterSheetTabPanels } from "@/features/character/character-sheet/ui/sheet/character-sheet-tab-panels";
-import { SheetRollsProvider } from "@/features/character/character-sheet/ui/beyond/sheet-rolls";
+import { SheetRollsProvider } from "@/features/character/character-sheet/ui/beyond/layout/sheet-rolls";
 import { SheetEditDialog } from "@/features/character/character-sheet/ui/edit/sheet-edit-dialog";
 import { buildSheetEditDialogs } from "@/features/character/character-sheet/ui/edit/sheet-edit-dialog-registry";
 import { motion } from "@/shared/lib/motion";

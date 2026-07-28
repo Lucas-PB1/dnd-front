@@ -95,7 +95,7 @@ features/character/create-character/
   ui/wizard/ · ui/steps/<step>/ · lib/<domínio>/
 
 features/character/character-sheet/
-  ui/sheet/ | edit/ | level-up/ | sections/ | beyond/
+  ui/sheet/ | edit/ | level-up/ | sections/ | beyond/{layout,combat,inventory,spells}/
 
 features/catalog/feat-catalog/
   ui/catalog/ | options/

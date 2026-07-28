@@ -5,11 +5,11 @@ import type { ReactNode } from "react";
 
 import type { CharacterDetail } from "@/entities/character/types";
 import type { useCharacterCatalogLabels } from "@/features/character/character-sheet/api/use-character-catalog-labels";
-import { BeyondActionsTab } from "@/features/character/character-sheet/ui/beyond/beyond-actions-tab";
-import type { BeyondTabId } from "@/features/character/character-sheet/ui/beyond/beyond-main-tabs";
-import { BeyondInventoryTab } from "@/features/character/character-sheet/ui/beyond/beyond-inventory-tab";
-import { BeyondSpellsTab } from "@/features/character/character-sheet/ui/beyond/beyond-spells-tab";
-import { BeyondTraitsTab } from "@/features/character/character-sheet/ui/beyond/beyond-traits-tab";
+import { BeyondActionsTab } from "@/features/character/character-sheet/ui/beyond/layout/beyond-actions-tab";
+import type { BeyondTabId } from "@/features/character/character-sheet/ui/beyond/layout/beyond-main-tabs";
+import { BeyondInventoryTab } from "@/features/character/character-sheet/ui/beyond/inventory/beyond-inventory-tab";
+import { BeyondSpellsTab } from "@/features/character/character-sheet/ui/beyond/spells/beyond-spells-tab";
+import { BeyondTraitsTab } from "@/features/character/character-sheet/ui/beyond/layout/beyond-traits-tab";
 import { CharacterSheetTabSection } from "@/features/character/character-sheet/ui/sheet/character-sheet-tab-section";
 import { SheetEditButton } from "@/features/character/character-sheet/ui/sheet/character-sheet-header";
 import { LevelUpSection } from "@/features/character/character-sheet/ui/level-up/level-up-section";

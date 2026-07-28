@@ -14,8 +14,8 @@ import {
   formatSkillBonus,
 } from "@/entities/character";
 import { useClassDetail } from "@/features/catalog/class-catalog/api/use-classes";
-import { BeyondPanel, ABILITY_SHORT } from "@/features/character/character-sheet/ui/beyond/beyond-panel";
-import { useSheetRolls } from "@/features/character/character-sheet/ui/beyond/sheet-rolls";
+import { BeyondPanel, ABILITY_SHORT } from "@/features/character/character-sheet/ui/beyond/layout/beyond-panel";
+import { useSheetRolls } from "@/features/character/character-sheet/ui/beyond/layout/sheet-rolls";
 import { useSpeciesDetail } from "@/features/catalog/species-catalog/api/use-species";
 import { cn } from "@/shared/lib/utils";
 

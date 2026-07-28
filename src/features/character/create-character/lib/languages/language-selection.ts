@@ -69,9 +69,6 @@ export function syncLanguagesForBackground(
   return [...granted, ...chosen];
 }
 
-/** @deprecated Use syncLanguagesForBackground */
-export const syncLanguagesForSpecies = syncLanguagesForBackground;
-
 export function toggleLanguageSelection(
   selected: string[],
   slug: string,

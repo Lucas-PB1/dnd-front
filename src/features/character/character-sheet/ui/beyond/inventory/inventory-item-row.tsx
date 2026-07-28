@@ -22,8 +22,8 @@ import {
   SLOT_OPTIONS,
   itemTypeLabel,
   type EquipmentSlot,
-} from "@/features/character/character-sheet/ui/beyond/inventory-item-meta";
-import { QuantityStepper } from "@/features/character/character-sheet/ui/beyond/quantity-stepper";
+} from "@/features/character/character-sheet/ui/beyond/inventory/inventory-item-meta";
+import { QuantityStepper } from "@/features/character/character-sheet/ui/beyond/inventory/quantity-stepper";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
 import { nativeSelectClassName } from "@/shared/ui/native-select";

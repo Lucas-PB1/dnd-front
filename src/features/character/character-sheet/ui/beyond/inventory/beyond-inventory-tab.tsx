@@ -14,9 +14,9 @@ import {
   usePatchInventoryItem,
   useRemoveInventoryItem,
 } from "@/features/character/character-sheet/api/use-character-inventory";
-import { MAX_ATTUNED_ITEMS } from "@/features/character/character-sheet/ui/beyond/inventory-item-meta";
-import { InventoryLocationSection } from "@/features/character/character-sheet/ui/beyond/inventory-location-section";
-import { QuantityStepper } from "@/features/character/character-sheet/ui/beyond/quantity-stepper";
+import { MAX_ATTUNED_ITEMS } from "@/features/character/character-sheet/ui/beyond/inventory/inventory-item-meta";
+import { InventoryLocationSection } from "@/features/character/character-sheet/ui/beyond/inventory/inventory-location-section";
+import { QuantityStepper } from "@/features/character/character-sheet/ui/beyond/inventory/quantity-stepper";
 import { ItemPicker } from "@/features/catalog/item-catalog/ui/item-picker";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";

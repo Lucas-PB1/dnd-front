@@ -115,8 +115,8 @@ export function EquipmentSection({
         ? backgroundEquipmentLines(backgroundPkg, resolveCtx)
         : [];
 
-    // Catálogo do pacote é a fonte de verdade na leitura (marcadores TEMP
-    // e choice_text resolvem aqui). Persistidos cobrem fallback sem catálogo.
+    // Catálogo do pacote é a fonte de verdade na leitura (choice_text e
+    // opções resolvem aqui). Persistidos cobrem fallback sem catálogo.
     const displayLines =
       catalogLines.length > 0
         ? catalogLines.map((line, index) => ({

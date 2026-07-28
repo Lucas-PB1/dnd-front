@@ -19,7 +19,7 @@ import {
   useTakeRest,
 } from "@/features/character/character-sheet/api/use-character-state";
 import { usePatchCharacter } from "@/features/character/character-sheet/api/use-patch-character";
-import { ABILITY_SHORT } from "@/features/character/character-sheet/ui/beyond/beyond-panel";
+import { ABILITY_SHORT } from "@/features/character/character-sheet/ui/beyond/layout/beyond-panel";
 import { useSpeciesDetail } from "@/features/catalog/species-catalog/api/use-species";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";

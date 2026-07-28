@@ -12,9 +12,6 @@ export const EXTRA_ASI_FEAT_LEVELS_BY_CLASS: Readonly<
   rogue: [10],
 };
 
-/** @deprecated Prefer BASE_ASI_FEAT_LEVELS / asiFeatLevelsForClass. */
-export const ASI_FEAT_LEVELS = BASE_ASI_FEAT_LEVELS;
-
 export function asiFeatLevelsForClass(
   classSlug: string | null | undefined,
 ): number[] {
