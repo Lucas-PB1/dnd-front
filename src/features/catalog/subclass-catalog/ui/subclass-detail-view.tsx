@@ -1,0 +1,183 @@
+"use client";
+
+import { Suspense } from "react";
+
+import type { SubclassSummary } from "@/entities/subclass/types";
+import { useSubclassMechanics } from "@/features/catalog/class-catalog/api/use-classes";
+import { useSubclassDetail } from "@/features/catalog/subclass-catalog/api/use-subclasses";
+import { useCatalogBackHref } from "@/shared/lib/use-catalog-back-href";
+import {
+  CatalogDetailError,
+  CatalogDetailHero,
+} from "@/shared/ui/catalog-detail-hero";
+import { CollapsibleCard } from "@/shared/ui/collapsible-card";
+import { PhbProse } from "@/shared/ui/phb-prose";
+
+type SubclassDetailViewProps = {
+  slug: string;
+};
+
+function SubclassHero({
+  subclass,
+  backHref,
+}: {
+  subclass: SubclassSummary;
+  backHref: string;
+}) {
+  const stats: { label: string; value: string }[] = [
+    { label: "Classe", value: subclass.className },
+  ];
+  if (subclass.sourceChapter != null) {
+    stats.push({
+      label: "Capítulo",
+      value: String(subclass.sourceChapter),
+    });
+  }
+  if (subclass.spellSourceLabel) {
+    stats.push({
+      label: "Fonte de magias",
+      value: subclass.spellSourceLabel,
+    });
+  }
+
+  return (
+    <CatalogDetailHero
+      backHref={backHref}
+      backLabel="Subclasses"
+      title={subclass.name}
+      eyebrow={subclass.tagline ?? subclass.className}
+      stats={stats}
+    />
+  );
+}
+
+function SubclassDetailBody({ slug }: SubclassDetailViewProps) {
+  const { data, isPending, isError, error } = useSubclassDetail(slug);
+  const {
+    data: mechanics,
+    isPending: mechanicsPending,
+  } = useSubclassMechanics(slug, !!slug);
+  const backHref = useCatalogBackHref("/subclasses");
+
+  if (isPending) {
+    return (
+      <p className="text-sm text-muted-foreground">Carregando subclasse…</p>
+    );
+  }
+
+  if (isError || !data) {
+    return (
+      <CatalogDetailError
+        backHref={backHref}
+        message={
+          error instanceof Error
+            ? error.message
+            : "Subclasse não encontrada"
+        }
+      />
+    );
+  }
+
+  const features = mechanics?.data ?? [];
+
+  return (
+    <div className="flex flex-col gap-12">
+      <SubclassHero subclass={data} backHref={backHref} />
+
+      {data.summary ? (
+        <section aria-labelledby="subclass-summary" className="space-y-4">
+          <div className="space-y-1">
+            <p className="text-xs font-medium tracking-wider text-primary uppercase">
+              Resumo
+            </p>
+            <h2
+              id="subclass-summary"
+              className="font-heading text-2xl font-semibold tracking-tight"
+            >
+              Visão geral
+            </h2>
+          </div>
+          <PhbProse
+            text={data.summary}
+            className="text-base leading-relaxed text-justify text-foreground/85 [&_p]:text-justify [&_p]:text-foreground/85"
+          />
+        </section>
+      ) : null}
+
+      <section aria-labelledby="subclass-features" className="space-y-4">
+        <div className="space-y-1">
+          <p className="text-xs font-medium tracking-wider text-primary uppercase">
+            Características
+          </p>
+          <h2
+            id="subclass-features"
+            className="font-heading text-2xl font-semibold tracking-tight"
+          >
+            Recursos da subclasse
+          </h2>
+        </div>
+
+        {mechanicsPending && !mechanics ? (
+          <p className="text-sm text-muted-foreground">
+            Carregando características…
+          </p>
+        ) : !features.length ? (
+          <p className="text-sm text-muted-foreground">
+            Sem características cadastradas.
+          </p>
+        ) : (
+          <div className="space-y-3">
+            {features.map((feature, index) => {
+              const title = `Nível ${feature.featureLevel} · ${feature.featureName}`;
+              const meta: string[] = [];
+              if (feature.resourceName) {
+                meta.push(feature.resourceName);
+              }
+              if (feature.maxFormula) {
+                meta.push(`Máx.: ${feature.maxFormula}`);
+              } else if (feature.fixedMax != null) {
+                meta.push(`Máx.: ${feature.fixedMax}`);
+              }
+
+              return (
+                <CollapsibleCard
+                  key={`${feature.featureLevel}-${feature.featureName}-${index}`}
+                  title={title}
+                  defaultOpen={features.length <= 4}
+                >
+                  {meta.length ? (
+                    <p className="mb-3 text-xs text-muted-foreground">
+                      {meta.join(" · ")}
+                    </p>
+                  ) : null}
+                  {feature.featureDescription ? (
+                    <PhbProse
+                      text={feature.featureDescription}
+                      className="text-base leading-relaxed text-justify text-foreground/85 [&_p]:text-justify [&_p]:text-foreground/85"
+                    />
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      Sem descrição.
+                    </p>
+                  )}
+                </CollapsibleCard>
+              );
+            })}
+          </div>
+        )}
+      </section>
+    </div>
+  );
+}
+
+export function SubclassDetailView({ slug }: SubclassDetailViewProps) {
+  return (
+    <Suspense
+      fallback={
+        <p className="text-sm text-muted-foreground">Carregando subclasse…</p>
+      }
+    >
+      <SubclassDetailBody slug={slug} />
+    </Suspense>
+  );
+}

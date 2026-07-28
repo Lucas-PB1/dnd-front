@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { FightingStylesGrid } from "@/features/fighting-style-catalog/ui/fighting-styles-grid";
+import { FightingStylesGrid } from "@/features/catalog/fighting-style-catalog/ui/fighting-styles-grid";
 import { CatalogShell } from "@/widgets/catalog-shell/ui/catalog-shell";
 
 export default function FightingStylesPage() {

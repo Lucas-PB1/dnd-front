@@ -1,4 +1,4 @@
-import { SpellDetailView } from "@/features/spell-catalog/ui/spell-detail-view";
+import { SpellDetailView } from "@/features/catalog/spell-catalog/ui/spell-detail-view";
 import { PageMain } from "@/shared/ui/page-main";
 import { AppHeader } from "@/widgets/app-header/ui/app-header";
 

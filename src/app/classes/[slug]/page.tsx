@@ -1,4 +1,4 @@
-import { ClassDetailView } from "@/features/class-catalog/ui/class-detail-view";
+import { ClassDetailView } from "@/features/catalog/class-catalog/ui/class-detail-view";
 import { PageMain } from "@/shared/ui/page-main";
 import { AppHeader } from "@/widgets/app-header/ui/app-header";
 

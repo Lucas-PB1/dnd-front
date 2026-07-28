@@ -4,7 +4,7 @@ import type { FeatOptionDefinition } from "@/entities/feat/types";
 import {
   resolveFeatOptionDisplay,
   resolveFeatOptionValueLabel,
-} from "@/features/feat-catalog/lib/resolve-feat-option-label";
+} from "@/features/catalog/feat-catalog/lib/resolve-feat-option-label";
 
 const defs: FeatOptionDefinition[] = [
   {

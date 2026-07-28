@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { SkillsGrid } from "@/features/skill-catalog/ui/skills-grid";
+import { SkillsGrid } from "@/features/catalog/skill-catalog/ui/skills-grid";
 import { CatalogShell } from "@/widgets/catalog-shell/ui/catalog-shell";
 
 export default function SkillsPage() {

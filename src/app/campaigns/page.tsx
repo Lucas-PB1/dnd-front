@@ -1,4 +1,4 @@
-import { CampaignsHome } from "@/features/campaigns/ui/campaigns-home";
+import { CampaignsHome } from "@/features/campaign/campaigns/ui/home/campaigns-home";
 import { SourceEditionBadge } from "@/shared/ui/source-edition-badge";
 import { PageMain } from "@/shared/ui/page-main";
 import { AppHeader } from "@/widgets/app-header/ui/app-header";

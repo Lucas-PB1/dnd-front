@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { filterResilientAbilityOptionValues } from "@/features/feat-catalog/lib/resilient-feat-options";
+import { filterResilientAbilityOptionValues } from "@/features/catalog/feat-catalog/lib/resilient-feat-options";
 
 describe("filterResilientAbilityOptionValues", () => {
   const values = [

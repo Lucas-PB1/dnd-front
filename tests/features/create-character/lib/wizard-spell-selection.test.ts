@@ -7,7 +7,7 @@ import {
   formatSpellSlotsForLevel,
   toggleCantrip,
   toggleLeveledSpell,
-} from "@/features/create-character/lib/spells/wizard-spell-selection";
+} from "@/features/character/create-character/lib/spells/wizard-spell-selection";
 import type { ClassSpellOption } from "@/entities/class/types";
 
 const catalog: ClassSpellOption[] = [

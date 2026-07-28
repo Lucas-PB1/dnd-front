@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { EquipmentCatalog } from "@/features/equipment-catalog/ui/equipment-catalog";
+import { EquipmentCatalog } from "@/features/catalog/equipment-catalog/ui/equipment-catalog";
 import { CatalogShell } from "@/widgets/catalog-shell/ui/catalog-shell";
 
 export default function EquipmentPage() {

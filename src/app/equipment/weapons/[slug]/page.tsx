@@ -1,4 +1,4 @@
-import { WeaponDetailView } from "@/features/equipment-catalog/ui/weapon-detail-view";
+import { WeaponDetailView } from "@/features/catalog/equipment-catalog/ui/weapon-detail-view";
 import { PageMain } from "@/shared/ui/page-main";
 import { AppHeader } from "@/widgets/app-header/ui/app-header";
 

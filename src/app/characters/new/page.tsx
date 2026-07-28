@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { CreateCharacterWizard } from "@/features/create-character/ui/wizard/create-character-wizard";
+import { CreateCharacterWizard } from "@/features/character/create-character/ui/wizard/create-character-wizard";
 import { cn } from "@/shared/lib/utils";
 import { BackLink } from "@/shared/ui/back-link";
 import { buttonVariants } from "@/shared/ui/button";

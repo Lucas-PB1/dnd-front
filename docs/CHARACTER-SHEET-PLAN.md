@@ -86,8 +86,8 @@ Detalhamento e fases: **[`sheet-readiness-plan.md`](../../dnd-api/docs/plans/she
 | -------- | ------- |
 | Sheet readiness | [`dnd-api/docs/plans/sheet-readiness-plan.md`](../../dnd-api/docs/plans/sheet-readiness-plan.md) |
 | UX / UI | [UX-UI-PLAN.md](./UX-UI-PLAN.md) |
-| Wizard | `src/features/create-character/` |
-| Ficha | `src/features/character-sheet/` |
+| Wizard | `src/features/character/create-character/` |
+| Ficha | `src/features/character/character-sheet/` |
 | Tipos | `src/entities/character/types.ts` |
 | API DTO | `dnd-api/src/game/sheet/dto/character-response.dto.ts` |
 | Contrato | `.cursor/skills/dnd-api-contract/references/api-endpoints.md` |

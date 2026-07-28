@@ -1,4 +1,4 @@
-import { SpeciesDetailView } from "@/features/species-catalog/ui/species-detail-view";
+import { SpeciesDetailView } from "@/features/catalog/species-catalog/ui/species-detail-view";
 import { PageMain } from "@/shared/ui/page-main";
 import { AppHeader } from "@/widgets/app-header/ui/app-header";
 

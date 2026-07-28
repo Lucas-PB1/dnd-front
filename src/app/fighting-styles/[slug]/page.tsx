@@ -1,4 +1,4 @@
-import { FightingStyleDetailView } from "@/features/fighting-style-catalog/ui/fighting-style-detail-view";
+import { FightingStyleDetailView } from "@/features/catalog/fighting-style-catalog/ui/fighting-style-detail-view";
 import { PageMain } from "@/shared/ui/page-main";
 import { AppHeader } from "@/widgets/app-header/ui/app-header";
 

@@ -24,7 +24,7 @@ Componentes em `src/shared/ui/`. Dados sempre da **dnd-api** (tagline, summary, 
 
 ## Listagem
 
-Padrão: `CatalogSearch` + grid de cards em `features/*-catalog/ui/`.
+Padrão: `CatalogSearch` + grid de cards em `features/catalog/*-catalog/ui/`.
 
 Card deve mostrar apresentação (`tagline` / `summary` da API) além de traços mecânicos.
 
@@ -38,12 +38,12 @@ Hub: `widgets/compendium-hub` — lista de seções com eyebrow + seta.
 
 Padrão de referência:
 
-- `features/class-catalog/ui/class-detail-view.tsx`
-- `features/species-catalog/ui/species-detail-view.tsx`
-- `features/background-catalog/ui/background-detail-view.tsx`
-- `features/spell-catalog/ui/spell-detail-view.tsx`
-- `features/feat-catalog/ui/feat-detail-view.tsx`
-- `features/equipment-catalog/ui/*-detail-view.tsx`
+- `features/catalog/class-catalog/ui/class-detail-view.tsx`
+- `features/catalog/species-catalog/ui/species-detail-view.tsx`
+- `features/catalog/background-catalog/ui/background-detail-view.tsx`
+- `features/catalog/spell-catalog/ui/spell-detail-view.tsx`
+- `features/catalog/feat-catalog/ui/catalog/feat-detail-view.tsx`
+- `features/catalog/equipment-catalog/ui/*-detail-view.tsx`
 
 1. Hero com nome + faixa de stats da API
 2. Corpo com `PhbProse` (largura do container; `text-justify` ok)

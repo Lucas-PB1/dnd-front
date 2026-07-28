@@ -1,4 +1,4 @@
-import { ItemDetailView } from "@/features/equipment-catalog/ui/item-detail-view";
+import { ItemDetailView } from "@/features/catalog/equipment-catalog/ui/item-detail-view";
 import { PageMain } from "@/shared/ui/page-main";
 import { AppHeader } from "@/widgets/app-header/ui/app-header";
 

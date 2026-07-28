@@ -5,9 +5,9 @@ import {
   pointBuyRemaining,
   pointBuySpent,
   POINT_BUY_DEFAULT,
-} from "@/features/create-character/lib/abilities/point-buy";
-import { toCreateCharacterPayload } from "@/features/create-character/model/to-create-payload";
-import type { CreateCharacterInput } from "@/features/create-character/model/create-character.schema";
+} from "@/features/character/create-character/lib/abilities/point-buy";
+import { toCreateCharacterPayload } from "@/features/character/create-character/model/to-create-payload";
+import type { CreateCharacterInput } from "@/features/character/create-character/model/create-character.schema";
 
 describe("point-buy helpers", () => {
   it("tracks spent and remaining points", () => {

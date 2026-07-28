@@ -1,4 +1,4 @@
-import { CampaignDetailView } from "@/features/campaigns/ui/campaign-detail-view";
+import { CampaignDetailView } from "@/features/campaign/campaigns/ui/detail/campaign-detail-view";
 import { SourceEditionBadge } from "@/shared/ui/source-edition-badge";
 import { PageMain } from "@/shared/ui/page-main";
 import { AppHeader } from "@/widgets/app-header/ui/app-header";

@@ -1,4 +1,4 @@
-import { SkillDetailView } from "@/features/skill-catalog/ui/skill-detail-view";
+import { SkillDetailView } from "@/features/catalog/skill-catalog/ui/skill-detail-view";
 import { PageMain } from "@/shared/ui/page-main";
 import { AppHeader } from "@/widgets/app-header/ui/app-header";
 

@@ -1,4 +1,4 @@
-import { ArmorDetailView } from "@/features/equipment-catalog/ui/armor-detail-view";
+import { ArmorDetailView } from "@/features/catalog/equipment-catalog/ui/armor-detail-view";
 import { PageMain } from "@/shared/ui/page-main";
 import { AppHeader } from "@/widgets/app-header/ui/app-header";
 

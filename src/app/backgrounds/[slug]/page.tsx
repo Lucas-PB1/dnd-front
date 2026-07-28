@@ -1,4 +1,4 @@
-import { BackgroundDetailView } from "@/features/background-catalog/ui/background-detail-view";
+import { BackgroundDetailView } from "@/features/catalog/background-catalog/ui/background-detail-view";
 import { PageMain } from "@/shared/ui/page-main";
 import { AppHeader } from "@/widgets/app-header/ui/app-header";
 

@@ -1,4 +1,4 @@
-import { LanguageDetailView } from "@/features/language-catalog/ui/language-detail-view";
+import { LanguageDetailView } from "@/features/catalog/language-catalog/ui/language-detail-view";
 import { PageMain } from "@/shared/ui/page-main";
 import { AppHeader } from "@/widgets/app-header/ui/app-header";
 

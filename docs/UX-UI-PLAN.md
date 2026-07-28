@@ -34,8 +34,8 @@ Não substitui [CHARACTER-SHEET-PLAN.md](./CHARACTER-SHEET-PLAN.md) (fluxo de fi
 | Header     | [`app-header.tsx`](../src/widgets/app-header/ui/app-header.tsx) — brand `dnd-front`                       | Branding fraco; sem nav Compêndio / Fichas                |
 | Tipografia | Source Serif 4 + Source Sans 3 em [`layout.tsx`](../src/app/layout.tsx)                                    | —                                                         |
 | Compêndio  | Hub + grids/cards (`compendium-hub`, `*-catalog`)                                                         | Funcional; visual homogêneo e pouco hierárquico           |
-| Wizard     | [`create-character-wizard.tsx`](../src/features/create-character/ui/create-character-wizard.tsx)          | Fluxo longo; progresso/skip/revisão podem ser mais claros |
-| Ficha      | [`character-sheet-view.tsx`](../src/features/character-sheet/ui/character-sheet-view.tsx) + layout widget | Densidade alta; leitura vs mesa pouco separados           |
+| Wizard     | [`create-character-wizard.tsx`](../src/features/character/create-character/ui/wizard/create-character-wizard.tsx) | Fluxo longo; progresso/skip/revisão podem ser mais claros |
+| Ficha      | [`character-sheet-view.tsx`](../src/features/character/character-sheet/ui/sheet/character-sheet-view.tsx) + layout widget | Densidade alta; leitura vs mesa pouco separados           |
 | Auth       | login/signup + `auth-page-shell`                                                                          | Funcional; alinhar tipografia/atmosfera ao tema           |
 | Status     | `HealthStatus` / `DndApiStatus` no meio da home                                                           | Ruído de produto; útil só em dev ou footer                |
 
@@ -72,14 +72,14 @@ Não substitui [CHARACTER-SHEET-PLAN.md](./CHARACTER-SHEET-PLAN.md) (fluxo de fi
 | Header (global)                        | `src/widgets/app-header/ui/app-header.tsx`                 | Alta (Fase 1–2)                          |
 | Theme toggle                           | `src/widgets/app-header/ui/theme-toggle.tsx`               | Média (motion)                           |
 | `/login`, `/signup`                    | `features/auth/ui/*`                                       | Média (Fase 2)                           |
-| `/characters`                          | `features/characters/ui/characters-list.tsx`               | Alta (Fase 2)                            |
-| `/characters/new`                      | `features/create-character/ui/create-character-wizard.tsx` | Alta (Fase 4)                            |
-| `/characters/[id]`                     | `features/character-sheet/` + layout widget                | Alta (Fase 5)                            |
+| `/characters`                          | `features/character/characters/ui/characters-list.tsx`               | Alta (Fase 2)                            |
+| `/characters/new`                      | `features/character/create-character/ui/create-character-wizard.tsx` | Alta (Fase 4)                            |
+| `/characters/[id]`                     | `features/character/character-sheet/` + layout widget                | Alta (Fase 5)                            |
 | `/compendium`                          | `widgets/compendium-hub/`                                  | Média (Fase 3)                           |
-| `/classes`, `/classes/[slug]`          | `features/class-catalog/`                                  | Média (Fase 3)                           |
-| `/species`, `/species/[slug]`          | `features/species-catalog/`                                | Média (Fase 3)                           |
-| `/backgrounds`, `/backgrounds/[slug]`  | `features/background-catalog/`                             | Média (Fase 3)                           |
-| `/spells`, `/spells/[slug]`            | `features/spell-catalog/`                                  | Média (Fase 3)                           |
+| `/classes`, `/classes/[slug]`          | `features/catalog/class-catalog/`                                  | Média (Fase 3)                           |
+| `/species`, `/species/[slug]`          | `features/catalog/species-catalog/`                                | Média (Fase 3)                           |
+| `/backgrounds`, `/backgrounds/[slug]`  | `features/catalog/background-catalog/`                             | Média (Fase 3)                           |
+| `/spells`, `/spells/[slug]`            | `features/catalog/spell-catalog/`                                  | Média (Fase 3)                           |
 | Feats / skills / equipamento (páginas) | — (lacuna)                                                 | Ver roadmap produto; UX quando existirem |
 
 ---
@@ -184,8 +184,8 @@ Ordem de implementação. Features de regra (ASI, picker de condições) ficam n
 | Compêndio hub         | `src/widgets/compendium-hub/`                             |
 | Catalog shell / busca | `src/widgets/catalog-shell/`, `src/shared/ui/catalog-*`   |
 | Largura de conteúdo   | `src/shared/ui/page-main.tsx` (`max-w-6xl` / `max-w-7xl`) |
-| Wizard                | `src/features/create-character/`                          |
-| Ficha                 | `src/features/character-sheet/` (+ `ui/beyond/`)          |
+| Wizard                | `src/features/character/create-character/`                |
+| Ficha                 | `src/features/character/character-sheet/` (+ `ui/beyond/`) |
 | Qualidade de tela     | `.cursor/rules/31-ui-screen-quality.mdc`                  |
 | Rule ficha            | `.cursor/rules/32-ui-character-sheet.mdc`                 |
 | Cores (doc)           | [COLORS.md](./COLORS.md)                                  |

@@ -1,6 +1,6 @@
 ---
 description: Ficha de personagem — layout estilo Beyond + tema Taverna
-globs: src/features/character-sheet/**/*.tsx,src/app/characters/**/*.tsx
+globs: src/features/character/character-sheet/**/*.tsx,src/app/characters/**/*.tsx
 alwaysApply: false
 ---
 
@@ -20,8 +20,8 @@ Mobile (`order-*`): combate + abas → perícias → proficiências.
 
 ## Componentes
 
-- Primitivos em `features/character-sheet/ui/beyond/` (`BeyondPanel`, hub, tabs, colunas)
-- Leitura: `sheet-read-sections.tsx` · edição: `sheet-edit-forms.tsx`
+- Primitivos em `features/character/character-sheet/ui/beyond/` (`BeyondPanel`, hub, tabs, colunas)
+- Leitura: `ui/sections/sheet-read-sections.tsx` · edição: `ui/edit/sheet-edit-forms.tsx`
 - Vitais / condições / descanso: hub de combate (`BeyondCombatHub`)
 - Slots / conjurar / concentração: aba Magias (`BeyondSpellsTab` — lista por círculo + cast na linha)
 - Economia de ação: aba Ações (`BeyondActionsTab` — Ação · Bônus · Reação · Livre; sem inventário)

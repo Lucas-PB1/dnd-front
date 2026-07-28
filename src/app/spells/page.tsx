@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { SpellsGrid } from "@/features/spell-catalog/ui/spells-grid";
+import { SpellsGrid } from "@/features/catalog/spell-catalog/ui/spells-grid";
 import { CatalogShell } from "@/widgets/catalog-shell/ui/catalog-shell";
 
 export default function SpellsPage() {

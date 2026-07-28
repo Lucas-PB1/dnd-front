@@ -5,12 +5,13 @@ Frontend **dnd-front** (FSD) consome a API Nest no repo irmão **`dnd-api`**.
 ## Código
 
 ```text
-src/shared/api/dnd-api/           # catalogFetch, gameFetch
-src/features/*-catalog/           # catálogo PHB (sem auth)
-src/features/characters/          # listagem de fichas
-src/features/character-sheet/     # detalhe / edição / mesa (CharacterSheetView)
-src/features/create-character/    # wizard → POST /characters
-src/features/auth/                # sessão Supabase
+src/shared/api/dnd-api/                      # catalogFetch, gameFetch
+src/features/catalog/*-catalog/              # catálogo PHB (sem auth)
+src/features/character/characters/           # listagem de fichas
+src/features/character/character-sheet/      # detalhe / edição / mesa
+src/features/character/create-character/     # wizard → POST /characters
+src/features/campaign/campaigns/             # mesas / encontros
+src/features/auth/                           # sessão Supabase
 ```
 
 Skills: `dnd-api-client` · `dnd-api-contract` · `supabase-auth`

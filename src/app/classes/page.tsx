@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { ClassesGrid } from "@/features/class-catalog/ui/classes-grid";
+import { ClassesGrid } from "@/features/catalog/class-catalog/ui/classes-grid";
 import { CatalogShell } from "@/widgets/catalog-shell/ui/catalog-shell";
 
 export default function ClassesPage() {

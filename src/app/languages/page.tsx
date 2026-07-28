@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { LanguagesGrid } from "@/features/language-catalog/ui/languages-grid";
+import { LanguagesGrid } from "@/features/catalog/language-catalog/ui/languages-grid";
 import { CatalogShell } from "@/widgets/catalog-shell/ui/catalog-shell";
 
 export default function LanguagesPage() {

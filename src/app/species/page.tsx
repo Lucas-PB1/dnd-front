@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { SpeciesGrid } from "@/features/species-catalog/ui/species-grid";
+import { SpeciesGrid } from "@/features/catalog/species-catalog/ui/species-grid";
 import { CatalogShell } from "@/widgets/catalog-shell/ui/catalog-shell";
 
 export default function SpeciesPage() {

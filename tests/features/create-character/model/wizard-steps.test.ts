@@ -4,13 +4,13 @@ import {
   computeWizardHasSpellStep,
   maxSpellLevelFromSlots,
   wizardMaxSpellLevelForLevel,
-} from "@/features/create-character/lib/spells/wizard-spell-step";
+} from "@/features/character/create-character/lib/spells/wizard-spell-step";
 import {
   nextWizardStep,
   prevWizardStep,
   skippedWizardSteps,
   visibleWizardSteps,
-} from "@/features/create-character/model/wizard-steps";
+} from "@/features/character/create-character/model/wizard-steps";
 
 describe("maxSpellLevelFromSlots", () => {
   it("caps half-caster ranger level 5 at circle 2", () => {

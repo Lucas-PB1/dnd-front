@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { BackgroundsGrid } from "@/features/background-catalog/ui/backgrounds-grid";
+import { BackgroundsGrid } from "@/features/catalog/background-catalog/ui/backgrounds-grid";
 import { CatalogShell } from "@/widgets/catalog-shell/ui/catalog-shell";
 
 export default function BackgroundsPage() {

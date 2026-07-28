@@ -1,4 +1,4 @@
-import { EncounterView } from "@/features/campaigns/ui/encounter-view";
+import { EncounterView } from "@/features/campaign/campaigns/ui/encounter/encounter-view";
 import { SourceEditionBadge } from "@/shared/ui/source-edition-badge";
 import { PageMain } from "@/shared/ui/page-main";
 import { AppHeader } from "@/widgets/app-header/ui/app-header";

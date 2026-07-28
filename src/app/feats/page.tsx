@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { FeatsGrid } from "@/features/feat-catalog/ui/catalog/feats-grid";
+import { FeatsGrid } from "@/features/catalog/feat-catalog/ui/catalog/feats-grid";
 import { CatalogShell } from "@/widgets/catalog-shell/ui/catalog-shell";
 
 export default function FeatsPage() {

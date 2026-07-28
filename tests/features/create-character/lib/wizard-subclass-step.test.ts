@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { shouldShowWizardSubclassStep } from "@/features/create-character/lib/subclass/wizard-subclass-step";
+import { shouldShowWizardSubclassStep } from "@/features/character/create-character/lib/subclass/wizard-subclass-step";
 
 describe("shouldShowWizardSubclassStep", () => {
   it("is false below subclass unlock level", () => {

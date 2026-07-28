@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { SubclassesGrid } from "@/features/subclass-catalog/ui/subclasses-grid";
+import { SubclassesGrid } from "@/features/catalog/subclass-catalog/ui/subclasses-grid";
 import { CatalogShell } from "@/widgets/catalog-shell/ui/catalog-shell";
 
 export default function SubclassesPage() {
