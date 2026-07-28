@@ -8,7 +8,7 @@ import {
   remainingPoolForAbility,
   removeOneOccurrence,
   UNASSIGNED_ABILITY_SCORES,
-} from "@/features/create-character/lib/ability-pool";
+} from "@/features/create-character/lib/abilities/ability-pool";
 
 const scores = (partial: Partial<AbilityScores>): AbilityScores => ({
   ...UNASSIGNED_ABILITY_SCORES,

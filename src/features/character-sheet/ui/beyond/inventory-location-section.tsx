@@ -10,7 +10,7 @@ import { InventoryItemRow } from "@/features/character-sheet/ui/beyond/inventory
 import {
   SheetEmptyHint,
   SheetSubheader,
-} from "@/features/character-sheet/ui/sheet-ui";
+} from "@/features/character-sheet/ui/sheet/sheet-ui";
 
 type InventoryLocationSectionProps = {
   id: string;

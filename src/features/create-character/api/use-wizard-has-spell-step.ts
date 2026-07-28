@@ -4,7 +4,7 @@ import { isSubclassRequired } from "@/entities/character/lib/subclass";
 import {
   computeWizardHasSpellStep,
   maxSpellLevelFromSlots,
-} from "@/features/create-character/lib/wizard-spell-step";
+} from "@/features/create-character/lib/spells/wizard-spell-step";
 import {
   useClassSpells,
   useClassSpellSlots,

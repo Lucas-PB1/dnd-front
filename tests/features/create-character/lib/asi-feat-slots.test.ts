@@ -5,9 +5,9 @@ import {
   asiFeatLevelsForClass,
   asiFeatLevelsUpTo,
   countAsiFeatSlots,
-} from "@/features/create-character/lib/asi-feat-slots";
-import { asiFeatSlotsToCharacterFeats } from "@/features/create-character/lib/asi-feat-slots-to-feats";
-import { resolveCreateCharacterFeats } from "@/features/create-character/lib/preview-create-character-feats";
+} from "@/features/create-character/lib/feats/asi-feat-slots";
+import { asiFeatSlotsToCharacterFeats } from "@/features/create-character/lib/feats/asi-feat-slots-to-feats";
+import { resolveCreateCharacterFeats } from "@/features/create-character/lib/feats/preview-create-character-feats";
 
 describe("asi-feat-slots", () => {
   it("counts slots up to character level (base classes)", () => {

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   resolveEquipmentChoiceText,
   toolNameForSlug,
-} from "@/features/create-character/lib/equipment-choice-resolve";
+} from "@/features/create-character/lib/equipment/equipment-choice-resolve";
 import {
   BACKGROUND_GOLD_PACKAGE_SLUG,
   automaticPackageItemSlugs,
@@ -13,7 +13,7 @@ import {
   classEquipmentLines,
   formatClassEquipmentLine,
   isGoldOnlyClassPackage,
-} from "@/features/create-character/lib/equipment-selection";
+} from "@/features/create-character/lib/equipment/equipment-selection";
 import type { ClassEquipmentOption } from "@/entities/class/types";
 
 describe("equipment-choice-resolve", () => {

@@ -2,7 +2,7 @@
 
 import { isSubclassRequired } from "@/entities/character/lib/subclass";
 import { useSubclassOptions } from "@/features/class-catalog/api/use-classes";
-import { shouldShowWizardSubclassStep } from "@/features/create-character/lib/wizard-subclass-step";
+import { shouldShowWizardSubclassStep } from "@/features/create-character/lib/subclass/wizard-subclass-step";
 
 export function useWizardHasSubclassStep(level: number, subclassSlug: string) {
   const needsQuery = isSubclassRequired(level) && !!subclassSlug.trim();

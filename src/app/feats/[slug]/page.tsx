@@ -1,4 +1,4 @@
-import { FeatDetailView } from "@/features/feat-catalog/ui/feat-detail-view";
+import { FeatDetailView } from "@/features/feat-catalog/ui/catalog/feat-detail-view";
 import { PageMain } from "@/shared/ui/page-main";
 import { AppHeader } from "@/widgets/app-header/ui/app-header";
 

@@ -27,11 +27,11 @@ import {
   SpeciesChoicesSection,
   SubclassMechanicsSection,
   SubclassOptionsSection,
-} from "@/features/character-sheet/ui/sheet-read-sections";
+} from "@/features/character-sheet/ui/sections/sheet-read-sections";
 import {
   SheetEditAction,
   SheetSectionHeader,
-} from "@/features/character-sheet/ui/sheet-ui";
+} from "@/features/character-sheet/ui/sheet/sheet-ui";
 import { cn } from "@/shared/lib/utils";
 
 type TraitsSectionId =

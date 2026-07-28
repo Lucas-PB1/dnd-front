@@ -1,5 +1,5 @@
 import type { CreateCharacterPayload } from "@/entities/character/types";
-import { asiFeatSlotsToCharacterFeats } from "@/features/create-character/lib/asi-feat-slots-to-feats";
+import { asiFeatSlotsToCharacterFeats } from "@/features/create-character/lib/feats/asi-feat-slots-to-feats";
 import { SUBCLASS_UNLOCK_LEVEL_DEFAULT } from "@/entities/character/lib/subclass";
 import type { CreateCharacterInput } from "@/features/create-character/model/create-character.schema";
 

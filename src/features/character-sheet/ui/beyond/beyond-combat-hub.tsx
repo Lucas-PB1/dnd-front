@@ -25,7 +25,7 @@ import { CombatMetric } from "@/features/character-sheet/ui/beyond/combat-metric
 import { CombatStatusEditor } from "@/features/character-sheet/ui/beyond/combat-status-editor";
 import { DeathSaveTrack } from "@/features/character-sheet/ui/beyond/death-save-track";
 import { useSheetRolls } from "@/features/character-sheet/ui/beyond/sheet-rolls";
-import { SheetChip } from "@/features/character-sheet/ui/sheet-ui";
+import { SheetChip } from "@/features/character-sheet/ui/sheet/sheet-ui";
 import { useConditions } from "@/features/reference-catalog/api/use-reference";
 import { Button } from "@/shared/ui/button";
 

@@ -15,7 +15,7 @@ import {
   SheetEmptyHint,
   SheetSectionHeader,
   SheetSubheader,
-} from "@/features/character-sheet/ui/sheet-ui";
+} from "@/features/character-sheet/ui/sheet/sheet-ui";
 
 type BeyondActionsTabProps = {
   character: CharacterDetail;

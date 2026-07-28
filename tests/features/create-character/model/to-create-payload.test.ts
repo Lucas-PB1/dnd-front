@@ -5,7 +5,7 @@ import {
   pointBuyRemaining,
   pointBuySpent,
   POINT_BUY_DEFAULT,
-} from "@/features/create-character/lib/point-buy";
+} from "@/features/create-character/lib/abilities/point-buy";
 import { toCreateCharacterPayload } from "@/features/create-character/model/to-create-payload";
 import type { CreateCharacterInput } from "@/features/create-character/model/create-character.schema";
 

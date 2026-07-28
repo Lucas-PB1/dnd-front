@@ -4,7 +4,7 @@ import {
   computeWizardHasSpellStep,
   maxSpellLevelFromSlots,
   wizardMaxSpellLevelForLevel,
-} from "@/features/create-character/lib/wizard-spell-step";
+} from "@/features/create-character/lib/spells/wizard-spell-step";
 import {
   nextWizardStep,
   prevWizardStep,

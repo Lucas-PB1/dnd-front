@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowRightIcon, PlusIcon } from "@heroicons/react/24/outline";
 
 import { useCharacters } from "@/features/characters/api/use-characters";
-import { DeleteCharacterButton } from "@/features/character-sheet/ui/delete-character-button";
+import { DeleteCharacterButton } from "@/features/character-sheet/ui/sheet/delete-character-button";
 import { motion } from "@/shared/lib/motion";
 import { cn } from "@/shared/lib/utils";
 import { EmptyScrollMark } from "@/shared/ui/brand-marks";

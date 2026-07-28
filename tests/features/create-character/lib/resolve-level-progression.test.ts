@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { resolveLevelProgression } from "@/features/create-character/lib/resolve-level-progression";
+import { resolveLevelProgression } from "@/features/create-character/lib/progression/resolve-level-progression";
 
 describe("resolveLevelProgression", () => {
   it("falls back to spell-slots row", () => {

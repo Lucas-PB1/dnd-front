@@ -50,6 +50,29 @@ src/
 3. `widgets/` — composição (opcional)
 4. `app/<rota>/page.tsx` — fino
 
+## Slice grande (evitar poluir)
+
+FSD não usa pastas tech (`hooks/`, `components/`). Quando um slice cresce:
+
+1. **Subpastas por domínio dentro do segment** (preferido aqui) — ex. `ui/steps/spells/`, `lib/equipment/`, `ui/level-up/`
+2. **Slice group** — pasta só de organização, sem public API própria: `features/catalog/class-catalog/`
+3. **Novo slice** — só se for ação/domínio independente (ex. extrair inventário da ficha)
+
+Exemplos atuais:
+
+```text
+features/create-character/
+  ui/wizard/          # shell do wizard
+  ui/steps/<step>/    # um domínio por etapa
+  lib/<domínio>/      # hooks/helpers alinhados ao domínio
+
+features/character-sheet/
+  ui/sheet/ | edit/ | level-up/ | sections/ | beyond/
+
+features/feat-catalog/
+  ui/catalog/ | options/
+```
+
 ## Stack
 
 Next.js 16 · React 19 · TanStack Query · Supabase SSR · shadcn · Tailwind 4 · Zod · RHF · **dnd-api** Nest

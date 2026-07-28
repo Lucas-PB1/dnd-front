@@ -29,7 +29,7 @@ import {
   SheetEditAction,
   SheetEmptyHint,
   SheetSectionHeader,
-} from "@/features/character-sheet/ui/sheet-ui";
+} from "@/features/character-sheet/ui/sheet/sheet-ui";
 import { useSpells } from "@/features/spell-catalog/api/use-spells";
 
 type BeyondSpellsTabProps = {

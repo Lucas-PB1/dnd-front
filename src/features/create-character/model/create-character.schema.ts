@@ -1,12 +1,12 @@
 import { z } from "zod";
 
 import { SUBCLASS_UNLOCK_LEVEL_DEFAULT } from "@/entities/character/lib/subclass";
-import { isAbilityPoolAssigned } from "@/features/create-character/lib/ability-pool";
+import { isAbilityPoolAssigned } from "@/features/create-character/lib/abilities/ability-pool";
 import {
   isPointBuyValid,
   POINT_BUY_MAX,
   POINT_BUY_MIN,
-} from "@/features/create-character/lib/point-buy";
+} from "@/features/create-character/lib/abilities/point-buy";
 
 const SUBCLASS_UNLOCK_LEVEL = SUBCLASS_UNLOCK_LEVEL_DEFAULT;
 

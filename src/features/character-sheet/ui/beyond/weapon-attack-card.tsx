@@ -8,7 +8,7 @@ import { formatSkillBonus } from "@/entities/character";
 import type { AdvantageMode } from "@/features/character-sheet/api/character-rolls.api";
 import { useSheetRolls } from "@/features/character-sheet/ui/beyond/sheet-rolls";
 import { ABILITY_SHORT } from "@/features/character-sheet/ui/beyond/beyond-panel";
-import { SheetChip } from "@/features/character-sheet/ui/sheet-ui";
+import { SheetChip } from "@/features/character-sheet/ui/sheet/sheet-ui";
 import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
 

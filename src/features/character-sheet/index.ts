@@ -1,2 +1,2 @@
 export * from "@/features/character-sheet/api";
-export { CharacterSheetView } from "@/features/character-sheet/ui/character-sheet-view";
+export { CharacterSheetView } from "@/features/character-sheet/ui/sheet/character-sheet-view";

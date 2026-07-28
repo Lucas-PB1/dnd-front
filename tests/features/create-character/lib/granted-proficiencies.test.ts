@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   filterOptionsExcludingTaken,
   siblingFeatOptionValueIds,
-} from "@/features/create-character/lib/granted-proficiencies";
+} from "@/features/create-character/lib/class-skills/granted-proficiencies";
 
 describe("granted-proficiencies", () => {
   it("filters options already granted", () => {

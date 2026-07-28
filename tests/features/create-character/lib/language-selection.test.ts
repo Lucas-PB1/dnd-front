@@ -4,7 +4,7 @@ import {
   languageQuota,
   syncLanguagesForBackground,
   toggleLanguageSelection,
-} from "@/features/create-character/lib/language-selection";
+} from "@/features/create-character/lib/languages/language-selection";
 
 const acolyte = {
   grantedSlugs: ["common"],

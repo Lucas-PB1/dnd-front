@@ -19,7 +19,7 @@ import {
   ABILITY_SHORT,
 } from "@/features/character-sheet/ui/beyond/beyond-panel";
 import { useSheetRolls } from "@/features/character-sheet/ui/beyond/sheet-rolls";
-import { SheetEditAction } from "@/features/character-sheet/ui/sheet-ui";
+import { SheetEditAction } from "@/features/character-sheet/ui/sheet/sheet-ui";
 import { cn } from "@/shared/lib/utils";
 
 type BeyondSkillsColumnProps = {

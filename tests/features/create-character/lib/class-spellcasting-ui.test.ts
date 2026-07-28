@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { resolveSpellcastingUiProfile } from "@/features/create-character/lib/class-spellcasting-ui";
+import { resolveSpellcastingUiProfile } from "@/features/create-character/lib/spells/class-spellcasting-ui";
 
 describe("class-spellcasting-ui", () => {
   it("customizes cleric copy", () => {

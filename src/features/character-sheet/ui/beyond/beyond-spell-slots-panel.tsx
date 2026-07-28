@@ -4,7 +4,7 @@ import { StopCircleIcon } from "@heroicons/react/24/outline";
 
 import type { CharacterState } from "@/entities/character/session-types";
 import type { CharacterCatalogLabels } from "@/features/character-sheet/api/use-character-catalog-labels";
-import { SheetSlotPips } from "@/features/character-sheet/ui/sheet-ui";
+import { SheetSlotPips } from "@/features/character-sheet/ui/sheet/sheet-ui";
 import { Button } from "@/shared/ui/button";
 
 type SpellSlotSummary = {

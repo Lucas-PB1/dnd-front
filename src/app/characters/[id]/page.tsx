@@ -1,4 +1,4 @@
-import { CharacterSheetView } from "@/features/character-sheet/ui/character-sheet-view";
+import { CharacterSheetView } from "@/features/character-sheet/ui/sheet/character-sheet-view";
 import { PageMain } from "@/shared/ui/page-main";
 import { AppHeader } from "@/widgets/app-header/ui/app-header";
 
