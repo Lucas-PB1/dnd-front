@@ -6,7 +6,7 @@ import {
   PencilSquareIcon,
   ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
-import { useMemo, useState, type ComponentType, type ReactNode } from "react";
+import { useMemo, useState } from "react";
 
 import type { CharacterDetail } from "@/entities/character/types";
 import {
@@ -19,122 +19,18 @@ import {
   usePatchCharacterState,
   useSpendClassResource,
 } from "@/features/character-sheet/api/use-character-state";
+import { CombatMetric } from "@/features/character-sheet/ui/beyond/combat-metric";
+import { CombatStatusEditor } from "@/features/character-sheet/ui/beyond/combat-status-editor";
+import { DeathSaveTrack } from "@/features/character-sheet/ui/beyond/death-save-track";
 import { useSheetRolls } from "@/features/character-sheet/ui/beyond/sheet-rolls";
 import { SheetChip } from "@/features/character-sheet/ui/sheet-ui";
 import { useConditions } from "@/features/reference-catalog/api/use-reference";
 import { Button } from "@/shared/ui/button";
-import { Field, FieldLabel } from "@/shared/ui/field";
-import { Input } from "@/shared/ui/input";
-import { cn } from "@/shared/lib/utils";
 
 type BeyondCombatHubProps = {
   characterId: string;
   character: CharacterDetail;
 };
-
-function CombatMetric({
-  label,
-  value,
-  hint,
-  icon: Icon,
-  emphasize = false,
-  onClick,
-  disabled,
-}: {
-  label: string;
-  value: ReactNode;
-  hint?: ReactNode;
-  icon?: ComponentType<{ className?: string }>;
-  emphasize?: boolean;
-  onClick?: () => void;
-  disabled?: boolean;
-}) {
-  const className = cn(
-    "flex min-w-0 flex-col items-center justify-center rounded-lg border px-3 py-2 text-center",
-    emphasize
-      ? "border-primary/45 bg-primary/8"
-      : "border-border/70 bg-card/70",
-    onClick && "hover:border-primary/50 hover:bg-primary/10 disabled:opacity-60",
-  );
-
-  const body = (
-    <>
-      <span className="inline-flex items-center gap-1 text-[0.58rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
-        {Icon ? <Icon className="size-3 text-secondary" aria-hidden /> : null}
-        {label}
-      </span>
-      <span className="font-heading mt-0.5 text-2xl font-semibold leading-none tabular-nums">
-        {value}
-      </span>
-      {hint ? (
-        <span className="mt-1 max-w-full truncate text-[0.65rem] text-muted-foreground">
-          {hint}
-        </span>
-      ) : null}
-    </>
-  );
-
-  if (onClick) {
-    return (
-      <button
-        type="button"
-        className={className}
-        onClick={onClick}
-        disabled={disabled}
-        title={`Rolar ${label.toLowerCase()}`}
-      >
-        {body}
-      </button>
-    );
-  }
-
-  return <div className={className}>{body}</div>;
-}
-
-function DeathSaveTrack({
-  label,
-  value,
-  onChange,
-  disabled,
-  tone = "default",
-}: {
-  label: string;
-  value: number;
-  onChange: (next: number) => void;
-  disabled?: boolean;
-  tone?: "default" | "danger";
-}) {
-  return (
-    <div className="rounded-lg border border-border/70 bg-card/70 px-3 py-2">
-      <p className="text-[0.58rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
-        {label}
-      </p>
-      <div className="mt-2 flex gap-1.5">
-        {[1, 2, 3].map((pip) => {
-          const filled = value >= pip;
-          return (
-            <button
-              key={pip}
-              type="button"
-              disabled={disabled}
-              aria-label={`${label}: ${pip}`}
-              title={filled ? `Definir como ${pip - 1}` : `Definir como ${pip}`}
-              onClick={() => onChange(filled && value === pip ? pip - 1 : pip)}
-              className={cn(
-                "size-4 rounded-full border transition-colors disabled:opacity-50",
-                filled
-                  ? tone === "danger"
-                    ? "border-destructive bg-destructive"
-                    : "border-primary bg-primary"
-                  : "border-border/80 bg-muted/30 hover:border-primary/50",
-              )}
-            />
-          );
-        })}
-      </div>
-    </div>
-  );
-}
 
 export function BeyondCombatHub({
   characterId,
@@ -347,87 +243,23 @@ export function BeyondCombatHub({
       ) : null}
 
       {editingStatus ? (
-        <div className="mt-2 space-y-2 rounded-lg border border-border/60 bg-background/50 p-2.5">
-          {conditionsCatalog.isPending ? (
-            <p className="text-sm text-muted-foreground">
-              Carregando condições…
-            </p>
-          ) : (
-            <div className="flex flex-wrap gap-1">
-              {(conditionsCatalog.data ?? []).map((condition) => {
-                const selected = selectedConditions.includes(condition.slug);
-                return (
-                  <button
-                    key={condition.slug}
-                    type="button"
-                    onClick={() => toggleCondition(condition.slug)}
-                    className={cn(
-                      "rounded-md border px-2 py-1 text-xs transition-colors",
-                      selected
-                        ? "border-primary/50 bg-primary/15 font-medium text-primary"
-                        : "border-border/80 bg-muted/20 text-muted-foreground hover:text-foreground",
-                    )}
-                  >
-                    {condition.name}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
-          <Field className="max-w-[8rem]">
-            <FieldLabel htmlFor="temp-hp">PV temporários</FieldLabel>
-            <Input
-              id="temp-hp"
-              type="number"
-              min={0}
-              value={tempHpDraft}
-              onChange={(event) => setTempHpDraft(event.target.value)}
-            />
-          </Field>
-
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={inspirationDraft}
-              onChange={(event) => setInspirationDraft(event.target.checked)}
-            />
-            Inspiração
-          </label>
-
-          <div className="grid gap-2 sm:grid-cols-2">
-            <DeathSaveTrack
-              label="Sucessos (morte)"
-              value={deathSuccessDraft}
-              onChange={setDeathSuccessDraft}
-            />
-            <DeathSaveTrack
-              label="Falhas (morte)"
-              value={deathFailDraft}
-              tone="danger"
-              onChange={setDeathFailDraft}
-            />
-          </div>
-
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              size="sm"
-              disabled={patchState.isPending}
-              onClick={saveStatus}
-            >
-              {patchState.isPending ? "Salvando…" : "Salvar"}
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              onClick={() => setEditingStatus(false)}
-            >
-              Cancelar
-            </Button>
-          </div>
-        </div>
+        <CombatStatusEditor
+          conditions={conditionsCatalog.data ?? []}
+          conditionsLoading={conditionsCatalog.isPending}
+          selectedConditions={selectedConditions}
+          tempHpDraft={tempHpDraft}
+          inspirationDraft={inspirationDraft}
+          deathSuccessDraft={deathSuccessDraft}
+          deathFailDraft={deathFailDraft}
+          isPending={patchState.isPending}
+          onToggleCondition={toggleCondition}
+          onTempHpChange={setTempHpDraft}
+          onInspirationChange={setInspirationDraft}
+          onDeathSuccessChange={setDeathSuccessDraft}
+          onDeathFailChange={setDeathFailDraft}
+          onSave={saveStatus}
+          onCancel={() => setEditingStatus(false)}
+        />
       ) : null}
 
       {patchState.isError ? (
@@ -451,7 +283,9 @@ export function BeyondCombatHub({
           !(character.equipmentWarnings ?? []).some(
             (w) => w.code === "strength_requirement",
           ) ? (
-            <li>Deslocamento −{character.speedPenaltyMeters} m (Força insuficiente).</li>
+            <li>
+              Deslocamento −{character.speedPenaltyMeters} m (Força insuficiente).
+            </li>
           ) : null}
           {character.cannotCastSpellsInArmor &&
           !(character.equipmentWarnings ?? []).some(
