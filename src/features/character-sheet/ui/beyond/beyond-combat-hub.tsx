@@ -19,6 +19,8 @@ import {
   usePatchCharacterState,
   useSpendClassResource,
 } from "@/features/character-sheet/api/use-character-state";
+import { CombatClassResourcesPanel } from "@/features/character-sheet/ui/beyond/combat-class-resources-panel";
+import { CombatEquipmentWarnings } from "@/features/character-sheet/ui/beyond/combat-equipment-warnings";
 import { CombatMetric } from "@/features/character-sheet/ui/beyond/combat-metric";
 import { CombatStatusEditor } from "@/features/character-sheet/ui/beyond/combat-status-editor";
 import { DeathSaveTrack } from "@/features/character-sheet/ui/beyond/death-save-track";
@@ -198,49 +200,13 @@ export function BeyondCombatHub({
         />
       </div>
 
-      {classResources.length > 0 ? (
-        <div className="mt-2 rounded-lg border border-border/70 bg-card/70 px-3 py-2">
-          <p className="text-[0.58rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
-            Recursos de classe
-          </p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {classResources.map((resource) => (
-              <div
-                key={resource.slug}
-                className="inline-flex items-center gap-2 rounded-md border border-border/80 bg-background/60 px-2 py-1"
-              >
-                <span className="text-sm">
-                  {resource.name}{" "}
-                  <span className="tabular-nums text-muted-foreground">
-                    {resource.remaining}/{resource.max}
-                    {resource.dieLabel ? ` · ${resource.dieLabel}` : ""}
-                  </span>
-                </span>
-                <Button
-                  type="button"
-                  size="xs"
-                  variant="outline"
-                  disabled={
-                    resource.remaining <= 0 || spendResource.isPending
-                  }
-                  onClick={() =>
-                    spendResource.mutate({ resourceSlug: resource.slug })
-                  }
-                >
-                  Usar
-                </Button>
-              </div>
-            ))}
-          </div>
-          {spendResource.isError ? (
-            <p className="mt-2 text-sm text-destructive" role="alert">
-              {spendResource.error instanceof Error
-                ? spendResource.error.message
-                : "Não foi possível gastar o recurso"}
-            </p>
-          ) : null}
-        </div>
-      ) : null}
+      <CombatClassResourcesPanel
+        resources={classResources}
+        isPending={spendResource.isPending}
+        isError={spendResource.isError}
+        error={spendResource.error}
+        onSpend={(resourceSlug) => spendResource.mutate({ resourceSlug })}
+      />
 
       {editingStatus ? (
         <CombatStatusEditor
@@ -270,31 +236,7 @@ export function BeyondCombatHub({
         </p>
       ) : null}
 
-      {character.equipmentWarnings?.length ||
-      (character.speedPenaltyMeters ?? 0) > 0 ||
-      character.cannotCastSpellsInArmor ? (
-        <ul className="mt-2 space-y-1 rounded-lg border border-secondary/35 bg-secondary/5 px-3 py-2 text-xs text-secondary">
-          {(character.equipmentWarnings ?? []).map((warning) => (
-            <li key={`${warning.code}-${warning.itemSlug ?? warning.message}`}>
-              {warning.message}
-            </li>
-          ))}
-          {(character.speedPenaltyMeters ?? 0) > 0 &&
-          !(character.equipmentWarnings ?? []).some(
-            (w) => w.code === "strength_requirement",
-          ) ? (
-            <li>
-              Deslocamento −{character.speedPenaltyMeters} m (Força insuficiente).
-            </li>
-          ) : null}
-          {character.cannotCastSpellsInArmor &&
-          !(character.equipmentWarnings ?? []).some(
-            (w) => w.code === "lacks_armor_training",
-          ) ? (
-            <li>Não pode conjurar com armadura/escudo sem treino.</li>
-          ) : null}
-        </ul>
-      ) : null}
+      <CombatEquipmentWarnings character={character} />
     </div>
   );
 }

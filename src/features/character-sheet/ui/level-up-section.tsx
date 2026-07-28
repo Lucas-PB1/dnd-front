@@ -2,35 +2,28 @@
 
 import { useMemo, useState } from "react";
 
-import {
-  appendCharacterFeat,
-  canAddCharacterFeat,
-} from "@/entities/character/lib/character-feat";
+import { appendCharacterFeat } from "@/entities/character/lib/character-feat";
 import type { CharacterDetail } from "@/entities/character/types";
 import type { ClassOption } from "@/entities/character/sheet-types";
 import type { FeatOption } from "@/entities/character/sheet-types";
-import { useClassSubclasses } from "@/features/class-catalog/api/use-classes";
+import type { LevelUpAsiDistributionMode } from "@/entities/character/session-types";
 import {
   useLevelUp,
   useLevelUpPreview,
 } from "@/features/character-sheet/api/use-character-progression";
+import { submitLevelUp } from "@/features/character-sheet/lib/submit-level-up";
+import { LevelUpAsiFeatPanel } from "@/features/character-sheet/ui/level-up-asi-feat-panel";
+import { LevelUpClassFeaturesSection } from "@/features/character-sheet/ui/level-up-class-features-section";
 import {
-  LevelUpClassExpertise,
   levelUpExpertiseComplete,
 } from "@/features/character-sheet/ui/level-up-class-expertise";
-import { isLevelUpAsiComplete } from "@/features/character-sheet/ui/level-up-asi-picker";
-import { LevelUpAsiFeatPanel } from "@/features/character-sheet/ui/level-up-asi-feat-panel";
 import { LevelUpPreviewSummary } from "@/features/character-sheet/ui/level-up-preview-summary";
+import { LevelUpSubmitFooter } from "@/features/character-sheet/ui/level-up-submit-footer";
 import {
-  LevelUpWeaponMastery,
   levelUpWeaponMasteryComplete,
 } from "@/features/character-sheet/ui/level-up-weapon-mastery";
-import { findIncompleteCreateFeatOptions } from "@/features/create-character/lib/validate-create-feat-options";
-import { CatalogSelect } from "@/features/create-character/ui/catalog-select";
 import { useFeatOptions } from "@/features/feat-catalog/api/use-feat-options";
 import { useFeats } from "@/features/reference-catalog/api/use-reference";
-import type { LevelUpAsiDistributionMode } from "@/entities/character/session-types";
-import { Button } from "@/shared/ui/button";
 
 type LevelUpSectionProps = {
   characterId: string;
@@ -60,11 +53,6 @@ export function LevelUpSection({
   const [asiPrimary, setAsiPrimary] = useState("");
   const [asiSecondary, setAsiSecondary] = useState("");
   const [levelUpError, setLevelUpError] = useState<string | undefined>();
-
-  const subclasses = useClassSubclasses(
-    character.classSlug,
-    !!preview.data?.subclassRequired,
-  );
 
   const newFeatInstance = useMemo(() => {
     if (!selectedFeatSlug) return null;
@@ -122,85 +110,37 @@ export function LevelUpSection({
   );
 
   async function handleLevelUp() {
-    if (!data) return;
     setLevelUpError(undefined);
 
-    if (data.isAsiOrFeatLevel && asiMode && selectedFeatSlug) {
-      setLevelUpError("Escolha ASI ou talento neste nível — não os dois.");
-      return;
-    }
-    if (
-      data.isAsiOrFeatLevel &&
-      !isLevelUpAsiComplete(asiMode, asiPrimary, asiSecondary)
-    ) {
-      setLevelUpError("Complete a melhoria de atributo ou deixe em branco.");
+    const result = await submitLevelUp({
+      data,
+      character,
+      subclassSlug,
+      asiMode,
+      asiPrimary,
+      asiSecondary,
+      selectedFeatSlug,
+      levelUpFeatOptions,
+      levelUpClassOptions,
+      newFeatInstance,
+      hasFeatOptions,
+      featNameBySlug,
+      feats: feats.data?.data ?? [],
+      mutateAsync: levelUp.mutateAsync,
+    });
+
+    if (!result.ok) {
+      setLevelUpError(result.error);
       return;
     }
 
-    const payload: Parameters<typeof levelUp.mutateAsync>[0] = {};
-    if (data.subclassRequired && subclassSlug) {
-      payload.subclassSlug = subclassSlug;
-    }
-    if (data.isAsiOrFeatLevel && asiMode) {
-      payload.asiDistributionMode = asiMode;
-      payload.asiPrimaryAbilitySlug = asiPrimary;
-      if (asiMode === "plus1plus1") {
-        payload.asiSecondaryAbilitySlug = asiSecondary;
-      }
-    }
-    if (
-      data.isAsiOrFeatLevel &&
-      !asiMode &&
-      selectedFeatSlug &&
-      newFeatInstance
-    ) {
-      const feat = (feats.data?.data ?? []).find(
-        (item) => item.slug === selectedFeatSlug,
-      );
-      if (
-        feat &&
-        canAddCharacterFeat(
-          character.characterFeats,
-          selectedFeatSlug,
-          feat.repeatable,
-        )
-      ) {
-        if (hasFeatOptions) {
-          const incomplete = await findIncompleteCreateFeatOptions(
-            [newFeatInstance],
-            levelUpFeatOptions,
-            featNameBySlug,
-            character.level + 1,
-          );
-          if (incomplete) {
-            setLevelUpError(incomplete);
-            return;
-          }
-        }
-
-        payload.characterFeats = appendCharacterFeat(
-          character.characterFeats,
-          selectedFeatSlug,
-        );
-        if (levelUpFeatOptions.length > 0) {
-          payload.featOptions = [
-            ...character.featOptions,
-            ...levelUpFeatOptions,
-          ];
-        }
-      }
-    }
-    if (newExpertiseSlots.length > 0 || newMasterySlots.length > 0) {
-      payload.classOptions = levelUpClassOptions;
-    }
-    const updated = await levelUp.mutateAsync(payload);
     setSelectedFeatSlug("");
     setLevelUpFeatOptions([]);
     setAsiMode("");
     setAsiPrimary("");
     setAsiSecondary("");
-    if (updated) {
-      setLevelUpClassOptions(updated.classOptions ?? []);
+    if (result.updated) {
+      setLevelUpClassOptions(result.updated.classOptions ?? []);
     }
   }
 
@@ -229,95 +169,30 @@ export function LevelUpSection({
         />
       ) : null}
 
-      {data.subclassRequired ? (
-        <CatalogSelect
-          id="level-up-subclass"
-          label="Subclasse"
-          description={
-            data.subclassUnlockLevel
-              ? `Obrigatória no nível ${data.subclassUnlockLevel}.`
-              : undefined
-          }
-          isLoading={subclasses.isPending}
-          options={(subclasses.data?.data ?? []).map((s) => ({
-            value: s.slug,
-            label: s.name,
-          }))}
-          value={subclassSlug}
-          onChange={(e) => setSubclassSlug(e.target.value)}
-        />
-      ) : null}
+      <LevelUpClassFeaturesSection
+        character={character}
+        subclassRequired={data.subclassRequired}
+        subclassUnlockLevel={data.subclassUnlockLevel}
+        newSpellOptionsCount={data.newSpellOptions.length}
+        newExpertiseSlots={newExpertiseSlots}
+        newMasterySlots={newMasterySlots}
+        subclassSlug={subclassSlug}
+        onSubclassChange={setSubclassSlug}
+        classOptions={levelUpClassOptions}
+        onClassOptionsChange={setLevelUpClassOptions}
+      />
 
-      {data.newSpellOptions.length > 0 ? (
-        <div className="flex items-start gap-3 rounded-md border border-border bg-muted/30 px-3 py-3 text-sm">
-          <span
-            aria-hidden
-            className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/15 font-mono text-xs font-semibold text-primary tabular-nums"
-          >
-            {data.newSpellOptions.length}
-          </span>
-          <div className="space-y-0.5">
-            <p className="font-medium">Novas magias disponíveis</p>
-            <p className="text-muted-foreground">
-              Depois de subir de nível, escolha na aba{" "}
-              <span className="font-medium text-foreground">Magias</span>.
-            </p>
-          </div>
-        </div>
-      ) : null}
-
-      {newExpertiseSlots.length > 0 ? (
-        <LevelUpClassExpertise
-          character={character}
-          newSlots={newExpertiseSlots}
-          value={levelUpClassOptions}
-          onChange={setLevelUpClassOptions}
-        />
-      ) : null}
-
-      {newMasterySlots.length > 0 ? (
-        <LevelUpWeaponMastery
-          character={character}
-          newSlots={newMasterySlots}
-          value={levelUpClassOptions}
-          onChange={setLevelUpClassOptions}
-        />
-      ) : null}
-
-      {levelUpError ? (
-        <p className="text-sm text-destructive" role="alert">
-          {levelUpError}
-        </p>
-      ) : null}
-
-      <Button
-        type="button"
+      <LevelUpSubmitFooter
+        nextLevel={data.nextLevel}
+        levelUpError={levelUpError}
         disabled={
-          levelUp.isPending ||
           (data.subclassRequired && !subclassSlug) ||
           (newExpertiseSlots.length > 0 && !expertiseComplete) ||
           (newMasterySlots.length > 0 && !masteryComplete)
         }
-        onClick={handleLevelUp}
-      >
-        {levelUp.isPending
-          ? "Subindo de nível…"
-          : `Subir para nível ${data.nextLevel}`}
-      </Button>
-
-      {levelUp.isError ? (
-        <p className="text-sm text-destructive" role="alert">
-          {levelUp.error instanceof Error
-            ? levelUp.error.message
-            : "Erro ao subir de nível"}
-        </p>
-      ) : null}
-
-      {levelUp.isSuccess ? (
-        <p className="text-sm text-green-700 dark:text-green-400">
-          Nível atualizado com sucesso.
-        </p>
-      ) : null}
+        levelUp={levelUp}
+        onSubmit={handleLevelUp}
+      />
     </div>
   );
 }
