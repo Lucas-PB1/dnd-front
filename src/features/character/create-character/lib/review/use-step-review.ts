@@ -4,10 +4,6 @@ import { useMemo } from "react";
 import type { Control } from "react-hook-form";
 import { useWatch } from "react-hook-form";
 
-import {
-  appendCharacterFeat,
-  featInstanceKey,
-} from "@/entities/character/lib/character-feat";
 import { epicBoonFeatSlugsFromCatalog } from "@/entities/character/lib/epic-boon-feat-options";
 import { BACKGROUND_BOOST_MODE_PLUS2_PLUS1 } from "@/entities/character/lib/background-boost";
 import { isSubclassRequired } from "@/entities/character/lib/subclass";
@@ -26,12 +22,15 @@ import {
 import { asiFeatLevelsUpTo } from "@/features/character/create-character/lib/feats/asi-feat-slots";
 import { asiFeatSlotsToCharacterFeats } from "@/features/character/create-character/lib/feats/asi-feat-slots-to-feats";
 import { toolNameForSlug } from "@/features/character/create-character/lib/equipment/equipment-choice-resolve";
-import {
-  BACKGROUND_GOLD_PACKAGE_SLUG,
-  groupEquipmentPackages,
-} from "@/features/character/create-character/lib/equipment/equipment-selection";
+import { groupEquipmentPackages } from "@/features/character/create-character/lib/equipment/equipment-selection";
 import { languageQuota } from "@/features/character/create-character/lib/languages/language-selection";
 import { previewCreateCharacter } from "@/features/character/create-character/lib/review/preview-create-character";
+import {
+  buildAsiLevelByFeatKey,
+  groupFeatOptionsByInstance,
+  resolveReviewEquipmentItemName,
+  resolveReviewPackageLabel,
+} from "@/features/character/create-character/lib/review/review-display";
 import { resolveCreateCharacterFeats } from "@/features/character/create-character/lib/feats/preview-create-character-feats";
 import type { CreateCharacterInput } from "@/features/character/create-character/model/create-character.schema";
 import { ABILITY_METHOD_LABEL } from "@/features/character/create-character/lib/review/review-labels";
@@ -175,59 +174,35 @@ export function useStepReview(control: Control<CreateCharacterInput>) {
     packageSlug: string,
     itemSlug?: string,
   ) {
-    if (!itemSlug) return null;
-    const rows =
-      source === "class"
-        ? (classEquipment.data?.data ?? [])
-        : (backgroundEquipment.data?.data ?? []);
-    const row = rows.find(
-      (r) => r.packageSlug === packageSlug && r.itemSlug === itemSlug,
-    );
-    return row?.itemName ?? toolNameForSlug(itemSlug) ?? itemSlug;
+    return resolveReviewEquipmentItemName({
+      source,
+      packageSlug,
+      itemSlug,
+      classRows: classEquipment.data?.data ?? [],
+      backgroundRows: backgroundEquipment.data?.data ?? [],
+    });
   }
 
   function resolvePackageLabel(
     source: "class" | "background",
     packageSlug: string,
   ) {
-    if (
-      source === "background" &&
-      packageSlug === BACKGROUND_GOLD_PACKAGE_SLUG
-    ) {
-      const gold = backgroundDetail.data?.equipmentGoldOption;
-      return gold != null ? `${gold} PO (em vez dos itens)` : "Ouro";
-    }
-    const packages = source === "class" ? classPackages : backgroundPackages;
-    const pkg = packages.find((p) => p.packageSlug === packageSlug);
-    return `Pacote ${pkg?.packageLabel ?? packageSlug.toUpperCase()}`;
+    return resolveReviewPackageLabel({
+      source,
+      packageSlug,
+      equipmentGoldOption: backgroundDetail.data?.equipmentGoldOption,
+      classPackages,
+      backgroundPackages,
+    });
   }
 
-  const optionsByFeatInstance = (values.featOptions ?? []).reduce<
-    Record<string, typeof values.featOptions>
-  >((acc, option) => {
-    const key = featInstanceKey(option.featSlug, option.instanceIndex);
-    const list = acc[key] ?? [];
-    list.push(option);
-    acc[key] = list;
-    return acc;
-  }, {});
+  const optionsByFeatInstance = groupFeatOptionsByInstance(values.featOptions);
 
   const asiLevels = asiFeatLevelsUpTo(values.classSlug, values.level);
-  const asiLevelByFeatKey = useMemo(() => {
-    const map = new Map<string, number>();
-    let built: ReturnType<typeof asiFeatSlotsToCharacterFeats> = [];
-    (values.asiFeatSlotSlugs ?? []).forEach((slug, index) => {
-      if (!slug.trim()) return;
-      built = appendCharacterFeat(built, slug.trim());
-      const last = built[built.length - 1];
-      if (!last) return;
-      const level = asiLevels[index];
-      if (level != null) {
-        map.set(featInstanceKey(last.featSlug, last.instanceIndex), level);
-      }
-    });
-    return map;
-  }, [values.asiFeatSlotSlugs, asiLevels]);
+  const asiLevelByFeatKey = useMemo(
+    () => buildAsiLevelByFeatKey(values.asiFeatSlotSlugs, asiLevels),
+    [values.asiFeatSlotSlugs, asiLevels],
+  );
 
   const methodLabel =
     ABILITY_METHOD_LABEL[values.abilityGenerationMethodSlug] ??

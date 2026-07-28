@@ -4,7 +4,6 @@ import { useEffect, useMemo } from "react";
 import type { Control, UseFormSetValue } from "react-hook-form";
 import { useWatch } from "react-hook-form";
 
-import { canAddCharacterFeat } from "@/entities/character/lib/character-feat";
 import type { FeatOption } from "@/entities/character/sheet-types";
 import { useBackgroundDetail } from "@/features/catalog/background-catalog/api/use-backgrounds";
 import { useBackgroundSkills } from "@/features/catalog/background-catalog/api/use-backgrounds";
@@ -15,6 +14,10 @@ import {
 } from "@/features/character/create-character/lib/feats/asi-feat-slots";
 import { asiFeatSlotsToCharacterFeats } from "@/features/character/create-character/lib/feats/asi-feat-slots-to-feats";
 import { pruneFeatOptions } from "@/features/character/create-character/lib/feats/feat-options-prune";
+import {
+  ASI_FEAT_SLUG,
+  sortedAsiSlotFeatOptions,
+} from "@/features/character/create-character/lib/feats/asi-slot-feat-options";
 import { resolveCreateCharacterFeats } from "@/features/character/create-character/lib/feats/preview-create-character-feats";
 import { skillChoiceKinds } from "@/features/character/create-character/lib/class-skills/granted-proficiencies";
 import type { CreateCharacterInput } from "@/features/character/create-character/model/create-character.schema";
@@ -23,8 +26,6 @@ import {
   collectTakenFightingStyleSlugs,
 } from "@/features/catalog/feat-catalog/lib/fighting-style-feat-options";
 import { useFeats } from "@/features/catalog/reference-catalog/api/use-reference";
-
-const ASI_FEAT_SLUG = "ability-score-improvement";
 
 export function useStepFeats(
   control: Control<CreateCharacterInput>,
@@ -202,50 +203,18 @@ export function useStepFeats(
     return tool ? [tool] : [];
   }, [backgroundDetail.data?.toolItemSlug, backgroundToolItemSlug]);
 
-  function slotFeatOptions(slotIndex: number) {
-    const otherSlots = asiFeatSlotSlugs.map((slug, index) =>
-      index === slotIndex ? "" : slug,
-    );
-    const otherFeats = asiFeatSlotsToCharacterFeats(otherSlots);
-    const previewWithoutSlot = resolveCreateCharacterFeats(
+  function sortedSlotFeatOptions(slotIndex: number) {
+    return sortedAsiSlotFeatOptions({
+      slotIndex,
+      asiFeatSlotSlugs,
       originFeatSlug,
-      otherFeats,
       speciesChoices,
-    );
-    const currentSlotSlug = asiFeatSlotSlugs[slotIndex] ?? "";
-    const takenStyles = collectTakenFightingStyleSlugs({
-      characterFeatSlugs: [
-        ...previewWithoutSlot.map((feat) => feat.featSlug),
-        ...(fightingStyleSlug ? [fightingStyleSlug] : []),
-      ],
+      fightingStyleSlug,
       fightingStyleFeatSlugs,
       subclassOptions,
+      classFightingStyleSlugs,
+      feats: feats.data?.data ?? [],
     });
-    const allowedStyles = new Set(classDetail.data?.fightingStyleSlugs ?? []);
-
-    return (feats.data?.data ?? []).filter((feat) => {
-      if (
-        !canAddCharacterFeat(previewWithoutSlot, feat.slug, feat.repeatable)
-      ) {
-        return false;
-      }
-      if (feat.categorySlug !== FIGHTING_STYLE_FEAT_CATEGORY) {
-        return true;
-      }
-      if (feat.slug === currentSlotSlug) {
-        return allowedStyles.has(feat.slug);
-      }
-      return allowedStyles.has(feat.slug) && !takenStyles.includes(feat.slug);
-    });
-  }
-
-  function sortedSlotFeatOptions(slotIndex: number) {
-    const list = slotFeatOptions(slotIndex);
-    const asiFeat = list.find((f) => f.slug === ASI_FEAT_SLUG);
-    const rest = list
-      .filter((f) => f.slug !== ASI_FEAT_SLUG)
-      .sort((a, b) => a.name.localeCompare(b.name, "pt"));
-    return asiFeat ? [asiFeat, ...rest] : rest;
   }
 
   const showOriginSection = !!originFeatSlug;

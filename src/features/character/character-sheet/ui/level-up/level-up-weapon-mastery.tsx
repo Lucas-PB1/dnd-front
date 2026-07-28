@@ -45,8 +45,10 @@ export function LevelUpWeaponMastery({
     [classDetail.data?.weaponMasteryEligibility],
   );
 
-  const weaponProficiencySlugs =
-    classDetail.data?.weaponProficiencySlugs ?? [];
+  const weaponProficiencySlugs = useMemo(
+    () => classDetail.data?.weaponProficiencySlugs ?? [],
+    [classDetail.data?.weaponProficiencySlugs],
+  );
 
   const candidates = useMemo(() => {
     const items = weapons.data?.data ?? [];

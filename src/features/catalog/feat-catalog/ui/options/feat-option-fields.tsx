@@ -38,7 +38,10 @@ export function FeatOptionFields({
   const optionsQuery = useFeatOptions(feat.featSlug, !!feat.featSlug);
   const classDetail = useClassDetail(classSlug, !!classSlug);
   const classSavingThrowSlugs = classDetail.data?.savingThrowSlugs ?? [];
-  const allDefs = optionsQuery.data?.data ?? [];
+  const allDefs = useMemo(
+    () => optionsQuery.data?.data ?? [],
+    [optionsQuery.data?.data],
+  );
   const proficiencyBonus = proficiencyBonusForLevel(characterLevel);
 
   const instanceOptions = value.filter(

@@ -72,7 +72,10 @@ export function useStepClassSkills(
   const allSkills = useSkills();
 
   const requiredCount = classDetail.data?.skillChoiceCount ?? 0;
-  const options = classSkills.data?.data ?? [];
+  const options = useMemo(
+    () => classSkills.data?.data ?? [],
+    [classSkills.data?.data],
+  );
   const backgroundSkillSlugs = useMemo(
     () => new Set((backgroundSkills.data?.data ?? []).map((s) => s.slug)),
     [backgroundSkills.data?.data],
@@ -138,8 +141,10 @@ export function useStepClassSkills(
       .sort((a, b) => a.label.localeCompare(b.label, "pt"));
   }, [proficientSlugs, skillNameBySlug, whitelist]);
 
-  const weaponProficiencySlugs =
-    classDetail.data?.weaponProficiencySlugs ?? [];
+  const weaponProficiencySlugs = useMemo(
+    () => classDetail.data?.weaponProficiencySlugs ?? [],
+    [classDetail.data?.weaponProficiencySlugs],
+  );
 
   const masteryCandidates = useMemo(() => {
     const items = weapons.data?.data ?? [];
