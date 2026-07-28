@@ -12,11 +12,10 @@ import {
   useSubclassOptions,
 } from "@/features/class-catalog/api/use-classes";
 import { useCreateCharacter } from "@/features/create-character/api/use-create-character";
-import { STANDARD_ARRAY_VALUES, UNASSIGNED_ABILITY_SCORES } from "@/features/create-character/lib/ability-pool";
+import { advanceWizardStep } from "@/features/create-character/lib/advance-wizard-step";
+import { CREATE_CHARACTER_DEFAULT_VALUES } from "@/features/create-character/lib/create-character-defaults";
 import {
-  abilitiesStepSchema,
   createCharacterSchema,
-  identityStepSchema,
   type CreateCharacterInput,
   SUBCLASS_REQUIRED_FROM_LEVEL,
 } from "@/features/create-character/model/create-character.schema";
@@ -44,43 +43,12 @@ import { WizardStepIndicator } from "@/features/create-character/ui/wizard-step-
 import { useSpeciesTraitChoices } from "@/features/species-catalog/api/use-species";
 import { useBackgroundDetail } from "@/features/background-catalog/api/use-backgrounds";
 import { countAsiFeatSlots } from "@/features/create-character/lib/asi-feat-slots";
-import { classExpertiseSlotsAtLevel } from "@/entities/character/lib/class-expertise-slots";
-import { classWeaponMasterySlotsAtLevel } from "@/entities/character/lib/class-weapon-mastery-slots";
 import { asiFeatSlotsToCharacterFeats } from "@/features/create-character/lib/asi-feat-slots-to-feats";
 import { resolveCreateCharacterFeats } from "@/features/create-character/lib/preview-create-character-feats";
 import { ritualSpellSlotIndex } from "@/features/create-character/lib/feat-option-requirements";
 import { proficiencyBonusForLevel } from "@/features/create-character/lib/proficiency-bonus-for-level";
-import { findIncompleteCreateFeatOptions } from "@/features/create-character/lib/validate-create-feat-options";
 import { TempTestPresetsPanel } from "@/features/create-character/ui/temp-test-presets-panel";
 import { Button } from "@/shared/ui/button";
-
-const DEFAULT_VALUES: CreateCharacterInput = {
-  name: "",
-  level: 1,
-  classSlug: "",
-  speciesSlug: "",
-  backgroundSlug: "",
-  subclassSlug: "",
-  abilityGenerationMethodSlug: "standard-array",
-  abilityScores: { ...UNASSIGNED_ABILITY_SCORES },
-  backgroundAbilityBoostMode: "plus2plus1",
-  backgroundAbilityBoostPlus2Slug: "",
-  backgroundAbilityBoostPlus1Slug: "",
-  backgroundAbilityBoostPlus1Slugs: ["", "", ""],
-  backgroundToolItemSlug: "",
-  classSkillSlugs: [],
-  abilityRawValues: [...STANDARD_ARRAY_VALUES],
-  speciesChoices: [],
-  subclassOptions: [],
-  classOptions: [],
-  featOptions: [],
-  asiFeatSlotSlugs: [],
-  fightingStyleFeatSlug: "",
-  alignmentSlug: "",
-  languageSlugs: [],
-  equipment: [],
-  characterSpells: [],
-};
 
 export function CreateCharacterWizard() {
   const router = useRouter();
@@ -103,7 +71,7 @@ export function CreateCharacterWizard() {
     formState: { errors },
   } = useForm<CreateCharacterInput>({
     resolver: zodResolver(createCharacterSchema),
-    defaultValues: DEFAULT_VALUES,
+    defaultValues: CREATE_CHARACTER_DEFAULT_VALUES,
     mode: "onChange",
   });
 
@@ -245,220 +213,37 @@ export function CreateCharacterWizard() {
   }, [level, classSlug, setValue, getValues, backgroundDetail.data?.originFeatSlug]);
 
   async function goNext() {
-    setSkillsError(undefined);
-    setAbilitiesError(undefined);
-    setSpeciesError(undefined);
-    setSubclassError(undefined);
-    setBackgroundError(undefined);
-    setFeatsError(undefined);
-
-    if (step === "identity") {
-      const valid = await trigger([
-        "name",
-        "level",
-        "classSlug",
-        "speciesSlug",
-        "backgroundSlug",
-        "subclassSlug",
-      ]);
-      if (!valid) return;
-      if (!identityStepSchema.safeParse(getValues()).success) return;
-      setStep("abilities");
-      return;
-    }
-
-    if (step === "abilities") {
-      const values = getValues();
-      const parsed = abilitiesStepSchema.safeParse(values);
-      if (!parsed.success) {
-        setAbilitiesError(
-          parsed.error.issues[0]?.message ??
-            "Complete os atributos antes de continuar.",
-        );
-        return;
-      }
-
-      if (values.abilityGenerationMethodSlug === "point-buy") {
-        const ok = await trigger("abilityScores");
-        if (!ok) return;
-      }
-
-      const boostOk = await trigger([
-        "backgroundAbilityBoostMode",
-        "backgroundAbilityBoostPlus2Slug",
-        "backgroundAbilityBoostPlus1Slug",
-        "backgroundAbilityBoostPlus1Slugs",
-      ]);
-      if (!boostOk) {
-        setAbilitiesError("Escolha a distribuição e os bônus do antecedente.");
-        return;
-      }
-
-      setStep("skills");
-      return;
-    }
-
-    if (step === "skills") {
-      const values = getValues();
-      const required = classDetail.data?.skillChoiceCount ?? 0;
-      if (required > 0 && values.classSkillSlugs.length !== required) {
-        setSkillsError(`Escolha exatamente ${required} perícia(s).`);
-        return;
-      }
-      const expertiseSlots = classExpertiseSlotsAtLevel(
-        values.classSlug,
-        values.level,
-      );
-      if (expertiseSlots.length > 0) {
-        const filled = new Set(
-          (values.classOptions ?? [])
-            .filter((option) => option.valueId)
-            .map((option) => option.optionKey),
-        );
-        const missing = expertiseSlots.filter(
-          (slot) => !filled.has(slot.optionKey),
-        );
-        if (missing.length > 0) {
-          setSkillsError(
-            `Escolha ${expertiseSlots.length} especialização(ões) de perícia.`,
-          );
-          return;
-        }
-      }
-      const masterySlots = classWeaponMasterySlotsAtLevel(
-        classProgression.data?.data ?? [],
-        values.level,
-      );
-      if (masterySlots.length > 0) {
-        const filled = new Set(
-          (values.classOptions ?? [])
-            .filter((option) => option.valueId)
-            .map((option) => option.optionKey),
-        );
-        const missing = masterySlots.filter(
-          (slot) => !filled.has(slot.optionKey),
-        );
-        if (missing.length > 0) {
-          setSkillsError(
-            `Escolha ${masterySlots.length} maestria(s) em arma.`,
-          );
-          return;
-        }
-      }
-      setStep("background");
-      return;
-    }
-
-    if (step === "background") {
-      const values = getValues();
-      const bg = backgroundDetail.data;
-      if (!bg) {
-        setBackgroundError("Carregue o antecedente antes de continuar.");
-        return;
-      }
-      if (
-        bg.toolProficiencyKind === "choice" &&
-        !values.backgroundToolItemSlug?.trim()
-      ) {
-        setBackgroundError("Escolha a ferramenta do antecedente.");
-        return;
-      }
-      setStep("species");
-      return;
-    }
-
-    if (step === "species") {
-      const values = getValues();
-      const requiredKinds = [
-        ...new Set((speciesTraits.data?.data ?? []).map((r) => r.choiceKind)),
-      ];
-      if (requiredKinds.length > 0) {
-        const provided = values.speciesChoices.map((c) => c.choiceKind);
-        const missing = requiredKinds.filter((k) => !provided.includes(k));
-        if (missing.length > 0) {
-          setSpeciesError("Complete todas as escolhas de traço da espécie.");
-          return;
-        }
-      }
-      setSpeciesError(undefined);
-      setStep(hasFeatsStep ? "feats" : hasSubclassStep ? "subclass" : "equipment");
-      return;
-    }
-
-    if (step === "feats") {
-      const values = getValues();
-      const fightingStyle = values.fightingStyleFeatSlug?.trim() ?? "";
-      if (hasFightingStylePick && !fightingStyle) {
-        setFeatsError("Escolha um Estilo de Luta.");
-        return;
-      }
-      if (
-        fightingStyle &&
-        !(classDetail.data?.fightingStyleSlugs ?? []).includes(fightingStyle)
-      ) {
-        setFeatsError("Estilo de Luta inválido para esta classe.");
-        return;
-      }
-      const previewFeats = resolveCreateCharacterFeats(
-        originFeatSlug || null,
-        [
-          ...asiFeatSlotsToCharacterFeats(values.asiFeatSlotSlugs ?? []),
-          ...(fightingStyle
-            ? [{ featSlug: fightingStyle, instanceIndex: 0 }]
-            : []),
-        ],
-        values.speciesChoices ?? [],
-      );
-      if (previewFeats.length > 0) {
-        const incomplete = await findIncompleteCreateFeatOptions(
-          previewFeats,
-          values.featOptions ?? [],
-          {},
-          values.level,
-        );
-        if (incomplete) {
-          setFeatsError(incomplete);
-          return;
-        }
-      }
-      setFeatsError(undefined);
-      setStep(hasSubclassStep ? "subclass" : "equipment");
-      return;
-    }
-
-    if (step === "subclass") {
-      const values = getValues();
-      const requiredOptions = subclassOpts.data?.data ?? [];
-      if (requiredOptions.length > 0) {
-        const provided = new Set(
-          values.subclassOptions.map((o) => o.optionKey),
-        );
-        const missing = requiredOptions.filter(
-          (o) => !provided.has(o.optionKey),
-        );
-        if (missing.length > 0) {
-          setSubclassError("Selecione todas as opções de subclasse.");
-          return;
-        }
-      }
-      setStep("equipment");
-      return;
-    }
-
-    if (step === "equipment") {
-      setStep(hasSpellStep ? "spells" : "languages");
-      return;
-    }
-
-    if (step === "spells") {
-      setStep("languages");
-      return;
-    }
-
-    if (step === "languages") {
-      setStep("review");
-      return;
-    }
+    await advanceWizardStep({
+      step,
+      getValues,
+      trigger,
+      setStep,
+      clearStepErrors: () => {
+        setSkillsError(undefined);
+        setAbilitiesError(undefined);
+        setSpeciesError(undefined);
+        setSubclassError(undefined);
+        setBackgroundError(undefined);
+        setFeatsError(undefined);
+      },
+      setAbilitiesError,
+      setSkillsError,
+      setBackgroundError,
+      setSpeciesError,
+      setFeatsError,
+      setSubclassError,
+      classDetail: classDetail.data,
+      classProgression: classProgression.data?.data,
+      backgroundDetail: backgroundDetail.data,
+      speciesTraitChoices: speciesTraits.data?.data,
+      subclassOptions: subclassOpts.data?.data,
+      originFeatSlug,
+      hasFightingStylePick,
+      fightingStyleSlugs: classDetail.data?.fightingStyleSlugs ?? [],
+      hasFeatsStep,
+      hasSubclassStep,
+      hasSpellStep,
+    });
   }
 
   function goBack() {

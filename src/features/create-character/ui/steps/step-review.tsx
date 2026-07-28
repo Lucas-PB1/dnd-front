@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, type ReactNode } from "react";
+import { useMemo } from "react";
 import { useWatch } from "react-hook-form";
 import type { Control } from "react-hook-form";
 
@@ -8,16 +8,13 @@ import { ABILITY_LABELS_PT, abilityModifier } from "@/entities/character/types";
 import {
   BACKGROUND_BOOST_MODE_PLUS1X3,
   BACKGROUND_BOOST_MODE_PLUS2_PLUS1,
-  previewBackgroundAbilityBoosts,
 } from "@/entities/character/lib/background-boost";
-import { previewFeatAbilityBoosts } from "@/entities/character/lib/feat-ability-boost";
 import { epicBoonFeatSlugsFromCatalog } from "@/entities/character/lib/epic-boon-feat-options";
 import { resolveCreateCharacterFeats } from "@/features/create-character/lib/preview-create-character-feats";
-import { abilityModifierValue } from "@/entities/character";
 import { ABILITY_KEYS } from "@/features/create-character/lib/point-buy";
+import { previewCreateCharacter } from "@/features/create-character/lib/preview-create-character";
 import type { CreateCharacterInput } from "@/features/create-character/model/create-character.schema";
 import { useCharacterCatalogLabels } from "@/features/character-sheet/api/use-character-catalog-labels";
-import type { CharacterDetail } from "@/entities/character/types";
 import { useSpeciesTraitChoices } from "@/features/species-catalog/api/use-species";
 import {
   useClassEquipment,
@@ -48,160 +45,17 @@ import { FeatOptionsReadList } from "@/features/feat-catalog/ui/feat-options-rea
 import { useFeats } from "@/features/reference-catalog/api/use-reference";
 import { useSpells } from "@/features/spell-catalog/api/use-spells";
 import { isSubclassRequired } from "@/entities/character/lib/subclass";
+import {
+  ABILITY_METHOD_LABEL,
+  ReviewChipList,
+  ReviewField,
+  SPELL_LIST_LABEL,
+} from "@/features/create-character/ui/steps/review-ui";
 import { WizardFormSection } from "@/features/create-character/ui/wizard-form-section";
 
 type StepReviewProps = {
   control: Control<CreateCharacterInput>;
 };
-
-const SPELL_LIST_LABEL: Record<string, string> = {
-  known: "Conhecida",
-  prepared: "Preparada",
-  always_prepared: "Sempre preparada",
-};
-
-const METHOD_LABEL: Record<string, string> = {
-  "point-buy": "Compra de pontos",
-  "standard-array": "Array padrão",
-  roll: "Rolagem",
-};
-
-function previewCharacter(
-  values: CreateCharacterInput,
-  epicBoonFeatSlugs: ReadonlySet<string>,
-): CharacterDetail {
-  const mode = values.backgroundAbilityBoostMode ?? BACKGROUND_BOOST_MODE_PLUS2_PLUS1;
-  const plus2 = values.backgroundAbilityBoostPlus2Slug;
-  const plus1 = values.backgroundAbilityBoostPlus1Slug;
-  const plus1Slugs = values.backgroundAbilityBoostPlus1Slugs ?? [];
-  const afterBackground =
-    mode === BACKGROUND_BOOST_MODE_PLUS1X3 &&
-    plus1Slugs.filter(Boolean).length === 3 &&
-    new Set(plus1Slugs.filter(Boolean)).size === 3
-      ? previewBackgroundAbilityBoosts(values.abilityScores, {
-          mode: BACKGROUND_BOOST_MODE_PLUS1X3,
-          plus1Slugs: plus1Slugs as (keyof typeof values.abilityScores)[],
-        })
-      : mode === BACKGROUND_BOOST_MODE_PLUS2_PLUS1 &&
-          plus2 &&
-          plus1 &&
-          plus2 !== plus1
-        ? previewBackgroundAbilityBoosts(values.abilityScores, {
-            mode: BACKGROUND_BOOST_MODE_PLUS2_PLUS1,
-            plus2Slug: plus2 as keyof typeof values.abilityScores,
-            plus1Slug: plus1 as keyof typeof values.abilityScores,
-          })
-        : values.abilityScores;
-  const finalScores = previewFeatAbilityBoosts(
-    afterBackground,
-    values.featOptions ?? [],
-    epicBoonFeatSlugs,
-  );
-
-  return {
-    id: "",
-    name: values.name,
-    level: values.level,
-    classSlug: values.classSlug,
-    speciesSlug: values.speciesSlug,
-    backgroundSlug: values.backgroundSlug,
-    subclassSlug: values.subclassSlug?.trim() ? values.subclassSlug : null,
-    alignmentSlug: values.alignmentSlug?.trim()
-      ? values.alignmentSlug.trim()
-      : null,
-    abilityScores: finalScores,
-    hitPointsMax: null,
-    hitPointsCurrent: null,
-    proficiencyBonus: 0,
-    classSkillSlugs: values.classSkillSlugs,
-    backgroundSkillSlugs: [],
-    speciesChoices: values.speciesChoices,
-    subclassOptions: values.subclassOptions,
-    classOptions: values.classOptions ?? [],
-    characterFeats: [],
-    featOptions: values.featOptions,
-    characterSpells: values.characterSpells,
-    equipment: values.equipment,
-    languageSlugs: values.languageSlugs,
-    abilityGenerationMethodSlug: values.abilityGenerationMethodSlug,
-    backgroundAbilityBoostMode: mode,
-    backgroundAbilityBoostPlus2Slug:
-      values.backgroundAbilityBoostPlus2Slug ?? null,
-    backgroundAbilityBoostPlus1Slug:
-      values.backgroundAbilityBoostPlus1Slug ?? null,
-    backgroundAbilityBoostPlus1Slugs:
-      mode === BACKGROUND_BOOST_MODE_PLUS1X3
-        ? (values.backgroundAbilityBoostPlus1Slugs ?? null)
-        : null,
-    backgroundToolItemSlug: values.backgroundToolItemSlug?.trim()
-      ? values.backgroundToolItemSlug.trim()
-      : null,
-    abilityModifiers: {
-      forca: abilityModifierValue(finalScores.forca),
-      destreza: abilityModifierValue(finalScores.destreza),
-      constituicao: abilityModifierValue(finalScores.constituicao),
-      inteligencia: abilityModifierValue(finalScores.inteligencia),
-      sabedoria: abilityModifierValue(finalScores.sabedoria),
-      carisma: abilityModifierValue(finalScores.carisma),
-    },
-    passivePerception: 10 + abilityModifierValue(finalScores.sabedoria),
-    armorClass: 10 + abilityModifierValue(finalScores.destreza),
-    armorClassNote: "Sem armadura",
-    weaponAttacks: [],
-    equipmentWarnings: [],
-    cannotCastSpellsInArmor: false,
-    speedPenaltyMeters: 0,
-    spellcastingAbilitySlug: null,
-    spellSaveDc: null,
-    spellAttackBonus: null,
-    campaigns: [],
-    createdAt: "",
-    updatedAt: "",
-  };
-}
-
-function ChipList({
-  items,
-}: {
-  items: { key: string; label: string; hint?: string }[];
-}) {
-  if (!items.length) {
-    return <p className="text-sm text-muted-foreground">Nenhum</p>;
-  }
-
-  return (
-    <ul className="flex flex-wrap gap-1.5">
-      {items.map((item) => (
-        <li
-          key={item.key}
-          className="rounded-md border border-border bg-muted/30 px-2 py-0.5 text-xs"
-        >
-          <span className="font-medium">{item.label}</span>
-          {item.hint ? (
-            <span className="text-muted-foreground"> · {item.hint}</span>
-          ) : null}
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-function Field({
-  label,
-  children,
-}: {
-  label: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className="min-w-0">
-      <dt className="text-[0.65rem] font-medium tracking-wider text-muted-foreground uppercase">
-        {label}
-      </dt>
-      <dd className="mt-0.5 text-sm">{children}</dd>
-    </div>
-  );
-}
 
 export function StepReview({ control }: StepReviewProps) {
   const values = useWatch({ control }) as CreateCharacterInput;
@@ -216,7 +70,7 @@ export function StepReview({ control }: StepReviewProps) {
   const plus1 = values.backgroundAbilityBoostPlus1Slug;
   const plus1Slugs = values.backgroundAbilityBoostPlus1Slugs ?? [];
   const preview = useMemo(
-    () => previewCharacter(values, epicBoonFeatSlugs),
+    () => previewCreateCharacter(values, epicBoonFeatSlugs),
     [values, epicBoonFeatSlugs],
   );
   const labels = useCharacterCatalogLabels(preview);
@@ -392,7 +246,7 @@ export function StepReview({ control }: StepReviewProps) {
     return map;
   }, [values.asiFeatSlotSlugs, asiLevels]);
   const methodLabel =
-    METHOD_LABEL[values.abilityGenerationMethodSlug] ??
+    ABILITY_METHOD_LABEL[values.abilityGenerationMethodSlug] ??
     values.abilityGenerationMethodSlug;
 
   const classSkillChips = values.classSkillSlugs.map((slug) => ({
@@ -428,18 +282,18 @@ export function StepReview({ control }: StepReviewProps) {
         compact
       >
         <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <Field label="Antecedente">
+          <ReviewField label="Antecedente">
             {labels.identity.backgroundName ?? values.backgroundSlug}
-          </Field>
-          <Field label="Alinhamento">
+          </ReviewField>
+          <ReviewField label="Alinhamento">
             {labels.identity.alignmentName ?? (
               <span className="text-muted-foreground">—</span>
             )}
-          </Field>
-          <Field label="Atributos">{methodLabel}</Field>
+          </ReviewField>
+          <ReviewField label="Atributos">{methodLabel}</ReviewField>
           {boostMode === BACKGROUND_BOOST_MODE_PLUS1X3 &&
           plus1Slugs.filter(Boolean).length === 3 ? (
-            <Field label="Bônus do antecedente">
+            <ReviewField label="Bônus do antecedente">
               +1{" "}
               {plus1Slugs
                 .map(
@@ -448,12 +302,12 @@ export function StepReview({ control }: StepReviewProps) {
                     slug,
                 )
                 .join(", ")}
-            </Field>
+            </ReviewField>
           ) : plus2 && plus1 && plus2 !== plus1 ? (
-            <Field label="Bônus do antecedente">
+            <ReviewField label="Bônus do antecedente">
               +2 {ABILITY_LABELS_PT[plus2 as keyof typeof ABILITY_LABELS_PT]}, +1{" "}
               {ABILITY_LABELS_PT[plus1 as keyof typeof ABILITY_LABELS_PT]}
-            </Field>
+            </ReviewField>
           ) : null}
         </dl>
       </WizardFormSection>
@@ -483,7 +337,7 @@ export function StepReview({ control }: StepReviewProps) {
       </WizardFormSection>
 
       <WizardFormSection title="Perícias" compact>
-        <ChipList items={[...backgroundSkillChips, ...classSkillChips]} />
+        <ReviewChipList items={[...backgroundSkillChips, ...classSkillChips]} />
         {toolLabel ? (
           <p className="text-sm">
             <span className="text-muted-foreground">Ferramenta: </span>
@@ -500,7 +354,7 @@ export function StepReview({ control }: StepReviewProps) {
               <p className="text-[0.65rem] font-medium tracking-wider text-muted-foreground uppercase">
                 Espécie
               </p>
-              <ChipList
+              <ReviewChipList
                 items={values.speciesChoices.map((c) => ({
                   key: `${c.choiceKind}-${c.choiceSlug}`,
                   label: speciesChoiceLabel(c.choiceKind, c.choiceSlug),
@@ -513,7 +367,7 @@ export function StepReview({ control }: StepReviewProps) {
               <p className="text-[0.65rem] font-medium tracking-wider text-muted-foreground uppercase">
                 Subclasse
               </p>
-              <ChipList
+              <ReviewChipList
                 items={values.subclassOptions.map((o) => ({
                   key: `${o.optionKey}-${o.valueId}`,
                   label: subclassOptionLabel(o.optionKey, o.valueId),
@@ -644,7 +498,7 @@ export function StepReview({ control }: StepReviewProps) {
                 <p className="text-[0.65rem] font-medium tracking-wider text-muted-foreground uppercase">
                   Truques
                 </p>
-                <ChipList
+                <ReviewChipList
                   items={cantrips.map((s) => ({
                     key: `c-${s.spellSlug}-${s.listType}`,
                     label: labels.resolveSpell(s.spellSlug),
@@ -657,7 +511,7 @@ export function StepReview({ control }: StepReviewProps) {
                 <p className="text-[0.65rem] font-medium tracking-wider text-muted-foreground uppercase">
                   Magias
                 </p>
-                <ChipList
+                <ReviewChipList
                   items={leveledSpells.map((s) => ({
                     key: `l-${s.spellSlug}-${s.listType}`,
                     label: labels.resolveSpell(s.spellSlug),
@@ -671,7 +525,7 @@ export function StepReview({ control }: StepReviewProps) {
       </WizardFormSection>
 
       <WizardFormSection title="Idiomas" compact>
-        <ChipList
+        <ReviewChipList
           items={values.languageSlugs.map((slug) => ({
             key: slug,
             label: labels.resolveLanguage(slug),
