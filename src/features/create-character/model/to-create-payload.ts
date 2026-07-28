@@ -70,9 +70,7 @@ export function toCreateCharacterPayload(
   if (values.alignmentSlug?.trim()) {
     payload.alignmentSlug = values.alignmentSlug.trim();
   }
-  if (values.languageSlugs.length > 0) {
-    payload.languageSlugs = values.languageSlugs;
-  }
+  payload.languageSlugs = values.languageSlugs;
 
   return payload;
 }

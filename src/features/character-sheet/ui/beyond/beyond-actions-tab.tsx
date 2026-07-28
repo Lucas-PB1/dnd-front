@@ -10,15 +10,12 @@ import {
 import type { ComponentType, SVGProps } from "react";
 
 import type { CharacterDetail } from "@/entities/character/types";
-import { formatSkillBonus } from "@/entities/character";
-import { useSheetRolls } from "@/features/character-sheet/ui/beyond/sheet-rolls";
+import { WeaponAttackCard } from "@/features/character-sheet/ui/beyond/weapon-attack-card";
 import {
   SheetEmptyHint,
   SheetSectionHeader,
   SheetSubheader,
 } from "@/features/character-sheet/ui/sheet-ui";
-import { Button } from "@/shared/ui/button";
-import { cn } from "@/shared/lib/utils";
 
 type BeyondActionsTabProps = {
   character: CharacterDetail;
@@ -62,8 +59,6 @@ const SECTIONS: {
 /** Economia de ação na mesa — ataques de arma vêm da ficha (`weaponAttacks`). */
 export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
   const attacks = character.weaponAttacks ?? [];
-  const rolls = useSheetRolls();
-  const busy = rolls.attack.isPending || rolls.damage.isPending;
 
   return (
     <div className="space-y-5">
@@ -81,123 +76,10 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
         ) : (
           <ul className="space-y-2">
             {attacks.map((attack) => (
-              <li
-                key={`${attack.itemSlug}-${attack.mode}`}
-                className="flex gap-3 rounded-lg border border-border/70 bg-card/60 px-3 py-2.5"
-              >
-                <span
-                  className={cn(
-                    "mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-md border border-secondary/35 bg-secondary/10 text-secondary",
-                  )}
-                  aria-hidden
-                >
-                  <CubeIcon className="size-4" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-baseline justify-between gap-2">
-                    <p className="font-heading text-sm font-semibold tracking-tight">
-                      {attack.itemName}
-                      <span className="ml-2 text-xs font-normal text-muted-foreground">
-                        {attack.mode === "ranged"
-                          ? "à distância"
-                          : "corpo a corpo"}
-                        {attack.role === "light_bonus"
-                          ? attack.nickUsesAttackAction
-                            ? " · adicional (Ágil)"
-                            : " · adicional (Leve)"
-                          : null}
-                        {attack.role === "dual_bonus"
-                          ? " · adicional (Ambidestro)"
-                          : null}
-                        {attack.masteryActive && attack.masteryName
-                          ? ` · ${attack.masteryName}`
-                          : null}
-                      </span>
-                    </p>
-                    <p
-                      className={cn(
-                        "rounded-md border px-2 py-0.5 font-mono text-sm font-semibold tabular-nums",
-                        attack.attackDisadvantage
-                          ? "border-destructive/40 bg-destructive/10 text-destructive"
-                          : "border-primary/30 bg-primary/8 text-primary",
-                      )}
-                    >
-                      {formatSkillBonus(attack.attackBonus)}
-                      {attack.attackDisadvantage ? " desv." : null}
-                    </p>
-                  </div>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {attack.damageNote}
-                    {attack.damageType ? ` ${attack.damageType}` : ""}
-                  </p>
-                  <p className="mt-0.5 text-[0.7rem] text-muted-foreground/90">
-                    {attack.attackNote}
-                    {attack.proficient ? "" : " · sem proficiência"}
-                  </p>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="secondary"
-                      disabled={busy}
-                      onClick={() =>
-                        rolls.attack.mutate({
-                          itemSlug: attack.itemSlug,
-                          mode: attack.mode,
-                        })
-                      }
-                    >
-                      Atacar
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      disabled={busy}
-                      onClick={() =>
-                        rolls.damage.mutate({
-                          itemSlug: attack.itemSlug,
-                          mode: attack.mode,
-                        })
-                      }
-                    >
-                      Dano
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      disabled={busy}
-                      onClick={() =>
-                        rolls.damage.mutate({
-                          itemSlug: attack.itemSlug,
-                          mode: attack.mode,
-                          critical: true,
-                        })
-                      }
-                    >
-                      Crítico
-                    </Button>
-                    {attack.grazeOnMissDamage != null ? (
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="ghost"
-                        disabled={busy}
-                        onClick={() =>
-                          rolls.damage.mutate({
-                            itemSlug: attack.itemSlug,
-                            mode: attack.mode,
-                            grazeMiss: true,
-                          })
-                        }
-                      >
-                        Erro (Garantido)
-                      </Button>
-                    ) : null}
-                  </div>
-                </div>
-              </li>
+              <WeaponAttackCard
+                key={`${attack.itemSlug}-${attack.mode}-${attack.role ?? "main"}`}
+                attack={attack}
+              />
             ))}
           </ul>
         )}

@@ -47,6 +47,10 @@ export function CampaignDetailView({ campaignId }: { campaignId: string }) {
   );
   const available = (myCharacters ?? []).filter((c) => !linkedIds.has(c.id));
   const isDm = data?.myRole === "dm";
+  const canOpenEncounter =
+    data?.myRole === "dm" ||
+    data?.myRole === "assistant" ||
+    data?.myRole === "player";
   const myUserId = user?.id;
 
   function startEdit() {
@@ -184,6 +188,21 @@ export function CampaignDetailView({ campaignId }: { campaignId: string }) {
           ) : null}
         </div>
       </div>
+
+      {canOpenEncounter ? (
+        <section className="space-y-3">
+          <h2 className="font-heading text-lg font-semibold">Combate</h2>
+          <p className="text-sm text-muted-foreground">
+            Tracker de iniciativa, criaturas e turnos da mesa.
+          </p>
+          <Link
+            href={`/campaigns/${campaignId}/encounter`}
+            className={cn(buttonVariants({ size: "sm" }))}
+          >
+            Abrir encontro
+          </Link>
+        </section>
+      ) : null}
 
       <section className="space-y-3">
         <h2 className="font-heading text-lg font-semibold">Membros</h2>

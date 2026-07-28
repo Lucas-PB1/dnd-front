@@ -66,6 +66,14 @@ const SECTIONS: ReadonlyArray<{
     icon: SparklesIcon,
   },
   {
+    href: "/fighting-styles",
+    title: "Estilos de luta",
+    eyebrow: "Combate",
+    description:
+      "Duelismo, Arquearia e mais — o texto completo de cada estilo.",
+    icon: ShieldCheckIcon,
+  },
+  {
     href: "/subclasses",
     title: "Subclasses",
     eyebrow: "Arquétipos",

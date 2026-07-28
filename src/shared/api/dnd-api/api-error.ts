@@ -48,4 +48,8 @@ export class ApiError extends Error {
   get isForbidden(): boolean {
     return this.statusCode === 403;
   }
+
+  get isNotFound(): boolean {
+    return this.statusCode === 404;
+  }
 }

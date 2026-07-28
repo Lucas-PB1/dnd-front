@@ -26,6 +26,7 @@ import {
 import {
   useBackgroundDetail,
   useBackgroundEquipment,
+  useBackgroundLanguages,
   useBackgroundSkills,
   useBackgroundTools,
 } from "@/features/background-catalog/api/use-backgrounds";
@@ -279,10 +280,14 @@ export function StepReview({ control }: StepReviewProps) {
       },
     });
 
-  const langQuota = languageQuota(
-    values.speciesSlug,
-    values.speciesChoices ?? [],
+  const backgroundLanguages = useBackgroundLanguages(
+    values.backgroundSlug,
+    !!values.backgroundSlug,
   );
+  const langQuota = languageQuota({
+    grantedSlugs: (backgroundLanguages.data?.data ?? []).map((row) => row.slug),
+    languageChoiceCount: backgroundDetail.data?.languageChoiceCount ?? 2,
+  });
 
   const classPackages = useMemo(
     () => groupEquipmentPackages(classEquipment.data?.data ?? []),
@@ -670,7 +675,7 @@ export function StepReview({ control }: StepReviewProps) {
           items={values.languageSlugs.map((slug) => ({
             key: slug,
             label: labels.resolveLanguage(slug),
-            hint: langQuota.granted.includes(slug) ? "Espécie" : undefined,
+            hint: langQuota.granted.includes(slug) ? "Antecedente" : undefined,
           }))}
         />
         <p className="text-xs text-muted-foreground">

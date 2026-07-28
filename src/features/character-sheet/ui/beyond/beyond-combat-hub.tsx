@@ -91,6 +91,51 @@ function CombatMetric({
   return <div className={className}>{body}</div>;
 }
 
+function DeathSaveTrack({
+  label,
+  value,
+  onChange,
+  disabled,
+  tone = "default",
+}: {
+  label: string;
+  value: number;
+  onChange: (next: number) => void;
+  disabled?: boolean;
+  tone?: "default" | "danger";
+}) {
+  return (
+    <div className="rounded-lg border border-border/70 bg-card/70 px-3 py-2">
+      <p className="text-[0.58rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
+        {label}
+      </p>
+      <div className="mt-2 flex gap-1.5">
+        {[1, 2, 3].map((pip) => {
+          const filled = value >= pip;
+          return (
+            <button
+              key={pip}
+              type="button"
+              disabled={disabled}
+              aria-label={`${label}: ${pip}`}
+              title={filled ? `Definir como ${pip - 1}` : `Definir como ${pip}`}
+              onClick={() => onChange(filled && value === pip ? pip - 1 : pip)}
+              className={cn(
+                "size-4 rounded-full border transition-colors disabled:opacity-50",
+                filled
+                  ? tone === "danger"
+                    ? "border-destructive bg-destructive"
+                    : "border-primary bg-primary"
+                  : "border-border/80 bg-muted/30 hover:border-primary/50",
+              )}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export function BeyondCombatHub({
   characterId,
   character,
@@ -104,6 +149,9 @@ export function BeyondCombatHub({
   const [editingStatus, setEditingStatus] = useState(false);
   const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
   const [tempHpDraft, setTempHpDraft] = useState("");
+  const [inspirationDraft, setInspirationDraft] = useState(false);
+  const [deathSuccessDraft, setDeathSuccessDraft] = useState(0);
+  const [deathFailDraft, setDeathFailDraft] = useState(0);
 
   const state = stateQuery.data;
   const classResources = state?.classResources ?? [];
@@ -124,6 +172,9 @@ export function BeyondCombatHub({
   function openStatusEditor() {
     setSelectedConditions([...(state?.conditions ?? [])]);
     setTempHpDraft(String(state?.tempHp ?? 0));
+    setInspirationDraft(state?.inspiration ?? false);
+    setDeathSuccessDraft(state?.deathSaveSuccesses ?? 0);
+    setDeathFailDraft(state?.deathSaveFailures ?? 0);
     setEditingStatus(true);
   }
 
@@ -139,8 +190,17 @@ export function BeyondCombatHub({
     await patchState.mutateAsync({
       conditions: selectedConditions,
       tempHp: Number(tempHpDraft) || 0,
+      inspiration: inspirationDraft,
+      deathSaveSuccesses: deathSuccessDraft,
+      deathSaveFailures: deathFailDraft,
     });
     setEditingStatus(false);
+  }
+
+  async function patchDeathOrInspiration(
+    patch: Parameters<typeof patchState.mutateAsync>[0],
+  ) {
+    await patchState.mutateAsync(patch);
   }
 
   return (
@@ -201,6 +261,45 @@ export function BeyondCombatHub({
             )}
           </div>
         </div>
+      </div>
+
+      <div className="mt-2 grid gap-2 sm:grid-cols-3">
+        <div className="rounded-lg border border-border/70 bg-card/70 px-3 py-2">
+          <p className="text-[0.58rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
+            Inspiração
+          </p>
+          <Button
+            type="button"
+            size="sm"
+            variant={state?.inspiration ? "default" : "outline"}
+            className="mt-2"
+            disabled={!state || patchState.isPending}
+            onClick={() =>
+              patchDeathOrInspiration({
+                inspiration: !(state?.inspiration ?? false),
+              })
+            }
+          >
+            {state?.inspiration ? "Ativa" : "Inativa"}
+          </Button>
+        </div>
+        <DeathSaveTrack
+          label="Sucessos (morte)"
+          value={state?.deathSaveSuccesses ?? 0}
+          disabled={!state || patchState.isPending}
+          onChange={(deathSaveSuccesses) =>
+            patchDeathOrInspiration({ deathSaveSuccesses })
+          }
+        />
+        <DeathSaveTrack
+          label="Falhas (morte)"
+          value={state?.deathSaveFailures ?? 0}
+          tone="danger"
+          disabled={!state || patchState.isPending}
+          onChange={(deathSaveFailures) =>
+            patchDeathOrInspiration({ deathSaveFailures })
+          }
+        />
       </div>
 
       {classResources.length > 0 ? (
@@ -286,6 +385,29 @@ export function BeyondCombatHub({
               onChange={(event) => setTempHpDraft(event.target.value)}
             />
           </Field>
+
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={inspirationDraft}
+              onChange={(event) => setInspirationDraft(event.target.checked)}
+            />
+            Inspiração
+          </label>
+
+          <div className="grid gap-2 sm:grid-cols-2">
+            <DeathSaveTrack
+              label="Sucessos (morte)"
+              value={deathSuccessDraft}
+              onChange={setDeathSuccessDraft}
+            />
+            <DeathSaveTrack
+              label="Falhas (morte)"
+              value={deathFailDraft}
+              tone="danger"
+              onChange={setDeathFailDraft}
+            />
+          </div>
 
           <div className="flex gap-2">
             <Button

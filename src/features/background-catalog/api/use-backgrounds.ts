@@ -6,6 +6,7 @@ import {
   backgroundKeys,
   fetchBackgroundBySlug,
   fetchBackgroundEquipment,
+  fetchBackgroundLanguages,
   fetchBackgroundSkills,
   fetchBackgroundTools,
   fetchBackgrounds,
@@ -71,6 +72,16 @@ export function useBackgroundSkills(slug: string, enabled = true) {
     slug,
     queryKey: backgroundKeys.skills(slug),
     queryFn: () => fetchBackgroundSkills(slug),
+    enabled,
+    retry: false,
+  });
+}
+
+export function useBackgroundLanguages(slug: string, enabled = true) {
+  return useCatalogDetailQuery({
+    slug,
+    queryKey: backgroundKeys.languages(slug),
+    queryFn: () => fetchBackgroundLanguages(slug),
     enabled,
     retry: false,
   });

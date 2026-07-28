@@ -2,64 +2,57 @@ import { describe, expect, it } from "vitest";
 
 import {
   languageQuota,
-  syncLanguagesForSpecies,
+  syncLanguagesForBackground,
   toggleLanguageSelection,
 } from "@/features/create-character/lib/language-selection";
 
+const acolyte = {
+  grantedSlugs: ["common"],
+  languageChoiceCount: 2,
+};
+
 describe("language-selection", () => {
-  it("gives dragonborn common + draconic with no extras", () => {
-    expect(languageQuota("dragonborn")).toEqual({
-      granted: ["common", "draconic"],
-      choiceCount: 0,
-      maxTotal: 2,
+  it("uses background common + 2 choices by default", () => {
+    expect(languageQuota(acolyte)).toEqual({
+      granted: ["common"],
+      choiceCount: 2,
+      maxTotal: 3,
     });
   });
 
-  it("lets human pick one extra language", () => {
-    expect(languageQuota("human")).toEqual({
-      granted: ["common"],
-      choiceCount: 1,
-      maxTotal: 2,
-    });
-
-    const first = toggleLanguageSelection(["common"], "elvish", "human");
+  it("lets the player pick two extra languages", () => {
+    const first = toggleLanguageSelection(["common"], "elvish", acolyte);
     expect(first).toEqual({ ok: true, next: ["common", "elvish"] });
 
-    const blocked = toggleLanguageSelection(
+    const second = toggleLanguageSelection(
       ["common", "elvish"],
       "dwarvish",
-      "human",
+      acolyte,
+    );
+    expect(second).toEqual({
+      ok: true,
+      next: ["common", "elvish", "dwarvish"],
+    });
+
+    const blocked = toggleLanguageSelection(
+      ["common", "elvish", "dwarvish"],
+      "orc",
+      acolyte,
     );
     expect(blocked.ok).toBe(false);
   });
 
   it("locks granted languages", () => {
-    const result = toggleLanguageSelection(
-      ["common", "draconic"],
-      "common",
-      "dragonborn",
-    );
+    const result = toggleLanguageSelection(["common"], "common", acolyte);
     expect(result.ok).toBe(false);
   });
 
-  it("syncs selection when species changes", () => {
+  it("syncs selection when background grant changes", () => {
     expect(
-      syncLanguagesForSpecies(
-        ["common", "elvish", "dwarvish"],
-        "dragonborn",
+      syncLanguagesForBackground(
+        ["common", "elvish", "dwarvish", "orc"],
+        acolyte,
       ),
-    ).toEqual(["common", "draconic"]);
-  });
-
-  it("uses abyssal for abyssal tiefling legacy", () => {
-    expect(
-      languageQuota("tiefling", [
-        { choiceKind: "infernal_legacy", choiceSlug: "abyssal" },
-      ]),
-    ).toEqual({
-      granted: ["common", "abyssal"],
-      choiceCount: 0,
-      maxTotal: 2,
-    });
+    ).toEqual(["common", "elvish", "dwarvish"]);
   });
 });

@@ -13,7 +13,7 @@ import {
   ShieldExclamationIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
-import { useEffect, useState, type ComponentType, type SVGProps } from "react";
+import { useState, type ComponentType, type SVGProps } from "react";
 
 import type {
   InventoryItem,
@@ -196,6 +196,24 @@ export function BeyondInventoryTab({
           </Button>
         </div>
       </div>
+
+      {inventory.data?.encumbrance ? (
+        <p
+          className={cn(
+            "rounded-md border px-3 py-2 text-xs tabular-nums",
+            inventory.data.encumbrance.encumbered
+              ? "border-destructive/40 bg-destructive/10 text-destructive"
+              : "border-border/70 bg-muted/30 text-muted-foreground",
+          )}
+          role={inventory.data.encumbrance.encumbered ? "status" : undefined}
+        >
+          Carga {inventory.data.encumbrance.totalWeightKg} /{" "}
+          {inventory.data.encumbrance.carryingCapacityKg} kg
+          {inventory.data.encumbrance.encumbered
+            ? " — capacidade excedida (Força × 7,5)"
+            : ""}
+        </p>
+      ) : null}
 
       {inventory.isPending ? (
         <p className="text-sm text-muted-foreground">Carregando inventário…</p>
@@ -453,20 +471,17 @@ function InventoryItemRow({
   onPatch: (slug: string, payload: PatchInventoryItemPayload) => void;
   onRemove: (slug: string) => void;
 }) {
-  const [qtyDraft, setQtyDraft] = useState(String(item.quantity));
+  const [qtyDraft, setQtyDraft] = useState<string | null>(null);
+  const qtyDisplay = qtyDraft ?? String(item.quantity);
   const qtyId = `qty-${item.itemSlug}`;
   const slotId = `slot-${item.itemSlug}`;
   const equipped = item.location === "equipped";
   const canAttune =
     item.requiresAttunement && (item.attuned || !attunementSlotsFull);
 
-  useEffect(() => {
-    setQtyDraft(String(item.quantity));
-  }, [item.quantity]);
-
   function commitQuantity(nextRaw: number) {
     const next = Math.max(1, Math.trunc(nextRaw) || 1);
-    setQtyDraft(String(next));
+    setQtyDraft(null);
     if (next !== item.quantity) {
       onPatch(item.itemSlug, { quantity: next });
     }
@@ -533,7 +548,7 @@ function InventoryItemRow({
           </span>
           <QuantityStepper
             id={qtyId}
-            value={qtyDraft}
+            value={qtyDisplay}
             onChange={setQtyDraft}
             onCommit={commitQuantity}
             disabled={isPending}

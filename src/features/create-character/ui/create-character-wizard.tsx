@@ -43,7 +43,6 @@ import { StepSubclassOptions } from "@/features/create-character/ui/steps/step-s
 import { WizardStepIndicator } from "@/features/create-character/ui/wizard-step-indicator";
 import { useSpeciesTraitChoices } from "@/features/species-catalog/api/use-species";
 import { useBackgroundDetail } from "@/features/background-catalog/api/use-backgrounds";
-import { syncLanguagesForSpecies } from "@/features/create-character/lib/language-selection";
 import { countAsiFeatSlots } from "@/features/create-character/lib/asi-feat-slots";
 import { classExpertiseSlotsAtLevel } from "@/entities/character/lib/class-expertise-slots";
 import { classWeaponMasterySlotsAtLevel } from "@/entities/character/lib/class-weapon-mastery-slots";
@@ -183,6 +182,7 @@ export function CreateCharacterWizard() {
       setValue("featOptions", []);
       setValue("asiFeatSlotSlugs", []);
       setValue("classSkillSlugs", []);
+      setValue("languageSlugs", []);
       prevBackgroundSlugRef.current = backgroundSlug;
     }
   }, [backgroundSlug, setValue]);
@@ -206,10 +206,6 @@ export function CreateCharacterWizard() {
   useEffect(() => {
     if (prevSpeciesSlugRef.current !== speciesSlug) {
       setValue("speciesChoices", []);
-      setValue(
-        "languageSlugs",
-        syncLanguagesForSpecies([], speciesSlug),
-      );
       prevSpeciesSlugRef.current = speciesSlug;
     }
   }, [speciesSlug, setValue]);

@@ -1,6 +1,7 @@
 import { catalogFetch } from "@/shared/api/dnd-api/api-client";
 import type {
   BackgroundEquipmentOption,
+  BackgroundLanguageOption,
   BackgroundListResponse,
   BackgroundSkillOption,
   BackgroundSummary,
@@ -24,6 +25,8 @@ export const backgroundKeys = {
     [...backgroundKeys.all, "equipment", slug] as const,
   skills: (slug: string) => [...backgroundKeys.all, "skills", slug] as const,
   tools: (slug: string) => [...backgroundKeys.all, "tools", slug] as const,
+  languages: (slug: string) =>
+    [...backgroundKeys.all, "languages", slug] as const,
 };
 
 export async function fetchBackgroundsPage(params?: {
@@ -75,6 +78,13 @@ export async function fetchBackgroundSkills(slug: string) {
 export async function fetchBackgroundTools(slug: string, limit = 50) {
   return catalogFetch<PaginatedResponse<BackgroundToolOption>>(
     `/backgrounds/${slug}/tools?limit=${limit}`,
+    CATALOG_FETCH_INIT,
+  );
+}
+
+export async function fetchBackgroundLanguages(slug: string) {
+  return catalogFetch<PaginatedResponse<BackgroundLanguageOption>>(
+    `/backgrounds/${slug}/languages`,
     CATALOG_FETCH_INIT,
   );
 }

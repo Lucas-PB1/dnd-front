@@ -6,11 +6,15 @@ import { useWatch } from "react-hook-form";
 
 import {
   languageQuota,
-  syncLanguagesForSpecies,
+  syncLanguagesForBackground,
   toggleLanguageSelection,
 } from "@/features/create-character/lib/language-selection";
 import type { CreateCharacterInput } from "@/features/create-character/model/create-character.schema";
 import { WizardFormSection } from "@/features/create-character/ui/wizard-form-section";
+import {
+  useBackgroundDetail,
+  useBackgroundLanguages,
+} from "@/features/background-catalog/api/use-backgrounds";
 import { useLanguages } from "@/features/reference-catalog/api/use-reference";
 import { cn } from "@/shared/lib/utils";
 
@@ -21,15 +25,10 @@ type StepLanguagesProps = {
 
 export function StepLanguages({ control, setValue }: StepLanguagesProps) {
   const languages = useLanguages();
-  const speciesSlug = useWatch({
+  const backgroundSlug = useWatch({
     control,
-    name: "speciesSlug",
+    name: "backgroundSlug",
     defaultValue: "",
-  });
-  const speciesChoices = useWatch({
-    control,
-    name: "speciesChoices",
-    defaultValue: [],
   });
   const selected = useWatch({
     control,
@@ -38,36 +37,42 @@ export function StepLanguages({ control, setValue }: StepLanguagesProps) {
   });
   const [hint, setHint] = useState<string | null>(null);
 
-  const quota = useMemo(
-    () => languageQuota(speciesSlug, speciesChoices),
-    [speciesSlug, speciesChoices],
+  const background = useBackgroundDetail(backgroundSlug, !!backgroundSlug);
+  const fixedLanguages = useBackgroundLanguages(
+    backgroundSlug,
+    !!backgroundSlug,
   );
+
+  const grant = useMemo(
+    () => ({
+      grantedSlugs: (fixedLanguages.data?.data ?? []).map((row) => row.slug),
+      languageChoiceCount: background.data?.languageChoiceCount ?? 2,
+    }),
+    [fixedLanguages.data?.data, background.data?.languageChoiceCount],
+  );
+
+  const quota = useMemo(() => languageQuota(grant), [grant]);
+  const grantReady =
+    !!backgroundSlug &&
+    !background.isPending &&
+    !fixedLanguages.isPending;
 
   const chosenCount = selected.filter((s) => !quota.granted.includes(s)).length;
 
-  // Garante idiomas da espécie ao entrar / mudar espécie ou legado.
   useEffect(() => {
-    const next = syncLanguagesForSpecies(
-      selected,
-      speciesSlug,
-      speciesChoices,
-    );
+    if (!grantReady) return;
+    const next = syncLanguagesForBackground(selected, grant);
     const same =
       next.length === selected.length &&
       next.every((slug, i) => slug === selected[i]);
     if (!same) {
       setValue("languageSlugs", next, { shouldDirty: true });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- sync por espécie/legado
-  }, [speciesSlug, speciesChoices, setValue]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- sync por antecedente
+  }, [grantReady, grant.grantedSlugs.join(","), grant.languageChoiceCount, setValue]);
 
   function toggle(slug: string) {
-    const result = toggleLanguageSelection(
-      selected,
-      slug,
-      speciesSlug,
-      speciesChoices,
-    );
+    const result = toggleLanguageSelection(selected, slug, grant);
     if (!result.ok) {
       setHint(result.reason);
       return;
@@ -83,9 +88,11 @@ export function StepLanguages({ control, setValue }: StepLanguagesProps) {
           <div className="space-y-0.5">
             <p className="text-xs font-medium">Cota</p>
             <p className="text-[11px] text-muted-foreground">
-              {quota.choiceCount === 0
-                ? "Sua espécie define os idiomas — sem escolha extra."
-                : `Espécie concede ${quota.granted.length} idioma(s) fixo(s) + ${quota.choiceCount} à escolha.`}
+              {!backgroundSlug
+                ? "Selecione um antecedente para ver a cota de idiomas."
+                : quota.choiceCount === 0
+                  ? "Seu antecedente define os idiomas — sem escolha extra."
+                  : `Antecedente concede ${quota.granted.length} idioma(s) fixo(s) + ${quota.choiceCount} à escolha.`}
             </p>
           </div>
           <p className="tabular-nums text-sm font-semibold">
@@ -122,7 +129,7 @@ export function StepLanguages({ control, setValue }: StepLanguagesProps) {
           </p>
         ) : null}
 
-        {languages.isPending ? (
+        {languages.isPending || !grantReady ? (
           <p className="text-sm text-muted-foreground">Carregando…</p>
         ) : (
           <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
@@ -130,9 +137,7 @@ export function StepLanguages({ control, setValue }: StepLanguagesProps) {
               const granted = quota.granted.includes(lang.slug);
               const checked = selected.includes(lang.slug);
               const atLimit =
-                !checked &&
-                !granted &&
-                chosenCount >= quota.choiceCount;
+                !checked && !granted && chosenCount >= quota.choiceCount;
               return (
                 <li key={lang.slug}>
                   <label
@@ -154,7 +159,7 @@ export function StepLanguages({ control, setValue }: StepLanguagesProps) {
                       <span className="font-medium">{lang.name}</span>
                       {granted ? (
                         <span className="mt-0.5 block text-[10px] tracking-wide text-muted-foreground uppercase">
-                          Espécie
+                          Antecedente
                         </span>
                       ) : null}
                       {lang.isRare && !granted ? (

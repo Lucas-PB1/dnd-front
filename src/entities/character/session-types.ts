@@ -24,12 +24,18 @@ export type CharacterState = {
   hitDiceCurrent: number;
   hitDiceMax: number;
   hitDie: string | null;
+  deathSaveSuccesses: number;
+  deathSaveFailures: number;
+  inspiration: boolean;
 };
 
 export type PatchCharacterStatePayload = {
   conditions?: string[];
   tempHp?: number;
   concentratingOn?: string | null;
+  deathSaveSuccesses?: number;
+  deathSaveFailures?: number;
+  inspiration?: boolean;
 };
 
 export type UseClassResourcePayload = {
@@ -73,10 +79,18 @@ export type InventoryItem = {
   equipmentSlot: string | null;
   attuned: boolean;
   requiresAttunement: boolean;
+  weightKg: number;
+};
+
+export type InventoryEncumbrance = {
+  totalWeightKg: number;
+  carryingCapacityKg: number;
+  encumbered: boolean;
 };
 
 export type CharacterInventory = {
   items: InventoryItem[];
+  encumbrance: InventoryEncumbrance;
 };
 
 export type AddInventoryItemPayload = {
@@ -123,6 +137,8 @@ export type LevelUpPreview = {
   newWeaponMasterySlots: LevelUpWeaponMasterySlot[];
 };
 
+export type LevelUpAsiDistributionMode = "plus2" | "plus1plus1";
+
 export type LevelUpPayload = {
   subclassSlug?: string;
   classSkillSlugs?: string[];
@@ -135,4 +151,7 @@ export type LevelUpPayload = {
   equipment?: import("@/entities/character/sheet-types").CharacterEquipment[];
   languageSlugs?: string[];
   abilityGenerationMethodSlug?: string;
+  asiDistributionMode?: LevelUpAsiDistributionMode;
+  asiPrimaryAbilitySlug?: string;
+  asiSecondaryAbilitySlug?: string;
 };

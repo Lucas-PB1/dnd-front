@@ -7,6 +7,7 @@ export type BackgroundSummary = {
   summary: string | null;
   description: string | null;
   equipmentGoldOption: number | null;
+  languageChoiceCount: number;
   abilityOptionSlugs: string[];
   abilityOptionNames: string[];
   originFeatSlug: string | null;
@@ -48,4 +49,11 @@ export type BackgroundEquipmentOption = {
 export type BackgroundSkillOption = {
   slug: string;
   name: string;
+};
+
+/** Espelha BackgroundLanguageResponseDto */
+export type BackgroundLanguageOption = {
+  slug: string;
+  name: string;
+  isRare: boolean;
 };
