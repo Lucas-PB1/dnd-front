@@ -98,8 +98,9 @@ export function LevelUpSection({
     );
   }
 
-  const newExpertiseSlots = data.newClassExpertiseSlots ?? [];
-  const newMasterySlots = data.newWeaponMasterySlots ?? [];
+  const levelUpPreview = data;
+  const newExpertiseSlots = levelUpPreview.newClassExpertiseSlots ?? [];
+  const newMasterySlots = levelUpPreview.newWeaponMasterySlots ?? [];
   const expertiseComplete = levelUpExpertiseComplete(
     newExpertiseSlots,
     levelUpClassOptions,
@@ -113,7 +114,7 @@ export function LevelUpSection({
     setLevelUpError(undefined);
 
     const result = await submitLevelUp({
-      data,
+      data: levelUpPreview,
       character,
       subclassSlug,
       asiMode,
@@ -146,9 +147,9 @@ export function LevelUpSection({
 
   return (
     <div className="space-y-4">
-      <LevelUpPreviewSummary {...data} />
+      <LevelUpPreviewSummary {...levelUpPreview} />
 
-      {data.isAsiOrFeatLevel ? (
+      {levelUpPreview.isAsiOrFeatLevel ? (
         <LevelUpAsiFeatPanel
           character={character}
           featsPending={feats.isPending}
@@ -171,9 +172,9 @@ export function LevelUpSection({
 
       <LevelUpClassFeaturesSection
         character={character}
-        subclassRequired={data.subclassRequired}
-        subclassUnlockLevel={data.subclassUnlockLevel}
-        newSpellOptionsCount={data.newSpellOptions.length}
+        subclassRequired={levelUpPreview.subclassRequired}
+        subclassUnlockLevel={levelUpPreview.subclassUnlockLevel}
+        newSpellOptionsCount={levelUpPreview.newSpellOptions.length}
         newExpertiseSlots={newExpertiseSlots}
         newMasterySlots={newMasterySlots}
         subclassSlug={subclassSlug}

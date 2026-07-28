@@ -78,13 +78,13 @@ export function useSpellStepFormValues(
   );
 
   return {
-    level,
-    classSlug,
-    speciesSlug,
-    subclassSlug,
-    speciesChoices,
-    featOptions,
-    characterSpells,
+    level: level ?? 1,
+    classSlug: classSlug ?? "",
+    speciesSlug: speciesSlug ?? "",
+    subclassSlug: subclassSlug ?? "",
+    speciesChoices: speciesChoices ?? [],
+    featOptions: featOptions ?? [],
+    characterSpells: characterSpells ?? [],
     characterFeats,
     playerPickedSpells,
   };

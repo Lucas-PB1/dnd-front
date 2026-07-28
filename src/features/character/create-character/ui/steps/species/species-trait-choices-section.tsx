@@ -9,7 +9,7 @@ import { FieldError } from "@/shared/ui/field";
 type SpeciesTraitChoicesSectionProps = {
   groups: SpeciesTraitChoiceGroup[];
   speciesChoices: SpeciesChoice[];
-  skillKinds: Set<string>;
+  skillKinds: ReadonlySet<string>;
   grantedSkillSlugs: string[];
   error?: string;
   onSelect: (kind: string, slug: string) => void;

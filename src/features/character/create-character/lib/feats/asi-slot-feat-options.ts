@@ -65,7 +65,11 @@ export function sortedAsiSlotFeatOptions(args: {
 
   const list = feats.filter((feat) => {
     if (
-      !canAddCharacterFeat(previewWithoutSlot, feat.slug, feat.repeatable)
+      !canAddCharacterFeat(
+        previewWithoutSlot,
+        feat.slug,
+        feat.repeatable ?? false,
+      )
     ) {
       return false;
     }

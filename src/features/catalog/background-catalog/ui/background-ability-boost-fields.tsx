@@ -10,10 +10,10 @@ import {
   type BackgroundBoostMode,
 } from "@/entities/character/lib/background-boost";
 import {
-  ABILITY_KEYS,
   ABILITY_LABELS_PT,
   type AbilityScores,
 } from "@/entities/character/types";
+import { ABILITY_KEYS } from "@/features/character/create-character/lib/abilities/point-buy";
 import { CatalogSelect } from "@/features/character/create-character/ui/catalog-select";
 import { Field, FieldLabel } from "@/shared/ui/field";
 import { nativeSelectClassName } from "@/shared/ui/native-select";
@@ -36,7 +36,7 @@ type BackgroundAbilityBoostFieldsProps = {
   errors?: {
     plus2Slug?: FieldError;
     plus1Slug?: FieldError;
-    plus1Slugs?: FieldError;
+    plus1Slugs?: FieldError | { message?: string };
   };
   plus2Label?: string;
   plus1Label?: string;
