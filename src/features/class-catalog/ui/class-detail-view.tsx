@@ -2,19 +2,17 @@
 
 import { Suspense, useMemo } from "react";
 
-import type { ClassFeature, ClassSummary } from "@/entities/class/types";
+import type { ClassFeature } from "@/entities/class/types";
 import {
   useClassDetail,
   useClassFeatures,
   useClassSkills,
   useClassSubclasses,
 } from "@/features/class-catalog/api/use-classes";
+import { ClassDetailHero } from "@/features/class-catalog/ui/class-detail-hero";
 import { SubclassCard } from "@/features/class-catalog/ui/subclass-card";
 import { useCatalogBackHref } from "@/shared/lib/use-catalog-back-href";
-import {
-  CatalogDetailError,
-  CatalogDetailHero,
-} from "@/shared/ui/catalog-detail-hero";
+import { CatalogDetailError } from "@/shared/ui/catalog-detail-hero";
 import { CollapsibleCard } from "@/shared/ui/collapsible-card";
 import { PhbProse } from "@/shared/ui/phb-prose";
 
@@ -30,79 +28,6 @@ function groupFeaturesByLevel(features: ClassFeature[]) {
     map.set(feature.featureLevel, list);
   }
   return [...map.entries()].sort(([a], [b]) => a - b);
-}
-
-function ClassHero({
-  cls,
-  backHref,
-}: {
-  cls: ClassSummary;
-  backHref: string;
-}) {
-  const stats: { label: string; value: string }[] = [
-    { label: "Dado de vida", value: cls.hitDie },
-  ];
-  if (cls.primaryAbilityLabel) {
-    stats.push({ label: "Atributo", value: cls.primaryAbilityLabel });
-  }
-  if (cls.hpLevel1DieValue != null) {
-    stats.push({ label: "PV nível 1", value: `${cls.hpLevel1DieValue} + CON` });
-  }
-  if (cls.hpFixedPerLevel != null) {
-    stats.push({
-      label: "PV por nível",
-      value: `+${cls.hpFixedPerLevel} + CON`,
-    });
-  }
-  if (cls.skillChoiceCount != null) {
-    stats.push({
-      label: "Perícias",
-      value: `${cls.skillChoiceCount} à escolha${cls.skillChoiceFrom === "any" ? " (qualquer)" : ""}`,
-    });
-  }
-  if (cls.savingThrowNames?.length) {
-    stats.push({
-      label: "Salvaguardas",
-      value: cls.savingThrowNames.join(", "),
-    });
-  }
-
-  return (
-    <CatalogDetailHero
-      backHref={backHref}
-      backLabel="Classes"
-      title={cls.name}
-      titleExtra={
-        <span className="font-mono text-sm tracking-wide text-secondary">
-          {cls.hitDie}
-        </span>
-      }
-      eyebrow={cls.tagline}
-      summary={cls.summary}
-      stats={stats}
-    >
-      {(cls.armorTrainingNames?.length || cls.weaponProficiencyNames?.length) ? (
-        <dl className="grid gap-3 text-sm sm:grid-cols-2">
-          {cls.armorTrainingNames?.length ? (
-            <div>
-              <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                Armaduras
-              </dt>
-              <dd>{cls.armorTrainingNames.join(", ")}</dd>
-            </div>
-          ) : null}
-          {cls.weaponProficiencyNames?.length ? (
-            <div>
-              <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                Armas
-              </dt>
-              <dd>{cls.weaponProficiencyNames.join(", ")}</dd>
-            </div>
-          ) : null}
-        </dl>
-      ) : null}
-    </CatalogDetailHero>
-  );
 }
 
 export function ClassDetailView({ slug }: ClassDetailViewProps) {
@@ -150,7 +75,7 @@ function ClassDetailBody({ slug }: ClassDetailViewProps) {
 
   return (
     <div className="flex flex-col gap-12">
-      <ClassHero cls={cls} backHref={backHref} />
+      <ClassDetailHero cls={cls} backHref={backHref} />
 
       {cls.description ? (
         <section aria-labelledby="class-about" className="space-y-4">

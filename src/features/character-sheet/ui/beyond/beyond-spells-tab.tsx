@@ -4,7 +4,6 @@ import { useMemo } from "react";
 import {
   PencilSquareIcon,
   SparklesIcon,
-  StopCircleIcon,
 } from "@heroicons/react/24/outline";
 
 import {
@@ -25,14 +24,13 @@ import {
   SPELL_SLOT_LEVELS,
   type SpellRowModel,
 } from "@/features/character-sheet/ui/beyond/beyond-spell-row";
+import { BeyondSpellSlotsPanel } from "@/features/character-sheet/ui/beyond/beyond-spell-slots-panel";
 import {
   SheetEditAction,
   SheetEmptyHint,
   SheetSectionHeader,
-  SheetSlotPips,
 } from "@/features/character-sheet/ui/sheet-ui";
 import { useSpells } from "@/features/spell-catalog/api/use-spells";
-import { Button } from "@/shared/ui/button";
 
 type BeyondSpellsTabProps = {
   characterId: string;
@@ -166,62 +164,14 @@ export function BeyondSpellsTab({
         </p>
       ) : null}
 
-      {stateQuery.isPending ? (
-        <p className="text-sm text-muted-foreground">Carregando slots…</p>
-      ) : (
-        <div className="space-y-3 border-b border-border/50 pb-3">
-          {activeSlots.length > 0 ? (
-            <ul className="flex flex-wrap gap-2">
-              {activeSlots.map((slot) => (
-                <li
-                  key={slot.level}
-                  className="flex min-w-[5.5rem] flex-col gap-1 rounded-lg border border-border/70 bg-background/40 px-2.5 py-2"
-                >
-                  <div className="flex items-baseline justify-between gap-2">
-                    <span className="text-[0.65rem] font-semibold tracking-wide text-muted-foreground uppercase">
-                      {slot.level}º
-                    </span>
-                    <span className="font-mono text-xs tabular-nums text-muted-foreground">
-                      {slot.remaining}/{slot.max}
-                    </span>
-                  </div>
-                  <SheetSlotPips max={slot.max} used={slot.used} />
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              Sem espaços de magia neste nível.
-            </p>
-          )}
-
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="min-w-0">
-              <p className="text-[0.65rem] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
-                Concentração
-              </p>
-              <p className="mt-0.5 text-sm font-medium">
-                {state?.concentratingOn
-                  ? labels.resolveSpell(state.concentratingOn)
-                  : "Nenhuma"}
-              </p>
-            </div>
-            {state?.concentratingOn ? (
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                className="gap-1"
-                disabled={patchState.isPending}
-                onClick={clearConcentration}
-              >
-                <StopCircleIcon className="size-3.5" aria-hidden />
-                {patchState.isPending ? "Limpando…" : "Encerrar"}
-              </Button>
-            ) : null}
-          </div>
-        </div>
-      )}
+      <BeyondSpellSlotsPanel
+        isPending={stateQuery.isPending}
+        activeSlots={activeSlots}
+        state={state}
+        labels={labels}
+        isClearingConcentration={patchState.isPending}
+        onClearConcentration={clearConcentration}
+      />
 
       {cannotCastSpellsInArmor ? (
         <p

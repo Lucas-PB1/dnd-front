@@ -2,26 +2,20 @@
 
 import { useState } from "react";
 import type { AbilityScores } from "@/entities/character/types";
-import { ABILITY_LABELS_PT, abilityModifier } from "@/entities/character/types";
 import {
-  formatPoolOptionLabel,
-  poolOptionsWithCounts,
-  remainingPoolForAbility,
   STANDARD_ARRAY_VALUES,
   sumAbilityValues,
   UNASSIGNED_ABILITY_SCORES,
 } from "@/features/create-character/lib/ability-pool";
 import {
-  ABILITY_KEYS,
   DEFAULT_ABILITY_SCORES,
-  formatPointBuyOptionLabel,
   POINT_BUY_BUDGET,
   POINT_BUY_DEFAULT,
-  pointBuyAffordableOptions,
   pointBuyRemaining,
   pointBuySpent,
 } from "@/features/create-character/lib/point-buy";
 import type { CreateCharacterInput } from "@/features/create-character/model/create-character.schema";
+import { AbilityScoreGrid } from "@/features/create-character/ui/steps/ability-score-grid";
 import { WizardFormSection } from "@/features/create-character/ui/wizard-form-section";
 import { useAbilityGenerationMethods } from "@/features/reference-catalog/api/use-reference";
 import { useRollAbilities } from "@/features/character-sheet/api/use-roll-abilities";
@@ -227,66 +221,14 @@ export function AbilityGenerationFields({
 
       <FieldError errors={[errors.abilityScores]} />
 
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
-        {ABILITY_KEYS.map((key) => {
-          const score = abilityScores[key];
-          const poolOptions = hasRawPool
-            ? poolOptionsWithCounts(
-                remainingPoolForAbility(rawValues, abilityScores, key),
-              )
-            : [];
-          const pointBuyOptions = isPointBuy
-            ? pointBuyAffordableOptions(abilityScores, key)
-            : [];
-
-          return (
-            <div
-              key={key}
-              className="rounded-lg border border-border px-2.5 py-2"
-            >
-              <p className="text-xs font-medium">{ABILITY_LABELS_PT[key]}</p>
-
-              {isPointBuy ? (
-                <select
-                  className={cn(nativeSelectClassName, "mt-1.5 h-8")}
-                  value={score}
-                  onChange={(e) =>
-                    setValue("abilityScores", {
-                      ...abilityScores,
-                      [key]: Number(e.target.value),
-                    })
-                  }
-                >
-                  {pointBuyOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {formatPointBuyOptionLabel(option)}
-                    </option>
-                  ))}
-                </select>
-              ) : hasRawPool ? (
-                <select
-                  className={cn(nativeSelectClassName, "mt-1.5 h-8")}
-                  value={score > 0 ? score : ""}
-                  onChange={(e) => handlePoolAssign(key, e.target.value)}
-                >
-                  <option value="">Escolher…</option>
-                  {poolOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {formatPoolOptionLabel(option)}
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <p className="mt-1 text-sm text-muted-foreground">—</p>
-              )}
-
-              <p className="mt-0.5 font-mono text-xs text-muted-foreground">
-                {score > 0 ? abilityModifier(score) : "—"}
-              </p>
-            </div>
-          );
-        })}
-      </div>
+      <AbilityScoreGrid
+        abilityScores={abilityScores}
+        hasRawPool={!!hasRawPool}
+        rawValues={rawValues}
+        isPointBuy={isPointBuy}
+        setValue={setValue}
+        onPoolAssign={handlePoolAssign}
+      />
     </WizardFormSection>
   );
 }
