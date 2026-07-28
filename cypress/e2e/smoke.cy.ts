@@ -1,8 +1,9 @@
 describe("home", () => {
   it("carrega a página inicial", () => {
     cy.visit("/");
-    cy.contains("Campanhas & fichas").should("be.visible");
-    cy.contains("dnd").should("be.visible");
+    cy.contains("Taverna").should("be.visible");
+    cy.contains("Fichas prontas para a mesa").should("be.visible");
+    cy.contains("Abrir compêndio").should("be.visible");
   });
 });
 
@@ -14,5 +15,27 @@ describe("health API", () => {
       expect(response.body).to.have.property("database");
       expect(response.body).to.have.property("timestamp");
     });
+  });
+});
+
+describe("rotas públicas e auth", () => {
+  it("abre o compêndio sem login", () => {
+    cy.visit("/compendium");
+    cy.contains("Compêndio").should("be.visible");
+  });
+
+  it("abre a página de login", () => {
+    cy.visit("/login");
+    cy.contains("Entrar").should("be.visible");
+  });
+
+  it("protege /campaigns redirecionando para login", () => {
+    cy.visit("/campaigns");
+    cy.location("pathname").should("eq", "/login");
+  });
+
+  it("protege /characters redirecionando para login", () => {
+    cy.visit("/characters");
+    cy.location("pathname").should("eq", "/login");
   });
 });
