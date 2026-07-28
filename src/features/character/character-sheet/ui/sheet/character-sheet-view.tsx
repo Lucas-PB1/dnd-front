@@ -10,6 +10,7 @@ import { buildCharacterSheetTabPanels } from "@/features/character/character-she
 import { SheetRollsProvider } from "@/features/character/character-sheet/ui/beyond/layout/sheet-rolls";
 import { SheetEditDialog } from "@/features/character/character-sheet/ui/edit/sheet-edit-dialog";
 import { buildSheetEditDialogs } from "@/features/character/character-sheet/ui/edit/sheet-edit-dialog-registry";
+import { SheetSettingsDialog } from "@/features/character/character-sheet/ui/edit/sheet-settings-dialog";
 import { motion } from "@/shared/lib/motion";
 import { cn } from "@/shared/lib/utils";
 
@@ -42,7 +43,6 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
     characterId: id,
     character: sheet.data,
     labels: sheet.labels,
-    sectionProps: sheet.sectionProps,
     onEdit: sheet.setEditing,
   });
 
@@ -58,7 +58,7 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
           characterId={id}
           character={sheet.data}
           labels={sheet.labels}
-          onEditIdentity={() => sheet.setEditing("identity")}
+          onOpenSettings={sheet.openSettings}
         />
 
         <CharacterSheetMainGrid
@@ -70,6 +70,14 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
           onEditSkills={() => sheet.setEditing("skills")}
           onEditAbilities={() => sheet.setEditing("abilities")}
         />
+
+        {sheet.settingsOpen ? (
+          <SheetSettingsDialog
+            characterId={id}
+            character={sheet.data}
+            onClose={sheet.closeSettings}
+          />
+        ) : null}
 
         {activeEdit ? (
           <SheetEditDialog

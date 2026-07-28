@@ -7,33 +7,19 @@ import {
   EditCombatForm,
   EditEquipmentForm,
   EditFeatsForm,
-  EditIdentityForm,
   EditLanguagesForm,
   EditSpeciesChoicesForm,
   EditSpellsForm,
   EditSubclassOptionsForm,
 } from "@/features/character/character-sheet/ui/edit/sheet-edit-forms";
+import type { EditFormProps } from "@/features/character/character-sheet/ui/edit/edit-form-shell";
 import type { SheetEditDialogConfig } from "@/features/character/character-sheet/ui/edit/sheet-edit-dialog";
 import type { SheetEditId } from "@/features/character/character-sheet/lib/edit/sheet-edit-types";
-
-type EditFormProps = {
-  character: NonNullable<
-    Parameters<typeof EditIdentityForm>[0]["character"]
-  >;
-  onSuccess: () => void;
-  onCancel: () => void;
-};
 
 export function buildSheetEditDialogs(
   editForms: EditFormProps,
 ): Record<NonNullable<SheetEditId>, SheetEditDialogConfig> {
   return {
-    identity: {
-      title: "Identidade",
-      description: "Nome, nível, classe, espécie, antecedente e alinhamento.",
-      width: "md",
-      content: <EditIdentityForm {...editForms} />,
-    },
     "background-tool": {
       title: "Ferramenta do antecedente",
       description: "Escolha a ferramenta concedida pelo antecedente.",

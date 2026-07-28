@@ -1,5 +1,4 @@
 export type SheetEditId =
-  | "identity"
   | "background-tool"
   | "combat"
   | "abilities"

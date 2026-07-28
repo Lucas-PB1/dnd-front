@@ -124,6 +124,10 @@ export async function submitLevelUp({
   }
   if (newExpertiseSlots.length > 0 || newMasterySlots.length > 0) {
     payload.classOptions = levelUpClassOptions;
+    // A API valida expertise contra proficiências já salvas; envia o contexto
+    // (featOptions fica a cargo do ramo ASI/talento ou do snapshot na API).
+    payload.classSkillSlugs = character.classSkillSlugs;
+    payload.speciesChoices = character.speciesChoices;
   }
 
   const updated = await mutateAsync(payload);

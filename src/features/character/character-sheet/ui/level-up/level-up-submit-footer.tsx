@@ -6,6 +6,16 @@ import type { CharacterDetail } from "@/entities/character/types";
 import type { LevelUpPayload } from "@/entities/character/session-types";
 import { Button } from "@/shared/ui/button";
 
+function formatLevelUpError(message: string): string {
+  if (/Expertise skill '.+' requires proficiency/i.test(message)) {
+    return "Especialização exige perícia em que você já é proficiente.";
+  }
+  if (/Expertise skill '.+' is not allowed/i.test(message)) {
+    return "Essa perícia não é permitida para especialização desta classe.";
+  }
+  return message;
+}
+
 type LevelUpSubmitFooterProps = {
   nextLevel: number;
   levelUpError?: string;
@@ -30,7 +40,7 @@ export function LevelUpSubmitFooter({
     <>
       {levelUpError ? (
         <p className="text-sm text-destructive" role="alert">
-          {levelUpError}
+          {formatLevelUpError(levelUpError)}
         </p>
       ) : null}
 
@@ -47,7 +57,7 @@ export function LevelUpSubmitFooter({
       {levelUp.isError ? (
         <p className="text-sm text-destructive" role="alert">
           {levelUp.error instanceof Error
-            ? levelUp.error.message
+            ? formatLevelUpError(levelUp.error.message)
             : "Erro ao subir de nível"}
         </p>
       ) : null}

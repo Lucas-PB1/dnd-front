@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  EditFormShell,
   useSectionPatch,
   type EditFormProps,
 } from "@/features/character/character-sheet/ui/edit/edit-form-shell";
@@ -9,12 +8,13 @@ import {
   LanguagePickerFields,
   useSheetLanguageSelection,
 } from "@/features/character/character-sheet/ui/edit/language-picker-fields";
+import { Button } from "@/shared/ui/button";
 
-export function EditLanguagesForm({
+/** Idiomas no hub de Ajustes — mesma cota do wizard (fixos + N à escolha). */
+export function EditLanguagesInlineForm({
   character,
   onSuccess,
-  onCancel,
-}: EditFormProps) {
+}: Pick<EditFormProps, "character" | "onSuccess">) {
   const { patch, formError, submit } = useSectionPatch(character, onSuccess);
   const selection = useSheetLanguageSelection({
     backgroundSlug: character.backgroundSlug,
@@ -22,10 +22,8 @@ export function EditLanguagesForm({
   });
 
   return (
-    <EditFormShell
-      isPending={patch.isPending}
-      formError={formError ?? selection.hint}
-      onCancel={onCancel}
+    <form
+      className="space-y-3"
       onSubmit={(e) => {
         e.preventDefault();
         if (!selection.grantReady) return;
@@ -38,10 +36,23 @@ export function EditLanguagesForm({
         quota={selection.quota}
         selected={selection.selected}
         chosenCount={selection.chosenCount}
-        hint={null}
+        hint={selection.hint}
         onToggle={selection.toggle}
         languageRows={selection.languages.data?.data ?? []}
       />
-    </EditFormShell>
+
+      {formError ? (
+        <p className="text-sm text-destructive" role="alert">
+          {formError}
+        </p>
+      ) : null}
+      <Button
+        type="submit"
+        size="sm"
+        disabled={patch.isPending || !selection.grantReady}
+      >
+        {patch.isPending ? "Salvando…" : "Salvar idiomas"}
+      </Button>
+    </form>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { PencilSquareIcon, UserIcon } from "@heroicons/react/24/outline";
+import { Cog6ToothIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import type { CharacterDetail } from "@/entities/character/types";
 import type { useCharacterCatalogLabels } from "@/features/character/character-sheet/api/use-character-catalog-labels";
@@ -16,14 +16,14 @@ type CharacterSheetHeaderProps = {
   characterId: string;
   character: CharacterDetail;
   labels: ReturnType<typeof useCharacterCatalogLabels>;
-  onEditIdentity: () => void;
+  onOpenSettings: () => void;
 };
 
 export function CharacterSheetHeader({
   characterId,
   character,
   labels,
-  onEditIdentity,
+  onOpenSettings,
 }: CharacterSheetHeaderProps) {
   return (
     <header className="flex shrink-0 flex-col gap-2 border-b border-border/60 pb-2 sm:flex-row sm:items-center sm:justify-between">
@@ -64,14 +64,14 @@ export function CharacterSheetHeader({
         <BeyondRestActions characterId={characterId} />
         <button
           type="button"
-          onClick={onEditIdentity}
+          onClick={onOpenSettings}
           className={cn(
             buttonVariants({ variant: "outline", size: "sm" }),
             "inline-flex items-center gap-1.5",
           )}
         >
-          <UserIcon className="size-3.5" aria-hidden />
-          Identidade
+          <Cog6ToothIcon className="size-3.5" aria-hidden />
+          Ajustes
         </button>
         <DeleteCharacterButton
           characterId={characterId}

@@ -12,8 +12,11 @@ export function useCharacterSheetView(id: string) {
   const labels = useCharacterCatalogLabels(data);
   const skillsQuery = useSkills();
   const [editing, setEditing] = useState<SheetEditId>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const closeEdit = useCallback(() => setEditing(null), []);
+  const openSettings = useCallback(() => setSettingsOpen(true), []);
+  const closeSettings = useCallback(() => setSettingsOpen(false), []);
 
   const languageNames =
     data?.languageSlugs.map((slug) => labels.resolveLanguage(slug)) ?? [];
@@ -38,6 +41,9 @@ export function useCharacterSheetView(id: string) {
     editing,
     setEditing,
     closeEdit,
+    settingsOpen,
+    openSettings,
+    closeSettings,
     languageNames,
     sectionProps,
     editForms,

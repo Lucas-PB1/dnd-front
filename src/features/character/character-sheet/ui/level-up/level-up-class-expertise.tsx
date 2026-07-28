@@ -34,16 +34,16 @@ export function LevelUpClassExpertise({
 
   const proficientSlugs = useMemo(
     () =>
+      // Sem classOptions: expertise não conta como “já proficiente” (igual à API).
       collectProficientSkillSlugs({
         classSkillSlugs: character.classSkillSlugs,
         backgroundSkillSlugs: character.backgroundSkillSlugs,
         speciesChoices: character.speciesChoices,
         featOptions: character.featOptions,
-        classOptions: value,
         classSlug: character.classSlug,
         level: character.level,
       }),
-    [character, value],
+    [character],
   );
 
   const skillNameBySlug = useMemo(() => {
@@ -84,6 +84,12 @@ export function LevelUpClassExpertise({
       <p className="text-muted-foreground">
         Escolha perícias nas quais você já é proficiente (×2 PB).
       </p>
+      {expertiseCandidates.length === 0 ? (
+        <p className="text-sm text-destructive" role="status">
+          Nenhuma perícia elegível. Você precisa ser proficiente numa perícia
+          permitida pela classe antes de especializar.
+        </p>
+      ) : null}
       <div className="grid gap-2 sm:grid-cols-2">
         {newSlots.map((slot) => {
           const selected =

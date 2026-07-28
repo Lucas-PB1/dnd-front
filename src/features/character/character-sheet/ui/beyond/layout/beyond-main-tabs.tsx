@@ -2,7 +2,6 @@
 
 import {
   BookOpenIcon,
-  Cog6ToothIcon,
   CubeIcon,
   SparklesIcon,
   BoltIcon,
@@ -24,8 +23,7 @@ export type BeyondTabId =
   | "actions"
   | "spells"
   | "inventory"
-  | "features"
-  | "settings";
+  | "features";
 
 type HeroIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
@@ -34,7 +32,6 @@ const TABS: { id: BeyondTabId; label: string; icon: HeroIcon }[] = [
   { id: "spells", label: "Magias", icon: SparklesIcon },
   { id: "inventory", label: "Inventário", icon: CubeIcon },
   { id: "features", label: "Traços", icon: BookOpenIcon },
-  { id: "settings", label: "Ajustes", icon: Cog6ToothIcon },
 ];
 
 type BeyondMainTabsProps = {

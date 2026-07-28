@@ -10,10 +10,10 @@ Inspiração de **layout**: D&D Beyond (dashboard denso). Visual: **Taverna/Masm
 
 ## Estrutura canônica
 
-1. **Header compacto** — nome, chips, descansos, Identidade / Excluir (sem hero grande)  
+1. **Header compacto** — nome, chips, descansos, **Ajustes** (modal hub) / Excluir  
 2. **Faixa de estatísticas** — 6 atributos + proficiência + deslocamento + PV/curar/dano  
 3. **Grid desktop** — esq. salvaguardas/sentidos/profs · meio perícias · dir. iniciativa/CA/defesas/condições + **abas**  
-4. **Abas** — Ações · Magias · Inventário · Traços · Ajustes  
+4. **Abas** — Ações · Magias · Inventário · Traços  
 
 A ficha **pode crescer** além da viewport; a página rola normalmente (sem `h-dvh` / scroll interno forçado nas colunas).  
 Mobile (`order-*`): combate + abas → perícias → proficiências.
@@ -26,7 +26,7 @@ Mobile (`order-*`): combate + abas → perícias → proficiências.
 - Slots / conjurar / concentração: aba Magias (`BeyondSpellsTab` — lista por círculo + cast na linha)
 - Economia de ação: aba Ações (`BeyondActionsTab` — Ação · Bônus · Reação · Livre; sem inventário)
 - Inventário: aba Inventário (`BeyondInventoryTab` — só itens Equipado/Mochila; add colapsável)
-- Subir de nível: aba Ajustes (`LevelUpSection`)
+- Subir de nível / idiomas / nome·alinhamento: botão **Ajustes** no header → `SheetSettingsDialog` (hub em modal; sem aba Ajustes)
 
 ## Regras de UX
 
@@ -36,7 +36,8 @@ Mobile (`order-*`): combate + abas → perícias → proficiências.
 - Sem aba **Mesa** — cada função fica na seção respectiva
 - Aba **Ações**: só economia de ação (vazia até API `kind`); **sem** inventário / Desequipar / pacote inicial
 - Aba **Inventário**: itens (Equipado/Mochila); Adicionar em **modal**; pacotes de criação viram itens na API (seed); escolha de pacote só em Ajustes
-- Aba **Ajustes**: level-up + Idiomas (tab id `settings`); sem grid de atalhos (cada seção edita no próprio lugar)
+- Aba **Ajustes** removida — hub no header (`SheetSettingsDialog`: Personagem · Subir de nível · Idiomas)
+- Sem modal **Identidade** (não trocar classe/espécie/antecedente na ficha completa)
 - Level-up: subclasse e ASI/talento escolhidos ali; magias **só indicadas** (contador) — jogador escolhe depois na aba Magias
 - Aba **Traços**: subnavegação (Classe/Espécie/Subclasse/Talentos/Antecedente) + `CollapsibleCard` compacto + `PhbProse`
 - Edição: **sempre em modal** (`SheetEditDialog` + `EditFormShell` — corpo rola, rodapé fixo com Cancelar/Salvar); um `editing` por vez, título/descrição/largura vêm de `editDialogs`
