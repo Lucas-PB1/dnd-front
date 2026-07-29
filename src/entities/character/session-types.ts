@@ -28,6 +28,8 @@ export type CharacterState = {
   deathSaveFailures: number;
   inspiration: boolean;
   firearmChambers?: Record<string, number>;
+  rageActive?: boolean;
+  recklessActive?: boolean;
 };
 
 export type ResourceDieRoll = {

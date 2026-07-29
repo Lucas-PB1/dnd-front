@@ -51,6 +51,8 @@ export function useCharacterRolls(
       grazeMiss?: boolean;
       headShot?: boolean;
       sightedReroll?: boolean;
+      brutalStrike?: boolean;
+      divineFury?: boolean;
     }) => run(rollCharacterDamage, args),
     onSuccess: onResult,
   });

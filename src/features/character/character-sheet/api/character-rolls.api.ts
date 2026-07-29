@@ -42,6 +42,8 @@ export async function rollCharacterDamage(
     grazeMiss?: boolean;
     headShot?: boolean;
     sightedReroll?: boolean;
+    brutalStrike?: boolean;
+    divineFury?: boolean;
   },
 ) {
   return gameFetch<CharacterRollResult>(

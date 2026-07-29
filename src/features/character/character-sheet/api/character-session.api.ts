@@ -144,3 +144,38 @@ export async function recoverRisk(accessToken: string, characterId: string) {
     { method: "POST", body: "{}" },
   );
 }
+
+export async function toggleRage(
+  accessToken: string,
+  characterId: string,
+  active?: boolean,
+) {
+  return gameFetch<CharacterState>(
+    `/characters/${characterId}/rage/toggle`,
+    accessToken,
+    { method: "POST", body: JSON.stringify(active == null ? {} : { active }) },
+  );
+}
+
+export async function toggleReckless(
+  accessToken: string,
+  characterId: string,
+  active?: boolean,
+) {
+  return gameFetch<CharacterState>(
+    `/characters/${characterId}/reckless/toggle`,
+    accessToken,
+    { method: "POST", body: JSON.stringify(active == null ? {} : { active }) },
+  );
+}
+
+export async function recoverAllRage(
+  accessToken: string,
+  characterId: string,
+) {
+  return gameFetch<CharacterState>(
+    `/characters/${characterId}/resources/rage/recover-all`,
+    accessToken,
+    { method: "POST", body: "{}" },
+  );
+}

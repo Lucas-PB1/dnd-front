@@ -60,6 +60,12 @@ function AttackBadges({ attack }: { attack: WeaponAttackSummary }) {
       {attack.overkillExtraDice ? (
         <SheetChip active>Exagero +{attack.overkillExtraDice}</SheetChip>
       ) : null}
+      {attack.rageDamageBonus ? (
+        <SheetChip active>Fúria +{attack.rageDamageBonus}</SheetChip>
+      ) : null}
+      {attack.brutalStrikeDice ? (
+        <SheetChip>Golpe Brutal {attack.brutalStrikeDice}</SheetChip>
+      ) : null}
       {attack.masteryActive && attack.masteryName ? (
         <SheetChip active>{attack.masteryName}</SheetChip>
       ) : null}
@@ -237,6 +243,24 @@ export function WeaponAttackCard({
           >
             Crítico
           </Button>
+          {attack.brutalStrikeDice ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              disabled={busy}
+              title={`Golpe Brutal: +${attack.brutalStrikeDice} de dano (abre mão da vantagem do Imprudente)`}
+              onClick={() =>
+                rolls.damage.mutate({
+                  itemSlug: attack.itemSlug,
+                  mode: attack.mode,
+                  brutalStrike: true,
+                })
+              }
+            >
+              Golpe Brutal (+{attack.brutalStrikeDice})
+            </Button>
+          ) : null}
           {canHeadShot ? (
             <Button
               type="button"

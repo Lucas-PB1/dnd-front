@@ -69,6 +69,7 @@ export type CharacterDetail = {
   cannotCastSpellsInArmor?: boolean;
   speedPenaltyMeters?: 0 | 3;
   itemSpeedBonusMeters?: number;
+  classCombatNotes?: string[];
   spellcastingAbilitySlug?: string | null;
   spellSaveDc?: number | null;
   spellAttackBonus?: number | null;
@@ -108,6 +109,8 @@ export type WeaponAttackSummary = {
   overkillExtraDice?: string | null;
   reloadCapacity?: number | null;
   hasRecoil?: boolean;
+  rageDamageBonus?: number;
+  brutalStrikeDice?: string | null;
 };
 
 export type EquipmentWarning = {
