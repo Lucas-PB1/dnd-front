@@ -44,6 +44,9 @@ type WeaponAttackCardProps = {
     subclassSlug?: string | null;
   };
   onDreadAmbusherResolved?: () => void | Promise<void>;
+  cleric?: {
+    level: number;
+  };
 };
 
 const ADVANTAGE_OPTIONS: { id: AdvantageMode; label: string }[] = [
@@ -69,6 +72,7 @@ export function WeaponAttackCard({
   onDivineSmiteResolved,
   ranger,
   onDreadAmbusherResolved,
+  cleric,
 }: WeaponAttackCardProps) {
   const rolls = useSheetRolls();
   const busy = rolls.attack.isPending || rolls.damage.isPending;
@@ -87,7 +91,9 @@ export function WeaponAttackCard({
   const [assassinPoisonFailedSave, setAssassinPoisonFailedSave] =
     useState(false);
   const [strokeOfLuck, setStrokeOfLuck] = useState(false);
-  const [cunningStrikeEffects, setCunningStrikeEffects] = useState<string[]>([]);
+  const [cunningStrikeEffects, setCunningStrikeEffects] = useState<string[]>(
+    [],
+  );
   const smiteSlots = (paladin?.smiteSlots ?? []).filter(
     (slot) => slot.remaining > 0,
   );
@@ -100,6 +106,7 @@ export function WeaponAttackCard({
   const [preciseHunter, setPreciseHunter] = useState(false);
   const [colossusSlayer, setColossusSlayer] = useState(false);
   const [dreadfulStrikes, setDreadfulStrikes] = useState(false);
+  const [divineStrike, setDivineStrike] = useState(false);
   const canPreciseHunter = Boolean(ranger && ranger.level >= 17);
   const canColossusSlayer = Boolean(
     ranger?.subclassSlug === "hunter" && ranger.level >= 3,
@@ -319,6 +326,22 @@ export function WeaponAttackCard({
               Caçador Preciso
             </button>
           ) : null}
+          {cleric && cleric.level >= 7 ? (
+            <button
+              type="button"
+              className={cn(
+                "rounded-md border px-2 py-0.5 text-[0.7rem] font-medium transition-colors",
+                divineStrike
+                  ? "border-primary/50 bg-primary/15 text-primary"
+                  : "border-border/70 bg-muted/20 text-muted-foreground hover:bg-muted/40",
+              )}
+              aria-pressed={divineStrike}
+              title="Golpe Divino, se escolhido em Golpes Abençoados (1× por turno)"
+              onClick={() => setDivineStrike((value) => !value)}
+            >
+              Golpe Divino
+            </button>
+          ) : null}
         </div>
 
         {ranger ? (
@@ -387,21 +410,24 @@ export function WeaponAttackCard({
             variant="outline"
             disabled={busy}
             onClick={() =>
-              rolls.damage.mutate(buildWeaponDamagePayload({
-                itemSlug: attack.itemSlug,
-                mode: attack.mode,
-                sightedReroll:
-                  attack.masteryActive && attack.masterySlug === "sighted",
-                sneakAttack,
-                cunningStrikeEffects,
-                poisonousSneak,
-                assassinSurprise,
-                assassinDeathStrike,
-                assassinPoisonFailedSave,
-                huntersMark,
-                colossusSlayer,
-                dreadfulStrikes,
-              }))
+              rolls.damage.mutate(
+                buildWeaponDamagePayload({
+                  itemSlug: attack.itemSlug,
+                  mode: attack.mode,
+                  sightedReroll:
+                    attack.masteryActive && attack.masterySlug === "sighted",
+                  sneakAttack,
+                  cunningStrikeEffects,
+                  poisonousSneak,
+                  assassinSurprise,
+                  assassinDeathStrike,
+                  assassinPoisonFailedSave,
+                  huntersMark,
+                  colossusSlayer,
+                  dreadfulStrikes,
+                  divineStrike,
+                }),
+              )
             }
           >
             Dano
@@ -426,6 +452,7 @@ export function WeaponAttackCard({
                   huntersMark,
                   colossusSlayer,
                   dreadfulStrikes,
+                  divineStrike,
                 }),
               )
             }

@@ -116,12 +116,7 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
       shots?: number;
     }) => {
       try {
-        return await fireChamber(
-          requireToken(),
-          character.id,
-          itemSlug,
-          shots,
-        );
+        return await fireChamber(requireToken(), character.id, itemSlug, shots);
       } catch (error) {
         return handleUnauthorized(error);
       }
@@ -154,9 +149,7 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
                     : null
                 }
                 onReload={(itemSlug) => reload.mutate(itemSlug)}
-                onFire={(itemSlug, shots) =>
-                  fire.mutate({ itemSlug, shots })
-                }
+                onFire={(itemSlug, shots) => fire.mutate({ itemSlug, shots })}
                 onHeadShot={async () => {
                   await spendRisk.mutateAsync({
                     resourceSlug: "risk",
@@ -198,9 +191,7 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
                     : undefined
                 }
                 paladin={
-                  character.classSlug === "paladin"
-                    ? { smiteSlots }
-                    : undefined
+                  character.classSlug === "paladin" ? { smiteSlots } : undefined
                 }
                 onDivineSmiteResolved={invalidateState}
                 ranger={
@@ -212,6 +203,11 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
                     : undefined
                 }
                 onDreadAmbusherResolved={invalidateState}
+                cleric={
+                  character.classSlug === "cleric"
+                    ? { level: character.level }
+                    : undefined
+                }
               />
             ))}
           </ul>

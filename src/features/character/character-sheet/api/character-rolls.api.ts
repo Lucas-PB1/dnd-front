@@ -52,6 +52,7 @@ export type RollDamagePayload = {
   colossusSlayer?: boolean;
   dreadfulStrikes?: boolean;
   dreadAmbusher?: boolean;
+  divineStrike?: boolean;
 };
 
 export type RollSkillPayload = {

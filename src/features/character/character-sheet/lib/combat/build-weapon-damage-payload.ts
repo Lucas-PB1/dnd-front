@@ -24,6 +24,7 @@ export type WeaponDamageOptions = {
   psiStrike?: boolean;
   monsterSlayer?: boolean;
   grazeMiss?: boolean;
+  divineStrike?: boolean;
 };
 
 /** Builds the shared damage/crit payload for weapon attack rolls. */
@@ -37,7 +38,9 @@ export function buildWeaponDamagePayload(
     ...(options.critical ? { critical: true } : {}),
     ...(options.sightedReroll ? { sightedReroll: true } : {}),
     ...(sneak ? { sneakAttack: true } : {}),
-    ...(sneak && options.cunningStrikeEffects && options.cunningStrikeEffects.length > 0
+    ...(sneak &&
+    options.cunningStrikeEffects &&
+    options.cunningStrikeEffects.length > 0
       ? { cunningStrikeEffects: options.cunningStrikeEffects }
       : {}),
     ...(sneak && options.poisonousSneak ? { poisonousSneak: true } : {}),
@@ -63,5 +66,6 @@ export function buildWeaponDamagePayload(
     ...(options.psiStrike ? { psiStrike: true } : {}),
     ...(options.monsterSlayer ? { monsterSlayer: true } : {}),
     ...(options.grazeMiss ? { grazeMiss: true } : {}),
+    ...(options.divineStrike ? { divineStrike: true } : {}),
   };
 }

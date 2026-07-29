@@ -57,4 +57,18 @@ describe("buildWeaponDamagePayload", () => {
       mode: "melee",
     });
   });
+
+  it("includes Cleric Divine Strike when selected", () => {
+    expect(
+      buildWeaponDamagePayload({
+        itemSlug: "mace",
+        mode: "melee",
+        divineStrike: true,
+      }),
+    ).toEqual({
+      itemSlug: "mace",
+      mode: "melee",
+      divineStrike: true,
+    });
+  });
 });

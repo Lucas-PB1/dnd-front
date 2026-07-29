@@ -425,3 +425,33 @@ export async function executeRangerTableAction(
     },
   );
 }
+
+export type ClericTableActionSlug =
+  | "divine-spark-heal"
+  | "divine-spark-damage"
+  | "turn-undead"
+  | "divine-intervention"
+  | "preserve-life"
+  | "radiance-of-dawn"
+  | "warding-flare"
+  | "crown-of-light"
+  | "tricksters-blessing"
+  | "invoke-duplicity"
+  | "guided-strike"
+  | "war-priest"
+  | "war-gods-blessing";
+
+export async function executeClericTableAction(
+  accessToken: string,
+  characterId: string,
+  actionSlug: ClericTableActionSlug,
+) {
+  return gameFetch<TableActionResult>(
+    `/characters/${characterId}/cleric/table-action`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify({ actionSlug }),
+    },
+  );
+}
