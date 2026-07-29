@@ -25,6 +25,9 @@ export async function rollCharacterAttack(
     automatic?: boolean;
     studiedAttack?: boolean;
     doorKick?: boolean;
+    steadyAim?: boolean;
+    strokeOfLuck?: boolean;
+    assassinate?: boolean;
   },
 ) {
   return gameFetch<CharacterRollResult>(
@@ -48,7 +51,15 @@ export async function rollCharacterDamage(
     divineFury?: boolean;
     psiStrike?: boolean;
     monsterSlayer?: boolean;
-    precisionAttack?: boolean;
+    sneakAttack?: boolean;
+    cunningStrikeEffects?: string[];
+    poisonousSneak?: boolean;
+    assassinSurprise?: boolean;
+    assassinDeathStrike?: boolean;
+    assassinPoisonFailedSave?: boolean;
+    divineSmite?: boolean;
+    smiteSlotLevel?: number;
+    smiteVsUndeadOrFiend?: boolean;
   },
 ) {
   return gameFetch<CharacterRollResult>(
@@ -61,7 +72,11 @@ export async function rollCharacterDamage(
 export async function rollCharacterSkill(
   accessToken: string,
   characterId: string,
-  payload: { skillSlug: string; advantage?: AdvantageMode },
+  payload: {
+    skillSlug: string;
+    advantage?: AdvantageMode;
+    strokeOfLuck?: boolean;
+  },
 ) {
   return gameFetch<CharacterRollResult>(
     `/characters/${characterId}/rolls/skill`,
@@ -77,6 +92,7 @@ export async function rollCharacterSavingThrow(
     abilitySlug: string;
     advantage?: AdvantageMode;
     indomitable?: boolean;
+    strokeOfLuck?: boolean;
   },
 ) {
   return gameFetch<CharacterRollResult>(
@@ -89,7 +105,7 @@ export async function rollCharacterSavingThrow(
 export async function rollCharacterInitiative(
   accessToken: string,
   characterId: string,
-  payload: { advantage?: AdvantageMode } = {},
+  payload: { advantage?: AdvantageMode; strokeOfLuck?: boolean } = {},
 ) {
   return gameFetch<CharacterRollResult>(
     `/characters/${characterId}/rolls/initiative`,

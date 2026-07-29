@@ -83,6 +83,17 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
     });
   };
 
+  const smiteSlots =
+    character.classSlug === "paladin"
+      ? Object.entries(stateQuery.data?.spellSlotsRemaining ?? {})
+          .map(([level, remaining]) => ({
+            level: Number(level),
+            remaining: Number(remaining),
+          }))
+          .filter((slot) => slot.level >= 1 && slot.remaining > 0)
+          .sort((a, b) => a.level - b.level)
+      : [];
+
   const spendRisk = useSpendClassResource(character.id);
 
   const reload = useMutation({
@@ -178,6 +189,20 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
                     amount: 1,
                   });
                 }}
+                rogue={
+                  character.classSlug === "rogue"
+                    ? {
+                        level: character.level,
+                        subclassSlug: character.subclassSlug,
+                      }
+                    : undefined
+                }
+                paladin={
+                  character.classSlug === "paladin"
+                    ? { smiteSlots }
+                    : undefined
+                }
+                onDivineSmiteResolved={invalidateState}
               />
             ))}
           </ul>

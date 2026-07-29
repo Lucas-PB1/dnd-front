@@ -112,6 +112,8 @@ export type WeaponAttackSummary = {
   hasRecoil?: boolean;
   rageDamageBonus?: number;
   brutalStrikeDice?: string | null;
+  sneakAttackEligible?: boolean;
+  martialArtsDie?: string | null;
 };
 
 export type EquipmentWarning = {

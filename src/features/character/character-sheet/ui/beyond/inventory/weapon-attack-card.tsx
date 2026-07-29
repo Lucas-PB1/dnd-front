@@ -24,7 +24,24 @@ type WeaponAttackCardProps = {
   canPsiStrike?: boolean;
   canMonsterSlayer?: boolean;
   onSpendPsi?: () => void | Promise<void>;
+  rogue?: {
+    level: number;
+    subclassSlug?: string | null;
+  };
+  paladin?: {
+    smiteSlots: { level: number; remaining: number }[];
+  };
+  onDivineSmiteResolved?: () => void | Promise<void>;
 };
+
+const CUNNING_STRIKES = [
+  { slug: "poison", label: "Envenenar", cost: 1, level: 5 },
+  { slug: "withdraw", label: "Retirada", cost: 1, level: 5 },
+  { slug: "trip", label: "Tropeço", cost: 1, level: 5 },
+  { slug: "daze", label: "Aturdir", cost: 2, level: 14 },
+  { slug: "knock-out", label: "Nocaute", cost: 6, level: 14 },
+  { slug: "obscure", label: "Obscurecer", cost: 3, level: 14 },
+] as const;
 
 const ADVANTAGE_OPTIONS: { id: AdvantageMode; label: string }[] = [
   { id: "normal", label: "Normal" },
@@ -95,6 +112,9 @@ export function WeaponAttackCard({
   canPsiStrike = false,
   canMonsterSlayer = false,
   onSpendPsi,
+  rogue,
+  paladin,
+  onDivineSmiteResolved,
 }: WeaponAttackCardProps) {
   const rolls = useSheetRolls();
   const busy = rolls.attack.isPending || rolls.damage.isPending;
@@ -104,9 +124,59 @@ export function WeaponAttackCard({
   const [automatic, setAutomatic] = useState(false);
   const [studiedAttack, setStudiedAttack] = useState(false);
   const [doorKick, setDoorKick] = useState(false);
+  const [sneakAttack, setSneakAttack] = useState(false);
+  const [steadyAim, setSteadyAim] = useState(false);
+  const [poisonousSneak, setPoisonousSneak] = useState(false);
+  const [assassinSurprise, setAssassinSurprise] = useState(false);
+  const [assassinate, setAssassinate] = useState(false);
+  const [assassinDeathStrike, setAssassinDeathStrike] = useState(false);
+  const [assassinPoisonFailedSave, setAssassinPoisonFailedSave] =
+    useState(false);
+  const [strokeOfLuck, setStrokeOfLuck] = useState(false);
+  const [cunningStrikeEffects, setCunningStrikeEffects] = useState<string[]>([]);
+  const smiteSlots = (paladin?.smiteSlots ?? []).filter(
+    (slot) => slot.remaining > 0,
+  );
+  const canDivineSmite = attack.mode === "melee" && smiteSlots.length > 0;
+  const [smiteSlotLevel, setSmiteSlotLevel] = useState<number | null>(null);
+  const [smiteVsUndeadOrFiend, setSmiteVsUndeadOrFiend] = useState(false);
+  const selectedSmiteSlot =
+    smiteSlotLevel ?? (smiteSlots.length > 0 ? smiteSlots[0].level : null);
   const hasChamber = attack.reloadCapacity != null;
   const shotsLeft =
     chamberRemaining ?? (hasChamber ? attack.reloadCapacity : null);
+  const canSneakAttack = Boolean(rogue && attack.sneakAttackEligible);
+  const maxCunningEffects = (rogue?.level ?? 0) >= 11 ? 2 : 1;
+  const availableCunningStrikes = rogue
+    ? [
+        ...CUNNING_STRIKES.filter((effect) => rogue.level >= effect.level),
+        ...(rogue.subclassSlug === "thief" && rogue.level >= 9
+          ? [
+              {
+                slug: "hidden-attack",
+                label: "Ataque Escondido",
+                cost: 1,
+                level: 9,
+              },
+            ]
+          : []),
+        ...(rogue.subclassSlug === "arachnoid-stalker" && rogue.level >= 17
+          ? [{ slug: "paralyze", label: "Paralisar", cost: 4, level: 17 }]
+          : []),
+      ]
+    : [];
+
+  function toggleCunningStrike(slug: string) {
+    setCunningStrikeEffects((current) => {
+      if (current.includes(slug)) {
+        return current.filter((item) => item !== slug);
+      }
+      if (current.length >= maxCunningEffects) {
+        return [...current.slice(1), slug];
+      }
+      return [...current, slug];
+    });
+  }
 
   return (
     <li className="flex gap-3 rounded-lg border border-border/70 bg-card/60 px-3 py-2.5">
@@ -230,7 +300,160 @@ export function WeaponAttackCard({
               1ª rodada
             </button>
           ) : null}
+          {rogue && rogue.level >= 3 ? (
+            <button
+              type="button"
+              className={cn(
+                "rounded-md border px-2 py-0.5 text-[0.7rem] font-medium transition-colors",
+                steadyAim
+                  ? "border-primary/50 bg-primary/15 text-primary"
+                  : "border-border/70 bg-muted/20 text-muted-foreground hover:bg-muted/40",
+              )}
+              aria-pressed={steadyAim}
+              onClick={() => setSteadyAim((value) => !value)}
+            >
+              Mira Firme
+            </button>
+          ) : null}
+          {rogue?.level === 20 ? (
+            <button
+              type="button"
+              className={cn(
+                "rounded-md border px-2 py-0.5 text-[0.7rem] font-medium transition-colors",
+                strokeOfLuck
+                  ? "border-primary/50 bg-primary/15 text-primary"
+                  : "border-border/70 bg-muted/20 text-muted-foreground hover:bg-muted/40",
+              )}
+              aria-pressed={strokeOfLuck}
+              title="Use após falhar: transforma o resultado do d20 em 20 e gasta o uso"
+              onClick={() => setStrokeOfLuck((value) => !value)}
+            >
+              Golpe de Sorte
+            </button>
+          ) : null}
+          {rogue?.subclassSlug === "assassin" ? (
+            <button
+              type="button"
+              className={cn(
+                "rounded-md border px-2 py-0.5 text-[0.7rem] font-medium transition-colors",
+                assassinate
+                  ? "border-primary/50 bg-primary/15 text-primary"
+                  : "border-border/70 bg-muted/20 text-muted-foreground hover:bg-muted/40",
+              )}
+              aria-pressed={assassinate}
+              title="Primeira rodada, contra criatura que ainda não agiu"
+              onClick={() => setAssassinate((value) => !value)}
+            >
+              Assassinar
+            </button>
+          ) : null}
         </div>
+
+        {canSneakAttack ? (
+          <div className="mt-2 rounded-md border border-border/60 bg-muted/15 p-2">
+            <div className="flex flex-wrap gap-1">
+              <button
+                type="button"
+                className={cn(
+                  "rounded-md border px-2 py-0.5 text-[0.7rem] font-medium",
+                  sneakAttack
+                    ? "border-secondary/50 bg-secondary/15 text-secondary"
+                    : "border-border/70 text-muted-foreground",
+                )}
+                aria-pressed={sneakAttack}
+                onClick={() => setSneakAttack((value) => !value)}
+              >
+                Ataque Furtivo
+              </button>
+              {rogue?.subclassSlug === "arachnoid-stalker" ? (
+                <button
+                  type="button"
+                  className={cn(
+                    "rounded-md border px-2 py-0.5 text-[0.7rem] font-medium",
+                    poisonousSneak
+                      ? "border-secondary/50 bg-secondary/15 text-secondary"
+                      : "border-border/70 text-muted-foreground",
+                  )}
+                  aria-pressed={poisonousSneak}
+                  onClick={() => setPoisonousSneak((value) => !value)}
+                >
+                  Golpe Venenoso (d8)
+                </button>
+              ) : null}
+              {rogue?.subclassSlug === "assassin" ? (
+                <>
+                  <button
+                    type="button"
+                    className={cn(
+                      "rounded-md border px-2 py-0.5 text-[0.7rem] font-medium",
+                      assassinSurprise
+                        ? "border-secondary/50 bg-secondary/15 text-secondary"
+                        : "border-border/70 text-muted-foreground",
+                    )}
+                    aria-pressed={assassinSurprise}
+                    onClick={() => setAssassinSurprise((value) => !value)}
+                  >
+                    Golpe Surpreendente
+                  </button>
+                  {rogue.level >= 17 ? (
+                    <button
+                      type="button"
+                      className={cn(
+                        "rounded-md border px-2 py-0.5 text-[0.7rem] font-medium",
+                        assassinDeathStrike
+                          ? "border-secondary/50 bg-secondary/15 text-secondary"
+                          : "border-border/70 text-muted-foreground",
+                      )}
+                      aria-pressed={assassinDeathStrike}
+                      title="Marque quando o alvo falhar na salvaguarda de Golpe Mortal"
+                      onClick={() => setAssassinDeathStrike((value) => !value)}
+                    >
+                      Golpe Mortal falhou
+                    </button>
+                  ) : null}
+                  {rogue.level >= 13 &&
+                  cunningStrikeEffects.includes("poison") ? (
+                    <button
+                      type="button"
+                      className={cn(
+                        "rounded-md border px-2 py-0.5 text-[0.7rem] font-medium",
+                        assassinPoisonFailedSave
+                          ? "border-secondary/50 bg-secondary/15 text-secondary"
+                          : "border-border/70 text-muted-foreground",
+                      )}
+                      aria-pressed={assassinPoisonFailedSave}
+                      onClick={() =>
+                        setAssassinPoisonFailedSave((value) => !value)
+                      }
+                    >
+                      Envenenar falhou (+2d6)
+                    </button>
+                  ) : null}
+                </>
+              ) : null}
+            </div>
+            {sneakAttack && availableCunningStrikes.length > 0 ? (
+              <div className="mt-1.5 flex flex-wrap gap-1">
+                {availableCunningStrikes.map((effect) => (
+                  <button
+                    key={effect.slug}
+                    type="button"
+                    className={cn(
+                      "rounded border px-1.5 py-0.5 text-[0.65rem]",
+                      cunningStrikeEffects.includes(effect.slug)
+                        ? "border-primary/50 bg-primary/10 text-primary"
+                        : "border-border/60 text-muted-foreground",
+                    )}
+                    aria-pressed={cunningStrikeEffects.includes(effect.slug)}
+                    onClick={() => toggleCunningStrike(effect.slug)}
+                  >
+                    {effect.label} −{effect.cost}d
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
 
         <div className="mt-2 flex flex-wrap gap-2">
           <Button
@@ -249,7 +472,11 @@ export function WeaponAttackCard({
                 automatic: automatic || undefined,
                 studiedAttack: studiedAttack || undefined,
                 doorKick: doorKick || undefined,
+                steadyAim: steadyAim || undefined,
+                strokeOfLuck: strokeOfLuck || undefined,
+                assassinate: assassinate || undefined,
               });
+              setStrokeOfLuck(false);
             }}
           >
             Atacar
@@ -267,6 +494,19 @@ export function WeaponAttackCard({
                   attack.masteryActive && attack.masterySlug === "sighted"
                     ? true
                     : undefined,
+                sneakAttack: sneakAttack || undefined,
+                cunningStrikeEffects:
+                  sneakAttack && cunningStrikeEffects.length > 0
+                    ? cunningStrikeEffects
+                    : undefined,
+                poisonousSneak:
+                  sneakAttack && poisonousSneak ? true : undefined,
+                assassinSurprise:
+                  sneakAttack && assassinSurprise ? true : undefined,
+                assassinDeathStrike:
+                  sneakAttack && assassinDeathStrike ? true : undefined,
+                assassinPoisonFailedSave:
+                  sneakAttack && assassinPoisonFailedSave ? true : undefined,
               })
             }
           >
@@ -282,11 +522,73 @@ export function WeaponAttackCard({
                 itemSlug: attack.itemSlug,
                 mode: attack.mode,
                 critical: true,
+                sneakAttack: sneakAttack || undefined,
+                cunningStrikeEffects:
+                  sneakAttack && cunningStrikeEffects.length > 0
+                    ? cunningStrikeEffects
+                    : undefined,
+                poisonousSneak:
+                  sneakAttack && poisonousSneak ? true : undefined,
+                assassinSurprise:
+                  sneakAttack && assassinSurprise ? true : undefined,
+                assassinDeathStrike:
+                  sneakAttack && assassinDeathStrike ? true : undefined,
+                assassinPoisonFailedSave:
+                  sneakAttack && assassinPoisonFailedSave ? true : undefined,
               })
             }
           >
             Crítico
           </Button>
+          {canDivineSmite && selectedSmiteSlot != null ? (
+            <span className="inline-flex items-center gap-1 rounded-md border border-border/70 px-1.5 py-0.5">
+              <select
+                value={selectedSmiteSlot}
+                onChange={(event) =>
+                  setSmiteSlotLevel(Number(event.target.value))
+                }
+                className="rounded-md border border-border bg-background px-1 py-0.5 text-xs"
+                aria-label="Círculo do espaço de magia para a Destruição Divina"
+              >
+                {smiteSlots.map((slot) => (
+                  <option key={slot.level} value={slot.level}>
+                    {slot.level}º ({slot.remaining})
+                  </option>
+                ))}
+              </select>
+              <label className="flex items-center gap-1 text-[0.7rem] text-muted-foreground">
+                <input
+                  type="checkbox"
+                  checked={smiteVsUndeadOrFiend}
+                  onChange={(event) =>
+                    setSmiteVsUndeadOrFiend(event.target.checked)
+                  }
+                />
+                +1d8
+              </label>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                disabled={busy}
+                title="Destruição Divina: gasta um espaço de magia e adiciona 2d8 Radiante (+1d8 por círculo acima do 1º)"
+                onClick={() =>
+                  rolls.damage.mutate(
+                    {
+                      itemSlug: attack.itemSlug,
+                      mode: attack.mode,
+                      divineSmite: true,
+                      smiteSlotLevel: selectedSmiteSlot,
+                      smiteVsUndeadOrFiend: smiteVsUndeadOrFiend || undefined,
+                    },
+                    { onSuccess: () => onDivineSmiteResolved?.() },
+                  )
+                }
+              >
+                Golpe Divino
+              </Button>
+            </span>
+          ) : null}
           {attack.brutalStrikeDice ? (
             <Button
               type="button"

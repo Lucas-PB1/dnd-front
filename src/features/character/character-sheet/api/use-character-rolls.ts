@@ -41,6 +41,9 @@ export function useCharacterRolls(
       automatic?: boolean;
       studiedAttack?: boolean;
       doorKick?: boolean;
+      steadyAim?: boolean;
+      strokeOfLuck?: boolean;
+      assassinate?: boolean;
     }) => run(rollCharacterAttack, args),
     onSuccess: onResult,
   });
@@ -57,13 +60,25 @@ export function useCharacterRolls(
       divineFury?: boolean;
       psiStrike?: boolean;
       monsterSlayer?: boolean;
-      precisionAttack?: boolean;
+      sneakAttack?: boolean;
+      cunningStrikeEffects?: string[];
+      poisonousSneak?: boolean;
+      assassinSurprise?: boolean;
+      assassinDeathStrike?: boolean;
+      assassinPoisonFailedSave?: boolean;
+      divineSmite?: boolean;
+      smiteSlotLevel?: number;
+      smiteVsUndeadOrFiend?: boolean;
     }) => run(rollCharacterDamage, args),
     onSuccess: onResult,
   });
 
   const skill = useMutation({
-    mutationFn: (args: { skillSlug: string; advantage?: AdvantageMode }) =>
+    mutationFn: (args: {
+      skillSlug: string;
+      advantage?: AdvantageMode;
+      strokeOfLuck?: boolean;
+    }) =>
       run(rollCharacterSkill, args),
     onSuccess: onResult,
   });
@@ -73,13 +88,17 @@ export function useCharacterRolls(
       abilitySlug: string;
       advantage?: AdvantageMode;
       indomitable?: boolean;
+      strokeOfLuck?: boolean;
     }) =>
       run(rollCharacterSavingThrow, args),
     onSuccess: onResult,
   });
 
   const initiative = useMutation({
-    mutationFn: (args: { advantage?: AdvantageMode } = {}) =>
+    mutationFn: (args: {
+      advantage?: AdvantageMode;
+      strokeOfLuck?: boolean;
+    } = {}) =>
       run(rollCharacterInitiative, args),
     onSuccess: onResult,
   });

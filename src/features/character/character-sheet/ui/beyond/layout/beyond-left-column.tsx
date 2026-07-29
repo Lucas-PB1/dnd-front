@@ -36,6 +36,7 @@ export function BeyondLeftColumn({
   const speciesDetail = useSpeciesDetail(character.speciesSlug, true);
   const rolls = useSheetRolls();
   const [useIndomitable, setUseIndomitable] = useState(false);
+  const [useStrokeOfLuck, setUseStrokeOfLuck] = useState(false);
   const hasIndomitable =
     character.classSlug === "fighter" && character.level >= 9;
   const proficient = new Set(
@@ -44,6 +45,10 @@ export function BeyondLeftColumn({
       character.featOptions,
     ),
   );
+  if (character.classSlug === "rogue" && character.level >= 15) {
+    proficient.add("sabedoria");
+    proficient.add("carisma");
+  }
   const pb = character.proficiencyBonus;
   const scores = sheetAbilityScores(character);
 
@@ -59,6 +64,20 @@ export function BeyondLeftColumn({
               onChange={(event) => setUseIndomitable(event.target.checked)}
             />
             Indomável: rerrolar com +{character.level}
+          </label>
+        ) : null}
+        {character.classSlug === "rogue" && character.level >= 20 ? (
+          <label className="mb-1.5 block text-[0.68rem] text-muted-foreground">
+            <input
+              className="mr-1 align-middle"
+              type="checkbox"
+              checked={useStrokeOfLuck}
+              onChange={(event) => {
+                setUseStrokeOfLuck(event.target.checked);
+                if (event.target.checked) setUseIndomitable(false);
+              }}
+            />
+            Golpe de Sorte: transformar falha em 20
           </label>
         ) : null}
         {classDetail.isPending ? (
@@ -78,8 +97,10 @@ export function BeyondLeftColumn({
                       rolls.savingThrow.mutate({
                         abilitySlug: slug,
                         indomitable: useIndomitable || undefined,
+                        strokeOfLuck: useStrokeOfLuck || undefined,
                       });
                       setUseIndomitable(false);
+                      setUseStrokeOfLuck(false);
                     }}
                     className={cn(
                       "flex w-full items-center gap-2 rounded-md px-2 py-1 text-left text-sm",

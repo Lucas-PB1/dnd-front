@@ -231,6 +231,19 @@ export type PsiWarriorActionSlug =
   | "energy-bulwark"
   | "telekinetic-master";
 
+export type RogueTableActionSlug =
+  | "psychic-blade-main"
+  | "psychic-blade-bonus"
+  | "psi-bolstered-knack"
+  | "guided-strike"
+  | "psychic-whispers"
+  | "psychic-teleport"
+  | "psychic-veil"
+  | "rend-mind"
+  | "spell-thief"
+  | "arachnoid-web"
+  | "magic-device-charge";
+
 export async function activateSecondWind(
   accessToken: string,
   characterId: string,
@@ -319,6 +332,74 @@ export async function castDungeonPrecaution(
     {
       method: "POST",
       body: JSON.stringify({ spellSlug }),
+    },
+  );
+}
+
+export async function executeRogueTableAction(
+  accessToken: string,
+  characterId: string,
+  payload: {
+    actionSlug: RogueTableActionSlug;
+    checkTotal?: number;
+    dc?: number;
+    usePsiDie?: boolean;
+  },
+) {
+  return gameFetch<FighterTableActionResult>(
+    `/characters/${characterId}/rogue/table-action`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
+export type MonkTableActionSlug =
+  | "flurry-of-blows"
+  | "patient-defense"
+  | "step-of-the-wind"
+  | "stunning-strike"
+  | "open-hand-technique"
+  | "elemental-blast"
+  | "hand-of-healing"
+  | "hand-of-harm"
+  | "shadow-step";
+
+export async function executeMonkTableAction(
+  accessToken: string,
+  characterId: string,
+  actionSlug: MonkTableActionSlug,
+) {
+  return gameFetch<FighterTableActionResult>(
+    `/characters/${characterId}/monk/table-action`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify({ actionSlug }),
+    },
+  );
+}
+
+export type PaladinTableActionSlug =
+  | "lay-on-hands"
+  | "cure-poison"
+  | "divine-sense"
+  | "abjure-enemies"
+  | "oath-channel";
+
+export async function executePaladinTableAction(
+  accessToken: string,
+  characterId: string,
+  payload: { actionSlug: PaladinTableActionSlug; amount?: number },
+) {
+  return gameFetch<FighterTableActionResult>(
+    `/characters/${characterId}/paladin/table-action`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
     },
   );
 }

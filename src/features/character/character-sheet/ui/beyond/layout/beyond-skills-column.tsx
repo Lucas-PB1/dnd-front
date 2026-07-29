@@ -4,6 +4,7 @@ import {
   AcademicCapIcon,
   PencilSquareIcon,
 } from "@heroicons/react/24/outline";
+import { useState } from "react";
 
 import type { AbilityScores, CharacterDetail } from "@/entities/character/types";
 import {
@@ -44,6 +45,7 @@ export function BeyondSkillsColumn({
   onEdit,
 }: BeyondSkillsColumnProps) {
   const rolls = useSheetRolls();
+  const [useStrokeOfLuck, setUseStrokeOfLuck] = useState(false);
   const scores = sheetAbilityScores(character);
   const skillSources = {
     classSkillSlugs: character.classSkillSlugs,
@@ -100,6 +102,17 @@ export function BeyondSkillsColumn({
       }
       flush
     >
+      {character.classSlug === "rogue" && character.level >= 20 ? (
+        <label className="block border-b border-border/50 px-3 py-1.5 text-[0.68rem] text-muted-foreground">
+          <input
+            className="mr-1 align-middle"
+            type="checkbox"
+            checked={useStrokeOfLuck}
+            onChange={(event) => setUseStrokeOfLuck(event.target.checked)}
+          />
+          Golpe de Sorte: transformar falha em 20
+        </label>
+      ) : null}
       <ul className="pb-1">
         {rows.map((row, index) => {
           const showDivider =
@@ -118,7 +131,13 @@ export function BeyondSkillsColumn({
               <SkillRow
                 {...row}
                 pending={rolls.skill.isPending}
-                onRoll={() => rolls.skill.mutate({ skillSlug: row.skill.slug })}
+                onRoll={() => {
+                  rolls.skill.mutate({
+                    skillSlug: row.skill.slug,
+                    strokeOfLuck: useStrokeOfLuck || undefined,
+                  });
+                  setUseStrokeOfLuck(false);
+                }}
               />
             </li>
           );

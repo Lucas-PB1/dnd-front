@@ -23,6 +23,9 @@ import {
 import type { ResourceDieRoll } from "@/entities/character/session-types";
 import { CombatBarbarianPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-barbarian-panel";
 import { CombatFighterPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-fighter-panel";
+import { CombatRoguePanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-rogue-panel";
+import { CombatMonkPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-monk-panel";
+import { CombatPaladinPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-paladin-panel";
 import { CombatClassResourcesPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-class-resources-panel";
 import { CombatEquipmentWarnings } from "@/features/character/character-sheet/ui/beyond/combat/combat-equipment-warnings";
 import {
@@ -257,6 +260,45 @@ export function BeyondCombatHub({
         attacksPerAction={character.attacksPerAction}
         combatNotes={
           character.classSlug === "fighter"
+            ? character.classCombatNotes
+            : undefined
+        }
+        state={state}
+      />
+
+      <CombatRoguePanel
+        characterId={characterId}
+        classSlug={character.classSlug}
+        subclassSlug={character.subclassSlug}
+        level={character.level}
+        combatNotes={
+          character.classSlug === "rogue"
+            ? character.classCombatNotes
+            : undefined
+        }
+        state={state}
+      />
+
+      <CombatMonkPanel
+        characterId={characterId}
+        classSlug={character.classSlug}
+        subclassSlug={character.subclassSlug}
+        level={character.level}
+        combatNotes={
+          character.classSlug === "monk"
+            ? character.classCombatNotes
+            : undefined
+        }
+        state={state}
+      />
+
+      <CombatPaladinPanel
+        characterId={characterId}
+        classSlug={character.classSlug}
+        subclassSlug={character.subclassSlug}
+        level={character.level}
+        combatNotes={
+          character.classSlug === "paladin"
             ? character.classCombatNotes
             : undefined
         }
