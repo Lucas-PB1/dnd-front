@@ -151,9 +151,14 @@ export function useStepClassSkills(
     return items
       .filter((weapon) => weapon.mastery)
       .filter((weapon) => {
-        if (masteryEligibility !== "melee") return true;
         const props = weapon.propertyDetails.map((p) => p.slug);
-        return !(props.includes("ammunition") && !props.includes("thrown"));
+        if (masteryEligibility === "melee") {
+          return !(props.includes("ammunition") && !props.includes("thrown"));
+        }
+        if (masteryEligibility === "ranged") {
+          return props.includes("ammunition");
+        }
+        return true;
       })
       .filter((weapon) =>
         isWeaponProficient(

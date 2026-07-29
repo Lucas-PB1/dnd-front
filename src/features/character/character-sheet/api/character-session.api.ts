@@ -3,10 +3,13 @@ import type {
   CastSpellPayload,
   CastSpellResult,
   CharacterState,
+  GunslingerManeuver,
   PatchCharacterStatePayload,
   RestPayload,
   RestResult,
   UseClassResourcePayload,
+  UseClassResourceResult,
+  UseManeuverResult,
 } from "@/entities/character/session-types";
 
 export const sessionKeys = {
@@ -71,12 +74,73 @@ export async function spendClassResource(
   characterId: string,
   payload: UseClassResourcePayload,
 ) {
-  return gameFetch<CharacterState>(
+  return gameFetch<UseClassResourceResult>(
     `/characters/${characterId}/resources/use`,
     accessToken,
     {
       method: "POST",
       body: JSON.stringify(payload),
     },
+  );
+}
+
+export async function listManeuvers(accessToken: string, characterId: string) {
+  return gameFetch<GunslingerManeuver[]>(
+    `/characters/${characterId}/maneuvers`,
+    accessToken,
+  );
+}
+
+export async function useManeuver(
+  accessToken: string,
+  characterId: string,
+  maneuverSlug: string,
+) {
+  return gameFetch<UseManeuverResult>(
+    `/characters/${characterId}/maneuvers/use`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify({ maneuverSlug }),
+    },
+  );
+}
+
+export async function reloadFirearm(
+  accessToken: string,
+  characterId: string,
+  itemSlug: string,
+) {
+  return gameFetch<CharacterState>(
+    `/characters/${characterId}/firearms/reload`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify({ itemSlug }),
+    },
+  );
+}
+
+export async function fireChamber(
+  accessToken: string,
+  characterId: string,
+  itemSlug: string,
+  shots = 1,
+) {
+  return gameFetch<CharacterState>(
+    `/characters/${characterId}/firearms/fire`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify({ itemSlug, shots }),
+    },
+  );
+}
+
+export async function recoverRisk(accessToken: string, characterId: string) {
+  return gameFetch<CharacterState>(
+    `/characters/${characterId}/resources/risk/recover`,
+    accessToken,
+    { method: "POST", body: "{}" },
   );
 }

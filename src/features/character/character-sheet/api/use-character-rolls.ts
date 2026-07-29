@@ -38,6 +38,7 @@ export function useCharacterRolls(
       itemSlug: string;
       mode: "melee" | "ranged";
       advantage?: AdvantageMode;
+      automatic?: boolean;
     }) => run(rollCharacterAttack, args),
     onSuccess: onResult,
   });
@@ -48,6 +49,8 @@ export function useCharacterRolls(
       mode: "melee" | "ranged";
       critical?: boolean;
       grazeMiss?: boolean;
+      headShot?: boolean;
+      sightedReroll?: boolean;
     }) => run(rollCharacterDamage, args),
     onSuccess: onResult,
   });

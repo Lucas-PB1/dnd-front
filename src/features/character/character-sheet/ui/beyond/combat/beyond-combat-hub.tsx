@@ -20,8 +20,13 @@ import {
   usePatchCharacterState,
   useSpendClassResource,
 } from "@/features/character/character-sheet/api/use-character-state";
+import type { ResourceDieRoll } from "@/entities/character/session-types";
 import { CombatClassResourcesPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-class-resources-panel";
 import { CombatEquipmentWarnings } from "@/features/character/character-sheet/ui/beyond/combat/combat-equipment-warnings";
+import {
+  CombatManeuversPanel,
+  useRecoverRisk,
+} from "@/features/character/character-sheet/ui/beyond/combat/combat-maneuvers-panel";
 import { CombatMetric } from "@/features/character/character-sheet/ui/beyond/combat/combat-metric";
 import { CombatStatusEditor } from "@/features/character/character-sheet/ui/beyond/combat/combat-status-editor";
 import { DeathSaveTrack } from "@/features/character/character-sheet/ui/beyond/combat/death-save-track";
@@ -42,9 +47,13 @@ export function BeyondCombatHub({
   const stateQuery = useCharacterState(characterId);
   const patchState = usePatchCharacterState(characterId);
   const spendResource = useSpendClassResource(characterId);
+  const recoverRiskMutation = useRecoverRisk(characterId);
   const conditionsCatalog = useConditions();
   const rolls = useSheetRolls();
 
+  const [lastRiskRoll, setLastRiskRoll] = useState<ResourceDieRoll | null>(
+    null,
+  );
   const [editingStatus, setEditingStatus] = useState(false);
   const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
   const [tempHpDraft, setTempHpDraft] = useState("");
@@ -203,10 +212,32 @@ export function BeyondCombatHub({
 
       <CombatClassResourcesPanel
         resources={classResources}
-        isPending={spendResource.isPending}
+        isPending={
+          spendResource.isPending || recoverRiskMutation.isPending
+        }
         isError={spendResource.isError}
         error={spendResource.error}
-        onSpend={(resourceSlug) => spendResource.mutate({ resourceSlug })}
+        lastRoll={lastRiskRoll}
+        canRecoverRisk={
+          character.classSlug === "gunslinger" && character.level >= 15
+        }
+        onRecoverRisk={() => recoverRiskMutation.mutate()}
+        onSpend={(resourceSlug) => {
+          spendResource.mutate(
+            { resourceSlug },
+            {
+              onSuccess: (result) => {
+                if (result?.roll) setLastRiskRoll(result.roll);
+              },
+            },
+          );
+        }}
+      />
+
+      <CombatManeuversPanel
+        characterId={characterId}
+        classSlug={character.classSlug}
+        level={character.level}
       />
 
       {editingStatus ? (

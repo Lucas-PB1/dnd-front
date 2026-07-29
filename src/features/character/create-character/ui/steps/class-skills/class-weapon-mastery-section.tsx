@@ -35,7 +35,12 @@ export function ClassWeaponMasterySection({
     >
       <p className="text-xs text-muted-foreground">
         Escolha tipos de arma cuja propriedade de maestria você pode usar
-        {masteryEligibility === "melee" ? " (corpo a corpo)" : ""}.
+        {masteryEligibility === "melee"
+          ? " (corpo a corpo)"
+          : masteryEligibility === "ranged"
+            ? " (à distância)"
+            : ""}
+        .
       </p>
       <div className="grid gap-2 sm:grid-cols-2">
         {masterySlots.map((slot) => {

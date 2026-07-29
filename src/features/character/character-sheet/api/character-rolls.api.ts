@@ -12,6 +12,7 @@ export type CharacterRollResult = {
   critical?: boolean;
   rolls: number[];
   kept?: number[];
+  note?: string;
 };
 
 export async function rollCharacterAttack(
@@ -21,6 +22,7 @@ export async function rollCharacterAttack(
     itemSlug: string;
     mode: "melee" | "ranged";
     advantage?: AdvantageMode;
+    automatic?: boolean;
   },
 ) {
   return gameFetch<CharacterRollResult>(
@@ -38,6 +40,8 @@ export async function rollCharacterDamage(
     mode: "melee" | "ranged";
     critical?: boolean;
     grazeMiss?: boolean;
+    headShot?: boolean;
+    sightedReroll?: boolean;
   },
 ) {
   return gameFetch<CharacterRollResult>(

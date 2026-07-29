@@ -124,6 +124,9 @@ export function useSpendClassResource(characterId: string) {
         return handleUnauthorized(error);
       }
     },
-    onSuccess: setState,
+    onSuccess: (result) => {
+      if (!result) return;
+      setState(result.state);
+    },
   });
 }

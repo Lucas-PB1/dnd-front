@@ -103,6 +103,11 @@ export type WeaponAttackSummary = {
   masteryName?: string | null;
   nickUsesAttackAction?: boolean;
   grazeOnMissDamage?: number | null;
+  isFirearm?: boolean;
+  critThreshold?: number;
+  overkillExtraDice?: string | null;
+  reloadCapacity?: number | null;
+  hasRecoil?: boolean;
 };
 
 export type EquipmentWarning = {

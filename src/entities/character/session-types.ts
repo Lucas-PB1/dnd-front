@@ -27,6 +27,41 @@ export type CharacterState = {
   deathSaveSuccesses: number;
   deathSaveFailures: number;
   inspiration: boolean;
+  firearmChambers?: Record<string, number>;
+};
+
+export type ResourceDieRoll = {
+  resourceSlug: string;
+  faces: number;
+  value: number;
+  expression: string;
+};
+
+export type UseClassResourceResult = {
+  state: CharacterState;
+  roll?: ResourceDieRoll | null;
+};
+
+export type GunslingerManeuver = {
+  slug: string;
+  name: string;
+  description: string;
+  effectKind: string;
+  riskCost: number;
+  fromLevel: number;
+};
+
+export type UseManeuverResult = {
+  state: CharacterState;
+  maneuverSlug: string;
+  maneuverName: string;
+  effectKind: string;
+  riskRoll: ResourceDieRoll;
+  tempHpGained?: number;
+  missDamage?: number;
+  acBonus?: number;
+  checkBonus?: number;
+  note: string;
 };
 
 export type PatchCharacterStatePayload = {

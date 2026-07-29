@@ -14,6 +14,11 @@ import { cn } from "@/shared/lib/utils";
 
 type WeaponAttackCardProps = {
   attack: WeaponAttackSummary;
+  chamberRemaining?: number | null;
+  onReload?: (itemSlug: string) => void;
+  onFire?: (itemSlug: string, shots?: number) => void;
+  onHeadShot?: () => void | Promise<void>;
+  canHeadShot?: boolean;
 };
 
 const ADVANTAGE_OPTIONS: { id: AdvantageMode; label: string }[] = [
@@ -40,9 +45,20 @@ function AttackBadges({ attack }: { attack: WeaponAttackSummary }) {
         {ABILITY_SHORT[attack.abilitySlug] ?? attack.abilitySlug}
       </SheetChip>
       {!attack.proficient ? <SheetChip>sem prof.</SheetChip> : null}
+      {attack.isFirearm ? <SheetChip active>arma de fogo</SheetChip> : null}
+      {attack.hasRecoil ? <SheetChip>recuo</SheetChip> : null}
+      {attack.reloadCapacity != null ? (
+        <SheetChip>recarga {attack.reloadCapacity}</SheetChip>
+      ) : null}
+      {attack.critThreshold != null && attack.critThreshold < 20 ? (
+        <SheetChip active>crít. {attack.critThreshold}–20</SheetChip>
+      ) : null}
       {attack.greatWeaponFighting ? <SheetChip active>GWF</SheetChip> : null}
       {attack.omitsAbilityDamage ? (
         <SheetChip>sem mod. no dano</SheetChip>
+      ) : null}
+      {attack.overkillExtraDice ? (
+        <SheetChip active>Exagero +{attack.overkillExtraDice}</SheetChip>
       ) : null}
       {attack.masteryActive && attack.masteryName ? (
         <SheetChip active>{attack.masteryName}</SheetChip>
@@ -56,12 +72,23 @@ function AttackBadges({ attack }: { attack: WeaponAttackSummary }) {
   );
 }
 
-export function WeaponAttackCard({ attack }: WeaponAttackCardProps) {
+export function WeaponAttackCard({
+  attack,
+  chamberRemaining,
+  onReload,
+  onFire,
+  onHeadShot,
+  canHeadShot = false,
+}: WeaponAttackCardProps) {
   const rolls = useSheetRolls();
   const busy = rolls.attack.isPending || rolls.damage.isPending;
   const [advantage, setAdvantage] = useState<AdvantageMode>(
     attack.attackDisadvantage ? "disadvantage" : "normal",
   );
+  const [automatic, setAutomatic] = useState(false);
+  const hasChamber = attack.reloadCapacity != null;
+  const shotsLeft =
+    chamberRemaining ?? (hasChamber ? attack.reloadCapacity : null);
 
   return (
     <li className="flex gap-3 rounded-lg border border-border/70 bg-card/60 px-3 py-2.5">
@@ -81,6 +108,11 @@ export function WeaponAttackCard({ attack }: WeaponAttackCardProps) {
               </span>
             </p>
             <AttackBadges attack={attack} />
+            {hasChamber ? (
+              <p className="mt-1 text-[0.7rem] text-muted-foreground">
+                Câmara: {shotsLeft ?? "—"}/{attack.reloadCapacity}
+              </p>
+            ) : null}
           </div>
           <div className="flex shrink-0 gap-1.5">
             <p
@@ -135,6 +167,21 @@ export function WeaponAttackCard({ attack }: WeaponAttackCardProps) {
               {option.label}
             </button>
           ))}
+          {attack.masteryActive && attack.masterySlug === "automatic" ? (
+            <button
+              type="button"
+              className={cn(
+                "rounded-md border px-2 py-0.5 text-[0.7rem] font-medium transition-colors",
+                automatic
+                  ? "border-primary/50 bg-primary/15 text-primary"
+                  : "border-border/70 bg-muted/20 text-muted-foreground hover:bg-muted/40",
+              )}
+              aria-pressed={automatic}
+              onClick={() => setAutomatic((value) => !value)}
+            >
+              Automática
+            </button>
+          ) : null}
         </div>
 
         <div className="mt-2 flex flex-wrap gap-2">
@@ -143,13 +190,17 @@ export function WeaponAttackCard({ attack }: WeaponAttackCardProps) {
             size="sm"
             variant="secondary"
             disabled={busy}
-            onClick={() =>
+            onClick={() => {
+              if (hasChamber && onFire) {
+                onFire(attack.itemSlug, automatic ? 2 : 1);
+              }
               rolls.attack.mutate({
                 itemSlug: attack.itemSlug,
                 mode: attack.mode,
                 advantage,
-              })
-            }
+                automatic: automatic || undefined,
+              });
+            }}
           >
             Atacar
           </Button>
@@ -162,6 +213,10 @@ export function WeaponAttackCard({ attack }: WeaponAttackCardProps) {
               rolls.damage.mutate({
                 itemSlug: attack.itemSlug,
                 mode: attack.mode,
+                sightedReroll:
+                  attack.masteryActive && attack.masterySlug === "sighted"
+                    ? true
+                    : undefined,
               })
             }
           >
@@ -182,6 +237,26 @@ export function WeaponAttackCard({ attack }: WeaponAttackCardProps) {
           >
             Crítico
           </Button>
+          {canHeadShot ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              disabled={busy}
+              title="Gasta 3 Dados de Risco para usar Tiro na cabeça"
+              onClick={async () => {
+                if (onHeadShot) await onHeadShot();
+                rolls.damage.mutate({
+                  itemSlug: attack.itemSlug,
+                  mode: attack.mode,
+                  critical: true,
+                  headShot: true,
+                });
+              }}
+            >
+              Tiro na cabeça (3 Risco)
+            </Button>
+          ) : null}
           {attack.grazeOnMissDamage != null ? (
             <Button
               type="button"
@@ -197,6 +272,17 @@ export function WeaponAttackCard({ attack }: WeaponAttackCardProps) {
               }
             >
               Erro (Garantido · {formatSkillBonus(attack.grazeOnMissDamage)})
+            </Button>
+          ) : null}
+          {hasChamber && onReload ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={busy}
+              onClick={() => onReload(attack.itemSlug)}
+            >
+              Recarregar
             </Button>
           ) : null}
         </div>

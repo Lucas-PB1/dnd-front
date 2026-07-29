@@ -87,6 +87,9 @@ function RollResultBanner({
             {result.expression}
             {result.critical ? " · crítico" : ""}
           </p>
+          {result.note ? (
+            <p className="mt-0.5 text-[0.7rem] text-secondary">{result.note}</p>
+          ) : null}
           <p className="mt-0.5 text-[0.7rem] text-muted-foreground/90">{faces}</p>
         </div>
         <Button type="button" size="sm" variant="ghost" onClick={onDismiss}>

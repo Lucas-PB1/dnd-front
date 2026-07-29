@@ -55,9 +55,14 @@ export function LevelUpWeaponMastery({
     return items
       .filter((weapon) => weapon.mastery)
       .filter((weapon) => {
-        if (eligibility !== "melee") return true;
         const props = weapon.propertyDetails.map((p) => p.slug);
-        return !(props.includes("ammunition") && !props.includes("thrown"));
+        if (eligibility === "melee") {
+          return !(props.includes("ammunition") && !props.includes("thrown"));
+        }
+        if (eligibility === "ranged") {
+          return props.includes("ammunition");
+        }
+        return true;
       })
       .filter((weapon) =>
         isWeaponProficient(
@@ -92,7 +97,12 @@ export function LevelUpWeaponMastery({
       <p className="font-medium">Nova Maestria em Arma</p>
       <p className="text-muted-foreground">
         Escolha tipos de arma cuja propriedade de maestria você pode usar
-        {eligibility === "melee" ? " (corpo a corpo)" : ""}.
+        {eligibility === "melee"
+          ? " (corpo a corpo)"
+          : eligibility === "ranged"
+            ? " (à distância)"
+            : ""}
+        .
       </p>
       <div className="grid gap-2 sm:grid-cols-2">
         {newSlots.map((slot) => {

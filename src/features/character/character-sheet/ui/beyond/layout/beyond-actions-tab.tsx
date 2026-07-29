@@ -8,8 +8,19 @@ import {
   SparklesIcon,
 } from "@heroicons/react/24/outline";
 import type { ComponentType, SVGProps } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import type { CharacterDetail } from "@/entities/character/types";
+import {
+  fireChamber,
+  reloadFirearm,
+  sessionKeys,
+} from "@/features/character/character-sheet/api/character-session.api";
+import {
+  useCharacterState,
+  useSpendClassResource,
+} from "@/features/character/character-sheet/api/use-character-state";
+import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
 import { WeaponAttackCard } from "@/features/character/character-sheet/ui/beyond/inventory/weapon-attack-card";
 import {
   SheetEmptyHint,
@@ -59,6 +70,53 @@ const SECTIONS: {
 /** Economia de ação na mesa — ataques de arma vêm da ficha (`weaponAttacks`). */
 export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
   const attacks = character.weaponAttacks ?? [];
+  const stateQuery = useCharacterState(character.id);
+  const { requireToken, handleUnauthorized } = useGameAuth(
+    `/characters/${character.id}`,
+  );
+  const queryClient = useQueryClient();
+  const chambers = stateQuery.data?.firearmChambers ?? {};
+
+  const invalidateState = () => {
+    void queryClient.invalidateQueries({
+      queryKey: sessionKeys.state(character.id),
+    });
+  };
+
+  const spendRisk = useSpendClassResource(character.id);
+
+  const reload = useMutation({
+    mutationFn: async (itemSlug: string) => {
+      try {
+        return await reloadFirearm(requireToken(), character.id, itemSlug);
+      } catch (error) {
+        return handleUnauthorized(error);
+      }
+    },
+    onSuccess: invalidateState,
+  });
+
+  const fire = useMutation({
+    mutationFn: async ({
+      itemSlug,
+      shots,
+    }: {
+      itemSlug: string;
+      shots?: number;
+    }) => {
+      try {
+        return await fireChamber(
+          requireToken(),
+          character.id,
+          itemSlug,
+          shots,
+        );
+      } catch (error) {
+        return handleUnauthorized(error);
+      }
+    },
+    onSuccess: invalidateState,
+  });
 
   return (
     <div className="space-y-5">
@@ -79,6 +137,26 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
               <WeaponAttackCard
                 key={`${attack.itemSlug}-${attack.mode}-${attack.role ?? "main"}`}
                 attack={attack}
+                chamberRemaining={
+                  attack.reloadCapacity != null
+                    ? (chambers[attack.itemSlug] ?? attack.reloadCapacity)
+                    : null
+                }
+                onReload={(itemSlug) => reload.mutate(itemSlug)}
+                onFire={(itemSlug, shots) =>
+                  fire.mutate({ itemSlug, shots })
+                }
+                onHeadShot={async () => {
+                  await spendRisk.mutateAsync({
+                    resourceSlug: "risk",
+                    amount: 3,
+                  });
+                }}
+                canHeadShot={
+                  character.classSlug === "gunslinger" &&
+                  character.level >= 20 &&
+                  attack.mode === "ranged"
+                }
               />
             ))}
           </ul>

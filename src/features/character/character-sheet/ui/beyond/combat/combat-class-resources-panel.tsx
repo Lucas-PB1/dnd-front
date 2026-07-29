@@ -1,6 +1,9 @@
 "use client";
 
-import type { ClassResourceState } from "@/entities/character/session-types";
+import type {
+  ClassResourceState,
+  ResourceDieRoll,
+} from "@/entities/character/session-types";
 import { Button } from "@/shared/ui/button";
 
 type CombatClassResourcesPanelProps = {
@@ -9,6 +12,9 @@ type CombatClassResourcesPanelProps = {
   isError: boolean;
   error: Error | null;
   onSpend: (resourceSlug: string) => void;
+  lastRoll?: ResourceDieRoll | null;
+  onRecoverRisk?: () => void;
+  canRecoverRisk?: boolean;
 };
 
 export function CombatClassResourcesPanel({
@@ -17,6 +23,9 @@ export function CombatClassResourcesPanel({
   isError,
   error,
   onSpend,
+  lastRoll,
+  onRecoverRisk,
+  canRecoverRisk = false,
 }: CombatClassResourcesPanelProps) {
   if (resources.length === 0) {
     return null;
@@ -49,9 +58,26 @@ export function CombatClassResourcesPanel({
             >
               Usar
             </Button>
+            {resource.slug === "risk" && canRecoverRisk && onRecoverRisk ? (
+              <Button
+                type="button"
+                size="xs"
+                variant="ghost"
+                disabled={isPending}
+                onClick={onRecoverRisk}
+                title="Gambito Terrível"
+              >
+                +1
+              </Button>
+            ) : null}
           </div>
         ))}
       </div>
+      {lastRoll ? (
+        <p className="mt-2 text-sm text-secondary" role="status">
+          {lastRoll.expression} → <strong>{lastRoll.value}</strong>
+        </p>
+      ) : null}
       {isError ? (
         <p className="mt-2 text-sm text-destructive" role="alert">
           {error instanceof Error
