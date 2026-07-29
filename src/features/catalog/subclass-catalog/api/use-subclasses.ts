@@ -8,6 +8,7 @@ import {
   fetchSubclassesPage,
   subclassCatalogKeys,
 } from "@/features/catalog/subclass-catalog/api/subclasses.api";
+import { useCatalogSources } from "@/features/catalog/catalog-sources/model/catalog-sources-provider";
 import { CATALOG_DETAIL_STALE_MS } from "@/shared/lib/catalog-query";
 import {
   useCatalogDetailQuery,
@@ -20,15 +21,21 @@ export function useSubclassesCatalog(params: {
   q?: string;
   class?: string;
 }) {
+  const { editionSlugsParam } = useCatalogSources();
   return useCatalogListQuery({
     page: params.page,
-    filters: { q: params.q, class: params.class },
+    filters: {
+      q: params.q,
+      class: params.class,
+      editionSlugs: editionSlugsParam,
+    },
     queryKey: (p) =>
       subclassCatalogKeys.listPage({
         page: p.page,
         limit: p.limit,
         q: p.q ?? "",
         class: p.class ?? "",
+        editionSlugs: p.editionSlugs,
       }),
     queryFn: (p) =>
       fetchSubclassesPage({
@@ -36,14 +43,16 @@ export function useSubclassesCatalog(params: {
         limit: p.limit,
         q: p.q,
         class: p.class,
+        editionSlugs: p.editionSlugs,
       }),
   });
 }
 
 export function useSubclassClassOptions() {
+  const { editionSlugsParam } = useCatalogSources();
   return useQuery({
-    queryKey: ["classes", "list", "filter-options"] as const,
-    queryFn: () => fetchClasses(50),
+    queryKey: ["classes", "list", "filter-options", editionSlugsParam ?? "all"] as const,
+    queryFn: () => fetchClasses(50, editionSlugsParam),
     staleTime: CATALOG_DETAIL_STALE_MS,
   });
 }

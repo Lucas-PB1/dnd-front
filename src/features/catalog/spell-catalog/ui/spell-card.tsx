@@ -1,5 +1,6 @@
 import type { SpellSummary } from "@/entities/spell/types";
 import { withCatalogReturn } from "@/shared/lib/catalog-return";
+import { CatalogEditionChip } from "@/shared/ui/catalog-edition-chip";
 import { CatalogListCard } from "@/shared/ui/catalog-list-card";
 
 type SpellCardProps = {
@@ -23,8 +24,11 @@ export function SpellCard({ spell, listPath, className }: SpellCardProps) {
       href={withCatalogReturn(`/spells/${spell.slug}`, listPath)}
       title={spell.name}
       titleExtra={
-        <span className="font-mono text-xs text-secondary">
-          {spell.levelLabel}
+        <span className="inline-flex items-center gap-1.5">
+          <CatalogEditionChip editionSlug={spell.editionSlug} />
+          <span className="font-mono text-xs text-secondary">
+            {spell.levelLabel}
+          </span>
         </span>
       }
       eyebrow={spell.schoolName}

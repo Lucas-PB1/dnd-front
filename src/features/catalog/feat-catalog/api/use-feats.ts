@@ -5,6 +5,7 @@ import {
   fetchFeatBySlug,
   fetchFeatsPage,
 } from "@/features/catalog/feat-catalog/api/feats.api";
+import { useCatalogSources } from "@/features/catalog/catalog-sources/model/catalog-sources-provider";
 import {
   useCatalogDetailQuery,
   useCatalogListQuery,
@@ -16,15 +17,21 @@ export function useFeatsCatalog(params: {
   q?: string;
   category?: string;
 }) {
+  const { editionSlugsParam } = useCatalogSources();
   return useCatalogListQuery({
     page: params.page,
-    filters: { q: params.q, category: params.category },
+    filters: {
+      q: params.q,
+      category: params.category,
+      editionSlugs: editionSlugsParam,
+    },
     queryKey: (p) =>
       featKeys.listPage({
         page: p.page,
         limit: p.limit,
         q: p.q ?? "",
         category: p.category ?? "",
+        editionSlugs: p.editionSlugs,
       }),
     queryFn: (p) =>
       fetchFeatsPage({
@@ -32,6 +39,7 @@ export function useFeatsCatalog(params: {
         limit: p.limit,
         q: p.q,
         category: p.category,
+        editionSlugs: p.editionSlugs,
       }),
   });
 }

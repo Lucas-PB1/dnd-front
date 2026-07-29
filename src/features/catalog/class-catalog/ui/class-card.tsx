@@ -1,5 +1,6 @@
 import type { ClassSummary } from "@/entities/class/types";
 import { withCatalogReturn } from "@/shared/lib/catalog-return";
+import { CatalogEditionChip } from "@/shared/ui/catalog-edition-chip";
 import { CatalogTileCard } from "@/shared/ui/catalog-list-card";
 
 type ClassCardProps = {
@@ -14,8 +15,11 @@ export function ClassCard({ classItem, listPath, className }: ClassCardProps) {
       href={withCatalogReturn(`/classes/${classItem.slug}`, listPath)}
       title={classItem.name}
       titleExtra={
-        <span className="shrink-0 font-mono text-xs text-muted-foreground">
-          {classItem.hitDie}
+        <span className="inline-flex shrink-0 items-center gap-1.5">
+          <CatalogEditionChip editionSlug={classItem.editionSlug} />
+          <span className="font-mono text-xs text-muted-foreground">
+            {classItem.hitDie}
+          </span>
         </span>
       }
       eyebrow={classItem.tagline}

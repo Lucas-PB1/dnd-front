@@ -17,6 +17,7 @@ export const featKeys = {
     limit: number;
     q: string;
     category: string;
+    editionSlugs?: string;
   }) => [...featKeys.all, "list", "page", params] as const,
   detail: (slug: string) => [...featKeys.all, "detail", slug] as const,
   options: (slug: string) => [...featKeys.all, "options", slug] as const,
@@ -27,12 +28,16 @@ export async function fetchFeatsPage(params?: {
   limit?: number;
   q?: string;
   category?: string;
+  editionSlugs?: string;
 }): Promise<FeatListResponse> {
   const search = buildCatalogSearchParams({
     page: params?.page,
     limit: params?.limit ?? CATALOG_PAGE_SIZE,
     q: params?.q,
-    filters: { category: params?.category },
+    filters: {
+      category: params?.category,
+      editionSlugs: params?.editionSlugs,
+    },
   });
 
   return catalogFetch<FeatListResponse>(`/feats?${search}`, CATALOG_FETCH_INIT);

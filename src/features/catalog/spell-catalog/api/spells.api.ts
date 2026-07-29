@@ -16,6 +16,7 @@ export const spellKeys = {
     q: string;
     level: string;
     school: string;
+    editionSlugs?: string;
   }) => [...spellKeys.all, "list", "page", params] as const,
   detail: (slug: string) => [...spellKeys.all, "detail", slug] as const,
 };
@@ -28,6 +29,7 @@ export async function fetchSpellsPage(params?: {
   q?: string;
   level?: number | string;
   school?: string;
+  editionSlugs?: string;
 }): Promise<SpellListResponse> {
   const search = buildCatalogSearchParams({
     page: params?.page,
@@ -36,6 +38,7 @@ export async function fetchSpellsPage(params?: {
     filters: {
       level: params?.level,
       school: params?.school,
+      editionSlugs: params?.editionSlugs,
     },
   });
 
@@ -46,9 +49,11 @@ export async function fetchSpellsPage(params?: {
 }
 
 /** Catálogo completo — wizard, ficha e editores (não usar na listagem paginada). */
-export async function fetchSpells(): Promise<SpellListResponse> {
+export async function fetchSpells(
+  editionSlugs?: string,
+): Promise<SpellListResponse> {
   return fetchAllCatalogPages(
-    (page) => fetchSpellsPage({ ...page }),
+    (page) => fetchSpellsPage({ ...page, editionSlugs }),
     FETCH_PAGE_SIZE,
   );
 }

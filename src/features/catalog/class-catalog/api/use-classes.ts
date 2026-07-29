@@ -21,6 +21,7 @@ import {
   fetchSubclassSpellcasting,
   subclassKeys,
 } from "@/features/catalog/class-catalog/api/classes.api";
+import { useCatalogSources } from "@/features/catalog/catalog-sources/model/catalog-sources-provider";
 import { CATALOG_DETAIL_STALE_MS } from "@/shared/lib/catalog-query";
 import {
   useCatalogDetailQuery,
@@ -28,21 +29,34 @@ import {
 } from "@/shared/lib/use-catalog-query";
 
 export function useClasses() {
+  const { editionSlugsParam } = useCatalogSources();
   return useQuery({
-    queryKey: classKeys.list(),
-    queryFn: () => fetchClasses(),
+    queryKey: [...classKeys.list(), editionSlugsParam ?? "all"],
+    queryFn: () => fetchClasses(50, editionSlugsParam),
     staleTime: CATALOG_DETAIL_STALE_MS,
   });
 }
 
 /** Compêndio: busca `q` na API (dataset pequeno). */
 export function useClassesCatalog(params: { page: number; q?: string }) {
+  const { editionSlugsParam } = useCatalogSources();
   return useCatalogListQuery({
     page: params.page,
-    filters: { q: params.q },
+    filters: { q: params.q, editionSlugs: editionSlugsParam },
     queryKey: (p) =>
-      classKeys.listPage({ page: p.page, limit: p.limit, q: p.q ?? "" }),
-    queryFn: (p) => fetchClassesPage({ page: p.page, limit: p.limit, q: p.q }),
+      classKeys.listPage({
+        page: p.page,
+        limit: p.limit,
+        q: p.q ?? "",
+        editionSlugs: p.editionSlugs,
+      }),
+    queryFn: (p) =>
+      fetchClassesPage({
+        page: p.page,
+        limit: p.limit,
+        q: p.q,
+        editionSlugs: p.editionSlugs,
+      }),
   });
 }
 
@@ -56,10 +70,11 @@ export function useClassDetail(slug: string, enabled = true) {
 }
 
 export function useClassSubclasses(slug: string, enabled = true) {
+  const { editionSlugsParam } = useCatalogSources();
   return useCatalogDetailQuery({
     slug,
-    queryKey: classKeys.subclasses(slug),
-    queryFn: () => fetchClassSubclasses(slug),
+    queryKey: [...classKeys.subclasses(slug), editionSlugsParam ?? "all"],
+    queryFn: () => fetchClassSubclasses(slug, 50, editionSlugsParam),
     enabled,
   });
 }

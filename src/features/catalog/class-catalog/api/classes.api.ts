@@ -25,8 +25,12 @@ import {
 export const classKeys = {
   all: ["classes"] as const,
   list: () => [...classKeys.all, "list"] as const,
-  listPage: (params: { page: number; limit: number; q: string }) =>
-    [...classKeys.all, "list", "page", params] as const,
+  listPage: (params: {
+    page: number;
+    limit: number;
+    q: string;
+    editionSlugs?: string;
+  }) => [...classKeys.all, "list", "page", params] as const,
   detail: (slug: string) => [...classKeys.all, "detail", slug] as const,
   subclasses: (slug: string) => [...classKeys.all, "subclasses", slug] as const,
   skills: (slug: string) => [...classKeys.all, "skills", slug] as const,
@@ -58,11 +62,13 @@ export async function fetchClassesPage(params?: {
   page?: number;
   limit?: number;
   q?: string;
+  editionSlugs?: string;
 }) {
   const search = buildCatalogSearchParams({
     page: params?.page,
     limit: params?.limit ?? 50,
     q: params?.q,
+    filters: { editionSlugs: params?.editionSlugs },
   });
 
   return catalogFetch<ClassListResponse>(
@@ -71,17 +77,26 @@ export async function fetchClassesPage(params?: {
   );
 }
 
-export async function fetchClasses(limit = 50) {
-  return fetchClassesPage({ page: 1, limit });
+export async function fetchClasses(limit = 50, editionSlugs?: string) {
+  return fetchClassesPage({ page: 1, limit, editionSlugs });
 }
 
 export async function fetchClassBySlug(slug: string) {
   return catalogFetch<ClassSummary>(`/classes/${slug}`, CATALOG_FETCH_INIT);
 }
 
-export async function fetchClassSubclasses(slug: string, limit = 50) {
+export async function fetchClassSubclasses(
+  slug: string,
+  limit = 50,
+  editionSlugs?: string,
+) {
+  const search = buildCatalogSearchParams({
+    page: 1,
+    limit,
+    filters: { editionSlugs },
+  });
   return catalogFetch<SubclassListResponse>(
-    `/classes/${slug}/subclasses?limit=${limit}`,
+    `/classes/${slug}/subclasses?${search}`,
     CATALOG_FETCH_INIT,
   );
 }

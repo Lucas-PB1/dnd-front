@@ -12,6 +12,7 @@ import {
   fetchBackgrounds,
   fetchBackgroundsPage,
 } from "@/features/catalog/background-catalog/api/backgrounds.api";
+import { useCatalogSources } from "@/features/catalog/catalog-sources/model/catalog-sources-provider";
 import { CATALOG_DETAIL_STALE_MS } from "@/shared/lib/catalog-query";
 import {
   useCatalogDetailQuery,
@@ -20,22 +21,34 @@ import {
 
 /** Lista completa — wizard / ficha. */
 export function useBackgrounds() {
+  const { editionSlugsParam } = useCatalogSources();
   return useQuery({
-    queryKey: backgroundKeys.listAll(),
-    queryFn: () => fetchBackgrounds(),
+    queryKey: [...backgroundKeys.listAll(), editionSlugsParam ?? "all"],
+    queryFn: () => fetchBackgrounds(50, editionSlugsParam),
     staleTime: CATALOG_DETAIL_STALE_MS,
   });
 }
 
 /** Listagem do compêndio: 20/página + busca `q` na API. */
 export function useBackgroundsCatalog(params: { page: number; q?: string }) {
+  const { editionSlugsParam } = useCatalogSources();
   return useCatalogListQuery({
     page: params.page,
-    filters: { q: params.q },
+    filters: { q: params.q, editionSlugs: editionSlugsParam },
     queryKey: (p) =>
-      backgroundKeys.listPage({ page: p.page, limit: p.limit, q: p.q ?? "" }),
+      backgroundKeys.listPage({
+        page: p.page,
+        limit: p.limit,
+        q: p.q ?? "",
+        editionSlugs: p.editionSlugs,
+      }),
     queryFn: (p) =>
-      fetchBackgroundsPage({ page: p.page, limit: p.limit, q: p.q }),
+      fetchBackgroundsPage({
+        page: p.page,
+        limit: p.limit,
+        q: p.q,
+        editionSlugs: p.editionSlugs,
+      }),
   });
 }
 

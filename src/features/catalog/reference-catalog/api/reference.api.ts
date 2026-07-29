@@ -5,7 +5,7 @@ import type { ConditionSummary } from "@/entities/condition/types";
 import type { FeatListResponse } from "@/entities/feat/types";
 import type { LanguageListResponse } from "@/entities/language/types";
 import type { SkillListResponse } from "@/entities/skill/types";
-import { CATALOG_FETCH_INIT } from "@/shared/lib/catalog-query";
+import { CATALOG_FETCH_INIT, buildCatalogSearchParams } from "@/shared/lib/catalog-query";
 
 export const referenceKeys = {
   all: ["reference"] as const,
@@ -25,9 +25,14 @@ export async function fetchSkills(limit = 100) {
   );
 }
 
-export async function fetchFeats(limit = 100) {
+export async function fetchFeats(limit = 100, editionSlugs?: string) {
+  const search = buildCatalogSearchParams({
+    page: 1,
+    limit,
+    filters: { editionSlugs },
+  });
   return catalogFetch<FeatListResponse>(
-    `/feats?limit=${limit}`,
+    `/feats?${search}`,
     CATALOG_FETCH_INIT,
   );
 }

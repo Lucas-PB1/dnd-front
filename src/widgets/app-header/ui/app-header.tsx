@@ -12,6 +12,7 @@ import { usePathname } from "next/navigation";
 import { useState, type ComponentType, type SVGProps } from "react";
 
 import { AuthNav } from "@/features/auth/ui/auth-nav";
+import { CatalogSourcesMenu } from "@/features/catalog/catalog-sources/ui/catalog-sources-menu";
 import { BRAND_NAME } from "@/shared/config/brand";
 import { cn } from "@/shared/lib/utils";
 import { SealMark } from "@/shared/ui/brand-marks";
@@ -88,6 +89,7 @@ export function AppHeader({ className }: { className?: string }) {
         </div>
 
         <div className="flex items-center gap-1 sm:gap-2">
+          <CatalogSourcesMenu />
           <div className="hidden sm:block">
             <AuthNav />
           </div>

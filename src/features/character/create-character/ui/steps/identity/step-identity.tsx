@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { useWatch } from "react-hook-form";
 
+import { editionShortLabel } from "@/entities/edition/catalog-sources";
 import { useBackgrounds } from "@/features/catalog/background-catalog/api/use-backgrounds";
 import {
   useClasses,
@@ -30,6 +31,14 @@ type StepIdentityProps = {
 
 function sortByLabel<T extends { label: string }>(items: T[]): T[] {
   return [...items].sort((a, b) => a.label.localeCompare(b.label, "pt"));
+}
+
+function withEditionLabel(
+  name: string,
+  editionSlug: string | null | undefined,
+): string {
+  const source = editionShortLabel(editionSlug);
+  return source === "PHB" ? name : `${name} · ${source}`;
 }
 
 export function StepIdentity({ register, control, errors }: StepIdentityProps) {
@@ -62,7 +71,7 @@ export function StepIdentity({ register, control, errors }: StepIdentityProps) {
       sortByLabel(
         (classes.data?.data ?? []).map((c) => ({
           value: c.slug,
-          label: c.name,
+          label: withEditionLabel(c.name, c.editionSlug),
         })),
       ),
     [classes.data?.data],
@@ -73,7 +82,7 @@ export function StepIdentity({ register, control, errors }: StepIdentityProps) {
       sortByLabel(
         (species.data?.data ?? []).map((s) => ({
           value: s.slug,
-          label: s.name,
+          label: withEditionLabel(s.name, s.editionSlug),
         })),
       ),
     [species.data?.data],
@@ -84,7 +93,7 @@ export function StepIdentity({ register, control, errors }: StepIdentityProps) {
       sortByLabel(
         (backgrounds.data?.data ?? []).map((b) => ({
           value: b.slug,
-          label: b.name,
+          label: withEditionLabel(b.name, b.editionSlug),
         })),
       ),
     [backgrounds.data?.data],
@@ -95,7 +104,7 @@ export function StepIdentity({ register, control, errors }: StepIdentityProps) {
       sortByLabel(
         (subclasses.data?.data ?? []).map((s) => ({
           value: s.slug,
-          label: s.name,
+          label: withEditionLabel(s.name, s.editionSlug),
         })),
       ),
     [subclasses.data?.data],

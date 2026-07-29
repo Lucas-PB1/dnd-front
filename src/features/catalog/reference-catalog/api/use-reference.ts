@@ -11,6 +11,7 @@ import {
   fetchSkills,
   referenceKeys,
 } from "@/features/catalog/reference-catalog/api/reference.api";
+import { useCatalogSources } from "@/features/catalog/catalog-sources/model/catalog-sources-provider";
 import { CATALOG_DETAIL_STALE_MS } from "@/shared/lib/catalog-query";
 
 export function useSkills() {
@@ -22,9 +23,10 @@ export function useSkills() {
 }
 
 export function useFeats() {
+  const { editionSlugsParam } = useCatalogSources();
   return useQuery({
-    queryKey: referenceKeys.feats(),
-    queryFn: () => fetchFeats(),
+    queryKey: [...referenceKeys.feats(), editionSlugsParam ?? "all"],
+    queryFn: () => fetchFeats(100, editionSlugsParam),
     staleTime: CATALOG_DETAIL_STALE_MS,
   });
 }

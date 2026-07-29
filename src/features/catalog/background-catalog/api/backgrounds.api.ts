@@ -18,8 +18,12 @@ import { CATALOG_PAGE_SIZE } from "@/shared/lib/catalog-pagination";
 export const backgroundKeys = {
   all: ["backgrounds"] as const,
   listAll: () => [...backgroundKeys.all, "list", "all"] as const,
-  listPage: (params: { page: number; limit: number; q: string }) =>
-    [...backgroundKeys.all, "list", "page", params] as const,
+  listPage: (params: {
+    page: number;
+    limit: number;
+    q: string;
+    editionSlugs?: string;
+  }) => [...backgroundKeys.all, "list", "page", params] as const,
   detail: (slug: string) => [...backgroundKeys.all, "detail", slug] as const,
   equipment: (slug: string) =>
     [...backgroundKeys.all, "equipment", slug] as const,
@@ -33,11 +37,13 @@ export async function fetchBackgroundsPage(params?: {
   page?: number;
   limit?: number;
   q?: string;
+  editionSlugs?: string;
 }) {
   const search = buildCatalogSearchParams({
     page: params?.page,
     limit: params?.limit ?? CATALOG_PAGE_SIZE,
     q: params?.q,
+    filters: { editionSlugs: params?.editionSlugs },
   });
 
   return catalogFetch<BackgroundListResponse>(
@@ -47,8 +53,8 @@ export async function fetchBackgroundsPage(params?: {
 }
 
 /** Lista completa (poucos itens) — wizard / ficha. */
-export async function fetchBackgrounds(limit = 50) {
-  return fetchBackgroundsPage({ page: 1, limit });
+export async function fetchBackgrounds(limit = 50, editionSlugs?: string) {
+  return fetchBackgroundsPage({ page: 1, limit, editionSlugs });
 }
 
 export async function fetchBackgroundBySlug(slug: string) {

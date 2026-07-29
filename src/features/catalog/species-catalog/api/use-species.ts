@@ -10,6 +10,7 @@ import {
   fetchSpeciesTraits,
   speciesKeys,
 } from "@/features/catalog/species-catalog/api/species.api";
+import { useCatalogSources } from "@/features/catalog/catalog-sources/model/catalog-sources-provider";
 import { CATALOG_DETAIL_STALE_MS } from "@/shared/lib/catalog-query";
 import {
   useCatalogDetailQuery,
@@ -17,22 +18,34 @@ import {
 } from "@/shared/lib/use-catalog-query";
 
 export function useSpecies() {
+  const { editionSlugsParam } = useCatalogSources();
   return useQuery({
-    queryKey: speciesKeys.list(),
-    queryFn: () => fetchSpecies(),
+    queryKey: [...speciesKeys.list(), editionSlugsParam ?? "all"],
+    queryFn: () => fetchSpecies(50, editionSlugsParam),
     staleTime: CATALOG_DETAIL_STALE_MS,
   });
 }
 
 /** Compêndio: busca `q` na API. */
 export function useSpeciesCatalog(params: { page: number; q?: string }) {
+  const { editionSlugsParam } = useCatalogSources();
   return useCatalogListQuery({
     page: params.page,
-    filters: { q: params.q },
+    filters: { q: params.q, editionSlugs: editionSlugsParam },
     queryKey: (p) =>
-      speciesKeys.listPage({ page: p.page, limit: p.limit, q: p.q ?? "" }),
+      speciesKeys.listPage({
+        page: p.page,
+        limit: p.limit,
+        q: p.q ?? "",
+        editionSlugs: p.editionSlugs,
+      }),
     queryFn: (p) =>
-      fetchSpeciesPage({ page: p.page, limit: p.limit, q: p.q }),
+      fetchSpeciesPage({
+        page: p.page,
+        limit: p.limit,
+        q: p.q,
+        editionSlugs: p.editionSlugs,
+      }),
   });
 }
 

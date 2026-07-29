@@ -9,6 +9,7 @@ export type SpeciesSummary = {
   size: string;
   speed: string;
   description: string;
+  editionSlug?: string | null;
 };
 
 export type SpeciesListResponse = PaginatedResponse<SpeciesSummary>;

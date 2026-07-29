@@ -16,6 +16,7 @@ export const subclassCatalogKeys = {
     limit: number;
     q: string;
     class: string;
+    editionSlugs?: string;
   }) => [...subclassCatalogKeys.all, "list", "page", params] as const,
   detail: (slug: string) =>
     [...subclassCatalogKeys.all, "detail", slug] as const,
@@ -26,12 +27,16 @@ export async function fetchSubclassesPage(params?: {
   limit?: number;
   q?: string;
   class?: string;
+  editionSlugs?: string;
 }): Promise<SubclassListResponse> {
   const search = buildCatalogSearchParams({
     page: params?.page,
     limit: params?.limit ?? CATALOG_PAGE_SIZE,
     q: params?.q,
-    filters: { class: params?.class },
+    filters: {
+      class: params?.class,
+      editionSlugs: params?.editionSlugs,
+    },
   });
 
   return catalogFetch<SubclassListResponse>(

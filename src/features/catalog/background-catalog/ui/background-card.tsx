@@ -1,5 +1,6 @@
 import type { BackgroundSummary } from "@/entities/background/types";
 import { withCatalogReturn } from "@/shared/lib/catalog-return";
+import { CatalogEditionChip } from "@/shared/ui/catalog-edition-chip";
 import { CatalogListCard } from "@/shared/ui/catalog-list-card";
 
 type BackgroundCardProps = {
@@ -17,6 +18,7 @@ export function BackgroundCard({
     <CatalogListCard
       href={withCatalogReturn(`/backgrounds/${background.slug}`, listPath)}
       title={background.name}
+      titleExtra={<CatalogEditionChip editionSlug={background.editionSlug} />}
       eyebrow={background.tagline}
       teaser={background.summary}
       aside={

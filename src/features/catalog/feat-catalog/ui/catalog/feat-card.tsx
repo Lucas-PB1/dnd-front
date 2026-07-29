@@ -1,5 +1,6 @@
 import type { FeatSummary } from "@/entities/feat/types";
 import { withCatalogReturn } from "@/shared/lib/catalog-return";
+import { CatalogEditionChip } from "@/shared/ui/catalog-edition-chip";
 import { CatalogListCard } from "@/shared/ui/catalog-list-card";
 
 type FeatCardProps = {
@@ -21,9 +22,12 @@ export function FeatCard({ feat, listPath, className }: FeatCardProps) {
       href={withCatalogReturn(`/feats/${feat.slug}`, listPath)}
       title={feat.name}
       titleExtra={
-        feat.repeatable ? (
-          <span className="text-xs text-secondary">Repetível</span>
-        ) : null
+        <span className="inline-flex items-center gap-1.5">
+          <CatalogEditionChip editionSlug={feat.editionSlug} />
+          {feat.repeatable ? (
+            <span className="text-xs text-secondary">Repetível</span>
+          ) : null}
+        </span>
       }
       eyebrow={feat.categoryTypeLabel || feat.categoryName}
       teaser={teaser}

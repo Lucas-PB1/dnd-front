@@ -14,8 +14,12 @@ import {
 export const speciesKeys = {
   all: ["species"] as const,
   list: () => [...speciesKeys.all, "list"] as const,
-  listPage: (params: { page: number; limit: number; q: string }) =>
-    [...speciesKeys.all, "list", "page", params] as const,
+  listPage: (params: {
+    page: number;
+    limit: number;
+    q: string;
+    editionSlugs?: string;
+  }) => [...speciesKeys.all, "list", "page", params] as const,
   detail: (slug: string) => [...speciesKeys.all, "detail", slug] as const,
   traits: (slug: string) => [...speciesKeys.all, "traits", slug] as const,
   traitChoices: (slug: string) =>
@@ -26,11 +30,13 @@ export async function fetchSpeciesPage(params?: {
   page?: number;
   limit?: number;
   q?: string;
+  editionSlugs?: string;
 }) {
   const search = buildCatalogSearchParams({
     page: params?.page,
     limit: params?.limit ?? 50,
     q: params?.q,
+    filters: { editionSlugs: params?.editionSlugs },
   });
 
   return catalogFetch<SpeciesListResponse>(
@@ -39,8 +45,8 @@ export async function fetchSpeciesPage(params?: {
   );
 }
 
-export async function fetchSpecies(limit = 50) {
-  return fetchSpeciesPage({ page: 1, limit });
+export async function fetchSpecies(limit = 50, editionSlugs?: string) {
+  return fetchSpeciesPage({ page: 1, limit, editionSlugs });
 }
 
 export async function fetchSpeciesBySlug(slug: string) {

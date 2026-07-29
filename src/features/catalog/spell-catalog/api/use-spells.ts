@@ -8,6 +8,7 @@ import {
   fetchSpellsPage,
   spellKeys,
 } from "@/features/catalog/spell-catalog/api/spells.api";
+import { useCatalogSources } from "@/features/catalog/catalog-sources/model/catalog-sources-provider";
 import { CATALOG_DETAIL_STALE_MS } from "@/shared/lib/catalog-query";
 import {
   useCatalogDetailQuery,
@@ -16,9 +17,10 @@ import {
 
 /** Lista completa — wizard / ficha / editores. */
 export function useSpells() {
+  const { editionSlugsParam } = useCatalogSources();
   return useQuery({
-    queryKey: spellKeys.listAll(),
-    queryFn: () => fetchSpells(),
+    queryKey: [...spellKeys.listAll(), editionSlugsParam ?? "all"],
+    queryFn: () => fetchSpells(editionSlugsParam),
     staleTime: CATALOG_DETAIL_STALE_MS,
   });
 }
@@ -30,9 +32,15 @@ export function useSpellsCatalog(params: {
   level?: string;
   school?: string;
 }) {
+  const { editionSlugsParam } = useCatalogSources();
   return useCatalogListQuery({
     page: params.page,
-    filters: { q: params.q, level: params.level, school: params.school },
+    filters: {
+      q: params.q,
+      level: params.level,
+      school: params.school,
+      editionSlugs: editionSlugsParam,
+    },
     queryKey: (p) =>
       spellKeys.listPage({
         page: p.page,
@@ -40,6 +48,7 @@ export function useSpellsCatalog(params: {
         q: p.q ?? "",
         level: p.level ?? "",
         school: p.school ?? "",
+        editionSlugs: p.editionSlugs,
       }),
     queryFn: (p) =>
       fetchSpellsPage({
@@ -48,6 +57,7 @@ export function useSpellsCatalog(params: {
         q: p.q,
         level: p.level,
         school: p.school,
+        editionSlugs: p.editionSlugs,
       }),
   });
 }
