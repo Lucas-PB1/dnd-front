@@ -7,11 +7,12 @@ import type { CharacterState } from "@/entities/character/session-types";
 import {
   listBattleMasterManeuvers,
   sessionKeys,
-  useActionSurge,
-  useSecondWind,
-  useTacticalMind,
+  activateActionSurge,
+  activateSecondWind,
+  applyTacticalMind,
 } from "@/features/character/character-sheet/api/character-session.api";
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
+import { FighterSubclassActions } from "@/features/character/character-sheet/ui/beyond/combat/fighter-subclass-actions";
 import { Button } from "@/shared/ui/button";
 
 type CombatFighterPanelProps = {
@@ -45,7 +46,7 @@ export function CombatFighterPanel({
   const secondWindMutation = useMutation({
     mutationFn: async () => {
       try {
-        return await useSecondWind(requireToken(), characterId);
+        return await activateSecondWind(requireToken(), characterId);
       } catch (error) {
         return handleUnauthorized(error);
       }
@@ -63,7 +64,7 @@ export function CombatFighterPanel({
   const surgeMutation = useMutation({
     mutationFn: async () => {
       try {
-        return await useActionSurge(requireToken(), characterId);
+        return await activateActionSurge(requireToken(), characterId);
       } catch (error) {
         return handleUnauthorized(error);
       }
@@ -78,7 +79,7 @@ export function CombatFighterPanel({
   const mindMutation = useMutation({
     mutationFn: async () => {
       try {
-        return await useTacticalMind(
+        return await applyTacticalMind(
           requireToken(),
           characterId,
           Number(mindCheck) || 0,
@@ -207,28 +208,13 @@ export function CombatFighterPanel({
         </p>
       ) : null}
 
-      {maneuversQuery.data && maneuversQuery.data.length > 0 ? (
-        <div className="mt-2">
-          <p className="text-[0.58rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
-            Manobras (Mestre da Batalha)
-          </p>
-          <ul className="mt-1 max-h-28 space-y-1 overflow-y-auto text-[0.7rem] text-muted-foreground">
-            {maneuversQuery.data.map((maneuver) => (
-              <li key={maneuver.slug} title={maneuver.description}>
-                <span className="font-medium text-foreground">
-                  {maneuver.name}
-                </span>
-                {maneuver.addsToDamage ? " · +dado no dano" : ""}
-                {maneuver.addsToAttack ? " · +dado no ataque" : ""}
-              </li>
-            ))}
-          </ul>
-          <p className="mt-1 text-[0.65rem] text-muted-foreground">
-            Gaste um Dado de Superioridade no painel de recursos; no dano use
-            “Superioridade”.
-          </p>
-        </div>
-      ) : null}
+      <FighterSubclassActions
+        characterId={characterId}
+        subclassSlug={subclassSlug}
+        level={level}
+        maneuvers={maneuversQuery.data}
+        onResult={(result) => setLastNote(result.note)}
+      />
 
       {combatNotes && combatNotes.length > 0 ? (
         <ul className="mt-2 space-y-1 text-[0.7rem] text-muted-foreground">

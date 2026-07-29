@@ -76,6 +76,7 @@ export async function rollCharacterSavingThrow(
   payload: {
     abilitySlug: string;
     advantage?: AdvantageMode;
+    indomitable?: boolean;
   },
 ) {
   return gameFetch<CharacterRollResult>(

@@ -5,10 +5,10 @@ import { useState } from "react";
 
 import type { UseManeuverResult } from "@/entities/character/session-types";
 import {
+  executeGunslingerManeuver,
   listManeuvers,
   recoverRisk,
   sessionKeys,
-  useManeuver,
 } from "@/features/character/character-sheet/api/character-session.api";
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
 import { Button } from "@/shared/ui/button";
@@ -46,7 +46,11 @@ export function CombatManeuversPanel({
   const useMutationManeuver = useMutation({
     mutationFn: async (maneuverSlug: string) => {
       try {
-        return await useManeuver(requireToken(), characterId, maneuverSlug);
+        return await executeGunslingerManeuver(
+          requireToken(),
+          characterId,
+          maneuverSlug,
+        );
       } catch (error) {
         return handleUnauthorized(error);
       }

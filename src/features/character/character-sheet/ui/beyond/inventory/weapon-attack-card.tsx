@@ -23,8 +23,6 @@ type WeaponAttackCardProps = {
   canDoorKick?: boolean;
   canPsiStrike?: boolean;
   canMonsterSlayer?: boolean;
-  canPrecisionAttack?: boolean;
-  onSpendSuperiority?: () => void | Promise<void>;
   onSpendPsi?: () => void | Promise<void>;
 };
 
@@ -96,8 +94,6 @@ export function WeaponAttackCard({
   canDoorKick = false,
   canPsiStrike = false,
   canMonsterSlayer = false,
-  canPrecisionAttack = false,
-  onSpendSuperiority,
   onSpendPsi,
 }: WeaponAttackCardProps) {
   const rolls = useSheetRolls();
@@ -344,25 +340,6 @@ export function WeaponAttackCard({
               }
             >
               Matar Monstro (+1d10)
-            </Button>
-          ) : null}
-          {canPrecisionAttack ? (
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              disabled={busy}
-              title="Gasta 1 Dado de Superioridade e soma ao dano/ataque"
-              onClick={async () => {
-                if (onSpendSuperiority) await onSpendSuperiority();
-                rolls.damage.mutate({
-                  itemSlug: attack.itemSlug,
-                  mode: attack.mode,
-                  precisionAttack: true,
-                });
-              }}
-            >
-              Superioridade
             </Button>
           ) : null}
           {canHeadShot ? (

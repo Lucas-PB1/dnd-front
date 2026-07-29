@@ -91,7 +91,7 @@ export async function listManeuvers(accessToken: string, characterId: string) {
   );
 }
 
-export async function useManeuver(
+export async function executeGunslingerManeuver(
   accessToken: string,
   characterId: string,
   maneuverSlug: string,
@@ -212,7 +212,26 @@ export type BattleMasterManeuver = {
   addsToAttack: boolean;
 };
 
-export async function useSecondWind(
+export type FighterTableActionResult = {
+  state: CharacterState;
+  actionName: string;
+  expression?: string;
+  roll?: number;
+  total?: number;
+  saveDc?: number;
+  resourceSpent: boolean;
+  note: string;
+};
+
+export type PsiWarriorActionSlug =
+  | "protective-field"
+  | "telekinetic-movement"
+  | "psychic-leap"
+  | "mental-guard"
+  | "energy-bulwark"
+  | "telekinetic-master";
+
+export async function activateSecondWind(
   accessToken: string,
   characterId: string,
 ) {
@@ -223,7 +242,7 @@ export async function useSecondWind(
   );
 }
 
-export async function useTacticalMind(
+export async function applyTacticalMind(
   accessToken: string,
   characterId: string,
   checkTotal: number,
@@ -236,7 +255,7 @@ export async function useTacticalMind(
   );
 }
 
-export async function useActionSurge(
+export async function activateActionSurge(
   accessToken: string,
   characterId: string,
 ) {
@@ -254,5 +273,52 @@ export async function listBattleMasterManeuvers(
   return gameFetch<BattleMasterManeuver[]>(
     `/characters/${characterId}/fighter/maneuvers`,
     accessToken,
+  );
+}
+
+export async function executeBattleMasterManeuver(
+  accessToken: string,
+  characterId: string,
+  maneuverSlug: string,
+  useRelentless = false,
+) {
+  return gameFetch<FighterTableActionResult>(
+    `/characters/${characterId}/fighter/maneuvers/use`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify({ maneuverSlug, useRelentless }),
+    },
+  );
+}
+
+export async function executePsiWarriorAction(
+  accessToken: string,
+  characterId: string,
+  actionSlug: PsiWarriorActionSlug,
+  usePsiDie = false,
+) {
+  return gameFetch<FighterTableActionResult>(
+    `/characters/${characterId}/fighter/psi-action`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify({ actionSlug, usePsiDie }),
+    },
+  );
+}
+
+export async function castDungeonPrecaution(
+  accessToken: string,
+  characterId: string,
+  spellSlug: string,
+) {
+  return gameFetch<FighterTableActionResult>(
+    `/characters/${characterId}/fighter/dungeon-precaution`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify({ spellSlug }),
+    },
   );
 }

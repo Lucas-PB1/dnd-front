@@ -69,7 +69,11 @@ export function useCharacterRolls(
   });
 
   const savingThrow = useMutation({
-    mutationFn: (args: { abilitySlug: string; advantage?: AdvantageMode }) =>
+    mutationFn: (args: {
+      abilitySlug: string;
+      advantage?: AdvantageMode;
+      indomitable?: boolean;
+    }) =>
       run(rollCharacterSavingThrow, args),
     onSuccess: onResult,
   });

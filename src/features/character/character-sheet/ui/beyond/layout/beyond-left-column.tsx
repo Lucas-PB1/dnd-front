@@ -5,6 +5,7 @@ import {
   LanguageIcon,
   ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
+import { useState } from "react";
 
 import type { AbilityScores, CharacterDetail } from "@/entities/character/types";
 import {
@@ -34,6 +35,9 @@ export function BeyondLeftColumn({
   const classDetail = useClassDetail(character.classSlug, true);
   const speciesDetail = useSpeciesDetail(character.speciesSlug, true);
   const rolls = useSheetRolls();
+  const [useIndomitable, setUseIndomitable] = useState(false);
+  const hasIndomitable =
+    character.classSlug === "fighter" && character.level >= 9;
   const proficient = new Set(
     collectSaveProficiencyAbilities(
       classDetail.data?.savingThrowSlugs ?? [],
@@ -46,6 +50,17 @@ export function BeyondLeftColumn({
   return (
     <div className="flex flex-col gap-2.5">
       <BeyondPanel title="Salvaguardas" icon={ShieldCheckIcon}>
+        {hasIndomitable ? (
+          <label className="mb-1.5 block text-[0.68rem] text-muted-foreground">
+            <input
+              className="mr-1 align-middle"
+              type="checkbox"
+              checked={useIndomitable}
+              onChange={(event) => setUseIndomitable(event.target.checked)}
+            />
+            Indomável: rerrolar com +{character.level}
+          </label>
+        ) : null}
         {classDetail.isPending ? (
           <p className="text-sm text-muted-foreground">Carregando…</p>
         ) : (
@@ -59,9 +74,13 @@ export function BeyondLeftColumn({
                   <button
                     type="button"
                     disabled={rolls.savingThrow.isPending}
-                    onClick={() =>
-                      rolls.savingThrow.mutate({ abilitySlug: slug })
-                    }
+                    onClick={() => {
+                      rolls.savingThrow.mutate({
+                        abilitySlug: slug,
+                        indomitable: useIndomitable || undefined,
+                      });
+                      setUseIndomitable(false);
+                    }}
                     className={cn(
                       "flex w-full items-center gap-2 rounded-md px-2 py-1 text-left text-sm",
                       isProficient ? "bg-primary/10" : "hover:bg-muted/40",
