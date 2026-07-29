@@ -20,6 +20,7 @@ import {
   MAX_ATTUNED_ITEMS,
   SLOT_LABELS,
   SLOT_OPTIONS,
+  effectsStatusLabel,
   itemTypeLabel,
   type EquipmentSlot,
 } from "@/features/character/character-sheet/ui/beyond/inventory/inventory-item-meta";
@@ -70,6 +71,10 @@ export function InventoryItemRow({
     equipped && item.equipmentSlot
       ? (SLOT_LABELS[item.equipmentSlot] ?? item.equipmentSlot)
       : null;
+  const effectsLabel =
+    item.requiresAttunement || item.itemType === "other"
+      ? effectsStatusLabel(item.effectsStatus)
+      : null;
   const metaParts = [
     typeLabel,
     slotLabel && slotLabel !== typeLabel ? slotLabel : null,
@@ -100,6 +105,18 @@ export function InventoryItemRow({
             {item.itemName}
           </p>
           <p className="text-xs text-muted-foreground">{meta}</p>
+          {effectsLabel ? (
+            <p
+              className={cn(
+                "text-[0.65rem] font-medium",
+                item.effectsActive
+                  ? "text-secondary"
+                  : "text-muted-foreground",
+              )}
+            >
+              Efeitos: {effectsLabel}
+            </p>
+          ) : null}
           {warnings.length > 0 ? (
             <ul className="space-y-0.5 pt-1">
               {warnings.map((warning) => (

@@ -79,6 +79,8 @@ export type InventoryItem = {
   equipmentSlot: string | null;
   attuned: boolean;
   requiresAttunement: boolean;
+  effectsActive: boolean;
+  effectsStatus: "active" | "inactive_unequipped" | "inactive_unattuned";
   weightKg: number;
 };
 
@@ -100,7 +102,13 @@ export type AddInventoryItemPayload = {
 
 export type PatchInventoryItemPayload = {
   location?: "equipped" | "backpack";
-  equipmentSlot?: "armor" | "main_hand" | "off_hand" | "shield";
+  equipmentSlot?:
+    | "armor"
+    | "main_hand"
+    | "off_hand"
+    | "shield"
+    | "worn"
+    | "carried";
   quantity?: number;
   attuned?: boolean;
 };

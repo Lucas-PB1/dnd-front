@@ -117,6 +117,7 @@ export function previewCreateCharacter(
     equipmentWarnings: [],
     cannotCastSpellsInArmor: false,
     speedPenaltyMeters: 0,
+    itemSpeedBonusMeters: 0,
     spellcastingAbilitySlug: null,
     spellSaveDc: null,
     spellAttackBonus: null,

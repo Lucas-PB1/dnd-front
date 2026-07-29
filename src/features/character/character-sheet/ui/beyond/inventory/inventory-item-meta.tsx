@@ -17,6 +17,8 @@ export const SLOT_OPTIONS = [
   { value: "shield", label: "Escudo" },
   { value: "main_hand", label: "Mão principal" },
   { value: "off_hand", label: "Mão secundária" },
+  { value: "worn", label: "Vestido" },
+  { value: "carried", label: "Carregado" },
 ] as const;
 
 export type EquipmentSlot = (typeof SLOT_OPTIONS)[number]["value"];
@@ -24,6 +26,15 @@ export type EquipmentSlot = (typeof SLOT_OPTIONS)[number]["value"];
 export const SLOT_LABELS: Record<string, string> = Object.fromEntries(
   SLOT_OPTIONS.map((option) => [option.value, option.label]),
 );
+
+export function effectsStatusLabel(
+  status: InventoryItem["effectsStatus"] | undefined,
+): string | null {
+  if (status === "active") return "Ativo";
+  if (status === "inactive_unequipped") return "Inativo — equipe";
+  if (status === "inactive_unattuned") return "Inativo — sintonize";
+  return null;
+}
 
 export function itemTypeLabel(itemType: string): string {
   const known: Record<string, string> = {

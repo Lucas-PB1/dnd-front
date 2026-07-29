@@ -66,6 +66,7 @@ export type CharacterDetail = {
   equipmentWarnings?: EquipmentWarning[];
   cannotCastSpellsInArmor?: boolean;
   speedPenaltyMeters?: 0 | 3;
+  itemSpeedBonusMeters?: number;
   spellcastingAbilitySlug?: string | null;
   spellSaveDc?: number | null;
   spellAttackBonus?: number | null;
