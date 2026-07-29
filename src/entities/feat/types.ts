@@ -1,4 +1,5 @@
 import type { PaginatedResponse } from "@/shared/api/dnd-api/types";
+import type { AbilityScores } from "@/entities/character/types";
 
 export type FeatBenefit = {
   name?: string;
@@ -14,6 +15,14 @@ export type FeatSummary = {
   categoryTypeLabel: string;
   repeatable: boolean;
   prerequisite: string | null;
+  minimumLevel: number | null;
+  abilityPrerequisites: {
+    abilitySlug: keyof AbilityScores;
+    minimumScore: number;
+  }[];
+  requiresSpellcasting: boolean;
+  requiredArmorTrainingSlug: string | null;
+  requiresFightingStyle: boolean;
   sourceChapter: number | null;
   sourceChapterTitle: string | null;
   editionSlug: string | null;

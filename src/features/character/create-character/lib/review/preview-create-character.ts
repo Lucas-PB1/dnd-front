@@ -8,11 +8,20 @@ import { abilityModifierValue } from "@/entities/character";
 import type { CharacterDetail } from "@/entities/character/types";
 import type { CreateCharacterInput } from "@/features/character/create-character/model/create-character.schema";
 
-/** Monta um CharacterDetail mínimo para labels/preview no passo de revisão. */
-export function previewCreateCharacter(
-  values: CreateCharacterInput,
+type AbilityPreviewInput = Pick<
+  CreateCharacterInput,
+  | "abilityScores"
+  | "backgroundAbilityBoostMode"
+  | "backgroundAbilityBoostPlus2Slug"
+  | "backgroundAbilityBoostPlus1Slug"
+  | "backgroundAbilityBoostPlus1Slugs"
+  | "featOptions"
+>;
+
+export function previewCreateCharacterAbilityScores(
+  values: AbilityPreviewInput,
   epicBoonFeatSlugs: ReadonlySet<string>,
-): CharacterDetail {
+): CreateCharacterInput["abilityScores"] {
   const mode =
     values.backgroundAbilityBoostMode ?? BACKGROUND_BOOST_MODE_PLUS2_PLUS1;
   const plus2 = values.backgroundAbilityBoostPlus2Slug;
@@ -36,9 +45,22 @@ export function previewCreateCharacter(
             plus1Slug: plus1 as keyof typeof values.abilityScores,
           })
         : values.abilityScores;
-  const finalScores = previewFeatAbilityBoosts(
+  return previewFeatAbilityBoosts(
     afterBackground,
     values.featOptions ?? [],
+    epicBoonFeatSlugs,
+  );
+}
+
+/** Monta um CharacterDetail mínimo para labels/preview no passo de revisão. */
+export function previewCreateCharacter(
+  values: CreateCharacterInput,
+  epicBoonFeatSlugs: ReadonlySet<string>,
+): CharacterDetail {
+  const mode =
+    values.backgroundAbilityBoostMode ?? BACKGROUND_BOOST_MODE_PLUS2_PLUS1;
+  const finalScores = previewCreateCharacterAbilityScores(
+    values,
     epicBoonFeatSlugs,
   );
 

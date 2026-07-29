@@ -7,7 +7,10 @@ import { useWatch } from "react-hook-form";
 import type { FeatOption } from "@/entities/character/sheet-types";
 import { useBackgroundDetail } from "@/features/catalog/background-catalog/api/use-backgrounds";
 import { useBackgroundSkills } from "@/features/catalog/background-catalog/api/use-backgrounds";
-import { useClassDetail } from "@/features/catalog/class-catalog/api/use-classes";
+import {
+  useClassDetail,
+  useClassSpellSlots,
+} from "@/features/catalog/class-catalog/api/use-classes";
 import {
   asiFeatLevelsUpTo,
   countAsiFeatSlots,
@@ -19,6 +22,7 @@ import {
   sortedAsiSlotFeatOptions,
 } from "@/features/character/create-character/lib/feats/asi-slot-feat-options";
 import { resolveCreateCharacterFeats } from "@/features/character/create-character/lib/feats/preview-create-character-feats";
+import { previewCreateCharacterAbilityScores } from "@/features/character/create-character/lib/review/preview-create-character";
 import { skillChoiceKinds } from "@/features/character/create-character/lib/class-skills/granted-proficiencies";
 import type { CreateCharacterInput } from "@/features/character/create-character/model/create-character.schema";
 import {
@@ -77,9 +81,27 @@ export function useStepFeats(
     name: "backgroundToolItemSlug",
     defaultValue: "",
   });
+  const abilityScores = useWatch({ control, name: "abilityScores" });
+  const backgroundAbilityBoostMode = useWatch({
+    control,
+    name: "backgroundAbilityBoostMode",
+  });
+  const backgroundAbilityBoostPlus2Slug = useWatch({
+    control,
+    name: "backgroundAbilityBoostPlus2Slug",
+  });
+  const backgroundAbilityBoostPlus1Slug = useWatch({
+    control,
+    name: "backgroundAbilityBoostPlus1Slug",
+  });
+  const backgroundAbilityBoostPlus1Slugs = useWatch({
+    control,
+    name: "backgroundAbilityBoostPlus1Slugs",
+  });
 
   const feats = useFeats();
   const classDetail = useClassDetail(classSlug, !!classSlug);
+  const classSpellSlots = useClassSpellSlots(classSlug, !!classSlug);
   const backgroundDetail = useBackgroundDetail(
     backgroundSlug,
     !!backgroundSlug,
@@ -93,6 +115,44 @@ export function useStepFeats(
 
   const asiSlotCount = countAsiFeatSlots(classSlug, level);
   const asiLevels = asiFeatLevelsUpTo(classSlug, level);
+  const epicBoonFeatSlugs = useMemo(
+    () =>
+      new Set(
+        (feats.data?.data ?? [])
+          .filter((feat) => feat.categorySlug === "epic-boon")
+          .map((feat) => feat.slug),
+      ),
+    [feats.data?.data],
+  );
+  const effectiveAbilityScores = useMemo(
+    () =>
+      previewCreateCharacterAbilityScores(
+        {
+          abilityScores,
+          backgroundAbilityBoostMode,
+          backgroundAbilityBoostPlus2Slug,
+          backgroundAbilityBoostPlus1Slug,
+          backgroundAbilityBoostPlus1Slugs,
+          featOptions,
+        },
+        epicBoonFeatSlugs,
+      ),
+    [
+      abilityScores,
+      backgroundAbilityBoostMode,
+      backgroundAbilityBoostPlus2Slug,
+      backgroundAbilityBoostPlus1Slug,
+      backgroundAbilityBoostPlus1Slugs,
+      featOptions,
+      epicBoonFeatSlugs,
+    ],
+  );
+  const hasSpellcasting = (classSpellSlots.data?.data ?? []).some(
+    (row) =>
+      row.classLevel <= level &&
+      (Object.values(row.spellSlots).some((slots) => slots > 0) ||
+        (row.cantrips ?? 0) > 0),
+  );
 
   const featNameBySlug = useMemo(
     () =>
@@ -192,8 +252,15 @@ export function useStepFeats(
     const fromBackground = (backgroundSkills.data?.data ?? []).map(
       (skill) => skill.slug,
     );
-    return [...new Set([...classSkillSlugs, ...fromBackground, ...fromSpecies])];
-  }, [backgroundSkills.data?.data, classSkillSlugs, skillKinds, speciesChoices]);
+    return [
+      ...new Set([...classSkillSlugs, ...fromBackground, ...fromSpecies]),
+    ];
+  }, [
+    backgroundSkills.data?.data,
+    classSkillSlugs,
+    skillKinds,
+    speciesChoices,
+  ]);
 
   const grantedToolSlugs = useMemo(() => {
     const tool =
@@ -214,6 +281,13 @@ export function useStepFeats(
       subclassOptions,
       classFightingStyleSlugs,
       feats: feats.data?.data ?? [],
+      eligibility: {
+        level,
+        abilityScores: effectiveAbilityScores,
+        hasSpellcasting,
+        armorTrainingSlugs: classDetail.data?.armorTrainingSlugs ?? [],
+        hasFightingStyleFeature: classFightingStyleSlugs.length > 0,
+      },
     });
   }
 
@@ -244,8 +318,7 @@ export function useStepFeats(
     grantedToolSlugs,
     updateAsiSlot,
     sortedSlotFeatOptions,
-    setFightingStyle: (slug: string) =>
-      setValue("fightingStyleFeatSlug", slug),
+    setFightingStyle: (slug: string) => setValue("fightingStyleFeatSlug", slug),
     setFeatOptions: (next: FeatOption[]) => setValue("featOptions", next),
   };
 }

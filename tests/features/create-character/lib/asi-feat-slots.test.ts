@@ -7,6 +7,7 @@ import {
   countAsiFeatSlots,
 } from "@/features/character/create-character/lib/feats/asi-feat-slots";
 import { asiFeatSlotsToCharacterFeats } from "@/features/character/create-character/lib/feats/asi-feat-slots-to-feats";
+import { featSlugsGrantedOutsideSpecies } from "@/features/character/create-character/lib/feats/origin-feat-options";
 import { resolveCreateCharacterFeats } from "@/features/character/create-character/lib/feats/preview-create-character-feats";
 
 describe("asi-feat-slots", () => {
@@ -24,9 +25,7 @@ describe("asi-feat-slots", () => {
   });
 
   it("includes Fighter extra ASI at 6 and 14", () => {
-    expect(asiFeatLevelsForClass("fighter")).toEqual([
-      4, 6, 8, 12, 14, 16, 19,
-    ]);
+    expect(asiFeatLevelsForClass("fighter")).toEqual([4, 6, 8, 12, 14, 16, 19]);
     expect(countAsiFeatSlots("fighter", 6)).toBe(2);
     expect(asiFeatLevelsUpTo("fighter", 14)).toEqual([4, 6, 8, 12, 14]);
   });
@@ -69,5 +68,26 @@ describe("resolveCreateCharacterFeats", () => {
         { featSlug: "magic-initiate", instanceIndex: 0 },
       ]),
     ).toEqual([{ featSlug: "magic-initiate", instanceIndex: 0 }]);
+  });
+});
+
+describe("featSlugsGrantedOutsideSpecies", () => {
+  it("inclui o talento de origem do antecedente e os marcos ASI", () => {
+    expect(
+      featSlugsGrantedOutsideSpecies({
+        backgroundOriginFeatSlug: "tough",
+        asiFeatSlotSlugs: ["alert", ""],
+      }),
+    ).toEqual(new Set(["tough", "alert"]));
+  });
+
+  it("mantém a seleção atual da espécie disponível no campo", () => {
+    expect(
+      featSlugsGrantedOutsideSpecies({
+        backgroundOriginFeatSlug: "tough",
+        asiFeatSlotSlugs: [],
+        selectedOriginFeatSlug: "tough",
+      }),
+    ).toEqual(new Set());
   });
 });

@@ -6,15 +6,26 @@ import {
   FIGHTING_STYLE_FEAT_CATEGORY,
   collectTakenFightingStyleSlugs,
 } from "@/features/catalog/feat-catalog/lib/fighting-style-feat-options";
+import {
+  meetsFeatRequirements,
+  type FeatEligibilityContext,
+} from "@/features/catalog/feat-catalog/lib/feat-eligibility";
+import type { FeatSummary } from "@/entities/feat/types";
 
 const ASI_FEAT_SLUG = "ability-score-improvement";
 
-type FeatCatalogRow = {
-  slug: string;
-  name: string;
-  repeatable?: boolean;
-  categorySlug?: string | null;
-};
+type FeatCatalogRow = Pick<
+  FeatSummary,
+  | "slug"
+  | "name"
+  | "repeatable"
+  | "categorySlug"
+  | "minimumLevel"
+  | "abilityPrerequisites"
+  | "requiresSpellcasting"
+  | "requiredArmorTrainingSlug"
+  | "requiresFightingStyle"
+>;
 
 type SubclassOption = { optionKey: string; valueId: string };
 
@@ -30,6 +41,7 @@ export function sortedAsiSlotFeatOptions(args: {
   subclassOptions: SubclassOption[];
   classFightingStyleSlugs: string[];
   feats: FeatCatalogRow[];
+  eligibility: FeatEligibilityContext;
 }): FeatCatalogRow[] {
   const {
     slotIndex,
@@ -41,6 +53,7 @@ export function sortedAsiSlotFeatOptions(args: {
     subclassOptions,
     classFightingStyleSlugs,
     feats,
+    eligibility,
   } = args;
 
   const otherSlots = asiFeatSlotSlugs.map((slug, index) =>
@@ -64,13 +77,14 @@ export function sortedAsiSlotFeatOptions(args: {
   const allowedStyles = new Set(classFightingStyleSlugs);
 
   const list = feats.filter((feat) => {
-    if (
-      !canAddCharacterFeat(
-        previewWithoutSlot,
-        feat.slug,
-        feat.repeatable ?? false,
-      )
-    ) {
+    if (!canAddCharacterFeat(previewWithoutSlot, feat.slug)) {
+      return false;
+    }
+    const categoryAllowed =
+      feat.categorySlug === "general" ||
+      (feat.categorySlug === "epic-boon" && eligibility.level >= 19) ||
+      feat.categorySlug === FIGHTING_STYLE_FEAT_CATEGORY;
+    if (!categoryAllowed || !meetsFeatRequirements(feat, eligibility)) {
       return false;
     }
     if (feat.categorySlug !== FIGHTING_STYLE_FEAT_CATEGORY) {

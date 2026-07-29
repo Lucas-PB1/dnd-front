@@ -45,8 +45,6 @@ export function formatCharacterFeatLabel(
 export function canAddCharacterFeat(
   feats: CharacterFeat[],
   featSlug: string,
-  repeatable: boolean,
 ): boolean {
-  if (repeatable) return true;
   return !feats.some((feat) => feat.featSlug === featSlug);
 }

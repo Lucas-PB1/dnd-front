@@ -18,6 +18,8 @@ import {
   type EditFormProps,
 } from "@/features/character/character-sheet/ui/edit/edit-form-shell";
 import { CatalogSelect } from "@/features/character/create-character/ui/catalog-select";
+import { useClassDetail } from "@/features/catalog/class-catalog/api/use-classes";
+import { meetsFeatRequirements } from "@/features/catalog/feat-catalog/lib/feat-eligibility";
 import { FeatOptionsEditor } from "@/features/catalog/feat-catalog/ui/options/feat-options-editor";
 import { useFeats } from "@/features/catalog/reference-catalog/api/use-reference";
 import { Button } from "@/shared/ui/button";
@@ -29,6 +31,7 @@ export function EditFeatsForm({
 }: EditFormProps) {
   const { patch, formError, submit } = useSectionPatch(character, onSuccess);
   const feats = useFeats();
+  const classDetail = useClassDetail(character.classSlug);
   const [characterFeats, setCharacterFeats] = useState<CharacterFeat[]>(
     character.characterFeats,
   );
@@ -40,9 +43,14 @@ export function EditFeatsForm({
   const featNameBySlug = Object.fromEntries(
     (feats.data?.data ?? []).map((feat) => [feat.slug, feat.name]),
   );
-  const featRepeatableBySlug = Object.fromEntries(
-    (feats.data?.data ?? []).map((feat) => [feat.slug, feat.repeatable]),
-  );
+  const eligibility = {
+    level: character.level,
+    abilityScores: character.abilityScores,
+    hasSpellcasting: character.spellcastingAbilitySlug !== null,
+    armorTrainingSlugs: classDetail.data?.armorTrainingSlugs ?? [],
+    hasFightingStyleFeature:
+      (classDetail.data?.fightingStyleSlugs?.length ?? 0) > 0,
+  };
 
   function removeFeat(feat: CharacterFeat) {
     const key = featInstanceKey(feat.featSlug, feat.instanceIndex);
@@ -64,14 +72,15 @@ export function EditFeatsForm({
 
   function handleAddFeat() {
     if (!addFeatSlug) return;
-    const repeatable = featRepeatableBySlug[addFeatSlug] ?? false;
-    if (!canAddCharacterFeat(characterFeats, addFeatSlug, repeatable)) return;
+    if (!canAddCharacterFeat(characterFeats, addFeatSlug)) return;
     setCharacterFeats((prev) => appendCharacterFeat(prev, addFeatSlug));
     setAddFeatSlug("");
   }
 
-  const addableFeats = (feats.data?.data ?? []).filter((feat) =>
-    canAddCharacterFeat(characterFeats, feat.slug, feat.repeatable),
+  const addableFeats = (feats.data?.data ?? []).filter(
+    (feat) =>
+      canAddCharacterFeat(characterFeats, feat.slug) &&
+      meetsFeatRequirements(feat, eligibility),
   );
 
   return (

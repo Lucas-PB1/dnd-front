@@ -5,10 +5,17 @@ import type { Control, UseFormSetValue } from "react-hook-form";
 import { useWatch } from "react-hook-form";
 
 import { featInstanceKey } from "@/entities/character/lib/character-feat";
-import type { FeatOption, SpeciesChoice } from "@/entities/character/sheet-types";
+import type {
+  FeatOption,
+  SpeciesChoice,
+} from "@/entities/character/sheet-types";
 import { asiFeatSlotsToCharacterFeats } from "@/features/character/create-character/lib/feats/asi-feat-slots-to-feats";
 import { skillChoiceKinds } from "@/features/character/create-character/lib/class-skills/granted-proficiencies";
-import { resolveCreateCharacterFeats } from "@/features/character/create-character/lib/feats/preview-create-character-feats";
+import { featSlugsGrantedOutsideSpecies } from "@/features/character/create-character/lib/feats/origin-feat-options";
+import {
+  HUMAN_ORIGIN_FEAT_KIND,
+  resolveCreateCharacterFeats,
+} from "@/features/character/create-character/lib/feats/preview-create-character-feats";
 import type { CreateCharacterInput } from "@/features/character/create-character/model/create-character.schema";
 import {
   useBackgroundDetail,
@@ -100,6 +107,18 @@ export function useStepSpeciesChoices(
     return tool ? [tool] : [];
   }, [backgroundDetail.data?.toolItemSlug, backgroundToolItemSlug]);
 
+  const featSlugsFromOtherSources = useMemo(
+    () =>
+      featSlugsGrantedOutsideSpecies({
+        backgroundOriginFeatSlug: backgroundDetail.data?.originFeatSlug,
+        asiFeatSlotSlugs,
+        selectedOriginFeatSlug: speciesChoices.find(
+          (choice) => choice.choiceKind === HUMAN_ORIGIN_FEAT_KIND,
+        )?.choiceSlug,
+      }),
+    [asiFeatSlotSlugs, backgroundDetail.data?.originFeatSlug, speciesChoices],
+  );
+
   const groups = useMemo((): SpeciesTraitChoiceGroup[] => {
     const map = new Map<
       string,
@@ -141,9 +160,14 @@ export function useStepSpeciesChoices(
     return [...map.entries()].map(([kind, group]) => ({
       kind,
       traitName: group.traitName,
-      options: group.options,
+      options:
+        kind === HUMAN_ORIGIN_FEAT_KIND
+          ? group.options.filter(
+              (option) => !featSlugsFromOtherSources.has(option.choiceSlug),
+            )
+          : group.options,
     }));
-  }, [speciesChoices, traitChoices.data?.data]);
+  }, [featSlugsFromOtherSources, speciesChoices, traitChoices.data?.data]);
 
   const featNameBySlug = useMemo(
     () =>
@@ -160,11 +184,7 @@ export function useStepSpeciesChoices(
         asiFeatSlotsToCharacterFeats(asiFeatSlotSlugs),
         speciesChoices,
       ),
-    [
-      asiFeatSlotSlugs,
-      backgroundDetail.data?.originFeatSlug,
-      speciesChoices,
-    ],
+    [asiFeatSlotSlugs, backgroundDetail.data?.originFeatSlug, speciesChoices],
   );
 
   const humanOriginFeatKeys = useMemo(() => {

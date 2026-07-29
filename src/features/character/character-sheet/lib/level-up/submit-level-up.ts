@@ -36,7 +36,9 @@ type SubmitLevelUpInput = {
   hasFeatOptions: boolean;
   featNameBySlug: Record<string, string>;
   feats: FeatCatalogItem[];
-  mutateAsync: (payload: LevelUpPayload) => Promise<CharacterDetail | undefined>;
+  mutateAsync: (
+    payload: LevelUpPayload,
+  ) => Promise<CharacterDetail | undefined>;
 };
 
 export type SubmitLevelUpResult =
@@ -60,7 +62,10 @@ export async function submitLevelUp({
   mutateAsync,
 }: SubmitLevelUpInput): Promise<SubmitLevelUpResult> {
   if (data.isAsiOrFeatLevel && asiMode && selectedFeatSlug) {
-    return { ok: false, error: "Escolha ASI ou talento neste nível — não os dois." };
+    return {
+      ok: false,
+      error: "Escolha ASI ou talento neste nível — não os dois.",
+    };
   }
   if (
     data.isAsiOrFeatLevel &&
@@ -95,11 +100,7 @@ export async function submitLevelUp({
     const feat = feats.find((item) => item.slug === selectedFeatSlug);
     if (
       feat &&
-      canAddCharacterFeat(
-        character.characterFeats,
-        selectedFeatSlug,
-        feat.repeatable,
-      )
+      canAddCharacterFeat(character.characterFeats, selectedFeatSlug)
     ) {
       if (hasFeatOptions) {
         const incomplete = await findIncompleteCreateFeatOptions(

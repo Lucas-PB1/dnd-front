@@ -7,16 +7,26 @@ import type {
   FeatOption,
 } from "@/entities/character/sheet-types";
 import type { LevelUpAsiDistributionMode } from "@/entities/character/session-types";
+import type { FeatSummary } from "@/entities/feat/types";
 import { LevelUpAsiPicker } from "@/features/character/character-sheet/ui/level-up/level-up-asi-picker";
 import { CatalogSelect } from "@/features/character/create-character/ui/catalog-select";
+import { useClassDetail } from "@/features/catalog/class-catalog/api/use-classes";
 import { useFeatOptions } from "@/features/catalog/feat-catalog/api/use-feat-options";
+import { meetsFeatRequirements } from "@/features/catalog/feat-catalog/lib/feat-eligibility";
 import { FeatOptionsEditor } from "@/features/catalog/feat-catalog/ui/options/feat-options-editor";
 
-type FeatCatalogItem = {
-  slug: string;
-  name: string;
-  repeatable: boolean;
-};
+type FeatCatalogItem = Pick<
+  FeatSummary,
+  | "slug"
+  | "name"
+  | "repeatable"
+  | "categorySlug"
+  | "minimumLevel"
+  | "abilityPrerequisites"
+  | "requiresSpellcasting"
+  | "requiredArmorTrainingSlug"
+  | "requiresFightingStyle"
+>;
 
 type LevelUpAsiFeatPanelProps = {
   character: CharacterDetail;
@@ -55,17 +65,28 @@ export function LevelUpAsiFeatPanel({
   onLevelUpFeatOptionsChange,
   onInteraction,
 }: LevelUpAsiFeatPanelProps) {
+  const classDetail = useClassDetail(character.classSlug);
   const selectedFeatOptionDefs = useFeatOptions(
     selectedFeatSlug,
     !!selectedFeatSlug,
   );
   const hasFeatOptions = (selectedFeatOptionDefs.data?.data.length ?? 0) > 0;
+  const nextLevel = character.level + 1;
+  const eligibility = {
+    level: nextLevel,
+    abilityScores: character.abilityScores,
+    hasSpellcasting: character.spellcastingAbilitySlug !== null,
+    armorTrainingSlugs: classDetail.data?.armorTrainingSlugs ?? [],
+    hasFightingStyleFeature:
+      (classDetail.data?.fightingStyleSlugs?.length ?? 0) > 0,
+  };
 
   return (
     <div className="space-y-4 rounded-md border border-border bg-muted/30 px-3 py-3 text-sm">
       <p className="text-muted-foreground">
-        Neste nível escolha <span className="font-medium text-foreground">ASI</span>{" "}
-        ou um <span className="font-medium text-foreground">talento</span> (não os
+        Neste nível escolha{" "}
+        <span className="font-medium text-foreground">ASI</span> ou um{" "}
+        <span className="font-medium text-foreground">talento</span> (não os
         dois).
       </p>
       <LevelUpAsiPicker
@@ -96,12 +117,13 @@ export function LevelUpAsiFeatPanel({
             options={[
               { value: "", label: "Nenhum talento" },
               ...feats
-                .filter((feat) =>
-                  canAddCharacterFeat(
-                    character.characterFeats,
-                    feat.slug,
-                    feat.repeatable,
-                  ),
+                .filter(
+                  (feat) =>
+                    canAddCharacterFeat(character.characterFeats, feat.slug) &&
+                    (feat.categorySlug === "general" ||
+                      (feat.categorySlug === "epic-boon" && nextLevel >= 19) ||
+                      feat.categorySlug === "fighting-style") &&
+                    meetsFeatRequirements(feat, eligibility),
                 )
                 .map((feat) => ({
                   value: feat.slug,

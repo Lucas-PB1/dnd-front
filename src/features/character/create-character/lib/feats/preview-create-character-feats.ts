@@ -2,7 +2,7 @@ import type { CharacterFeat } from "@/entities/character/sheet-types";
 import type { SpeciesChoice } from "@/entities/character/sheet-types";
 import { nextCharacterFeatInstanceIndex } from "@/entities/character/lib/character-feat";
 
-const HUMAN_ORIGIN_FEAT_KIND = "human_origin_feat";
+export const HUMAN_ORIGIN_FEAT_KIND = "human_origin_feat";
 
 /** Espelha resolveBackgroundOriginCharacterFeats + resolveHumanOriginCharacterFeats na API. */
 export function resolveCreateCharacterFeats(
