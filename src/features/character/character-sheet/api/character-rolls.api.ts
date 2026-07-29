@@ -15,20 +15,67 @@ export type CharacterRollResult = {
   note?: string;
 };
 
+export type RollAttackPayload = {
+  itemSlug: string;
+  mode: "melee" | "ranged";
+  advantage?: AdvantageMode;
+  automatic?: boolean;
+  studiedAttack?: boolean;
+  doorKick?: boolean;
+  steadyAim?: boolean;
+  strokeOfLuck?: boolean;
+  assassinate?: boolean;
+  preciseHunter?: boolean;
+};
+
+export type RollDamagePayload = {
+  itemSlug: string;
+  mode: "melee" | "ranged";
+  critical?: boolean;
+  grazeMiss?: boolean;
+  headShot?: boolean;
+  sightedReroll?: boolean;
+  brutalStrike?: boolean;
+  divineFury?: boolean;
+  psiStrike?: boolean;
+  monsterSlayer?: boolean;
+  sneakAttack?: boolean;
+  cunningStrikeEffects?: string[];
+  poisonousSneak?: boolean;
+  assassinSurprise?: boolean;
+  assassinDeathStrike?: boolean;
+  assassinPoisonFailedSave?: boolean;
+  divineSmite?: boolean;
+  smiteSlotLevel?: number;
+  smiteVsUndeadOrFiend?: boolean;
+  huntersMark?: boolean;
+  colossusSlayer?: boolean;
+  dreadfulStrikes?: boolean;
+  dreadAmbusher?: boolean;
+};
+
+export type RollSkillPayload = {
+  skillSlug: string;
+  advantage?: AdvantageMode;
+  strokeOfLuck?: boolean;
+};
+
+export type RollSavingThrowPayload = {
+  abilitySlug: string;
+  advantage?: AdvantageMode;
+  indomitable?: boolean;
+  strokeOfLuck?: boolean;
+};
+
+export type RollInitiativePayload = {
+  advantage?: AdvantageMode;
+  strokeOfLuck?: boolean;
+};
+
 export async function rollCharacterAttack(
   accessToken: string,
   characterId: string,
-  payload: {
-    itemSlug: string;
-    mode: "melee" | "ranged";
-    advantage?: AdvantageMode;
-    automatic?: boolean;
-    studiedAttack?: boolean;
-    doorKick?: boolean;
-    steadyAim?: boolean;
-    strokeOfLuck?: boolean;
-    assassinate?: boolean;
-  },
+  payload: RollAttackPayload,
 ) {
   return gameFetch<CharacterRollResult>(
     `/characters/${characterId}/rolls/attack`,
@@ -40,27 +87,7 @@ export async function rollCharacterAttack(
 export async function rollCharacterDamage(
   accessToken: string,
   characterId: string,
-  payload: {
-    itemSlug: string;
-    mode: "melee" | "ranged";
-    critical?: boolean;
-    grazeMiss?: boolean;
-    headShot?: boolean;
-    sightedReroll?: boolean;
-    brutalStrike?: boolean;
-    divineFury?: boolean;
-    psiStrike?: boolean;
-    monsterSlayer?: boolean;
-    sneakAttack?: boolean;
-    cunningStrikeEffects?: string[];
-    poisonousSneak?: boolean;
-    assassinSurprise?: boolean;
-    assassinDeathStrike?: boolean;
-    assassinPoisonFailedSave?: boolean;
-    divineSmite?: boolean;
-    smiteSlotLevel?: number;
-    smiteVsUndeadOrFiend?: boolean;
-  },
+  payload: RollDamagePayload,
 ) {
   return gameFetch<CharacterRollResult>(
     `/characters/${characterId}/rolls/damage`,
@@ -72,11 +99,7 @@ export async function rollCharacterDamage(
 export async function rollCharacterSkill(
   accessToken: string,
   characterId: string,
-  payload: {
-    skillSlug: string;
-    advantage?: AdvantageMode;
-    strokeOfLuck?: boolean;
-  },
+  payload: RollSkillPayload,
 ) {
   return gameFetch<CharacterRollResult>(
     `/characters/${characterId}/rolls/skill`,
@@ -88,12 +111,7 @@ export async function rollCharacterSkill(
 export async function rollCharacterSavingThrow(
   accessToken: string,
   characterId: string,
-  payload: {
-    abilitySlug: string;
-    advantage?: AdvantageMode;
-    indomitable?: boolean;
-    strokeOfLuck?: boolean;
-  },
+  payload: RollSavingThrowPayload,
 ) {
   return gameFetch<CharacterRollResult>(
     `/characters/${characterId}/rolls/saving-throw`,
@@ -105,7 +123,7 @@ export async function rollCharacterSavingThrow(
 export async function rollCharacterInitiative(
   accessToken: string,
   characterId: string,
-  payload: { advantage?: AdvantageMode; strokeOfLuck?: boolean } = {},
+  payload: RollInitiativePayload = {},
 ) {
   return gameFetch<CharacterRollResult>(
     `/characters/${characterId}/rolls/initiative`,

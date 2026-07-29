@@ -26,6 +26,7 @@ import { CombatFighterPanel } from "@/features/character/character-sheet/ui/beyo
 import { CombatRoguePanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-rogue-panel";
 import { CombatMonkPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-monk-panel";
 import { CombatPaladinPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-paladin-panel";
+import { CombatRangerPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-ranger-panel";
 import { CombatClassResourcesPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-class-resources-panel";
 import { CombatEquipmentWarnings } from "@/features/character/character-sheet/ui/beyond/combat/combat-equipment-warnings";
 import {
@@ -299,6 +300,19 @@ export function BeyondCombatHub({
         level={character.level}
         combatNotes={
           character.classSlug === "paladin"
+            ? character.classCombatNotes
+            : undefined
+        }
+        state={state}
+      />
+
+      <CombatRangerPanel
+        characterId={characterId}
+        classSlug={character.classSlug}
+        subclassSlug={character.subclassSlug}
+        level={character.level}
+        combatNotes={
+          character.classSlug === "ranger"
             ? character.classCombatNotes
             : undefined
         }

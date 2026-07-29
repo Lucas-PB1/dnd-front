@@ -1,16 +1,14 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import type { CharacterState } from "@/entities/character/session-types";
 import {
   executePaladinTableAction,
-  sessionKeys,
-  type FighterTableActionResult,
   type PaladinTableActionSlug,
 } from "@/features/character/character-sheet/api/character-session.api";
-import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
+import { useTableActionMutation } from "@/features/character/character-sheet/api/use-table-action-mutation";
+import { TableActionFeedback } from "@/features/character/character-sheet/ui/beyond/combat/table-action-feedback";
 import { Button } from "@/shared/ui/button";
 
 type CombatPaladinPanelProps = {
@@ -41,35 +39,8 @@ export function CombatPaladinPanel({
   combatNotes,
   state,
 }: CombatPaladinPanelProps) {
-  const { requireToken, handleUnauthorized } = useGameAuth(
-    `/characters/${characterId}`,
-  );
-  const queryClient = useQueryClient();
-  const [lastResult, setLastResult] =
-    useState<FighterTableActionResult | null>(null);
   const [healAmount, setHealAmount] = useState(1);
-
-  const action = useMutation({
-    mutationFn: async (payload: {
-      actionSlug: PaladinTableActionSlug;
-      amount?: number;
-    }) => {
-      try {
-        return await executePaladinTableAction(
-          requireToken(),
-          characterId,
-          payload,
-        );
-      } catch (error) {
-        return handleUnauthorized(error);
-      }
-    },
-    onSuccess: (result) => {
-      if (!result) return;
-      queryClient.setQueryData(sessionKeys.state(characterId), result.state);
-      setLastResult(result);
-    },
-  });
+  const action = useTableActionMutation(characterId, executePaladinTableAction);
 
   if (classSlug !== "paladin") return null;
 
@@ -118,7 +89,10 @@ export function CombatPaladinPanel({
               variant="outline"
               disabled={action.isPending || poolRemaining < healAmount}
               onClick={() =>
-                action.mutate({ actionSlug: "lay-on-hands", amount: healAmount })
+                action.mutate({
+                  actionSlug: "lay-on-hands",
+                  amount: healAmount,
+                })
               }
             >
               Curar
@@ -170,18 +144,10 @@ export function CombatPaladinPanel({
         </ul>
       ) : null}
 
-      {lastResult ? (
-        <p className="mt-2 text-sm text-secondary" role="status">
-          {lastResult.note}
-        </p>
-      ) : null}
-      {action.error ? (
-        <p className="mt-2 text-sm text-destructive" role="alert">
-          {action.error instanceof Error
-            ? action.error.message
-            : "Não foi possível executar a ação"}
-        </p>
-      ) : null}
+      <TableActionFeedback
+        lastResultNote={action.lastResult?.note}
+        error={action.error}
+      />
     </div>
   );
 }

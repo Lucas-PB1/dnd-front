@@ -1,16 +1,12 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-
 import type { CharacterState } from "@/entities/character/session-types";
 import {
   executeMonkTableAction,
-  sessionKeys,
-  type FighterTableActionResult,
   type MonkTableActionSlug,
 } from "@/features/character/character-sheet/api/character-session.api";
-import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
+import { useTableActionMutation } from "@/features/character/character-sheet/api/use-table-action-mutation";
+import { TableActionFeedback } from "@/features/character/character-sheet/ui/beyond/combat/table-action-feedback";
 import { Button } from "@/shared/ui/button";
 
 type CombatMonkPanelProps = {
@@ -31,10 +27,30 @@ type MonkAction = {
 };
 
 const MONK_ACTIONS: readonly MonkAction[] = [
-  { slug: "flurry-of-blows", label: "Torrente de Golpes", minLevel: 2, spendsFocus: true },
-  { slug: "patient-defense", label: "Defesa Paciente", minLevel: 2, spendsFocus: true },
-  { slug: "step-of-the-wind", label: "Passo do Vento", minLevel: 2, spendsFocus: true },
-  { slug: "stunning-strike", label: "Golpe Atordoante", minLevel: 5, spendsFocus: true },
+  {
+    slug: "flurry-of-blows",
+    label: "Torrente de Golpes",
+    minLevel: 2,
+    spendsFocus: true,
+  },
+  {
+    slug: "patient-defense",
+    label: "Defesa Paciente",
+    minLevel: 2,
+    spendsFocus: true,
+  },
+  {
+    slug: "step-of-the-wind",
+    label: "Passo do Vento",
+    minLevel: 2,
+    spendsFocus: true,
+  },
+  {
+    slug: "stunning-strike",
+    label: "Golpe Atordoante",
+    minLevel: 5,
+    spendsFocus: true,
+  },
   {
     slug: "open-hand-technique",
     label: "Técnica da Mão Espalmada",
@@ -80,31 +96,7 @@ export function CombatMonkPanel({
   combatNotes,
   state,
 }: CombatMonkPanelProps) {
-  const { requireToken, handleUnauthorized } = useGameAuth(
-    `/characters/${characterId}`,
-  );
-  const queryClient = useQueryClient();
-  const [lastResult, setLastResult] =
-    useState<FighterTableActionResult | null>(null);
-
-  const action = useMutation({
-    mutationFn: async (actionSlug: MonkTableActionSlug) => {
-      try {
-        return await executeMonkTableAction(
-          requireToken(),
-          characterId,
-          actionSlug,
-        );
-      } catch (error) {
-        return handleUnauthorized(error);
-      }
-    },
-    onSuccess: (result) => {
-      if (!result) return;
-      queryClient.setQueryData(sessionKeys.state(characterId), result.state);
-      setLastResult(result);
-    },
-  });
+  const action = useTableActionMutation(characterId, executeMonkTableAction);
 
   if (classSlug !== "monk") return null;
 
@@ -158,18 +150,10 @@ export function CombatMonkPanel({
         </ul>
       ) : null}
 
-      {lastResult ? (
-        <p className="mt-2 text-sm text-secondary" role="status">
-          {lastResult.note}
-        </p>
-      ) : null}
-      {action.error ? (
-        <p className="mt-2 text-sm text-destructive" role="alert">
-          {action.error instanceof Error
-            ? action.error.message
-            : "Não foi possível executar a ação"}
-        </p>
-      ) : null}
+      <TableActionFeedback
+        lastResultNote={action.lastResult?.note}
+        error={action.error}
+      />
     </div>
   );
 }

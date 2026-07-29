@@ -1,16 +1,14 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import type { CharacterState } from "@/entities/character/session-types";
 import {
   executeRogueTableAction,
-  sessionKeys,
-  type FighterTableActionResult,
   type RogueTableActionSlug,
 } from "@/features/character/character-sheet/api/character-session.api";
-import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
+import { useTableActionMutation } from "@/features/character/character-sheet/api/use-table-action-mutation";
+import { TableActionFeedback } from "@/features/character/character-sheet/ui/beyond/combat/table-action-feedback";
 import { useSheetRolls } from "@/features/character/character-sheet/ui/beyond/layout/sheet-rolls";
 import { Button } from "@/shared/ui/button";
 
@@ -31,36 +29,21 @@ export function CombatRoguePanel({
   combatNotes,
   state,
 }: CombatRoguePanelProps) {
-  const { requireToken, handleUnauthorized } = useGameAuth(
-    `/characters/${characterId}`,
-  );
-  const queryClient = useQueryClient();
   const rolls = useSheetRolls();
   const [checkTotal, setCheckTotal] = useState("10");
   const [dc, setDc] = useState("15");
   const [usePsiDie, setUsePsiDie] = useState(false);
-  const [lastResult, setLastResult] =
-    useState<FighterTableActionResult | null>(null);
-
-  const action = useMutation({
-    mutationFn: async (actionSlug: RogueTableActionSlug) => {
-      try {
-        return await executeRogueTableAction(requireToken(), characterId, {
-          actionSlug,
-          checkTotal: Number(checkTotal) || undefined,
-          dc: Number(dc) || undefined,
-          usePsiDie,
-        });
-      } catch (error) {
-        return handleUnauthorized(error);
-      }
+  const action = useTableActionMutation(
+    characterId,
+    (token: string, id: string, actionSlug: RogueTableActionSlug) => {
+      return executeRogueTableAction(token, id, {
+        actionSlug,
+        checkTotal: Number(checkTotal) || undefined,
+        dc: Number(dc) || undefined,
+        usePsiDie,
+      });
     },
-    onSuccess: (result) => {
-      if (!result) return;
-      queryClient.setQueryData(sessionKeys.state(characterId), result.state);
-      setLastResult(result);
-    },
-  });
+  );
 
   if (classSlug !== "rogue") return null;
 
@@ -235,8 +218,7 @@ export function CombatRoguePanel({
           variant="outline"
           className="mt-2"
           disabled={
-            action.isPending ||
-            (resource("spell-thief")?.remaining ?? 0) <= 0
+            action.isPending || (resource("spell-thief")?.remaining ?? 0) <= 0
           }
           onClick={() => action.mutate("spell-thief")}
         >
@@ -264,8 +246,7 @@ export function CombatRoguePanel({
           variant="outline"
           className="mt-2"
           disabled={
-            action.isPending ||
-            (resource("arachnoid-web")?.remaining ?? 0) <= 0
+            action.isPending || (resource("arachnoid-web")?.remaining ?? 0) <= 0
           }
           onClick={() => action.mutate("arachnoid-web")}
         >
@@ -281,18 +262,10 @@ export function CombatRoguePanel({
         </ul>
       ) : null}
 
-      {lastResult ? (
-        <p className="mt-2 text-sm text-secondary" role="status">
-          {lastResult.note}
-        </p>
-      ) : null}
-      {action.error ? (
-        <p className="mt-2 text-sm text-destructive" role="alert">
-          {action.error instanceof Error
-            ? action.error.message
-            : "Não foi possível executar a ação"}
-        </p>
-      ) : null}
+      <TableActionFeedback
+        lastResultNote={action.lastResult?.note}
+        error={action.error}
+      />
     </div>
   );
 }

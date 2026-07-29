@@ -169,10 +169,7 @@ export async function toggleReckless(
   );
 }
 
-export async function recoverAllRage(
-  accessToken: string,
-  characterId: string,
-) {
+export async function recoverAllRage(accessToken: string, characterId: string) {
   return gameFetch<CharacterState>(
     `/characters/${characterId}/resources/rage/recover-all`,
     accessToken,
@@ -222,6 +219,8 @@ export type FighterTableActionResult = {
   resourceSpent: boolean;
   note: string;
 };
+
+export type TableActionResult = FighterTableActionResult;
 
 export type PsiWarriorActionSlug =
   | "protective-field"
@@ -400,6 +399,29 @@ export async function executePaladinTableAction(
     {
       method: "POST",
       body: JSON.stringify(payload),
+    },
+  );
+}
+
+export type RangerTableActionSlug =
+  | "hunters-mark-free"
+  | "tireless"
+  | "natures-veil"
+  | "fey-reinforcements"
+  | "misty-wanderer"
+  | "primal-companion";
+
+export async function executeRangerTableAction(
+  accessToken: string,
+  characterId: string,
+  actionSlug: RangerTableActionSlug,
+) {
+  return gameFetch<FighterTableActionResult>(
+    `/characters/${characterId}/ranger/table-action`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify({ actionSlug }),
     },
   );
 }

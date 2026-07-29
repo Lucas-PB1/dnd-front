@@ -203,6 +203,15 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
                     : undefined
                 }
                 onDivineSmiteResolved={invalidateState}
+                ranger={
+                  character.classSlug === "ranger"
+                    ? {
+                        level: character.level,
+                        subclassSlug: character.subclassSlug,
+                      }
+                    : undefined
+                }
+                onDreadAmbusherResolved={invalidateState}
               />
             ))}
           </ul>
