@@ -19,6 +19,13 @@ type WeaponAttackCardProps = {
   onFire?: (itemSlug: string, shots?: number) => void;
   onHeadShot?: () => void | Promise<void>;
   canHeadShot?: boolean;
+  canStudiedAttack?: boolean;
+  canDoorKick?: boolean;
+  canPsiStrike?: boolean;
+  canMonsterSlayer?: boolean;
+  canPrecisionAttack?: boolean;
+  onSpendSuperiority?: () => void | Promise<void>;
+  onSpendPsi?: () => void | Promise<void>;
 };
 
 const ADVANTAGE_OPTIONS: { id: AdvantageMode; label: string }[] = [
@@ -85,6 +92,13 @@ export function WeaponAttackCard({
   onFire,
   onHeadShot,
   canHeadShot = false,
+  canStudiedAttack = false,
+  canDoorKick = false,
+  canPsiStrike = false,
+  canMonsterSlayer = false,
+  canPrecisionAttack = false,
+  onSpendSuperiority,
+  onSpendPsi,
 }: WeaponAttackCardProps) {
   const rolls = useSheetRolls();
   const busy = rolls.attack.isPending || rolls.damage.isPending;
@@ -92,6 +106,8 @@ export function WeaponAttackCard({
     attack.attackDisadvantage ? "disadvantage" : "normal",
   );
   const [automatic, setAutomatic] = useState(false);
+  const [studiedAttack, setStudiedAttack] = useState(false);
+  const [doorKick, setDoorKick] = useState(false);
   const hasChamber = attack.reloadCapacity != null;
   const shotsLeft =
     chamberRemaining ?? (hasChamber ? attack.reloadCapacity : null);
@@ -188,6 +204,36 @@ export function WeaponAttackCard({
               Automática
             </button>
           ) : null}
+          {canStudiedAttack ? (
+            <button
+              type="button"
+              className={cn(
+                "rounded-md border px-2 py-0.5 text-[0.7rem] font-medium transition-colors",
+                studiedAttack
+                  ? "border-primary/50 bg-primary/15 text-primary"
+                  : "border-border/70 bg-muted/20 text-muted-foreground hover:bg-muted/40",
+              )}
+              aria-pressed={studiedAttack}
+              onClick={() => setStudiedAttack((value) => !value)}
+            >
+              Estudado
+            </button>
+          ) : null}
+          {canDoorKick ? (
+            <button
+              type="button"
+              className={cn(
+                "rounded-md border px-2 py-0.5 text-[0.7rem] font-medium transition-colors",
+                doorKick
+                  ? "border-primary/50 bg-primary/15 text-primary"
+                  : "border-border/70 bg-muted/20 text-muted-foreground hover:bg-muted/40",
+              )}
+              aria-pressed={doorKick}
+              onClick={() => setDoorKick((value) => !value)}
+            >
+              1ª rodada
+            </button>
+          ) : null}
         </div>
 
         <div className="mt-2 flex flex-wrap gap-2">
@@ -205,6 +251,8 @@ export function WeaponAttackCard({
                 mode: attack.mode,
                 advantage,
                 automatic: automatic || undefined,
+                studiedAttack: studiedAttack || undefined,
+                doorKick: doorKick || undefined,
               });
             }}
           >
@@ -259,6 +307,62 @@ export function WeaponAttackCard({
               }
             >
               Golpe Brutal (+{attack.brutalStrikeDice})
+            </Button>
+          ) : null}
+          {canPsiStrike ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              disabled={busy}
+              title="Gasta 1 Dado de Energia Psiônica"
+              onClick={async () => {
+                if (onSpendPsi) await onSpendPsi();
+                rolls.damage.mutate({
+                  itemSlug: attack.itemSlug,
+                  mode: attack.mode,
+                  psiStrike: true,
+                });
+              }}
+            >
+              Golpe Psiônico
+            </Button>
+          ) : null}
+          {canMonsterSlayer ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              disabled={busy}
+              title=" +1d10 vs Aberração, Dragão, Feérico, Corruptor, Monstruosidade, Gosma ou Morto-vivo"
+              onClick={() =>
+                rolls.damage.mutate({
+                  itemSlug: attack.itemSlug,
+                  mode: attack.mode,
+                  monsterSlayer: true,
+                })
+              }
+            >
+              Matar Monstro (+1d10)
+            </Button>
+          ) : null}
+          {canPrecisionAttack ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              disabled={busy}
+              title="Gasta 1 Dado de Superioridade e soma ao dano/ataque"
+              onClick={async () => {
+                if (onSpendSuperiority) await onSpendSuperiority();
+                rolls.damage.mutate({
+                  itemSlug: attack.itemSlug,
+                  mode: attack.mode,
+                  precisionAttack: true,
+                });
+              }}
+            >
+              Superioridade
             </Button>
           ) : null}
           {canHeadShot ? (

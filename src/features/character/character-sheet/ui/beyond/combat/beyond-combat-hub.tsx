@@ -22,6 +22,7 @@ import {
 } from "@/features/character/character-sheet/api/use-character-state";
 import type { ResourceDieRoll } from "@/entities/character/session-types";
 import { CombatBarbarianPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-barbarian-panel";
+import { CombatFighterPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-fighter-panel";
 import { CombatClassResourcesPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-class-resources-panel";
 import { CombatEquipmentWarnings } from "@/features/character/character-sheet/ui/beyond/combat/combat-equipment-warnings";
 import {
@@ -245,6 +246,20 @@ export function BeyondCombatHub({
         characterId={characterId}
         classSlug={character.classSlug}
         combatNotes={character.classCombatNotes}
+        state={state}
+      />
+
+      <CombatFighterPanel
+        characterId={characterId}
+        classSlug={character.classSlug}
+        subclassSlug={character.subclassSlug}
+        level={character.level}
+        attacksPerAction={character.attacksPerAction}
+        combatNotes={
+          character.classSlug === "fighter"
+            ? character.classCombatNotes
+            : undefined
+        }
         state={state}
       />
 

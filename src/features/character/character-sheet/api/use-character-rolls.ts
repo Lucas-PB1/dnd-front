@@ -39,6 +39,8 @@ export function useCharacterRolls(
       mode: "melee" | "ranged";
       advantage?: AdvantageMode;
       automatic?: boolean;
+      studiedAttack?: boolean;
+      doorKick?: boolean;
     }) => run(rollCharacterAttack, args),
     onSuccess: onResult,
   });
@@ -53,6 +55,9 @@ export function useCharacterRolls(
       sightedReroll?: boolean;
       brutalStrike?: boolean;
       divineFury?: boolean;
+      psiStrike?: boolean;
+      monsterSlayer?: boolean;
+      precisionAttack?: boolean;
     }) => run(rollCharacterDamage, args),
     onSuccess: onResult,
   });

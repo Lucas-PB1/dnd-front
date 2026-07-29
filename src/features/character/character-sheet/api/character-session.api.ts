@@ -179,3 +179,80 @@ export async function recoverAllRage(
     { method: "POST", body: "{}" },
   );
 }
+
+export type SecondWindResult = {
+  state: CharacterState;
+  expression: string;
+  healAmount: number;
+  hitPointsCurrent: number;
+  note?: string;
+};
+
+export type TacticalMindResult = {
+  state: CharacterState;
+  expression: string;
+  roll: number;
+  newTotal: number;
+  success: boolean;
+  resourceSpent: boolean;
+  note: string;
+};
+
+export type ActionSurgeResult = {
+  state: CharacterState;
+  note: string;
+};
+
+export type BattleMasterManeuver = {
+  slug: string;
+  name: string;
+  description: string;
+  timing: string;
+  addsToDamage: boolean;
+  addsToAttack: boolean;
+};
+
+export async function useSecondWind(
+  accessToken: string,
+  characterId: string,
+) {
+  return gameFetch<SecondWindResult>(
+    `/characters/${characterId}/fighter/second-wind`,
+    accessToken,
+    { method: "POST", body: "{}" },
+  );
+}
+
+export async function useTacticalMind(
+  accessToken: string,
+  characterId: string,
+  checkTotal: number,
+  dc: number,
+) {
+  return gameFetch<TacticalMindResult>(
+    `/characters/${characterId}/fighter/tactical-mind`,
+    accessToken,
+    { method: "POST", body: JSON.stringify({ checkTotal, dc }) },
+  );
+}
+
+export async function useActionSurge(
+  accessToken: string,
+  characterId: string,
+) {
+  return gameFetch<ActionSurgeResult>(
+    `/characters/${characterId}/fighter/action-surge`,
+    accessToken,
+    { method: "POST", body: "{}" },
+  );
+}
+
+export async function listBattleMasterManeuvers(
+  accessToken: string,
+  characterId: string,
+) {
+  return gameFetch<BattleMasterManeuver[]>(
+    `/characters/${characterId}/fighter/maneuvers`,
+    accessToken,
+  );
+}

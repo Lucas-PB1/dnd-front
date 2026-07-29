@@ -23,6 +23,8 @@ export async function rollCharacterAttack(
     mode: "melee" | "ranged";
     advantage?: AdvantageMode;
     automatic?: boolean;
+    studiedAttack?: boolean;
+    doorKick?: boolean;
   },
 ) {
   return gameFetch<CharacterRollResult>(
@@ -44,6 +46,9 @@ export async function rollCharacterDamage(
     sightedReroll?: boolean;
     brutalStrike?: boolean;
     divineFury?: boolean;
+    psiStrike?: boolean;
+    monsterSlayer?: boolean;
+    precisionAttack?: boolean;
   },
 ) {
   return gameFetch<CharacterRollResult>(

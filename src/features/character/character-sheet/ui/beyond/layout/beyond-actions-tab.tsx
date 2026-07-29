@@ -157,6 +157,37 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
                   character.level >= 20 &&
                   attack.mode === "ranged"
                 }
+                canStudiedAttack={
+                  character.classSlug === "fighter" && character.level >= 13
+                }
+                canDoorKick={
+                  character.subclassSlug === "dungeoneer" &&
+                  character.level >= 3
+                }
+                canPsiStrike={
+                  character.subclassSlug === "psi-warrior" &&
+                  character.level >= 3
+                }
+                canMonsterSlayer={
+                  character.subclassSlug === "dungeoneer" &&
+                  character.level >= 10
+                }
+                canPrecisionAttack={
+                  character.subclassSlug === "battle-master" &&
+                  character.level >= 3
+                }
+                onSpendPsi={async () => {
+                  await spendRisk.mutateAsync({
+                    resourceSlug: "psi-energy-dice",
+                    amount: 1,
+                  });
+                }}
+                onSpendSuperiority={async () => {
+                  await spendRisk.mutateAsync({
+                    resourceSlug: "superiority-dice",
+                    amount: 1,
+                  });
+                }}
               />
             ))}
           </ul>

@@ -70,6 +70,7 @@ export type CharacterDetail = {
   speedPenaltyMeters?: 0 | 3;
   itemSpeedBonusMeters?: number;
   classCombatNotes?: string[];
+  attacksPerAction?: number;
   spellcastingAbilitySlug?: string | null;
   spellSaveDc?: number | null;
   spellAttackBonus?: number | null;
