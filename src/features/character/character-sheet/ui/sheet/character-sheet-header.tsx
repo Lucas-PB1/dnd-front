@@ -1,13 +1,12 @@
 "use client";
 
-import { Cog6ToothIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
+import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import type { CharacterDetail } from "@/entities/character/types";
 import type { useCharacterCatalogLabels } from "@/features/character/character-sheet/api/use-character-catalog-labels";
 import { BeyondRestActions } from "@/features/character/character-sheet/ui/beyond/layout/beyond-ability-row";
 import { DeleteCharacterButton } from "@/features/character/character-sheet/ui/sheet/delete-character-button";
-import type { SheetEditId } from "@/features/character/character-sheet/lib/edit/sheet-edit-types";
-import { SheetChip, SheetEditAction } from "@/features/character/character-sheet/ui/sheet/sheet-ui";
+import { SheetChip } from "@/features/character/character-sheet/ui/sheet/sheet-ui";
 import { BackLink } from "@/shared/ui/back-link";
 import { buttonVariants } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
@@ -82,30 +81,7 @@ export function CharacterSheetHeader({
   );
 }
 
-type SheetEditButtonProps = {
-  editId: NonNullable<SheetEditId>;
-  label?: string;
-  onEdit: (editId: NonNullable<SheetEditId>) => void;
-};
-
-export function SheetEditButton({
-  editId,
-  label = "Editar",
-  onEdit,
-}: SheetEditButtonProps) {
-  return (
-    <SheetEditAction onClick={() => onEdit(editId)}>
-      <PencilSquareIcon className="size-3" aria-hidden />
-      {label}
-    </SheetEditAction>
-  );
-}
-
-export function CharacterSheetErrorState({
-  message,
-}: {
-  message: string;
-}) {
+export function CharacterSheetErrorState({ message }: { message: string }) {
   return (
     <div className="flex flex-col gap-4">
       <p className="text-sm text-destructive">{message}</p>

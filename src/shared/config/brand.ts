@@ -1,4 +1,4 @@
-/** Nome de produto provisório — ver docs/UX-UI-PLAN.md */
+/** Nome do produto exibido na interface. */
 export const BRAND_NAME = "Taverna";
 
 export const BRAND_DESCRIPTION =

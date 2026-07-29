@@ -63,15 +63,15 @@ features/
 
 ## Divisão front / API / Supabase
 
-| Assunto        | Front                                      | API / Supabase              |
-| -------------- | ------------------------------------------ | --------------------------- |
-| Login, sessão  | `features/auth`                            | API valida JWT              |
-| Catálogo PHB   | `features/catalog/*-catalog`               | `GET /classes`, …           |
-| Listar fichas  | `features/character/characters`            | `GET /characters`           |
-| Detalhe / mesa | `features/character/character-sheet`       | `GET/PATCH` + session etc.  |
-| Criar ficha    | `features/character/create-character`      | `POST /characters`          |
-| Campanhas      | `features/campaign/campaigns`              | campanhas / encontros       |
-| Regras D&D     | **não** (exceto enums UI explícitos)       | dnd-api                     |
+| Assunto        | Front                                 | API / Supabase             |
+| -------------- | ------------------------------------- | -------------------------- |
+| Login, sessão  | `features/auth`                       | API valida JWT             |
+| Catálogo PHB   | `features/catalog/*-catalog`          | `GET /classes`, …          |
+| Listar fichas  | `features/character/characters`       | `GET /characters`          |
+| Detalhe / mesa | `features/character/character-sheet`  | `GET/PATCH` + session etc. |
+| Criar ficha    | `features/character/create-character` | `POST /characters`         |
+| Campanhas      | `features/campaign/campaigns`         | campanhas / encontros      |
+| Regras D&D     | **não** (exceto enums UI explícitos)  | dnd-api                    |
 
 ## Nova feature
 
@@ -108,4 +108,4 @@ features/campaign/campaigns/
 
 Next.js 16 · React 19 · TanStack Query · Supabase SSR · shadcn · Tailwind 4 · Zod · RHF · **dnd-api** Nest
 
-Ver: [STACK-OPTIONS.md](./STACK-OPTIONS.md) · [API-INTEGRATION.md](./API-INTEGRATION.md) · [CHARACTER-SHEET-PLAN.md](./CHARACTER-SHEET-PLAN.md) · [UX-UI-PLAN.md](./UX-UI-PLAN.md) · [COLORS.md](./COLORS.md) · [SUPABASE.md](./SUPABASE.md)
+Ver: [API-INTEGRATION.md](./API-INTEGRATION.md) · [COLORS.md](./COLORS.md) · [SUPABASE.md](./SUPABASE.md)

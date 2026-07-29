@@ -26,6 +26,8 @@ cypress/videos
 # misc
 .DS_Store
 *.pem
+*.pdf
+*.traineddata
 
 # debug
 npm-debug.log*

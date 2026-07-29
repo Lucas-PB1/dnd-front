@@ -36,5 +36,10 @@ export function siblingFeatOptionValueIds(
 }
 
 export function skillChoiceKinds(): ReadonlySet<string> {
-  return new Set(["human_skill", "elf_keen_senses"]);
+  return new Set([
+    "human_skill",
+    "elf_keen_senses",
+    "geppettin_skill",
+    "mandrake_skill",
+  ]);
 }

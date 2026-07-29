@@ -25,10 +25,7 @@ export function SheetSectionHeader({
       {Icon ? (
         <Icon className="size-3.5 shrink-0 text-secondary" aria-hidden />
       ) : null}
-      <h3
-        id={id}
-        className="font-heading text-sm font-semibold tracking-tight"
-      >
+      <h3 id={id} className="font-heading text-sm font-semibold tracking-tight">
         {title}
         {count != null ? (
           <span className="ml-1.5 font-mono text-[0.7rem] font-normal tabular-nums text-muted-foreground">
@@ -113,81 +110,6 @@ export function SheetEditAction({
     >
       {children}
     </button>
-  );
-}
-
-/** Rótulo de banda entre grupos de seções. */
-export function SheetBandLabel({
-  children,
-  tone = "muted",
-}: {
-  children: ReactNode;
-  tone?: "muted" | "primary";
-}) {
-  return (
-    <p
-      className={cn(
-        "pt-1 text-[0.65rem] font-medium tracking-[0.14em] uppercase",
-        tone === "primary" ? "text-primary" : "text-muted-foreground",
-      )}
-    >
-      {children}
-    </p>
-  );
-}
-
-/** Campo de metadado (rótulo + valor). */
-export function SheetMetaField({
-  label,
-  children,
-}: {
-  label: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className="min-w-0">
-      <dt className="text-[0.65rem] font-medium tracking-wider text-muted-foreground uppercase">
-        {label}
-      </dt>
-      <dd className="mt-0.5 text-sm font-medium">{children}</dd>
-    </div>
-  );
-}
-
-/** Tile de estatística (CA, PB, atributo…). */
-export function SheetStatTile({
-  label,
-  value,
-  hint,
-  emphasize = false,
-  className,
-}: {
-  label: string;
-  value: ReactNode;
-  hint?: ReactNode;
-  emphasize?: boolean;
-  className?: string;
-}) {
-  return (
-    <div
-      className={cn(
-        "rounded-xl border px-3 py-2.5 text-center",
-        emphasize
-          ? "border-primary/40 bg-primary/8"
-          : "border-border/80 bg-background/50",
-        className,
-      )}
-    >
-      <p className="text-[0.65rem] tracking-wide text-muted-foreground uppercase">
-        {label}
-      </p>
-      <p className="font-heading mt-0.5 text-2xl font-semibold tabular-nums tracking-tight">
-        {value}
-      </p>
-      {hint ? (
-        <p className="mt-0.5 text-[11px] text-muted-foreground">{hint}</p>
-      ) : null}
-    </div>
   );
 }
 

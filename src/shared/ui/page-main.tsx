@@ -1,7 +1,7 @@
 import { motion } from "@/shared/lib/motion";
 import { cn } from "@/shared/lib/utils";
 
-/** Larguras de layout da app — ver docs/UX-UI-PLAN.md */
+/** Larguras compartilhadas dos layouts da aplicação. */
 export const contentWidthClass = {
   /** Listagens, hub, wizard, páginas gerais */
   page: "mx-auto w-full max-w-6xl",

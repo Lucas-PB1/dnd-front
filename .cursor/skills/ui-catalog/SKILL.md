@@ -58,4 +58,4 @@ Dados de apresentação vêm da **API** — não hardcodar no front.
 ## Ícones / tema
 
 Heroicons outline (`@heroicons/react/24/outline`); shadcn em `src/shared/ui/` (skill global `shadcn`).  
-Plano visual: [docs/UX-UI-PLAN.md](docs/UX-UI-PLAN.md).
+Tokens visuais: [docs/COLORS.md](docs/COLORS.md).

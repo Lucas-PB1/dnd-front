@@ -112,9 +112,19 @@ export function useStepSpeciesChoices(
     const elfLineage = speciesChoices.find(
       (c) => c.choiceKind === "elf_lineage",
     )?.choiceSlug;
+    const geppettinConstruction = speciesChoices.find(
+      (c) => c.choiceKind === "geppettin_construction",
+    )?.choiceSlug;
 
     for (const row of traitChoices.data?.data ?? []) {
       if (row.choiceKind === "high_elf_cantrip" && elfLineage !== "high-elf") {
+        continue;
+      }
+      if (
+        row.choiceKind === "geppettin_size" &&
+        row.choiceSlug === "medium" &&
+        geppettinConstruction !== "marionette"
+      ) {
         continue;
       }
       const group = map.get(row.choiceKind) ?? {

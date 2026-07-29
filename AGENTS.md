@@ -45,4 +45,4 @@ API irmã: **dnd-api** (Nest). Não recriar backend de regras PHB no Next.
 
 ## Stack
 
-Decisões: [docs/STACK-OPTIONS.md](docs/STACK-OPTIONS.md) · Integração: [docs/API-INTEGRATION.md](docs/API-INTEGRATION.md)
+Decisões: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · Integração: [docs/API-INTEGRATION.md](docs/API-INTEGRATION.md)

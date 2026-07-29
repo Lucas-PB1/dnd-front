@@ -61,4 +61,4 @@ Mobile (`order-*`): combate + abas → perícias → proficiências.
 - Tirar o usuário da ficha para editar (painel de página com “Voltar à ficha” foi removido)
 - Travar a ficha em `h-dvh` com scroll só interno (deixar a página crescer)
 
-Plano: [docs/UX-UI-PLAN.md](docs/UX-UI-PLAN.md) § Fase 5 · [docs/CHARACTER-SHEET-PLAN.md](docs/CHARACTER-SHEET-PLAN.md)
+Arquitetura: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)

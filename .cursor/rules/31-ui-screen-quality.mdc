@@ -41,4 +41,4 @@ Tema: **Taverna** (light) / **Masmorra** (dark). Tokens em `globals.css` — sem
 - Só `motion.*` / `animate-in` com propósito (entrada, expand, hover de linha)
 - Respeitar `prefers-reduced-motion` (já em `globals.css`)
 
-Docs: [docs/UX-UI-PLAN.md](docs/UX-UI-PLAN.md) · [docs/COLORS.md](docs/COLORS.md)
+Docs: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · [docs/COLORS.md](docs/COLORS.md)

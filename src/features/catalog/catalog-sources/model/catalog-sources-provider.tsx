@@ -64,11 +64,7 @@ function setStoredSnapshot(slugs: string[] | null) {
 }
 
 function useStoredEnabledSlugs(): string[] | null {
-  return useSyncExternalStore(
-    subscribeStored,
-    getStoredSnapshot,
-    () => null,
-  );
+  return useSyncExternalStore(subscribeStored, getStoredSnapshot, () => null);
 }
 
 export function CatalogSourcesProvider({ children }: { children: ReactNode }) {
@@ -142,12 +138,9 @@ export function CatalogSourcesProvider({ children }: { children: ReactNode }) {
 export function useCatalogSources(): CatalogSourcesContextValue {
   const ctx = useContext(CatalogSourcesContext);
   if (!ctx) {
-    throw new Error("useCatalogSources must be used within CatalogSourcesProvider");
+    throw new Error(
+      "useCatalogSources must be used within CatalogSourcesProvider",
+    );
   }
   return ctx;
-}
-
-/** Seguro fora do provider (ex.: testes) — sem filtro. */
-export function useCatalogSourcesOptional(): CatalogSourcesContextValue | null {
-  return useContext(CatalogSourcesContext);
 }
