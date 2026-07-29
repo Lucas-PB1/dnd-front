@@ -13,6 +13,7 @@ import {
   abilityModifierValue,
   formatSkillBonus,
   initiativeBonus,
+  sheetAbilityScores,
 } from "@/entities/character";
 import {
   useCharacterState,
@@ -54,7 +55,7 @@ export function BeyondCombatHub({
   const state = stateQuery.data;
   const classResources = state?.classResources ?? [];
   const initiative = initiativeBonus(
-    abilityModifierValue(character.abilityScores.destreza),
+    abilityModifierValue(sheetAbilityScores(character).destreza),
     character.proficiencyBonus,
     character.characterFeats,
   );

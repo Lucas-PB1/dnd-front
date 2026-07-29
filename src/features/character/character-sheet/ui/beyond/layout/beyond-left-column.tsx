@@ -12,6 +12,7 @@ import {
   abilityModifierValue,
   collectSaveProficiencyAbilities,
   formatSkillBonus,
+  sheetAbilityScores,
 } from "@/entities/character";
 import { useClassDetail } from "@/features/catalog/class-catalog/api/use-classes";
 import { BeyondPanel, ABILITY_SHORT } from "@/features/character/character-sheet/ui/beyond/layout/beyond-panel";
@@ -40,6 +41,7 @@ export function BeyondLeftColumn({
     ),
   );
   const pb = character.proficiencyBonus;
+  const scores = sheetAbilityScores(character);
 
   return (
     <div className="flex flex-col gap-2.5">
@@ -49,7 +51,7 @@ export function BeyondLeftColumn({
         ) : (
           <ul className="space-y-0.5">
             {ORDER.map((slug) => {
-              const mod = abilityModifierValue(character.abilityScores[slug]);
+              const mod = abilityModifierValue(scores[slug]);
               const isProficient = proficient.has(slug);
               const total = mod + (isProficient ? pb : 0);
               return (

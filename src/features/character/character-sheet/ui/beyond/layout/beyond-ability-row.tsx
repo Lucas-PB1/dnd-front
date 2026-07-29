@@ -13,7 +13,11 @@ import type {
   AbilityScores,
   CharacterDetail,
 } from "@/entities/character/types";
-import { ABILITY_LABELS_PT, abilityModifier } from "@/entities/character";
+import {
+  ABILITY_LABELS_PT,
+  abilityModifier,
+  sheetAbilityScores,
+} from "@/entities/character";
 import {
   useCharacterState,
   useTakeRest,
@@ -79,6 +83,7 @@ export function BeyondCharacterStatsBar({
   const speciesDetail = useSpeciesDetail(character.speciesSlug, true);
   const [delta, setDelta] = useState("");
 
+  const scores = sheetAbilityScores(character);
   const state = stateQuery.data;
   const hpCurrent =
     state?.hitPointsCurrent ??
@@ -114,8 +119,8 @@ export function BeyondCharacterStatsBar({
         >
           <StatCell
             label={ABILITY_SHORT[key]}
-            value={abilityModifier(character.abilityScores[key])}
-            detail={character.abilityScores[key]}
+            value={abilityModifier(scores[key])}
+            detail={scores[key]}
           />
         </button>
       ))}

@@ -1,5 +1,18 @@
+import type { AbilityScores, CharacterDetail } from "@/entities/character/types";
+
 export function abilityModifierValue(score: number): number {
   return Math.floor((score - 10) / 2);
+}
+
+/**
+ * Atributos a exibir na ficha: os efetivos (com aumentos permanentes de classe)
+ * quando disponíveis, senão os base. NÃO use em formulários de edição, que
+ * precisam do valor base.
+ */
+export function sheetAbilityScores(
+  character: Pick<CharacterDetail, "abilityScores" | "effectiveAbilityScores">,
+): AbilityScores {
+  return character.effectiveAbilityScores ?? character.abilityScores;
 }
 
 export function formatAbilityModifier(mod: number): string {

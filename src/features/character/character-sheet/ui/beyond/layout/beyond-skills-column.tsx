@@ -9,6 +9,7 @@ import type { AbilityScores, CharacterDetail } from "@/entities/character/types"
 import {
   ABILITY_LABELS_PT,
   formatSkillBonus,
+  sheetAbilityScores,
   skillCheckBonus,
   skillProficiencyRank,
   abilityModifierValue,
@@ -43,6 +44,7 @@ export function BeyondSkillsColumn({
   onEdit,
 }: BeyondSkillsColumnProps) {
   const rolls = useSheetRolls();
+  const scores = sheetAbilityScores(character);
   const skillSources = {
     classSkillSlugs: character.classSkillSlugs,
     backgroundSkillSlugs: character.backgroundSkillSlugs,
@@ -55,7 +57,7 @@ export function BeyondSkillsColumn({
 
   const withBonus: SkillRowData[] = skills.map((skill) => {
     const abilityKey = skill.abilitySlug as keyof AbilityScores;
-    const score = character.abilityScores[abilityKey] ?? 10;
+    const score = scores[abilityKey] ?? 10;
     const rank = skillProficiencyRank(skill.slug, skillSources);
     const isProficient = rank === "proficient" || rank === "expertise";
     const isExpertise = rank === "expertise";

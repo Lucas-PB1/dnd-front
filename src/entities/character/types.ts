@@ -39,6 +39,8 @@ export type CharacterDetail = {
   subclassSlug: string | null;
   alignmentSlug: string | null;
   abilityScores: AbilityScores;
+  /** Atributos após aumentos permanentes de classe (nível 20). Use na ficha. */
+  effectiveAbilityScores?: AbilityScores;
   hitPointsMax: number | null;
   hitPointsCurrent: number | null;
   proficiencyBonus: number;

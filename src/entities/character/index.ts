@@ -15,6 +15,7 @@ export {
   abilityModifierValue,
   formatAbilityModifier,
   formatSkillBonus,
+  sheetAbilityScores,
   skillBonus,
 } from "@/entities/character/lib/ability";
 export {
