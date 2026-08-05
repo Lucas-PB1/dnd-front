@@ -5,9 +5,11 @@ import { useMemo } from "react";
 import { isSubclassRequired } from "@/entities/character/lib/subclass";
 import type { SubclassMechanic } from "@/entities/subclass/types";
 import { useSubclassMechanics } from "@/features/catalog/class-catalog/api/use-classes";
+import {
+  LevelGroupedDetailTiles,
+  type DetailTileItem,
+} from "@/features/character/character-sheet/ui/sections/detail-tile-grid";
 import type { SheetReadSectionProps } from "@/features/character/character-sheet/ui/sections/sheet-section-types";
-import { cn } from "@/shared/lib/utils";
-import { CollapsibleCard } from "@/shared/ui/collapsible-card";
 
 function formatSubclassMechanicDetail(
   mechanic: SubclassMechanic,
@@ -31,7 +33,6 @@ function formatSubclassMechanicDetail(
   return parts.length > 0 ? parts.join(" · ") : null;
 }
 
-/** Feature + recurso podem repetir o mesmo nome (ex.: Poder Psiônico ×2). */
 function subclassMechanicListKey(
   level: number,
   mechanic: SubclassMechanic,
@@ -64,7 +65,7 @@ export function SubclassMechanicsSection({
     [character.subclassOptions],
   );
 
-  const byLevel = useMemo(() => {
+  const groups = useMemo(() => {
     const map = new Map<number, SubclassMechanic[]>();
     for (const mechanic of mechanicsQuery.data?.data ?? []) {
       if (mechanic.featureLevel > character.level) continue;
@@ -72,8 +73,36 @@ export function SubclassMechanicsSection({
       list.push(mechanic);
       map.set(mechanic.featureLevel, list);
     }
-    return [...map.entries()].sort(([a], [b]) => a - b);
-  }, [character.level, mechanicsQuery.data?.data]);
+    return [...map.entries()]
+      .sort(([a], [b]) => a - b)
+      .map(([level, mechanics]) => ({
+        level,
+        items: mechanics.map((mechanic, index): DetailTileItem => {
+          const detail = formatSubclassMechanicDetail(mechanic);
+          const matchesOption =
+            mechanic.optionKey != null &&
+            selectedOptionKeys.has(mechanic.optionKey);
+          return {
+            id: subclassMechanicListKey(level, mechanic, index),
+            title: mechanic.featureName,
+            subtitle: matchesOption
+              ? "Opção escolhida"
+              : (detail ?? undefined),
+            badge: `Nv. ${level}`,
+            accent: matchesOption,
+            body: (
+              <p className="text-sm text-muted-foreground">
+                {detail ?? "Sem detalhes adicionais."}
+              </p>
+            ),
+          };
+        }),
+      }));
+  }, [
+    character.level,
+    mechanicsQuery.data?.data,
+    selectedOptionKeys,
+  ]);
 
   if (!enabled) {
     return (
@@ -91,7 +120,7 @@ export function SubclassMechanicsSection({
     );
   }
 
-  if (byLevel.length === 0) {
+  if (groups.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
         Nenhuma mecânica de subclasse até o nível atual.
@@ -100,47 +129,9 @@ export function SubclassMechanicsSection({
   }
 
   return (
-    <div className="space-y-4">
-      {byLevel.map(([level, mechanics]) => (
-        <section key={level} className="space-y-2">
-          <h4 className="text-sm font-semibold text-muted-foreground">
-            Nível {level}
-          </h4>
-          <ul className="space-y-1.5">
-            {mechanics.map((mechanic, index) => {
-              const detail = formatSubclassMechanicDetail(mechanic);
-              const matchesOption =
-                mechanic.optionKey != null &&
-                selectedOptionKeys.has(mechanic.optionKey);
-
-              return (
-                <li key={subclassMechanicListKey(level, mechanic, index)}>
-                  <CollapsibleCard
-                    title={mechanic.featureName}
-                    subtitle={
-                      matchesOption ? "Opção escolhida" : (detail ?? undefined)
-                    }
-                    size="compact"
-                    defaultOpen={false}
-                    className={cn(
-                      "bg-background/50",
-                      matchesOption && "border-primary/40",
-                    )}
-                  >
-                    {detail ? (
-                      <p className="text-sm text-muted-foreground">{detail}</p>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">
-                        Sem detalhes adicionais.
-                      </p>
-                    )}
-                  </CollapsibleCard>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      ))}
-    </div>
+    <LevelGroupedDetailTiles
+      groups={groups}
+      hint="Toque em uma mecânica para ver detalhes."
+    />
   );
 }

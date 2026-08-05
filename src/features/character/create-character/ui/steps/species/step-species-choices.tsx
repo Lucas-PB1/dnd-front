@@ -11,19 +11,28 @@ type StepSpeciesChoicesProps = {
   control: Control<CreateCharacterInput>;
   setValue: UseFormSetValue<CreateCharacterInput>;
   error?: string;
+  /** Slug da ficha — fallback se o watch ainda não hidratou. */
+  lockedSpeciesSlug?: string;
 };
 
 export function StepSpeciesChoices({
   control,
   setValue,
   error,
+  lockedSpeciesSlug,
 }: StepSpeciesChoicesProps) {
-  const data = useStepSpeciesChoices(control, setValue);
+  const data = useStepSpeciesChoices(
+    control,
+    setValue,
+    lockedSpeciesSlug,
+  );
 
   if (!data.speciesSlug) {
     return (
       <p className="text-sm text-muted-foreground">
-        Volte à identidade e escolha uma espécie.
+        {lockedSpeciesSlug
+          ? "Não foi possível carregar a espécie desta ficha."
+          : "Volte à identidade e escolha uma espécie."}
       </p>
     );
   }

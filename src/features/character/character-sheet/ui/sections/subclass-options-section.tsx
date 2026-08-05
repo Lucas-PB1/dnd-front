@@ -4,8 +4,11 @@ import { useMemo } from "react";
 
 import { isSubclassRequired } from "@/entities/character/lib/subclass";
 import { useSubclassOptions } from "@/features/catalog/class-catalog/api/use-classes";
+import {
+  DetailTileGrid,
+  type DetailTileItem,
+} from "@/features/character/character-sheet/ui/sections/detail-tile-grid";
 import type { SheetReadSectionProps } from "@/features/character/character-sheet/ui/sections/sheet-section-types";
-import { CollapsibleCard } from "@/shared/ui/collapsible-card";
 
 export function SubclassOptionsSection({
   character,
@@ -18,16 +21,29 @@ export function SubclassOptionsSection({
     enabled && character.subclassOptions.length > 0,
   );
 
-  const resolved = useMemo(() => {
+  const items = useMemo((): DetailTileItem[] => {
     const groups = optionsQuery.data?.data ?? [];
     return character.subclassOptions.map((opt) => {
       const group = groups.find((g) => g.optionKey === opt.optionKey);
       const value = group?.values.find((v) => v.valueId === opt.valueId);
+      const label = group?.label ?? opt.optionKey;
+      const valueLabel = value?.label ?? opt.valueId;
       return {
-        ...opt,
-        label: group?.label ?? opt.optionKey,
-        valueLabel: value?.label ?? opt.valueId,
-        unlockLevel: group?.unlockLevel,
+        id: opt.optionKey,
+        title: valueLabel,
+        subtitle:
+          group?.unlockLevel != null
+            ? `${label} · nv. ${group.unlockLevel}`
+            : label,
+        accent: true,
+        body: (
+          <p className="text-sm text-muted-foreground">
+            Opção de subclasse selecionada:{" "}
+            <span className="font-medium text-foreground">{valueLabel}</span>
+            {" — "}
+            {label}.
+          </p>
+        ),
       };
     });
   }, [character.subclassOptions, optionsQuery.data?.data]);
@@ -45,25 +61,9 @@ export function SubclassOptionsSection({
   }
 
   return (
-    <div className="space-y-1.5">
-      {resolved.map((item) => (
-        <CollapsibleCard
-          key={item.optionKey}
-          title={item.valueLabel}
-          subtitle={
-            item.unlockLevel != null
-              ? `${item.label} · nv. ${item.unlockLevel}`
-              : item.label
-          }
-          size="compact"
-          defaultOpen={false}
-          className="bg-background/50"
-        >
-          <p className="text-sm text-muted-foreground">
-            Opção de subclasse selecionada.
-          </p>
-        </CollapsibleCard>
-      ))}
-    </div>
+    <DetailTileGrid
+      items={items}
+      hint="Toque para ver a opção escolhida."
+    />
   );
 }

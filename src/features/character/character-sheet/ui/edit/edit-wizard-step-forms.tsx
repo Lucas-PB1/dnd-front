@@ -33,7 +33,11 @@ export function EditSpeciesChoicesForm(props: EditFormProps) {
       toPayload={(v) => ({ speciesChoices: v.speciesChoices })}
     >
       {(form) => (
-        <StepSpeciesChoices control={form.control} setValue={form.setValue} />
+        <StepSpeciesChoices
+          control={form.control}
+          setValue={form.setValue}
+          lockedSpeciesSlug={props.character.speciesSlug}
+        />
       )}
     </SheetStepForm>
   );

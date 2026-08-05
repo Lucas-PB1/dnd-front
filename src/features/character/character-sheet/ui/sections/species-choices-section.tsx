@@ -2,14 +2,27 @@
 
 import { useMemo } from "react";
 
+import { shortSpeciesSize } from "@/entities/species/short-size";
+import {
+  DetailTileGrid,
+  type DetailTileItem,
+} from "@/features/character/character-sheet/ui/sections/detail-tile-grid";
 import type { SheetReadSectionProps } from "@/features/character/character-sheet/ui/sections/sheet-section-types";
 import {
   useSpeciesDetail,
   useSpeciesTraitChoices,
   useSpeciesTraits,
 } from "@/features/catalog/species-catalog/api/use-species";
-import { CollapsibleCard } from "@/shared/ui/collapsible-card";
 import { PhbProse } from "@/shared/ui/phb-prose";
+
+function isSizeChoiceKind(choiceKind: string): boolean {
+  return (
+    choiceKind === "size" ||
+    choiceKind === "creature_size" ||
+    choiceKind === "tamanho" ||
+    choiceKind.endsWith("_size")
+  );
+}
 
 export function SpeciesChoicesSection({
   character,
@@ -48,27 +61,62 @@ export function SpeciesChoicesSection({
     (trait) => !trait.choiceKind,
   );
 
+  const fixedItems: DetailTileItem[] = fixedTraits.map((trait) => ({
+    id: `fixed-${trait.name}`,
+    title: trait.name,
+    body: trait.description ? (
+      <PhbProse text={trait.description} />
+    ) : (
+      <p className="text-sm text-muted-foreground">Sem descrição.</p>
+    ),
+  }));
+
+  const sizeChoice = resolved.find((item) =>
+    isSizeChoiceKind(item.choiceKind),
+  );
+  const displaySize = sizeChoice
+    ? sizeChoice.choiceName
+    : speciesDetail.data?.size
+      ? shortSpeciesSize(speciesDetail.data.size)
+      : null;
+
+  const choiceItems: DetailTileItem[] = resolved
+    .filter((item) => !isSizeChoiceKind(item.choiceKind))
+    .map((item) => ({
+      id: `${item.choiceKind}-${item.choiceSlug}`,
+      title: item.choiceName,
+      subtitle: item.traitName,
+      accent: true,
+      body: item.level1Benefit ? (
+        <PhbProse text={item.level1Benefit} />
+      ) : (
+        <p className="text-sm text-muted-foreground">Sem descrição adicional.</p>
+      ),
+    }));
+
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       {speciesDetail.data ? (
-        <dl className="grid gap-3 sm:grid-cols-3">
-          <div>
-            <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+        <dl className="grid gap-2 grid-cols-3 text-center sm:text-left">
+          <div className="rounded-lg border border-border/50 bg-background/40 px-2 py-1.5">
+            <dt className="text-[0.58rem] font-semibold tracking-wide text-muted-foreground uppercase">
               Tipo
             </dt>
             <dd className="text-sm font-medium">
               {speciesDetail.data.creatureType}
             </dd>
           </div>
-          <div>
-            <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+          <div className="rounded-lg border border-border/50 bg-background/40 px-2 py-1.5">
+            <dt className="text-[0.58rem] font-semibold tracking-wide text-muted-foreground uppercase">
               Tamanho
             </dt>
-            <dd className="text-sm font-medium">{speciesDetail.data.size}</dd>
+            <dd className="text-sm font-medium">
+              {displaySize ?? "—"}
+            </dd>
           </div>
-          <div>
-            <dt className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-              Deslocamento
+          <div className="rounded-lg border border-border/50 bg-background/40 px-2 py-1.5">
+            <dt className="text-[0.58rem] font-semibold tracking-wide text-muted-foreground uppercase">
+              Desloc.
             </dt>
             <dd className="text-sm font-medium">{speciesDetail.data.speed}</dd>
           </div>
@@ -77,67 +125,37 @@ export function SpeciesChoicesSection({
 
       {traitsQuery.isPending ? (
         <p className="text-sm text-muted-foreground">Carregando traços…</p>
-      ) : fixedTraits.length > 0 ? (
-        <div className="space-y-2">
-          <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+      ) : fixedItems.length > 0 ? (
+        <div className="space-y-1.5">
+          <p className="text-[0.65rem] font-semibold tracking-wider text-muted-foreground uppercase">
             Traços fixos
           </p>
-          <div className="space-y-2">
-            {fixedTraits.map((trait) => (
-              <CollapsibleCard
-                key={trait.name}
-                title={trait.name}
-                size="compact"
-                defaultOpen={false}
-                className="bg-background/50"
-              >
-                {trait.description ? (
-                  <PhbProse text={trait.description} />
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    Sem descrição.
-                  </p>
-                )}
-              </CollapsibleCard>
-            ))}
-          </div>
+          <DetailTileGrid
+            items={fixedItems}
+            hint="Toque para ler o traço."
+          />
         </div>
       ) : null}
 
-      <div className="space-y-2">
-        <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-          Escolhas
+      {character.speciesChoices.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          Nenhuma escolha de traço registrada.
         </p>
-        {character.speciesChoices.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            Nenhuma escolha de traço registrada.
+      ) : traitChoices.isPending ? (
+        <div className="space-y-1.5">
+          <p className="text-[0.65rem] font-semibold tracking-wider text-muted-foreground uppercase">
+            Escolhas
           </p>
-        ) : traitChoices.isPending ? (
           <p className="text-sm text-muted-foreground">Carregando escolhas…</p>
-        ) : (
-          <ul className="space-y-1.5">
-            {resolved.map((item) => (
-              <li key={`${item.choiceKind}-${item.choiceSlug}`}>
-                <CollapsibleCard
-                  title={item.choiceName}
-                  subtitle={item.traitName}
-                  size="compact"
-                  defaultOpen={false}
-                  className="bg-background/50"
-                >
-                  {item.level1Benefit ? (
-                    <PhbProse text={item.level1Benefit} />
-                  ) : (
-                    <p className="text-sm text-muted-foreground">
-                      Sem descrição adicional.
-                    </p>
-                  )}
-                </CollapsibleCard>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+        </div>
+      ) : choiceItems.length > 0 ? (
+        <div className="space-y-1.5">
+          <p className="text-[0.65rem] font-semibold tracking-wider text-muted-foreground uppercase">
+            Escolhas
+          </p>
+          <DetailTileGrid items={choiceItems} />
+        </div>
+      ) : null}
     </div>
   );
 }

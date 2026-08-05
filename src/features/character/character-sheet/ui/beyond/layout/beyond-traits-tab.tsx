@@ -190,7 +190,7 @@ export function BeyondTraitsTab({
         id={panelId}
         role="tabpanel"
         aria-labelledby={`${baseId}-tab-${activeTab.id}`}
-        className="max-h-[22rem] space-y-2 overflow-y-auto pr-0.5"
+        className="space-y-2"
       >
         {activeTab.edit && onEdit ? (
           <div className="flex justify-end">

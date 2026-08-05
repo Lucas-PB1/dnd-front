@@ -131,7 +131,7 @@ export function CombatClassSubtabs({
         id={panelId}
         role="tabpanel"
         aria-labelledby={`${baseId}-subtab-${active}`}
-        className="max-h-[12rem] overflow-y-auto px-3 py-2"
+        className="px-3 py-2"
       >
         {activeContent}
       </div>

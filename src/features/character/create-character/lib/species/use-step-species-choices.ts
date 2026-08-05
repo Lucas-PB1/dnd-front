@@ -33,52 +33,53 @@ export type SpeciesTraitChoiceGroup = {
 export function useStepSpeciesChoices(
   control: Control<CreateCharacterInput>,
   setValue: UseFormSetValue<CreateCharacterInput>,
+  fallbackSpeciesSlug?: string,
 ) {
-  const speciesSlug = useWatch({
+  const speciesSlugRaw = useWatch({
     control,
     name: "speciesSlug",
-    defaultValue: "",
   });
-  const speciesChoices = useWatch({
-    control,
-    name: "speciesChoices",
-    defaultValue: [],
-  });
-  const backgroundSlug = useWatch({
-    control,
-    name: "backgroundSlug",
-    defaultValue: "",
-  });
-  const asiFeatSlotSlugs = useWatch({
-    control,
-    name: "asiFeatSlotSlugs",
-    defaultValue: [],
-  });
-  const featOptions = useWatch({
-    control,
-    name: "featOptions",
-    defaultValue: [],
-  });
-  const level = useWatch({
-    control,
-    name: "level",
-    defaultValue: 1,
-  });
-  const classSlug = useWatch({
-    control,
-    name: "classSlug",
-    defaultValue: "",
-  });
-  const classSkillSlugs = useWatch({
-    control,
-    name: "classSkillSlugs",
-    defaultValue: [],
-  });
-  const backgroundToolItemSlug = useWatch({
-    control,
-    name: "backgroundToolItemSlug",
-    defaultValue: "",
-  });
+  const speciesSlug = speciesSlugRaw || fallbackSpeciesSlug || "";
+  const speciesChoices =
+    useWatch({
+      control,
+      name: "speciesChoices",
+    }) ?? [];
+  const backgroundSlug =
+    useWatch({
+      control,
+      name: "backgroundSlug",
+    }) ?? "";
+  const asiFeatSlotSlugs =
+    useWatch({
+      control,
+      name: "asiFeatSlotSlugs",
+    }) ?? [];
+  const featOptions =
+    useWatch({
+      control,
+      name: "featOptions",
+    }) ?? [];
+  const level =
+    useWatch({
+      control,
+      name: "level",
+    }) ?? 1;
+  const classSlug =
+    useWatch({
+      control,
+      name: "classSlug",
+    }) ?? "";
+  const classSkillSlugs =
+    useWatch({
+      control,
+      name: "classSkillSlugs",
+    }) ?? [];
+  const backgroundToolItemSlug =
+    useWatch({
+      control,
+      name: "backgroundToolItemSlug",
+    }) ?? "";
 
   const traitChoices = useSpeciesTraitChoices(speciesSlug, !!speciesSlug);
   const backgroundDetail = useBackgroundDetail(

@@ -189,8 +189,8 @@ export type TacticalMindResult = {
   state: CharacterState;
   expression: string;
   roll: number;
-  newTotal: number;
-  success: boolean;
+  newTotal?: number;
+  success?: boolean;
   resourceSpent: boolean;
   note: string;
 };
@@ -257,13 +257,11 @@ export async function activateSecondWind(
 export async function applyTacticalMind(
   accessToken: string,
   characterId: string,
-  checkTotal: number,
-  dc: number,
 ) {
   return gameFetch<TacticalMindResult>(
     `/characters/${characterId}/fighter/tactical-mind`,
     accessToken,
-    { method: "POST", body: JSON.stringify({ checkTotal, dc }) },
+    { method: "POST", body: "{}" },
   );
 }
 

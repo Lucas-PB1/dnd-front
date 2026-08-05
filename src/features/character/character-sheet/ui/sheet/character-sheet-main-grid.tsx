@@ -44,12 +44,12 @@ export function CharacterSheetMainGrid({
 
       <div
         className={cn(
-          "grid grid-cols-1 items-start gap-3",
-          "xl:grid-cols-[15rem_minmax(0,1fr)_20rem]",
-          "2xl:grid-cols-[16rem_minmax(0,1.35fr)_22rem]",
+          "grid grid-cols-1 items-start gap-2.5",
+          "xl:grid-cols-[17rem_minmax(0,1fr)_17rem]",
+          "2xl:grid-cols-[18rem_minmax(0,1fr)_18rem]",
         )}
       >
-        <aside className="order-3 min-w-0 xl:sticky xl:top-3 xl:order-1">
+        <aside className="order-3 min-w-0 xl:order-1">
           <BeyondLeftColumn
             character={character}
             languageNames={languageNames}
@@ -61,7 +61,7 @@ export function CharacterSheetMainGrid({
           <CharacterSheetPageSections panels={pagePanels} />
         </div>
 
-        <aside className="order-2 min-w-0 xl:sticky xl:top-3 xl:order-3">
+        <aside className="order-2 min-w-0 xl:order-3">
           {skillsQuery.isPending ? (
             <BeyondPanel title="Perícias">
               <p className="text-sm text-muted-foreground">Carregando...</p>

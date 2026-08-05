@@ -41,8 +41,6 @@ export function CombatFighterPanel({
   );
   const queryClient = useQueryClient();
   const [lastNote, setLastNote] = useState<string | null>(null);
-  const [mindCheck, setMindCheck] = useState("10");
-  const [mindDc, setMindDc] = useState("15");
 
   const secondWindMutation = useMutation({
     mutationFn: async () => {
@@ -80,12 +78,7 @@ export function CombatFighterPanel({
   const mindMutation = useMutation({
     mutationFn: async () => {
       try {
-        return await applyTacticalMind(
-          requireToken(),
-          characterId,
-          Number(mindCheck) || 0,
-          Number(mindDc) || 0,
-        );
+        return await applyTacticalMind(requireToken(), characterId);
       } catch (error) {
         return handleUnauthorized(error);
       }
@@ -93,9 +86,7 @@ export function CombatFighterPanel({
     onSuccess: (result) => {
       if (!result) return;
       queryClient.setQueryData(sessionKeys.state(characterId), result.state);
-      setLastNote(
-        `${result.note} (${result.expression}=${result.roll} → total ${result.newTotal})`,
-      );
+      setLastNote(result.note);
     },
   });
 
@@ -165,40 +156,20 @@ export function CombatFighterPanel({
             {actionSurge ? ` (${actionSurge.remaining})` : ""}
           </Button>
         ) : null}
-      </div>
-
-      {level >= 2 ? (
-        <div className="flex flex-wrap items-end gap-2">
-          <label className="text-[0.7rem] text-muted-foreground">
-            Teste
-            <input
-              className="ml-1 w-14 rounded border border-border/70 bg-background px-1 py-0.5 font-mono text-sm"
-              value={mindCheck}
-              onChange={(event) => setMindCheck(event.target.value)}
-              inputMode="numeric"
-            />
-          </label>
-          <label className="text-[0.7rem] text-muted-foreground">
-            CD
-            <input
-              className="ml-1 w-14 rounded border border-border/70 bg-background px-1 py-0.5 font-mono text-sm"
-              value={mindDc}
-              onChange={(event) => setMindDc(event.target.value)}
-              inputMode="numeric"
-            />
-          </label>
+        {level >= 2 ? (
           <Button
             type="button"
-            size="xs"
-            variant="ghost"
+            size="sm"
+            variant="outline"
             disabled={busy || !state || (secondWind?.remaining ?? 0) <= 0}
-            title="Mente Tática: +1d10; gasta Recuperar Fôlego só se virar sucesso"
+            title="Gasta 1 Recuperar Fôlego e rola +1d10 no teste. Se ainda falhar, devolva o uso."
             onClick={() => mindMutation.mutate()}
           >
             Mente Tática
+            {secondWind ? ` (${secondWind.remaining})` : ""}
           </Button>
-        </div>
-      ) : null}
+        ) : null}
+      </div>
 
       {indomitable ? (
         <p className="text-[0.7rem] text-muted-foreground">

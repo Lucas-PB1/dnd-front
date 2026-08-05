@@ -4,7 +4,7 @@ import {
   AcademicCapIcon,
   PencilSquareIcon,
 } from "@heroicons/react/24/outline";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 import type { AbilityScores, CharacterDetail } from "@/entities/character/types";
 import {
@@ -85,7 +85,13 @@ export function BeyondSkillsColumn({
     .filter((r) => !r.isProficient)
     .sort((a, b) => a.skill.name.localeCompare(b.skill.name, "pt"));
 
-  const rows = [...proficientRows, ...otherRows];
+  function rollSkill(row: SkillRowData) {
+    rolls.skill.mutate({
+      skillSlug: row.skill.slug,
+      strokeOfLuck: useStrokeOfLuck || undefined,
+    });
+    setUseStrokeOfLuck(false);
+  }
 
   return (
     <BeyondPanel
@@ -100,10 +106,9 @@ export function BeyondSkillsColumn({
           </SheetEditAction>
         ) : null
       }
-      flush
     >
       {character.classSlug === "rogue" && character.level >= 20 ? (
-        <label className="block border-b border-border/50 px-3 py-1.5 text-[0.68rem] text-muted-foreground">
+        <label className="mb-1.5 block text-[0.68rem] text-muted-foreground">
           <input
             className="mr-1 align-middle"
             type="checkbox"
@@ -113,37 +118,54 @@ export function BeyondSkillsColumn({
           Golpe de Sorte: transformar falha em 20
         </label>
       ) : null}
-      <ul className="pb-1">
-        {rows.map((row, index) => {
-          const showDivider =
-            index === proficientRows.length &&
-            proficientRows.length > 0 &&
-            otherRows.length > 0;
 
-          return (
-            <li key={row.skill.slug}>
-              {showDivider ? (
-                <div
-                  className="mx-3 my-1 border-t border-border/50"
-                  aria-hidden
-                />
-              ) : null}
+      <div className="space-y-3">
+        {proficientRows.length > 0 ? (
+          <SkillGroup label="Proficientes">
+            {proficientRows.map((row) => (
               <SkillRow
+                key={row.skill.slug}
                 {...row}
                 pending={rolls.skill.isPending}
-                onRoll={() => {
-                  rolls.skill.mutate({
-                    skillSlug: row.skill.slug,
-                    strokeOfLuck: useStrokeOfLuck || undefined,
-                  });
-                  setUseStrokeOfLuck(false);
-                }}
+                onRoll={() => rollSkill(row)}
               />
-            </li>
-          );
-        })}
-      </ul>
+            ))}
+          </SkillGroup>
+        ) : null}
+
+        {otherRows.length > 0 ? (
+          <SkillGroup label={proficientRows.length > 0 ? "Outras" : undefined}>
+            {otherRows.map((row) => (
+              <SkillRow
+                key={row.skill.slug}
+                {...row}
+                pending={rolls.skill.isPending}
+                onRoll={() => rollSkill(row)}
+              />
+            ))}
+          </SkillGroup>
+        ) : null}
+      </div>
     </BeyondPanel>
+  );
+}
+
+function SkillGroup({
+  label,
+  children,
+}: {
+  label?: string;
+  children: ReactNode;
+}) {
+  return (
+    <div>
+      {label ? (
+        <p className="mb-1 text-[0.65rem] font-semibold tracking-wider text-muted-foreground uppercase">
+          {label}
+        </p>
+      ) : null}
+      <ul className="space-y-0.5">{children}</ul>
+    </div>
   );
 }
 
@@ -163,73 +185,67 @@ function SkillRow({
     "—";
 
   return (
-    <button
-      type="button"
-      disabled={pending}
-      onClick={onRoll}
-      className={cn(
-        "grid w-full grid-cols-[auto_2.25rem_minmax(0,1fr)_2.5rem] items-baseline gap-x-2 px-3 py-1.5 text-left text-sm",
-        "hover:bg-muted/30 disabled:opacity-60",
-        isProficient && "bg-primary/[0.07]",
-      )}
-      title={`Rolar ${skill.name} (${ABILITY_LABELS_PT[abilityKey]})${isExpertise ? " · Especialização" : isJack ? " · Pau pra Toda Obra" : ""}`}
-    >
-      <span
+    <li>
+      <button
+        type="button"
+        disabled={pending}
+        onClick={onRoll}
         className={cn(
-          "mt-0.5 size-1.5 shrink-0 self-center rounded-full",
-          isExpertise
-            ? "bg-primary ring-1 ring-primary/40 ring-offset-1 ring-offset-background"
-            : isProficient
-              ? "bg-primary"
-              : isJack
-                ? "bg-primary/50"
-                : "bg-border",
+          "flex w-full items-center gap-2 rounded-md px-2 py-1 text-left text-sm",
+          isProficient ? "bg-primary/10" : "hover:bg-muted/40",
+          "disabled:opacity-60",
         )}
-        aria-label={
-          isExpertise
-            ? "Especialização"
-            : isProficient
-              ? "Proficiente"
-              : isJack
-                ? "Pau pra Toda Obra"
-                : undefined
-        }
-        aria-hidden={!isProficient && !isJack}
-      />
-
-      <span
-        className="self-center font-mono text-[0.65rem] font-semibold tracking-wide text-muted-foreground uppercase"
-        title={ABILITY_LABELS_PT[abilityKey]}
+        title={`Rolar ${skill.name} (${ABILITY_LABELS_PT[abilityKey]})${isExpertise ? " · Especialização" : isJack ? " · Pau pra Toda Obra" : ""}`}
       >
-        {abilityLabel}
-      </span>
-
-      <span
-        className={cn(
-          "min-w-0 leading-snug break-words",
-          isProficient ? "font-medium text-foreground" : "text-foreground/80",
-        )}
-      >
-        {skill.name}
-        {isExpertise ? (
-          <span className="ml-1 text-[0.65rem] font-normal text-primary">
-            ×2
-          </span>
-        ) : isJack ? (
-          <span className="ml-1 text-[0.65rem] font-normal text-muted-foreground">
-            ½
-          </span>
-        ) : null}
-      </span>
-
-      <span
-        className={cn(
-          "self-center text-right font-mono text-sm font-semibold tabular-nums",
-          isProficient ? "text-primary" : "text-foreground",
-        )}
-      >
-        {formatSkillBonus(bonus)}
-      </span>
-    </button>
+        <span
+          className={cn(
+            "size-1.5 shrink-0 rounded-full",
+            isExpertise
+              ? "bg-primary ring-1 ring-primary/40 ring-offset-1 ring-offset-background"
+              : isProficient
+                ? "bg-primary"
+                : isJack
+                  ? "bg-primary/50"
+                  : "bg-border",
+          )}
+          aria-label={
+            isExpertise
+              ? "Especialização"
+              : isProficient
+                ? "Proficiente"
+                : isJack
+                  ? "Pau pra Toda Obra"
+                  : undefined
+          }
+          aria-hidden={!isProficient && !isJack}
+        />
+        <span
+          className="w-7 text-[0.65rem] font-semibold tracking-wide text-muted-foreground uppercase"
+          title={ABILITY_LABELS_PT[abilityKey]}
+        >
+          {abilityLabel}
+        </span>
+        <span
+          className={cn(
+            "min-w-0 flex-1 truncate font-medium",
+            !isProficient && "text-foreground/85",
+          )}
+        >
+          {skill.name}
+          {isExpertise ? (
+            <span className="ml-1 text-[0.65rem] font-normal text-primary">
+              ×2
+            </span>
+          ) : isJack ? (
+            <span className="ml-1 text-[0.65rem] font-normal text-muted-foreground">
+              ½
+            </span>
+          ) : null}
+        </span>
+        <span className="font-mono text-sm font-semibold tabular-nums">
+          {formatSkillBonus(bonus)}
+        </span>
+      </button>
+    </li>
   );
 }

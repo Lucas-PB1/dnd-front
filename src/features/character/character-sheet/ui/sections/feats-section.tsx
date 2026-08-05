@@ -1,5 +1,7 @@
 "use client";
 
+import { useMemo } from "react";
+
 import {
   featInstanceKey,
   formatCharacterFeatLabel,
@@ -8,8 +10,11 @@ import { useFeatDetails } from "@/features/catalog/feat-catalog/api/use-feat-det
 import { useFeatOptionLabels } from "@/features/catalog/feat-catalog/api/use-feat-option-labels";
 import { FeatBenefits } from "@/features/catalog/feat-catalog/ui/catalog/feat-benefits";
 import { FeatOptionsReadList } from "@/features/catalog/feat-catalog/ui/options/feat-options-read-list";
+import {
+  DetailTileGrid,
+  type DetailTileItem,
+} from "@/features/character/character-sheet/ui/sections/detail-tile-grid";
 import type { SheetReadSectionProps } from "@/features/character/character-sheet/ui/sections/sheet-section-types";
-import { CollapsibleCard } from "@/shared/ui/collapsible-card";
 
 export function FeatsSection({ character, labels }: SheetReadSectionProps) {
   const featDetailSlugs = character.characterFeats.map((feat) => feat.featSlug);
@@ -27,6 +32,71 @@ export function FeatsSection({ character, labels }: SheetReadSectionProps) {
     },
   });
 
+  const optionsByInstance = useMemo(
+    () =>
+      character.featOptions.reduce<
+        Record<string, typeof character.featOptions>
+      >((acc, option) => {
+        const key = featInstanceKey(option.featSlug, option.instanceIndex);
+        const list = acc[key] ?? [];
+        list.push(option);
+        acc[key] = list;
+        return acc;
+      }, {}),
+    [character.featOptions],
+  );
+
+  const items = useMemo((): DetailTileItem[] => {
+    return character.characterFeats.map((feat) => {
+      const key = featInstanceKey(feat.featSlug, feat.instanceIndex);
+      const options = optionsByInstance[key] ?? [];
+      const detail = featBySlug[feat.featSlug];
+      const title = formatCharacterFeatLabel(
+        feat,
+        { [feat.featSlug]: labels.resolveFeat(feat.featSlug) },
+        character.characterFeats,
+      );
+      return {
+        id: key,
+        title,
+        subtitle: detail?.categoryName
+          ? detail.categoryName
+          : options.length > 0
+            ? `${options.length} escolha${options.length > 1 ? "s" : ""}`
+            : undefined,
+        body: featDetailsLoading ? (
+          <p className="text-sm text-muted-foreground">
+            Carregando descrição…
+          </p>
+        ) : (
+          <div className="space-y-3">
+            <FeatBenefits
+              benefits={detail?.benefits ?? []}
+              prerequisite={detail?.prerequisite}
+            />
+            {options.length > 0 ? (
+              <FeatOptionsReadList
+                options={options}
+                defs={featOptionDefsFor(feat.featSlug)}
+                resolveFeatOption={resolveFeatOption}
+                loading={featOptionsLoading}
+              />
+            ) : null}
+          </div>
+        ),
+      };
+    });
+  }, [
+    character.characterFeats,
+    featBySlug,
+    featDetailsLoading,
+    featOptionDefsFor,
+    featOptionsLoading,
+    labels,
+    optionsByInstance,
+    resolveFeatOption,
+  ]);
+
   if (character.characterFeats.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
@@ -35,71 +105,10 @@ export function FeatsSection({ character, labels }: SheetReadSectionProps) {
     );
   }
 
-  const optionsByInstance = character.featOptions.reduce<
-    Record<string, typeof character.featOptions>
-  >((acc, option) => {
-    const key = featInstanceKey(option.featSlug, option.instanceIndex);
-    const list = acc[key] ?? [];
-    list.push(option);
-    acc[key] = list;
-    return acc;
-  }, {});
-
   return (
-    <div className="space-y-4">
-      <p className="text-xs text-muted-foreground">
-        Toque em um talento para ler o texto.
-      </p>
-      <ul className="space-y-1.5">
-        {character.characterFeats.map((feat) => {
-          const key = featInstanceKey(feat.featSlug, feat.instanceIndex);
-          const options = optionsByInstance[key] ?? [];
-          const detail = featBySlug[feat.featSlug];
-          const title = formatCharacterFeatLabel(
-            feat,
-            { [feat.featSlug]: labels.resolveFeat(feat.featSlug) },
-            character.characterFeats,
-          );
-          return (
-            <li key={key}>
-              <CollapsibleCard
-                title={title}
-                subtitle={
-                  detail?.categoryName
-                    ? detail.categoryName
-                    : options.length > 0
-                      ? `${options.length} escolha${options.length > 1 ? "s" : ""}`
-                      : undefined
-                }
-                size="compact"
-                defaultOpen={false}
-                className="bg-background/50"
-              >
-                {featDetailsLoading ? (
-                  <p className="text-sm text-muted-foreground">
-                    Carregando descrição…
-                  </p>
-                ) : (
-                  <div className="space-y-3">
-                    <FeatBenefits
-                      benefits={detail?.benefits ?? []}
-                      prerequisite={detail?.prerequisite}
-                    />
-                    {options.length > 0 ? (
-                      <FeatOptionsReadList
-                        options={options}
-                        defs={featOptionDefsFor(feat.featSlug)}
-                        resolveFeatOption={resolveFeatOption}
-                        loading={featOptionsLoading}
-                      />
-                    ) : null}
-                  </div>
-                )}
-              </CollapsibleCard>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
+    <DetailTileGrid
+      items={items}
+      hint="Toque em um talento para ler o texto."
+    />
   );
 }

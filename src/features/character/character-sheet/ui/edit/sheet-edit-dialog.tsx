@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/shared/ui/dialog";
+import { cn } from "@/shared/lib/utils";
 
 const WIDTH_CLASS = {
   sm: "sm:max-w-md",
@@ -36,7 +37,7 @@ type SheetEditDialogProps = {
 
 /**
  * Casca de edição da ficha: cabeçalho fixo e corpo preenchido pelo formulário,
- * que controla o scroll e o rodapé de ações. Fica aberta enquanto montada.
+ * que cresce até o teto do dialog e só então rola.
  */
 export function SheetEditDialog({
   onClose,
@@ -52,12 +53,19 @@ export function SheetEditDialog({
         if (!next) onClose();
       }}
     >
-      <DialogContent className={WIDTH_CLASS[width]}>
-        <DialogHeader>
+      <DialogContent
+        className={cn(
+          "flex max-h-[min(92vh,52rem)] min-h-0 flex-col gap-3 overflow-hidden",
+          WIDTH_CLASS[width],
+        )}
+      >
+        <DialogHeader className="shrink-0">
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
-        {children}
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          {children}
+        </div>
       </DialogContent>
     </Dialog>
   );
