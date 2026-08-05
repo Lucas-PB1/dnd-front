@@ -3,6 +3,7 @@
 import {
   BookOpenIcon,
   CubeIcon,
+  ShieldExclamationIcon,
   SparklesIcon,
   BoltIcon,
 } from "@heroicons/react/24/outline";
@@ -21,6 +22,7 @@ import { cn } from "@/shared/lib/utils";
 
 export type BeyondTabId =
   | "actions"
+  | "resources"
   | "spells"
   | "inventory"
   | "features";
@@ -29,6 +31,7 @@ type HeroIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
 const TABS: { id: BeyondTabId; label: string; icon: HeroIcon }[] = [
   { id: "actions", label: "Ações", icon: BoltIcon },
+  { id: "resources", label: "Classe", icon: ShieldExclamationIcon },
   { id: "spells", label: "Magias", icon: SparklesIcon },
   { id: "inventory", label: "Inventário", icon: CubeIcon },
   { id: "features", label: "Traços", icon: BookOpenIcon },

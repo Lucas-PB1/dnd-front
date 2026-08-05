@@ -13,6 +13,8 @@ import {
 } from "@/features/character/character-sheet/api/character-session.api";
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
 import { FighterSubclassActions } from "@/features/character/character-sheet/ui/beyond/combat/fighter-subclass-actions";
+import { CombatClassSubtabs } from "@/features/character/character-sheet/ui/beyond/combat/combat-class-subtabs";
+import { CombatNotesList } from "@/features/character/character-sheet/ui/beyond/combat/combat-notes-list";
 import { Button } from "@/shared/ui/button";
 
 type CombatFighterPanelProps = {
@@ -128,13 +130,11 @@ export function CombatFighterPanel({
     (resource) => resource.slug === "indomitable",
   );
 
-  return (
-    <div className="mt-2 rounded-lg border border-border/70 bg-card/70 px-3 py-2">
-      <p className="text-[0.58rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
-        Combate do Guerreiro
-      </p>
+  /* ── Tab: Ações Principais ── */
+  const actionsContent = (
+    <div className="space-y-2">
       {attacksPerAction != null ? (
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           Ataques por ação:{" "}
           <span className="font-semibold text-foreground">
             {attacksPerAction}
@@ -142,7 +142,7 @@ export function CombatFighterPanel({
         </p>
       ) : null}
 
-      <div className="mt-2 flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2">
         <Button
           type="button"
           size="sm"
@@ -169,7 +169,7 @@ export function CombatFighterPanel({
       </div>
 
       {level >= 2 ? (
-        <div className="mt-2 flex flex-wrap items-end gap-2">
+        <div className="flex flex-wrap items-end gap-2">
           <label className="text-[0.7rem] text-muted-foreground">
             Teste
             <input
@@ -202,40 +202,63 @@ export function CombatFighterPanel({
       ) : null}
 
       {indomitable ? (
-        <p className="mt-2 text-[0.7rem] text-muted-foreground">
+        <p className="text-[0.7rem] text-muted-foreground">
           Indomável: {indomitable.remaining}/{indomitable.max} — use na
           salvaguarda com a opção Indomável.
         </p>
       ) : null}
 
-      <FighterSubclassActions
-        characterId={characterId}
-        subclassSlug={subclassSlug}
-        level={level}
-        maneuvers={maneuversQuery.data}
-        onResult={(result) => setLastNote(result.note)}
-      />
-
-      {combatNotes && combatNotes.length > 0 ? (
-        <ul className="mt-2 space-y-1 text-[0.7rem] text-muted-foreground">
-          {combatNotes.map((note) => (
-            <li key={note}>{note}</li>
-          ))}
-        </ul>
-      ) : null}
-
       {lastNote ? (
-        <p className="mt-2 text-sm text-secondary" role="status">
+        <p className="text-sm text-secondary" role="status">
           {lastNote}
         </p>
       ) : null}
       {mutationError ? (
-        <p className="mt-2 text-sm text-destructive" role="alert">
+        <p className="text-sm text-destructive" role="alert">
           {mutationError instanceof Error
             ? mutationError.message
             : "Não foi possível executar a ação"}
         </p>
       ) : null}
     </div>
+  );
+
+  /* ── Tab: Subclasse / Poderes ── */
+  const hasSubclassContent = subclassSlug != null && level >= 3;
+  const powersContent = hasSubclassContent ? (
+    <FighterSubclassActions
+      characterId={characterId}
+      subclassSlug={subclassSlug}
+      level={level}
+      maneuvers={maneuversQuery.data}
+      onResult={(result) => setLastNote(result.note)}
+    />
+  ) : null;
+
+  /* ── Tab: Passivas & Regras ── */
+  const passivesContent =
+    combatNotes && combatNotes.length > 0 ? (
+      <CombatNotesList notes={combatNotes} />
+    ) : null;
+
+  return (
+    <CombatClassSubtabs
+      title="Combate do Guerreiro"
+      tabs={[
+        { id: "actions", label: "Ações", icon: "⚡", content: actionsContent },
+        {
+          id: "powers",
+          label: "Poderes",
+          icon: "🧠",
+          content: powersContent,
+        },
+        {
+          id: "passives",
+          label: "Passivas",
+          icon: "📜",
+          content: passivesContent,
+        },
+      ]}
+    />
   );
 }

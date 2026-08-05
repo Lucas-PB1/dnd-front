@@ -455,3 +455,136 @@ export async function executeClericTableAction(
     },
   );
 }
+
+export type BardTableActionSlug =
+  | "grant-inspiration"
+  | "cutting-words"
+  | "enthralling-performance"
+  | "agile-response"
+  | "unarmed-dance"
+  | "combat-inspiration"
+  | "superior-inspiration";
+
+export async function executeBardTableAction(
+  accessToken: string,
+  characterId: string,
+  actionSlug: BardTableActionSlug,
+) {
+  return gameFetch<TableActionResult>(
+    `/characters/${characterId}/bard/table-action`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify({ actionSlug }),
+    },
+  );
+}
+
+export type SorcererTableActionSlug =
+  | "convert-slot-1-to-points"
+  | "convert-slot-2-to-points"
+  | "convert-slot-3-to-points"
+  | "convert-slot-4-to-points"
+  | "convert-slot-5-to-points"
+  | "convert-points-to-slot-1"
+  | "convert-points-to-slot-2"
+  | "convert-points-to-slot-3"
+  | "convert-points-to-slot-4"
+  | "convert-points-to-slot-5"
+  | "use-metamagic-1"
+  | "use-metamagic-2"
+  | "use-metamagic-3"
+  | "innate-sorcery"
+  | "sorcerous-restoration"
+  | "tides-of-chaos"
+  | "bastion-of-law";
+
+export async function executeSorcererTableAction(
+  accessToken: string,
+  characterId: string,
+  actionSlug: SorcererTableActionSlug,
+) {
+  return gameFetch<TableActionResult>(
+    `/characters/${characterId}/sorcerer/table-action`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify({ actionSlug }),
+    },
+  );
+}
+
+export type WarlockTableActionSlug =
+  | "magical-cunning"
+  | "healing-light"
+  | "dark-ones-own-luck"
+  | "fey-step-effect"
+  | "awakened-mind"
+  | "fiendish-resilience";
+
+export async function executeWarlockTableAction(
+  accessToken: string,
+  characterId: string,
+  actionSlug: WarlockTableActionSlug,
+) {
+  return gameFetch<TableActionResult>(
+    `/characters/${characterId}/warlock/table-action`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify({ actionSlug }),
+    },
+  );
+}
+
+export type DruidTableActionSlug =
+  | "wild-shape"
+  | "wild-resurgence-slot"
+  | "wild-resurgence-shape"
+  | "starry-form-archer"
+  | "starry-form-chalice"
+  | "starry-form-dragon"
+  | "wrath-of-the-sea"
+  | "moon-combat-wild-shape";
+
+export async function executeDruidTableAction(
+  accessToken: string,
+  characterId: string,
+  actionSlug: DruidTableActionSlug,
+) {
+  return gameFetch<TableActionResult>(
+    `/characters/${characterId}/druid/table-action`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify({ actionSlug }),
+    },
+  );
+}
+
+export type WizardTableActionSlug =
+  | "arcane-recovery-1"
+  | "arcane-recovery-2"
+  | "arcane-recovery-3"
+  | "arcane-recovery-4"
+  | "arcane-recovery-5"
+  | "arcane-ward"
+  | "portent"
+  | "sculpt-spells"
+  | "improved-illusions"
+  | "spell-mastery";
+
+export async function executeWizardTableAction(
+  accessToken: string,
+  characterId: string,
+  actionSlug: WizardTableActionSlug,
+) {
+  return gameFetch<TableActionResult>(
+    `/characters/${characterId}/wizard/table-action`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify({ actionSlug }),
+    },
+  );
+}

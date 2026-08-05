@@ -1,25 +1,24 @@
 "use client";
 
-import {
-  BeyondCharacterStatsBar,
-} from "@/features/character/character-sheet/ui/beyond/layout/beyond-ability-row";
-import { BeyondCombatHub } from "@/features/character/character-sheet/ui/beyond/combat/beyond-combat-hub";
-import { BeyondLeftColumn } from "@/features/character/character-sheet/ui/beyond/layout/beyond-left-column";
-import { BeyondMainTabs } from "@/features/character/character-sheet/ui/beyond/layout/beyond-main-tabs";
-import { BeyondPanel } from "@/features/character/character-sheet/ui/beyond/layout/beyond-panel";
-import { BeyondSkillsColumn } from "@/features/character/character-sheet/ui/beyond/layout/beyond-skills-column";
+import type { ReactNode } from "react";
+
 import type { CharacterDetail } from "@/entities/character/types";
 import type { useSkills } from "@/features/catalog/reference-catalog/api/use-reference";
-import type { BeyondTabId } from "@/features/character/character-sheet/ui/beyond/layout/beyond-main-tabs";
+import { BeyondCombatHub } from "@/features/character/character-sheet/ui/beyond/combat/beyond-combat-hub";
+import { BeyondCharacterStatsBar } from "@/features/character/character-sheet/ui/beyond/layout/beyond-ability-row";
+import { BeyondLeftColumn } from "@/features/character/character-sheet/ui/beyond/layout/beyond-left-column";
+import { BeyondPanel } from "@/features/character/character-sheet/ui/beyond/layout/beyond-panel";
+import { BeyondSkillsColumn } from "@/features/character/character-sheet/ui/beyond/layout/beyond-skills-column";
+import { CharacterSheetPageSections } from "@/features/character/character-sheet/ui/sheet/character-sheet-page-sections";
+import type { CharacterSheetPageSectionId } from "@/features/character/character-sheet/ui/sheet/character-sheet-tab-panels";
 import { cn } from "@/shared/lib/utils";
-import type { ReactNode } from "react";
 
 type CharacterSheetMainGridProps = {
   characterId: string;
   character: CharacterDetail;
   languageNames: string[];
   skillsQuery: ReturnType<typeof useSkills>;
-  tabPanels: Record<BeyondTabId, ReactNode>;
+  pagePanels: Record<CharacterSheetPageSectionId, ReactNode>;
   onEditSkills: () => void;
   onEditAbilities: () => void;
 };
@@ -29,13 +28,13 @@ export function CharacterSheetMainGrid({
   character,
   languageNames,
   skillsQuery,
-  tabPanels,
+  pagePanels,
   onEditSkills,
   onEditAbilities,
 }: CharacterSheetMainGridProps) {
   return (
     <>
-      <div className="shrink-0">
+      <div className="shrink-0 rounded-xl border border-border/60 bg-card/45 p-2 shadow-sm">
         <BeyondCharacterStatsBar
           characterId={characterId}
           character={character}
@@ -43,30 +42,29 @@ export function CharacterSheetMainGrid({
         />
       </div>
 
-      {/*
-        Mobile order: combate → perícias → proffs
-        Desktop: salvaguardas | perícias | combate+abas
-        A página pode crescer além da viewport (scroll externo).
-      */}
       <div
         className={cn(
-          "grid gap-3",
-          "grid-cols-1",
-          "lg:grid-cols-[minmax(12rem,0.9fr)_minmax(17rem,1fr)_minmax(26rem,2.15fr)]",
-          "xl:grid-cols-[14rem_20rem_minmax(0,1fr)]",
+          "grid grid-cols-1 items-start gap-3",
+          "xl:grid-cols-[15rem_minmax(0,1fr)_20rem]",
+          "2xl:grid-cols-[16rem_minmax(0,1.35fr)_22rem]",
         )}
       >
-        <div className="order-3 min-w-0 lg:order-1">
+        <aside className="order-3 min-w-0 xl:sticky xl:top-3 xl:order-1">
           <BeyondLeftColumn
             character={character}
             languageNames={languageNames}
           />
+        </aside>
+
+        <div className="order-1 flex min-w-0 flex-col gap-3 xl:order-2">
+          <BeyondCombatHub characterId={characterId} character={character} />
+          <CharacterSheetPageSections panels={pagePanels} />
         </div>
 
-        <div className="order-2 min-w-0 lg:order-2">
+        <aside className="order-2 min-w-0 xl:sticky xl:top-3 xl:order-3">
           {skillsQuery.isPending ? (
             <BeyondPanel title="Perícias">
-              <p className="text-sm text-muted-foreground">Carregando…</p>
+              <p className="text-sm text-muted-foreground">Carregando...</p>
             </BeyondPanel>
           ) : (
             <BeyondSkillsColumn
@@ -75,12 +73,7 @@ export function CharacterSheetMainGrid({
               onEdit={onEditSkills}
             />
           )}
-        </div>
-
-        <div className="order-1 flex min-w-0 flex-col gap-2.5 lg:order-3">
-          <BeyondCombatHub characterId={characterId} character={character} />
-          <BeyondMainTabs panels={tabPanels} />
-        </div>
+        </aside>
       </div>
     </>
   );

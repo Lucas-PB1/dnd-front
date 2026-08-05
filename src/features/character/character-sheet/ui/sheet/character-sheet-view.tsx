@@ -6,7 +6,7 @@ import {
   CharacterSheetHeader,
 } from "@/features/character/character-sheet/ui/sheet/character-sheet-header";
 import { CharacterSheetMainGrid } from "@/features/character/character-sheet/ui/sheet/character-sheet-main-grid";
-import { buildCharacterSheetTabPanels } from "@/features/character/character-sheet/ui/sheet/character-sheet-tab-panels";
+import { buildCharacterSheetPagePanels } from "@/features/character/character-sheet/ui/sheet/character-sheet-tab-panels";
 import { SheetRollsProvider } from "@/features/character/character-sheet/ui/beyond/layout/sheet-rolls";
 import { SheetEditDialog } from "@/features/character/character-sheet/ui/edit/sheet-edit-dialog";
 import { buildSheetEditDialogs } from "@/features/character/character-sheet/ui/edit/sheet-edit-dialog-registry";
@@ -39,7 +39,7 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
 
   const editDialogs = buildSheetEditDialogs(sheet.editForms);
   const activeEdit = sheet.editing ? editDialogs[sheet.editing] : null;
-  const tabPanels = buildCharacterSheetTabPanels({
+  const pagePanels = buildCharacterSheetPagePanels({
     characterId: id,
     character: sheet.data,
     labels: sheet.labels,
@@ -66,7 +66,7 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
           character={sheet.data}
           languageNames={sheet.languageNames}
           skillsQuery={sheet.skillsQuery}
-          tabPanels={tabPanels}
+          pagePanels={pagePanels}
           onEditSkills={() => sheet.setEditing("skills")}
           onEditAbilities={() => sheet.setEditing("abilities")}
         />
