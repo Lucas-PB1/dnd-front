@@ -9,6 +9,7 @@ import {
   toggleReckless,
 } from "@/features/character/character-sheet/api/character-session.api";
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
+import { CombatClassPanelShell } from "@/features/character/character-sheet/ui/beyond/combat/combat-class-panel-shell";
 import { Button } from "@/shared/ui/button";
 
 type CombatBarbarianPanelProps = {
@@ -63,12 +64,9 @@ export function CombatBarbarianPanel({
   const busy = rageMutation.isPending || recklessMutation.isPending;
   const mutationError = rageMutation.error ?? recklessMutation.error;
 
-  return (
-    <div className="mt-2 rounded-lg border border-border/70 bg-card/70 px-3 py-2">
-      <p className="text-[0.58rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
-        Combate do Bárbaro
-      </p>
-      <div className="mt-2 flex flex-wrap gap-2">
+  const actionsContent = (
+    <div className="space-y-2">
+      <div className="flex flex-wrap gap-2">
         <Button
           type="button"
           size="sm"
@@ -94,20 +92,22 @@ export function CombatBarbarianPanel({
           {recklessActive ? "Imprudente ativo" : "Ataque Imprudente"}
         </Button>
       </div>
-      {combatNotes && combatNotes.length > 0 ? (
-        <ul className="mt-2 space-y-1 text-[0.7rem] text-muted-foreground">
-          {combatNotes.map((note) => (
-            <li key={note}>{note}</li>
-          ))}
-        </ul>
-      ) : null}
+
       {mutationError ? (
-        <p className="mt-2 text-sm text-destructive" role="alert">
+        <p className="text-sm text-destructive" role="alert">
           {mutationError instanceof Error
             ? mutationError.message
             : "Não foi possível atualizar o estado de combate"}
         </p>
       ) : null}
     </div>
+  );
+
+  return (
+    <CombatClassPanelShell
+      title="Combate do Bárbaro"
+      actionsContent={actionsContent}
+      combatNotes={combatNotes}
+    />
   );
 }

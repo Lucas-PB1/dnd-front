@@ -6,7 +6,13 @@ import {
   CubeIcon,
   SparklesIcon,
 } from "@heroicons/react/24/outline";
-import type { ComponentType, ReactNode, SVGProps } from "react";
+import {
+  useId,
+  useState,
+  type ComponentType,
+  type ReactNode,
+  type SVGProps,
+} from "react";
 
 import type { CharacterSheetPageSectionId } from "@/features/character/character-sheet/ui/sheet/character-sheet-tab-panels";
 import { cn } from "@/shared/lib/utils";
@@ -52,41 +58,53 @@ type CharacterSheetPageSectionsProps = {
 export function CharacterSheetPageSections({
   panels,
 }: CharacterSheetPageSectionsProps) {
+  const baseId = useId();
+  const [openSection, setOpenSection] =
+    useState<CharacterSheetPageSectionId>("actions");
+
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-2">
       <nav
         aria-label="Navegação da ficha"
-        className="sticky top-2 z-10 grid grid-cols-2 gap-2 rounded-xl border border-border/65 bg-background/88 p-2 shadow-sm backdrop-blur sm:grid-cols-4"
+        className="sticky top-2 z-10 grid grid-cols-2 gap-1.5 rounded-xl border border-border/65 bg-background/88 p-1.5 shadow-sm backdrop-blur sm:grid-cols-4"
       >
         {PAGE_SECTIONS.map((item) => {
           const Icon = item.icon;
+          const isOpen = openSection === item.id;
           return (
-            <a
+            <button
               key={item.id}
-              href={`#sheet-${item.id}`}
+              type="button"
+              aria-expanded={isOpen}
+              aria-controls={`${baseId}-${item.id}`}
+              onClick={() => setOpenSection(item.id)}
               className={cn(
-                "group flex min-h-12 items-center gap-2 rounded-lg border px-2.5 py-2 text-xs font-semibold tracking-wide uppercase transition-colors hover:bg-card",
-                item.tone,
+                "group flex min-h-10 items-center gap-1.5 rounded-lg border px-2 py-1.5 text-[0.7rem] font-semibold tracking-wide uppercase transition-colors",
+                isOpen
+                  ? item.tone
+                  : "border-transparent bg-transparent text-muted-foreground hover:bg-card hover:text-foreground",
               )}
             >
-              <Icon className="size-4 shrink-0" aria-hidden />
+              <Icon className="size-3.5 shrink-0" aria-hidden />
               <span className="min-w-0 truncate">{item.label}</span>
-            </a>
+            </button>
           );
         })}
       </nav>
 
-      <div className="flex flex-col gap-3">
-        {PAGE_SECTIONS.map((item) => (
+      {PAGE_SECTIONS.map((item) => {
+        const isOpen = openSection === item.id;
+        return (
           <section
             key={item.id}
-            id={`sheet-${item.id}`}
-            className="scroll-mt-20"
+            id={`${baseId}-${item.id}`}
+            hidden={!isOpen}
+            className={cn(!isOpen && "hidden")}
           >
-            {panels[item.id]}
+            {isOpen ? panels[item.id] : null}
           </section>
-        ))}
-      </div>
+        );
+      })}
     </div>
   );
 }

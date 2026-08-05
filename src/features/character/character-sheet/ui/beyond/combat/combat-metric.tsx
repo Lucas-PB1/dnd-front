@@ -13,7 +13,8 @@ type CombatMetricProps = {
   onClick?: () => void;
   disabled?: boolean;
   progressPercent?: number;
-  progressColor?: "emerald" | "amber" | "rose" | "indigo" | "sky";
+  /** Tokens chart-* do tema Grimoire (docs/COLORS.md). */
+  progressColor?: "chart-1" | "chart-2" | "chart-3" | "chart-4" | "chart-5";
   badge?: ReactNode;
 };
 
@@ -26,45 +27,45 @@ export function CombatMetric({
   onClick,
   disabled,
   progressPercent,
-  progressColor = "emerald",
+  progressColor = "chart-3",
   badge,
 }: CombatMetricProps) {
   const colorMap = {
-    emerald: "bg-emerald-500",
-    amber: "bg-amber-500",
-    rose: "bg-rose-500",
-    indigo: "bg-indigo-500",
-    sky: "bg-sky-500",
+    "chart-1": "bg-chart-1",
+    "chart-2": "bg-chart-2",
+    "chart-3": "bg-chart-3",
+    "chart-4": "bg-chart-4",
+    "chart-5": "bg-chart-5",
   };
 
   const className = cn(
-    "group relative flex min-w-0 flex-col items-center justify-center rounded-xl border px-3.5 py-2.5 text-center transition-all duration-200 backdrop-blur-md shadow-sm",
+    "group relative flex min-w-0 flex-col items-center justify-center rounded-lg border px-2.5 py-1.5 text-center transition-all duration-200",
     emphasize
-      ? "border-primary/50 bg-primary/10 shadow-[0_0_12px_rgba(168,85,247,0.12)]"
+      ? "border-primary/50 bg-primary/10"
       : "border-border/60 bg-card/60 hover:bg-card/90",
     onClick &&
-      "cursor-pointer hover:scale-[1.02] hover:border-primary/60 hover:shadow-md disabled:opacity-60 disabled:pointer-events-none",
+      "cursor-pointer hover:border-primary/60 disabled:pointer-events-none disabled:opacity-60",
   );
 
   const body = (
     <>
-      <div className="flex items-center gap-1 text-[0.62rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
+      <div className="flex items-center gap-1 text-[0.58rem] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
         {Icon ? (
-          <Icon className="size-3.5 text-primary group-hover:scale-110 transition-transform" aria-hidden />
+          <Icon className="size-3 text-primary" aria-hidden />
         ) : null}
         <span>{label}</span>
-        {badge ? <span className="ml-1">{badge}</span> : null}
+        {badge ? <span className="ml-0.5">{badge}</span> : null}
       </div>
 
-      <span className="font-heading mt-1 text-2xl font-bold leading-none tabular-nums tracking-tight text-foreground">
+      <span className="font-heading mt-0.5 text-xl font-bold leading-none tabular-nums tracking-tight text-foreground">
         {value}
       </span>
 
       {progressPercent != null ? (
-        <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted/60">
+        <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-muted/60">
           <div
             className={cn(
-              "h-full transition-all duration-500 rounded-full",
+              "h-full rounded-full transition-all duration-500",
               colorMap[progressColor],
             )}
             style={{ width: `${Math.min(100, Math.max(0, progressPercent))}%` }}
@@ -73,7 +74,7 @@ export function CombatMetric({
       ) : null}
 
       {hint ? (
-        <span className="mt-1 max-w-full truncate text-[0.68rem] text-muted-foreground font-medium">
+        <span className="mt-0.5 max-w-full truncate text-[0.65rem] font-medium text-muted-foreground">
           {hint}
         </span>
       ) : null}

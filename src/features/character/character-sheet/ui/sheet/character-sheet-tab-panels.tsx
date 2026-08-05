@@ -68,15 +68,18 @@ export function buildCharacterSheetPagePanels({
         title="Traços & escolhas"
         icon={BookOpenIcon}
         className="bg-card/70"
+        flush
       >
-        <BeyondTraitsTab
-          character={character}
-          labels={labels}
-          onEdit={(section) => {
-            if (section === "background") onEdit("background-tool");
-            else onEdit(section);
-          }}
-        />
+        <div className="p-3">
+          <BeyondTraitsTab
+            character={character}
+            labels={labels}
+            onEdit={(section) => {
+              if (section === "background") onEdit("background-tool");
+              else onEdit(section);
+            }}
+          />
+        </div>
       </BeyondPanel>
     ),
   };

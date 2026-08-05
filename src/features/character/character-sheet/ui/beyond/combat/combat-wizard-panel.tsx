@@ -6,6 +6,7 @@ import {
   type WizardTableActionSlug,
 } from "@/features/character/character-sheet/api/character-session.api";
 import { useTableActionMutation } from "@/features/character/character-sheet/api/use-table-action-mutation";
+import { CombatClassPanelShell } from "@/features/character/character-sheet/ui/beyond/combat/combat-class-panel-shell";
 import { TableActionFeedback } from "@/features/character/character-sheet/ui/beyond/combat/table-action-feedback";
 import { Button } from "@/shared/ui/button";
 
@@ -78,13 +79,9 @@ export function CombatWizardPanel({
       (!item.subclass || item.subclass === subclassSlug),
   );
 
-  return (
-    <div className="mt-2 rounded-lg border border-border/70 bg-card/70 px-3 py-2 space-y-2">
-      <p className="text-[0.58rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
-        Combate do Mago (Grimório & Tradição Arcana)
-      </p>
-
-      <div className="space-y-1 pt-1">
+  const actionsContent = (
+    <div className="space-y-2">
+      <div className="space-y-1">
         <p className="text-xs font-medium text-muted-foreground">
           Recuperação Arcana (1×/Descanso Curto — limite total: {maxSlotLevelsToRecover} níveis de slot):
         </p>
@@ -110,40 +107,44 @@ export function CombatWizardPanel({
         </div>
       </div>
 
-      {availableSubclassActions.length ? (
-        <div className="pt-1">
-          <p className="text-xs font-medium text-muted-foreground mb-1">
-            Tradição Arcana & Habilidades de Escola:
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {availableSubclassActions.map((item) => (
-              <Button
-                key={item.slug}
-                type="button"
-                size="sm"
-                variant="secondary"
-                disabled={action.isPending}
-                onClick={() => action.mutate(item.slug)}
-              >
-                {item.label}
-              </Button>
-            ))}
-          </div>
-        </div>
-      ) : null}
-
-      {combatNotes?.length ? (
-        <ul className="mt-2 space-y-1 text-[0.7rem] text-muted-foreground">
-          {combatNotes.map((note) => (
-            <li key={note}>{note}</li>
-          ))}
-        </ul>
-      ) : null}
-
       <TableActionFeedback
         lastResultNote={action.lastResult?.note}
         error={action.error}
       />
     </div>
+  );
+
+  const powersContent =
+    availableSubclassActions.length > 0 ? (
+      <div className="space-y-2">
+        <div className="flex flex-wrap gap-2">
+          {availableSubclassActions.map((item) => (
+            <Button
+              key={item.slug}
+              type="button"
+              size="sm"
+              variant="secondary"
+              disabled={action.isPending}
+              onClick={() => action.mutate(item.slug)}
+            >
+              {item.label}
+            </Button>
+          ))}
+        </div>
+
+        <TableActionFeedback
+          lastResultNote={action.lastResult?.note}
+          error={action.error}
+        />
+      </div>
+    ) : null;
+
+  return (
+    <CombatClassPanelShell
+      title="Combate do Mago (Grimório & Tradição Arcana)"
+      actionsContent={actionsContent}
+      powersContent={powersContent}
+      combatNotes={combatNotes}
+    />
   );
 }

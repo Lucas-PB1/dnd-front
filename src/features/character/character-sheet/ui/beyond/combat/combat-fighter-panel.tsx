@@ -13,8 +13,7 @@ import {
 } from "@/features/character/character-sheet/api/character-session.api";
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
 import { FighterSubclassActions } from "@/features/character/character-sheet/ui/beyond/combat/fighter-subclass-actions";
-import { CombatClassSubtabs } from "@/features/character/character-sheet/ui/beyond/combat/combat-class-subtabs";
-import { CombatNotesList } from "@/features/character/character-sheet/ui/beyond/combat/combat-notes-list";
+import { CombatClassPanelShell } from "@/features/character/character-sheet/ui/beyond/combat/combat-class-panel-shell";
 import { Button } from "@/shared/ui/button";
 
 type CombatFighterPanelProps = {
@@ -235,30 +234,13 @@ export function CombatFighterPanel({
     />
   ) : null;
 
-  /* ── Tab: Passivas & Regras ── */
-  const passivesContent =
-    combatNotes && combatNotes.length > 0 ? (
-      <CombatNotesList notes={combatNotes} />
-    ) : null;
-
   return (
-    <CombatClassSubtabs
+    <CombatClassPanelShell
       title="Combate do Guerreiro"
-      tabs={[
-        { id: "actions", label: "Ações", icon: "⚡", content: actionsContent },
-        {
-          id: "powers",
-          label: "Poderes",
-          icon: "🧠",
-          content: powersContent,
-        },
-        {
-          id: "passives",
-          label: "Passivas",
-          icon: "📜",
-          content: passivesContent,
-        },
-      ]}
+      actionsContent={actionsContent}
+      powersContent={powersContent}
+      combatNotes={combatNotes}
+      powersIcon="🧠"
     />
   );
 }

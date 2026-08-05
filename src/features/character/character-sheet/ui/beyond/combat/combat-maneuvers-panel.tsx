@@ -11,6 +11,7 @@ import {
   sessionKeys,
 } from "@/features/character/character-sheet/api/character-session.api";
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
+import { CombatClassPanelShell } from "@/features/character/character-sheet/ui/beyond/combat/combat-class-panel-shell";
 import { Button } from "@/shared/ui/button";
 
 type CombatManeuversPanelProps = {
@@ -67,12 +68,9 @@ export function CombatManeuversPanel({
   const maneuvers = maneuversQuery.data ?? [];
   if (maneuvers.length === 0 && !maneuversQuery.isPending) return null;
 
-  return (
-    <div className="mt-2 rounded-lg border border-border/70 bg-card/70 px-3 py-2">
-      <p className="text-[0.58rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
-        Manobras de Risco
-      </p>
-      <div className="mt-2 flex flex-wrap gap-2">
+  const actionsContent = (
+    <div className="space-y-2">
+      <div className="flex flex-wrap gap-2">
         {maneuvers.map((maneuver) => (
           <Button
             key={maneuver.slug}
@@ -87,8 +85,9 @@ export function CombatManeuversPanel({
           </Button>
         ))}
       </div>
+
       {lastResult ? (
-        <div className="mt-2 space-y-1 text-sm" role="status">
+        <div className="space-y-1 text-sm" role="status">
           <p className="text-secondary">
             {lastResult.maneuverName}: {lastResult.riskRoll.expression} →{" "}
             <strong>{lastResult.riskRoll.value}</strong>
@@ -108,14 +107,22 @@ export function CombatManeuversPanel({
           ) : null}
         </div>
       ) : null}
+
       {useMutationManeuver.isError ? (
-        <p className="mt-2 text-sm text-destructive" role="alert">
+        <p className="text-sm text-destructive" role="alert">
           {useMutationManeuver.error instanceof Error
             ? useMutationManeuver.error.message
             : "Não foi possível usar a manobra"}
         </p>
       ) : null}
     </div>
+  );
+
+  return (
+    <CombatClassPanelShell
+      title="Manobras de Risco"
+      actionsContent={actionsContent}
+    />
   );
 }
 

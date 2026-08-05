@@ -31,6 +31,24 @@ function formatSubclassMechanicDetail(
   return parts.length > 0 ? parts.join(" · ") : null;
 }
 
+/** Feature + recurso podem repetir o mesmo nome (ex.: Poder Psiônico ×2). */
+function subclassMechanicListKey(
+  level: number,
+  mechanic: SubclassMechanic,
+  index: number,
+): string {
+  return [
+    level,
+    mechanic.featureName,
+    mechanic.optionKey ?? "",
+    mechanic.resourceSlug ?? "",
+    mechanic.resourceUnlockLevel ?? "",
+    mechanic.maxFormula ?? "",
+    mechanic.fixedMax ?? "",
+    index,
+  ].join("|");
+}
+
 export function SubclassMechanicsSection({
   character,
 }: Pick<SheetReadSectionProps, "character">) {
@@ -89,16 +107,14 @@ export function SubclassMechanicsSection({
             Nível {level}
           </h4>
           <ul className="space-y-1.5">
-            {mechanics.map((mechanic) => {
+            {mechanics.map((mechanic, index) => {
               const detail = formatSubclassMechanicDetail(mechanic);
               const matchesOption =
                 mechanic.optionKey != null &&
                 selectedOptionKeys.has(mechanic.optionKey);
 
               return (
-                <li
-                  key={`${level}-${mechanic.featureName}-${mechanic.optionKey ?? ""}`}
-                >
+                <li key={subclassMechanicListKey(level, mechanic, index)}>
                   <CollapsibleCard
                     title={mechanic.featureName}
                     subtitle={

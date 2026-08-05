@@ -56,7 +56,7 @@ export function CharacterSheetMainGrid({
           />
         </aside>
 
-        <div className="order-1 flex min-w-0 flex-col gap-3 xl:order-2">
+        <div className="order-1 flex min-w-0 flex-col gap-2 xl:order-2">
           <BeyondCombatHub characterId={characterId} character={character} />
           <CharacterSheetPageSections panels={pagePanels} />
         </div>

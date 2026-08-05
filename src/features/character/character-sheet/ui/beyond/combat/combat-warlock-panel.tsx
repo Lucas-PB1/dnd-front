@@ -6,6 +6,8 @@ import {
   type WarlockTableActionSlug,
 } from "@/features/character/character-sheet/api/character-session.api";
 import { useTableActionMutation } from "@/features/character/character-sheet/api/use-table-action-mutation";
+import { CombatClassPanelShell } from "@/features/character/character-sheet/ui/beyond/combat/combat-class-panel-shell";
+import { CombatResourceSummary } from "@/features/character/character-sheet/ui/beyond/combat/combat-resource-summary";
 import { TableActionFeedback } from "@/features/character/character-sheet/ui/beyond/combat/table-action-feedback";
 import { Button } from "@/shared/ui/button";
 
@@ -85,32 +87,18 @@ export function CombatWarlockPanel({
       (!item.subclass || item.subclass === subclassSlug),
   );
 
-  return (
-    <div className="mt-2 rounded-lg border border-border/70 bg-card/70 px-3 py-2 space-y-2">
-      <p className="text-[0.58rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
-        Combate do Bruxo (Magia de Pacto)
-      </p>
+  const baseActions = availableActions.filter((item) => !item.subclass);
+  const subclassActions = availableActions.filter((item) => item.subclass);
 
-      <div className="mt-1 space-y-1 text-sm text-muted-foreground">
-        {resources.map((res) => {
-          if (
-            res.slug !== "healing-light" &&
-            res.slug !== "dark-ones-own-luck"
-          )
-            return null;
-          return (
-            <p key={res.slug}>
-              {res.name}:{" "}
-              <span className="font-semibold text-foreground">
-                {res.remaining}/{res.max}
-              </span>
-            </p>
-          );
-        })}
-      </div>
+  const actionsContent = (
+    <div className="space-y-2">
+      <CombatResourceSummary
+        resources={resources}
+        slugs={["healing-light", "dark-ones-own-luck"]}
+      />
 
-      <div className="mt-2 flex flex-wrap gap-2">
-        {availableActions.map((item) => {
+      <div className="flex flex-wrap gap-2">
+        {baseActions.map((item) => {
           const resource = item.resourceSlug
             ? resources.find((entry) => entry.slug === item.resourceSlug)
             : undefined;
@@ -127,23 +115,59 @@ export function CombatWarlockPanel({
               onClick={() => action.mutate(item.slug)}
             >
               {item.label}
+              {resource ? ` (${resource.remaining})` : ""}
             </Button>
           );
         })}
       </div>
-
-      {combatNotes?.length ? (
-        <ul className="mt-2 space-y-1 text-[0.7rem] text-muted-foreground">
-          {combatNotes.map((note) => (
-            <li key={note}>{note}</li>
-          ))}
-        </ul>
-      ) : null}
 
       <TableActionFeedback
         lastResultNote={action.lastResult?.note}
         error={action.error}
       />
     </div>
+  );
+
+  const powersContent =
+    subclassActions.length > 0 ? (
+      <div className="space-y-2">
+        <div className="flex flex-wrap gap-2">
+          {subclassActions.map((item) => {
+            const resource = item.resourceSlug
+              ? resources.find((entry) => entry.slug === item.resourceSlug)
+              : undefined;
+            return (
+              <Button
+                key={item.slug}
+                type="button"
+                size="sm"
+                variant={item.resourceSlug ? "outline" : "ghost"}
+                disabled={
+                  action.isPending ||
+                  (resource != null && resource.remaining <= 0)
+                }
+                onClick={() => action.mutate(item.slug)}
+              >
+                {item.label}
+                {resource ? ` (${resource.remaining})` : ""}
+              </Button>
+            );
+          })}
+        </div>
+
+        <TableActionFeedback
+          lastResultNote={action.lastResult?.note}
+          error={action.error}
+        />
+      </div>
+    ) : null;
+
+  return (
+    <CombatClassPanelShell
+      title="Combate do Bruxo (Magia de Pacto)"
+      actionsContent={actionsContent}
+      powersContent={powersContent}
+      combatNotes={combatNotes}
+    />
   );
 }

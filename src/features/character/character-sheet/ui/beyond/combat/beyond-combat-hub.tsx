@@ -21,24 +21,11 @@ import {
   useSpendClassResource,
 } from "@/features/character/character-sheet/api/use-character-state";
 import type { ResourceDieRoll } from "@/entities/character/session-types";
-import { CombatBarbarianPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-barbarian-panel";
-import { CombatFighterPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-fighter-panel";
-import { CombatRoguePanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-rogue-panel";
-import { CombatMonkPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-monk-panel";
-import { CombatPaladinPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-paladin-panel";
-import { CombatRangerPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-ranger-panel";
-import { CombatClericPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-cleric-panel";
-import { CombatBardPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-bard-panel";
-import { CombatSorcererPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-sorcerer-panel";
-import { CombatWarlockPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-warlock-panel";
-import { CombatDruidPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-druid-panel";
-import { CombatWizardPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-wizard-panel";
+import { managedClassResourceSlugs } from "@/features/character/character-sheet/lib/combat/managed-class-resources";
+import { ClassCombatPanel } from "@/features/character/character-sheet/ui/beyond/combat/class-combat-panel";
 import { CombatClassResourcesPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-class-resources-panel";
 import { CombatEquipmentWarnings } from "@/features/character/character-sheet/ui/beyond/combat/combat-equipment-warnings";
-import {
-  CombatManeuversPanel,
-  useRecoverRisk,
-} from "@/features/character/character-sheet/ui/beyond/combat/combat-maneuvers-panel";
+import { useRecoverRisk } from "@/features/character/character-sheet/ui/beyond/combat/combat-maneuvers-panel";
 import { CombatMetric } from "@/features/character/character-sheet/ui/beyond/combat/combat-metric";
 import { CombatStatusEditor } from "@/features/character/character-sheet/ui/beyond/combat/combat-status-editor";
 import { DeathSaveTrack } from "@/features/character/character-sheet/ui/beyond/combat/death-save-track";
@@ -126,12 +113,12 @@ export function BeyondCombatHub({
   const currentHp = state?.hitPointsCurrent ?? character.hitPointsMax ?? 10;
   const maxHp = character.hitPointsMax ?? 10;
   const hpPercent = Math.round((currentHp / Math.max(1, maxHp)) * 100);
-  const hpProgressColor: "emerald" | "amber" | "rose" =
-    hpPercent > 50 ? "emerald" : hpPercent >= 25 ? "amber" : "rose";
+  const hpProgressColor: "chart-3" | "chart-2" | "chart-1" =
+    hpPercent > 50 ? "chart-3" : hpPercent >= 25 ? "chart-2" : "chart-1";
 
   return (
-    <div className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-md p-3 shadow-sm space-y-3">
-      <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-[6.5rem_7rem_1fr_1fr]">
+    <div className="space-y-2 rounded-xl border border-border/60 bg-card/60 p-2.5 shadow-sm">
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-[5.5rem_6rem_minmax(0,1fr)_minmax(0,1fr)]">
         <CombatMetric
           label="Iniciativa"
           value={formatSkillBonus(initiative)}
@@ -152,11 +139,11 @@ export function BeyondCombatHub({
           value={`${currentHp} / ${maxHp}`}
           hint={
             state?.tempHp ? (
-              <span className="text-indigo-400 font-semibold">
+              <span className="font-semibold text-accent">
                 +{state.tempHp} PV Temp
               </span>
             ) : (
-              `${hpPercent}% HP Restante`
+              `${hpPercent}%`
             )
           }
           icon={HeartIcon}
@@ -164,24 +151,24 @@ export function BeyondCombatHub({
           progressColor={hpProgressColor}
           badge={
             state?.tempHp ? (
-              <span className="rounded-full bg-indigo-500/20 px-1.5 py-0.5 text-[0.6rem] font-bold text-indigo-400 border border-indigo-500/30">
-                +{state.tempHp} Temp
+              <span className="rounded-full border border-accent/30 bg-accent/15 px-1 py-0.5 text-[0.55rem] font-bold text-accent">
+                +{state.tempHp}
               </span>
             ) : null
           }
         />
 
-        <div className="min-w-0 rounded-xl border border-border/60 bg-card/60 backdrop-blur-sm px-3.5 py-2.5">
+        <div className="min-w-0 rounded-lg border border-border/60 bg-card/60 px-2.5 py-1.5">
           <div className="flex items-center justify-between gap-2">
-            <p className="inline-flex items-center gap-1 text-[0.62rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
-              <HeartIcon className="size-3.5 text-rose-500" aria-hidden />
-              Condições & Status
+            <p className="inline-flex items-center gap-1 text-[0.58rem] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+              <HeartIcon className="size-3 text-rose-500" aria-hidden />
+              Condições
             </p>
             <Button
               type="button"
               size="xs"
               variant="ghost"
-              className="gap-1 h-6 px-2 text-[0.7rem]"
+              className="h-5 gap-1 px-1.5 text-[0.65rem]"
               disabled={!state}
               onClick={openStatusEditor}
             >
@@ -189,7 +176,7 @@ export function BeyondCombatHub({
               Editar
             </Button>
           </div>
-          <div className="mt-1.5 flex min-w-0 flex-wrap gap-1">
+          <div className="mt-1 flex min-w-0 flex-wrap gap-1">
             {state?.conditions?.length ? (
               state.conditions.map((slug) => (
                 <SheetChip key={slug} active>
@@ -197,22 +184,24 @@ export function BeyondCombatHub({
                 </SheetChip>
               ))
             ) : (
-              <span className="text-xs text-muted-foreground italic">Nenhuma condição ativa</span>
+              <span className="text-xs text-muted-foreground italic">
+                Nenhuma
+              </span>
             )}
           </div>
         </div>
       </div>
 
-      <div className="mt-2 grid gap-2 sm:grid-cols-3">
-        <div className="rounded-lg border border-border/70 bg-card/70 px-3 py-2">
-          <p className="text-[0.58rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
+      <div className="grid gap-1.5 sm:grid-cols-3">
+        <div className="rounded-lg border border-border/70 bg-card/70 px-2.5 py-1.5">
+          <p className="text-[0.55rem] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
             Inspiração
           </p>
           <Button
             type="button"
-            size="sm"
+            size="xs"
             variant={state?.inspiration ? "default" : "outline"}
-            className="mt-2"
+            className="mt-1.5"
             disabled={!state || patchState.isPending}
             onClick={() =>
               patchDeathOrInspiration({
@@ -244,6 +233,7 @@ export function BeyondCombatHub({
 
       <CombatClassResourcesPanel
         resources={classResources}
+        hideSlugs={managedClassResourceSlugs(character.classSlug)}
         isPending={spendResource.isPending || recoverRiskMutation.isPending}
         isError={spendResource.isError}
         error={spendResource.error}
@@ -264,160 +254,9 @@ export function BeyondCombatHub({
         }}
       />
 
-      <CombatManeuversPanel
+      <ClassCombatPanel
         characterId={characterId}
-        classSlug={character.classSlug}
-        level={character.level}
-      />
-
-      <CombatBarbarianPanel
-        characterId={characterId}
-        classSlug={character.classSlug}
-        combatNotes={character.classCombatNotes}
-        state={state}
-      />
-
-      <CombatFighterPanel
-        characterId={characterId}
-        classSlug={character.classSlug}
-        subclassSlug={character.subclassSlug}
-        level={character.level}
-        attacksPerAction={character.attacksPerAction}
-        combatNotes={
-          character.classSlug === "fighter"
-            ? character.classCombatNotes
-            : undefined
-        }
-        state={state}
-      />
-
-      <CombatRoguePanel
-        characterId={characterId}
-        classSlug={character.classSlug}
-        subclassSlug={character.subclassSlug}
-        level={character.level}
-        combatNotes={
-          character.classSlug === "rogue"
-            ? character.classCombatNotes
-            : undefined
-        }
-        state={state}
-      />
-
-      <CombatMonkPanel
-        characterId={characterId}
-        classSlug={character.classSlug}
-        subclassSlug={character.subclassSlug}
-        level={character.level}
-        combatNotes={
-          character.classSlug === "monk"
-            ? character.classCombatNotes
-            : undefined
-        }
-        state={state}
-      />
-
-      <CombatPaladinPanel
-        characterId={characterId}
-        classSlug={character.classSlug}
-        subclassSlug={character.subclassSlug}
-        level={character.level}
-        combatNotes={
-          character.classSlug === "paladin"
-            ? character.classCombatNotes
-            : undefined
-        }
-        state={state}
-      />
-
-      <CombatRangerPanel
-        characterId={characterId}
-        classSlug={character.classSlug}
-        subclassSlug={character.subclassSlug}
-        level={character.level}
-        combatNotes={
-          character.classSlug === "ranger"
-            ? character.classCombatNotes
-            : undefined
-        }
-        state={state}
-      />
-
-      <CombatClericPanel
-        characterId={characterId}
-        classSlug={character.classSlug}
-        subclassSlug={character.subclassSlug}
-        level={character.level}
-        combatNotes={
-          character.classSlug === "cleric"
-            ? character.classCombatNotes
-            : undefined
-        }
-        state={state}
-      />
-
-      <CombatBardPanel
-        characterId={characterId}
-        classSlug={character.classSlug}
-        subclassSlug={character.subclassSlug}
-        level={character.level}
-        combatNotes={
-          character.classSlug === "bard"
-            ? character.classCombatNotes
-            : undefined
-        }
-        state={state}
-      />
-
-      <CombatSorcererPanel
-        characterId={characterId}
-        classSlug={character.classSlug}
-        subclassSlug={character.subclassSlug}
-        level={character.level}
-        combatNotes={
-          character.classSlug === "sorcerer"
-            ? character.classCombatNotes
-            : undefined
-        }
-        state={state}
-      />
-
-      <CombatWarlockPanel
-        characterId={characterId}
-        classSlug={character.classSlug}
-        subclassSlug={character.subclassSlug}
-        level={character.level}
-        combatNotes={
-          character.classSlug === "warlock"
-            ? character.classCombatNotes
-            : undefined
-        }
-        state={state}
-      />
-
-      <CombatDruidPanel
-        characterId={characterId}
-        classSlug={character.classSlug}
-        subclassSlug={character.subclassSlug}
-        level={character.level}
-        combatNotes={
-          character.classSlug === "druid"
-            ? character.classCombatNotes
-            : undefined
-        }
-        state={state}
-      />
-
-      <CombatWizardPanel
-        characterId={characterId}
-        classSlug={character.classSlug}
-        subclassSlug={character.subclassSlug}
-        level={character.level}
-        combatNotes={
-          character.classSlug === "wizard"
-            ? character.classCombatNotes
-            : undefined
-        }
+        character={character}
         state={state}
       />
 

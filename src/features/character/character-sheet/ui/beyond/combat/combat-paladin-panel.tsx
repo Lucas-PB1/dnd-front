@@ -8,6 +8,7 @@ import {
   type PaladinTableActionSlug,
 } from "@/features/character/character-sheet/api/character-session.api";
 import { useTableActionMutation } from "@/features/character/character-sheet/api/use-table-action-mutation";
+import { CombatClassPanelShell } from "@/features/character/character-sheet/ui/beyond/combat/combat-class-panel-shell";
 import { TableActionFeedback } from "@/features/character/character-sheet/ui/beyond/combat/table-action-feedback";
 import { Button } from "@/shared/ui/button";
 
@@ -57,14 +58,10 @@ export function CombatPaladinPanel({
     (item) => level >= item.minLevel,
   );
 
-  return (
-    <div className="mt-2 rounded-lg border border-border/70 bg-card/70 px-3 py-2">
-      <p className="text-[0.58rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
-        Combate do Paladino
-      </p>
-
+  const actionsContent = (
+    <div className="space-y-2">
       {layOnHands ? (
-        <div className="mt-2">
+        <div>
           <p className="text-sm text-muted-foreground">
             Mãos Consagradas:{" "}
             <span className="font-semibold text-foreground">
@@ -88,6 +85,7 @@ export function CombatPaladinPanel({
               size="sm"
               variant="outline"
               disabled={action.isPending || poolRemaining < healAmount}
+              title="Ação: gasta pontos da reserva para curar"
               onClick={() =>
                 action.mutate({
                   actionSlug: "lay-on-hands",
@@ -102,6 +100,7 @@ export function CombatPaladinPanel({
               size="sm"
               variant="ghost"
               disabled={action.isPending || poolRemaining < 5}
+              title="Ação: gasta 5 pontos para curar veneno ou doença"
               onClick={() => action.mutate({ actionSlug: "cure-poison" })}
             >
               Curar Veneno (5)
@@ -111,7 +110,7 @@ export function CombatPaladinPanel({
       ) : null}
 
       {channel ? (
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           Canalizar Divindade:{" "}
           <span className="font-semibold text-foreground">
             {channelRemaining}/{channel.max}
@@ -119,8 +118,8 @@ export function CombatPaladinPanel({
         </p>
       ) : null}
 
-      {channelActions.length ? (
-        <div className="mt-2 flex flex-wrap gap-2">
+      {channelActions.length > 0 ? (
+        <div className="flex flex-wrap gap-2">
           {channelActions.map((item) => (
             <Button
               key={item.slug}
@@ -130,18 +129,10 @@ export function CombatPaladinPanel({
               disabled={action.isPending || channelRemaining <= 0}
               onClick={() => action.mutate({ actionSlug: item.slug })}
             >
-              {item.label}
+              {item.label} ({channelRemaining})
             </Button>
           ))}
         </div>
-      ) : null}
-
-      {combatNotes?.length ? (
-        <ul className="mt-2 space-y-1 text-[0.7rem] text-muted-foreground">
-          {combatNotes.map((note) => (
-            <li key={note}>{note}</li>
-          ))}
-        </ul>
       ) : null}
 
       <TableActionFeedback
@@ -149,5 +140,13 @@ export function CombatPaladinPanel({
         error={action.error}
       />
     </div>
+  );
+
+  return (
+    <CombatClassPanelShell
+      title="Combate do Paladino"
+      actionsContent={actionsContent}
+      combatNotes={combatNotes}
+    />
   );
 }

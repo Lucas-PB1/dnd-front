@@ -8,6 +8,8 @@ import { Button } from "@/shared/ui/button";
 
 type CombatClassResourcesPanelProps = {
   resources: ClassResourceState[];
+  /** Slugs já tratados pelo painel da classe — omitidos aqui. */
+  hideSlugs?: readonly string[];
   isPending: boolean;
   isError: boolean;
   error: Error | null;
@@ -19,6 +21,7 @@ type CombatClassResourcesPanelProps = {
 
 export function CombatClassResourcesPanel({
   resources,
+  hideSlugs = [],
   isPending,
   isError,
   error,
@@ -27,17 +30,21 @@ export function CombatClassResourcesPanel({
   onRecoverRisk,
   canRecoverRisk = false,
 }: CombatClassResourcesPanelProps) {
-  if (resources.length === 0) {
+  const visible = resources.filter(
+    (resource) => !hideSlugs.includes(resource.slug),
+  );
+
+  if (visible.length === 0) {
     return null;
   }
 
   return (
-    <div className="mt-2 rounded-xl border border-border/60 bg-card/60 px-3.5 py-2.5 backdrop-blur-md">
-      <p className="text-[0.6rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
+    <div className="mt-1.5 rounded-lg border border-border/60 bg-card/60 px-2.5 py-2">
+      <p className="text-[0.55rem] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
         Recursos de Classe & Reservas
       </p>
-      <div className="mt-2 flex flex-wrap gap-2.5">
-        {resources.map((resource) => {
+      <div className="mt-1.5 flex flex-wrap gap-2">
+        {visible.map((resource) => {
           const showPips = resource.max > 0 && resource.max <= 12;
           return (
             <div
@@ -48,7 +55,7 @@ export function CombatClassResourcesPanel({
                 <span className="text-xs font-semibold text-foreground">
                   {resource.name}
                   {resource.dieLabel ? (
-                    <span className="ml-1 text-indigo-400 font-mono">
+                    <span className="ml-1 font-mono text-accent">
                       ({resource.dieLabel})
                     </span>
                   ) : null}
@@ -59,13 +66,15 @@ export function CombatClassResourcesPanel({
                     type="button"
                     size="xs"
                     variant="outline"
-                    className="h-6 px-2 text-[0.7rem] hover:bg-primary hover:text-primary-foreground transition-colors"
+                    className="h-6 px-2 text-[0.7rem] transition-colors hover:bg-primary hover:text-primary-foreground"
                     disabled={resource.remaining <= 0 || isPending}
                     onClick={() => onSpend(resource.slug)}
                   >
                     Gastar
                   </Button>
-                  {resource.slug === "risk" && canRecoverRisk && onRecoverRisk ? (
+                  {resource.slug === "risk" &&
+                  canRecoverRisk &&
+                  onRecoverRisk ? (
                     <Button
                       type="button"
                       size="xs"
@@ -81,26 +90,25 @@ export function CombatClassResourcesPanel({
                 </div>
               </div>
 
-              {/* Pip tracker de recursos */}
               <div className="flex items-center gap-1.5">
                 {showPips ? (
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1" aria-hidden>
                     {Array.from({ length: resource.max }).map((_, index) => {
                       const isAvailable = index < resource.remaining;
                       return (
                         <span
                           key={index}
-                          className={`size-2.5 rounded-full transition-all duration-300 ${
+                          className={
                             isAvailable
-                              ? "bg-primary shadow-[0_0_8px_rgba(168,85,247,0.6)]"
-                              : "border border-border/80 bg-muted/30"
-                          }`}
+                              ? "size-2.5 rounded-full bg-secondary"
+                              : "size-2.5 rounded-full border border-border/80 bg-muted/30"
+                          }
                         />
                       );
                     })}
                   </div>
                 ) : null}
-                <span className="tabular-nums text-[0.7rem] text-muted-foreground font-medium">
+                <span className="text-[0.7rem] font-medium tabular-nums text-muted-foreground">
                   {resource.remaining} / {resource.max}
                 </span>
               </div>
@@ -109,7 +117,7 @@ export function CombatClassResourcesPanel({
         })}
       </div>
       {lastRoll ? (
-        <p className="mt-2 text-sm text-secondary font-medium" role="status">
+        <p className="mt-2 text-sm font-medium text-secondary" role="status">
           {lastRoll.expression} → <strong>{lastRoll.value}</strong>
         </p>
       ) : null}

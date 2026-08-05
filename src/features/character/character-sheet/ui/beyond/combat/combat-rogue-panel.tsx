@@ -8,6 +8,7 @@ import {
   type RogueTableActionSlug,
 } from "@/features/character/character-sheet/api/character-session.api";
 import { useTableActionMutation } from "@/features/character/character-sheet/api/use-table-action-mutation";
+import { CombatClassPanelShell } from "@/features/character/character-sheet/ui/beyond/combat/combat-class-panel-shell";
 import { TableActionFeedback } from "@/features/character/character-sheet/ui/beyond/combat/table-action-feedback";
 import { useSheetRolls } from "@/features/character/character-sheet/ui/beyond/layout/sheet-rolls";
 import { Button } from "@/shared/ui/button";
@@ -51,34 +52,41 @@ export function CombatRoguePanel({
     state?.classResources?.find((item) => item.slug === slug);
   const psiRemaining = resource("soulknife-psi-dice")?.remaining ?? 0;
 
-  return (
-    <div className="mt-2 rounded-lg border border-border/70 bg-card/70 px-3 py-2">
-      <p className="text-[0.58rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
-        Combate do Ladino
-      </p>
-      <p className="mt-1 text-sm text-muted-foreground">
+  const actionsContent = (
+    <div className="space-y-2">
+      <p className="text-sm text-muted-foreground">
         Ataque Furtivo:{" "}
         <span className="font-semibold text-foreground">
           {Math.ceil(level / 2)}d6
         </span>
         {subclassSlug === "arachnoid-stalker" ? " (ou d8 Venenoso)" : ""}
       </p>
+
       {level >= 20 ? (
         <Button
           type="button"
           size="xs"
           variant="ghost"
-          className="mt-2"
           disabled={
             rolls.initiative.isPending ||
             (resource("strokeOfLuck")?.remaining ?? 0) <= 0
           }
+          title="Golpe de Sorte: transforma falha crítica em sucesso (nv. 20)"
           onClick={() => rolls.initiative.mutate({ strokeOfLuck: true })}
         >
-          Golpe de Sorte na iniciativa
+          Golpe de Sorte na iniciativa ({resource("strokeOfLuck")?.remaining ?? 0})
         </Button>
       ) : null}
 
+      <TableActionFeedback
+        lastResultNote={action.lastResult?.note}
+        error={action.error}
+      />
+    </div>
+  );
+
+  const soulknifePowersContent = subclassSlug === "soulknife" ? (
+    <div className="space-y-2">
       {subclassSlug === "soulknife" ? (
         <>
           <div className="mt-2 flex flex-wrap gap-2">
@@ -211,61 +219,91 @@ export function CombatRoguePanel({
         </>
       ) : null}
 
-      {subclassSlug === "arcane-trickster" && level >= 17 ? (
+      <TableActionFeedback
+        lastResultNote={action.lastResult?.note}
+        error={action.error}
+      />
+    </div>
+  ) : null;
+
+  const tricksterPowersContent =
+    subclassSlug === "arcane-trickster" && level >= 17 ? (
+      <div className="space-y-2">
         <Button
           type="button"
           size="sm"
           variant="outline"
-          className="mt-2"
           disabled={
             action.isPending || (resource("spell-thief")?.remaining ?? 0) <= 0
           }
+          title="Ladrão de Magias: roubar magia de oponente (1×/descanso)"
           onClick={() => action.mutate("spell-thief")}
         >
-          Ladrão de Magias
+          Ladrão de Magias ({resource("spell-thief")?.remaining ?? 0})
         </Button>
-      ) : null}
 
-      {subclassSlug === "thief" && level >= 13 ? (
+        <TableActionFeedback
+          lastResultNote={action.lastResult?.note}
+          error={action.error}
+        />
+      </div>
+    ) : null;
+
+  const thiefPowersContent =
+    subclassSlug === "thief" && level >= 13 ? (
+      <div className="space-y-2">
         <Button
           type="button"
           size="sm"
           variant="outline"
-          className="mt-2"
           disabled={action.isPending}
+          title="Usar Item Mágico: teste para recarregar item (nv. 13+)"
           onClick={() => action.mutate("magic-device-charge")}
         >
           Testar carga de item mágico
         </Button>
-      ) : null}
 
-      {subclassSlug === "arachnoid-stalker" ? (
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          className="mt-2"
-          disabled={
-            action.isPending || (resource("arachnoid-web")?.remaining ?? 0) <= 0
-          }
-          onClick={() => action.mutate("arachnoid-web")}
-        >
-          Correia/Teia ({resource("arachnoid-web")?.remaining ?? 0})
-        </Button>
-      ) : null}
+        <TableActionFeedback
+          lastResultNote={action.lastResult?.note}
+          error={action.error}
+        />
+      </div>
+    ) : null;
 
-      {combatNotes?.length ? (
-        <ul className="mt-2 space-y-1 text-[0.7rem] text-muted-foreground">
-          {combatNotes.map((note) => (
-            <li key={note}>{note}</li>
-          ))}
-        </ul>
-      ) : null}
+  const arachnoidPowersContent = subclassSlug === "arachnoid-stalker" ? (
+    <div className="space-y-2">
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        disabled={
+          action.isPending || (resource("arachnoid-web")?.remaining ?? 0) <= 0
+        }
+        title="Correia Aracnóide: criar teia ou correia (gasta 1 uso)"
+        onClick={() => action.mutate("arachnoid-web")}
+      >
+        Correia/Teia ({resource("arachnoid-web")?.remaining ?? 0})
+      </Button>
 
       <TableActionFeedback
         lastResultNote={action.lastResult?.note}
         error={action.error}
       />
     </div>
+  ) : null;
+
+  const powersContent =
+    soulknifePowersContent ??
+    tricksterPowersContent ??
+    thiefPowersContent ??
+    arachnoidPowersContent;
+
+  return (
+    <CombatClassPanelShell
+      title="Combate do Ladino"
+      actionsContent={actionsContent}
+      powersContent={powersContent}
+      combatNotes={combatNotes}
+    />
   );
 }

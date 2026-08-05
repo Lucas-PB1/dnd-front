@@ -18,11 +18,11 @@ export function DeathSaveTrack({
   tone = "default",
 }: DeathSaveTrackProps) {
   return (
-    <div className="rounded-lg border border-border/70 bg-card/70 px-3 py-2">
-      <p className="text-[0.58rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
+    <div className="rounded-lg border border-border/70 bg-card/70 px-2.5 py-1.5">
+      <p className="text-[0.55rem] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
         {label}
       </p>
-      <div className="mt-2 flex gap-1.5">
+      <div className="mt-1.5 flex gap-1.5">
         {[1, 2, 3].map((pip) => {
           const filled = value >= pip;
           return (

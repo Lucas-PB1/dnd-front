@@ -6,6 +6,8 @@ import {
   type MonkTableActionSlug,
 } from "@/features/character/character-sheet/api/character-session.api";
 import { useTableActionMutation } from "@/features/character/character-sheet/api/use-table-action-mutation";
+import { CombatClassPanelShell } from "@/features/character/character-sheet/ui/beyond/combat/combat-class-panel-shell";
+import { CombatResourceSummary } from "@/features/character/character-sheet/ui/beyond/combat/combat-resource-summary";
 import { TableActionFeedback } from "@/features/character/character-sheet/ui/beyond/combat/table-action-feedback";
 import { Button } from "@/shared/ui/button";
 
@@ -100,9 +102,8 @@ export function CombatMonkPanel({
 
   if (classSlug !== "monk") return null;
 
-  const focus = state?.classResources?.find(
-    (item) => item.slug === "focusPoints",
-  );
+  const resources = state?.classResources ?? [];
+  const focus = resources.find((item) => item.slug === "focusPoints");
   const focusRemaining = focus?.remaining ?? 0;
 
   const available = MONK_ACTIONS.filter(
@@ -111,49 +112,74 @@ export function CombatMonkPanel({
       (!item.subclass || item.subclass === subclassSlug),
   );
 
-  return (
-    <div className="mt-2 rounded-lg border border-border/70 bg-card/70 px-3 py-2">
-      <p className="text-[0.58rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
-        Combate do Monge
-      </p>
-      {focus ? (
-        <p className="mt-1 text-sm text-muted-foreground">
-          Pontos de Foco:{" "}
-          <span className="font-semibold text-foreground">
-            {focusRemaining}/{focus.max}
-          </span>
-        </p>
-      ) : null}
+  const baseActions = available.filter((item) => !item.subclass);
+  const subclassActions = available.filter((item) => item.subclass);
 
-      <div className="mt-2 flex flex-wrap gap-2">
-        {available.map((item) => (
+  const actionsContent = (
+    <div className="space-y-2">
+      <CombatResourceSummary resources={resources} slugs={["focusPoints"]} />
+
+      <div className="flex flex-wrap gap-2">
+        {baseActions.map((item) => (
           <Button
             key={item.slug}
             type="button"
             size="sm"
             variant={item.spendsFocus ? "outline" : "ghost"}
+            title={item.spendsFocus ? `Gasta 1 Ponto de Foco (${focusRemaining})` : undefined}
             disabled={
               action.isPending || (item.spendsFocus && focusRemaining <= 0)
             }
             onClick={() => action.mutate(item.slug)}
           >
             {item.label}
+            {item.spendsFocus ? ` (${focusRemaining})` : ""}
           </Button>
         ))}
       </div>
-
-      {combatNotes?.length ? (
-        <ul className="mt-2 space-y-1 text-[0.7rem] text-muted-foreground">
-          {combatNotes.map((note) => (
-            <li key={note}>{note}</li>
-          ))}
-        </ul>
-      ) : null}
 
       <TableActionFeedback
         lastResultNote={action.lastResult?.note}
         error={action.error}
       />
     </div>
+  );
+
+  const powersContent =
+    subclassActions.length > 0 ? (
+      <div className="space-y-2">
+        <div className="flex flex-wrap gap-2">
+          {subclassActions.map((item) => (
+            <Button
+              key={item.slug}
+              type="button"
+              size="sm"
+              variant={item.spendsFocus ? "outline" : "ghost"}
+              title={item.spendsFocus ? `Gasta 1 Ponto de Foco (${focusRemaining})` : undefined}
+              disabled={
+                action.isPending || (item.spendsFocus && focusRemaining <= 0)
+              }
+              onClick={() => action.mutate(item.slug)}
+            >
+              {item.label}
+              {item.spendsFocus ? ` (${focusRemaining})` : ""}
+            </Button>
+          ))}
+        </div>
+
+        <TableActionFeedback
+          lastResultNote={action.lastResult?.note}
+          error={action.error}
+        />
+      </div>
+    ) : null;
+
+  return (
+    <CombatClassPanelShell
+      title="Combate do Monge"
+      actionsContent={actionsContent}
+      powersContent={powersContent}
+      combatNotes={combatNotes}
+    />
   );
 }

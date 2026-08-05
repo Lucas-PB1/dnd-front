@@ -6,6 +6,8 @@ import {
   type DruidTableActionSlug,
 } from "@/features/character/character-sheet/api/character-session.api";
 import { useTableActionMutation } from "@/features/character/character-sheet/api/use-table-action-mutation";
+import { CombatClassPanelShell } from "@/features/character/character-sheet/ui/beyond/combat/combat-class-panel-shell";
+import { CombatResourceSummary } from "@/features/character/character-sheet/ui/beyond/combat/combat-resource-summary";
 import { TableActionFeedback } from "@/features/character/character-sheet/ui/beyond/combat/table-action-feedback";
 import { Button } from "@/shared/ui/button";
 
@@ -110,53 +112,57 @@ export function CombatDruidPanel({
       (!item.subclass || item.subclass === subclassSlug),
   );
 
-  return (
-    <div className="mt-2 rounded-lg border border-border/70 bg-card/70 px-3 py-2 space-y-2">
-      <p className="text-[0.58rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
-        Combate do Druida (Forma Selvagem)
-      </p>
+  const actionsContent = (
+    <div className="space-y-2">
+      <CombatResourceSummary
+        resources={resources}
+        slugs={["wildShape", "wild-shape"]}
+      />
 
-      {wildShapeResource ? (
-        <div className="text-sm text-muted-foreground">
-          Usos de Forma Selvagem:{" "}
-          <span className="font-semibold text-foreground">
-            {wildShapeResource.remaining}/{wildShapeResource.max}
-          </span>
-        </div>
-      ) : null}
-
-      <div className="flex flex-wrap gap-2 pt-1">
-        {availableBaseActions.map((item) => (
-          <Button
-            key={item.slug}
-            type="button"
-            size="sm"
-            variant={item.resourceSlug ? "outline" : "secondary"}
-            disabled={
-              action.isPending ||
-              (item.resourceSlug != null &&
-                wildShapeResource != null &&
-                wildShapeResource.remaining <= 0)
-            }
-            onClick={() => action.mutate(item.slug)}
-          >
-            {item.label}
-          </Button>
-        ))}
+      <div className="flex flex-wrap gap-2">
+        {availableBaseActions.map((item) => {
+          const remaining = wildShapeResource?.remaining ?? 0;
+          return (
+            <Button
+              key={item.slug}
+              type="button"
+              size="sm"
+              variant={item.resourceSlug ? "outline" : "secondary"}
+              title={item.resourceSlug ? `Gasta 1 uso de Forma Selvagem (${remaining})` : undefined}
+              disabled={
+                action.isPending ||
+                (item.resourceSlug != null &&
+                  wildShapeResource != null &&
+                  wildShapeResource.remaining <= 0)
+              }
+              onClick={() => action.mutate(item.slug)}
+            >
+              {item.label}
+            </Button>
+          );
+        })}
       </div>
 
-      {availableSubclassActions.length ? (
-        <div className="pt-1">
-          <p className="text-xs font-medium text-muted-foreground mb-1">
-            Habilidades de Círculo:
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {availableSubclassActions.map((item) => (
+      <TableActionFeedback
+        lastResultNote={action.lastResult?.note}
+        error={action.error}
+      />
+    </div>
+  );
+
+  const powersContent =
+    availableSubclassActions.length > 0 ? (
+      <div className="space-y-2">
+        <div className="flex flex-wrap gap-2">
+          {availableSubclassActions.map((item) => {
+            const remaining = wildShapeResource?.remaining ?? 0;
+            return (
               <Button
                 key={item.slug}
                 type="button"
                 size="sm"
                 variant="default"
+                title={item.resourceSlug ? `Gasta 1 uso de Forma Selvagem (${remaining})` : undefined}
                 disabled={
                   action.isPending ||
                   (item.resourceSlug != null &&
@@ -167,23 +173,23 @@ export function CombatDruidPanel({
               >
                 {item.label}
               </Button>
-            ))}
-          </div>
+            );
+          })}
         </div>
-      ) : null}
 
-      {combatNotes?.length ? (
-        <ul className="mt-2 space-y-1 text-[0.7rem] text-muted-foreground">
-          {combatNotes.map((note) => (
-            <li key={note}>{note}</li>
-          ))}
-        </ul>
-      ) : null}
+        <TableActionFeedback
+          lastResultNote={action.lastResult?.note}
+          error={action.error}
+        />
+      </div>
+    ) : null;
 
-      <TableActionFeedback
-        lastResultNote={action.lastResult?.note}
-        error={action.error}
-      />
-    </div>
+  return (
+    <CombatClassPanelShell
+      title="Combate do Druida (Forma Selvagem)"
+      actionsContent={actionsContent}
+      powersContent={powersContent}
+      combatNotes={combatNotes}
+    />
   );
 }

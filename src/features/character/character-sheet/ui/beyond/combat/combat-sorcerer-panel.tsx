@@ -6,6 +6,8 @@ import {
   type SorcererTableActionSlug,
 } from "@/features/character/character-sheet/api/character-session.api";
 import { useTableActionMutation } from "@/features/character/character-sheet/api/use-table-action-mutation";
+import { CombatClassPanelShell } from "@/features/character/character-sheet/ui/beyond/combat/combat-class-panel-shell";
+import { CombatResourceSummary } from "@/features/character/character-sheet/ui/beyond/combat/combat-resource-summary";
 import { TableActionFeedback } from "@/features/character/character-sheet/ui/beyond/combat/table-action-feedback";
 import { Button } from "@/shared/ui/button";
 
@@ -102,23 +104,15 @@ export function CombatSorcererPanel({
   const slotsRemaining = state?.spellSlotsRemaining ?? {};
   const slotsMax = state?.spellSlotsMax ?? {};
 
-  return (
-    <div className="mt-2 rounded-lg border border-border/70 bg-card/70 px-3 py-2 space-y-2">
-      <p className="text-[0.58rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
-        Combate do Feiticeiro (Fonte de Magia)
-      </p>
-
-      {pointsResource ? (
-        <div className="text-sm text-muted-foreground">
-          Pontos de Feitiçaria:{" "}
-          <span className="font-semibold text-foreground">
-            {pointsResource.remaining}/{pointsResource.max}
-          </span>
-        </div>
-      ) : null}
+  const actionsContent = (
+    <div className="space-y-2">
+      <CombatResourceSummary
+        resources={resources}
+        slugs={["sorceryPoints", "sorcery-points"]}
+      />
 
       {level >= 2 ? (
-        <div className="space-y-1.5 pt-1">
+        <div className="space-y-1.5">
           <p className="text-xs font-medium text-muted-foreground">
             Converter Slot de Magia → Pontos (+1 Ponto / nível do Slot):
           </p>
@@ -176,7 +170,7 @@ export function CombatSorcererPanel({
       ) : null}
 
       {level >= 2 ? (
-        <div className="pt-1">
+        <div>
           <p className="text-xs font-medium text-muted-foreground mb-1">
             Metamágica:
           </p>
@@ -200,8 +194,17 @@ export function CombatSorcererPanel({
         </div>
       ) : null}
 
-      {availableSubclassActions.length ? (
-        <div className="flex flex-wrap gap-2 pt-1">
+      <TableActionFeedback
+        lastResultNote={action.lastResult?.note}
+        error={action.error}
+      />
+    </div>
+  );
+
+  const powersContent =
+    availableSubclassActions.length > 0 ? (
+      <div className="space-y-2">
+        <div className="flex flex-wrap gap-2">
           {availableSubclassActions.map((item) => (
             <Button
               key={item.slug}
@@ -220,20 +223,20 @@ export function CombatSorcererPanel({
             </Button>
           ))}
         </div>
-      ) : null}
 
-      {combatNotes?.length ? (
-        <ul className="mt-2 space-y-1 text-[0.7rem] text-muted-foreground">
-          {combatNotes.map((note) => (
-            <li key={note}>{note}</li>
-          ))}
-        </ul>
-      ) : null}
+        <TableActionFeedback
+          lastResultNote={action.lastResult?.note}
+          error={action.error}
+        />
+      </div>
+    ) : null;
 
-      <TableActionFeedback
-        lastResultNote={action.lastResult?.note}
-        error={action.error}
-      />
-    </div>
+  return (
+    <CombatClassPanelShell
+      title="Combate do Feiticeiro (Fonte de Magia)"
+      actionsContent={actionsContent}
+      powersContent={powersContent}
+      combatNotes={combatNotes}
+    />
   );
 }
