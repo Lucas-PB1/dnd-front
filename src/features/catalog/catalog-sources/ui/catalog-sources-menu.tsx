@@ -8,7 +8,7 @@ import { useCatalogSources } from "@/features/catalog/catalog-sources/model/cata
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
 
-/** Seletor global de fontes do catálogo (PHB / Valda). */
+/** Seletor global de fontes do catálogo (PHB / Valdas). */
 export function CatalogSourcesMenu({ className }: { className?: string }) {
   const { editions, editionsPending, enabledSlugs, setEnabled } =
     useCatalogSources();

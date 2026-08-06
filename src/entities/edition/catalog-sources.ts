@@ -3,13 +3,19 @@ import type { Edition } from "@/entities/edition/api";
 export const CATALOG_SOURCES_STORAGE_KEY = "grimoire.catalogSources";
 
 export const PHB_EDITION_SLUG = "phb-2024-pt";
-export const VALDA_EDITION_SLUG = "valda-spire-2024-en";
+export const VALDAS_EDITION_SLUG = "valdas-spire-2024-en";
+
+const LEGACY_VALDA_EDITION_SLUG = "valda-spire-2024-en";
+
+function normalizeEditionSlug(slug: string): string {
+  return slug === LEGACY_VALDA_EDITION_SLUG ? VALDAS_EDITION_SLUG : slug;
+}
 
 /** Rótulo curto na UI (badge / menu). */
 export function editionShortLabel(slug: string | null | undefined): string {
   if (!slug) return "PHB";
   if (slug === PHB_EDITION_SLUG || slug.startsWith("phb-")) return "PHB";
-  if (slug.startsWith("valda-")) return "Valda";
+  if (slug.startsWith("valdas-") || slug.startsWith("valda-")) return "Valdas";
   return slug;
 }
 
@@ -18,8 +24,8 @@ export function editionMenuLabel(edition: Pick<Edition, "slug" | "label" | "book
   if (edition.slug === PHB_EDITION_SLUG || edition.slug.startsWith("phb-")) {
     return "PHB 2024";
   }
-  if (edition.slug.startsWith("valda-")) {
-    return "Valda";
+  if (edition.slug.startsWith("valdas-") || edition.slug.startsWith("valda-")) {
+    return "Valdas";
   }
   return edition.label || edition.book || edition.slug;
 }
@@ -31,7 +37,9 @@ export function readStoredEnabledEditions(): string[] | null {
     if (!raw) return null;
     const parsed = JSON.parse(raw) as unknown;
     if (!Array.isArray(parsed)) return null;
-    const slugs = parsed.filter((item): item is string => typeof item === "string");
+    const slugs = parsed
+      .filter((item): item is string => typeof item === "string")
+      .map(normalizeEditionSlug);
     return slugs.length > 0 ? slugs : null;
   } catch {
     return null;
@@ -42,7 +50,7 @@ export function writeStoredEnabledEditions(slugs: string[]): void {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(
     CATALOG_SOURCES_STORAGE_KEY,
-    JSON.stringify(slugs),
+    JSON.stringify(slugs.map(normalizeEditionSlug)),
   );
 }
 
@@ -61,7 +69,7 @@ export function isEditionAllowed(
   editionSlug: string | null | undefined,
   enabled: ReadonlySet<string>,
 ): boolean {
-  const slug = editionSlug?.trim() || PHB_EDITION_SLUG;
+  const slug = normalizeEditionSlug(editionSlug?.trim() || PHB_EDITION_SLUG);
   if (enabled.size === 0) return true;
   return enabled.has(slug);
 }

@@ -6,7 +6,7 @@ type CatalogEditionChipProps = {
   className?: string;
 };
 
-/** Chip curto PHB / Valda ao lado do nome do item. */
+/** Chip curto PHB / Valdas ao lado do nome do item. */
 export function CatalogEditionChip({
   editionSlug,
   className,

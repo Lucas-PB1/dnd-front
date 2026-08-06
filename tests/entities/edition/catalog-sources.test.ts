@@ -7,18 +7,18 @@ import {
   filterByEnabledEditions,
   isEditionAllowed,
   PHB_EDITION_SLUG,
-  VALDA_EDITION_SLUG,
+  VALDAS_EDITION_SLUG,
 } from "@/entities/edition/catalog-sources";
 
 describe("catalog-sources helpers", () => {
   it("maps short labels", () => {
     expect(editionShortLabel(PHB_EDITION_SLUG)).toBe("PHB");
-    expect(editionShortLabel(VALDA_EDITION_SLUG)).toBe("Valda");
+    expect(editionShortLabel(VALDAS_EDITION_SLUG)).toBe("Valdas");
     expect(editionShortLabel(null)).toBe("PHB");
   });
 
   it("builds query param only when subset selected", () => {
-    const all = [PHB_EDITION_SLUG, VALDA_EDITION_SLUG];
+    const all = [PHB_EDITION_SLUG, VALDAS_EDITION_SLUG];
     expect(editionSlugsQueryParam(new Set(all), all)).toBeUndefined();
     expect(editionSlugsQueryParam(new Set([PHB_EDITION_SLUG]), all)).toBe(
       PHB_EDITION_SLUG,
@@ -28,7 +28,7 @@ describe("catalog-sources helpers", () => {
   it("filters items by enabled editions", () => {
     const items = [
       { slug: "fighter", editionSlug: PHB_EDITION_SLUG },
-      { slug: "gunslinger", editionSlug: VALDA_EDITION_SLUG },
+      { slug: "gunslinger", editionSlug: VALDAS_EDITION_SLUG },
       { slug: "human", editionSlug: null },
     ];
     expect(
@@ -37,17 +37,17 @@ describe("catalog-sources helpers", () => {
       ),
     ).toEqual(["fighter", "human"]);
     expect(
-      isEditionAllowed(VALDA_EDITION_SLUG, new Set([PHB_EDITION_SLUG])),
+      isEditionAllowed(VALDAS_EDITION_SLUG, new Set([PHB_EDITION_SLUG])),
     ).toBe(false);
   });
 
   it("menu label prefers friendly names", () => {
     expect(
       editionMenuLabel({
-        slug: VALDA_EDITION_SLUG,
-        label: "Valda Spire 2024 EN",
-        book: "Valda",
+        slug: VALDAS_EDITION_SLUG,
+        label: "Valdas Spire 2024 EN",
+        book: "Valdas",
       }),
-    ).toBe("Valda");
+    ).toBe("Valdas");
   });
 });
