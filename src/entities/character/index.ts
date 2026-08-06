@@ -20,6 +20,7 @@ export {
 } from "@/entities/character/lib/ability";
 export {
   collectSaveProficiencyAbilities,
+  computePassiveSkill,
   initiativeBonus,
   skillCheckBonus,
   skillProficiencyRank,

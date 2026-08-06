@@ -13,8 +13,7 @@ import {
   pointBuyAffordableOptions,
 } from "@/features/character/create-character/lib/abilities/point-buy";
 import type { CreateCharacterInput } from "@/features/character/create-character/model/create-character.schema";
-import { nativeSelectClassName } from "@/shared/ui/native-select";
-import { cn } from "@/shared/lib/utils";
+import { SearchableSelect } from "@/shared/ui/searchable-select";
 import type { UseFormSetValue } from "react-hook-form";
 
 type AbilityScoreGridProps = {
@@ -55,35 +54,38 @@ export function AbilityScoreGrid({
             <p className="text-xs font-medium">{ABILITY_LABELS_PT[key]}</p>
 
             {isPointBuy ? (
-              <select
-                className={cn(nativeSelectClassName, "mt-1.5 h-8")}
-                value={score}
-                onChange={(e) =>
+              <SearchableSelect
+                id={`ability-${key}`}
+                aria-label={ABILITY_LABELS_PT[key]}
+                className="mt-1.5"
+                options={pointBuyOptions.map((option) => ({
+                  value: String(option),
+                  label: formatPointBuyOptionLabel(option),
+                }))}
+                value={String(score)}
+                onValueChange={(next) =>
                   setValue("abilityScores", {
                     ...abilityScores,
-                    [key]: Number(e.target.value),
+                    [key]: Number(next),
                   })
                 }
-              >
-                {pointBuyOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {formatPointBuyOptionLabel(option)}
-                  </option>
-                ))}
-              </select>
+              />
             ) : hasRawPool ? (
-              <select
-                className={cn(nativeSelectClassName, "mt-1.5 h-8")}
-                value={score > 0 ? score : ""}
-                onChange={(e) => onPoolAssign(key, e.target.value)}
-              >
-                <option value="">Escolher…</option>
-                {poolOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {formatPoolOptionLabel(option)}
-                  </option>
-                ))}
-              </select>
+              <SearchableSelect
+                id={`ability-${key}`}
+                aria-label={ABILITY_LABELS_PT[key]}
+                className="mt-1.5"
+                options={[
+                  { value: "", label: "Escolher…" },
+                  ...poolOptions.map((option) => ({
+                    value: String(option.value),
+                    label: formatPoolOptionLabel(option),
+                  })),
+                ]}
+                value={score > 0 ? String(score) : ""}
+                placeholder="Escolher…"
+                onValueChange={(next) => onPoolAssign(key, next)}
+              />
             ) : (
               <p className="mt-1 text-sm text-muted-foreground">—</p>
             )}

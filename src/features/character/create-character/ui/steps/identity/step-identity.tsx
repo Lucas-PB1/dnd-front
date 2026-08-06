@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
-import { useWatch } from "react-hook-form";
+import { Controller, useWatch } from "react-hook-form";
 
 import { editionShortLabel } from "@/entities/edition/catalog-sources";
 import { useBackgrounds } from "@/features/catalog/background-catalog/api/use-backgrounds";
@@ -144,68 +144,122 @@ export function StepIdentity({ register, control, errors }: StepIdentityProps) {
                 : "grid gap-4 sm:grid-cols-[minmax(7.5rem,9rem)_minmax(0,1fr)] sm:items-start"
             }
           >
-            <CatalogSelect
-              id="level"
-              label="Nível"
-              options={LEVEL_OPTIONS.map((lv) => ({
-                value: String(lv),
-                label: String(lv),
-              }))}
-              error={errors.level}
-              {...register("level", { valueAsNumber: true })}
+            <Controller
+              control={control}
+              name="level"
+              render={({ field }) => (
+                <CatalogSelect
+                  id="level"
+                  label="Nível"
+                  name={field.name}
+                  options={LEVEL_OPTIONS.map((lv) => ({
+                    value: String(lv),
+                    label: String(lv),
+                  }))}
+                  value={String(field.value ?? "")}
+                  onBlur={field.onBlur}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
+                  error={errors.level}
+                />
+              )}
             />
 
-            <CatalogSelect
-              id="classSlug"
-              label="Classe"
-              isLoading={classes.isPending}
-              options={classOptions}
-              error={errors.classSlug}
-              {...register("classSlug")}
+            <Controller
+              control={control}
+              name="classSlug"
+              render={({ field }) => (
+                <CatalogSelect
+                  id="classSlug"
+                  label="Classe"
+                  name={field.name}
+                  isLoading={classes.isPending}
+                  options={classOptions}
+                  value={field.value ?? ""}
+                  onBlur={field.onBlur}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  error={errors.classSlug}
+                />
+              )}
             />
 
             {needsSubclass ? (
-              <CatalogSelect
-                id="subclassSlug"
-                label="Subclasse"
-                isLoading={subclasses.isPending}
-                disabled={!classSlug}
-                options={subclassOptions}
-                error={errors.subclassSlug}
-                {...register("subclassSlug")}
+              <Controller
+                control={control}
+                name="subclassSlug"
+                render={({ field }) => (
+                  <CatalogSelect
+                    id="subclassSlug"
+                    label="Subclasse"
+                    name={field.name}
+                    isLoading={subclasses.isPending}
+                    disabled={!classSlug}
+                    options={subclassOptions}
+                    value={field.value ?? ""}
+                    onBlur={field.onBlur}
+                    onChange={(e) => field.onChange(e.target.value)}
+                    error={errors.subclassSlug}
+                  />
+                )}
               />
             ) : null}
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 sm:items-start">
-            <CatalogSelect
-              id="speciesSlug"
-              label="Espécie"
-              isLoading={species.isPending}
-              options={speciesOptions}
-              error={errors.speciesSlug}
-              {...register("speciesSlug")}
+            <Controller
+              control={control}
+              name="speciesSlug"
+              render={({ field }) => (
+                <CatalogSelect
+                  id="speciesSlug"
+                  label="Espécie"
+                  name={field.name}
+                  isLoading={species.isPending}
+                  options={speciesOptions}
+                  value={field.value ?? ""}
+                  onBlur={field.onBlur}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  error={errors.speciesSlug}
+                />
+              )}
             />
 
-            <CatalogSelect
-              id="backgroundSlug"
-              label="Antecedente"
-              isLoading={backgrounds.isPending}
-              options={backgroundOptions}
-              error={errors.backgroundSlug}
-              {...register("backgroundSlug")}
+            <Controller
+              control={control}
+              name="backgroundSlug"
+              render={({ field }) => (
+                <CatalogSelect
+                  id="backgroundSlug"
+                  label="Antecedente"
+                  name={field.name}
+                  isLoading={backgrounds.isPending}
+                  options={backgroundOptions}
+                  value={field.value ?? ""}
+                  onBlur={field.onBlur}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  error={errors.backgroundSlug}
+                />
+              )}
             />
           </div>
 
-          <CatalogSelect
-            id="alignmentSlug"
-            label="Alinhamento"
-            isLoading={alignments.isPending}
-            options={[
-              { value: "", label: "Não definido" },
-              ...alignmentOptions,
-            ]}
-            {...register("alignmentSlug")}
+          <Controller
+            control={control}
+            name="alignmentSlug"
+            render={({ field }) => (
+              <CatalogSelect
+                id="alignmentSlug"
+                label="Alinhamento"
+                name={field.name}
+                isLoading={alignments.isPending}
+                options={[
+                  { value: "", label: "Não definido" },
+                  ...alignmentOptions,
+                ]}
+                value={field.value ?? ""}
+                onBlur={field.onBlur}
+                onChange={(e) => field.onChange(e.target.value)}
+              />
+            )}
           />
         </WizardFormSection>
       </div>

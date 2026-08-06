@@ -6,6 +6,7 @@ import {
   type CampaignRole,
 } from "@/features/campaign/campaigns/api/campaigns.api";
 import { Button } from "@/shared/ui/button";
+import { SearchableSelect } from "@/shared/ui/searchable-select";
 
 type CampaignMemberRoleMutation = {
   isPending: boolean;
@@ -57,21 +58,22 @@ export function CampaignMembersSection({
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 {isDm && !isMe ? (
-                  <select
-                    className="h-8 rounded-md border border-input bg-background px-2 text-sm"
+                  <SearchableSelect
+                    className="h-8 w-auto min-w-[8rem] text-sm"
                     value={member.role}
                     disabled={updateRole.isPending}
-                    onChange={(e) =>
+                    options={[
+                      { value: "dm", label: "Mestre" },
+                      { value: "player", label: "Jogador" },
+                      { value: "assistant", label: "Auxiliar" },
+                    ]}
+                    onValueChange={(next) =>
                       updateRole.mutate({
                         userId: member.userId,
-                        role: e.target.value as CampaignRole,
+                        role: next as CampaignRole,
                       })
                     }
-                  >
-                    <option value="dm">Mestre</option>
-                    <option value="player">Jogador</option>
-                    <option value="assistant">Auxiliar</option>
-                  </select>
+                  />
                 ) : null}
                 {isMe && myRole !== "dm" ? (
                   <Button

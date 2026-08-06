@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/shared/ui/button";
+import { SearchableSelect } from "@/shared/ui/searchable-select";
 
 type PaladinSmiteControlsProps = {
   busy: boolean;
@@ -15,20 +16,16 @@ type PaladinSmiteControlsProps = {
 export function PaladinSmiteControls(props: PaladinSmiteControlsProps) {
   return (
     <span className="inline-flex items-center gap-1 rounded-md border border-border/70 px-1.5 py-0.5">
-      <select
-        value={props.selectedSmiteSlot}
-        onChange={(event) =>
-          props.onSmiteSlotChange(Number(event.target.value))
-        }
-        className="rounded-md border border-border bg-background px-1 py-0.5 text-xs"
+      <SearchableSelect
         aria-label="Círculo do espaço de magia para a Destruição Divina"
-      >
-        {props.smiteSlots.map((slot) => (
-          <option key={slot.level} value={slot.level}>
-            {slot.level}º ({slot.remaining})
-          </option>
-        ))}
-      </select>
+        className="h-7 min-w-[6.5rem] text-xs"
+        value={String(props.selectedSmiteSlot)}
+        options={props.smiteSlots.map((slot) => ({
+          value: String(slot.level),
+          label: `${slot.level}º (${slot.remaining})`,
+        }))}
+        onValueChange={(next) => props.onSmiteSlotChange(Number(next))}
+      />
       <label className="flex items-center gap-1 text-[0.7rem] text-muted-foreground">
         <input
           type="checkbox"

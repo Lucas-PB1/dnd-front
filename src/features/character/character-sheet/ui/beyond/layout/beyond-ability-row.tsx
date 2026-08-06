@@ -24,7 +24,6 @@ import {
 } from "@/features/character/character-sheet/api/use-character-state";
 import { usePatchCharacter } from "@/features/character/character-sheet/api/use-patch-character";
 import { ABILITY_SHORT } from "@/features/character/character-sheet/ui/beyond/layout/beyond-panel";
-import { useSpeciesDetail } from "@/features/catalog/species-catalog/api/use-species";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { cn } from "@/shared/lib/utils";
@@ -42,37 +41,41 @@ function StatCell({
   value,
   detail,
   emphasize = false,
+  title,
+  className,
 }: {
   label: string;
   value: ReactNode;
   detail?: ReactNode;
   emphasize?: boolean;
+  title?: string;
+  className?: string;
 }) {
   return (
     <div
+      title={title}
       className={cn(
-        "flex min-h-[4.5rem] min-w-0 flex-col items-center justify-center rounded-lg border px-2 py-1.5 text-center",
+        "flex h-full min-h-[3.75rem] w-full flex-col items-center justify-center rounded-lg border px-1.5 py-1 text-center",
         emphasize
           ? "border-primary/45 bg-primary/8"
           : "border-border/70 bg-card/70",
+        className,
       )}
     >
-      <span className="truncate text-[0.58rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
+      <span className="w-full truncate text-[0.55rem] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
         {label}
       </span>
-      <span className="font-heading mt-0.5 text-2xl font-semibold leading-none tabular-nums">
+      <span className="font-heading mt-0.5 text-xl font-semibold leading-none tabular-nums">
         {value}
       </span>
-      {detail ? (
-        <span className="mt-1 truncate text-[0.65rem] text-muted-foreground">
-          {detail}
-        </span>
-      ) : null}
+      <span className="mt-0.5 h-[0.85rem] truncate text-[0.6rem] leading-none text-muted-foreground">
+        {detail ?? "\u00a0"}
+      </span>
     </div>
   );
 }
 
-/** Faixa superior no padrão da ficha: atributos + PB + movimento + PV. */
+/** Faixa superior: atributos + PB + PV (cura/dano). */
 export function BeyondCharacterStatsBar({
   characterId,
   character,
@@ -80,7 +83,6 @@ export function BeyondCharacterStatsBar({
 }: BeyondCharacterStatsBarProps) {
   const stateQuery = useCharacterState(characterId);
   const patch = usePatchCharacter(characterId);
-  const speciesDetail = useSpeciesDetail(character.speciesSlug, true);
   const [delta, setDelta] = useState("");
 
   const scores = sheetAbilityScores(character);
@@ -91,6 +93,16 @@ export function BeyondCharacterStatsBar({
     character.hitPointsMax;
   const hpMax = state?.hitPointsMax ?? character.hitPointsMax;
   const tempHp = state?.tempHp ?? 0;
+  const hpPercent =
+    hpCurrent != null && hpMax != null && hpMax > 0
+      ? Math.round((hpCurrent / hpMax) * 100)
+      : 0;
+  const hpBarClass =
+    hpPercent > 50
+      ? "bg-chart-3"
+      : hpPercent >= 25
+        ? "bg-chart-2"
+        : "bg-chart-1";
 
   function parsedDelta() {
     const value = Number(delta);
@@ -108,14 +120,14 @@ export function BeyondCharacterStatsBar({
   }
 
   return (
-    <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-6 lg:grid-cols-10 lg:gap-2">
+    <div className="grid grid-cols-3 items-stretch gap-1.5 sm:grid-cols-6 lg:grid-cols-9 lg:gap-1.5">
       {ORDER.map((key) => (
         <button
           key={key}
           type="button"
           onClick={onEditAbilities}
           title={`Editar ${ABILITY_LABELS_PT[key]}`}
-          className="group rounded-lg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+          className="group h-full min-w-0 rounded-lg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
         >
           <StatCell
             label={ABILITY_SHORT[key]}
@@ -126,36 +138,40 @@ export function BeyondCharacterStatsBar({
       ))}
 
       <StatCell
-        label="Proficiência"
+        label="PB"
         value={`+${character.proficiencyBonus}`}
-        detail="bônus"
-      />
-      <StatCell
-        label="Deslocamento"
-        value={speciesDetail.data?.speed ?? "—"}
-        detail="movimento"
+        detail="prof."
+        title="Bônus de proficiência"
       />
 
-      <div className="col-span-3 rounded-lg border border-primary/45 bg-primary/8 p-2 sm:col-span-6 lg:col-span-2">
-        <div className="flex items-center justify-between gap-2">
-          <span className="inline-flex items-center gap-1 text-[0.58rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
+      <div className="col-span-3 rounded-lg border border-primary/45 bg-primary/8 px-2 py-1.5 sm:col-span-6 lg:col-span-2">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5">
+          <span className="inline-flex items-center gap-1 text-[0.55rem] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
             <HeartIcon className="size-3 text-secondary" aria-hidden />
-            Pontos de vida
+            PV
           </span>
-          <span className="font-heading text-xl font-semibold tabular-nums">
+          <span className="font-heading text-lg font-semibold tabular-nums">
             {hpCurrent ?? "—"}
             <span className="text-muted-foreground"> / {hpMax ?? "—"}</span>
           </span>
-          <span className="text-[0.65rem] text-muted-foreground">
-            {tempHp > 0 ? `+${tempHp} temp` : "sem temp"}
+          <span className="text-[0.6rem] text-muted-foreground">
+            {tempHp > 0 ? (
+              <span className="font-semibold text-accent">+{tempHp} temp</span>
+            ) : null}
             {state?.hitDiceMax != null ? (
               <>
-                {" · "}
+                {tempHp > 0 ? " · " : null}
                 {state.hitDiceCurrent}/{state.hitDiceMax}{" "}
                 {state.hitDie ?? "DV"}
               </>
             ) : null}
           </span>
+        </div>
+        <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-muted/60">
+          <div
+            className={cn("h-full rounded-full transition-all", hpBarClass)}
+            style={{ width: `${Math.min(100, Math.max(0, hpPercent))}%` }}
+          />
         </div>
         <div className="mt-1.5 flex items-center gap-1">
           <Input
@@ -220,11 +236,11 @@ export function BeyondRestActions({ characterId }: { characterId: string }) {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-1.5">
-      <div className="flex items-center gap-1 rounded-md border border-border/70 bg-card/60 px-1.5 py-0.5">
+    <div className="flex flex-wrap items-center gap-2">
+      <div className="flex h-8 items-center gap-1.5 rounded-lg border border-border/70 bg-background/40 px-2">
         <label
           htmlFor={`hit-dice-${characterId}`}
-          className="text-[0.65rem] whitespace-nowrap text-muted-foreground"
+          className="text-[0.65rem] font-medium whitespace-nowrap text-muted-foreground"
         >
           {hitDie}
         </label>
@@ -236,10 +252,10 @@ export function BeyondRestActions({ characterId }: { characterId: string }) {
           value={spend}
           onChange={(event) => setHitDiceSpent(Number(event.target.value) || 0)}
           aria-label="Dados de vida a gastar no descanso curto"
-          className="h-7 w-14 px-2"
+          className="h-7 w-12 border-0 bg-transparent px-1 shadow-none focus-visible:ring-0"
           disabled={takeRest.isPending || maxSpend === 0}
         />
-        <span className="text-[0.65rem] text-muted-foreground">
+        <span className="text-[0.65rem] tabular-nums text-muted-foreground">
           / {hitDiceCurrent}
         </span>
       </div>
@@ -247,7 +263,7 @@ export function BeyondRestActions({ characterId }: { characterId: string }) {
         type="button"
         size="sm"
         variant="outline"
-        className="gap-1"
+        className="h-8 gap-1.5"
         disabled={takeRest.isPending}
         onClick={() => void shortRest()}
       >
@@ -258,7 +274,7 @@ export function BeyondRestActions({ characterId }: { characterId: string }) {
         type="button"
         size="sm"
         variant="outline"
-        className="gap-1"
+        className="h-8 gap-1.5"
         disabled={takeRest.isPending}
         onClick={() => {
           setLastHeal(null);

@@ -5,6 +5,7 @@ import {
   CharacterSheetErrorState,
   CharacterSheetHeader,
 } from "@/features/character/character-sheet/ui/sheet/character-sheet-header";
+import { CharacterSheetLoadingSkeleton } from "@/features/character/character-sheet/ui/sheet/character-sheet-loading";
 import { CharacterSheetMainGrid } from "@/features/character/character-sheet/ui/sheet/character-sheet-main-grid";
 import { buildCharacterSheetPagePanels } from "@/features/character/character-sheet/ui/sheet/character-sheet-tab-panels";
 import { SheetRollsProvider } from "@/features/character/character-sheet/ui/beyond/layout/sheet-rolls";
@@ -22,23 +23,7 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
   const sheet = useCharacterSheetView(id);
 
   if (sheet.isPending) {
-    return (
-      <div
-        className="flex flex-col gap-3 pb-6"
-        role="status"
-        aria-label="Carregando ficha"
-      >
-        <div className="h-16 animate-pulse rounded-xl bg-muted/50" />
-        <div className="grid gap-3 sm:grid-cols-[minmax(0,12rem)_1fr]">
-          <div className="h-64 animate-pulse rounded-xl bg-muted/40" />
-          <div className="space-y-3">
-            <div className="h-28 animate-pulse rounded-xl bg-muted/40" />
-            <div className="h-48 animate-pulse rounded-xl bg-muted/30" />
-          </div>
-        </div>
-        <p className="text-sm text-muted-foreground">Carregando ficha…</p>
-      </div>
-    );
+    return <CharacterSheetLoadingSkeleton />;
   }
 
   if (sheet.isError || !sheet.data || !sheet.sectionProps || !sheet.editForms) {

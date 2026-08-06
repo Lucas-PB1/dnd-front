@@ -7,6 +7,7 @@ import type { CharacterSummary } from "@/entities/character/types";
 import { type CampaignCharacterSummary } from "@/features/campaign/campaigns/api/campaigns.api";
 import { cn } from "@/shared/lib/utils";
 import { Button, buttonVariants } from "@/shared/ui/button";
+import { SearchableSelect } from "@/shared/ui/searchable-select";
 
 type CampaignLinkCharacterMutation = {
   isPending: boolean;
@@ -95,18 +96,19 @@ export function CampaignCharactersSection({
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
           <label className="flex flex-1 flex-col gap-1 text-sm">
             <span className="text-muted-foreground">Vincular minha ficha</span>
-            <select
-              className="h-9 rounded-md border border-input bg-background px-3"
+            <SearchableSelect
+              className="h-9"
               value={selectedCharacterId}
-              onChange={(e) => setSelectedCharacterId(e.target.value)}
-            >
-              <option value="">Escolher…</option>
-              {available.map((character) => (
-                <option key={character.id} value={character.id}>
-                  {character.name}
-                </option>
-              ))}
-            </select>
+              placeholder="Escolher…"
+              options={[
+                { value: "", label: "Escolher…" },
+                ...available.map((character) => ({
+                  value: character.id,
+                  label: character.name,
+                })),
+              ]}
+              onValueChange={setSelectedCharacterId}
+            />
           </label>
           <Button
             type="button"

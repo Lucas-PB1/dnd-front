@@ -21,7 +21,7 @@ import { useAbilityGenerationMethods } from "@/features/catalog/reference-catalo
 import { useRollAbilities } from "@/features/character/character-sheet/api/use-roll-abilities";
 import { Button } from "@/shared/ui/button";
 import { Field, FieldError, FieldLabel } from "@/shared/ui/field";
-import { nativeSelectClassName } from "@/shared/ui/native-select";
+import { SearchableSelect } from "@/shared/ui/searchable-select";
 import { cn } from "@/shared/lib/utils";
 import type { Control, FieldErrors, UseFormSetValue } from "react-hook-form";
 import { useWatch } from "react-hook-form";
@@ -112,31 +112,27 @@ export function AbilityGenerationFields({
       <div className="flex flex-wrap items-end gap-3">
         <Field className="min-w-[12rem] flex-1">
           <FieldLabel htmlFor="abilityGenerationMethodSlug">Método</FieldLabel>
-          <select
+          <SearchableSelect
             id="abilityGenerationMethodSlug"
-            className={nativeSelectClassName}
             value={method}
-            onChange={(e) =>
+            options={
+              methods.isPending || !methods.data?.length
+                ? [
+                    { value: "standard-array", label: "Conjunto padrão" },
+                    { value: "roll", label: "Rolagem 4d6" },
+                    { value: "point-buy", label: "Compra de pontos" },
+                  ]
+                : methods.data.map((row) => ({
+                    value: row.slug,
+                    label: row.name,
+                  }))
+            }
+            onValueChange={(next) =>
               applyMethodChange(
-                e.target
-                  .value as CreateCharacterInput["abilityGenerationMethodSlug"],
+                next as CreateCharacterInput["abilityGenerationMethodSlug"],
               )
             }
-          >
-            {methods.isPending || !methods.data?.length ? (
-              <>
-                <option value="standard-array">Conjunto padrão</option>
-                <option value="roll">Rolagem 4d6</option>
-                <option value="point-buy">Compra de pontos</option>
-              </>
-            ) : (
-              methods.data.map((row) => (
-                <option key={row.slug} value={row.slug}>
-                  {row.name}
-                </option>
-              ))
-            )}
-          </select>
+          />
         </Field>
 
         {isRoll ? (

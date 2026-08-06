@@ -14,8 +14,8 @@ import {
 import type { CharacterState } from "@/entities/character/session-types";
 import type { SpellSummary } from "@/entities/spell/types";
 import { Button } from "@/shared/ui/button";
-import { nativeSelectClassName } from "@/shared/ui/native-select";
 import { PhbProse } from "@/shared/ui/phb-prose";
+import { SearchableSelect } from "@/shared/ui/searchable-select";
 import { cn } from "@/shared/lib/utils";
 
 const ABILITY_SHORT: Record<keyof AbilityScores, string> = {
@@ -200,19 +200,17 @@ export function BeyondSpellRow({
               >
                 Espaço
               </label>
-              <select
+              <SearchableSelect
                 id={`slot-${row.spell.spellSlug}`}
-                className={cn(nativeSelectClassName, "h-7 w-[4.5rem] text-xs")}
-                value={selectedSlot ?? ""}
+                className="h-7 w-[4.5rem] text-xs"
+                value={selectedSlot != null ? String(selectedSlot) : ""}
                 disabled={casting || availableUpcastLevels.length === 0}
-                onChange={(e) => setSlotLevel(Number(e.target.value))}
-              >
-                {availableUpcastLevels.map((lv) => (
-                  <option key={lv} value={lv}>
-                    {lv}º
-                  </option>
-                ))}
-              </select>
+                options={availableUpcastLevels.map((lv) => ({
+                  value: String(lv),
+                  label: `${lv}º`,
+                }))}
+                onValueChange={(next) => setSlotLevel(Number(next))}
+              />
             </>
           ) : null}
 

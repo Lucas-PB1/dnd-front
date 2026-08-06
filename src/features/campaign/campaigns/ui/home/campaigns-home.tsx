@@ -22,6 +22,7 @@ import { EmptyMapMark } from "@/shared/ui/brand-marks";
 import { Button, buttonVariants } from "@/shared/ui/button";
 import { EmptyState } from "@/shared/ui/empty-state";
 import { Input } from "@/shared/ui/input";
+import { SearchableSelect } from "@/shared/ui/searchable-select";
 
 function CampaignRow({ campaign }: { campaign: CampaignSummary }) {
   return (
@@ -116,16 +117,17 @@ export function CampaignsHome() {
           />
           <label className="flex flex-col gap-1 text-sm">
             <span className="text-muted-foreground">Papel</span>
-            <select
-              className="h-9 rounded-md border border-input bg-background px-3"
+            <SearchableSelect
+              className="h-9"
               value={joinRole}
-              onChange={(e) =>
-                setJoinRole(e.target.value as "player" | "assistant")
+              options={[
+                { value: "player", label: "Jogador" },
+                { value: "assistant", label: "Auxiliar" },
+              ]}
+              onValueChange={(next) =>
+                setJoinRole(next as "player" | "assistant")
               }
-            >
-              <option value="player">Jogador</option>
-              <option value="assistant">Auxiliar</option>
-            </select>
+            />
           </label>
           <Button
             type="submit"

@@ -5,7 +5,7 @@ import {
   toolOptionsForPool,
 } from "@/features/character/create-character/lib/equipment/equipment-choice-resolve";
 import type { EquipmentLine } from "@/features/character/create-character/lib/equipment/equipment-selection";
-import { nativeSelectClassName } from "@/shared/ui/native-select";
+import { SearchableSelect } from "@/shared/ui/searchable-select";
 
 type ChoicePickersProps = {
   source: "class" | "background";
@@ -20,6 +20,16 @@ type ChoicePickersProps = {
     valueId: string,
   ) => void;
 };
+
+function toolSelectOptions(pool: NonNullable<EquipmentLine["pool"]>) {
+  return [
+    { value: "", label: "Selecionar…" },
+    ...toolOptionsForPool(pool).map((opt) => ({
+      value: opt.slug,
+      label: opt.name,
+    })),
+  ];
+}
 
 export function ChoicePickers({
   source,
@@ -57,20 +67,16 @@ export function ChoicePickers({
                     Ainda não há ferramenta no Antecedente — escolha abaixo ou
                     volte um passo.
                   </p>
-                  <select
-                    className={nativeSelectClassName}
+                  <SearchableSelect
+                    id={key}
+                    aria-label={line.label}
+                    options={toolSelectOptions(pool)}
                     value={choicePicks[key] ?? ""}
-                    onChange={(e) =>
-                      onPick(source, packageSlug, sortOrder, e.target.value)
+                    placeholder="Selecionar…"
+                    onValueChange={(next) =>
+                      onPick(source, packageSlug, sortOrder, next)
                     }
-                  >
-                    <option value="">Selecionar…</option>
-                    {toolOptionsForPool(pool).map((opt) => (
-                      <option key={opt.slug} value={opt.slug}>
-                        {opt.name}
-                      </option>
-                    ))}
-                  </select>
+                  />
                 </div>
               )}
             </div>
@@ -82,21 +88,15 @@ export function ChoicePickers({
             <label className="text-xs font-medium" htmlFor={key}>
               {line.label}
             </label>
-            <select
+            <SearchableSelect
               id={key}
-              className={nativeSelectClassName}
+              options={toolSelectOptions(pool)}
               value={choicePicks[key] ?? ""}
-              onChange={(e) =>
-                onPick(source, packageSlug, sortOrder, e.target.value)
+              placeholder="Selecionar…"
+              onValueChange={(next) =>
+                onPick(source, packageSlug, sortOrder, next)
               }
-            >
-              <option value="">Selecionar…</option>
-              {toolOptionsForPool(pool).map((opt) => (
-                <option key={opt.slug} value={opt.slug}>
-                  {opt.name}
-                </option>
-              ))}
-            </select>
+            />
           </div>
         );
       })}

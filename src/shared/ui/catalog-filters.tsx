@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/shared/lib/utils";
+import { SearchableSelect } from "@/shared/ui/searchable-select";
 
 export type CatalogFilterOption = {
   value: string;
@@ -33,10 +34,7 @@ export function CatalogFilters({
 
   return (
     <div
-      className={cn(
-        "flex flex-wrap items-end gap-3",
-        className,
-      )}
+      className={cn("flex flex-wrap items-end gap-3", className)}
       role="group"
       aria-label="Filtros do catálogo"
     >
@@ -48,22 +46,17 @@ export function CatalogFilters({
             <span className="text-[0.65rem] font-medium tracking-wider text-muted-foreground uppercase">
               {field.label}
             </span>
-            <select
+            <SearchableSelect
               id={id}
               value={value}
-              onChange={(event) => onChange(field.key, event.target.value)}
-              className={cn(
-                "h-10 rounded-lg border border-input bg-background px-2.5 text-sm text-foreground",
-                "outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
-              )}
-            >
-              <option value="">{field.allLabel ?? "Todos"}</option>
-              {field.options.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+              className="h-10"
+              options={[
+                { value: "", label: field.allLabel ?? "Todos" },
+                ...field.options,
+              ]}
+              placeholder={field.allLabel ?? "Todos"}
+              onValueChange={(next) => onChange(field.key, next)}
+            />
           </label>
         );
       })}

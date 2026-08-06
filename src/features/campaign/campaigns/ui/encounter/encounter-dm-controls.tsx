@@ -15,6 +15,7 @@ import {
 } from "@/features/campaign/campaigns/api/use-encounters";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
+import { SearchableSelect } from "@/shared/ui/searchable-select";
 
 type Props = {
   campaignId: string;
@@ -73,18 +74,19 @@ export function EncounterDmControls({
       <div className="flex flex-wrap items-center gap-2">
         <label className="flex items-center gap-2 text-sm">
           Iniciativa
-          <select
-            className="h-8 rounded-md border border-input bg-background px-2 text-sm"
+          <SearchableSelect
+            className="h-8 w-auto min-w-[8rem] text-sm"
             value={advantage}
             disabled={busy}
-            onChange={(e) =>
-              onAdvantageChange(e.target.value as AdvantageMode)
+            options={[
+              { value: "normal", label: "Normal" },
+              { value: "advantage", label: "Vantagem" },
+              { value: "disadvantage", label: "Desvantagem" },
+            ]}
+            onValueChange={(next) =>
+              onAdvantageChange(next as AdvantageMode)
             }
-          >
-            <option value="normal">Normal</option>
-            <option value="advantage">Vantagem</option>
-            <option value="disadvantage">Desvantagem</option>
-          </select>
+          />
         </label>
         <Button
           type="button"
@@ -141,26 +143,27 @@ export function EncounterDmControls({
         </label>
         <label className="flex items-center gap-2">
           PV criaturas
-          <select
-            className="h-8 rounded-md border border-input bg-background px-2 text-sm"
+          <SearchableSelect
+            className="h-8 w-auto min-w-[8rem] text-sm"
             value={encounter.creatureHpVisibility}
             disabled={busy}
-            onChange={(e) =>
+            options={[
+              { value: "percent", label: "Percentual" },
+              { value: "hidden", label: "Oculto" },
+              { value: "exact", label: "Exato" },
+            ]}
+            onValueChange={(next) =>
               patch.mutate({
                 encounterId: encounter.id,
                 payload: {
-                  creatureHpVisibility: e.target.value as
+                  creatureHpVisibility: next as
                     | "hidden"
                     | "percent"
                     | "exact",
                 },
               })
             }
-          >
-            <option value="percent">Percentual</option>
-            <option value="hidden">Oculto</option>
-            <option value="exact">Exato</option>
-          </select>
+          />
         </label>
       </div>
 

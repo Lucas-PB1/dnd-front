@@ -12,16 +12,34 @@ import {
   ABILITY_LABELS_PT,
   abilityModifierValue,
   collectSaveProficiencyAbilities,
+  computePassiveSkill,
   formatSkillBonus,
   sheetAbilityScores,
 } from "@/entities/character";
 import { useClassDetail } from "@/features/catalog/class-catalog/api/use-classes";
 import { BeyondPanel, ABILITY_SHORT } from "@/features/character/character-sheet/ui/beyond/layout/beyond-panel";
 import { useSheetRolls } from "@/features/character/character-sheet/ui/beyond/layout/sheet-rolls";
-import { useSpeciesDetail } from "@/features/catalog/species-catalog/api/use-species";
 import { cn } from "@/shared/lib/utils";
 
 const ORDER = Object.keys(ABILITY_LABELS_PT) as (keyof AbilityScores)[];
+
+const PASSIVE_SENSES = [
+  {
+    label: "Percepção passiva",
+    skillSlug: "perception",
+    abilityKey: "sabedoria" as const,
+  },
+  {
+    label: "Intuição passiva",
+    skillSlug: "insight",
+    abilityKey: "sabedoria" as const,
+  },
+  {
+    label: "Investigação passiva",
+    skillSlug: "investigation",
+    abilityKey: "inteligencia" as const,
+  },
+] as const;
 
 type BeyondLeftColumnProps = {
   character: CharacterDetail;
@@ -33,7 +51,6 @@ export function BeyondLeftColumn({
   languageNames,
 }: BeyondLeftColumnProps) {
   const classDetail = useClassDetail(character.classSlug, true);
-  const speciesDetail = useSpeciesDetail(character.speciesSlug, true);
   const rolls = useSheetRolls();
   const [useIndomitable, setUseIndomitable] = useState(false);
   const [useStrokeOfLuck, setUseStrokeOfLuck] = useState(false);
@@ -51,6 +68,15 @@ export function BeyondLeftColumn({
   }
   const pb = character.proficiencyBonus;
   const scores = sheetAbilityScores(character);
+  const skillSources = {
+    classSkillSlugs: character.classSkillSlugs,
+    backgroundSkillSlugs: character.backgroundSkillSlugs,
+    speciesChoices: character.speciesChoices,
+    featOptions: character.featOptions,
+    classOptions: character.classOptions,
+    classSlug: character.classSlug,
+    level: character.level,
+  };
 
   return (
     <div className="flex flex-col gap-2.5">
@@ -135,22 +161,22 @@ export function BeyondLeftColumn({
 
       <BeyondPanel title="Sentidos" icon={EyeIcon}>
         <ul className="space-y-1.5 text-sm">
-          <li className="flex items-center justify-between gap-2 rounded-md bg-muted/30 px-2 py-1.5">
-            <span className="text-muted-foreground">Percepção passiva</span>
-            <span className="font-mono font-semibold tabular-nums">
-              {character.passivePerception}
-            </span>
-          </li>
-          {speciesDetail.isPending ? (
-            <li className="rounded-md bg-muted/30 px-2 py-1.5 text-muted-foreground">
-              Carregando deslocamento…
+          {PASSIVE_SENSES.map((sense) => (
+            <li
+              key={sense.skillSlug}
+              className="flex items-center justify-between gap-2 rounded-md bg-muted/30 px-2 py-1.5"
+            >
+              <span className="text-muted-foreground">{sense.label}</span>
+              <span className="font-mono font-semibold tabular-nums">
+                {computePassiveSkill(
+                  sense.skillSlug,
+                  scores[sense.abilityKey],
+                  pb,
+                  skillSources,
+                )}
+              </span>
             </li>
-          ) : speciesDetail.data?.speed ? (
-            <li className="flex items-center justify-between gap-2 rounded-md bg-muted/30 px-2 py-1.5">
-              <span className="text-muted-foreground">Deslocamento</span>
-              <span className="font-medium">{speciesDetail.data.speed}</span>
-            </li>
-          ) : null}
+          ))}
         </ul>
       </BeyondPanel>
 
@@ -186,12 +212,6 @@ export function BeyondLeftColumn({
               <dd className="mt-0.5">
                 {languageNames.length > 0 ? languageNames.join(", ") : "—"}
               </dd>
-            </div>
-            <div>
-              <dt className="text-[0.65rem] font-semibold tracking-wider text-muted-foreground uppercase">
-                Bônus de proficiência
-              </dt>
-              <dd className="mt-0.5 font-mono font-semibold">+{pb}</dd>
             </div>
           </dl>
         )}

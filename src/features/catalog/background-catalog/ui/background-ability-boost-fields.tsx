@@ -16,7 +16,7 @@ import {
 import { ABILITY_KEYS } from "@/features/character/create-character/lib/abilities/point-buy";
 import { CatalogSelect } from "@/features/character/create-character/ui/catalog-select";
 import { Field, FieldLabel } from "@/shared/ui/field";
-import { nativeSelectClassName } from "@/shared/ui/native-select";
+import { SearchableSelect } from "@/shared/ui/searchable-select";
 import { cn } from "@/shared/lib/utils";
 import type { FieldError } from "react-hook-form";
 
@@ -80,21 +80,21 @@ export function BackgroundAbilityBoostFields({
     <>
       <Field className="max-w-sm">
         <FieldLabel htmlFor={`${idPrefix}-boost-mode`}>Distribuição</FieldLabel>
-        <select
+        <SearchableSelect
           id={`${idPrefix}-boost-mode`}
-          className={nativeSelectClassName}
           value={mode}
-          onChange={(e) =>
-            onModeChange(e.target.value as BackgroundBoostMode)
-          }
-        >
-          <option value={BACKGROUND_BOOST_MODE_PLUS2_PLUS1}>
-            +2 em um e +1 em outro
-          </option>
-          <option value={BACKGROUND_BOOST_MODE_PLUS1X3}>
-            +1 em três atributos
-          </option>
-        </select>
+          options={[
+            {
+              value: BACKGROUND_BOOST_MODE_PLUS2_PLUS1,
+              label: "+2 em um e +1 em outro",
+            },
+            {
+              value: BACKGROUND_BOOST_MODE_PLUS1X3,
+              label: "+1 em três atributos",
+            },
+          ]}
+          onValueChange={(next) => onModeChange(next as BackgroundBoostMode)}
+        />
       </Field>
 
       {mode === BACKGROUND_BOOST_MODE_PLUS1X3 ? (

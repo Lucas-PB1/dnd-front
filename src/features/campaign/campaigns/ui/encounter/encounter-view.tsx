@@ -19,6 +19,7 @@ import { ApiError } from "@/shared/api/dnd-api/api-error";
 import { cn } from "@/shared/lib/utils";
 import { Button, buttonVariants } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
+import { SearchableSelect } from "@/shared/ui/searchable-select";
 
 export function EncounterView({ campaignId }: { campaignId: string }) {
   const campaign = useCampaign(campaignId);
@@ -134,17 +135,18 @@ export function EncounterView({ campaignId }: { campaignId: string }) {
             {!canManage ? (
               <label className="flex items-center gap-2 text-sm">
                 Iniciativa
-                <select
-                  className="h-8 rounded-md border border-input bg-background px-2 text-sm"
+                <SearchableSelect
+                  className="h-8 w-auto min-w-[8rem] text-sm"
                   value={advantage}
-                  onChange={(e) =>
-                    setAdvantage(e.target.value as AdvantageMode)
+                  options={[
+                    { value: "normal", label: "Normal" },
+                    { value: "advantage", label: "Vantagem" },
+                    { value: "disadvantage", label: "Desvantagem" },
+                  ]}
+                  onValueChange={(next) =>
+                    setAdvantage(next as AdvantageMode)
                   }
-                >
-                  <option value="normal">Normal</option>
-                  <option value="advantage">Vantagem</option>
-                  <option value="disadvantage">Desvantagem</option>
-                </select>
+                />
               </label>
             ) : null}
           </div>

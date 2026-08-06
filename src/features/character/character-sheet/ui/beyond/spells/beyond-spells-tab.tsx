@@ -122,9 +122,48 @@ export function BeyondSpellsTab({
     return (
       <div className="space-y-3">
         <SpellsTabHeader onEdit={onEdit} />
-        <SheetEmptyHint>
-          Nenhuma magia registrada. Use Editar para adicionar.
-        </SheetEmptyHint>
+        {character.spellSaveDc != null ||
+        character.spellAttackBonus != null ||
+        character.spellcastingAbilitySlug ? (
+          <>
+            {character.spellSaveDc != null ||
+            character.spellAttackBonus != null ? (
+              <p className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                {character.spellSaveDc != null ? (
+                  <span>
+                    <span className="font-semibold text-foreground">CD </span>
+                    <span className="font-mono tabular-nums text-foreground">
+                      {character.spellSaveDc}
+                    </span>
+                  </span>
+                ) : null}
+                {character.spellAttackBonus != null ? (
+                  <span>
+                    <span className="font-semibold text-foreground">Ataque </span>
+                    <span className="font-mono tabular-nums text-foreground">
+                      {formatSkillBonus(character.spellAttackBonus)}
+                    </span>
+                  </span>
+                ) : null}
+              </p>
+            ) : null}
+            <BeyondSpellSlotsPanel
+              isPending={stateQuery.isPending}
+              activeSlots={activeSlots}
+              state={state}
+              labels={labels}
+              isClearingConcentration={patchState.isPending}
+              onClearConcentration={clearConcentration}
+            />
+            <SheetEmptyHint>
+              Nenhuma magia preparada. Use Editar para adicionar.
+            </SheetEmptyHint>
+          </>
+        ) : (
+          <SheetEmptyHint>
+            Nenhuma magia registrada. Use Editar para adicionar.
+          </SheetEmptyHint>
+        )}
       </div>
     );
   }

@@ -173,6 +173,18 @@ export function skillCheckBonus(
   return abilityModifier;
 }
 
+/** Passiva = 10 + bônus de perícia (inclui Jack of All Trades / expertise). */
+export function computePassiveSkill(
+  skillSlug: string,
+  abilityScore: number,
+  proficiencyBonus: number,
+  sources: SkillBonusSources,
+): number {
+  const mod = Math.floor((abilityScore - 10) / 2);
+  const rank = skillProficiencyRank(skillSlug, sources);
+  return 10 + skillCheckBonus(mod, proficiencyBonus, rank);
+}
+
 export function collectSaveProficiencyAbilities(
   classSavingThrowSlugs: readonly string[],
   featOptions: readonly FeatOptionLike[] | undefined,

@@ -14,6 +14,7 @@ import {
 } from "@/features/character/character-sheet/api/character-session.api";
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
 import { Button } from "@/shared/ui/button";
+import { SearchableSelect } from "@/shared/ui/searchable-select";
 
 type FighterSubclassActionsProps = {
   characterId: string;
@@ -215,17 +216,15 @@ export function FighterSubclassActions({
           Precauções na Masmorra
         </p>
         <div className="mt-1 flex flex-wrap gap-2">
-          <select
-            className="min-w-44 rounded border border-border/70 bg-background px-2 py-1 text-xs"
+          <SearchableSelect
+            className="min-w-44 text-xs"
             value={precautionSpell}
-            onChange={(event) => setPrecautionSpell(event.target.value)}
-          >
-            {PRECAUTION_SPELLS.map(([slug, name]) => (
-              <option key={slug} value={slug}>
-                {name}
-              </option>
-            ))}
-          </select>
+            options={PRECAUTION_SPELLS.map(([slug, name]) => ({
+              value: slug,
+              label: name,
+            }))}
+            onValueChange={setPrecautionSpell}
+          />
           <Button
             type="button"
             size="xs"

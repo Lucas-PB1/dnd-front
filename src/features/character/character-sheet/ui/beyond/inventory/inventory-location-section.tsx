@@ -1,12 +1,21 @@
 "use client";
 
+import { useMemo } from "react";
+
 import type {
   InventoryItem,
   PatchInventoryItemPayload,
 } from "@/entities/character/session-types";
 import type { EquipmentWarning } from "@/entities/character/types";
 import type { HeroIcon } from "@/features/character/character-sheet/ui/beyond/inventory/inventory-item-meta";
-import { InventoryItemRow } from "@/features/character/character-sheet/ui/beyond/inventory/inventory-item-row";
+import {
+  InventoryItemDetail,
+  inventoryItemTileMeta,
+} from "@/features/character/character-sheet/ui/beyond/inventory/inventory-item-detail";
+import {
+  DetailTileGrid,
+  type DetailTileItem,
+} from "@/features/character/character-sheet/ui/sections/detail-tile-grid";
 import {
   SheetEmptyHint,
   SheetSubheader,
@@ -41,6 +50,43 @@ export function InventoryLocationSection({
   onPatch,
   onRemove,
 }: InventoryLocationSectionProps) {
+  const tiles = useMemo((): DetailTileItem[] => {
+    return items.map((item) => {
+      const meta = inventoryItemTileMeta(item);
+      const warnings = equipmentWarnings.filter(
+        (warning) => warning.itemSlug === item.itemSlug,
+      );
+      return {
+        id: `${item.itemSlug}-${item.equipmentSlot ?? "none"}`,
+        title: item.itemName,
+        subtitle: meta.subtitle,
+        badge: meta.badge,
+        accent: meta.accent,
+        body: (
+          <InventoryItemDetail
+            item={item}
+            isPending={isPending}
+            attunementSlotsFull={attunementSlotsFull}
+            warnings={warnings}
+            onToggleLocation={onToggleLocation}
+            onToggleAttunement={onToggleAttunement}
+            onPatch={onPatch}
+            onRemove={onRemove}
+          />
+        ),
+      };
+    });
+  }, [
+    attunementSlotsFull,
+    equipmentWarnings,
+    isPending,
+    items,
+    onPatch,
+    onRemove,
+    onToggleAttunement,
+    onToggleLocation,
+  ]);
+
   return (
     <section className="space-y-2" aria-labelledby={`inv-${id}`}>
       <SheetSubheader
@@ -53,23 +99,10 @@ export function InventoryLocationSection({
       {items.length === 0 ? (
         <SheetEmptyHint>{emptyMessage}</SheetEmptyHint>
       ) : (
-        <ul className="overflow-hidden rounded-lg border border-border/70 bg-card/40 divide-y divide-border/40">
-          {items.map((item) => (
-            <InventoryItemRow
-              key={`${item.itemSlug}-${item.equipmentSlot ?? "none"}`}
-              item={item}
-              isPending={isPending}
-              attunementSlotsFull={attunementSlotsFull}
-              warnings={equipmentWarnings.filter(
-                (warning) => warning.itemSlug === item.itemSlug,
-              )}
-              onToggleLocation={onToggleLocation}
-              onToggleAttunement={onToggleAttunement}
-              onPatch={onPatch}
-              onRemove={onRemove}
-            />
-          ))}
-        </ul>
+        <DetailTileGrid
+          items={tiles}
+          hint="Toque em um item para gerenciar."
+        />
       )}
     </section>
   );

@@ -37,6 +37,11 @@ export function BeyondSpellSlotsPanel({
     );
   }
 
+  const concentrating = Boolean(state?.concentratingOn);
+  if (activeSlots.length === 0 && !concentrating) {
+    return null;
+  }
+
   return (
     <div className="space-y-3 border-b border-border/50 pb-3">
       {activeSlots.length > 0 ? (
@@ -58,24 +63,18 @@ export function BeyondSpellSlotsPanel({
             </li>
           ))}
         </ul>
-      ) : (
-        <p className="text-sm text-muted-foreground">
-          Sem espaços de magia neste nível.
-        </p>
-      )}
+      ) : null}
 
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="min-w-0">
-          <p className="text-[0.65rem] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
-            Concentração
-          </p>
-          <p className="mt-0.5 text-sm font-medium">
-            {state?.concentratingOn
-              ? labels.resolveSpell(state.concentratingOn)
-              : "Nenhuma"}
-          </p>
-        </div>
-        {state?.concentratingOn ? (
+      {concentrating ? (
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="min-w-0">
+            <p className="text-[0.65rem] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+              Concentração
+            </p>
+            <p className="mt-0.5 text-sm font-medium">
+              {labels.resolveSpell(state!.concentratingOn!)}
+            </p>
+          </div>
           <Button
             type="button"
             size="sm"
@@ -87,8 +86,8 @@ export function BeyondSpellSlotsPanel({
             <StopCircleIcon className="size-3.5" aria-hidden />
             {isClearingConcentration ? "Limpando…" : "Encerrar"}
           </Button>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
     </div>
   );
 }
