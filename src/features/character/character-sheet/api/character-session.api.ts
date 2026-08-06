@@ -84,6 +84,21 @@ export async function spendClassResource(
   );
 }
 
+export async function recoverClassResource(
+  accessToken: string,
+  characterId: string,
+  payload: UseClassResourcePayload,
+) {
+  return gameFetch<CharacterState>(
+    `/characters/${characterId}/resources/recover`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
 export async function listManeuvers(accessToken: string, characterId: string) {
   return gameFetch<GunslingerManeuver[]>(
     `/characters/${characterId}/maneuvers`,

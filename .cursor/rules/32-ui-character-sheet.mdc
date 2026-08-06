@@ -12,19 +12,19 @@ Inspiração de **layout**: D&D Beyond (dashboard denso). Visual: **Taverna/Masm
 
 1. **Header compacto** — nome, chips, descansos, **Ajustes** (modal hub) / Excluir  
 2. **Faixa de estatísticas** — 6 atributos + proficiência + deslocamento + PV/curar/dano  
-3. **Grid desktop** — esq. salvaguardas/sentidos/profs · meio perícias · dir. iniciativa/CA/defesas/condições + **abas**  
+3. **Grid desktop** — esq. salvaguardas/sentidos/profs · meio abas · dir. perícias  
 4. **Abas** — Ações · Magias · Inventário · Traços  
 
 A ficha **pode crescer** além da viewport; a página rola normalmente (sem `h-dvh` / scroll interno forçado nas colunas).  
-Mobile (`order-*`): combate + abas → perícias → proficiências.
+Mobile (`order-*`): abas → perícias → proficiências.
 
 ## Componentes
 
 - Primitivos em `features/character/character-sheet/ui/beyond/{layout,combat,inventory,spells}/`
 - Leitura: `ui/sections/sheet-read-sections.tsx` · edição: `ui/edit/sheet-edit-forms.tsx`
-- Vitais / condições / descanso: hub de combate (`BeyondCombatHub`)
+- Vitais / condições / descanso: header + faixa de stats (`SheetCombatStrip`, `BeyondRestActions`)
 - Slots / conjurar / concentração: aba Magias (`BeyondSpellsTab` — lista por círculo + cast na linha)
-- Economia de ação: aba Ações (`BeyondActionsTab` — Ação · Bônus · Reação · Livre; sem inventário)
+- Aba Ações (`BeyondActionsTab`): passivas · ataques · ferramentas/poderes de classe · economia (Usar + ±)
 - Inventário: aba Inventário (`BeyondInventoryTab` — só itens Equipado/Mochila; add colapsável)
 - Subir de nível / idiomas / nome·alinhamento: botão **Ajustes** no header → `SheetSettingsDialog` (hub em modal; sem aba Ajustes)
 
@@ -34,7 +34,7 @@ Mobile (`order-*`): combate + abas → perícias → proficiências.
 - PV / CA / iniciativa / condições visíveis **sem abrir aba** (sem sticky)
 - Magias: slots no topo + lista acionável (sem chips + selects duplicados); inventário só na aba
 - Sem aba **Mesa** — cada função fica na seção respectiva
-- Aba **Ações**: só economia de ação (vazia até API `kind`); **sem** inventário / Desequipar / pacote inicial
+- Aba **Ações**: passivas · ataques · ferramentas/poderes de classe · economia (Usar + ±); **sem** inventário
 - Aba **Inventário**: itens (Equipado/Mochila); Adicionar em **modal**; pacotes de criação viram itens na API (seed); escolha de pacote só em Ajustes
 - Aba **Ajustes** removida — hub no header (`SheetSettingsDialog`: Personagem · Subir de nível · Idiomas)
 - Sem modal **Identidade** (não trocar classe/espécie/antecedente na ficha completa)
@@ -48,7 +48,7 @@ Mobile (`order-*`): combate + abas → perícias → proficiências.
 - [ ] Mobile: PV/CA aparecem antes de scroll longo de perícias
 - [ ] Painéis sem `ring`+`shadow`+`border` empilhados
 - [ ] Abas sem microcopy de roadmap
-- [ ] Tema light/dark legível nos tiles de atributo e hub
+- [ ] Tema light/dark legível nos tiles de atributo
 
 ## Não fazer
 
@@ -56,6 +56,7 @@ Mobile (`order-*`): combate + abas → perícias → proficiências.
 - Esperar catálogo inteiro para mostrar a ficha (`isPending` só do personagem)
 - Mostrar inventário, Desequipar ou pacote inicial na aba Ações
 - Duplicar magias por `castingTime` na aba Ações (permanecem na aba Magias)
+- Reintroduzir `BeyondCombatHub` acima das abas (combate vive na aba Ações)
 - Mostrar “pacotes” de criação na aba Inventário (após a escolha, só itens)
 - Parede de cards no inventário; ItemPicker sempre aberto no topo da aba
 - Tirar o usuário da ficha para editar (painel de página com “Voltar à ficha” foi removido)

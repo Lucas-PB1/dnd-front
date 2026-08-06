@@ -49,7 +49,7 @@ export function SheetSessionBadges({ characterId }: SheetSessionBadgesProps) {
         title={inspired ? "Inspiração ativa — clique para remover" : "Marcar inspiração"}
         onClick={() => patchState.mutate({ inspiration: !inspired })}
         className={cn(
-          "inline-flex size-9 items-center justify-center rounded-full border transition-colors",
+          "inline-flex size-8 items-center justify-center rounded-full border transition-colors",
           "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
           "disabled:opacity-50",
           inspired
@@ -58,9 +58,9 @@ export function SheetSessionBadges({ characterId }: SheetSessionBadgesProps) {
         )}
       >
         {inspired ? (
-          <SparklesSolid className="size-4" aria-hidden />
+          <SparklesSolid className="size-3.5" aria-hidden />
         ) : (
-          <SparklesIcon className="size-4" aria-hidden />
+          <SparklesIcon className="size-3.5" aria-hidden />
         )}
       </button>
 
@@ -70,7 +70,7 @@ export function SheetSessionBadges({ characterId }: SheetSessionBadgesProps) {
         variant={hasDeathMarks ? "outline" : "ghost"}
         disabled={!state}
         className={cn(
-          "h-9 gap-1.5 px-2.5",
+          "h-8 gap-1 px-2",
           hasDeathMarks && "border-destructive/40 text-destructive",
         )}
         onClick={() => setDeathOpen(true)}

@@ -52,36 +52,37 @@ export function CharacterSheetHeader({
         </div>
       </div>
 
-      <div className="flex min-w-0 items-start gap-3">
+      <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2">
         <div
           aria-hidden
-          className="flex size-12 shrink-0 items-center justify-center rounded-xl border border-primary/35 bg-primary/12 font-heading text-xl font-semibold text-primary shadow-inner sm:size-14 sm:text-2xl"
+          className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-primary/35 bg-primary/12 font-heading text-lg font-semibold text-primary shadow-inner sm:size-11 sm:text-xl"
         >
           {initial}
         </div>
 
-        <div className="min-w-0 flex-1">
-          <div className="flex min-w-0 flex-wrap items-center gap-2">
-            <h1 className="font-heading truncate text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">
-              {character.name}
-            </h1>
-            <SheetSessionBadges characterId={characterId} />
-          </div>
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            <SheetChip active>Nv. {character.level}</SheetChip>
-            {labels.identity.speciesName ? (
-              <SheetChip>{labels.identity.speciesName}</SheetChip>
-            ) : null}
-            {labels.identity.className ? (
-              <SheetChip>{labels.identity.className}</SheetChip>
-            ) : null}
-            {labels.identity.subclassName ? (
-              <SheetChip>{labels.identity.subclassName}</SheetChip>
-            ) : null}
-            {labels.identity.backgroundName ? (
-              <SheetChip>{labels.identity.backgroundName}</SheetChip>
-            ) : null}
-          </div>
+        <h1 className="font-heading max-w-[12rem] truncate text-xl font-semibold leading-none tracking-tight sm:max-w-[16rem] sm:text-2xl">
+          {character.name}
+        </h1>
+
+        <SheetSessionBadges characterId={characterId} />
+
+        <div
+          aria-label="Identidade do personagem"
+          className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5 sm:justify-end"
+        >
+          <SheetChip active>Nv. {character.level}</SheetChip>
+          {labels.identity.speciesName ? (
+            <SheetChip>{labels.identity.speciesName}</SheetChip>
+          ) : null}
+          {labels.identity.className ? (
+            <SheetChip>{labels.identity.className}</SheetChip>
+          ) : null}
+          {labels.identity.subclassName ? (
+            <SheetChip>{labels.identity.subclassName}</SheetChip>
+          ) : null}
+          {labels.identity.backgroundName ? (
+            <SheetChip>{labels.identity.backgroundName}</SheetChip>
+          ) : null}
         </div>
       </div>
 

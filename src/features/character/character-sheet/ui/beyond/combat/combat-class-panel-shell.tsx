@@ -2,58 +2,54 @@
 
 import type { ReactNode } from "react";
 
-import { CombatClassSubtabs } from "@/features/character/character-sheet/ui/beyond/combat/combat-class-subtabs";
-import { CombatNotesList } from "@/features/character/character-sheet/ui/beyond/combat/combat-notes-list";
+import { BookOpenIcon, SparklesIcon } from "@heroicons/react/24/outline";
+
+import { SheetSubheader } from "@/features/character/character-sheet/ui/sheet/sheet-ui";
 
 type CombatClassPanelShellProps = {
   title: string;
   actionsContent: ReactNode;
   powersContent?: ReactNode | null;
+  /** Ignorado — passivas vão no topo da aba Ações. */
   combatNotes?: string[];
   actionsIcon?: string;
   powersIcon?: string;
 };
 
 /**
- * Envelope visual único dos painéis de combate por classe:
- * Ações / Poderes / Passivas (notas de mesa).
+ * Conteúdo flat de combate por classe (sem sub-abas).
+ * Usado dentro da aba Ações após remoção do hub.
  */
 export function CombatClassPanelShell({
   title,
   actionsContent,
   powersContent = null,
-  combatNotes,
-  actionsIcon = "⚡",
-  powersIcon = "✨",
 }: CombatClassPanelShellProps) {
-  const passivesContent =
-    combatNotes && combatNotes.length > 0 ? (
-      <CombatNotesList notes={combatNotes} />
-    ) : null;
+  const hasActions = actionsContent != null && actionsContent !== false;
+  const hasPowers = powersContent != null && powersContent !== false;
+
+  if (!hasActions && !hasPowers) return null;
 
   return (
-    <CombatClassSubtabs
-      title={title}
-      tabs={[
-        {
-          id: "actions",
-          label: "Ações",
-          icon: actionsIcon,
-          content: actionsContent,
-        },
-        {
-          id: "powers",
-          label: "Poderes",
-          icon: powersIcon,
-          content: powersContent,
-        },
-        {
-          id: "passives",
-          label: "Passivas",
-          icon: "📜",
-          content: passivesContent,
-        },
-      ]}
-    />
+    <section
+      className="space-y-3 rounded-xl border border-border/50 bg-card/40 p-3"
+      aria-label={title}
+    >
+      <p className="text-[0.65rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
+        {title}
+      </p>
+      {hasActions ? (
+        <div className="space-y-1.5">
+          <SheetSubheader title="Ferramentas" icon={SparklesIcon} />
+          {actionsContent}
+        </div>
+      ) : null}
+      {hasPowers ? (
+        <div className="space-y-1.5">
+          <SheetSubheader title="Poderes" icon={BookOpenIcon} />
+          {powersContent}
+        </div>
+      ) : null}
+    </section>
   );
 }

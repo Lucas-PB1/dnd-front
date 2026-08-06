@@ -3,6 +3,8 @@
  * Fonte: PHB 2024 + painéis de combate do front (slugs alinhados).
  */
 
+import type { EconomyTableAction } from "@/features/character/character-sheet/lib/combat/economy-table-actions";
+
 export type ActionEconomyBucket =
   | "action"
   | "bonus"
@@ -17,8 +19,18 @@ export type ClassEconomyAction = {
   minLevel: number;
   /** Se definido, só aparece com essa subclasse. */
   subclassSlug?: string;
+  /** Pool principal (ex.: psi-energy-dice, secondWind). */
   resourceSlug?: string;
+  /** Tracker 0/1 de uso gratuito por descanso (ex.: telekinetic-movement). */
+  freeResourceSlug?: string;
+  /** Sempre gasta o pool (sem uso gratuito). */
+  alwaysSpendsResource?: boolean;
+  /** Resumo de uma linha na lista. */
   summary?: string;
+  /** Texto maior para o modal de detalhe (fallback: summary). */
+  description?: string;
+  /** Se definido, a aba Ações mostra Usar com efeito de mesa. */
+  tableAction?: EconomyTableAction;
 };
 
 const FIGHTER: ClassEconomyAction[] = [
@@ -30,6 +42,9 @@ const FIGHTER: ClassEconomyAction[] = [
     minLevel: 1,
     resourceSlug: "secondWind",
     summary: "Cura 1d10 + nível de Guerreiro",
+    description:
+      "Como Ação Bônus, você pode recuperar pontos de vida iguais a 1d10 + seu nível de Guerreiro. Você tem um número limitado de usos; recupere-os ao terminar um Descanso Curto ou Longo.",
+    tableAction: "second-wind",
   },
   {
     id: "fighter-action-surge",
@@ -39,6 +54,9 @@ const FIGHTER: ClassEconomyAction[] = [
     minLevel: 2,
     resourceSlug: "actionSurge",
     summary: "Concede uma ação adicional neste turno",
+    description:
+      "No seu turno, você pode se esforçar além do normal e ganhar uma Ação adicional. Depois de usar Surto de Ação, você precisa terminar um Descanso Curto ou Longo para usá-lo de novo (em níveis altos, pode ter mais usos).",
+    tableAction: "action-surge",
   },
   {
     id: "fighter-tactical-mind",
@@ -48,6 +66,9 @@ const FIGHTER: ClassEconomyAction[] = [
     minLevel: 2,
     resourceSlug: "secondWind",
     summary: "Ao falhar em teste: +1d10 (gasta Fôlego só se virar sucesso)",
+    description:
+      "Quando você falha em um teste de habilidade, você pode gastar um uso de Recuperar Fôlego para rolar 1d10 e somar ao resultado. Se o teste ainda falhar, o uso de Recuperar Fôlego não é gasto.",
+    tableAction: "tactical-mind",
   },
   {
     id: "fighter-indomitable",
@@ -57,6 +78,8 @@ const FIGHTER: ClassEconomyAction[] = [
     minLevel: 9,
     resourceSlug: "indomitable",
     summary: "Ao falhar salvaguarda: rerrola com +nível",
+    description:
+      "Se você falhar em uma salvaguarda, pode rerrolá-la com um bônus igual ao seu nível de Guerreiro. Você deve usar o novo resultado. Usos limitados; recupere-os ao terminar um Descanso Longo. Na ficha, marque a opção Indomável ao rolar a salvaguarda.",
   },
   {
     id: "fighter-psi-protective-field",
@@ -66,7 +89,11 @@ const FIGHTER: ClassEconomyAction[] = [
     subclassSlug: "psi-warrior",
     minLevel: 3,
     resourceSlug: "psi-energy-dice",
-    summary: "Reduz dano recebido com dado psiônico",
+    alwaysSpendsResource: true,
+    summary: "Reação: reduz dano com 1 dado psi + INT",
+    description:
+      "Quando você ou uma criatura que você possa ver a até 9 metros sofrer dano, use sua Reação e gaste um Dado de Energia Psiônica: reduza o dano pelo resultado do dado + seu modificador de Inteligência. Sempre gasta um dado (não tem uso gratuito).",
+    tableAction: "psi:protective-field",
   },
   {
     id: "fighter-psi-telekinetic-movement",
@@ -76,17 +103,25 @@ const FIGHTER: ClassEconomyAction[] = [
     subclassSlug: "psi-warrior",
     minLevel: 3,
     resourceSlug: "psi-energy-dice",
-    summary: "Mover objeto ou criatura (Usar Magia)",
+    freeResourceSlug: "telekinetic-movement",
+    summary: "1× gratuito por descanso; depois gasta 1 dado psi",
+    description:
+      "Mova um objeto solto ou uma criatura voluntária conforme a característica. O primeiro uso após um Descanso Curto ou Longo é gratuito; usos extras gastam um Dado de Energia Psiônica.",
+    tableAction: "psi:telekinetic-movement",
   },
   {
     id: "fighter-psi-psychic-leap",
-    name: "Salto Psíquico",
+    name: "Salto com Impulsão Psíquica",
     economy: "bonus",
     classSlug: "fighter",
     subclassSlug: "psi-warrior",
     minLevel: 7,
     resourceSlug: "psi-energy-dice",
-    summary: "Salto longo potencializado",
+    freeResourceSlug: "psychic-leap",
+    summary: "1× gratuito por descanso; voo = 2× deslocamento",
+    description:
+      "Como Ação Bônus, você ganha Deslocamento de Voo igual ao dobro do seu Deslocamento até o fim do turno. O primeiro uso após um Descanso Curto ou Longo é gratuito; depois, gaste um Dado de Energia Psiônica.",
+    tableAction: "psi:psychic-leap",
   },
   {
     id: "fighter-psi-mental-guard",
@@ -96,7 +131,11 @@ const FIGHTER: ClassEconomyAction[] = [
     subclassSlug: "psi-warrior",
     minLevel: 10,
     resourceSlug: "psi-energy-dice",
-    summary: "Gasta dado psiônico para resistência mental",
+    alwaysSpendsResource: true,
+    summary: "Gasta 1 dado: encerra Amedrontado/Enfeitiçado",
+    description:
+      "Gaste um Dado de Energia Psiônica (nenhuma ação) para encerrar em você todos os efeitos que causam as condições Amedrontado ou Enfeitiçado. Sempre gasta um dado.",
+    tableAction: "psi:mental-guard",
   },
   {
     id: "fighter-psi-energy-bulwark",
@@ -106,7 +145,25 @@ const FIGHTER: ClassEconomyAction[] = [
     subclassSlug: "psi-warrior",
     minLevel: 15,
     resourceSlug: "psi-energy-dice",
-    summary: "PV temporários com energia psiônica",
+    freeResourceSlug: "energy-bulwark",
+    summary: "1× gratuito por descanso longo; Cobertura Parcial",
+    description:
+      "Conceda Cobertura Parcial por 1 minuto a até o seu modificador de Inteligência em criaturas (mínimo 1). O primeiro uso após um Descanso Longo é gratuito; depois, gaste um Dado de Energia Psiônica.",
+    tableAction: "psi:energy-bulwark",
+  },
+  {
+    id: "fighter-psi-telekinetic-master",
+    name: "Mestre Telecinético",
+    economy: "free",
+    classSlug: "fighter",
+    subclassSlug: "psi-warrior",
+    minLevel: 18,
+    resourceSlug: "psi-energy-dice",
+    freeResourceSlug: "telekinetic-master",
+    summary: "1× gratuito por descanso longo; Telecinese",
+    description:
+      "Conjure Telecinese sem espaço nem componentes (INT é o atributo). O primeiro uso após um Descanso Longo é gratuito; depois, gaste um Dado de Energia Psiônica.",
+    tableAction: "psi:telekinetic-master",
   },
   {
     id: "fighter-bm-lunging-attack",
@@ -117,6 +174,8 @@ const FIGHTER: ClassEconomyAction[] = [
     minLevel: 3,
     resourceSlug: "superiority-dice",
     summary: "Manobra: Correr e potencializar ataque",
+    description:
+      "Manobra do Mestre de Batalha. Gaste um dado de superioridade para potencializar um ataque com alcance ou movimento extra conforme a manobra escolhida (veja o texto completo da manobra na aba de poderes).",
   },
   {
     id: "fighter-bm-rally",
@@ -127,6 +186,8 @@ const FIGHTER: ClassEconomyAction[] = [
     minLevel: 3,
     resourceSlug: "superiority-dice",
     summary: "Manobra: PV temporários a um aliado",
+    description:
+      "Como Ação Bônus, gaste um dado de superioridade para conceder pontos de vida temporários a um aliado. O aliado ganha PV temporários iguais ao resultado do dado + seu modificador de Carisma.",
   },
   {
     id: "fighter-bm-feinting-attack",
@@ -137,6 +198,8 @@ const FIGHTER: ClassEconomyAction[] = [
     minLevel: 3,
     resourceSlug: "superiority-dice",
     summary: "Manobra: Vantagem no próximo ataque",
+    description:
+      "Como Ação Bônus, gaste um dado de superioridade para fintar: você ganha Vantagem no próximo ataque contra o alvo neste turno e adiciona o dado ao dano se acertar.",
   },
   {
     id: "fighter-bm-parry",
@@ -147,6 +210,8 @@ const FIGHTER: ClassEconomyAction[] = [
     minLevel: 3,
     resourceSlug: "superiority-dice",
     summary: "Manobra: reduzir dano corpo a corpo",
+    description:
+      "Quando você é atingido por um ataque corpo a corpo, use sua Reação e gaste um dado de superioridade para reduzir o dano sofrido pelo resultado do dado + seu modificador de Destreza.",
   },
   {
     id: "fighter-bm-riposte",
@@ -157,6 +222,8 @@ const FIGHTER: ClassEconomyAction[] = [
     minLevel: 3,
     resourceSlug: "superiority-dice",
     summary: "Manobra: contra-ataque ao ser errado",
+    description:
+      "Quando uma criatura erra um ataque corpo a corpo contra você, use sua Reação para gastar um dado de superioridade e fazer um ataque com arma contra ela, adicionando o dado ao dano se acertar.",
   },
 ];
 
@@ -629,4 +696,15 @@ export function groupClassEconomyActions(
     reaction: actions.filter((a) => a.economy === "reaction"),
     free: actions.filter((a) => a.economy === "free"),
   };
+}
+
+/** Texto do modal: description completa ou summary. */
+export function economyActionDetailText(action: ClassEconomyAction): string {
+  return (action.description ?? action.summary ?? "").trim();
+}
+
+export function findClassEconomyActionById(
+  id: string,
+): ClassEconomyAction | undefined {
+  return CLASS_ECONOMY_ACTIONS.find((action) => action.id === id);
 }

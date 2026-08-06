@@ -30,7 +30,7 @@ type WeaponAttackCardProps = {
   canDoorKick?: boolean;
   canPsiStrike?: boolean;
   canMonsterSlayer?: boolean;
-  onSpendPsi?: () => void | Promise<void>;
+  onPsiStrikeResolved?: () => void | Promise<void>;
   rogue?: {
     level: number;
     subclassSlug?: string | null;
@@ -66,7 +66,7 @@ export function WeaponAttackCard({
   canDoorKick = false,
   canPsiStrike = false,
   canMonsterSlayer = false,
-  onSpendPsi,
+  onPsiStrikeResolved,
   rogue,
   paladin,
   onDivineSmiteResolved,
@@ -527,15 +527,17 @@ export function WeaponAttackCard({
               size="sm"
               variant="ghost"
               disabled={busy}
-              title="Gasta 1 Dado de Energia Psiônica"
-              onClick={async () => {
-                if (onSpendPsi) await onSpendPsi();
-                rolls.damage.mutate({
-                  itemSlug: attack.itemSlug,
-                  mode: attack.mode,
-                  psiStrike: true,
-                });
-              }}
+              title="Gasta 1 Dado de Energia Psiônica e rola o dano extra"
+              onClick={() =>
+                rolls.damage.mutate(
+                  {
+                    itemSlug: attack.itemSlug,
+                    mode: attack.mode,
+                    psiStrike: true,
+                  },
+                  { onSuccess: () => onPsiStrikeResolved?.() },
+                )
+              }
             >
               Golpe Psiônico
             </Button>

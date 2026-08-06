@@ -20,6 +20,7 @@ type ClassCombatPanelProps = {
   characterId: string;
   character: CharacterDetail;
   state: CharacterState | undefined;
+  onTableNote?: (note: string) => void;
 };
 
 /** Renderiza só o painel de combate da classe do personagem. */
@@ -27,6 +28,7 @@ export function ClassCombatPanel({
   characterId,
   character,
   state,
+  onTableNote,
 }: ClassCombatPanelProps) {
   const shared = {
     characterId,
@@ -51,7 +53,7 @@ export function ClassCombatPanel({
       return (
         <CombatFighterPanel
           {...shared}
-          attacksPerAction={character.attacksPerAction}
+          onTableNote={onTableNote}
         />
       );
     case "rogue":

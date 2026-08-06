@@ -5,9 +5,16 @@ import {
   ClockIcon,
   CubeIcon,
   HandRaisedIcon,
+  MinusIcon,
+  PlusIcon,
   SparklesIcon,
 } from "@heroicons/react/24/outline";
-import { useMemo, type ComponentType, type SVGProps } from "react";
+import {
+  useMemo,
+  useState,
+  type ComponentType,
+  type SVGProps,
+} from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import type { CharacterDetail } from "@/entities/character/types";
@@ -16,23 +23,34 @@ import {
   reloadFirearm,
   sessionKeys,
 } from "@/features/character/character-sheet/api/character-session.api";
+import { useEconomyTableAction } from "@/features/character/character-sheet/api/use-economy-table-action";
 import {
   useCharacterState,
+  useRecoverClassResource,
   useSpendClassResource,
 } from "@/features/character/character-sheet/api/use-character-state";
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
 import {
   groupClassEconomyActions,
   resolveClassEconomyActions,
+  economyActionDetailText,
   type ActionEconomyBucket,
   type ClassEconomyAction,
 } from "@/features/character/character-sheet/lib/combat/class-action-economy";
+import {
+  hasAvailableFreeEconomyUse,
+  planEconomyTableUse,
+} from "@/features/character/character-sheet/lib/combat/plan-economy-table-use";
+import { ClassCombatPanel } from "@/features/character/character-sheet/ui/beyond/combat/class-combat-panel";
 import { WeaponAttackCard } from "@/features/character/character-sheet/ui/beyond/inventory/weapon-attack-card";
+import { FeatureDetailTrigger } from "@/features/character/character-sheet/ui/sheet/feature-detail-dialog";
 import {
   SheetEmptyHint,
   SheetSectionHeader,
   SheetSubheader,
 } from "@/features/character/character-sheet/ui/sheet/sheet-ui";
+import { Button } from "@/shared/ui/button";
+import { cn } from "@/shared/lib/utils";
 
 type BeyondActionsTabProps = {
   character: CharacterDetail;
@@ -72,7 +90,7 @@ const ECONOMY_SECTIONS: {
   },
 ];
 
-/** Ataques com arma + features de classe por economia de ação. */
+/** Ataques, economia com Usar, ferramentas de classe e passivas. */
 export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
   const attacks = character.weaponAttacks ?? [];
   const stateQuery = useCharacterState(character.id);
@@ -81,6 +99,8 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
   );
   const queryClient = useQueryClient();
   const chambers = stateQuery.data?.firearmChambers ?? {};
+  const [tableNote, setTableNote] = useState<string | null>(null);
+  const [repeatWithPsi, setRepeatWithPsi] = useState(false);
 
   const economyActions = useMemo(
     () =>
@@ -113,7 +133,13 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
           .sort((a, b) => a.level - b.level)
       : [];
 
-  const spendRisk = useSpendClassResource(character.id);
+  const spendResource = useSpendClassResource(character.id);
+  const recoverResource = useRecoverClassResource(character.id);
+  const tableAction = useEconomyTableAction(character.id);
+  const resourceBusy =
+    spendResource.isPending ||
+    recoverResource.isPending ||
+    tableAction.isPending;
 
   const reload = useMutation({
     mutationFn: async (itemSlug: string) => {
@@ -154,9 +180,20 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
     return map;
   }, [stateQuery.data?.classResources]);
 
+  const showForcePsiSpend =
+    character.subclassSlug === "psi-warrior" &&
+    character.level >= 3 &&
+    hasAvailableFreeEconomyUse(economyActions, remainingBySlug);
+
   const visibleEconomySections = ECONOMY_SECTIONS.filter(
     (section) => grouped[section.bucket].length > 0,
   );
+
+  const resourceError =
+    (spendResource.isError && spendResource.error) ||
+    (recoverResource.isError && recoverResource.error) ||
+    (tableAction.isError && tableAction.error) ||
+    null;
 
   return (
     <div className="space-y-5">
@@ -185,7 +222,7 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
                 onReload={(itemSlug) => reload.mutate(itemSlug)}
                 onFire={(itemSlug, shots) => fire.mutate({ itemSlug, shots })}
                 onHeadShot={async () => {
-                  await spendRisk.mutateAsync({
+                  await spendResource.mutateAsync({
                     resourceSlug: "risk",
                     amount: 3,
                   });
@@ -210,12 +247,7 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
                   character.subclassSlug === "dungeoneer" &&
                   character.level >= 10
                 }
-                onSpendPsi={async () => {
-                  await spendRisk.mutateAsync({
-                    resourceSlug: "psi-energy-dice",
-                    amount: 1,
-                  });
-                }}
+                onPsiStrikeResolved={invalidateState}
                 rogue={
                   character.classSlug === "rogue"
                     ? {
@@ -250,13 +282,33 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
         )}
       </section>
 
+      <ClassCombatPanel
+        characterId={character.id}
+        character={character}
+        state={stateQuery.data}
+        onTableNote={setTableNote}
+      />
+
       {visibleEconomySections.length > 0 ? (
         <div className="space-y-3">
-          <SheetSectionHeader
-            title="Economia de Ação"
-            icon={BoltIcon}
-            count={economyActions.length}
-          />
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <SheetSectionHeader
+              title="Economia de Ação"
+              icon={BoltIcon}
+              count={economyActions.length}
+            />
+            {showForcePsiSpend ? (
+              <label className="text-[0.7rem] text-muted-foreground">
+                <input
+                  className="mr-1 align-middle"
+                  type="checkbox"
+                  checked={repeatWithPsi}
+                  onChange={(event) => setRepeatWithPsi(event.target.checked)}
+                />
+                gastar dado psi (em vez do uso gratuito)
+              </label>
+            ) : null}
+          </div>
           {visibleEconomySections.map((section) => (
             <EconomyBucketSection
               key={section.bucket}
@@ -266,8 +318,48 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
               bucket={section.bucket}
               actions={grouped[section.bucket]}
               remainingBySlug={remainingBySlug}
+              busy={resourceBusy}
+              preferSpendPool={repeatWithPsi}
+              onSpend={(resourceSlug) =>
+                spendResource.mutate({ resourceSlug, amount: 1 })
+              }
+              onRecover={(resourceSlug) =>
+                recoverResource.mutate({ resourceSlug, amount: 1 })
+              }
+              onUse={(action) => {
+                if (!action.tableAction) return;
+                const plan = planEconomyTableUse({
+                  action,
+                  remainingBySlug,
+                  preferSpendPool: repeatWithPsi,
+                });
+                if (!plan.canUse) return;
+                tableAction.mutate(
+                  {
+                    tableAction: action.tableAction,
+                    usePsiDie: plan.usePsiDie,
+                  },
+                  {
+                    onSuccess: (result) => {
+                      if (result?.note) setTableNote(result.note);
+                    },
+                  },
+                );
+              }}
             />
           ))}
+          {tableNote ? (
+            <p className="text-sm text-secondary" role="status">
+              {tableNote}
+            </p>
+          ) : null}
+          {resourceError ? (
+            <p className="text-sm text-destructive" role="alert">
+              {resourceError instanceof Error
+                ? resourceError.message
+                : "Não foi possível atualizar o recurso"}
+            </p>
+          ) : null}
         </div>
       ) : null}
     </div>
@@ -281,6 +373,11 @@ function EconomyBucketSection({
   icon: Icon,
   actions,
   remainingBySlug,
+  busy,
+  preferSpendPool,
+  onSpend,
+  onRecover,
+  onUse,
 }: {
   bucket: ActionEconomyBucket;
   title: string;
@@ -288,6 +385,11 @@ function EconomyBucketSection({
   icon: HeroIcon;
   actions: ClassEconomyAction[];
   remainingBySlug: Map<string, { remaining: number; max: number }>;
+  busy: boolean;
+  preferSpendPool: boolean;
+  onSpend: (resourceSlug: string) => void;
+  onRecover: (resourceSlug: string) => void;
+  onUse: (action: ClassEconomyAction) => void;
 }) {
   return (
     <section
@@ -309,30 +411,126 @@ function EconomyBucketSection({
       </div>
       <ul className="divide-y divide-border/40 overflow-hidden rounded-lg border border-border/60 bg-background/40">
         {actions.map((action) => {
-          const resource =
-            action.resourceSlug != null
-              ? remainingBySlug.get(action.resourceSlug)
+          const plan = planEconomyTableUse({
+            action,
+            remainingBySlug,
+            preferSpendPool,
+          });
+          const counter =
+            plan.counterSlug != null
+              ? remainingBySlug.get(plan.counterSlug)
               : undefined;
+          const canSpend = Boolean(
+            plan.counterSlug && counter && counter.remaining > 0,
+          );
+          const canRecover = Boolean(
+            plan.counterSlug &&
+              counter &&
+              counter.remaining < counter.max,
+          );
+          const detailText = economyActionDetailText(action);
+          const economyLabel =
+            action.economy === "bonus"
+              ? "Ação Bônus"
+              : action.economy === "reaction"
+                ? "Reação"
+                : action.economy === "free"
+                  ? "Sem ação / especial"
+                  : "Ação";
+
           return (
             <li
               key={action.id}
               className="flex items-start justify-between gap-3 px-2.5 py-2"
             >
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-foreground">
-                  {action.name}
-                </p>
-                {action.summary ? (
-                  <p className="mt-0.5 text-xs text-muted-foreground">
-                    {action.summary}
-                  </p>
+              <div className="min-w-0 flex-1">
+                {detailText ? (
+                  <FeatureDetailTrigger
+                    variant="text"
+                    title={action.name}
+                    subtitle={economyLabel}
+                    description={detailText}
+                  >
+                    <span className="text-sm font-medium text-foreground underline-offset-2 hover:underline">
+                      {action.name}
+                    </span>
+                    {action.summary ? (
+                      <span className="mt-0.5 block text-xs text-muted-foreground">
+                        {action.summary}
+                      </span>
+                    ) : null}
+                    {plan.hint ? (
+                      <span className="mt-0.5 block font-mono text-[0.65rem] text-muted-foreground/90">
+                        {plan.hint}
+                      </span>
+                    ) : null}
+                  </FeatureDetailTrigger>
+                ) : (
+                  <>
+                    <p className="text-sm font-medium text-foreground">
+                      {action.name}
+                    </p>
+                    {action.summary ? (
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        {action.summary}
+                      </p>
+                    ) : null}
+                  </>
+                )}
+              </div>
+              <div className="flex shrink-0 flex-col items-end gap-1 sm:flex-row sm:items-center">
+                {action.tableAction ? (
+                  <Button
+                    type="button"
+                    size="xs"
+                    variant="outline"
+                    className="h-7 px-2"
+                    disabled={busy || !plan.canUse}
+                    title={plan.buttonLabel}
+                    onClick={() => onUse(action)}
+                  >
+                    {plan.buttonLabel}
+                  </Button>
+                ) : null}
+                {counter && plan.counterSlug ? (
+                  <div className="flex items-center gap-1">
+                    <Button
+                      type="button"
+                      size="xs"
+                      variant="outline"
+                      className="size-7 p-0"
+                      disabled={!canSpend || busy}
+                      aria-label={`Gastar uso de ${action.name}`}
+                      title="Gastar 1 uso (ajuste manual)"
+                      onClick={() => onSpend(plan.counterSlug!)}
+                    >
+                      <MinusIcon className="size-3.5" aria-hidden />
+                    </Button>
+                    <span
+                      className={cn(
+                        "min-w-[2.75rem] text-center font-mono text-xs tabular-nums",
+                        counter.remaining <= 0
+                          ? "text-muted-foreground/70"
+                          : "text-foreground",
+                      )}
+                    >
+                      {counter.remaining}/{counter.max}
+                    </span>
+                    <Button
+                      type="button"
+                      size="xs"
+                      variant="ghost"
+                      className="size-7 p-0"
+                      disabled={!canRecover || busy}
+                      aria-label={`Recuperar uso de ${action.name}`}
+                      title="Recuperar 1 uso"
+                      onClick={() => onRecover(plan.counterSlug!)}
+                    >
+                      <PlusIcon className="size-3.5" aria-hidden />
+                    </Button>
+                  </div>
                 ) : null}
               </div>
-              {resource ? (
-                <span className="shrink-0 font-mono text-xs tabular-nums text-muted-foreground">
-                  {resource.remaining}/{resource.max}
-                </span>
-              ) : null}
             </li>
           );
         })}

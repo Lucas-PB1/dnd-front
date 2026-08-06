@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 
 import type { CharacterDetail } from "@/entities/character/types";
 import type { useSkills } from "@/features/catalog/reference-catalog/api/use-reference";
-import { BeyondCombatHub } from "@/features/character/character-sheet/ui/beyond/combat/beyond-combat-hub";
 import { BeyondCharacterStatsBar } from "@/features/character/character-sheet/ui/beyond/layout/beyond-ability-row";
 import { BeyondLeftColumn } from "@/features/character/character-sheet/ui/beyond/layout/beyond-left-column";
 import { BeyondPanel } from "@/features/character/character-sheet/ui/beyond/layout/beyond-panel";
@@ -57,14 +56,24 @@ export function CharacterSheetMainGrid({
         </aside>
 
         <div className="order-1 flex min-w-0 flex-col gap-2 xl:order-2">
-          <BeyondCombatHub characterId={characterId} character={character} />
           <CharacterSheetPageSections
             panels={pagePanels}
             character={character}
           />
         </div>
 
-        <aside className="order-2 min-w-0 xl:order-3">
+        <aside className="order-2 flex min-w-0 flex-col gap-2 xl:order-3">
+          {character.attacksPerAction != null &&
+          character.attacksPerAction > 1 ? (
+            <div className="flex items-center justify-between gap-2 rounded-lg border border-border/60 bg-card/50 px-2.5 py-2 shadow-sm">
+              <span className="text-[0.7rem] font-semibold tracking-wide text-muted-foreground uppercase">
+                Ataques por ação
+              </span>
+              <span className="font-mono text-sm font-semibold tabular-nums text-foreground">
+                {character.attacksPerAction}
+              </span>
+            </div>
+          ) : null}
           {skillsQuery.isPending ? (
             <BeyondPanel title="Perícias">
               <p className="text-sm text-muted-foreground">Carregando...</p>

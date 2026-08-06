@@ -51,6 +51,20 @@ export function CombatRoguePanel({
   const resource = (slug: string) =>
     state?.classResources?.find((item) => item.slug === slug);
   const psiRemaining = resource("soulknife-psi-dice")?.remaining ?? 0;
+  const hasFreeSoulknifeUse =
+    (resource("psychic-whispers")?.remaining ?? 0) > 0 ||
+    (resource("psychic-veil")?.remaining ?? 0) > 0 ||
+    (resource("rend-mind")?.remaining ?? 0) > 0;
+
+  function soulknifeLabel(
+    name: string,
+    freeSlug: string,
+    psiCost = 1,
+  ): string {
+    const freeLeft = resource(freeSlug)?.remaining ?? 0;
+    if (!usePsiDie && freeLeft > 0) return `${name} (gratuito)`;
+    return `${name} (${psiCost} dado${psiCost > 1 ? "s" : ""})`;
+  }
 
   const actionsContent = (
     <div className="space-y-2">
@@ -120,7 +134,7 @@ export function CombatRoguePanel({
               }
               onClick={() => action.mutate("psychic-whispers")}
             >
-              Sussurros Psíquicos
+              {soulknifeLabel("Sussurros Psíquicos", "psychic-whispers")}
             </Button>
             {level >= 9 ? (
               <Button
@@ -130,7 +144,7 @@ export function CombatRoguePanel({
                 disabled={action.isPending || psiRemaining <= 0}
                 onClick={() => action.mutate("psychic-teleport")}
               >
-                Teleporte Psíquico
+                Teleporte Psíquico (1 dado)
               </Button>
             ) : null}
             {level >= 13 ? (
@@ -146,7 +160,7 @@ export function CombatRoguePanel({
                 }
                 onClick={() => action.mutate("psychic-veil")}
               >
-                Véu Psíquico
+                {soulknifeLabel("Véu Psíquico", "psychic-veil")}
               </Button>
             ) : null}
             {level >= 17 ? (
@@ -162,7 +176,7 @@ export function CombatRoguePanel({
                 }
                 onClick={() => action.mutate("rend-mind")}
               >
-                Rasgar Mente
+                {soulknifeLabel("Rasgar Mente", "rend-mind", 3)}
               </Button>
             ) : null}
           </div>
@@ -206,15 +220,21 @@ export function CombatRoguePanel({
                 Golpe Teleguiado
               </Button>
             ) : null}
-            <label className="text-[0.7rem] text-muted-foreground">
-              <input
-                className="mr-1 align-middle"
-                type="checkbox"
-                checked={usePsiDie}
-                onChange={(event) => setUsePsiDie(event.target.checked)}
-              />
-              usar dado psi ({psiRemaining})
-            </label>
+            {hasFreeSoulknifeUse || usePsiDie ? (
+              <label className="text-[0.7rem] text-muted-foreground">
+                <input
+                  className="mr-1 align-middle"
+                  type="checkbox"
+                  checked={usePsiDie}
+                  onChange={(event) => setUsePsiDie(event.target.checked)}
+                />
+                gastar dado psi (em vez do uso gratuito) · {psiRemaining}
+              </label>
+            ) : (
+              <span className="text-[0.7rem] text-muted-foreground">
+                Dados psi: {psiRemaining}
+              </span>
+            )}
           </div>
         </>
       ) : null}

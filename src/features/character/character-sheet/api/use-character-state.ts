@@ -15,6 +15,7 @@ import {
   sessionKeys,
   takeCharacterRest,
   spendClassResource,
+  recoverClassResource,
 } from "@/features/character/character-sheet/api/character-session.api";
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
 import { charactersKeys } from "@/features/character/characters/api/characters.api";
@@ -127,6 +128,26 @@ export function useSpendClassResource(characterId: string) {
     onSuccess: (result) => {
       if (!result) return;
       setState(result.state);
+    },
+  });
+}
+
+export function useRecoverClassResource(characterId: string) {
+  const { requireToken, handleUnauthorized } = useGameAuth(
+    `/characters/${characterId}`,
+  );
+  const setState = useInvalidateState(characterId);
+
+  return useMutation({
+    mutationFn: async (payload: UseClassResourcePayload) => {
+      try {
+        return await recoverClassResource(requireToken(), characterId, payload);
+      } catch (error) {
+        return handleUnauthorized(error);
+      }
+    },
+    onSuccess: (state) => {
+      if (state) setState(state);
     },
   });
 }

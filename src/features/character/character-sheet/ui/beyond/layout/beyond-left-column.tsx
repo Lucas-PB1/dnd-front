@@ -18,6 +18,7 @@ import {
 } from "@/entities/character";
 import { useClassDetail } from "@/features/catalog/class-catalog/api/use-classes";
 import { BeyondPanel, ABILITY_SHORT } from "@/features/character/character-sheet/ui/beyond/layout/beyond-panel";
+import { CombatPassivesTrigger } from "@/features/character/character-sheet/ui/beyond/combat/combat-passives-trigger";
 import { useSheetRolls } from "@/features/character/character-sheet/ui/beyond/layout/sheet-rolls";
 import { cn } from "@/shared/lib/utils";
 
@@ -158,6 +159,8 @@ export function BeyondLeftColumn({
           </ul>
         )}
       </BeyondPanel>
+
+      <CombatPassivesTrigger notes={character.classCombatNotes ?? []} />
 
       <BeyondPanel title="Sentidos" icon={EyeIcon}>
         <ul className="space-y-1.5 text-sm">

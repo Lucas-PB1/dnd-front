@@ -6,13 +6,12 @@ import { useState } from "react";
 import {
   type BattleMasterManeuver,
   type FighterTableActionResult,
-  type PsiWarriorActionSlug,
   castDungeonPrecaution,
   executeBattleMasterManeuver,
-  executePsiWarriorAction,
   sessionKeys,
 } from "@/features/character/character-sheet/api/character-session.api";
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
+import { FeatureDetailTrigger } from "@/features/character/character-sheet/ui/sheet/feature-detail-dialog";
 import { Button } from "@/shared/ui/button";
 import { SearchableSelect } from "@/shared/ui/searchable-select";
 
@@ -23,35 +22,6 @@ type FighterSubclassActionsProps = {
   maneuvers?: BattleMasterManeuver[];
   onResult: (result: FighterTableActionResult) => void;
 };
-
-const PSI_ACTIONS: Array<{
-  slug: PsiWarriorActionSlug;
-  name: string;
-  level: number;
-}> = [
-  { slug: "protective-field", name: "Campo Protetor", level: 3 },
-  {
-    slug: "telekinetic-movement",
-    name: "Movimento Telecinético",
-    level: 3,
-  },
-  {
-    slug: "psychic-leap",
-    name: "Salto Psíquico",
-    level: 7,
-  },
-  { slug: "mental-guard", name: "Resguardo Mental", level: 10 },
-  {
-    slug: "energy-bulwark",
-    name: "Baluarte de Energia",
-    level: 15,
-  },
-  {
-    slug: "telekinetic-master",
-    name: "Mestre Telecinético",
-    level: 18,
-  },
-];
 
 const PRECAUTION_SPELLS = [
   ["alarme", "Alarme"],
@@ -75,7 +45,6 @@ export function FighterSubclassActions({
   );
   const queryClient = useQueryClient();
   const [useRelentless, setUseRelentless] = useState(false);
-  const [repeatWithPsi, setRepeatWithPsi] = useState(false);
   const [precautionSpell, setPrecautionSpell] = useState<string>(
     PRECAUTION_SPELLS[0][0],
   );
@@ -102,22 +71,6 @@ export function FighterSubclassActions({
     onSuccess: commitResult,
   });
 
-  const psiMutation = useMutation({
-    mutationFn: async (actionSlug: PsiWarriorActionSlug) => {
-      try {
-        return await executePsiWarriorAction(
-          requireToken(),
-          characterId,
-          actionSlug,
-          repeatWithPsi,
-        );
-      } catch (error) {
-        return handleUnauthorized(error);
-      }
-    },
-    onSuccess: commitResult,
-  });
-
   const precautionMutation = useMutation({
     mutationFn: async () => {
       try {
@@ -135,7 +88,7 @@ export function FighterSubclassActions({
 
   if (subclassSlug === "battle-master") {
     return (
-      <div className="mt-2">
+      <div className="mt-1">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-[0.58rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
             Manobras
@@ -154,17 +107,27 @@ export function FighterSubclassActions({
         </div>
         <div className="mt-1 flex flex-wrap gap-1.5">
           {maneuvers.map((maneuver) => (
-            <Button
+            <span
               key={maneuver.slug}
-              type="button"
-              size="xs"
-              variant="outline"
-              disabled={maneuverMutation.isPending}
-              title={maneuver.description}
-              onClick={() => maneuverMutation.mutate(maneuver.slug)}
+              className="inline-flex items-center gap-0.5"
             >
-              {maneuver.name}
-            </Button>
+              {maneuver.description ? (
+                <FeatureDetailTrigger
+                  title={maneuver.name}
+                  subtitle="Manobra · Mestre de Batalha"
+                  description={maneuver.description}
+                />
+              ) : null}
+              <Button
+                type="button"
+                size="xs"
+                variant="outline"
+                disabled={maneuverMutation.isPending}
+                onClick={() => maneuverMutation.mutate(maneuver.slug)}
+              >
+                {maneuver.name}
+              </Button>
+            </span>
           ))}
         </div>
         <MutationError error={maneuverMutation.error} />
@@ -172,46 +135,9 @@ export function FighterSubclassActions({
     );
   }
 
-  if (subclassSlug === "psi-warrior") {
-    const available = PSI_ACTIONS.filter((action) => level >= action.level);
-    return (
-      <div className="mt-2">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-[0.58rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
-            Poderes psiônicos
-          </p>
-          <label className="text-[0.65rem] text-muted-foreground">
-            <input
-              className="mr-1 align-middle"
-              type="checkbox"
-              checked={repeatWithPsi}
-              onChange={(event) => setRepeatWithPsi(event.target.checked)}
-            />
-            repetir gastando dado psi
-          </label>
-        </div>
-        <div className="mt-1 flex flex-wrap gap-1.5">
-          {available.map((action) => (
-            <Button
-              key={action.slug}
-              type="button"
-              size="xs"
-              variant="outline"
-              disabled={psiMutation.isPending}
-              onClick={() => psiMutation.mutate(action.slug)}
-            >
-              {action.name}
-            </Button>
-          ))}
-        </div>
-        <MutationError error={psiMutation.error} />
-      </div>
-    );
-  }
-
   if (subclassSlug === "dungeoneer" && level >= 7) {
     return (
-      <div className="mt-2">
+      <div className="mt-1">
         <p className="text-[0.58rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
           Precauções na Masmorra
         </p>
