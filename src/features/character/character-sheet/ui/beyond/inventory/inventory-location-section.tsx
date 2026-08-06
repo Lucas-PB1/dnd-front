@@ -30,10 +30,13 @@ type InventoryLocationSectionProps = {
   isPending: boolean;
   attunementSlotsFull: boolean;
   equipmentWarnings: EquipmentWarning[];
+  weaponOptions?: { value: string; label: string }[];
   onToggleLocation: (item: InventoryItem) => void;
   onToggleAttunement: (item: InventoryItem) => void;
   onPatch: (slug: string, payload: PatchInventoryItemPayload) => void;
   onRemove: (slug: string) => void;
+  onAttachCharm?: (weaponSlug: string, charmSlug: string) => void;
+  onDetachCharm?: (weaponSlug: string) => void;
 };
 
 export function InventoryLocationSection({
@@ -45,10 +48,13 @@ export function InventoryLocationSection({
   isPending,
   attunementSlotsFull,
   equipmentWarnings,
+  weaponOptions = [],
   onToggleLocation,
   onToggleAttunement,
   onPatch,
   onRemove,
+  onAttachCharm,
+  onDetachCharm,
 }: InventoryLocationSectionProps) {
   const tiles = useMemo((): DetailTileItem[] => {
     return items.map((item) => {
@@ -68,10 +74,13 @@ export function InventoryLocationSection({
             isPending={isPending}
             attunementSlotsFull={attunementSlotsFull}
             warnings={warnings}
+            weaponOptions={weaponOptions}
             onToggleLocation={onToggleLocation}
             onToggleAttunement={onToggleAttunement}
             onPatch={onPatch}
             onRemove={onRemove}
+            onAttachCharm={onAttachCharm}
+            onDetachCharm={onDetachCharm}
           />
         ),
       };
@@ -81,10 +90,13 @@ export function InventoryLocationSection({
     equipmentWarnings,
     isPending,
     items,
+    onAttachCharm,
+    onDetachCharm,
     onPatch,
     onRemove,
     onToggleAttunement,
     onToggleLocation,
+    weaponOptions,
   ]);
 
   return (

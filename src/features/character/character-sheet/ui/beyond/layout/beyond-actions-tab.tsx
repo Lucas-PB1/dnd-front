@@ -338,6 +338,9 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
                   {
                     tableAction: action.tableAction,
                     usePsiDie: plan.usePsiDie,
+                    resourceSlug: action.resourceSlug,
+                    spendAmount: action.spendAmount ?? 1,
+                    note: action.description ?? action.summary,
                   },
                   {
                     onSuccess: (result) => {

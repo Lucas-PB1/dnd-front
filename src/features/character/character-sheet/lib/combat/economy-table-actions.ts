@@ -12,7 +12,9 @@ export type EconomyTableAction =
   | "psi:psychic-leap"
   | "psi:mental-guard"
   | "psi:energy-bulwark"
-  | "psi:telekinetic-master";
+  | "psi:telekinetic-master"
+  /** Gasta `resourceSlug` da linha e devolve a description/summary como nota. */
+  | "spend-resource";
 
 export type PsiTableActionSlug =
   | "protective-field"

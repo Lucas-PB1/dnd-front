@@ -42,10 +42,17 @@ export function planEconomyTableUse(input: {
   }
 
   if (action.alwaysSpendsResource) {
+    const amount = action.spendAmount ?? 1;
+    const isPsi =
+      action.tableAction != null && isPsiTableAction(action.tableAction);
     return {
-      canUse: poolLeft > 0,
+      canUse: poolLeft >= amount,
       usePsiDie: true,
-      buttonLabel: "Usar (1 dado)",
+      buttonLabel: isPsi
+        ? "Usar (1 dado)"
+        : amount > 1
+          ? `Usar (${amount})`
+          : "Usar",
       counterSlug: poolSlug,
     };
   }

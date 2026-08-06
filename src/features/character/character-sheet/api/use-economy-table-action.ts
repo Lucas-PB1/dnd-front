@@ -8,6 +8,7 @@ import {
   applyTacticalMind,
   executePsiWarriorAction,
   sessionKeys,
+  spendClassResource,
   type PsiWarriorActionSlug,
 } from "@/features/character/character-sheet/api/character-session.api";
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
@@ -34,9 +35,15 @@ export function useEconomyTableAction(characterId: string) {
     mutationFn: async ({
       tableAction,
       usePsiDie = false,
+      resourceSlug,
+      spendAmount = 1,
+      note,
     }: {
       tableAction: EconomyTableAction;
       usePsiDie?: boolean;
+      resourceSlug?: string;
+      spendAmount?: number;
+      note?: string;
     }): Promise<EconomyTableActionResultNote> => {
       const token = requireToken();
       try {
@@ -71,6 +78,19 @@ export function useEconomyTableAction(characterId: string) {
           );
           queryClient.setQueryData(sessionKeys.state(characterId), result.state);
           return { note: result.note };
+        }
+        if (tableAction === "spend-resource") {
+          if (!resourceSlug) {
+            throw new Error("Recurso não definido para esta ação");
+          }
+          const result = await spendClassResource(token, characterId, {
+            resourceSlug,
+            amount: spendAmount,
+          });
+          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
+          return {
+            note: (note?.trim() || `Gastou ${spendAmount}× ${resourceSlug}`).trim(),
+          };
         }
         throw new Error(`Ação de mesa não suportada: ${tableAction}`);
       } catch (error) {

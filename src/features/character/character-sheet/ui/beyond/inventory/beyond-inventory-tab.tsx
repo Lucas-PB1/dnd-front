@@ -10,7 +10,9 @@ import type {
 import type { EquipmentWarning } from "@/entities/character/types";
 import {
   useAddInventoryItem,
+  useAttachWeaponCharm,
   useCharacterInventory,
+  useDetachWeaponCharm,
   usePatchInventoryItem,
   useRemoveInventoryItem,
 } from "@/features/character/character-sheet/api/use-character-inventory";
@@ -47,6 +49,8 @@ export function BeyondInventoryTab({
   const addItem = useAddInventoryItem(characterId);
   const patchItem = usePatchInventoryItem(characterId);
   const removeItem = useRemoveInventoryItem(characterId);
+  const attachCharm = useAttachWeaponCharm(characterId);
+  const detachCharm = useDetachWeaponCharm(characterId);
 
   const [addOpen, setAddOpen] = useState(false);
   const [selectedSlug, setSelectedSlug] = useState("");
@@ -57,7 +61,14 @@ export function BeyondInventoryTab({
   const backpack = items.filter((item) => item.location === "backpack");
   const attunedCount = items.filter((item) => item.attuned).length;
   const attunementSlotsFull = attunedCount >= MAX_ATTUNED_ITEMS;
-  const isPending = patchItem.isPending || removeItem.isPending;
+  const isPending =
+    patchItem.isPending ||
+    removeItem.isPending ||
+    attachCharm.isPending ||
+    detachCharm.isPending;
+  const weaponOptions = items
+    .filter((item) => item.itemType === "weapon")
+    .map((item) => ({ value: item.itemSlug, label: item.itemName }));
 
   function resetAddForm() {
     setSelectedSlug("");
@@ -98,7 +109,12 @@ export function BeyondInventoryTab({
   }
 
   const mutationError =
-    addItem.error ?? patchItem.error ?? removeItem.error ?? inventory.error;
+    addItem.error ??
+    patchItem.error ??
+    removeItem.error ??
+    attachCharm.error ??
+    detachCharm.error ??
+    inventory.error;
 
   return (
     <div className="space-y-4">
@@ -165,10 +181,15 @@ export function BeyondInventoryTab({
             isPending={isPending}
             attunementSlotsFull={attunementSlotsFull}
             equipmentWarnings={equipmentWarnings}
+            weaponOptions={weaponOptions}
             onToggleLocation={toggleLocation}
             onToggleAttunement={toggleAttunement}
             onPatch={patchFields}
             onRemove={(slug) => removeItem.mutate(slug)}
+            onAttachCharm={(weaponSlug, charmSlug) =>
+              attachCharm.mutate({ weaponSlug, charmSlug })
+            }
+            onDetachCharm={(weaponSlug) => detachCharm.mutate(weaponSlug)}
           />
           <InventoryLocationSection
             id="backpack"
@@ -179,10 +200,15 @@ export function BeyondInventoryTab({
             isPending={isPending}
             attunementSlotsFull={attunementSlotsFull}
             equipmentWarnings={equipmentWarnings}
+            weaponOptions={weaponOptions}
             onToggleLocation={toggleLocation}
             onToggleAttunement={toggleAttunement}
             onPatch={patchFields}
             onRemove={(slug) => removeItem.mutate(slug)}
+            onAttachCharm={(weaponSlug, charmSlug) =>
+              attachCharm.mutate({ weaponSlug, charmSlug })
+            }
+            onDetachCharm={(weaponSlug) => detachCharm.mutate(weaponSlug)}
           />
         </div>
       )}

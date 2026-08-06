@@ -33,11 +33,18 @@ type InventoryItemDetailProps = {
   isPending: boolean;
   attunementSlotsFull: boolean;
   warnings: EquipmentWarning[];
+  weaponOptions?: { value: string; label: string }[];
   onToggleLocation: (item: InventoryItem) => void;
   onToggleAttunement: (item: InventoryItem) => void;
   onPatch: (slug: string, payload: PatchInventoryItemPayload) => void;
   onRemove: (slug: string) => void;
+  onAttachCharm?: (weaponSlug: string, charmSlug: string) => void;
+  onDetachCharm?: (weaponSlug: string) => void;
 };
+
+function isWeaponCharmSlug(slug: string): boolean {
+  return slug.startsWith("weapon-charm-");
+}
 
 /** Controles e avisos do item (usado no modal do tile). */
 export function InventoryItemDetail({
@@ -45,18 +52,29 @@ export function InventoryItemDetail({
   isPending,
   attunementSlotsFull,
   warnings,
+  weaponOptions = [],
   onToggleLocation,
   onToggleAttunement,
   onPatch,
   onRemove,
+  onAttachCharm,
+  onDetachCharm,
 }: InventoryItemDetailProps) {
   const [qtyDraft, setQtyDraft] = useState<string | null>(null);
+  const [attachWeaponSlug, setAttachWeaponSlug] = useState("");
   const qtyDisplay = qtyDraft ?? String(item.quantity);
   const qtyId = `qty-${item.itemSlug}`;
   const slotId = `slot-${item.itemSlug}`;
   const equipped = item.location === "equipped";
   const canAttune =
     item.requiresAttunement && (item.attuned || !attunementSlotsFull);
+  const showAttach =
+    isWeaponCharmSlug(item.itemSlug) &&
+    item.location === "backpack" &&
+    Boolean(onAttachCharm) &&
+    weaponOptions.length > 0;
+  const showDetach =
+    Boolean(item.attachedCharmSlug) && Boolean(onDetachCharm);
 
   function commitQuantity(nextRaw: number) {
     const next = Math.max(1, Math.trunc(nextRaw) || 1);
@@ -81,6 +99,12 @@ export function InventoryItemDetail({
           )}
         >
           Efeitos: {effectsLabel}
+        </p>
+      ) : null}
+
+      {item.attachedCharmName ? (
+        <p className="text-xs text-muted-foreground">
+          Encanto: {item.attachedCharmName}
         </p>
       ) : null}
 
@@ -148,6 +172,38 @@ export function InventoryItemDetail({
         ) : null}
       </div>
 
+      {showAttach ? (
+        <div className="flex flex-wrap items-end gap-2">
+          <label className="flex min-w-[10rem] flex-1 flex-col gap-1">
+            <span className="text-[0.65rem] font-medium tracking-wide text-muted-foreground uppercase">
+              Prender em
+            </span>
+            <SearchableSelect
+              id={`attach-${item.itemSlug}`}
+              aria-label={`Arma para ${item.itemName}`}
+              className="h-7 text-xs"
+              value={attachWeaponSlug}
+              disabled={isPending}
+              placeholder="Escolher arma…"
+              options={weaponOptions}
+              onValueChange={setAttachWeaponSlug}
+            />
+          </label>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            disabled={isPending || !attachWeaponSlug}
+            onClick={() => {
+              if (!attachWeaponSlug || !onAttachCharm) return;
+              onAttachCharm(attachWeaponSlug, item.itemSlug);
+            }}
+          >
+            Prender
+          </Button>
+        </div>
+      ) : null}
+
       <div className="flex flex-wrap items-center gap-2">
         {item.requiresAttunement ? (
           <Button
@@ -188,6 +244,17 @@ export function InventoryItemDetail({
           )}
           {equipped ? "Desequipar" : "Equipar"}
         </Button>
+        {showDetach ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={isPending}
+            onClick={() => onDetachCharm?.(item.itemSlug)}
+          >
+            Remover encanto
+          </Button>
+        ) : null}
         <Button
           type="button"
           variant="ghost"
@@ -222,11 +289,12 @@ export function inventoryItemTileMeta(item: InventoryItem): {
       : item.requiresAttunement
         ? "Exige sintonia"
         : null,
+    item.attachedCharmName ? `Encanto: ${item.attachedCharmName}` : null,
   ].filter(Boolean);
 
   return {
     badge: slotLabel ?? typeLabel,
     subtitle: parts.length > 0 ? parts.join(" · ") : typeLabel,
-    accent: equipped || item.attuned,
+    accent: equipped || item.attuned || Boolean(item.attachedCharmSlug),
   };
 }

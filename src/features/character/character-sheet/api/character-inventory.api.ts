@@ -64,3 +64,42 @@ export async function removeInventoryItem(
     { method: "DELETE" },
   );
 }
+
+export type AttachWeaponCharmPayload = {
+  weaponSlug: string;
+  charmSlug: string;
+};
+
+export type DetachWeaponCharmPayload = {
+  weaponSlug: string;
+};
+
+export async function attachWeaponCharm(
+  accessToken: string,
+  characterId: string,
+  payload: AttachWeaponCharmPayload,
+) {
+  return gameFetch<InventoryItem>(
+    `/characters/${characterId}/inventory/weapon-charm/attach`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
+export async function detachWeaponCharm(
+  accessToken: string,
+  characterId: string,
+  payload: DetachWeaponCharmPayload,
+) {
+  return gameFetch<InventoryItem>(
+    `/characters/${characterId}/inventory/weapon-charm/detach`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+  );
+}

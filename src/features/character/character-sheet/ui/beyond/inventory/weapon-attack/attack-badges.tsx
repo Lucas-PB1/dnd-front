@@ -46,6 +46,9 @@ export function AttackBadges({ attack }: { attack: WeaponAttackSummary }) {
       {attack.masteryActive && attack.masteryName ? (
         <SheetChip active>{attack.masteryName}</SheetChip>
       ) : null}
+      {attack.attachedCharmName ? (
+        <SheetChip active>{attack.attachedCharmName}</SheetChip>
+      ) : null}
       {attack.attackDisadvantage ? (
         <SheetChip className="border-destructive/40 bg-destructive/10 text-destructive">
           desvantagem

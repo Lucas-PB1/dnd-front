@@ -114,6 +114,8 @@ export type WeaponAttackSummary = {
   brutalStrikeDice?: string | null;
   sneakAttackEligible?: boolean;
   martialArtsDie?: string | null;
+  attachedCharmSlug?: string | null;
+  attachedCharmName?: string | null;
 };
 
 export type EquipmentWarning = {

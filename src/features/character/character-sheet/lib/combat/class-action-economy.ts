@@ -31,6 +31,8 @@ export type ClassEconomyAction = {
   description?: string;
   /** Se definido, a aba Ações mostra Usar com efeito de mesa. */
   tableAction?: EconomyTableAction;
+  /** Quantidade gasta por Usar quando tableAction é spend-resource (padrão 1). */
+  spendAmount?: number;
 };
 
 const FIGHTER: ClassEconomyAction[] = [
@@ -418,6 +420,20 @@ const BARD: ClassEconomyAction[] = [
     minLevel: 6,
     summary: "Conjurar Comando sem gastar espaço",
   },
+  {
+    id: "bard-virtuoso-skill",
+    name: "Habilidade de Virtuoso",
+    economy: "free",
+    classSlug: "bard",
+    subclassSlug: "college-of-masks",
+    minLevel: 6,
+    resourceSlug: "virtuoso-skill",
+    alwaysSpendsResource: true,
+    summary: "1×/turno: Teste d20 com Carisma",
+    description:
+      "Uma vez por turno, ao fazer um Teste d20, você pode fazê-lo com Carisma se ainda não usar. Gaste 1 uso (máx. = mod. de Carisma).",
+    tableAction: "spend-resource",
+  },
 ];
 
 const PALADIN: ClassEconomyAction[] = [
@@ -504,6 +520,17 @@ const RANGER: ClassEconomyAction[] = [
     minLevel: 15,
     summary: "Desvantagem no ataque e teleporte de 9 m",
   },
+  {
+    id: "ranger-beastborne-aspect",
+    name: "Aspecto Bestial (mesa)",
+    economy: "bonus",
+    classSlug: "ranger",
+    subclassSlug: "beastborne",
+    minLevel: 3,
+    summary: "Tracker de Aspecto Bestial (0–5) na mesa",
+    description:
+      "Ajuste o nível de Aspecto Bestial no painel do Guardião (+/− ou Uivo Feral). Benefícios acumulam: Carnificina, Velocidade, Frenesi, Pele, Retaliação. Zera no descanso longo (e após 1 min sem dano na mesa).",
+  },
 ];
 
 const CLERIC: ClassEconomyAction[] = [
@@ -546,6 +573,34 @@ const CLERIC: ClassEconomyAction[] = [
     resourceSlug: "channelDivinity",
     summary: "Após errar: +10 no ataque",
   },
+  {
+    id: "cleric-dragon-majesty",
+    name: "Majestade Dracônica",
+    economy: "action",
+    classSlug: "cleric",
+    subclassSlug: "dragon-domain",
+    minLevel: 3,
+    resourceSlug: "channelDivinity",
+    alwaysSpendsResource: true,
+    summary: "Canalizar: Enfeitiçar ou Amedrontar (9 m)",
+    description:
+      "Ação Mágica: apresente o Símbolo Sagrado e gaste Canalizar Divindade. Emanação de 9 m — Enfeitiçado ou Amedrontado (salvaguarda SAB, 1 min).",
+    tableAction: "spend-resource",
+  },
+  {
+    id: "cleric-legendary-aspect",
+    name: "Aspecto Lendário",
+    economy: "free",
+    classSlug: "cleric",
+    subclassSlug: "dragon-domain",
+    minLevel: 17,
+    resourceSlug: "legendary-aspect",
+    alwaysSpendsResource: true,
+    summary: "Ação lendária (Rasgar / Cauda / Asas)",
+    description:
+      "Gaste 1 uso para Rasgar, Golpe de Cauda ou Batida de Asas imediatamente após o turno de outra criatura. 3 usos/LR.",
+    tableAction: "spend-resource",
+  },
 ];
 
 const DRUID: ClassEconomyAction[] = [
@@ -577,6 +632,34 @@ const DRUID: ClassEconomyAction[] = [
     resourceSlug: "wildShape",
     summary: "Aura de tempestade",
   },
+  {
+    id: "druid-city-shape",
+    name: "Forma da Cidade",
+    economy: "bonus",
+    classSlug: "druid",
+    subclassSlug: "circle-of-the-city",
+    minLevel: 3,
+    resourceSlug: "wildShape",
+    alwaysSpendsResource: true,
+    summary: "Gaste Forma Selvagem: Fundir-se / Passagem / Moldar Rocha",
+    description:
+      "Gaste 1 uso de Forma Selvagem para conjurar Fundir-se na Pedra, Passagem ou Moldar Rocha sem espaço de magia (mesa).",
+    tableAction: "spend-resource",
+  },
+  {
+    id: "druid-wall-warp",
+    name: "Distorção de Muro",
+    economy: "reaction",
+    classSlug: "druid",
+    subclassSlug: "circle-of-the-city",
+    minLevel: 10,
+    resourceSlug: "wall-warp",
+    alwaysSpendsResource: true,
+    summary: "Painel de Muralha de Pedra (1×/LR)",
+    description:
+      "Reação: ao ver um ataque causar dano a até 18 m, gaste o uso para erguer um painel 3×3 m (CA 15, 30 PV) até o fim do seu próximo turno.",
+    tableAction: "spend-resource",
+  },
 ];
 
 const SORCERER: ClassEconomyAction[] = [
@@ -605,6 +688,36 @@ const SORCERER: ClassEconomyAction[] = [
     subclassSlug: "draconic",
     minLevel: 14,
     summary: "Deslocamento de voo",
+  },
+  {
+    id: "sorcerer-heroic-soul",
+    name: "Alma Heróica",
+    economy: "free",
+    classSlug: "sorcerer",
+    subclassSlug: "heroic-sorcery",
+    minLevel: 3,
+    resourceSlug: "sorceryPoints",
+    alwaysSpendsResource: true,
+    spendAmount: 1,
+    summary: "Início do turno: 1 SP → PV temp. 1d6 + nível",
+    description:
+      "No início de cada um dos seus turnos, gaste 1 Ponto de Feitiçaria para ganhar PV temporários iguais a 1d6 + seu nível de Feiticeiro (sem ação).",
+    tableAction: "spend-resource",
+  },
+  {
+    id: "sorcerer-mystical-maneuver",
+    name: "Manobra Mística",
+    economy: "bonus",
+    classSlug: "sorcerer",
+    subclassSlug: "heroic-sorcery",
+    minLevel: 14,
+    resourceSlug: "sorceryPoints",
+    alwaysSpendsResource: true,
+    spendAmount: 2,
+    summary: "2 SP após acertar: Cegar / Ruinoso / Ferimento +2d8",
+    description:
+      "Ao acertar com arma ou Ataque Desarmado, gaste 2 Pontos de Feitiçaria como Ação Bônus: +2d8 no dano e Cegar, −3 CA ou ferimento sangrando (mesa).",
+    tableAction: "spend-resource",
   },
 ];
 
@@ -649,6 +762,62 @@ const WIZARD: ClassEconomyAction[] = [
     minLevel: 3,
     summary: "Conjurar ilusões como Ação Bônus (sem componente V)",
   },
+  {
+    id: "wizard-mm-free",
+    name: "Mísseis Mágicos Gratuitos",
+    economy: "action",
+    classSlug: "wizard",
+    subclassSlug: "magic-missile-mage",
+    minLevel: 3,
+    resourceSlug: "magic-missile-free",
+    alwaysSpendsResource: true,
+    summary: "Conjure Mísseis sem espaço (gasta 1 uso)",
+    description:
+      "Gaste 1 uso para conjurar Mísseis Mágicos sem espaço de magia. Aplique dardos extras e penetração na mesa.",
+    tableAction: "spend-resource",
+  },
+  {
+    id: "wizard-missile-shield",
+    name: "Escudo de Mísseis",
+    economy: "action",
+    classSlug: "wizard",
+    subclassSlug: "magic-missile-mage",
+    minLevel: 10,
+    resourceSlug: "missile-shield",
+    alwaysSpendsResource: true,
+    summary: "Orbitar dardos (+CA) por até 1 min",
+    description:
+      "Ao conjurar Mísseis Mágicos, gaste o uso para orbitar os dardos (+CA até +5, Emanação 3 m, até 1 min).",
+    tableAction: "spend-resource",
+  },
+  {
+    id: "wizard-giga-missile",
+    name: "Giga-Míssil",
+    economy: "free",
+    classSlug: "wizard",
+    subclassSlug: "magic-missile-mage",
+    minLevel: 14,
+    resourceSlug: "giga-missile",
+    alwaysSpendsResource: true,
+    summary: "+mod. INT de Força por dardo",
+    description:
+      "Ao conjurar Mísseis Mágicos, gaste o uso para adicionar seu modificador de Inteligência (mín. 1) de dano de Força a cada dardo.",
+    tableAction: "spend-resource",
+  },
+];
+
+const GUNSLINGER: ClassEconomyAction[] = [
+  {
+    id: "gunslinger-bullet-time",
+    name: "Tempo Bala",
+    economy: "free",
+    classSlug: "gunslinger",
+    subclassSlug: "pistolero",
+    minLevel: 14,
+    summary: "1×/turno: Vantagem em um ataque à distância com arma",
+    description:
+      "Uma vez em cada um dos seus turnos, ao fazer um ataque à distância com arma, você pode ter Vantagem na jogada (mesa).",
+  },
 ];
 
 /** Catálogo completo — ordem estável por classe. */
@@ -665,6 +834,7 @@ export const CLASS_ECONOMY_ACTIONS: readonly ClassEconomyAction[] = [
   ...SORCERER,
   ...WARLOCK,
   ...WIZARD,
+  ...GUNSLINGER,
 ];
 
 export type ResolveClassEconomyInput = {

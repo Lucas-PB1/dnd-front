@@ -422,19 +422,21 @@ export type RangerTableActionSlug =
   | "natures-veil"
   | "fey-reinforcements"
   | "misty-wanderer"
-  | "primal-companion";
+  | "primal-companion"
+  | "set-bestial-aspect"
+  | "feral-howl";
 
 export async function executeRangerTableAction(
   accessToken: string,
   characterId: string,
-  actionSlug: RangerTableActionSlug,
+  payload: { actionSlug: RangerTableActionSlug; level?: number },
 ) {
   return gameFetch<FighterTableActionResult>(
     `/characters/${characterId}/ranger/table-action`,
     accessToken,
     {
       method: "POST",
-      body: JSON.stringify({ actionSlug }),
+      body: JSON.stringify(payload),
     },
   );
 }
@@ -476,19 +478,20 @@ export type BardTableActionSlug =
   | "agile-response"
   | "unarmed-dance"
   | "combat-inspiration"
-  | "superior-inspiration";
+  | "superior-inspiration"
+  | "set-persona-masks";
 
 export async function executeBardTableAction(
   accessToken: string,
   characterId: string,
-  actionSlug: BardTableActionSlug,
+  payload: { actionSlug: BardTableActionSlug; masks?: string[] },
 ) {
   return gameFetch<TableActionResult>(
     `/characters/${characterId}/bard/table-action`,
     accessToken,
     {
       method: "POST",
-      body: JSON.stringify({ actionSlug }),
+      body: JSON.stringify(payload),
     },
   );
 }

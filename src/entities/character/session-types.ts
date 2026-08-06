@@ -30,6 +30,8 @@ export type CharacterState = {
   firearmChambers?: Record<string, number>;
   rageActive?: boolean;
   recklessActive?: boolean;
+  personaMasks?: string[];
+  bestialAspectLevel?: number;
 };
 
 export type ResourceDieRoll = {
@@ -119,6 +121,8 @@ export type InventoryItem = {
   effectsActive: boolean;
   effectsStatus: "active" | "inactive_unequipped" | "inactive_unattuned";
   weightKg: number;
+  attachedCharmSlug?: string | null;
+  attachedCharmName?: string | null;
 };
 
 export type InventoryEncumbrance = {

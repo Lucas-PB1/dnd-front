@@ -8,6 +8,8 @@ import type {
 } from "@/entities/character/session-types";
 import {
   addInventoryItem,
+  attachWeaponCharm,
+  detachWeaponCharm,
   fetchCharacterInventory,
   inventoryKeys,
   patchInventoryItem,
@@ -17,7 +19,9 @@ import { charactersKeys } from "@/features/character/characters/api/characters.a
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
 
 export function useCharacterInventory(characterId: string) {
-  const { accessToken, handleUnauthorized } = useGameAuth(`/characters/${characterId}`);
+  const { accessToken, handleUnauthorized } = useGameAuth(
+    `/characters/${characterId}`,
+  );
 
   return useQuery({
     queryKey: inventoryKeys.list(characterId),
@@ -48,7 +52,9 @@ function useInvalidateInventory(characterId: string) {
 }
 
 export function useAddInventoryItem(characterId: string) {
-  const { requireToken, handleUnauthorized } = useGameAuth(`/characters/${characterId}`);
+  const { requireToken, handleUnauthorized } = useGameAuth(
+    `/characters/${characterId}`,
+  );
   const invalidate = useInvalidateInventory(characterId);
 
   return useMutation({
@@ -64,7 +70,9 @@ export function useAddInventoryItem(characterId: string) {
 }
 
 export function usePatchInventoryItem(characterId: string) {
-  const { requireToken, handleUnauthorized } = useGameAuth(`/characters/${characterId}`);
+  const { requireToken, handleUnauthorized } = useGameAuth(
+    `/characters/${characterId}`,
+  );
   const invalidate = useInvalidateInventory(characterId);
 
   return useMutation({
@@ -91,13 +99,56 @@ export function usePatchInventoryItem(characterId: string) {
 }
 
 export function useRemoveInventoryItem(characterId: string) {
-  const { requireToken, handleUnauthorized } = useGameAuth(`/characters/${characterId}`);
+  const { requireToken, handleUnauthorized } = useGameAuth(
+    `/characters/${characterId}`,
+  );
   const invalidate = useInvalidateInventory(characterId);
 
   return useMutation({
     mutationFn: async (itemSlug: string) => {
       try {
         await removeInventoryItem(requireToken(), characterId, itemSlug);
+      } catch (error) {
+        return handleUnauthorized(error);
+      }
+    },
+    onSuccess: invalidate,
+  });
+}
+
+export function useAttachWeaponCharm(characterId: string) {
+  const { requireToken, handleUnauthorized } = useGameAuth(
+    `/characters/${characterId}`,
+  );
+  const invalidate = useInvalidateInventory(characterId);
+
+  return useMutation({
+    mutationFn: async (payload: {
+      weaponSlug: string;
+      charmSlug: string;
+    }) => {
+      try {
+        return await attachWeaponCharm(requireToken(), characterId, payload);
+      } catch (error) {
+        return handleUnauthorized(error);
+      }
+    },
+    onSuccess: invalidate,
+  });
+}
+
+export function useDetachWeaponCharm(characterId: string) {
+  const { requireToken, handleUnauthorized } = useGameAuth(
+    `/characters/${characterId}`,
+  );
+  const invalidate = useInvalidateInventory(characterId);
+
+  return useMutation({
+    mutationFn: async (weaponSlug: string) => {
+      try {
+        return await detachWeaponCharm(requireToken(), characterId, {
+          weaponSlug,
+        });
       } catch (error) {
         return handleUnauthorized(error);
       }

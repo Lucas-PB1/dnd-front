@@ -3,7 +3,7 @@
  * O painel genérico "Recursos de Classe" não deve listá-los (evita gastar sem contexto).
  */
 const MANAGED_BY_CLASS_PANEL: Readonly<Record<string, readonly string[]>> = {
-  bard: ["bardicInspiration", "bardic-inspiration"],
+  bard: ["bardicInspiration", "bardic-inspiration", "virtuoso-skill"],
   fighter: ["secondWind", "actionSurge", "indomitable"],
   cleric: [
     "channelDivinity",
@@ -11,10 +11,11 @@ const MANAGED_BY_CLASS_PANEL: Readonly<Record<string, readonly string[]>> = {
     "warding-flare",
     "corona-of-light",
     "war-priest",
+    "legendary-aspect",
   ],
   sorcerer: ["sorceryPoints", "sorcery-points"],
   warlock: ["healing-light", "dark-ones-own-luck"],
-  druid: ["wildShape", "wild-shape"],
+  druid: ["wildShape", "wild-shape", "wall-warp"],
   ranger: [
     "favoredEnemy",
     "tireless",
@@ -27,7 +28,7 @@ const MANAGED_BY_CLASS_PANEL: Readonly<Record<string, readonly string[]>> = {
   monk: ["focusPoints"],
   barbarian: ["rage"],
   rogue: ["strokeOfLuck", "soulknife-psi-dice"],
-  wizard: [],
+  wizard: ["magic-missile-free", "missile-shield", "giga-missile"],
   gunslinger: [],
 };
 
