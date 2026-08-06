@@ -7,7 +7,7 @@ export default function SubclassesPage() {
   return (
     <CatalogShell
       title="Subclasses"
-      description="Arquétipos de cada classe — tagline, resumo e características por nível."
+      description="Arquétipos de cada classe (PHB e Valdas) — tagline, resumo e características por nível."
       backHref="/compendium"
       backLabel="Compêndio"
     >

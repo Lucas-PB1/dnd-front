@@ -7,7 +7,7 @@ export default function ClassesPage() {
   return (
     <CatalogShell
       title="Classes"
-      description="Arquétipos do PHB 2024 — dado de vida, atributos e perícias."
+      description="Arquétipos do PHB 2024 e Valdas — dado de vida, atributos e perícias."
       backHref="/compendium"
       backLabel="Compêndio"
     >

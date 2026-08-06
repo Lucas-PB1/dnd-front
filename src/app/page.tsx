@@ -32,14 +32,14 @@ export default function Home() {
           <InkFlourish className="motion-enter motion-delay-1 mx-auto h-4 w-44 sm:w-56" />
         </div>
         <p className="motion-enter motion-delay-1 font-heading text-sm font-medium tracking-[0.2em] text-secondary uppercase">
-          Grimoire · PHB 2024
+          Grimoire · PHB 2024 · Valdas
         </p>
         <h1 className="motion-enter motion-delay-1 max-w-lg font-sans text-lg font-medium text-foreground/90 sm:text-xl">
           Fichas prontas para a mesa
         </h1>
         <p className="motion-enter motion-delay-2 max-w-md text-base text-muted-foreground">
-          Monte personagens PHB 2024, consulte o compêndio e jogue com a ficha
-          ao lado.
+          Monte personagens com PHB 2024 e Valdas, consulte o compêndio e jogue
+          com a ficha ao lado.
         </p>
         <div className="motion-enter motion-delay-3 flex flex-wrap items-center justify-center gap-3 pt-2">
           <Link

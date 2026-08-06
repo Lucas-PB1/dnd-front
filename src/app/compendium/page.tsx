@@ -5,7 +5,7 @@ export default function CompendiumPage() {
   return (
     <CatalogShell
       title="Compêndio"
-      description="O PHB 2024 na ponta dos dedos — classes, espécies, antecedentes, talentos, equipamento e magias."
+      description="PHB 2024 e Valdas Spire — classes, espécies, subclasses, talentos, equipamento e magias. Filtre as fontes no topo."
     >
       <CompendiumHub />
     </CatalogShell>

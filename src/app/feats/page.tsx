@@ -7,7 +7,7 @@ export default function FeatsPage() {
   return (
     <CatalogShell
       title="Talentos"
-      description="Origem, geral, estilo de luta e mais — pré-requisitos e benefícios do PHB 2024."
+      description="Origem, geral, estilo de luta e mais — pré-requisitos e benefícios (PHB e Valdas)."
       backHref="/compendium"
       backLabel="Compêndio"
     >
