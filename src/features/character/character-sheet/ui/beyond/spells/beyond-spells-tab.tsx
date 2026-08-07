@@ -7,9 +7,7 @@ import {
 } from "@heroicons/react/24/outline";
 
 import {
-  ABILITY_LABELS_PT,
   formatSkillBonus,
-  type AbilityScores,
   type CharacterDetail,
 } from "@/entities/character";
 import type { SpellSummary } from "@/entities/spell/types";
@@ -30,6 +28,7 @@ import {
   SheetEmptyHint,
   SheetSectionHeader,
 } from "@/features/character/character-sheet/ui/sheet/sheet-ui";
+import { useAbilityLabels } from "@/features/catalog/reference-catalog/api/use-ability-labels";
 import { useSpells } from "@/features/catalog/spell-catalog/api/use-spells";
 
 type BeyondSpellsTabProps = {
@@ -47,6 +46,7 @@ export function BeyondSpellsTab({
   onEdit,
   cannotCastSpellsInArmor = false,
 }: BeyondSpellsTabProps) {
+  const { labelOf } = useAbilityLabels();
   const stateQuery = useCharacterState(characterId);
   const patchState = usePatchCharacterState(characterId);
   const castSpell = useCastSpell(characterId);
@@ -183,11 +183,7 @@ export function BeyondSpellsTab({
               {character.spellcastingAbilitySlug ? (
                 <span>
                   {" "}
-                  (
-                  {ABILITY_LABELS_PT[
-                    character.spellcastingAbilitySlug as keyof AbilityScores
-                  ] ?? character.spellcastingAbilitySlug}
-                  )
+                  ({labelOf(character.spellcastingAbilitySlug)})
                 </span>
               ) : null}
             </span>

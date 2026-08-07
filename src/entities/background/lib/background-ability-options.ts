@@ -1,7 +1,4 @@
-import {
-  ABILITY_LABELS_PT,
-  type AbilityScores,
-} from "@/entities/character/types";
+import type { AbilityScores } from "@/entities/character/types";
 
 export type BackgroundAbilityBoostOption = {
   value: string;
@@ -17,10 +14,7 @@ export function buildBackgroundAbilityBoostOptions(
     .filter((slug): slug is string => !!slug?.trim())
     .map((slug, index) => ({
       value: slug,
-      label:
-        names?.[index]?.trim() ||
-        ABILITY_LABELS_PT[slug as keyof AbilityScores] ||
-        slug,
+      label: names?.[index]?.trim() || slug,
     }));
 }
 

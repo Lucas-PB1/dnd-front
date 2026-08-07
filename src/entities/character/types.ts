@@ -161,13 +161,4 @@ export type CreateCharacterPayload = {
 /** Payload para PATCH /characters/:id — espelha UpdateCharacterDto */
 export type UpdateCharacterPayload = Partial<CreateCharacterPayload>;
 
-export const ABILITY_LABELS_PT: Record<keyof AbilityScores, string> = {
-  forca: "Força",
-  destreza: "Destreza",
-  constituicao: "Constituição",
-  inteligencia: "Inteligência",
-  sabedoria: "Sabedoria",
-  carisma: "Carisma",
-};
-
 export { abilityModifier } from "@/entities/character/lib/ability";

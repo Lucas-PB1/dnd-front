@@ -1,16 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import type { CharacterState } from "@/entities/character/session-types";
-import {
-  executeRangerTableAction,
-  type RangerTableActionSlug,
-} from "@/features/character/character-sheet/api/character-session.api";
+import { executeRangerTableAction } from "@/features/character/character-sheet/api/character-session.api";
 import { useTableActionMutation } from "@/features/character/character-sheet/api/use-table-action-mutation";
-import { CombatClassPanelShell } from "@/features/character/character-sheet/ui/beyond/combat/combat-class-panel-shell";
-import { CombatResourceSummary } from "@/features/character/character-sheet/ui/beyond/combat/combat-resource-summary";
-import { TableActionFeedback } from "@/features/character/character-sheet/ui/beyond/combat/table-action-feedback";
+import { useCombatMechanicalCatalog } from "@/features/catalog/reference-catalog/api/use-reference";
+import { resolvePanelActions } from "@/features/character/character-sheet/lib/combat/resolve-panel-actions";
+import { CombatClassPanelShell } from "../shared/class-panel-shell";
+import { CombatPanelActionButtons } from "../shared/panel-action-buttons";
+import { CombatResourceSummary } from "../shared/resource-summary";
+import { TableActionFeedback } from "../shared/table-action-feedback";
 import { Button } from "@/shared/ui/button";
 
 type CombatRangerPanelProps = {
@@ -21,55 +21,6 @@ type CombatRangerPanelProps = {
   combatNotes?: string[];
   state: CharacterState | undefined;
 };
-
-type RangerAction = {
-  slug: RangerTableActionSlug;
-  label: string;
-  minLevel: number;
-  subclass?: string;
-  resourceSlug?: string;
-};
-
-const RANGER_ACTIONS: readonly RangerAction[] = [
-  {
-    slug: "hunters-mark-free",
-    label: "Marca do Predador (gratuita)",
-    minLevel: 1,
-    resourceSlug: "favoredEnemy",
-  },
-  {
-    slug: "tireless",
-    label: "Incansável",
-    minLevel: 10,
-    resourceSlug: "tireless",
-  },
-  {
-    slug: "natures-veil",
-    label: "Véu da Natureza",
-    minLevel: 14,
-    resourceSlug: "naturesVeil",
-  },
-  {
-    slug: "fey-reinforcements",
-    label: "Reforços Feéricos",
-    minLevel: 11,
-    subclass: "fey-wanderer",
-    resourceSlug: "fey-reinforcements",
-  },
-  {
-    slug: "misty-wanderer",
-    label: "Andarilho Nebuloso",
-    minLevel: 15,
-    subclass: "fey-wanderer",
-    resourceSlug: "misty-wanderer",
-  },
-  {
-    slug: "primal-companion",
-    label: "Companheiro Primal",
-    minLevel: 3,
-    subclass: "beast-master",
-  },
-];
 
 function clampAspect(n: number): number {
   return Math.min(5, Math.max(0, Math.trunc(n)));
@@ -84,6 +35,30 @@ export function CombatRangerPanel({
   state,
 }: CombatRangerPanelProps) {
   const action = useTableActionMutation(characterId, executeRangerTableAction);
+  const mechanicalCatalog = useCombatMechanicalCatalog();
+  const panelCatalog = mechanicalCatalog.data?.panelActions ?? [];
+
+  const baseActions = useMemo(
+    () =>
+      resolvePanelActions(panelCatalog, {
+        classSlug: "ranger",
+        level,
+        subclassSlug,
+        section: "base",
+      }),
+    [panelCatalog, level, subclassSlug],
+  );
+  const subclassActions = useMemo(
+    () =>
+      resolvePanelActions(panelCatalog, {
+        classSlug: "ranger",
+        level,
+        subclassSlug,
+        section: "subclass",
+      }),
+    [panelCatalog, level, subclassSlug],
+  );
+
   const isBeastborne = subclassSlug === "beastborne" && level >= 3;
   const aspectLevel = state?.bestialAspectLevel ?? 0;
   const [draftAspect, setDraftAspect] = useState(aspectLevel);
@@ -95,14 +70,10 @@ export function CombatRangerPanel({
   if (classSlug !== "ranger") return null;
 
   const resources = state?.classResources ?? [];
-  const available = RANGER_ACTIONS.filter(
-    (item) =>
-      level >= item.minLevel &&
-      (!item.subclass || item.subclass === subclassSlug),
-  );
 
-  const baseActions = available.filter((item) => !item.subclass);
-  const subclassActions = available.filter((item) => item.subclass);
+  function getRemaining(slug: string): number | null {
+    return resources.find((entry) => entry.slug === slug)?.remaining ?? null;
+  }
 
   const beastborneContent = isBeastborne ? (
     <div className="space-y-2 rounded-md border border-border/60 p-2">
@@ -170,29 +141,12 @@ export function CombatRangerPanel({
         slugs={["favoredEnemy", "tireless", "naturesVeil", "dread-strike"]}
       />
 
-      <div className="flex flex-wrap gap-2">
-        {baseActions.map((item) => {
-          const resource = item.resourceSlug
-            ? resources.find((entry) => entry.slug === item.resourceSlug)
-            : undefined;
-          const remaining = resource?.remaining ?? null;
-          return (
-            <Button
-              key={item.slug}
-              type="button"
-              size="sm"
-              variant={item.resourceSlug ? "outline" : "ghost"}
-              disabled={
-                action.isPending || (remaining != null && remaining <= 0)
-              }
-              onClick={() => action.mutate({ actionSlug: item.slug })}
-            >
-              {item.label}
-              {remaining != null ? ` (${remaining})` : ""}
-            </Button>
-          );
-        })}
-      </div>
+      <CombatPanelActionButtons
+        actions={baseActions}
+        getRemaining={getRemaining}
+        isPending={action.isPending}
+        onAction={(slug) => action.mutate({ actionSlug: slug as never })}
+      />
 
       <TableActionFeedback
         lastResultNote={action.lastResult?.note}
@@ -205,31 +159,12 @@ export function CombatRangerPanel({
     subclassActions.length > 0 || beastborneContent ? (
       <div className="space-y-2">
         {beastborneContent}
-        {subclassActions.length > 0 ? (
-          <div className="flex flex-wrap gap-2">
-            {subclassActions.map((item) => {
-              const resource = item.resourceSlug
-                ? resources.find((entry) => entry.slug === item.resourceSlug)
-                : undefined;
-              const remaining = resource?.remaining ?? null;
-              return (
-                <Button
-                  key={item.slug}
-                  type="button"
-                  size="sm"
-                  variant={item.resourceSlug ? "outline" : "ghost"}
-                  disabled={
-                    action.isPending || (remaining != null && remaining <= 0)
-                  }
-                  onClick={() => action.mutate({ actionSlug: item.slug })}
-                >
-                  {item.label}
-                  {remaining != null ? ` (${remaining})` : ""}
-                </Button>
-              );
-            })}
-          </div>
-        ) : null}
+        <CombatPanelActionButtons
+          actions={subclassActions}
+          getRemaining={getRemaining}
+          isPending={action.isPending}
+          onAction={(slug) => action.mutate({ actionSlug: slug as never })}
+        />
 
         <TableActionFeedback
           lastResultNote={action.lastResult?.note}

@@ -3,7 +3,7 @@
 import { BookOpenIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 
-import { CombatNotesList } from "@/features/character/character-sheet/ui/beyond/combat/combat-notes-list";
+import { CombatNotesList } from "../shared/notes-list";
 import { FeatureDetailDialog } from "@/features/character/character-sheet/ui/sheet/feature-detail-dialog";
 import { cn } from "@/shared/lib/utils";
 

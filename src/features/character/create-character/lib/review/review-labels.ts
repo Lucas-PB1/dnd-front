@@ -3,9 +3,3 @@ export const SPELL_LIST_LABEL: Record<string, string> = {
   prepared: "Preparada",
   always_prepared: "Sempre preparada",
 };
-
-export const ABILITY_METHOD_LABEL: Record<string, string> = {
-  "point-buy": "Compra de pontos",
-  "standard-array": "Array padrão",
-  roll: "Rolagem",
-};

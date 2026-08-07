@@ -8,8 +8,8 @@ import {
   type RogueTableActionSlug,
 } from "@/features/character/character-sheet/api/character-session.api";
 import { useTableActionMutation } from "@/features/character/character-sheet/api/use-table-action-mutation";
-import { CombatClassPanelShell } from "@/features/character/character-sheet/ui/beyond/combat/combat-class-panel-shell";
-import { TableActionFeedback } from "@/features/character/character-sheet/ui/beyond/combat/table-action-feedback";
+import { CombatClassPanelShell } from "../shared/class-panel-shell";
+import { TableActionFeedback } from "../shared/table-action-feedback";
 import { useSheetRolls } from "@/features/character/character-sheet/ui/beyond/layout/sheet-rolls";
 import { Button } from "@/shared/ui/button";
 

@@ -44,12 +44,3 @@ export function BeyondPanel({
     </section>
   );
 }
-
-export const ABILITY_SHORT: Record<string, string> = {
-  forca: "FOR",
-  destreza: "DES",
-  constituicao: "CON",
-  inteligencia: "INT",
-  sabedoria: "SAB",
-  carisma: "CAR",
-};

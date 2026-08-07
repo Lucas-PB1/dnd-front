@@ -3,8 +3,11 @@
 import { useQuery } from "@tanstack/react-query";
 
 import {
+  fetchAbilities,
   fetchAbilityGenerationMethods,
   fetchAlignments,
+  fetchCharacterLevels,
+  fetchCombatMechanicalCatalog,
   fetchConditions,
   fetchFeats,
   fetchLanguages,
@@ -55,10 +58,34 @@ export function useConditions() {
   });
 }
 
+export function useAbilities() {
+  return useQuery({
+    queryKey: referenceKeys.abilities(),
+    queryFn: () => fetchAbilities(),
+    staleTime: CATALOG_DETAIL_STALE_MS,
+  });
+}
+
 export function useAbilityGenerationMethods() {
   return useQuery({
     queryKey: referenceKeys.abilityGenerationMethods(),
     queryFn: () => fetchAbilityGenerationMethods(),
+    staleTime: CATALOG_DETAIL_STALE_MS,
+  });
+}
+
+export function useCharacterLevels() {
+  return useQuery({
+    queryKey: referenceKeys.characterLevels(),
+    queryFn: () => fetchCharacterLevels(),
+    staleTime: CATALOG_DETAIL_STALE_MS,
+  });
+}
+
+export function useCombatMechanicalCatalog() {
+  return useQuery({
+    queryKey: referenceKeys.combatMechanicalCatalog(),
+    queryFn: () => fetchCombatMechanicalCatalog(),
     staleTime: CATALOG_DETAIL_STALE_MS,
   });
 }

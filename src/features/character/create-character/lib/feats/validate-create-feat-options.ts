@@ -4,6 +4,7 @@ import type {
 } from "@/entities/character/sheet-types";
 import { featInstanceKey } from "@/entities/character/lib/character-feat";
 import { fetchFeatOptions } from "@/features/catalog/feat-catalog/api/feats.api";
+import { fetchCharacterLevels } from "@/features/catalog/reference-catalog/api/reference.api";
 import { requiredFeatOptionDefsForInstance } from "@/features/character/create-character/lib/feats/feat-option-requirements";
 import { proficiencyBonusForLevel } from "@/features/character/create-character/lib/progression/proficiency-bonus-for-level";
 
@@ -13,7 +14,9 @@ export async function findIncompleteCreateFeatOptions(
   featNameBySlug: Record<string, string> = {},
   characterLevel = 1,
 ): Promise<string | null> {
-  const proficiencyBonus = proficiencyBonusForLevel(characterLevel);
+  const levelsResponse = await fetchCharacterLevels();
+  const catalog = levelsResponse.data ?? [];
+  const proficiencyBonus = proficiencyBonusForLevel(characterLevel, catalog);
 
   for (const feat of characterFeats) {
     const response = await fetchFeatOptions(feat.featSlug);

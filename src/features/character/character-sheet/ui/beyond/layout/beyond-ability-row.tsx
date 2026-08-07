@@ -9,26 +9,17 @@ import {
 } from "@heroicons/react/24/outline";
 import { useState, type ReactNode } from "react";
 
-import type {
-  AbilityScores,
-  CharacterDetail,
-} from "@/entities/character/types";
-import {
-  ABILITY_LABELS_PT,
-  abilityModifier,
-  sheetAbilityScores,
-} from "@/entities/character";
+import type { CharacterDetail } from "@/entities/character/types";
+import { abilityModifier, sheetAbilityScores } from "@/entities/character";
+import { useAbilityLabels } from "@/features/catalog/reference-catalog/api/use-ability-labels";
 import {
   useCharacterState,
   useTakeRest,
 } from "@/features/character/character-sheet/api/use-character-state";
 import { usePatchCharacter } from "@/features/character/character-sheet/api/use-patch-character";
-import { ABILITY_SHORT } from "@/features/character/character-sheet/ui/beyond/layout/beyond-panel";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { cn } from "@/shared/lib/utils";
-
-const ORDER = Object.keys(ABILITY_LABELS_PT) as (keyof AbilityScores)[];
 
 type BeyondCharacterStatsBarProps = {
   characterId: string;
@@ -81,6 +72,7 @@ export function BeyondCharacterStatsBar({
   character,
   onEditAbilities,
 }: BeyondCharacterStatsBarProps) {
+  const { labelOf, shortOf, orderedKeys } = useAbilityLabels();
   const stateQuery = useCharacterState(characterId);
   const patch = usePatchCharacter(characterId);
   const [delta, setDelta] = useState("");
@@ -121,16 +113,16 @@ export function BeyondCharacterStatsBar({
 
   return (
     <div className="grid grid-cols-3 items-stretch gap-1.5 sm:grid-cols-6 lg:grid-cols-9 lg:gap-1.5">
-      {ORDER.map((key) => (
+      {orderedKeys.map((key) => (
         <button
           key={key}
           type="button"
           onClick={onEditAbilities}
-          title={`Editar ${ABILITY_LABELS_PT[key]}`}
+          title={`Editar ${labelOf(key)}`}
           className="group h-full min-w-0 rounded-lg focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
         >
           <StatCell
-            label={ABILITY_SHORT[key]}
+            label={shortOf(key)}
             value={abilityModifier(scores[key])}
             detail={scores[key]}
           />

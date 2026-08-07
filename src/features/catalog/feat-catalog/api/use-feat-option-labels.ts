@@ -3,7 +3,6 @@
 import { useQueries } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
 
-import { ABILITY_LABELS_PT } from "@/entities/character/types";
 import type {
   CharacterFeat,
   FeatOption,
@@ -18,6 +17,7 @@ import {
   type FeatOptionLabelContext,
 } from "@/features/catalog/feat-catalog/lib/resolve-feat-option-label";
 import { useItems } from "@/features/catalog/item-catalog/api/use-items";
+import { useAbilityLabels } from "@/features/catalog/reference-catalog/api/use-ability-labels";
 import { useFeats } from "@/features/catalog/reference-catalog/api/use-reference";
 import { CATALOG_DETAIL_STALE_MS } from "@/shared/lib/catalog-query";
 
@@ -30,6 +30,7 @@ export function useFeatOptionLabels({
   characterFeats,
   labelContext,
 }: UseFeatOptionLabelsInput) {
+  const { labelOf } = useAbilityLabels();
   const slugs = useMemo(
     () => [...new Set(characterFeats.map((feat) => feat.featSlug))],
     [characterFeats],
@@ -76,11 +77,10 @@ export function useFeatOptionLabels({
       resolveSpell: labelContext.resolveSpell,
       resolveSkill: labelContext.resolveSkill,
       resolveItem: (slug) => itemLabels[slug] ?? slug,
-      resolveAbility: (slug) =>
-        ABILITY_LABELS_PT[slug as keyof typeof ABILITY_LABELS_PT] ?? slug,
+      resolveAbility: (slug) => labelOf(slug),
       resolveFeat: (slug) => featLabels[slug] ?? slug,
     }),
-    [labelContext, itemLabels, featLabels],
+    [labelContext, itemLabels, featLabels, labelOf],
   );
 
   const resolveFeatOption = useCallback(

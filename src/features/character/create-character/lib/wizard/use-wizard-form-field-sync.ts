@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useRef } from "react";
 import type { UseFormGetValues, UseFormSetValue } from "react-hook-form";
 
@@ -10,6 +12,7 @@ import {
   SUBCLASS_REQUIRED_FROM_LEVEL,
   type CreateCharacterInput,
 } from "@/features/character/create-character/model/create-character.schema";
+import { useCharacterLevels } from "@/features/catalog/reference-catalog/api/use-reference";
 
 type UseWizardFormFieldSyncParams = {
   level: number;
@@ -32,6 +35,8 @@ export function useWizardFormFieldSync({
   setValue,
   getValues,
 }: UseWizardFormFieldSyncParams) {
+  const levels = useCharacterLevels();
+  const levelCatalog = levels.data?.data;
   const prevClassSlugRef = useRef(classSlug);
   const prevSpeciesSlugRef = useRef(speciesSlug);
   const prevSubclassSlugRef = useRef(subclassSlug);
@@ -102,6 +107,10 @@ export function useWizardFormFieldSync({
       const keys = new Set(
         preview.map((f) => `${f.featSlug}:${f.instanceIndex}`),
       );
+      const catalog = levelCatalog ?? [];
+      const proficiencyBonus = catalog.length
+        ? proficiencyBonusForLevel(level, catalog)
+        : undefined;
       setValue(
         "featOptions",
         (getValues("featOptions") ?? []).filter((option) => {
@@ -110,9 +119,10 @@ export function useWizardFormFieldSync({
           }
           const slot = ritualSpellSlotIndex(option.optionKey);
           if (slot === null) return true;
-          return slot <= proficiencyBonusForLevel(level);
+          if (proficiencyBonus === undefined) return true;
+          return slot <= proficiencyBonus;
         }),
       );
     }
-  }, [level, classSlug, setValue, getValues, originFeatSlug]);
+  }, [level, classSlug, setValue, getValues, originFeatSlug, levelCatalog]);
 }

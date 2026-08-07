@@ -33,15 +33,18 @@ import {
 } from "@/features/character/create-character/lib/review/review-display";
 import { resolveCreateCharacterFeats } from "@/features/character/create-character/lib/feats/preview-create-character-feats";
 import type { CreateCharacterInput } from "@/features/character/create-character/model/create-character.schema";
-import { ABILITY_METHOD_LABEL } from "@/features/character/create-character/lib/review/review-labels";
 import { useFeatOptionLabels } from "@/features/catalog/feat-catalog/api/use-feat-option-labels";
-import { useFeats } from "@/features/catalog/reference-catalog/api/use-reference";
+import {
+  useAbilityGenerationMethods,
+  useFeats,
+} from "@/features/catalog/reference-catalog/api/use-reference";
 import { useSpeciesTraitChoices } from "@/features/catalog/species-catalog/api/use-species";
 import { useSpells } from "@/features/catalog/spell-catalog/api/use-spells";
 
 export function useStepReview(control: Control<CreateCharacterInput>) {
   const values = useWatch({ control }) as CreateCharacterInput;
   const featsQuery = useFeats();
+  const abilityMethods = useAbilityGenerationMethods();
   const epicBoonFeatSlugs = useMemo(
     () => epicBoonFeatSlugsFromCatalog(featsQuery.data?.data ?? []),
     [featsQuery.data?.data],
@@ -205,8 +208,9 @@ export function useStepReview(control: Control<CreateCharacterInput>) {
   );
 
   const methodLabel =
-    ABILITY_METHOD_LABEL[values.abilityGenerationMethodSlug] ??
-    values.abilityGenerationMethodSlug;
+    abilityMethods.data?.find(
+      (method) => method.slug === values.abilityGenerationMethodSlug,
+    )?.name ?? values.abilityGenerationMethodSlug;
 
   const classSkillChips = values.classSkillSlugs.map((slug) => ({
     key: `class-${slug}`,

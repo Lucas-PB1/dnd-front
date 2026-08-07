@@ -1,10 +1,14 @@
 import { catalogFetch } from "@/shared/api/dnd-api/api-client";
+import type { AbilitySummary } from "@/entities/ability/types";
 import type { AbilityGenerationMethod } from "@/entities/ability-generation-method/types";
 import type { AlignmentListResponse } from "@/entities/alignment/types";
+import type { CharacterLevel } from "@/entities/character-level/types";
+import type { CombatMechanicalCatalog } from "@/entities/combat-mechanical/types";
 import type { ConditionSummary } from "@/entities/condition/types";
 import type { FeatListResponse } from "@/entities/feat/types";
 import type { LanguageListResponse } from "@/entities/language/types";
 import type { SkillListResponse } from "@/entities/skill/types";
+import type { PaginatedResponse } from "@/shared/api/dnd-api/types";
 import { CATALOG_FETCH_INIT, buildCatalogSearchParams } from "@/shared/lib/catalog-query";
 
 export const referenceKeys = {
@@ -14,8 +18,12 @@ export const referenceKeys = {
   alignments: () => [...referenceKeys.all, "alignments"] as const,
   languages: () => [...referenceKeys.all, "languages"] as const,
   conditions: () => [...referenceKeys.all, "conditions"] as const,
+  abilities: () => [...referenceKeys.all, "abilities"] as const,
   abilityGenerationMethods: () =>
     [...referenceKeys.all, "ability-generation-methods"] as const,
+  characterLevels: () => [...referenceKeys.all, "character-levels"] as const,
+  combatMechanicalCatalog: () =>
+    [...referenceKeys.all, "combat-mechanical-catalog"] as const,
 };
 
 export async function fetchSkills(limit = 100) {
@@ -58,6 +66,27 @@ export async function fetchConditions() {
 export async function fetchAbilityGenerationMethods() {
   return catalogFetch<AbilityGenerationMethod[]>(
     `/ability-generation-methods`,
+    CATALOG_FETCH_INIT,
+  );
+}
+
+export async function fetchAbilities(limit = 20) {
+  return catalogFetch<PaginatedResponse<AbilitySummary>>(
+    `/abilities?limit=${limit}`,
+    CATALOG_FETCH_INIT,
+  );
+}
+
+export async function fetchCharacterLevels(limit = 20) {
+  return catalogFetch<PaginatedResponse<CharacterLevel>>(
+    `/character-levels?limit=${limit}`,
+    CATALOG_FETCH_INIT,
+  );
+}
+
+export async function fetchCombatMechanicalCatalog() {
+  return catalogFetch<CombatMechanicalCatalog>(
+    `/combat-mechanical-catalog`,
     CATALOG_FETCH_INIT,
   );
 }

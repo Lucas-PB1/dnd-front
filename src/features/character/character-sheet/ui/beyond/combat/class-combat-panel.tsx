@@ -2,19 +2,19 @@
 
 import type { CharacterDetail } from "@/entities/character/types";
 import type { CharacterState } from "@/entities/character/session-types";
-import { CombatBarbarianPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-barbarian-panel";
-import { CombatBardPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-bard-panel";
-import { CombatClericPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-cleric-panel";
-import { CombatDruidPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-druid-panel";
-import { CombatFighterPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-fighter-panel";
-import { CombatManeuversPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-maneuvers-panel";
-import { CombatMonkPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-monk-panel";
-import { CombatPaladinPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-paladin-panel";
-import { CombatRangerPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-ranger-panel";
-import { CombatRoguePanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-rogue-panel";
-import { CombatSorcererPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-sorcerer-panel";
-import { CombatWarlockPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-warlock-panel";
-import { CombatWizardPanel } from "@/features/character/character-sheet/ui/beyond/combat/combat-wizard-panel";
+import { CombatBarbarianPanel } from "./panels/barbarian-panel";
+import { CombatBardPanel } from "./panels/bard-panel";
+import { CombatClericPanel } from "./panels/cleric-panel";
+import { CombatDruidPanel } from "./panels/druid-panel";
+import { CombatFighterPanel } from "./panels/fighter-panel";
+import { CombatManeuversPanel } from "./panels/maneuvers-panel";
+import { CombatMonkPanel } from "./panels/monk-panel";
+import { CombatPaladinPanel } from "./panels/paladin-panel";
+import { CombatRangerPanel } from "./panels/ranger-panel";
+import { CombatRoguePanel } from "./panels/rogue-panel";
+import { CombatSorcererPanel } from "./panels/sorcerer-panel";
+import { CombatWarlockPanel } from "./panels/warlock-panel";
+import { CombatWizardPanel } from "./panels/wizard-panel";
 
 type ClassCombatPanelProps = {
   characterId: string;

@@ -1,7 +1,7 @@
 "use client";
 
 import type { WeaponAttackSummary } from "@/entities/character/types";
-import { ABILITY_SHORT } from "@/features/character/character-sheet/ui/beyond/layout/beyond-panel";
+import { useAbilityLabels } from "@/features/catalog/reference-catalog/api/use-ability-labels";
 import { SheetChip } from "@/features/character/character-sheet/ui/sheet/sheet-ui";
 
 export function modeLabel(attack: WeaponAttackSummary): string {
@@ -16,10 +16,12 @@ export function modeLabel(attack: WeaponAttackSummary): string {
 }
 
 export function AttackBadges({ attack }: { attack: WeaponAttackSummary }) {
+  const { shortOf } = useAbilityLabels();
+
   return (
     <div className="mt-1.5 flex flex-wrap gap-1">
       <SheetChip active>
-        {ABILITY_SHORT[attack.abilitySlug] ?? attack.abilitySlug}
+        {shortOf(attack.abilitySlug)}
       </SheetChip>
       {!attack.proficient ? <SheetChip>sem prof.</SheetChip> : null}
       {attack.isFirearm ? <SheetChip active>arma de fogo</SheetChip> : null}

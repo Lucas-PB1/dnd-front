@@ -1,13 +1,17 @@
-import { ABILITY_LABELS_PT } from "@/entities/character/types";
+import type { AbilitySummary } from "@/entities/ability/types";
 import type { CatalogFilterField } from "@/shared/ui/catalog-filters";
 
-export const ABILITY_FILTER: CatalogFilterField = {
-  key: "ability",
-  label: "Atributo",
-  options: (
-    Object.entries(ABILITY_LABELS_PT) as [string, string][]
-  ).map(([value, label]) => ({ value, label })),
-};
+export function buildAbilityFilter(
+  abilities: readonly AbilitySummary[],
+): CatalogFilterField {
+  return {
+    key: "ability",
+    label: "Atributo",
+    options: [...abilities]
+      .sort((left, right) => left.sortOrder - right.sortOrder)
+      .map((ability) => ({ value: ability.slug, label: ability.name })),
+  };
+}
 
 export const RARE_FILTER: CatalogFilterField = {
   key: "rare",

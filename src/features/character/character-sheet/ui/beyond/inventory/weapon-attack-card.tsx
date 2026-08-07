@@ -8,6 +8,7 @@ import { formatSkillBonus } from "@/entities/character";
 import type { AdvantageMode } from "@/features/character/character-sheet/api/character-rolls.api";
 import { availableCunningStrikes as resolveCunningStrikes } from "@/features/character/character-sheet/lib/combat/available-cunning-strikes";
 import { buildWeaponDamagePayload } from "@/features/character/character-sheet/lib/combat/build-weapon-damage-payload";
+import { useCombatMechanicalCatalog } from "@/features/catalog/reference-catalog/api/use-reference";
 import { useSheetRolls } from "@/features/character/character-sheet/ui/beyond/layout/sheet-rolls";
 import {
   AttackBadges,
@@ -75,6 +76,7 @@ export function WeaponAttackCard({
   cleric,
 }: WeaponAttackCardProps) {
   const rolls = useSheetRolls();
+  const mechanicalCatalog = useCombatMechanicalCatalog();
   const busy = rolls.attack.isPending || rolls.damage.isPending;
   const [advantage, setAdvantage] = useState<AdvantageMode>(
     attack.attackDisadvantage ? "disadvantage" : "normal",
@@ -122,12 +124,13 @@ export function WeaponAttackCard({
     chamberRemaining ?? (hasChamber ? attack.reloadCapacity : null);
   const canSneakAttack = Boolean(rogue && attack.sneakAttackEligible);
   const maxCunningEffects = (rogue?.level ?? 0) >= 11 ? 2 : 1;
-  const availableCunningStrikes = rogue
-    ? resolveCunningStrikes({
-        level: rogue.level,
-        subclassSlug: rogue.subclassSlug,
-      })
-    : [];
+  const availableCunningStrikes =
+    rogue && mechanicalCatalog.data
+      ? resolveCunningStrikes(mechanicalCatalog.data.cunningStrikeEffects, {
+          level: rogue.level,
+          subclassSlug: rogue.subclassSlug,
+        })
+      : [];
 
   function toggleCunningStrike(slug: string) {
     setCunningStrikeEffects((current) => {

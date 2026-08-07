@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   type BattleMasterManeuver,
@@ -11,6 +11,7 @@ import {
   sessionKeys,
 } from "@/features/character/character-sheet/api/character-session.api";
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
+import { useCombatMechanicalCatalog } from "@/features/catalog/reference-catalog/api/use-reference";
 import { FeatureDetailTrigger } from "@/features/character/character-sheet/ui/sheet/feature-detail-dialog";
 import { Button } from "@/shared/ui/button";
 import { SearchableSelect } from "@/shared/ui/searchable-select";
@@ -23,16 +24,6 @@ type FighterSubclassActionsProps = {
   onResult: (result: FighterTableActionResult) => void;
 };
 
-const PRECAUTION_SPELLS = [
-  ["alarme", "Alarme"],
-  ["compreender-idiomas", "Compreender Idiomas"],
-  ["detectar-magia", "Detectar Magia"],
-  ["detectar-veneno-e-doenca", "Detectar Veneno e Doença"],
-  ["encontrar-armadilhas", "Encontrar Armadilhas"],
-  ["identificar", "Identificar"],
-  ["purificar-alimentos-e-bebidas", "Purificar Alimentos e Bebidas"],
-] as const;
-
 export function FighterSubclassActions({
   characterId,
   subclassSlug,
@@ -44,10 +35,16 @@ export function FighterSubclassActions({
     `/characters/${characterId}`,
   );
   const queryClient = useQueryClient();
+  const mechanicalCatalog = useCombatMechanicalCatalog();
+  const precautionSpells = mechanicalCatalog.data?.precautionSpells ?? [];
   const [useRelentless, setUseRelentless] = useState(false);
-  const [precautionSpell, setPrecautionSpell] = useState<string>(
-    PRECAUTION_SPELLS[0][0],
-  );
+  const [precautionSpell, setPrecautionSpell] = useState<string>("");
+
+  useEffect(() => {
+    if (!precautionSpell && precautionSpells.length > 0) {
+      setPrecautionSpell(precautionSpells[0].slug);
+    }
+  }, [precautionSpell, precautionSpells]);
 
   function commitResult(result: FighterTableActionResult | undefined) {
     if (!result) return;
@@ -145,9 +142,9 @@ export function FighterSubclassActions({
           <SearchableSelect
             className="min-w-44 text-xs"
             value={precautionSpell}
-            options={PRECAUTION_SPELLS.map(([slug, name]) => ({
-              value: slug,
-              label: name,
+            options={precautionSpells.map((spell) => ({
+              value: spell.slug,
+              label: spell.name,
             }))}
             onValueChange={setPrecautionSpell}
           />
@@ -155,7 +152,11 @@ export function FighterSubclassActions({
             type="button"
             size="xs"
             variant="outline"
-            disabled={precautionMutation.isPending}
+            disabled={
+              precautionMutation.isPending ||
+              !precautionSpell ||
+              precautionSpells.length === 0
+            }
             onClick={() => precautionMutation.mutate()}
           >
             Conjurar (1 uso)

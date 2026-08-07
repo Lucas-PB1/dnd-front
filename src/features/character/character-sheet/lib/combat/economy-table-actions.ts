@@ -1,31 +1,15 @@
 /**
  * Ações de mesa ligadas ao catálogo de economia (aba Ações → Usar).
- * IDs alinhados a class-action-economy.ts.
+ * IDs vêm de `economyActions[].tableAction` na API.
  */
 
-export type EconomyTableAction =
-  | "second-wind"
-  | "action-surge"
-  | "tactical-mind"
-  | "psi:protective-field"
-  | "psi:telekinetic-movement"
-  | "psi:psychic-leap"
-  | "psi:mental-guard"
-  | "psi:energy-bulwark"
-  | "psi:telekinetic-master"
-  /** Gasta `resourceSlug` da linha e devolve a description/summary como nota. */
-  | "spend-resource";
+/** Identificador de ação de mesa (string livre do catálogo). */
+export type EconomyTableAction = string;
 
-export type PsiTableActionSlug =
-  | "protective-field"
-  | "telekinetic-movement"
-  | "psychic-leap"
-  | "mental-guard"
-  | "energy-bulwark"
-  | "telekinetic-master";
+export type PsiTableActionSlug = string;
 
 export function isPsiTableAction(
-  action: EconomyTableAction,
+  action: string,
 ): action is `psi:${PsiTableActionSlug}` {
   return action.startsWith("psi:");
 }
@@ -33,5 +17,5 @@ export function isPsiTableAction(
 export function psiSlugFromTableAction(
   action: `psi:${PsiTableActionSlug}`,
 ): PsiTableActionSlug {
-  return action.slice(4) as PsiTableActionSlug;
+  return action.slice(4);
 }

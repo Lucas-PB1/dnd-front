@@ -19,7 +19,7 @@ import {
   useCharacterState,
   usePatchCharacterState,
 } from "@/features/character/character-sheet/api/use-character-state";
-import { CombatStatusEditor } from "@/features/character/character-sheet/ui/beyond/combat/combat-status-editor";
+import { CombatStatusEditor } from "@/features/character/character-sheet/ui/beyond/combat/status/status-editor";
 import { useSheetRolls } from "@/features/character/character-sheet/ui/beyond/layout/sheet-rolls";
 import { SheetChip } from "@/features/character/character-sheet/ui/sheet/sheet-ui";
 import { useConditions } from "@/features/catalog/reference-catalog/api/use-reference";

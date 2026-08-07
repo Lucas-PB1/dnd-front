@@ -3,10 +3,7 @@
 import {
   BACKGROUND_BOOST_MODE_PLUS1X3,
 } from "@/entities/character/lib/background-boost";
-import {
-  ABILITY_LABELS_PT,
-  abilityModifier,
-} from "@/entities/character/types";
+import { abilityModifier } from "@/entities/character/types";
 import { ABILITY_KEYS } from "@/features/character/create-character/lib/abilities/point-buy";
 import type { useStepReview } from "@/features/character/create-character/lib/review/use-step-review";
 import {
@@ -14,10 +11,12 @@ import {
   ReviewField,
 } from "@/features/character/create-character/ui/steps/review/review-ui";
 import { WizardFormSection } from "@/features/character/create-character/ui/wizard/wizard-form-section";
+import { useAbilityLabels } from "@/features/catalog/reference-catalog/api/use-ability-labels";
 
 type ReviewData = ReturnType<typeof useStepReview>;
 
 export function ReviewIdentitySection({ data }: { data: ReviewData }) {
+  const { labelOf } = useAbilityLabels();
   const {
     values,
     labels,
@@ -48,18 +47,11 @@ export function ReviewIdentitySection({ data }: { data: ReviewData }) {
         plus1Slugs.filter(Boolean).length === 3 ? (
           <ReviewField label="Bônus do antecedente">
             +1{" "}
-            {plus1Slugs
-              .map(
-                (slug) =>
-                  ABILITY_LABELS_PT[slug as keyof typeof ABILITY_LABELS_PT] ??
-                  slug,
-              )
-              .join(", ")}
+            {plus1Slugs.map((slug) => labelOf(slug)).join(", ")}
           </ReviewField>
         ) : plus2 && plus1 && plus2 !== plus1 ? (
           <ReviewField label="Bônus do antecedente">
-            +2 {ABILITY_LABELS_PT[plus2 as keyof typeof ABILITY_LABELS_PT]}, +1{" "}
-            {ABILITY_LABELS_PT[plus1 as keyof typeof ABILITY_LABELS_PT]}
+            +2 {labelOf(plus2)}, +1 {labelOf(plus1)}
           </ReviewField>
         ) : null}
       </dl>
@@ -68,6 +60,8 @@ export function ReviewIdentitySection({ data }: { data: ReviewData }) {
 }
 
 export function ReviewAbilitiesSection({ data }: { data: ReviewData }) {
+  const { labelOf } = useAbilityLabels();
+
   return (
     <WizardFormSection title="Atributos finais" compact>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
@@ -79,7 +73,7 @@ export function ReviewAbilitiesSection({ data }: { data: ReviewData }) {
               className="rounded-lg border border-border px-2 py-2 text-center"
             >
               <p className="text-[0.65rem] tracking-wide text-muted-foreground uppercase">
-                {ABILITY_LABELS_PT[key]}
+                {labelOf(key)}
               </p>
               <p className="font-heading text-xl font-semibold tabular-nums">
                 {score}

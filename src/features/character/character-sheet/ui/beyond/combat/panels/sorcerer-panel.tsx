@@ -1,14 +1,19 @@
 "use client";
 
+import { useMemo } from "react";
+
 import type { CharacterState } from "@/entities/character/session-types";
 import {
   executeSorcererTableAction,
   type SorcererTableActionSlug,
 } from "@/features/character/character-sheet/api/character-session.api";
 import { useTableActionMutation } from "@/features/character/character-sheet/api/use-table-action-mutation";
-import { CombatClassPanelShell } from "@/features/character/character-sheet/ui/beyond/combat/combat-class-panel-shell";
-import { CombatResourceSummary } from "@/features/character/character-sheet/ui/beyond/combat/combat-resource-summary";
-import { TableActionFeedback } from "@/features/character/character-sheet/ui/beyond/combat/table-action-feedback";
+import { useCombatMechanicalCatalog } from "@/features/catalog/reference-catalog/api/use-reference";
+import { resolvePanelActions } from "@/features/character/character-sheet/lib/combat/resolve-panel-actions";
+import { CombatClassPanelShell } from "../shared/class-panel-shell";
+import { CombatPanelActionButtons } from "../shared/panel-action-buttons";
+import { CombatResourceSummary } from "../shared/resource-summary";
+import { TableActionFeedback } from "../shared/table-action-feedback";
 import { Button } from "@/shared/ui/button";
 
 type CombatSorcererPanelProps = {
@@ -20,60 +25,9 @@ type CombatSorcererPanelProps = {
   state: CharacterState | undefined;
 };
 
-type SorcererAction = {
-  slug: SorcererTableActionSlug;
-  label: string;
-  minLevel: number;
-  subclass?: string;
-  resourceSlug?: string;
-};
-
-const METAMAGIC_ACTIONS: readonly SorcererAction[] = [
-  {
-    slug: "use-metamagic-1",
-    label: "Metamágica (1 pt)",
-    minLevel: 2,
-    resourceSlug: "sorceryPoints",
-  },
-  {
-    slug: "use-metamagic-2",
-    label: "Metamágica (2 pts)",
-    minLevel: 2,
-    resourceSlug: "sorceryPoints",
-  },
-  {
-    slug: "use-metamagic-3",
-    label: "Metamágica (3 pts)",
-    minLevel: 2,
-    resourceSlug: "sorceryPoints",
-  },
-];
-
-const SUBCLASS_ACTIONS: readonly SorcererAction[] = [
-  {
-    slug: "innate-sorcery",
-    label: "Ira Feiticeira",
-    minLevel: 1,
-  },
-  {
-    slug: "sorcerous-restoration",
-    label: "Restauração Feiticeira",
-    minLevel: 5,
-  },
-  {
-    slug: "tides-of-chaos",
-    label: "Maré de Caos",
-    minLevel: 3,
-    subclass: "wild-magic",
-  },
-  {
-    slug: "bastion-of-law",
-    label: "Baluarte da Ordem",
-    minLevel: 6,
-    subclass: "clockwork",
-    resourceSlug: "sorceryPoints",
-  },
-];
+function isSorceryPointsSlug(slug: string): boolean {
+  return slug === "sorceryPoints" || slug === "sorcery-points";
+}
 
 export function CombatSorcererPanel({
   characterId,
@@ -87,19 +41,42 @@ export function CombatSorcererPanel({
     characterId,
     executeSorcererTableAction,
   );
+  const mechanicalCatalog = useCombatMechanicalCatalog();
+  const panelCatalog = mechanicalCatalog.data?.panelActions ?? [];
+
+  const metamagicActions = useMemo(
+    () =>
+      resolvePanelActions(panelCatalog, {
+        classSlug: "sorcerer",
+        level,
+        subclassSlug,
+        section: "metamagic",
+      }),
+    [panelCatalog, level, subclassSlug],
+  );
+  const subclassActions = useMemo(
+    () =>
+      resolvePanelActions(panelCatalog, {
+        classSlug: "sorcerer",
+        level,
+        subclassSlug,
+        section: "subclass",
+      }),
+    [panelCatalog, level, subclassSlug],
+  );
 
   if (classSlug !== "sorcerer") return null;
 
   const resources = state?.classResources ?? [];
-  const pointsResource = resources.find(
-    (item) => item.slug === "sorceryPoints" || item.slug === "sorcery-points",
+  const pointsResource = resources.find((item) =>
+    isSorceryPointsSlug(item.slug),
   );
+  const pointsRemaining = pointsResource?.remaining ?? 0;
 
-  const availableSubclassActions = SUBCLASS_ACTIONS.filter(
-    (item) =>
-      level >= item.minLevel &&
-      (!item.subclass || item.subclass === subclassSlug),
-  );
+  function getRemaining(slug: string): number | null {
+    if (isSorceryPointsSlug(slug)) return pointsRemaining;
+    return resources.find((entry) => entry.slug === slug)?.remaining ?? null;
+  }
 
   const slotsRemaining = state?.spellSlotsRemaining ?? {};
   const slotsMax = state?.spellSlotsMax ?? {};
@@ -137,7 +114,8 @@ export function CombatSorcererPanel({
           </div>
 
           <p className="text-xs font-medium text-muted-foreground pt-1">
-            Criar Slot de Magia ← Pontos (Custos: L1=2, L2=3, L3=5, L4=6, L5=7 pts):
+            Criar Slot de Magia ← Pontos (Custos: L1=2, L2=3, L3=5, L4=6, L5=7
+            pts):
           </p>
           <div className="flex flex-wrap gap-1.5">
             {[
@@ -149,7 +127,6 @@ export function CombatSorcererPanel({
             ].map(({ lvl, cost }) => {
               const max = slotsMax[String(lvl)] ?? 0;
               if (max <= 0) return null;
-              const pointsLeft = pointsResource?.remaining ?? 0;
               const slug =
                 `convert-points-to-slot-${lvl}` as SorcererTableActionSlug;
               return (
@@ -158,7 +135,7 @@ export function CombatSorcererPanel({
                   type="button"
                   size="xs"
                   variant="outline"
-                  disabled={action.isPending || pointsLeft < cost}
+                  disabled={action.isPending || pointsRemaining < cost}
                   onClick={() => action.mutate(slug)}
                 >
                   +Slot {lvl}º ({cost} pts)
@@ -169,28 +146,20 @@ export function CombatSorcererPanel({
         </div>
       ) : null}
 
-      {level >= 2 ? (
+      {metamagicActions.length > 0 ? (
         <div>
           <p className="text-xs font-medium text-muted-foreground mb-1">
             Metamágica:
           </p>
-          <div className="flex flex-wrap gap-1.5">
-            {METAMAGIC_ACTIONS.map((item) => (
-              <Button
-                key={item.slug}
-                type="button"
-                size="xs"
-                variant="secondary"
-                disabled={
-                  action.isPending ||
-                  (pointsResource != null && pointsResource.remaining <= 0)
-                }
-                onClick={() => action.mutate(item.slug)}
-              >
-                {item.label}
-              </Button>
-            ))}
-          </div>
+          <CombatPanelActionButtons
+            actions={metamagicActions}
+            getRemaining={getRemaining}
+            isPending={action.isPending}
+            size="xs"
+            variant="secondary"
+            showRemaining={false}
+            onAction={(slug) => action.mutate(slug as SorcererTableActionSlug)}
+          />
         </div>
       ) : null}
 
@@ -202,27 +171,15 @@ export function CombatSorcererPanel({
   );
 
   const powersContent =
-    availableSubclassActions.length > 0 ? (
+    subclassActions.length > 0 ? (
       <div className="space-y-2">
-        <div className="flex flex-wrap gap-2">
-          {availableSubclassActions.map((item) => (
-            <Button
-              key={item.slug}
-              type="button"
-              size="sm"
-              variant={item.resourceSlug ? "outline" : "ghost"}
-              disabled={
-                action.isPending ||
-                (item.resourceSlug != null &&
-                  pointsResource != null &&
-                  pointsResource.remaining <= 0)
-              }
-              onClick={() => action.mutate(item.slug)}
-            >
-              {item.label}
-            </Button>
-          ))}
-        </div>
+        <CombatPanelActionButtons
+          actions={subclassActions}
+          getRemaining={getRemaining}
+          isPending={action.isPending}
+          showRemaining={false}
+          onAction={(slug) => action.mutate(slug as SorcererTableActionSlug)}
+        />
 
         <TableActionFeedback
           lastResultNote={action.lastResult?.note}

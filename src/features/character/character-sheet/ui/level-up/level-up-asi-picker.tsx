@@ -1,14 +1,12 @@
 "use client";
 
-import { ABILITY_LABELS_PT } from "@/entities/character/types";
+import { useMemo } from "react";
+
 import type { AbilityScores } from "@/entities/character/types";
 import type { LevelUpAsiDistributionMode } from "@/entities/character/session-types";
 import { CatalogSelect } from "@/features/character/create-character/ui/catalog-select";
+import { useAbilityLabels } from "@/features/catalog/reference-catalog/api/use-ability-labels";
 import { cn } from "@/shared/lib/utils";
-
-const ABILITY_OPTIONS = (
-  Object.entries(ABILITY_LABELS_PT) as [keyof AbilityScores, string][]
-).map(([value, label]) => ({ value, label }));
 
 type LevelUpAsiPickerProps = {
   scores: AbilityScores;
@@ -37,21 +35,33 @@ export function LevelUpAsiPicker({
   onPrimaryChange,
   onSecondaryChange,
 }: LevelUpAsiPickerProps) {
-  const primaryDelta = mode === "plus2" ? 2 : 1;
-  const primaryOptions = ABILITY_OPTIONS.filter((opt) =>
-    canRaise(scores, opt.value, primaryDelta),
-  ).map((opt) => ({
-    value: opt.value,
-    label: `${opt.label} (${scores[opt.value]})`,
-  }));
+  const { labelOf, orderedKeys } = useAbilityLabels();
+  const abilityOptions = useMemo(
+    () =>
+      orderedKeys.map((value) => ({
+        value,
+        label: labelOf(value),
+      })),
+    [orderedKeys, labelOf],
+  );
 
-  const secondaryOptions = ABILITY_OPTIONS.filter(
-    (opt) =>
-      opt.value !== primarySlug && canRaise(scores, opt.value, 1),
-  ).map((opt) => ({
-    value: opt.value,
-    label: `${opt.label} (${scores[opt.value]})`,
-  }));
+  const primaryDelta = mode === "plus2" ? 2 : 1;
+  const primaryOptions = abilityOptions
+    .filter((opt) => canRaise(scores, opt.value, primaryDelta))
+    .map((opt) => ({
+      value: opt.value,
+      label: `${opt.label} (${scores[opt.value]})`,
+    }));
+
+  const secondaryOptions = abilityOptions
+    .filter(
+      (opt) =>
+        opt.value !== primarySlug && canRaise(scores, opt.value, 1),
+    )
+    .map((opt) => ({
+      value: opt.value,
+      label: `${opt.label} (${scores[opt.value]})`,
+    }));
 
   return (
     <div className="space-y-3">

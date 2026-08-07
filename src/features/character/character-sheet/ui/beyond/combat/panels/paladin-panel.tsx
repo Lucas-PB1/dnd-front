@@ -1,15 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import type { CharacterState } from "@/entities/character/session-types";
-import {
-  executePaladinTableAction,
-  type PaladinTableActionSlug,
-} from "@/features/character/character-sheet/api/character-session.api";
+import { executePaladinTableAction } from "@/features/character/character-sheet/api/character-session.api";
 import { useTableActionMutation } from "@/features/character/character-sheet/api/use-table-action-mutation";
-import { CombatClassPanelShell } from "@/features/character/character-sheet/ui/beyond/combat/combat-class-panel-shell";
-import { TableActionFeedback } from "@/features/character/character-sheet/ui/beyond/combat/table-action-feedback";
+import { useCombatMechanicalCatalog } from "@/features/catalog/reference-catalog/api/use-reference";
+import { resolvePanelActions } from "@/features/character/character-sheet/lib/combat/resolve-panel-actions";
+import { CombatClassPanelShell } from "../shared/class-panel-shell";
+import { CombatPanelActionButtons } from "../shared/panel-action-buttons";
+import { TableActionFeedback } from "../shared/table-action-feedback";
 import { Button } from "@/shared/ui/button";
 
 type CombatPaladinPanelProps = {
@@ -21,18 +21,6 @@ type CombatPaladinPanelProps = {
   state: CharacterState | undefined;
 };
 
-type ChannelAction = {
-  slug: PaladinTableActionSlug;
-  label: string;
-  minLevel: number;
-};
-
-const CHANNEL_ACTIONS: readonly ChannelAction[] = [
-  { slug: "divine-sense", label: "Sentido Divino", minLevel: 3 },
-  { slug: "oath-channel", label: "Canalizar do Juramento", minLevel: 3 },
-  { slug: "abjure-enemies", label: "Repudiar Inimigos", minLevel: 9 },
-];
-
 export function CombatPaladinPanel({
   characterId,
   classSlug,
@@ -42,6 +30,18 @@ export function CombatPaladinPanel({
 }: CombatPaladinPanelProps) {
   const [healAmount, setHealAmount] = useState(1);
   const action = useTableActionMutation(characterId, executePaladinTableAction);
+  const mechanicalCatalog = useCombatMechanicalCatalog();
+  const panelCatalog = mechanicalCatalog.data?.panelActions ?? [];
+
+  const channelActions = useMemo(
+    () =>
+      resolvePanelActions(panelCatalog, {
+        classSlug: "paladin",
+        level,
+        section: "channel",
+      }),
+    [panelCatalog, level],
+  );
 
   if (classSlug !== "paladin") return null;
 
@@ -53,10 +53,6 @@ export function CombatPaladinPanel({
   );
   const poolRemaining = layOnHands?.remaining ?? 0;
   const channelRemaining = channel?.remaining ?? 0;
-
-  const channelActions = CHANNEL_ACTIONS.filter(
-    (item) => level >= item.minLevel,
-  );
 
   const actionsContent = (
     <div className="space-y-2">
@@ -118,22 +114,14 @@ export function CombatPaladinPanel({
         </p>
       ) : null}
 
-      {channelActions.length > 0 ? (
-        <div className="flex flex-wrap gap-2">
-          {channelActions.map((item) => (
-            <Button
-              key={item.slug}
-              type="button"
-              size="sm"
-              variant="outline"
-              disabled={action.isPending || channelRemaining <= 0}
-              onClick={() => action.mutate({ actionSlug: item.slug })}
-            >
-              {item.label} ({channelRemaining})
-            </Button>
-          ))}
-        </div>
-      ) : null}
+      <CombatPanelActionButtons
+        actions={channelActions}
+        isPending={action.isPending}
+        disabled={channelRemaining <= 0}
+        displayRemaining={channelRemaining}
+        variant="outline"
+        onAction={(slug) => action.mutate({ actionSlug: slug as never })}
+      />
 
       <TableActionFeedback
         lastResultNote={action.lastResult?.note}

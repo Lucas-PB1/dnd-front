@@ -30,6 +30,7 @@ import {
   useSpendClassResource,
 } from "@/features/character/character-sheet/api/use-character-state";
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
+import { useCombatMechanicalCatalog } from "@/features/catalog/reference-catalog/api/use-reference";
 import {
   groupClassEconomyActions,
   resolveClassEconomyActions,
@@ -101,15 +102,21 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
   const chambers = stateQuery.data?.firearmChambers ?? {};
   const [tableNote, setTableNote] = useState<string | null>(null);
   const [repeatWithPsi, setRepeatWithPsi] = useState(false);
+  const mechanicalCatalog = useCombatMechanicalCatalog();
 
   const economyActions = useMemo(
     () =>
-      resolveClassEconomyActions({
+      resolveClassEconomyActions(mechanicalCatalog.data?.economyActions ?? [], {
         classSlug: character.classSlug,
         level: character.level,
         subclassSlug: character.subclassSlug,
       }),
-    [character.classSlug, character.level, character.subclassSlug],
+    [
+      mechanicalCatalog.data?.economyActions,
+      character.classSlug,
+      character.level,
+      character.subclassSlug,
+    ],
   );
   const grouped = useMemo(
     () => groupClassEconomyActions(economyActions),

@@ -12,7 +12,10 @@ import { FeatOptionCatalogField } from "@/features/catalog/feat-catalog/ui/optio
 import { FeatOptionProficiencyField } from "@/features/catalog/feat-catalog/ui/options/feat-option-proficiency-field";
 import { FeatOptionSpellField } from "@/features/catalog/feat-catalog/ui/options/feat-option-spell-field";
 import { useItems } from "@/features/catalog/item-catalog/api/use-items";
-import { useSkills } from "@/features/catalog/reference-catalog/api/use-reference";
+import {
+  useCharacterLevels,
+  useSkills,
+} from "@/features/catalog/reference-catalog/api/use-reference";
 import { useSpells } from "@/features/catalog/spell-catalog/api/use-spells";
 import { FieldGroup } from "@/shared/ui/field";
 
@@ -38,11 +41,15 @@ export function FeatOptionFields({
   const optionsQuery = useFeatOptions(feat.featSlug, !!feat.featSlug);
   const classDetail = useClassDetail(classSlug, !!classSlug);
   const classSavingThrowSlugs = classDetail.data?.savingThrowSlugs ?? [];
+  const levels = useCharacterLevels();
+  const catalog = levels.data?.data ?? [];
+  const proficiencyBonus = catalog.length
+    ? proficiencyBonusForLevel(characterLevel, catalog)
+    : undefined;
   const allDefs = useMemo(
     () => optionsQuery.data?.data ?? [],
     [optionsQuery.data?.data],
   );
-  const proficiencyBonus = proficiencyBonusForLevel(characterLevel);
 
   const instanceOptions = value.filter(
     (option) =>
@@ -51,6 +58,7 @@ export function FeatOptionFields({
   );
 
   const defs = useMemo(() => {
+    if (proficiencyBonus === undefined) return [];
     const required = requiredFeatOptionDefsForInstance(
       feat.featSlug,
       allDefs,
@@ -89,7 +97,7 @@ export function FeatOptionFields({
     [grantedSkillSlugs, grantedToolSlugs],
   );
 
-  if (optionsQuery.isPending) {
+  if (optionsQuery.isPending || proficiencyBonus === undefined) {
     return <p className="text-sm text-muted-foreground">Carregando opções…</p>;
   }
 

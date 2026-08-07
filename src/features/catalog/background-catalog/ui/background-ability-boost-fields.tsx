@@ -9,12 +9,10 @@ import {
   BACKGROUND_BOOST_MODE_PLUS2_PLUS1,
   type BackgroundBoostMode,
 } from "@/entities/character/lib/background-boost";
-import {
-  ABILITY_LABELS_PT,
-  type AbilityScores,
-} from "@/entities/character/types";
+import type { AbilityScores } from "@/entities/character/types";
 import { ABILITY_KEYS } from "@/features/character/create-character/lib/abilities/point-buy";
 import { CatalogSelect } from "@/features/character/create-character/ui/catalog-select";
+import { useAbilityLabels } from "@/features/catalog/reference-catalog/api/use-ability-labels";
 import { Field, FieldLabel } from "@/shared/ui/field";
 import { SearchableSelect } from "@/shared/ui/searchable-select";
 import { cn } from "@/shared/lib/utils";
@@ -67,6 +65,7 @@ export function BackgroundAbilityBoostFields({
   baseScores,
   previewLayout = "inline",
 }: BackgroundAbilityBoostFieldsProps) {
+  const { labelOf } = useAbilityLabels();
   const plus2Value = isBackgroundAbilityBoostAllowed(plus2Slug, allowedSlugs)
     ? plus2Slug
     : "";
@@ -153,7 +152,7 @@ export function BackgroundAbilityBoostFields({
           {ABILITY_KEYS.map((key) => (
             <span key={key}>
               <span className="text-muted-foreground">
-                {ABILITY_LABELS_PT[key]}{" "}
+                {labelOf(key)}{" "}
               </span>
               <span className="font-medium tabular-nums">
                 {previewScores[key]}
@@ -176,7 +175,7 @@ export function BackgroundAbilityBoostFields({
             {ABILITY_KEYS.map((key) => (
               <div key={key}>
                 <span className="text-muted-foreground">
-                  {ABILITY_LABELS_PT[key]}:{" "}
+                  {labelOf(key)}:{" "}
                 </span>
                 <span className="font-medium">{previewScores[key]}</span>
               </div>

@@ -6,7 +6,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 
 import type { AbilityScores } from "@/entities/character/types";
-import { ABILITY_LABELS_PT, abilityModifier } from "@/entities/character";
+import { abilityModifier } from "@/entities/character";
 import {
   BACKGROUND_BOOST_MODE_PLUS1X3,
   BACKGROUND_BOOST_MODE_PLUS2_PLUS1,
@@ -23,6 +23,7 @@ import {
 } from "@/features/catalog/background-catalog/lib/background-ability-boost-form";
 import { useBackgroundAbilityBoostOptions } from "@/features/catalog/background-catalog/lib/use-background-ability-boost-options";
 import { BackgroundAbilityBoostFields } from "@/features/catalog/background-catalog/ui/background-ability-boost-fields";
+import { useAbilityLabels } from "@/features/catalog/reference-catalog/api/use-ability-labels";
 import {
   EditFormShell,
   useSectionPatch,
@@ -68,6 +69,7 @@ export function EditAbilitiesForm({
   onSuccess,
   onCancel,
 }: EditFormProps) {
+  const { labelOf } = useAbilityLabels();
   const { patch, formError, submit } = useSectionPatch(character, onSuccess);
   const [boostError, setBoostError] = useState<string | null>(null);
 
@@ -201,7 +203,7 @@ export function EditAbilitiesForm({
       <div className="grid gap-3 sm:grid-cols-2">
         {ABILITY_KEYS.map((key) => (
           <div key={key} className="rounded-lg border border-border px-3 py-3">
-            <p className="text-sm font-medium">{ABILITY_LABELS_PT[key]}</p>
+            <p className="text-sm font-medium">{labelOf(key)}</p>
             <Input
               type="number"
               min={1}

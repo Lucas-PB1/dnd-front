@@ -7,25 +7,15 @@ import {
 } from "@heroicons/react/24/outline";
 
 import type { CharacterSpell } from "@/entities/character/sheet-types";
-import {
-  formatSkillBonus,
-  type AbilityScores,
-} from "@/entities/character";
+import { formatSkillBonus } from "@/entities/character";
+import type { AbilityScores } from "@/entities/character/types";
 import type { CharacterState } from "@/entities/character/session-types";
 import type { SpellSummary } from "@/entities/spell/types";
+import { useAbilityLabels } from "@/features/catalog/reference-catalog/api/use-ability-labels";
 import { Button } from "@/shared/ui/button";
 import { PhbProse } from "@/shared/ui/phb-prose";
 import { SearchableSelect } from "@/shared/ui/searchable-select";
 import { cn } from "@/shared/lib/utils";
-
-const ABILITY_SHORT: Record<keyof AbilityScores, string> = {
-  forca: "FOR",
-  destreza: "DES",
-  constituicao: "CON",
-  inteligencia: "INT",
-  sabedoria: "SAB",
-  carisma: "CAR",
-};
 
 export const SPELL_SLOT_LEVELS = [
   "1",
@@ -78,6 +68,7 @@ export function BeyondSpellRow({
   spellAttackBonus,
   onCast,
 }: BeyondSpellRowProps) {
+  const { shortOf } = useAbilityLabels();
   const [open, setOpen] = useState(false);
   const [slotLevel, setSlotLevel] = useState<number | null>(null);
 
@@ -119,7 +110,7 @@ export function BeyondSpellRow({
     | undefined;
   const saveBadge =
     saveAbility && spellSaveDc != null
-      ? `CD ${spellSaveDc} · ${ABILITY_SHORT[saveAbility] ?? saveAbility}`
+      ? `CD ${spellSaveDc} · ${shortOf(saveAbility)}`
       : null;
   const attackBadge =
     row.detail?.requiresAttackRoll && spellAttackBonus != null

@@ -8,7 +8,6 @@ import { useState, type ReactNode } from "react";
 
 import type { AbilityScores, CharacterDetail } from "@/entities/character/types";
 import {
-  ABILITY_LABELS_PT,
   formatSkillBonus,
   sheetAbilityScores,
   skillCheckBonus,
@@ -16,10 +15,8 @@ import {
   abilityModifierValue,
 } from "@/entities/character";
 import type { SkillSummary } from "@/entities/skill/types";
-import {
-  BeyondPanel,
-  ABILITY_SHORT,
-} from "@/features/character/character-sheet/ui/beyond/layout/beyond-panel";
+import { useAbilityLabels } from "@/features/catalog/reference-catalog/api/use-ability-labels";
+import { BeyondPanel } from "@/features/character/character-sheet/ui/beyond/layout/beyond-panel";
 import { useSheetRolls } from "@/features/character/character-sheet/ui/beyond/layout/sheet-rolls";
 import { SheetEditAction } from "@/features/character/character-sheet/ui/sheet/sheet-ui";
 import { cn } from "@/shared/lib/utils";
@@ -179,10 +176,9 @@ function SkillRow({
   pending,
   onRoll,
 }: SkillRowData & { pending: boolean; onRoll: () => void }) {
-  const abilityLabel =
-    ABILITY_SHORT[abilityKey] ??
-    ABILITY_LABELS_PT[abilityKey]?.slice(0, 3) ??
-    "—";
+  const { labelOf, shortOf } = useAbilityLabels();
+  const abilityLabel = shortOf(abilityKey);
+  const abilityFullLabel = labelOf(abilityKey);
 
   return (
     <li>
@@ -195,7 +191,7 @@ function SkillRow({
           isProficient ? "bg-primary/10" : "hover:bg-muted/40",
           "disabled:opacity-60",
         )}
-        title={`Rolar ${skill.name} (${ABILITY_LABELS_PT[abilityKey]})${isExpertise ? " · Especialização" : isJack ? " · Pau pra Toda Obra" : ""}`}
+        title={`Rolar ${skill.name} (${abilityFullLabel})${isExpertise ? " · Especialização" : isJack ? " · Pau pra Toda Obra" : ""}`}
       >
         <span
           className={cn(
@@ -221,7 +217,7 @@ function SkillRow({
         />
         <span
           className="w-7 text-[0.65rem] font-semibold tracking-wide text-muted-foreground uppercase"
-          title={ABILITY_LABELS_PT[abilityKey]}
+          title={abilityFullLabel}
         >
           {abilityLabel}
         </span>

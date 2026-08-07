@@ -2,10 +2,11 @@
 
 import { useSkillsCatalog } from "@/features/catalog/skill-catalog/api/use-skills";
 import { SkillCard } from "@/features/catalog/skill-catalog/ui/skill-card";
+import { useAbilities } from "@/features/catalog/reference-catalog/api/use-reference";
 import { useCatalogListState } from "@/shared/lib/use-catalog-list-state";
 import { isCatalogPageOutOfRange } from "@/shared/lib/catalog-query";
 import { useClampCatalogPage } from "@/shared/lib/use-clamp-catalog-page";
-import { ABILITY_FILTER } from "@/shared/lib/catalog-filter-options";
+import { buildAbilityFilter } from "@/shared/lib/catalog-filter-options";
 import { CatalogFilters } from "@/shared/ui/catalog-filters";
 import { CatalogPagination } from "@/shared/ui/catalog-pagination";
 import { CatalogSearch } from "@/shared/ui/catalog-search";
@@ -25,6 +26,10 @@ export function SkillsGrid() {
     pageWindow,
     listPath,
   } = useCatalogListState({ syncUrl: true, filterKeys: ["ability"] });
+
+  const abilitiesQuery = useAbilities();
+  const abilities = abilitiesQuery.data?.data ?? [];
+  const abilityFilter = buildAbilityFilter(abilities);
 
   const ability = filters.ability ?? "";
 
@@ -62,11 +67,13 @@ export function SkillsGrid() {
           placeholder="Buscar perícia…"
           resultCount={total}
         />
-        <CatalogFilters
-          fields={[ABILITY_FILTER]}
-          values={filters}
-          onChange={setFilter}
-        />
+        {abilities.length > 0 ? (
+          <CatalogFilters
+            fields={[abilityFilter]}
+            values={filters}
+            onChange={setFilter}
+          />
+        ) : null}
       </div>
       {outOfRange ? (
         <p className="text-sm text-muted-foreground">Ajustando página…</p>

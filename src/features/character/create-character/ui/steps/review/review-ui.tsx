@@ -46,6 +46,5 @@ export function ReviewField({
 }
 
 export {
-  ABILITY_METHOD_LABEL,
   SPELL_LIST_LABEL,
 } from "@/features/character/create-character/lib/review/review-labels";

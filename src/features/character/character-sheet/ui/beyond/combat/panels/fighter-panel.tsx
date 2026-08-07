@@ -8,8 +8,8 @@ import {
   sessionKeys,
 } from "@/features/character/character-sheet/api/character-session.api";
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
-import { FighterSubclassActions } from "@/features/character/character-sheet/ui/beyond/combat/fighter-subclass-actions";
-import { CombatClassPanelShell } from "@/features/character/character-sheet/ui/beyond/combat/combat-class-panel-shell";
+import { FighterSubclassActions } from "./fighter-subclass-actions";
+import { CombatClassPanelShell } from "../shared/class-panel-shell";
 
 type CombatFighterPanelProps = {
   characterId: string;

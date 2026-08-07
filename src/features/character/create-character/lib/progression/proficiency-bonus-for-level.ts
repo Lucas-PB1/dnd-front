@@ -1,8 +1,13 @@
-/** Espelha rpg.phb_character_level (PHB 2024). */
-export function proficiencyBonusForLevel(level: number): number {
-  if (level >= 17) return 6;
-  if (level >= 13) return 5;
-  if (level >= 9) return 4;
-  if (level >= 5) return 3;
-  return 2;
+import type { CharacterLevel } from "@/entities/character-level/types";
+
+/** PB a partir do catálogo `GET /character-levels` (sem tabela local). */
+export function proficiencyBonusForLevel(
+  level: number,
+  catalog: readonly Pick<CharacterLevel, "level" | "proficiencyBonus">[],
+): number {
+  const row = catalog.find((entry) => entry.level === level);
+  if (!row) {
+    throw new Error(`Proficiency bonus not found for level ${level}`);
+  }
+  return row.proficiencyBonus;
 }

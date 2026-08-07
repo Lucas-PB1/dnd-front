@@ -1,7 +1,7 @@
 "use client";
 
 import type { AbilityScores } from "@/entities/character/types";
-import { ABILITY_LABELS_PT, abilityModifier } from "@/entities/character/types";
+import { abilityModifier } from "@/entities/character/types";
 import {
   formatPoolOptionLabel,
   poolOptionsWithCounts,
@@ -13,6 +13,7 @@ import {
   pointBuyAffordableOptions,
 } from "@/features/character/create-character/lib/abilities/point-buy";
 import type { CreateCharacterInput } from "@/features/character/create-character/model/create-character.schema";
+import { useAbilityLabels } from "@/features/catalog/reference-catalog/api/use-ability-labels";
 import { SearchableSelect } from "@/shared/ui/searchable-select";
 import type { UseFormSetValue } from "react-hook-form";
 
@@ -33,6 +34,8 @@ export function AbilityScoreGrid({
   setValue,
   onPoolAssign,
 }: AbilityScoreGridProps) {
+  const { labelOf } = useAbilityLabels();
+
   return (
     <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
       {ABILITY_KEYS.map((key) => {
@@ -45,18 +48,19 @@ export function AbilityScoreGrid({
         const pointBuyOptions = isPointBuy
           ? pointBuyAffordableOptions(abilityScores, key)
           : [];
+        const label = labelOf(key);
 
         return (
           <div
             key={key}
             className="rounded-lg border border-border px-2.5 py-2"
           >
-            <p className="text-xs font-medium">{ABILITY_LABELS_PT[key]}</p>
+            <p className="text-xs font-medium">{label}</p>
 
             {isPointBuy ? (
               <SearchableSelect
                 id={`ability-${key}`}
-                aria-label={ABILITY_LABELS_PT[key]}
+                aria-label={label}
                 className="mt-1.5"
                 options={pointBuyOptions.map((option) => ({
                   value: String(option),
@@ -73,7 +77,7 @@ export function AbilityScoreGrid({
             ) : hasRawPool ? (
               <SearchableSelect
                 id={`ability-${key}`}
-                aria-label={ABILITY_LABELS_PT[key]}
+                aria-label={label}
                 className="mt-1.5"
                 options={[
                   { value: "", label: "Escolher…" },

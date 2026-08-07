@@ -1,13 +1,18 @@
 "use client";
 
+import { useMemo } from "react";
+
 import type { CharacterState } from "@/entities/character/session-types";
 import {
   executeWizardTableAction,
   type WizardTableActionSlug,
 } from "@/features/character/character-sheet/api/character-session.api";
 import { useTableActionMutation } from "@/features/character/character-sheet/api/use-table-action-mutation";
-import { CombatClassPanelShell } from "@/features/character/character-sheet/ui/beyond/combat/combat-class-panel-shell";
-import { TableActionFeedback } from "@/features/character/character-sheet/ui/beyond/combat/table-action-feedback";
+import { useCombatMechanicalCatalog } from "@/features/catalog/reference-catalog/api/use-reference";
+import { resolvePanelActions } from "@/features/character/character-sheet/lib/combat/resolve-panel-actions";
+import { CombatClassPanelShell } from "../shared/class-panel-shell";
+import { CombatPanelActionButtons } from "../shared/panel-action-buttons";
+import { TableActionFeedback } from "../shared/table-action-feedback";
 import { Button } from "@/shared/ui/button";
 
 type CombatWizardPanelProps = {
@@ -19,45 +24,6 @@ type CombatWizardPanelProps = {
   state: CharacterState | undefined;
 };
 
-type WizardAction = {
-  slug: WizardTableActionSlug;
-  label: string;
-  minLevel: number;
-  subclass?: string;
-};
-
-const SUBCLASS_ACTIONS: readonly WizardAction[] = [
-  {
-    slug: "arcane-ward",
-    label: "Proteção Arcana",
-    minLevel: 3,
-    subclass: "abjurer",
-  },
-  {
-    slug: "portent",
-    label: "Rolar Presságio",
-    minLevel: 3,
-    subclass: "diviner",
-  },
-  {
-    slug: "sculpt-spells",
-    label: "Esculpir Magias",
-    minLevel: 3,
-    subclass: "evoker",
-  },
-  {
-    slug: "improved-illusions",
-    label: "Ilusão Aprimorada",
-    minLevel: 3,
-    subclass: "illusionist",
-  },
-  {
-    slug: "spell-mastery",
-    label: "Dominância de Magias",
-    minLevel: 18,
-  },
-];
-
 export function CombatWizardPanel({
   characterId,
   classSlug,
@@ -67,23 +33,31 @@ export function CombatWizardPanel({
   state,
 }: CombatWizardPanelProps) {
   const action = useTableActionMutation(characterId, executeWizardTableAction);
+  const mechanicalCatalog = useCombatMechanicalCatalog();
+  const panelCatalog = mechanicalCatalog.data?.panelActions ?? [];
+
+  const subclassActions = useMemo(
+    () =>
+      resolvePanelActions(panelCatalog, {
+        classSlug: "wizard",
+        level,
+        subclassSlug,
+        section: "subclass",
+      }),
+    [panelCatalog, level, subclassSlug],
+  );
 
   if (classSlug !== "wizard") return null;
 
   const maxSlotLevelsToRecover = Math.ceil(level / 2);
   const slotsMax = state?.spellSlotsMax ?? {};
 
-  const availableSubclassActions = SUBCLASS_ACTIONS.filter(
-    (item) =>
-      level >= item.minLevel &&
-      (!item.subclass || item.subclass === subclassSlug),
-  );
-
   const actionsContent = (
     <div className="space-y-2">
       <div className="space-y-1">
         <p className="text-xs font-medium text-muted-foreground">
-          Recuperação Arcana (1×/Descanso Curto — limite total: {maxSlotLevelsToRecover} níveis de slot):
+          Recuperação Arcana (1×/Descanso Curto — limite total:{" "}
+          {maxSlotLevelsToRecover} níveis de slot):
         </p>
         <div className="flex flex-wrap gap-1.5">
           {[1, 2, 3, 4, 5].map((slotLvl) => {
@@ -115,22 +89,14 @@ export function CombatWizardPanel({
   );
 
   const powersContent =
-    availableSubclassActions.length > 0 ? (
+    subclassActions.length > 0 ? (
       <div className="space-y-2">
-        <div className="flex flex-wrap gap-2">
-          {availableSubclassActions.map((item) => (
-            <Button
-              key={item.slug}
-              type="button"
-              size="sm"
-              variant="secondary"
-              disabled={action.isPending}
-              onClick={() => action.mutate(item.slug)}
-            >
-              {item.label}
-            </Button>
-          ))}
-        </div>
+        <CombatPanelActionButtons
+          actions={subclassActions}
+          isPending={action.isPending}
+          variant="secondary"
+          onAction={(slug) => action.mutate(slug as WizardTableActionSlug)}
+        />
 
         <TableActionFeedback
           lastResultNote={action.lastResult?.note}

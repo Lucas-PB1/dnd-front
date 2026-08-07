@@ -7,9 +7,8 @@ import {
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
 
-import type { AbilityScores, CharacterDetail } from "@/entities/character/types";
+import type { CharacterDetail } from "@/entities/character/types";
 import {
-  ABILITY_LABELS_PT,
   abilityModifierValue,
   collectSaveProficiencyAbilities,
   computePassiveSkill,
@@ -17,12 +16,11 @@ import {
   sheetAbilityScores,
 } from "@/entities/character";
 import { useClassDetail } from "@/features/catalog/class-catalog/api/use-classes";
-import { BeyondPanel, ABILITY_SHORT } from "@/features/character/character-sheet/ui/beyond/layout/beyond-panel";
-import { CombatPassivesTrigger } from "@/features/character/character-sheet/ui/beyond/combat/combat-passives-trigger";
+import { useAbilityLabels } from "@/features/catalog/reference-catalog/api/use-ability-labels";
+import { BeyondPanel } from "@/features/character/character-sheet/ui/beyond/layout/beyond-panel";
+import { CombatPassivesTrigger } from "@/features/character/character-sheet/ui/beyond/combat/status/passives-trigger";
 import { useSheetRolls } from "@/features/character/character-sheet/ui/beyond/layout/sheet-rolls";
 import { cn } from "@/shared/lib/utils";
-
-const ORDER = Object.keys(ABILITY_LABELS_PT) as (keyof AbilityScores)[];
 
 const PASSIVE_SENSES = [
   {
@@ -51,6 +49,7 @@ export function BeyondLeftColumn({
   character,
   languageNames,
 }: BeyondLeftColumnProps) {
+  const { labelOf, shortOf, orderedKeys } = useAbilityLabels();
   const classDetail = useClassDetail(character.classSlug, true);
   const rolls = useSheetRolls();
   const [useIndomitable, setUseIndomitable] = useState(false);
@@ -111,7 +110,7 @@ export function BeyondLeftColumn({
           <p className="text-sm text-muted-foreground">Carregando…</p>
         ) : (
           <ul className="space-y-0.5">
-            {ORDER.map((slug) => {
+            {orderedKeys.map((slug) => {
               const mod = abilityModifierValue(scores[slug]);
               const isProficient = proficient.has(slug);
               const total = mod + (isProficient ? pb : 0);
@@ -134,7 +133,7 @@ export function BeyondLeftColumn({
                       isProficient ? "bg-primary/10" : "hover:bg-muted/40",
                       "disabled:opacity-60",
                     )}
-                    title={`Rolar salvaguarda de ${ABILITY_LABELS_PT[slug]}`}
+                    title={`Rolar salvaguarda de ${labelOf(slug)}`}
                   >
                     <span
                       className={cn(
@@ -144,10 +143,10 @@ export function BeyondLeftColumn({
                       aria-hidden
                     />
                     <span className="w-7 text-[0.65rem] font-semibold tracking-wide text-muted-foreground uppercase">
-                      {ABILITY_SHORT[slug]}
+                      {shortOf(slug)}
                     </span>
                     <span className="min-w-0 flex-1 truncate font-medium">
-                      {ABILITY_LABELS_PT[slug]}
+                      {labelOf(slug)}
                     </span>
                     <span className="font-mono text-sm font-semibold tabular-nums">
                       {formatSkillBonus(total)}
