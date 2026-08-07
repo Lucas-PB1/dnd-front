@@ -32,6 +32,8 @@ export type CharacterState = {
   recklessActive?: boolean;
   personaMasks?: string[];
   bestialAspectLevel?: number;
+  missileShieldArmed?: boolean;
+  gigaMissileArmed?: boolean;
 };
 
 export type ResourceDieRoll = {
@@ -85,11 +87,14 @@ export type UseClassResourcePayload = {
 export type CastSpellPayload = {
   spellSlug: string;
   slotLevel?: number;
+  useFreeCast?: boolean;
+  freeCastResourceSlug?: string;
 };
 
 export type CastSpellResult = {
   spellSlug: string;
   slotLevelUsed: number | null;
+  note?: string | null;
   state: CharacterState;
 };
 

@@ -12,6 +12,8 @@ export type EconomyTableUsePlan = {
   counterSlug: string | null;
   /** Texto auxiliar (ex.: pool de dados). */
   hint?: string;
+  /** Flag de sessão já armada (Escudo/Giga). */
+  armed?: boolean;
 };
 
 /**
@@ -23,8 +25,16 @@ export function planEconomyTableUse(input: {
   remainingBySlug: Map<string, ResourceCounter>;
   /** Checkbox: forçar gasto do pool mesmo com uso gratuito disponível. */
   preferSpendPool: boolean;
+  missileShieldArmed?: boolean;
+  gigaMissileArmed?: boolean;
 }): EconomyTableUsePlan {
-  const { action, remainingBySlug, preferSpendPool } = input;
+  const {
+    action,
+    remainingBySlug,
+    preferSpendPool,
+    missileShieldArmed = false,
+    gigaMissileArmed = false,
+  } = input;
   const poolSlug = action.resourceSlug ?? null;
   const freeSlug = action.freeResourceSlug ?? null;
   const pool = poolSlug ? remainingBySlug.get(poolSlug) : undefined;
@@ -37,6 +47,42 @@ export function planEconomyTableUse(input: {
       canUse: false,
       usePsiDie: false,
       buttonLabel: "Usar",
+      /** Lembrete / choice: sem contador (±) nem Usar. */
+      counterSlug: null,
+    };
+  }
+
+  if (action.tableAction === "arm:missile-shield") {
+    return {
+      canUse: missileShieldArmed || poolLeft > 0,
+      usePsiDie: false,
+      buttonLabel: missileShieldArmed ? "Desarmar" : "Armar",
+      counterSlug: poolSlug,
+      armed: missileShieldArmed,
+      hint: missileShieldArmed
+        ? "Armado — aplica no próximo Mísseis"
+        : undefined,
+    };
+  }
+
+  if (action.tableAction === "arm:giga-missile") {
+    return {
+      canUse: gigaMissileArmed || poolLeft > 0,
+      usePsiDie: false,
+      buttonLabel: gigaMissileArmed ? "Desarmar" : "Armar",
+      counterSlug: poolSlug,
+      armed: gigaMissileArmed,
+      hint: gigaMissileArmed
+        ? "Armado — aplica no próximo Mísseis"
+        : undefined,
+    };
+  }
+
+  if (action.tableAction === "cast:misseis-magicos-free") {
+    return {
+      canUse: poolLeft >= (action.spendAmount ?? 1),
+      usePsiDie: false,
+      buttonLabel: "Conjurar",
       counterSlug: poolSlug,
     };
   }
@@ -81,12 +127,13 @@ export function planEconomyTableUse(input: {
     };
   }
 
-  // Ações sem uso gratuito (Fôlego, Surto, …)
   const needsPool = poolSlug != null;
   return {
     canUse: !needsPool || poolLeft > 0,
     usePsiDie: Boolean(
-      action.tableAction && isPsiTableAction(action.tableAction) && preferSpendPool,
+      action.tableAction &&
+        isPsiTableAction(action.tableAction) &&
+        preferSpendPool,
     ),
     buttonLabel: "Usar",
     counterSlug: poolSlug,

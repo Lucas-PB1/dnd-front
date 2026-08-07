@@ -35,6 +35,15 @@ const LIST_TYPE_LABELS: Record<CharacterSpell["listType"], string> = {
   always_prepared: "Sempre preparada",
 };
 
+const WIZARD_LIST_TYPE_LABELS: Record<CharacterSpell["listType"], string> = {
+  known: "Grimório",
+  prepared: "Preparada hoje",
+  always_prepared: "Sempre preparada",
+};
+
+export const MAGIC_MISSILE_SPELL_SLUG = "misseis-magicos";
+export const MAGIC_MISSILE_FREE_RESOURCE = "magic-missile-free";
+
 const SOURCE_LABELS: Record<NonNullable<CharacterSpell["source"]>, string> = {
   class: "Classe",
   subclass: "Subclasse",
@@ -56,7 +65,16 @@ type BeyondSpellRowProps = {
   cannotCastSpellsInArmor: boolean;
   spellSaveDc: number | null;
   spellAttackBonus: number | null;
-  onCast: (spellSlug: string, slotLevel?: number) => Promise<void>;
+  /** Labels de lista (mago: grimório vs preparadas). */
+  wizardLayout?: boolean;
+  /** Mago dos Mísseis: usos gratuitos restantes. */
+  freeMissileUses?: number;
+  /** Dominância de Magias: conjura sem espaço. */
+  isSpellMastery?: boolean;
+  onCast: (
+    spellSlug: string,
+    options?: { slotLevel?: number; freeCastResourceSlug?: string },
+  ) => Promise<void>;
 };
 
 export function BeyondSpellRow({
@@ -66,6 +84,9 @@ export function BeyondSpellRow({
   cannotCastSpellsInArmor,
   spellSaveDc,
   spellAttackBonus,
+  wizardLayout = false,
+  freeMissileUses = 0,
+  isSpellMastery = false,
   onCast,
 }: BeyondSpellRowProps) {
   const { shortOf } = useAbilityLabels();
@@ -90,16 +111,24 @@ export function BeyondSpellRow({
   const canCast =
     !cannotCastSpellsInArmor &&
     (isCantrip ||
+      isSpellMastery ||
       (selectedSlot != null &&
         (state?.spellSlotsRemaining[String(selectedSlot)] ?? 0) > 0));
 
-  const listLabel = LIST_TYPE_LABELS[row.spell.listType];
+  const canFreeCastMissile =
+    !cannotCastSpellsInArmor &&
+    row.spell.spellSlug === MAGIC_MISSILE_SPELL_SLUG &&
+    freeMissileUses > 0;
+
+  const listLabel = wizardLayout
+    ? WIZARD_LIST_TYPE_LABELS[row.spell.listType]
+    : LIST_TYPE_LABELS[row.spell.listType];
   const sourceLabel = row.spell.source
     ? SOURCE_LABELS[row.spell.source]
     : undefined;
   const metaParts = [
     row.detail?.schoolName,
-    listLabel,
+    wizardLayout ? null : listLabel,
     sourceLabel,
     row.detail?.castingTime,
   ].filter(Boolean);
@@ -118,12 +147,18 @@ export function BeyondSpellRow({
       : null;
 
   async function cast() {
-    if (isCantrip) {
+    if (isCantrip || isSpellMastery) {
       await onCast(row.spell.spellSlug);
       return;
     }
     if (selectedSlot == null) return;
-    await onCast(row.spell.spellSlug, selectedSlot);
+    await onCast(row.spell.spellSlug, { slotLevel: selectedSlot });
+  }
+
+  async function castFreeMissile() {
+    await onCast(row.spell.spellSlug, {
+      freeCastResourceSlug: MAGIC_MISSILE_FREE_RESOURCE,
+    });
   }
 
   return (
@@ -163,6 +198,14 @@ export function BeyondSpellRow({
                   R
                 </span>
               ) : null}
+              {isSpellMastery ? (
+                <span
+                  className="rounded border border-secondary/40 bg-secondary/10 px-1.5 py-px text-[0.6rem] font-semibold tracking-wide text-secondary uppercase"
+                  title="Dominância de Magias — sem espaço"
+                >
+                  À vontade
+                </span>
+              ) : null}
               {saveBadge ? (
                 <span className="rounded border border-secondary/40 bg-secondary/10 px-1.5 py-px font-mono text-[0.65rem] tabular-nums text-secondary">
                   {saveBadge}
@@ -183,7 +226,10 @@ export function BeyondSpellRow({
         </button>
 
         <div className="flex flex-wrap items-center gap-2">
-          {!isCantrip && !isUnknownLevel && availableUpcastLevels.length > 1 ? (
+          {!isCantrip &&
+          !isUnknownLevel &&
+          !isSpellMastery &&
+          availableUpcastLevels.length > 1 ? (
             <>
               <label
                 className="sr-only"
@@ -205,6 +251,20 @@ export function BeyondSpellRow({
             </>
           ) : null}
 
+          {canFreeCastMissile ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="gap-1"
+              disabled={casting || isUnknownLevel}
+              title="Conjura sem gastar espaço (uso gratuito da subclasse)"
+              onClick={castFreeMissile}
+            >
+              Uso gratuito
+            </Button>
+          ) : null}
+
           <Button
             type="button"
             size="sm"
@@ -216,9 +276,11 @@ export function BeyondSpellRow({
                 ? "Não pode conjurar com armadura/escudo sem treino"
                 : isUnknownLevel
                   ? "Aguardando catálogo"
-                  : !canCast
-                    ? "Sem espaços disponíveis"
-                    : undefined
+                  : isSpellMastery
+                    ? "Dominância — sem espaço"
+                    : !canCast
+                      ? "Sem espaços disponíveis"
+                      : undefined
             }
             onClick={cast}
           >

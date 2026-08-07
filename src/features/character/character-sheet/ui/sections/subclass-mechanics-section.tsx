@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 
 import { isSubclassRequired } from "@/entities/character/lib/subclass";
+import { subclassFeatureKindLabel } from "@/entities/subclass/lib/feature-kind-label";
 import type { SubclassMechanic } from "@/entities/subclass/types";
 import { useSubclassMechanics } from "@/features/catalog/class-catalog/api/use-classes";
 import {
@@ -10,14 +11,14 @@ import {
   type DetailTileItem,
 } from "@/features/character/character-sheet/ui/sections/detail-tile-grid";
 import type { SheetReadSectionProps } from "@/features/character/character-sheet/ui/sections/sheet-section-types";
+import { PhbProse } from "@/shared/ui/phb-prose";
 
-function formatSubclassMechanicDetail(
+function formatSubclassMechanicMeta(
   mechanic: SubclassMechanic,
 ): string | null {
   const parts: string[] = [];
-  if (mechanic.featureKind) {
-    parts.push(mechanic.featureKind);
-  }
+  const kind = subclassFeatureKindLabel(mechanic.featureKind);
+  if (kind) parts.push(kind);
   if (mechanic.resourceName) {
     let resource = mechanic.resourceName;
     if (mechanic.resourceUnlockLevel != null) {
@@ -78,21 +79,29 @@ export function SubclassMechanicsSection({
       .map(([level, mechanics]) => ({
         level,
         items: mechanics.map((mechanic, index): DetailTileItem => {
-          const detail = formatSubclassMechanicDetail(mechanic);
+          const meta = formatSubclassMechanicMeta(mechanic);
           const matchesOption =
             mechanic.optionKey != null &&
             selectedOptionKeys.has(mechanic.optionKey);
+          const description = mechanic.featureDescription?.trim();
           return {
             id: subclassMechanicListKey(level, mechanic, index),
             title: mechanic.featureName,
             subtitle: matchesOption
               ? "Opção escolhida"
-              : (detail ?? undefined),
+              : (meta ?? undefined),
             badge: `Nv. ${level}`,
             accent: matchesOption,
-            body: (
+            body: description ? (
+              <div className="space-y-3">
+                {meta && matchesOption ? (
+                  <p className="text-xs text-muted-foreground">{meta}</p>
+                ) : null}
+                <PhbProse text={description} />
+              </div>
+            ) : (
               <p className="text-sm text-muted-foreground">
-                {detail ?? "Sem detalhes adicionais."}
+                {meta ?? "Sem descrição cadastrada."}
               </p>
             ),
           };
@@ -131,7 +140,7 @@ export function SubclassMechanicsSection({
   return (
     <LevelGroupedDetailTiles
       groups={groups}
-      hint="Toque em uma mecânica para ver detalhes."
+      hint="Toque em uma mecânica para ler o texto."
     />
   );
 }

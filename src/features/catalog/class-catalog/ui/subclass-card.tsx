@@ -1,6 +1,7 @@
 "use client";
 
 import type { SubclassSummary } from "@/entities/class/types";
+import { subclassFeatureKindLabel } from "@/entities/subclass/lib/feature-kind-label";
 import { useSubclassMechanics } from "@/features/catalog/class-catalog/api/use-classes";
 import { CollapsibleCard } from "@/shared/ui/collapsible-card";
 import { PhbProse } from "@/shared/ui/phb-prose";
@@ -8,17 +9,6 @@ import { PhbProse } from "@/shared/ui/phb-prose";
 type SubclassCardProps = {
   subclass: SubclassSummary;
 };
-
-function kindLabel(kind: string | null): string | null {
-  if (!kind) return null;
-  const map: Record<string, string> = {
-    passive: "Passivo",
-    resource: "Recurso",
-    choice: "Escolha",
-    spell: "Magia",
-  };
-  return map[kind] ?? kind;
-}
 
 export function SubclassCard({ subclass }: SubclassCardProps) {
   const mechanicsQuery = useSubclassMechanics(subclass.slug, true);
@@ -51,7 +41,7 @@ export function SubclassCard({ subclass }: SubclassCardProps) {
               Características
             </p>
             {mechanicsQuery.data.data.map((feature) => {
-              const kind = kindLabel(feature.featureKind);
+              const kind = subclassFeatureKindLabel(feature.featureKind);
               const resource = feature.resourceName
                 ? `Recurso: ${feature.resourceName}`
                 : null;

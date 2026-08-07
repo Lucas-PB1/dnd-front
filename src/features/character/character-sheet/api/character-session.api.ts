@@ -588,7 +588,10 @@ export type WizardTableActionSlug =
   | "portent"
   | "sculpt-spells"
   | "improved-illusions"
-  | "spell-mastery";
+  | "arm-missile-shield"
+  | "disarm-missile-shield"
+  | "arm-giga-missile"
+  | "disarm-giga-missile";
 
 export async function executeWizardTableAction(
   accessToken: string,

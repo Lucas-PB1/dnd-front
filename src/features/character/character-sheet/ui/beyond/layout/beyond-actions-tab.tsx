@@ -327,19 +327,16 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
               remainingBySlug={remainingBySlug}
               busy={resourceBusy}
               preferSpendPool={repeatWithPsi}
+              missileShieldArmed={stateQuery.data?.missileShieldArmed ?? false}
+              gigaMissileArmed={stateQuery.data?.gigaMissileArmed ?? false}
               onSpend={(resourceSlug) =>
                 spendResource.mutate({ resourceSlug, amount: 1 })
               }
               onRecover={(resourceSlug) =>
                 recoverResource.mutate({ resourceSlug, amount: 1 })
               }
-              onUse={(action) => {
+              onUse={(action, plan) => {
                 if (!action.tableAction) return;
-                const plan = planEconomyTableUse({
-                  action,
-                  remainingBySlug,
-                  preferSpendPool: repeatWithPsi,
-                });
                 if (!plan.canUse) return;
                 tableAction.mutate(
                   {
@@ -348,6 +345,7 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
                     resourceSlug: action.resourceSlug,
                     spendAmount: action.spendAmount ?? 1,
                     note: action.description ?? action.summary,
+                    armed: plan.armed,
                   },
                   {
                     onSuccess: (result) => {
@@ -385,6 +383,8 @@ function EconomyBucketSection({
   remainingBySlug,
   busy,
   preferSpendPool,
+  missileShieldArmed,
+  gigaMissileArmed,
   onSpend,
   onRecover,
   onUse,
@@ -397,9 +397,14 @@ function EconomyBucketSection({
   remainingBySlug: Map<string, { remaining: number; max: number }>;
   busy: boolean;
   preferSpendPool: boolean;
+  missileShieldArmed: boolean;
+  gigaMissileArmed: boolean;
   onSpend: (resourceSlug: string) => void;
   onRecover: (resourceSlug: string) => void;
-  onUse: (action: ClassEconomyAction) => void;
+  onUse: (
+    action: ClassEconomyAction,
+    plan: ReturnType<typeof planEconomyTableUse>,
+  ) => void;
 }) {
   return (
     <section
@@ -425,6 +430,8 @@ function EconomyBucketSection({
             action,
             remainingBySlug,
             preferSpendPool,
+            missileShieldArmed,
+            gigaMissileArmed,
           });
           const counter =
             plan.counterSlug != null
@@ -497,12 +504,12 @@ function EconomyBucketSection({
                     className="h-7 px-2"
                     disabled={busy || !plan.canUse}
                     title={plan.buttonLabel}
-                    onClick={() => onUse(action)}
+                    onClick={() => onUse(action, plan)}
                   >
                     {plan.buttonLabel}
                   </Button>
                 ) : null}
-                {counter && plan.counterSlug ? (
+                {counter && plan.counterSlug && action.tableAction ? (
                   <div className="flex items-center gap-1">
                     <Button
                       type="button"
