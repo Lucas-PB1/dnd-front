@@ -24,6 +24,7 @@ type CombatPaladinPanelProps = {
 export function CombatPaladinPanel({
   characterId,
   classSlug,
+  subclassSlug,
   level,
   combatNotes,
   state,
@@ -39,8 +40,9 @@ export function CombatPaladinPanel({
         classSlug: "paladin",
         level,
         section: "channel",
+        subclassSlug,
       }),
-    [panelCatalog, level],
+    [panelCatalog, level, subclassSlug],
   );
 
   if (classSlug !== "paladin") return null;
