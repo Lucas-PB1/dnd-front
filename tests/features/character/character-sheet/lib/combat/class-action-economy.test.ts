@@ -70,6 +70,62 @@ const FIXTURE_CATALOG: ClassEconomyActionRecord[] = [
     classSlug: "rogue",
     minLevel: 2,
   },
+  {
+    id: "species-dwarf-stonecunning",
+    name: "Conhecimento de Pedras",
+    economy: "bonus",
+    speciesSlug: "dwarf",
+    minLevel: 1,
+    resourceSlug: "stonecunning",
+    tableAction: "spend-resource",
+  },
+  {
+    id: "species-goliath-cloud",
+    name: "Salto da Nuvem",
+    economy: "bonus",
+    speciesSlug: "goliath",
+    minLevel: 1,
+    resourceSlug: "giantAncestry",
+    requiresOptionKey: "giantAncestryId",
+    requiresOptionValue: "cloud",
+    tableAction: "spend-resource",
+  },
+  {
+    id: "species-goliath-ice",
+    name: "Arrepio do Gelo",
+    economy: "free",
+    speciesSlug: "goliath",
+    minLevel: 1,
+    resourceSlug: "giantAncestry",
+    requiresOptionKey: "giantAncestryId",
+    requiresOptionValue: "ice",
+    tableAction: "spend-resource",
+  },
+  {
+    id: "feat-lucky-advantage",
+    name: "Sorte · Vantagem",
+    economy: "free",
+    featSlug: "lucky",
+    minLevel: 1,
+    resourceSlug: "luckPoints",
+    tableAction: "spend-resource",
+  },
+  {
+    id: "feat-polearm-master-haft",
+    name: "Golpe de Haste",
+    economy: "bonus",
+    featSlug: "polearm-master",
+    minLevel: 1,
+  },
+  {
+    id: "item-ring-of-barrels",
+    name: "Invocar Barris",
+    economy: "action",
+    itemSlug: "ring-of-barrels",
+    minLevel: 1,
+    resourceSlug: "ringBarrelCharges",
+    tableAction: "spend-resource",
+  },
 ];
 
 describe("resolveClassEconomyActions", () => {
@@ -132,5 +188,64 @@ describe("resolveClassEconomyActions", () => {
     expect(
       actions.find((a) => a.id === "rogue-cunning-action")?.economy,
     ).toBe("bonus");
+  });
+
+  it("includes dwarf stonecunning for dwarf species", () => {
+    const actions = resolveClassEconomyActions(FIXTURE_CATALOG, {
+      classSlug: "wizard",
+      level: 20,
+      speciesSlug: "dwarf",
+    });
+    expect(actions.some((a) => a.id === "species-dwarf-stonecunning")).toBe(
+      true,
+    );
+  });
+
+  it("filters goliath ancestry by species choice", () => {
+    const actions = resolveClassEconomyActions(FIXTURE_CATALOG, {
+      classSlug: "barbarian",
+      level: 5,
+      speciesSlug: "goliath",
+      speciesChoices: [
+        { choiceKind: "giant_ancestry", choiceSlug: "cloud" },
+      ],
+    });
+    expect(actions.some((a) => a.id === "species-goliath-cloud")).toBe(true);
+    expect(actions.some((a) => a.id === "species-goliath-ice")).toBe(false);
+  });
+
+  it("includes lucky economy only when feat is on the sheet", () => {
+    const without = resolveClassEconomyActions(FIXTURE_CATALOG, {
+      classSlug: "wizard",
+      level: 5,
+      featSlugs: [],
+    });
+    expect(without.some((a) => a.id === "feat-lucky-advantage")).toBe(false);
+
+    const withLucky = resolveClassEconomyActions(FIXTURE_CATALOG, {
+      classSlug: "wizard",
+      level: 5,
+      featSlugs: ["lucky"],
+    });
+    expect(withLucky.some((a) => a.id === "feat-lucky-advantage")).toBe(true);
+    expect(withLucky.some((a) => a.id === "feat-polearm-master-haft")).toBe(
+      false,
+    );
+  });
+
+  it("includes item economy only when item is active", () => {
+    const without = resolveClassEconomyActions(FIXTURE_CATALOG, {
+      classSlug: "wizard",
+      level: 5,
+      activeItemSlugs: [],
+    });
+    expect(without.some((a) => a.id === "item-ring-of-barrels")).toBe(false);
+
+    const withRing = resolveClassEconomyActions(FIXTURE_CATALOG, {
+      classSlug: "wizard",
+      level: 5,
+      activeItemSlugs: ["ring-of-barrels"],
+    });
+    expect(withRing.some((a) => a.id === "item-ring-of-barrels")).toBe(true);
   });
 });

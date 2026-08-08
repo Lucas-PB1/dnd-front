@@ -1,5 +1,5 @@
 /**
- * Resolução de features de classe com economia de ação (turno).
+ * Resolução de features de classe/espécie/talento/item com economia de ação (turno).
  * Fonte: `GET /combat-mechanical-catalog` → `economyActions`.
  */
 
@@ -15,10 +15,15 @@ export type ClassEconomyAction = {
   id: string;
   name: string;
   economy: ActionEconomyBucket;
-  classSlug: string;
+  classSlug?: string | null;
+  speciesSlug?: string | null;
+  featSlug?: string | null;
+  itemSlug?: string | null;
   minLevel: number;
   /** Se definido, só aparece com essa subclasse. */
   subclassSlug?: string;
+  requiresOptionKey?: string;
+  requiresOptionValue?: string;
   /** Pool principal (ex.: psi-energy-dice, secondWind). */
   resourceSlug?: string;
   /** Tracker 0/1 de uso gratuito por descanso (ex.: telekinetic-movement). */
@@ -39,6 +44,23 @@ export type ResolveClassEconomyInput = {
   classSlug: string;
   level: number;
   subclassSlug?: string | null;
+  speciesSlug?: string | null;
+  /** Escolhas de espécie (choiceKind / choiceSlug). */
+  speciesChoices?: readonly { choiceKind: string; choiceSlug: string }[];
+  /** Slugs de talentos na ficha (inclui estilos de luta como feat). */
+  featSlugs?: readonly string[];
+  /** Itens ativos (equipado + sintonizado) e charms anexados. */
+  activeItemSlugs?: readonly string[];
+};
+
+/** option_key do catálogo → choiceKind na ficha. */
+const OPTION_KEY_TO_CHOICE_KIND: Record<string, string> = {
+  giantAncestryId: "giant_ancestry",
+  constructionId: "geppettin_construction",
+  dragonAncestryId: "dragon_ancestry",
+  lineageId: "elf_lineage",
+  gnomeLineageId: "gnome_lineage",
+  infernalLegacyId: "infernal_legacy",
 };
 
 const ECONOMY_BUCKETS = new Set<ActionEconomyBucket>([
@@ -62,8 +84,13 @@ export function mapEconomyActionRecord(
     name: record.name,
     economy: asEconomyBucket(String(record.economy)),
     classSlug: record.classSlug,
+    speciesSlug: record.speciesSlug,
+    featSlug: record.featSlug,
+    itemSlug: record.itemSlug,
     minLevel: record.minLevel,
     subclassSlug: record.subclassSlug,
+    requiresOptionKey: record.requiresOptionKey,
+    requiresOptionValue: record.requiresOptionValue,
     resourceSlug: record.resourceSlug,
     freeResourceSlug: record.freeResourceSlug,
     alwaysSpendsResource: record.alwaysSpendsResource,
@@ -74,15 +101,50 @@ export function mapEconomyActionRecord(
   };
 }
 
+function matchesSpeciesOption(
+  action: ClassEconomyActionRecord,
+  speciesChoices: readonly { choiceKind: string; choiceSlug: string }[],
+): boolean {
+  if (!action.requiresOptionKey || !action.requiresOptionValue) return true;
+  const choiceKind =
+    OPTION_KEY_TO_CHOICE_KIND[action.requiresOptionKey] ??
+    action.requiresOptionKey;
+  return speciesChoices.some(
+    (choice) =>
+      choice.choiceKind === choiceKind &&
+      choice.choiceSlug === action.requiresOptionValue,
+  );
+}
+
 export function resolveClassEconomyActions(
   catalog: readonly ClassEconomyActionRecord[],
   input: ResolveClassEconomyInput,
 ): ClassEconomyAction[] {
   const subclass = input.subclassSlug ?? null;
+  const species = input.speciesSlug ?? null;
+  const choices = input.speciesChoices ?? [];
+  const featSlugs = new Set(input.featSlugs ?? []);
+  const activeItemSlugs = new Set(input.activeItemSlugs ?? []);
+
   return catalog
     .filter((action) => {
-      if (action.classSlug !== input.classSlug) return false;
       if (input.level < action.minLevel) return false;
+
+      if (action.itemSlug) {
+        return activeItemSlugs.has(action.itemSlug);
+      }
+
+      if (action.featSlug) {
+        return featSlugs.has(action.featSlug);
+      }
+
+      const isSpeciesRow = Boolean(action.speciesSlug);
+      if (isSpeciesRow) {
+        if (action.speciesSlug !== species) return false;
+        return matchesSpeciesOption(action, choices);
+      }
+
+      if (action.classSlug !== input.classSlug) return false;
       if (action.subclassSlug != null && action.subclassSlug !== subclass) {
         return false;
       }

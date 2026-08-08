@@ -68,9 +68,14 @@ export type ClassEconomyActionRecord = {
   id: string;
   name: string;
   economy: ActionEconomyBucket | string;
-  classSlug: string;
+  classSlug?: string | null;
   minLevel: number;
   subclassSlug?: string;
+  speciesSlug?: string | null;
+  featSlug?: string | null;
+  itemSlug?: string | null;
+  requiresOptionKey?: string;
+  requiresOptionValue?: string;
   resourceSlug?: string;
   freeResourceSlug?: string;
   alwaysSpendsResource?: boolean;

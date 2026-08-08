@@ -29,8 +29,10 @@ import {
   useRecoverClassResource,
   useSpendClassResource,
 } from "@/features/character/character-sheet/api/use-character-state";
+import { useCharacterInventory } from "@/features/character/character-sheet/api/use-character-inventory";
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
 import { useCombatMechanicalCatalog } from "@/features/catalog/reference-catalog/api/use-reference";
+import { collectActiveItemSlugs } from "@/features/character/character-sheet/lib/combat/active-item-slugs";
 import {
   groupClassEconomyActions,
   resolveClassEconomyActions,
@@ -95,6 +97,7 @@ const ECONOMY_SECTIONS: {
 export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
   const attacks = character.weaponAttacks ?? [];
   const stateQuery = useCharacterState(character.id);
+  const inventoryQuery = useCharacterInventory(character.id);
   const { requireToken, handleUnauthorized } = useGameAuth(
     `/characters/${character.id}`,
   );
@@ -104,18 +107,46 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
   const [repeatWithPsi, setRepeatWithPsi] = useState(false);
   const mechanicalCatalog = useCombatMechanicalCatalog();
 
+  const activeItemSlugs = useMemo(
+    () =>
+      collectActiveItemSlugs({
+        inventoryItems: inventoryQuery.data?.items,
+        weaponAttacks: attacks,
+      }),
+    [inventoryQuery.data?.items, attacks],
+  );
+
   const economyActions = useMemo(
     () =>
       resolveClassEconomyActions(mechanicalCatalog.data?.economyActions ?? [], {
         classSlug: character.classSlug,
         level: character.level,
         subclassSlug: character.subclassSlug,
+        speciesSlug: character.speciesSlug,
+        speciesChoices: character.speciesChoices,
+        featSlugs: [
+          ...(character.characterFeats?.map((feat) => feat.featSlug) ?? []),
+          ...(character.subclassOptions ?? [])
+            .filter(
+              (option) =>
+                option.optionKey === "fighting_style" ||
+                option.optionKey === "additionalFightingStyle" ||
+                option.optionKey.endsWith("FightingStyle"),
+            )
+            .map((option) => option.valueId),
+        ],
+        activeItemSlugs,
       }),
     [
       mechanicalCatalog.data?.economyActions,
       character.classSlug,
       character.level,
       character.subclassSlug,
+      character.speciesSlug,
+      character.speciesChoices,
+      character.characterFeats,
+      character.subclassOptions,
+      activeItemSlugs,
     ],
   );
   const grouped = useMemo(
