@@ -28,11 +28,12 @@ import {
   useCatalogListQuery,
 } from "@/shared/lib/use-catalog-query";
 
+/** Listagem slim para selects do wizard (sem description). */
 export function useClasses() {
   const { editionSlugsParam } = useCatalogSources();
   return useQuery({
-    queryKey: [...classKeys.list(), editionSlugsParam ?? "all"],
-    queryFn: () => fetchClasses(50, editionSlugsParam),
+    queryKey: [...classKeys.list(), "summary", editionSlugsParam ?? "all"],
+    queryFn: () => fetchClasses(50, editionSlugsParam, "summary"),
     staleTime: CATALOG_DETAIL_STALE_MS,
   });
 }

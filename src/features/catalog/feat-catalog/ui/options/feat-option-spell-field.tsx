@@ -3,7 +3,7 @@
 import type { ClassSpellOption } from "@/entities/class/types";
 import type { CharacterFeat, FeatOption } from "@/entities/character/sheet-types";
 import type { FeatOptionDefinition } from "@/entities/feat/types";
-import type { SpellSummary } from "@/entities/spell/types";
+import type { SpellCatalogLabel } from "@/entities/spell/types";
 import { applyFeatOptionChange } from "@/features/catalog/feat-catalog/lib/apply-feat-option-change";
 import { CatalogSelect } from "@/features/character/create-character/ui/catalog-select";
 import {
@@ -21,7 +21,7 @@ type FeatOptionSpellFieldProps = {
   instanceOptions: FeatOption[];
   classSpellsLevel0: ClassSpellOption[];
   classSpellsLevel1: ClassSpellOption[];
-  allSpells: SpellSummary[];
+  allSpells: SpellCatalogLabel[];
   classSpellsLevel0Pending: boolean;
   classSpellsLevel1Pending: boolean;
   allSpellsPending: boolean;
@@ -35,7 +35,7 @@ function resolveSpellRows({
 }: Pick<
   FeatOptionSpellFieldProps,
   "def" | "allSpells" | "classSpellsLevel0" | "classSpellsLevel1"
->): ClassSpellOption[] | SpellSummary[] {
+>): ClassSpellOption[] | SpellCatalogLabel[] {
   if (def.spellRitualOnly) {
     return allSpells.filter(
       (spell) =>

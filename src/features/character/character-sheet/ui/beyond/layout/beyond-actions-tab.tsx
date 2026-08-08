@@ -105,7 +105,7 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
   const chambers = stateQuery.data?.firearmChambers ?? {};
   const [tableNote, setTableNote] = useState<string | null>(null);
   const [repeatWithPsi, setRepeatWithPsi] = useState(false);
-  const mechanicalCatalog = useCombatMechanicalCatalog();
+  const mechanicalCatalog = useCombatMechanicalCatalog({ classSlug: character.classSlug, subclassSlug: character.subclassSlug });
 
   const activeItemSlugs = useMemo(
     () =>

@@ -10,11 +10,11 @@ import {
 } from "@/features/catalog/class-catalog/api/use-classes";
 import {
   useAlignments,
-  useFeats,
+  useFeatLabels,
   useLanguages,
   useSkills,
 } from "@/features/catalog/reference-catalog/api/use-reference";
-import { useSpells } from "@/features/catalog/spell-catalog/api/use-spells";
+import { useSpellLabels } from "@/features/catalog/spell-catalog/api/use-spells";
 import { useSpeciesDetail } from "@/features/catalog/species-catalog/api/use-species";
 
 export type CharacterIdentityLabels = {
@@ -70,9 +70,9 @@ export function useCharacterCatalogLabels(
   const subclasses = useClassSubclasses(character?.classSlug ?? "", enabled);
   const alignments = useAlignments();
   const skills = useSkills();
-  const feats = useFeats();
+  const feats = useFeatLabels();
   const languages = useLanguages();
-  const spells = useSpells();
+  const spells = useSpellLabels();
 
   const skillLabels = useMemo(
     () => toLabelMap(skills.data?.data),

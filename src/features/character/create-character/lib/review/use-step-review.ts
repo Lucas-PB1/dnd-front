@@ -36,14 +36,14 @@ import type { CreateCharacterInput } from "@/features/character/create-character
 import { useFeatOptionLabels } from "@/features/catalog/feat-catalog/api/use-feat-option-labels";
 import {
   useAbilityGenerationMethods,
-  useFeats,
+  useFeatLabels,
 } from "@/features/catalog/reference-catalog/api/use-reference";
 import { useSpeciesTraitChoices } from "@/features/catalog/species-catalog/api/use-species";
-import { useSpells } from "@/features/catalog/spell-catalog/api/use-spells";
+import { useSpellLabels } from "@/features/catalog/spell-catalog/api/use-spells";
 
 export function useStepReview(control: Control<CreateCharacterInput>) {
   const values = useWatch({ control }) as CreateCharacterInput;
-  const featsQuery = useFeats();
+  const featsQuery = useFeatLabels();
   const abilityMethods = useAbilityGenerationMethods();
   const epicBoonFeatSlugs = useMemo(
     () => epicBoonFeatSlugsFromCatalog(featsQuery.data?.data ?? []),
@@ -92,10 +92,9 @@ export function useStepReview(control: Control<CreateCharacterInput>) {
     values.backgroundSlug,
     !!values.backgroundSlug,
   );
-  const spellsCatalog = useSpells();
+  const spellsCatalog = useSpellLabels();
 
   const originFeatSlug = backgroundDetail.data?.originFeatSlug ?? "";
-  const allFeats = useFeats();
   const fightingStyle = values.fightingStyleFeatSlug?.trim() ?? "";
   const previewFeats = resolveCreateCharacterFeats(
     originFeatSlug || null,
@@ -108,7 +107,7 @@ export function useStepReview(control: Control<CreateCharacterInput>) {
     values.speciesChoices ?? [],
   );
   const featNameBySlug = Object.fromEntries(
-    (allFeats.data?.data ?? []).map((feat) => [feat.slug, feat.name]),
+    (featsQuery.data?.data ?? []).map((feat) => [feat.slug, feat.name]),
   );
   const { resolveFeatOption, featOptionDefsFor, isLoading: featOptionsLoading } =
     useFeatOptionLabels({

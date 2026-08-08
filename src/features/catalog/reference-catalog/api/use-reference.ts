@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 
+import { fetchFeatLabels } from "@/features/catalog/feat-catalog/api/feats.api";
 import {
   fetchAbilities,
   fetchAbilityGenerationMethods,
@@ -30,6 +31,16 @@ export function useFeats() {
   return useQuery({
     queryKey: [...referenceKeys.feats(), editionSlugsParam ?? "all"],
     queryFn: () => fetchFeats(100, editionSlugsParam),
+    staleTime: CATALOG_DETAIL_STALE_MS,
+  });
+}
+
+/** Labels slim (`fields=summary`) — ficha / review. */
+export function useFeatLabels() {
+  const { editionSlugsParam } = useCatalogSources();
+  return useQuery({
+    queryKey: [...referenceKeys.feats(), "labels", editionSlugsParam ?? "all"],
+    queryFn: () => fetchFeatLabels(editionSlugsParam),
     staleTime: CATALOG_DETAIL_STALE_MS,
   });
 }
@@ -82,10 +93,19 @@ export function useCharacterLevels() {
   });
 }
 
-export function useCombatMechanicalCatalog() {
+export function useCombatMechanicalCatalog(filters?: {
+  classSlug?: string;
+  subclassSlug?: string | null;
+}) {
+  const classSlug = filters?.classSlug?.trim() || undefined;
+  const subclassSlug = filters?.subclassSlug?.trim() || undefined;
   return useQuery({
-    queryKey: referenceKeys.combatMechanicalCatalog(),
-    queryFn: () => fetchCombatMechanicalCatalog(),
+    queryKey: referenceKeys.combatMechanicalCatalog({
+      classSlug,
+      subclassSlug,
+    }),
+    queryFn: () =>
+      fetchCombatMechanicalCatalog({ classSlug, subclassSlug }),
     staleTime: CATALOG_DETAIL_STALE_MS,
   });
 }

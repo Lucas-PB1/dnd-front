@@ -16,7 +16,7 @@ import {
   useCharacterLevels,
   useSkills,
 } from "@/features/catalog/reference-catalog/api/use-reference";
-import { useSpells } from "@/features/catalog/spell-catalog/api/use-spells";
+import { useSpellLabels } from "@/features/catalog/spell-catalog/api/use-spells";
 import { FieldGroup } from "@/shared/ui/field";
 
 export type FeatOptionFieldsProps = {
@@ -74,9 +74,9 @@ export function FeatOptionFields({
 
   const classSpellsLevel0 = useClassSpells(spellList ?? "", 0, !!spellList);
   const classSpellsLevel1 = useClassSpells(spellList ?? "", 1, !!spellList);
-  const allSpells = useSpells();
+  const allSpells = useSpellLabels();
   const skills = useSkills();
-  const tools = useItems({ itemType: "tool", limit: 200 });
+  const tools = useItems({ itemType: "tool", limit: 200, fields: "summary" });
 
   const catalogProficiencyOptions = useMemo(() => {
     const skillOpts = (skills.data?.data ?? []).map((skill) => ({

@@ -21,12 +21,16 @@ export async function fetchItems(params?: {
   itemType?: string;
   limit?: number;
   page?: number;
+  fields?: "summary";
 }) {
   const search = buildCatalogSearchParams({
     page: params?.page ?? 1,
     limit: params?.limit ?? 100,
     q: params?.q,
-    filters: { itemType: params?.itemType },
+    filters: {
+      itemType: params?.itemType,
+      fields: params?.fields,
+    },
   });
 
   return catalogFetch<ItemListResponse>(`/items?${search}`, CATALOG_FETCH_INIT);

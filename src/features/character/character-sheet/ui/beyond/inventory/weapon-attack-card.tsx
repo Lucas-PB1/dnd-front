@@ -76,7 +76,7 @@ export function WeaponAttackCard({
   cleric,
 }: WeaponAttackCardProps) {
   const rolls = useSheetRolls();
-  const mechanicalCatalog = useCombatMechanicalCatalog();
+  const mechanicalCatalog = useCombatMechanicalCatalog(rogue ? { classSlug: "rogue", subclassSlug: rogue.subclassSlug } : undefined);
   const busy = rolls.attack.isPending || rolls.damage.isPending;
   const [advantage, setAdvantage] = useState<AdvantageMode>(
     attack.attackDisadvantage ? "disadvantage" : "normal",

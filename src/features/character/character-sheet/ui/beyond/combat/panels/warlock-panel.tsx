@@ -33,7 +33,7 @@ export function CombatWarlockPanel({
   state,
 }: CombatWarlockPanelProps) {
   const action = useTableActionMutation(characterId, executeWarlockTableAction);
-  const mechanicalCatalog = useCombatMechanicalCatalog();
+  const mechanicalCatalog = useCombatMechanicalCatalog({ classSlug, subclassSlug });
   const panelCatalog = mechanicalCatalog.data?.panelActions ?? [];
 
   const baseActions = useMemo(

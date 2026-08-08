@@ -6,6 +6,15 @@ export type FeatBenefit = {
   description?: string;
 };
 
+/** Resposta de `GET /feats?fields=summary`. */
+export type FeatCatalogLabel = {
+  slug: string;
+  name: string;
+  categorySlug: string;
+};
+
+export type FeatCatalogLabelListResponse = PaginatedResponse<FeatCatalogLabel>;
+
 /** Espelha FeatResponseDto da dnd-api */
 export type FeatSummary = {
   slug: string;

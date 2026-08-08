@@ -5,6 +5,7 @@ import {
   fetchFeatBySlug,
   fetchFeatsPage,
 } from "@/features/catalog/feat-catalog/api/feats.api";
+import type { FeatListResponse } from "@/entities/feat/types";
 import { useCatalogSources } from "@/features/catalog/catalog-sources/model/catalog-sources-provider";
 import {
   useCatalogDetailQuery,
@@ -40,7 +41,7 @@ export function useFeatsCatalog(params: {
         q: p.q,
         category: p.category,
         editionSlugs: p.editionSlugs,
-      }),
+      }) as Promise<FeatListResponse>,
   });
 }
 

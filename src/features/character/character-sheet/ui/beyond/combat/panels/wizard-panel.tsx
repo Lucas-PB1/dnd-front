@@ -33,7 +33,7 @@ export function CombatWizardPanel({
   state,
 }: CombatWizardPanelProps) {
   const action = useTableActionMutation(characterId, executeWizardTableAction);
-  const mechanicalCatalog = useCombatMechanicalCatalog();
+  const mechanicalCatalog = useCombatMechanicalCatalog({ classSlug, subclassSlug });
   const panelCatalog = mechanicalCatalog.data?.panelActions ?? [];
 
   const subclassActions = useMemo(

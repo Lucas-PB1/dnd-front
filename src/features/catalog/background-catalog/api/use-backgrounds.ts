@@ -19,12 +19,16 @@ import {
   useCatalogListQuery,
 } from "@/shared/lib/use-catalog-query";
 
-/** Lista completa — wizard / ficha. */
+/** Listagem slim para selects do wizard (sem description). */
 export function useBackgrounds() {
   const { editionSlugsParam } = useCatalogSources();
   return useQuery({
-    queryKey: [...backgroundKeys.listAll(), editionSlugsParam ?? "all"],
-    queryFn: () => fetchBackgrounds(50, editionSlugsParam),
+    queryKey: [
+      ...backgroundKeys.listAll(),
+      "summary",
+      editionSlugsParam ?? "all",
+    ],
+    queryFn: () => fetchBackgrounds(50, editionSlugsParam, "summary"),
     staleTime: CATALOG_DETAIL_STALE_MS,
   });
 }

@@ -35,7 +35,7 @@ export function FighterSubclassActions({
     `/characters/${characterId}`,
   );
   const queryClient = useQueryClient();
-  const mechanicalCatalog = useCombatMechanicalCatalog();
+  const mechanicalCatalog = useCombatMechanicalCatalog({ classSlug: "fighter", subclassSlug });
   const precautionSpells = mechanicalCatalog.data?.precautionSpells ?? [];
   const [useRelentless, setUseRelentless] = useState(false);
   const [precautionSpell, setPrecautionSpell] = useState<string>("");

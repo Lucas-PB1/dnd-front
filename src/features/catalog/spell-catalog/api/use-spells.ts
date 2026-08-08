@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import {
   fetchSpellBySlug,
+  fetchSpellLabels,
   fetchSpells,
   fetchSpellsPage,
   spellKeys,
@@ -14,13 +15,24 @@ import {
   useCatalogDetailQuery,
   useCatalogListQuery,
 } from "@/shared/lib/use-catalog-query";
+import type { SpellListResponse } from "@/entities/spell/types";
 
-/** Lista completa — wizard / ficha / editores. */
+/** Lista completa — wizard / editores (DTO com description). */
 export function useSpells() {
   const { editionSlugsParam } = useCatalogSources();
   return useQuery({
     queryKey: [...spellKeys.listAll(), editionSlugsParam ?? "all"],
     queryFn: () => fetchSpells(editionSlugsParam),
+    staleTime: CATALOG_DETAIL_STALE_MS,
+  });
+}
+
+/** Só nome/nível/escola — ficha e labels. */
+export function useSpellLabels() {
+  const { editionSlugsParam } = useCatalogSources();
+  return useQuery({
+    queryKey: [...spellKeys.labelsAll(), editionSlugsParam ?? "all"],
+    queryFn: () => fetchSpellLabels(editionSlugsParam),
     staleTime: CATALOG_DETAIL_STALE_MS,
   });
 }
@@ -58,7 +70,7 @@ export function useSpellsCatalog(params: {
         level: p.level,
         school: p.school,
         editionSlugs: p.editionSlugs,
-      }),
+      }) as Promise<SpellListResponse>,
   });
 }
 

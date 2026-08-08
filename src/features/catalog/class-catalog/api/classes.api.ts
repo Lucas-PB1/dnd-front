@@ -63,12 +63,16 @@ export async function fetchClassesPage(params?: {
   limit?: number;
   q?: string;
   editionSlugs?: string;
+  fields?: "summary";
 }) {
   const search = buildCatalogSearchParams({
     page: params?.page,
     limit: params?.limit ?? 50,
     q: params?.q,
-    filters: { editionSlugs: params?.editionSlugs },
+    filters: {
+      editionSlugs: params?.editionSlugs,
+      fields: params?.fields,
+    },
   });
 
   return catalogFetch<ClassListResponse>(
@@ -77,8 +81,12 @@ export async function fetchClassesPage(params?: {
   );
 }
 
-export async function fetchClasses(limit = 50, editionSlugs?: string) {
-  return fetchClassesPage({ page: 1, limit, editionSlugs });
+export async function fetchClasses(
+  limit = 50,
+  editionSlugs?: string,
+  fields?: "summary",
+) {
+  return fetchClassesPage({ page: 1, limit, editionSlugs, fields });
 }
 
 export async function fetchClassBySlug(slug: string) {

@@ -33,7 +33,7 @@ export function CombatMonkPanel({
   state,
 }: CombatMonkPanelProps) {
   const action = useTableActionMutation(characterId, executeMonkTableAction);
-  const mechanicalCatalog = useCombatMechanicalCatalog();
+  const mechanicalCatalog = useCombatMechanicalCatalog({ classSlug, subclassSlug });
   const panelCatalog = mechanicalCatalog.data?.panelActions ?? [];
 
   const baseActions = useMemo(

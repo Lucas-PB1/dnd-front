@@ -41,7 +41,7 @@ export function CombatSorcererPanel({
     characterId,
     executeSorcererTableAction,
   );
-  const mechanicalCatalog = useCombatMechanicalCatalog();
+  const mechanicalCatalog = useCombatMechanicalCatalog({ classSlug, subclassSlug });
   const panelCatalog = mechanicalCatalog.data?.panelActions ?? [];
 
   const metamagicActions = useMemo(

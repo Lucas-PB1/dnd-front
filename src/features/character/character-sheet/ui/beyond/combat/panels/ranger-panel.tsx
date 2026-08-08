@@ -35,7 +35,7 @@ export function CombatRangerPanel({
   state,
 }: CombatRangerPanelProps) {
   const action = useTableActionMutation(characterId, executeRangerTableAction);
-  const mechanicalCatalog = useCombatMechanicalCatalog();
+  const mechanicalCatalog = useCombatMechanicalCatalog({ classSlug, subclassSlug });
   const panelCatalog = mechanicalCatalog.data?.panelActions ?? [];
 
   const baseActions = useMemo(

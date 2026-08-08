@@ -41,7 +41,7 @@ export function CombatClericPanel({
   state,
 }: CombatClericPanelProps) {
   const action = useTableActionMutation(characterId, executeClericTableAction);
-  const mechanicalCatalog = useCombatMechanicalCatalog();
+  const mechanicalCatalog = useCombatMechanicalCatalog({ classSlug, subclassSlug });
   const panelCatalog = mechanicalCatalog.data?.panelActions ?? [];
 
   const baseActions = useMemo(

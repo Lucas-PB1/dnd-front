@@ -31,12 +31,16 @@ export async function fetchSpeciesPage(params?: {
   limit?: number;
   q?: string;
   editionSlugs?: string;
+  fields?: "summary";
 }) {
   const search = buildCatalogSearchParams({
     page: params?.page,
     limit: params?.limit ?? 50,
     q: params?.q,
-    filters: { editionSlugs: params?.editionSlugs },
+    filters: {
+      editionSlugs: params?.editionSlugs,
+      fields: params?.fields,
+    },
   });
 
   return catalogFetch<SpeciesListResponse>(
@@ -45,8 +49,12 @@ export async function fetchSpeciesPage(params?: {
   );
 }
 
-export async function fetchSpecies(limit = 50, editionSlugs?: string) {
-  return fetchSpeciesPage({ page: 1, limit, editionSlugs });
+export async function fetchSpecies(
+  limit = 50,
+  editionSlugs?: string,
+  fields?: "summary",
+) {
+  return fetchSpeciesPage({ page: 1, limit, editionSlugs, fields });
 }
 
 export async function fetchSpeciesBySlug(slug: string) {

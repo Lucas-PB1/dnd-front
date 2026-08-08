@@ -1,12 +1,12 @@
 "use client";
 
-import { useQueries } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
 import type { FeatSummary } from "@/entities/feat/types";
 import {
   featKeys,
-  fetchFeatBySlug,
+  fetchFeatsBySlugs,
 } from "@/features/catalog/feat-catalog/api/feats.api";
 import { CATALOG_DETAIL_STALE_MS } from "@/shared/lib/catalog-query";
 
@@ -16,25 +16,20 @@ export function useFeatDetails(slugs: string[]) {
     [slugs],
   );
 
-  const queries = useQueries({
-    queries: uniqueSlugs.map((slug) => ({
-      queryKey: featKeys.detail(slug),
-      queryFn: () => fetchFeatBySlug(slug),
-      staleTime: CATALOG_DETAIL_STALE_MS,
-      enabled: !!slug,
-    })),
+  const query = useQuery({
+    queryKey: featKeys.bySlugs(uniqueSlugs),
+    queryFn: () => fetchFeatsBySlugs(uniqueSlugs),
+    staleTime: CATALOG_DETAIL_STALE_MS,
+    enabled: uniqueSlugs.length > 0,
   });
 
   const featBySlug = useMemo(() => {
     const map: Record<string, FeatSummary> = {};
-    uniqueSlugs.forEach((slug, index) => {
-      const feat = queries[index]?.data;
-      if (feat) map[slug] = feat;
-    });
+    for (const feat of query.data ?? []) {
+      map[feat.slug] = feat;
+    }
     return map;
-  }, [uniqueSlugs, queries]);
+  }, [query.data]);
 
-  const isLoading = queries.some((query) => query.isPending);
-
-  return { featBySlug, isLoading };
+  return { featBySlug, isLoading: query.isPending && uniqueSlugs.length > 0 };
 }

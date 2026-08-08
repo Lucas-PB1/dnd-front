@@ -22,8 +22,16 @@ export const referenceKeys = {
   abilityGenerationMethods: () =>
     [...referenceKeys.all, "ability-generation-methods"] as const,
   characterLevels: () => [...referenceKeys.all, "character-levels"] as const,
-  combatMechanicalCatalog: () =>
-    [...referenceKeys.all, "combat-mechanical-catalog"] as const,
+  combatMechanicalCatalog: (filters?: {
+    classSlug?: string;
+    subclassSlug?: string;
+  }) =>
+    [
+      ...referenceKeys.all,
+      "combat-mechanical-catalog",
+      filters?.classSlug ?? "all",
+      filters?.subclassSlug ?? "all",
+    ] as const,
 };
 
 export async function fetchSkills(limit = 100) {
@@ -84,9 +92,24 @@ export async function fetchCharacterLevels(limit = 20) {
   );
 }
 
-export async function fetchCombatMechanicalCatalog() {
+export async function fetchCombatMechanicalCatalog(filters?: {
+  classSlug?: string;
+  subclassSlug?: string;
+}) {
+  const search = buildCatalogSearchParams({
+    page: 1,
+    limit: 1,
+    filters: {
+      classSlug: filters?.classSlug,
+      subclassSlug: filters?.subclassSlug,
+    },
+  });
+  // Endpoint não é paginado; remove page/limit do query string.
+  search.delete("page");
+  search.delete("limit");
+  const qs = search.toString();
   return catalogFetch<CombatMechanicalCatalog>(
-    `/combat-mechanical-catalog`,
+    qs ? `/combat-mechanical-catalog?${qs}` : `/combat-mechanical-catalog`,
     CATALOG_FETCH_INIT,
   );
 }

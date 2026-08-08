@@ -39,7 +39,7 @@ export function CombatBardPanel({
   state,
 }: CombatBardPanelProps) {
   const action = useTableActionMutation(characterId, executeBardTableAction);
-  const mechanicalCatalog = useCombatMechanicalCatalog();
+  const mechanicalCatalog = useCombatMechanicalCatalog({ classSlug, subclassSlug });
   const personaMasks = mechanicalCatalog.data?.personaMasks ?? [];
   const panelCatalog = mechanicalCatalog.data?.panelActions ?? [];
 

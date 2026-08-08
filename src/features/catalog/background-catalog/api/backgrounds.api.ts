@@ -38,12 +38,16 @@ export async function fetchBackgroundsPage(params?: {
   limit?: number;
   q?: string;
   editionSlugs?: string;
+  fields?: "summary";
 }) {
   const search = buildCatalogSearchParams({
     page: params?.page,
     limit: params?.limit ?? CATALOG_PAGE_SIZE,
     q: params?.q,
-    filters: { editionSlugs: params?.editionSlugs },
+    filters: {
+      editionSlugs: params?.editionSlugs,
+      fields: params?.fields,
+    },
   });
 
   return catalogFetch<BackgroundListResponse>(
@@ -53,8 +57,12 @@ export async function fetchBackgroundsPage(params?: {
 }
 
 /** Lista completa (poucos itens) — wizard / ficha. */
-export async function fetchBackgrounds(limit = 50, editionSlugs?: string) {
-  return fetchBackgroundsPage({ page: 1, limit, editionSlugs });
+export async function fetchBackgrounds(
+  limit = 50,
+  editionSlugs?: string,
+  fields?: "summary",
+) {
+  return fetchBackgroundsPage({ page: 1, limit, editionSlugs, fields });
 }
 
 export async function fetchBackgroundBySlug(slug: string) {

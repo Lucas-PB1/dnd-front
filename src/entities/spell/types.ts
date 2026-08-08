@@ -1,5 +1,17 @@
 import type { PaginatedResponse } from "@/shared/api/dnd-api/types";
 
+/** Resposta de `GET /spells?fields=summary`. */
+export type SpellCatalogLabel = {
+  slug: string;
+  name: string;
+  level: number;
+  schoolSlug: string;
+  schoolName: string;
+  ritual: boolean;
+};
+
+export type SpellCatalogLabelListResponse = PaginatedResponse<SpellCatalogLabel>;
+
 export type SpellSummary = {
   slug: string;
   name: string;

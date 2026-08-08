@@ -30,7 +30,7 @@ export function CombatPaladinPanel({
 }: CombatPaladinPanelProps) {
   const [healAmount, setHealAmount] = useState(1);
   const action = useTableActionMutation(characterId, executePaladinTableAction);
-  const mechanicalCatalog = useCombatMechanicalCatalog();
+  const mechanicalCatalog = useCombatMechanicalCatalog({ classSlug, subclassSlug });
   const panelCatalog = mechanicalCatalog.data?.panelActions ?? [];
 
   const channelActions = useMemo(

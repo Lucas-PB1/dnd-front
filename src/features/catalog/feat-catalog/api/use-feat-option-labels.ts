@@ -1,6 +1,6 @@
 "use client";
 
-import { useQueries } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
 
 import type {
@@ -10,7 +10,7 @@ import type {
 import type { FeatOptionDefinition } from "@/entities/feat/types";
 import {
   featKeys,
-  fetchFeatOptions,
+  fetchFeatOptionsBySlugs,
 } from "@/features/catalog/feat-catalog/api/feats.api";
 import {
   resolveFeatOptionDisplay,
@@ -18,7 +18,7 @@ import {
 } from "@/features/catalog/feat-catalog/lib/resolve-feat-option-label";
 import { useItems } from "@/features/catalog/item-catalog/api/use-items";
 import { useAbilityLabels } from "@/features/catalog/reference-catalog/api/use-ability-labels";
-import { useFeats } from "@/features/catalog/reference-catalog/api/use-reference";
+import { useFeatLabels } from "@/features/catalog/reference-catalog/api/use-reference";
 import { CATALOG_DETAIL_STALE_MS } from "@/shared/lib/catalog-query";
 
 type UseFeatOptionLabelsInput = {
@@ -36,17 +36,15 @@ export function useFeatOptionLabels({
     [characterFeats],
   );
 
-  const optionQueries = useQueries({
-    queries: slugs.map((slug) => ({
-      queryKey: featKeys.options(slug),
-      queryFn: () => fetchFeatOptions(slug),
-      staleTime: CATALOG_DETAIL_STALE_MS,
-      enabled: !!slug,
-    })),
+  const optionsQuery = useQuery({
+    queryKey: featKeys.optionsBySlugs(slugs),
+    queryFn: () => fetchFeatOptionsBySlugs(slugs),
+    staleTime: CATALOG_DETAIL_STALE_MS,
+    enabled: slugs.length > 0,
   });
 
-  const tools = useItems({ itemType: "tool", limit: 200 });
-  const featsCatalog = useFeats();
+  const tools = useItems({ itemType: "tool", limit: 200, fields: "summary" });
+  const featsCatalog = useFeatLabels();
 
   const featLabels = useMemo(
     () =>
@@ -58,11 +56,11 @@ export function useFeatOptionLabels({
 
   const defsBySlug = useMemo(() => {
     const map: Record<string, FeatOptionDefinition[]> = {};
-    slugs.forEach((slug, index) => {
-      map[slug] = optionQueries[index]?.data?.data ?? [];
-    });
+    for (const row of optionsQuery.data ?? []) {
+      map[row.featSlug] = row.options;
+    }
     return map;
-  }, [slugs, optionQueries]);
+  }, [optionsQuery.data]);
 
   const itemLabels = useMemo(
     () =>
@@ -95,7 +93,7 @@ export function useFeatOptionLabels({
   );
 
   const isLoading =
-    optionQueries.some((query) => query.isPending) ||
+    (slugs.length > 0 && optionsQuery.isPending) ||
     tools.isPending ||
     featsCatalog.isPending;
 

@@ -37,7 +37,7 @@ export function CombatDruidPanel({
   state,
 }: CombatDruidPanelProps) {
   const action = useTableActionMutation(characterId, executeDruidTableAction);
-  const mechanicalCatalog = useCombatMechanicalCatalog();
+  const mechanicalCatalog = useCombatMechanicalCatalog({ classSlug, subclassSlug });
   const panelCatalog = mechanicalCatalog.data?.panelActions ?? [];
 
   const baseActions = useMemo(
