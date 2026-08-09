@@ -16,6 +16,7 @@ Base comum:
 | Mago | **Concluída** |
 | Guerreiro | **Concluída** |
 | Patrulheiro | **Concluída** |
+| Ladino | **Concluída** |
 
 Classe nova: copiar uma destas (table-action + Economia com `resource_slug` / ±).
 
@@ -54,3 +55,12 @@ Classe nova: copiar uma destas (table-action + Economia com `resource_slug` / ±
 - Economy (controle de recurso): linhas C009 com `resource_slug` → ± na lista; `table_action` → Usar
 - `plan-economy-table-use`: `counterSlug` mesmo sem `tableAction` se houver `resourceSlug`
 - Polish adiado: tracker Companheiro Primal
+
+## Ladino — **concluída**
+
+- Painel: `…/panels/rogue-panel.tsx` — Poderes via `resolvePanelActions` (C010); extras locais (Furtivo Nd6, Total/CD, toggle dado psi, Golpe de Sorte na iniciativa)
+- `executeRogueTableAction` via `classSlug: rogue`
+- Economy: C009 com `resource_slug` (±) + `table_action` (Usar) para Soulknife / AT / Arachnoid; `strokeOfLuck` só contador
+- **Lâminas Psíquicas:** cards de ataque virtuais na ficha (`psychic-blade`) — Furtivo/Golpe Astuto no `rogue-attack-options` (não no painel)
+- Ataque: `rogue-attack-options.tsx` (Furtivo / Golpe Astuto / Assassino)
+- Polish adiado: Teia/posição, condições persistentes — ver exemplares API
