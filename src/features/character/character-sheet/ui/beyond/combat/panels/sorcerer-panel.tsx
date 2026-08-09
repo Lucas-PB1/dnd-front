@@ -70,9 +70,12 @@ export function CombatSorcererPanel({
         level,
         subclassSlug,
         section: "subclass",
-      }),
+      }).filter((entry) => entry.slug !== "bastion-of-law"),
     [panelCatalog, level, subclassSlug],
   );
+
+  const showBastion =
+    subclassSlug === "clockwork" && level >= 6;
 
   const knownMetamagics = useMemo(() => {
     const slugs = readMetamagicSlugs(classOptions);
@@ -114,6 +117,9 @@ export function CombatSorcererPanel({
           "sorcery-points",
           "innate-sorcery",
           "sorcerous-restoration",
+          "tides-of-chaos",
+          "restore-balance",
+          "dragon-wings",
         ]}
       />
 
@@ -229,7 +235,7 @@ export function CombatSorcererPanel({
   );
 
   const powersContent =
-    subclassActions.length > 0 ? (
+    subclassActions.length > 0 || showBastion ? (
       <div className="space-y-2">
         <CombatPanelActionButtons
           actions={subclassActions}
@@ -237,6 +243,30 @@ export function CombatSorcererPanel({
           isPending={action.isPending}
           onAction={(slug) => run({ actionSlug: slug as never })}
         />
+
+        {showBastion ? (
+          <div className="space-y-1">
+            <p className="text-xs font-medium text-muted-foreground">
+              Bastião da Lei (1–5 Pontos → N d8 de proteção):
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {[1, 2, 3, 4, 5].map((cost) => (
+                <Button
+                  key={cost}
+                  type="button"
+                  size="xs"
+                  variant="outline"
+                  disabled={action.isPending || pointsRemaining < cost}
+                  onClick={() =>
+                    run({ actionSlug: "bastion-of-law", pointsSpent: cost })
+                  }
+                >
+                  {cost} pt → {cost}d8
+                </Button>
+              ))}
+            </div>
+          </div>
+        ) : null}
 
         <TableActionFeedback
           lastResultNote={action.lastResult?.note}

@@ -8,10 +8,14 @@ import {
   applyTacticalMind,
   castCharacterSpell,
   executePsiWarriorAction,
+  executeSorcererTableAction,
+  executeWarlockTableAction,
   executeWizardTableAction,
   sessionKeys,
   spendClassResource,
   type PsiWarriorActionSlug,
+  type SorcererTableActionSlug,
+  type WarlockTableActionSlug,
   type WizardTableActionSlug,
 } from "@/features/character/character-sheet/api/character-session.api";
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
@@ -27,6 +31,31 @@ export type EconomyTableActionResultNote = {
 
 const MAGIC_MISSILE_SPELL_SLUG = "misseis-magicos";
 const MAGIC_MISSILE_FREE_RESOURCE = "magic-missile-free";
+
+const SORCERER_ECONOMY_TABLE_ACTIONS = new Set<string>([
+  "tides-of-chaos",
+  "bastion-of-law",
+  "restore-balance",
+  "dragon-wings",
+  "bend-luck",
+  "heroic-soul",
+  "mystical-maneuver",
+  "innate-sorcery",
+  "sorcerous-restoration",
+]);
+
+const WARLOCK_ECONOMY_TABLE_ACTIONS = new Set<string>([
+  "magical-cunning",
+  "healing-light",
+  "searing-vengeance",
+  "dark-ones-luck",
+  "fey-step-effect",
+  "awakened-mind",
+  "fiendish-resilience",
+  "hurl-through-hell",
+  "beguiling-defenses",
+  "clairvoyant-combatant",
+]);
 
 /**
  * Executa a ação de mesa ligada a uma linha de economia (Usar).
@@ -87,6 +116,34 @@ export function useEconomyTableAction(characterId: string) {
           );
           queryClient.setQueryData(sessionKeys.state(characterId), result.state);
           return { note: result.note };
+        }
+        if (SORCERER_ECONOMY_TABLE_ACTIONS.has(tableAction)) {
+          const result = await executeSorcererTableAction(
+            token,
+            characterId,
+            {
+              actionSlug: tableAction as SorcererTableActionSlug,
+              pointsSpent:
+                tableAction === "bastion-of-law" ? spendAmount : undefined,
+            },
+          );
+          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
+          return { note: result.note ?? note?.trim() ?? "" };
+        }
+        if (WARLOCK_ECONOMY_TABLE_ACTIONS.has(tableAction)) {
+          const result = await executeWarlockTableAction(token, characterId, {
+            actionSlug: tableAction as WarlockTableActionSlug,
+            diceCount:
+              tableAction === "healing-light" ? spendAmount : undefined,
+          });
+          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
+          return {
+            note:
+              result.note ??
+              (result.total != null
+                ? `${result.expression ?? ""} → ${result.total}`.trim()
+                : note?.trim() ?? ""),
+          };
         }
         if (tableAction === "cast:misseis-magicos-free") {
           const result = await castCharacterSpell(token, characterId, {

@@ -2,7 +2,7 @@
 
 import { sorcererMetamagicLimit } from "@/features/character/character-sheet/lib/sorcerer/metamagic";
 import type { MetamagicOption } from "@/features/catalog/metamagic-catalog/api/metamagics.api";
-import { cn } from "@/shared/lib/cn";
+import { cn } from "@/shared/lib/utils";
 
 type MetamagicPickerProps = {
   level: number;

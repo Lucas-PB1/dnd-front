@@ -511,11 +511,18 @@ export type SorcererTableActionSlug =
   | "innate-sorcery"
   | "sorcerous-restoration"
   | "tides-of-chaos"
-  | "bastion-of-law";
+  | "bastion-of-law"
+  | "restore-balance"
+  | "dragon-wings"
+  | "bend-luck"
+  | "heroic-soul"
+  | "mystical-maneuver";
 
 export type SorcererTableActionInput = {
   actionSlug: SorcererTableActionSlug;
   metamagicSlug?: string;
+  /** Bastião da Lei: 1–5 Pontos de Feitiçaria. */
+  pointsSpent?: number;
 };
 
 export async function executeSorcererTableAction(
