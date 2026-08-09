@@ -507,25 +507,28 @@ export type SorcererTableActionSlug =
   | "convert-points-to-slot-3"
   | "convert-points-to-slot-4"
   | "convert-points-to-slot-5"
-  | "use-metamagic-1"
-  | "use-metamagic-2"
-  | "use-metamagic-3"
+  | "use-metamagic"
   | "innate-sorcery"
   | "sorcerous-restoration"
   | "tides-of-chaos"
   | "bastion-of-law";
 
+export type SorcererTableActionInput = {
+  actionSlug: SorcererTableActionSlug;
+  metamagicSlug?: string;
+};
+
 export async function executeSorcererTableAction(
   accessToken: string,
   characterId: string,
-  actionSlug: SorcererTableActionSlug,
+  input: SorcererTableActionInput,
 ) {
   return gameFetch<TableActionResult>(
     `/characters/${characterId}/sorcerer/table-action`,
     accessToken,
     {
       method: "POST",
-      body: JSON.stringify({ actionSlug }),
+      body: JSON.stringify(input),
     },
   );
 }

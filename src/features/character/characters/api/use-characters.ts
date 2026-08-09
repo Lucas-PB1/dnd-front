@@ -8,7 +8,7 @@ import {
   charactersKeys,
   fetchCharacters,
 } from "@/features/character/characters/api/characters.api";
-import { useAuth } from "@/features/auth/model/use-auth";
+import { useAuth } from "@/features/auth/model";
 
 export function useCharacters() {
   const router = useRouter();

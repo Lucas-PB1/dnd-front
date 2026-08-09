@@ -13,7 +13,7 @@ import {
 import { Button } from "@/shared/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/shared/ui/field";
 import { Input } from "@/shared/ui/input";
-import { useAuth } from "@/features/auth/model/use-auth";
+import { useAuth } from "@/features/auth/model";
 
 export function SignupForm() {
   const router = useRouter();

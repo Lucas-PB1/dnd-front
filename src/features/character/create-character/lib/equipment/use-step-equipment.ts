@@ -24,7 +24,7 @@ import {
   pendingEquipmentChoices,
   type EquipmentLine,
   type EquipmentResolveContext,
-} from "@/features/character/create-character/lib/equipment/equipment-selection";
+} from "@/features/character/create-character/lib/equipment";
 import type { CreateCharacterInput } from "@/features/character/create-character/model/create-character.schema";
 
 export function useStepEquipment(

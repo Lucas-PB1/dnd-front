@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useMemo, useState } from "react";
 
-import { useAuth } from "@/features/auth/model/use-auth";
+import { useAuth } from "@/features/auth/model";
 import { useCharacters } from "@/features/character/characters/api/use-characters";
 import { campaignRoleLabel } from "@/features/campaign/campaigns/api/campaigns.api";
 import {

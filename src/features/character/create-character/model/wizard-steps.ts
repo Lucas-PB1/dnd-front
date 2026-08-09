@@ -9,6 +9,7 @@ export const WIZARD_STEPS = [
   { id: "equipment", label: "Equipamento" },
   { id: "spells", label: "Magias" },
   { id: "invocations", label: "Invocações" },
+  { id: "metamagics", label: "Metamagia" },
   { id: "languages", label: "Idiomas" },
   { id: "review", label: "Revisão" },
 ] as const;
@@ -20,6 +21,7 @@ export type WizardNavOptions = {
   skipFeats?: boolean;
   skipSubclass?: boolean;
   skipInvocations?: boolean;
+  skipMetamagics?: boolean;
 };
 
 function shouldSkipStep(
@@ -30,6 +32,7 @@ function shouldSkipStep(
   if (step === "feats" && options?.skipFeats) return true;
   if (step === "subclass" && options?.skipSubclass) return true;
   if (step === "invocations" && options?.skipInvocations) return true;
+  if (step === "metamagics" && options?.skipMetamagics) return true;
   return false;
 }
 

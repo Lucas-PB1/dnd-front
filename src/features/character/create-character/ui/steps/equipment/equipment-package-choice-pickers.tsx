@@ -4,7 +4,7 @@ import {
   choicePickKey,
   toolOptionsForPool,
 } from "@/features/character/create-character/lib/equipment/equipment-choice-resolve";
-import type { EquipmentLine } from "@/features/character/create-character/lib/equipment/equipment-selection";
+import type { EquipmentLine } from "@/features/character/create-character/lib/equipment";
 import { SearchableSelect } from "@/shared/ui/searchable-select";
 
 type ChoicePickersProps = {

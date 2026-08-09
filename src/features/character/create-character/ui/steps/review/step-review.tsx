@@ -13,7 +13,7 @@ import {
   ReviewLanguagesSection,
   ReviewSkillsSection,
   ReviewSpellsSection,
-} from "@/features/character/create-character/ui/steps/review/review-sections";
+} from "@/features/character/create-character/ui/steps/review";
 
 type StepReviewProps = {
   control: Control<CreateCharacterInput>;

@@ -23,6 +23,7 @@ src/
 ## Features (slice groups)
 
 Pastas de grupo **não** têm public API própria — só organizam slices.
+Quando uma pasta precisa de barrel público, use **`index.ts`** (sem aggregators nomeados tipo `sheet-read-sections.tsx`).
 
 ```text
 features/

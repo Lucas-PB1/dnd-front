@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { useAuth } from "@/features/auth/model/use-auth";
+import { useAuth } from "@/features/auth/model";
 import { cn } from "@/shared/lib/utils";
 import { Button, buttonVariants } from "@/shared/ui/button";
 

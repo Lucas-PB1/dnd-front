@@ -21,7 +21,7 @@ Mobile (`order-*`): abas → perícias → proficiências.
 ## Componentes
 
 - Primitivos em `features/character/character-sheet/ui/beyond/{layout,combat,inventory,spells}/`
-- Leitura: `ui/sections/sheet-read-sections.tsx` · edição: `ui/edit/sheet-edit-forms.tsx`
+- Leitura: `ui/sections/index.ts` · edição: `ui/edit/index.ts`
 - Vitais / condições / descanso: header + faixa de stats (`SheetCombatStrip`, `BeyondRestActions`)
 - Slots / conjurar / concentração: aba Magias (`BeyondSpellsTab` — lista por círculo + cast na linha)
 - Aba Ações (`BeyondActionsTab`): passivas · ataques · ferramentas/poderes de classe · economia (Usar + ±)

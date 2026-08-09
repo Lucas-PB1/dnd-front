@@ -22,7 +22,7 @@ import {
 import { asiFeatLevelsUpTo } from "@/features/character/create-character/lib/feats/asi-feat-slots";
 import { asiFeatSlotsToCharacterFeats } from "@/features/character/create-character/lib/feats/asi-feat-slots-to-feats";
 import { toolNameForSlug } from "@/features/character/create-character/lib/equipment/equipment-choice-resolve";
-import { groupEquipmentPackages } from "@/features/character/create-character/lib/equipment/equipment-selection";
+import { groupEquipmentPackages } from "@/features/character/create-character/lib/equipment";
 import { languageQuota } from "@/features/character/create-character/lib/languages/language-selection";
 import { previewCreateCharacter } from "@/features/character/create-character/lib/review/preview-create-character";
 import {

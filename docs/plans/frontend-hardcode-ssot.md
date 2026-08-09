@@ -109,7 +109,7 @@ Nota: **B−**
 | Catálogo + HTTP + FSD documentado | Forte (A−) |
 | `character-sheet` (combate / inventário / magias) | Fraco — god slice, arquivos 500–850 linhas, regras espelhadas |
 | Tipagem de resposta API | Só compile-time (`gameFetch<T>`); sem Zod no boundary |
-| Boundaries FSD | `shared` → `entities` em filtros/chips; poucos `index.ts` de public API |
+| Boundaries FSD | `shared` → `entities` em filtros/chips; barrels públicos = `index.ts` na pasta (sem aggregators nomeados) |
 | Testes | ~26 Vitest vs ~450 src; ficha quase sem cobertura; Cypress smoke |
 
 ### Melhorias alinhadas a este plano

@@ -27,7 +27,7 @@ import {
   SpeciesChoicesSection,
   SubclassMechanicsSection,
   SubclassOptionsSection,
-} from "@/features/character/character-sheet/ui/sections/sheet-read-sections";
+} from "@/features/character/character-sheet/ui/sections";
 import { SheetEditAction } from "@/features/character/character-sheet/ui/sheet/sheet-ui";
 import { cn } from "@/shared/lib/utils";
 

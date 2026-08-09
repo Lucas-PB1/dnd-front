@@ -11,7 +11,7 @@ import {
   EditSpeciesChoicesForm,
   EditSpellsForm,
   EditSubclassOptionsForm,
-} from "@/features/character/character-sheet/ui/edit/sheet-edit-forms";
+} from "@/features/character/character-sheet/ui/edit";
 import type { EditFormProps } from "@/features/character/character-sheet/ui/edit/edit-form-shell";
 import type { SheetEditDialogConfig } from "@/features/character/character-sheet/ui/edit/sheet-edit-dialog";
 import type { SheetEditId } from "@/features/character/character-sheet/lib/edit/sheet-edit-types";

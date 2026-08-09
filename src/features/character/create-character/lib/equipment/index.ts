@@ -4,22 +4,22 @@ export {
   type EquipmentLineKind,
   type EquipmentPackage,
   type EquipmentResolveContext,
-} from "@/features/character/create-character/lib/equipment/equipment-selection-types";
+} from "./equipment-selection-types";
 
 export {
   automaticPackageItemSlugs,
   formatClassEquipmentLine,
   groupEquipmentPackages,
   isGoldOnlyClassPackage,
-} from "@/features/character/create-character/lib/equipment/equipment-package-grouping";
+} from "./equipment-package-grouping";
 
 export {
   backgroundEquipmentLines,
   classEquipmentLines,
   pendingEquipmentChoices,
-} from "@/features/character/create-character/lib/equipment/equipment-line-resolve";
+} from "./equipment-line-resolve";
 
 export {
   buildBackgroundEquipmentPayload,
   buildClassEquipmentPayload,
-} from "@/features/character/create-character/lib/equipment/equipment-payload";
+} from "./equipment-payload";

@@ -13,7 +13,7 @@ import {
   classEquipmentLines,
   formatClassEquipmentLine,
   isGoldOnlyClassPackage,
-} from "@/features/character/create-character/lib/equipment/equipment-selection";
+} from "@/features/character/create-character/lib/equipment";
 import type { ClassEquipmentOption } from "@/entities/class/types";
 
 describe("equipment-choice-resolve", () => {

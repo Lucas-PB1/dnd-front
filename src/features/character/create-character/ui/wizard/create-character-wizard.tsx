@@ -108,6 +108,7 @@ export function CreateCharacterWizard() {
     skipFeats: !hasFeatsStep,
     skipSubclass: !hasSubclassStep,
     skipInvocations: classSlug !== "warlock",
+    skipMetamagics: classSlug !== "sorcerer" || level < 2,
   };
   const visibleSteps = visibleWizardSteps(wizardNav);
 
@@ -147,6 +148,7 @@ export function CreateCharacterWizard() {
       hasSubclassStep,
       hasSpellStep,
       hasInvocationsStep: classSlug === "warlock",
+      hasMetamagicsStep: classSlug === "sorcerer" && level >= 2,
     });
   }
 

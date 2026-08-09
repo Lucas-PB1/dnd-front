@@ -27,6 +27,10 @@ import {
   readEldritchInvocationSlugs,
   warlockInvocationLimit,
 } from "@/features/character/character-sheet/lib/warlock/eldritch-invocations";
+import {
+  readMetamagicSlugs,
+  sorcererMetamagicLimit,
+} from "@/features/character/character-sheet/lib/sorcerer/metamagic";
 
 export type WizardAdvanceDeps = {
   step: WizardStepId;
@@ -52,6 +56,7 @@ export type WizardAdvanceDeps = {
   hasSubclassStep: boolean;
   hasSpellStep: boolean;
   hasInvocationsStep: boolean;
+  hasMetamagicsStep: boolean;
 };
 
 /** Valida o passo atual e avança o wizard; retorna sem mudar o step se inválido. */
@@ -80,6 +85,7 @@ export async function advanceWizardStep(deps: WizardAdvanceDeps): Promise<void> 
     hasSubclassStep,
     hasSpellStep,
     hasInvocationsStep,
+    hasMetamagicsStep,
   } = deps;
 
   clearStepErrors();
@@ -268,12 +274,26 @@ export async function advanceWizardStep(deps: WizardAdvanceDeps): Promise<void> 
   }
 
   if (step === "equipment") {
-    setStep(hasSpellStep ? "spells" : hasInvocationsStep ? "invocations" : "languages");
+    setStep(
+      hasSpellStep
+        ? "spells"
+        : hasInvocationsStep
+          ? "invocations"
+          : hasMetamagicsStep
+            ? "metamagics"
+            : "languages",
+    );
     return;
   }
 
   if (step === "spells") {
-    setStep(hasInvocationsStep ? "invocations" : "languages");
+    setStep(
+      hasInvocationsStep
+        ? "invocations"
+        : hasMetamagicsStep
+          ? "metamagics"
+          : "languages",
+    );
     return;
   }
 
@@ -284,6 +304,21 @@ export async function advanceWizardStep(deps: WizardAdvanceDeps): Promise<void> 
     if (picks.length !== limit) {
       setSubclassError(
         `Escolha exatamente ${limit} invocação(ões) mística(s) para o nível ${values.level}.`,
+      );
+      return;
+    }
+    setSubclassError(undefined);
+    setStep("languages");
+    return;
+  }
+
+  if (step === "metamagics") {
+    const values = getValues();
+    const limit = sorcererMetamagicLimit(values.level);
+    const picks = readMetamagicSlugs(values.classOptions ?? []);
+    if (picks.length !== limit) {
+      setSubclassError(
+        `Escolha exatamente ${limit} opção(ões) de Metamagia para o nível ${values.level}.`,
       );
       return;
     }

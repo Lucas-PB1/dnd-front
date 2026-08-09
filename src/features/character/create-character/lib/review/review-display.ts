@@ -2,7 +2,7 @@ import {
   appendCharacterFeat,
   featInstanceKey,
 } from "@/entities/character/lib/character-feat";
-import { BACKGROUND_GOLD_PACKAGE_SLUG } from "@/features/character/create-character/lib/equipment/equipment-selection";
+import { BACKGROUND_GOLD_PACKAGE_SLUG } from "@/features/character/create-character/lib/equipment";
 import { toolNameForSlug } from "@/features/character/create-character/lib/equipment/equipment-choice-resolve";
 import { asiFeatSlotsToCharacterFeats } from "@/features/character/create-character/lib/feats/asi-feat-slots-to-feats";
 import type { CreateCharacterInput } from "@/features/character/create-character/model/create-character.schema";

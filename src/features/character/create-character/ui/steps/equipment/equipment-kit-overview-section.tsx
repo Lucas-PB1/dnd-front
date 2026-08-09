@@ -1,6 +1,6 @@
 "use client";
 
-import { BACKGROUND_GOLD_PACKAGE_SLUG } from "@/features/character/create-character/lib/equipment/equipment-selection";
+import { BACKGROUND_GOLD_PACKAGE_SLUG } from "@/features/character/create-character/lib/equipment";
 import type { StepEquipmentData } from "@/features/character/create-character/lib/equipment/use-step-equipment";
 import {
   SelectionStatus,

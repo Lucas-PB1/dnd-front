@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@/features/auth/model/use-auth";
+import { useAuth } from "@/features/auth/model";
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
 import { ApiError } from "@/shared/api/dnd-api/api-error";
 import {

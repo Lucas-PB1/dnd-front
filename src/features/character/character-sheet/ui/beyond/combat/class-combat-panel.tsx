@@ -69,7 +69,12 @@ export function ClassCombatPanel({
     case "bard":
       return <CombatBardPanel {...shared} />;
     case "sorcerer":
-      return <CombatSorcererPanel {...shared} />;
+      return (
+        <CombatSorcererPanel
+          {...shared}
+          classOptions={character.classOptions}
+        />
+      );
     case "warlock":
       return (
         <CombatWarlockPanel

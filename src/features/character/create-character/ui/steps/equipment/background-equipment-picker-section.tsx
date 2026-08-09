@@ -3,7 +3,7 @@
 import {
   BACKGROUND_GOLD_PACKAGE_SLUG,
   backgroundEquipmentLines,
-} from "@/features/character/create-character/lib/equipment/equipment-selection";
+} from "@/features/character/create-character/lib/equipment";
 import type { StepEquipmentData } from "@/features/character/create-character/lib/equipment/use-step-equipment";
 import {
   ChoicePickers,

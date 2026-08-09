@@ -25,6 +25,7 @@ import {
 } from "@/features/character/character-sheet/ui/beyond/spells/beyond-spell-row";
 import { BeyondSpellMasteryPanel } from "@/features/character/character-sheet/ui/beyond/spells/beyond-spell-mastery-panel";
 import { BeyondEldritchInvocationsPanel } from "@/features/character/character-sheet/ui/beyond/warlock/beyond-eldritch-invocations-panel";
+import { BeyondMetamagicsPanel } from "@/features/character/character-sheet/ui/beyond/sorcerer/beyond-metamagics-panel";
 import { BeyondSpellSlotsPanel } from "@/features/character/character-sheet/ui/beyond/spells/beyond-spell-slots-panel";
 import {
   SPELL_MASTERY_UNLOCK_LEVEL,
@@ -294,6 +295,11 @@ export function BeyondSpellsTab({
       ) : null}
 
       <BeyondEldritchInvocationsPanel
+        characterId={characterId}
+        character={character}
+      />
+
+      <BeyondMetamagicsPanel
         characterId={characterId}
         character={character}
       />

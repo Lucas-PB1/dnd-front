@@ -9,7 +9,7 @@ import {
   createCharacter,
 } from "@/features/character/characters/api/characters.api";
 import type { CreateCharacterPayload } from "@/entities/character/types";
-import { useAuth } from "@/features/auth/model/use-auth";
+import { useAuth } from "@/features/auth/model";
 
 export function useCreateCharacter() {
   const router = useRouter();

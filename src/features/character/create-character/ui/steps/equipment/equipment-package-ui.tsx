@@ -7,7 +7,7 @@ import {
   SparklesIcon,
 } from "@heroicons/react/24/outline";
 
-import type { EquipmentLine } from "@/features/character/create-character/lib/equipment/equipment-selection";
+import type { EquipmentLine } from "@/features/character/create-character/lib/equipment";
 import { motion } from "@/shared/lib/motion";
 import { cn } from "@/shared/lib/utils";
 

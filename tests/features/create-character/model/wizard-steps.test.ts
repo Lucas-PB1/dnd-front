@@ -55,12 +55,13 @@ describe("computeWizardHasSpellStep", () => {
 });
 
 describe("wizard step navigation", () => {
-  it("skips spells, feats, subclass and invocations when configured", () => {
+  it("skips spells, feats, subclass, invocations and metamagics when configured", () => {
     const nav = {
       skipSpells: true,
       skipFeats: true,
       skipSubclass: true,
       skipInvocations: true,
+      skipMetamagics: true,
     };
     expect(visibleWizardSteps(nav).map((step) => step.id)).not.toContain(
       "spells",
@@ -74,20 +75,31 @@ describe("wizard step navigation", () => {
     expect(visibleWizardSteps(nav).map((step) => step.id)).not.toContain(
       "invocations",
     );
+    expect(visibleWizardSteps(nav).map((step) => step.id)).not.toContain(
+      "metamagics",
+    );
     expect(skippedWizardSteps(nav).map((step) => step.id)).toEqual([
       "feats",
       "subclass",
       "spells",
       "invocations",
+      "metamagics",
     ]);
     expect(nextWizardStep("equipment", nav)).toBe("languages");
     expect(nextWizardStep("species", nav)).toBe("equipment");
     expect(prevWizardStep("species", nav)).toBe("background");
   });
 
-  it("keeps spells then invocations for casters", () => {
-    expect(nextWizardStep("equipment")).toBe("spells");
-    expect(nextWizardStep("spells")).toBe("invocations");
-    expect(prevWizardStep("languages")).toBe("invocations");
+  it("keeps spells then invocations for warlocks when metamagics skipped", () => {
+    const nav = { skipMetamagics: true };
+    expect(nextWizardStep("equipment", nav)).toBe("spells");
+    expect(nextWizardStep("spells", nav)).toBe("invocations");
+    expect(prevWizardStep("languages", nav)).toBe("invocations");
+  });
+
+  it("routes sorcerer through metamagics when invocations skipped", () => {
+    const nav = { skipInvocations: true };
+    expect(nextWizardStep("spells", nav)).toBe("metamagics");
+    expect(prevWizardStep("languages", nav)).toBe("metamagics");
   });
 });

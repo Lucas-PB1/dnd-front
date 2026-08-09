@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 
 import { ApiError } from "@/shared/api/dnd-api/api-error";
-import { useAuth } from "@/features/auth/model/use-auth";
+import { useAuth } from "@/features/auth/model";
 
 /**
  * Token + redirect 401 para rotas de jogo.

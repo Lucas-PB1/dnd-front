@@ -18,6 +18,7 @@ import { StepReview } from "@/features/character/create-character/ui/steps/revie
 import { StepSpeciesChoices } from "@/features/character/create-character/ui/steps/species/step-species-choices";
 import { StepSpells } from "@/features/character/create-character/ui/steps/spells/step-spells";
 import { StepWarlockInvocations } from "@/features/character/create-character/ui/steps/invocations/step-warlock-invocations";
+import { StepSorcererMetamagics } from "@/features/character/create-character/ui/steps/metamagics/step-sorcerer-metamagics";
 import { StepSubclassOptions } from "@/features/character/create-character/ui/steps/subclass/step-subclass-options";
 
 type WizardStepContentProps = {
@@ -119,6 +120,13 @@ export function WizardStepContent({
       {step === "invocations" ? (
         <>
           <StepWarlockInvocations control={control} setValue={setValue} />
+          {subclassError ? <StepInlineError message={subclassError} /> : null}
+        </>
+      ) : null}
+
+      {step === "metamagics" ? (
+        <>
+          <StepSorcererMetamagics control={control} setValue={setValue} />
           {subclassError ? <StepInlineError message={subclassError} /> : null}
         </>
       ) : null}
