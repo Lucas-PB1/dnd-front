@@ -91,12 +91,12 @@ const CLASS_COPY: Partial<
     listAccessNote: "Escolha da lista de bruxo",
   },
   ranger: {
-    archetypeTitle: "Magia do guardião (conhecidas)",
+    archetypeTitle: "Magia do patrulheiro (conhecidas)",
     guide:
-      "Meio conjurador: espaços sobem mais devagar. Escolha magias conhecidas da lista de guardião (sem truques nos níveis iniciais).",
+      "Meio conjurador: espaços sobem mais devagar. Escolha magias conhecidas da lista de patrulheiro (sem truques nos níveis iniciais).",
     leveledSectionTitle: "Magias conhecidas",
     leveledSectionHint: "Magias aprendidas na patrulha e na natureza.",
-    listAccessNote: "Escolha da lista de guardião",
+    listAccessNote: "Escolha da lista de patrulheiro",
   },
   paladin: {
     archetypeTitle: "Magia sagrada (preparada)",

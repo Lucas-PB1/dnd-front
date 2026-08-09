@@ -175,7 +175,7 @@ export function CombatRangerPanel({
 
   return (
     <CombatClassPanelShell
-      title="Combate do Guardião"
+      title="Combate do Patrulheiro"
       actionsContent={actionsContent}
       powersContent={powersContent}
       combatNotes={combatNotes}
