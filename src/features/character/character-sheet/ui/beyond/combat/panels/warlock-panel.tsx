@@ -11,12 +11,14 @@ import {
   type WarlockTableActionSlug,
 } from "@/features/character/character-sheet/api/character-session.api";
 import { inventoryKeys } from "@/features/character/character-sheet/api/character-inventory.api";
+import { useCastSpell } from "@/features/character/character-sheet/api/use-character-state";
 import { useCharacterInventory } from "@/features/character/character-sheet/api/use-character-inventory";
 import { useTableActionMutation } from "@/features/character/character-sheet/api/use-table-action-mutation";
 import { resolvePanelActions } from "@/features/character/character-sheet/lib/combat/resolve-panel-actions";
 import {
   eldritchInvocationKindLabel,
   eldritchInvocationMetaLine,
+  isEldritchOncePerLongRestInvocation,
   readEldritchInvocationPicks,
 } from "@/features/character/character-sheet/lib/warlock/eldritch-invocations";
 import { isMeleeWeaponFromPropertySlugs } from "@/features/character/character-sheet/lib/warlock/pact-blade";
@@ -41,7 +43,7 @@ import { TableActionFeedback } from "../shared/table-action-feedback";
 
 const PACT_OF_THE_BLADE = "pact-of-the-blade";
 const INVOKE_PACT_WEAPON = "invoke-pact-weapon";
-const NOTE_INVOCATION_KINDS = new Set(["bonus", "action"]);
+const NOTE_INVOCATION_KINDS = new Set(["bonus", "action", "note", "reaction"]);
 const EMPTY_PANEL_ACTIONS: ClassPanelActionRecord[] = [];
 
 type CombatWarlockPanelProps = {
@@ -65,6 +67,7 @@ export function CombatWarlockPanel({
 }: CombatWarlockPanelProps) {
   const queryClient = useQueryClient();
   const action = useTableActionMutation(characterId, executeWarlockTableAction);
+  const castSpell = useCastSpell(characterId);
   const mechanicalCatalog = useCombatMechanicalCatalog({ classSlug, subclassSlug });
   const panelCatalog =
     mechanicalCatalog.data?.panelActions ?? EMPTY_PANEL_ACTIONS;
@@ -183,13 +186,53 @@ export function CombatWarlockPanel({
     (row) =>
       row.slug !== PACT_OF_THE_BLADE && NOTE_INVOCATION_KINDS.has(row.kind),
   );
+  const freeCastInvocations = knownInvocations.filter(
+    (row) => row.kind === "free_cast" && Boolean(row.grantedSpellSlug),
+  );
+
+  const busy = action.isPending || castSpell.isPending;
+
+  function freeCastRemaining(spellSlug: string): number | null {
+    const option = state?.grantedSpellCastOptions?.find(
+      (entry) => entry.spellSlug === spellSlug,
+    );
+    return option?.freeCastsRemaining ?? null;
+  }
+
+  function canFreeCastInvocation(row: (typeof freeCastInvocations)[number]): boolean {
+    if (!row.grantedSpellSlug) return false;
+    if (!isEldritchOncePerLongRestInvocation(row.slug)) return true;
+    const remaining = freeCastRemaining(row.grantedSpellSlug);
+    return remaining == null || remaining > 0;
+  }
+
+  function runFreeCastInvocation(
+    row: (typeof freeCastInvocations)[number],
+  ) {
+    if (!row.grantedSpellSlug || !canFreeCastInvocation(row)) return;
+    setLocalNote(null);
+    setFeedbackZone("powers");
+    castSpell.mutate(
+      {
+        spellSlug: row.grantedSpellSlug,
+        ...(isEldritchOncePerLongRestInvocation(row.slug)
+          ? { useFreeCast: true }
+          : {}),
+      },
+      {
+        onSuccess: (result) => {
+          if (result?.note) setLocalNote(result.note);
+        },
+      },
+    );
+  }
 
   const actionsContent = (
     <div className="space-y-2">
       <CombatPanelActionButtons
         actions={baseActions}
         getRemaining={getRemaining}
-        isPending={action.isPending}
+        isPending={busy}
         onAction={(slug) =>
           runTableAction(slug as WarlockTableActionSlug, "tools")
         }
@@ -218,18 +261,12 @@ export function CombatWarlockPanel({
           <CombatPanelActionButtons
             actions={subclassActions}
             getRemaining={getRemaining}
-            isPending={action.isPending}
+            isPending={busy}
             variant="secondary"
             onAction={(slug) =>
               runTableAction(slug as WarlockTableActionSlug, "powers")
             }
           />
-          {feedbackZone === "powers" ? (
-            <TableActionFeedback
-              lastResultNote={localNote ?? action.lastResult?.note}
-              error={action.error}
-            />
-          ) : null}
         </div>
       ) : null}
 
@@ -251,7 +288,7 @@ export function CombatWarlockPanel({
             type="button"
             size="sm"
             variant="secondary"
-            disabled={action.isPending || meleeWeaponOptions.length === 0}
+            disabled={busy || meleeWeaponOptions.length === 0}
             onClick={() => {
               setPactWeaponSlug(
                 currentPactWeapon?.itemSlug ??
@@ -316,13 +353,13 @@ export function CombatWarlockPanel({
                   type="button"
                   variant="outline"
                   onClick={() => setPactModalOpen(false)}
-                  disabled={action.isPending}
+                  disabled={busy}
                 >
                   Cancelar
                 </Button>
                 <Button
                   type="button"
-                  disabled={action.isPending || !pactWeaponSlug}
+                  disabled={busy || !pactWeaponSlug}
                   onClick={() => {
                     runTableAction(
                       INVOKE_PACT_WEAPON,
@@ -351,13 +388,49 @@ export function CombatWarlockPanel({
               onClick={() => {
                 setFeedbackZone("powers");
                 setLocalNote(
-                  `${row.name}: ${row.description.trim() || "Nota de mesa (Ação Bônus)."}`,
+                  `${row.name}: ${row.description.trim() || "Nota de mesa."}`,
                 );
               }}
             >
               {row.name}
             </Button>
           ))}
+        </div>
+      ) : null}
+
+      {freeCastInvocations.length > 0 ? (
+        <div className="space-y-1.5">
+          <p className="text-xs font-medium text-muted-foreground">
+            Conjurar sem espaço (invocação)
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {freeCastInvocations.map((row) => {
+              const spellSlug = row.grantedSpellSlug!;
+              const oncePer = isEldritchOncePerLongRestInvocation(row.slug);
+              const remaining = freeCastRemaining(spellSlug);
+              const enabled = canFreeCastInvocation(row);
+              const spellName =
+                spellNameBySlug.get(spellSlug) ?? spellSlug;
+              return (
+                <Button
+                  key={row.slug}
+                  type="button"
+                  size="sm"
+                  variant="secondary"
+                  disabled={busy || !enabled}
+                  title={
+                    oncePer && remaining != null
+                      ? `${spellName} · ${remaining} restante(s)`
+                      : spellName
+                  }
+                  onClick={() => runFreeCastInvocation(row)}
+                >
+                  {row.name}
+                  {oncePer && remaining != null ? ` (${remaining})` : ""}
+                </Button>
+              );
+            })}
+          </div>
         </div>
       ) : null}
 
@@ -368,7 +441,7 @@ export function CombatWarlockPanel({
         title={`Invocações Místicas${
           knownInvocations.length > 0 ? ` (${knownInvocations.length})` : ""
         }`}
-        subtitle="Toque no nome para ler o efeito completo. Troque invocações na aba Magias."
+        subtitle="Conjurações acima · toque no nome para o texto completo · troca na aba Magias."
       >
         {invocationsQuery.isPending ? (
           <p className="text-xs text-muted-foreground">Carregando invocações…</p>
@@ -434,6 +507,13 @@ export function CombatWarlockPanel({
           </ul>
         )}
       </CollapsibleCard>
+
+      {feedbackZone === "powers" ? (
+        <TableActionFeedback
+          lastResultNote={localNote ?? action.lastResult?.note}
+          error={action.error ?? castSpell.error}
+        />
+      ) : null}
     </div>
   );
 

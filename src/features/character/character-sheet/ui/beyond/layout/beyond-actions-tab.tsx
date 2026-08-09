@@ -372,6 +372,7 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
                 tableAction.mutate(
                   {
                     tableAction: action.tableAction,
+                    classSlug: action.classSlug,
                     usePsiDie: plan.usePsiDie,
                     resourceSlug: action.resourceSlug,
                     spendAmount: action.spendAmount ?? 1,

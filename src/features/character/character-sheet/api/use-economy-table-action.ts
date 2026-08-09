@@ -17,7 +17,10 @@ import {
 } from "@/features/character/character-sheet/api/character-session.api";
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
 import {
+  isArmTableAction,
   isPsiTableAction,
+  SPEND_RESOURCE_TABLE_ACTION,
+  wizardSlugFromArmTableAction,
   type EconomyTableAction,
 } from "@/features/character/character-sheet/lib/combat/economy-table-actions";
 
@@ -27,41 +30,33 @@ export type EconomyTableActionResultNote = {
 
 const MAGIC_MISSILE_SPELL_SLUG = "misseis-magicos";
 const MAGIC_MISSILE_FREE_RESOURCE = "magic-missile-free";
+const MAGIC_MISSILE_FREE_CAST = "cast:misseis-magicos-free";
 
-const FIGHTER_ECONOMY_TABLE_ACTIONS = new Set<string>([
-  "second-wind",
-  "action-surge",
-  "tactical-mind",
-]);
+type SessionNoteResult = {
+  state: unknown;
+  note?: string | null;
+  total?: number;
+  expression?: string | null;
+};
 
-const SORCERER_ECONOMY_TABLE_ACTIONS = new Set<string>([
-  "tides-of-chaos",
-  "bastion-of-law",
-  "restore-balance",
-  "dragon-wings",
-  "bend-luck",
-  "heroic-soul",
-  "mystical-maneuver",
-  "innate-sorcery",
-  "sorcerous-restoration",
-  "warp-implosion",
-]);
-
-const WARLOCK_ECONOMY_TABLE_ACTIONS = new Set<string>([
-  "magical-cunning",
-  "healing-light",
-  "searing-vengeance",
-  "dark-ones-luck",
-  "fey-step-effect",
-  "awakened-mind",
-  "fiendish-resilience",
-  "hurl-through-hell",
-  "beguiling-defenses",
-  "clairvoyant-combatant",
-]);
+function noteFromResult(
+  result: SessionNoteResult,
+  fallbackNote?: string,
+): EconomyTableActionResultNote {
+  if (result.note?.trim()) {
+    return { note: result.note.trim() };
+  }
+  if (result.total != null) {
+    return {
+      note: `${result.expression ?? ""} → ${result.total}`.trim(),
+    };
+  }
+  return { note: fallbackNote?.trim() ?? "" };
+}
 
 /**
  * Executa a ação de mesa ligada a uma linha de economia (Usar).
+ * Roteia por `classSlug` do catálogo (+ protocolos cast/arm/spend-resource).
  */
 export function useEconomyTableAction(characterId: string) {
   const { requireToken, handleUnauthorized } = useGameAuth(
@@ -72,6 +67,7 @@ export function useEconomyTableAction(characterId: string) {
   return useMutation({
     mutationFn: async ({
       tableAction,
+      classSlug,
       usePsiDie = false,
       resourceSlug,
       spendAmount = 1,
@@ -79,6 +75,8 @@ export function useEconomyTableAction(characterId: string) {
       armed,
     }: {
       tableAction: EconomyTableAction;
+      /** `economyActions[].classSlug` — obrigatório para slugs de classe. */
+      classSlug?: string | null;
       usePsiDie?: boolean;
       resourceSlug?: string;
       spendAmount?: number;
@@ -88,80 +86,7 @@ export function useEconomyTableAction(characterId: string) {
     }): Promise<EconomyTableActionResultNote> => {
       const token = requireToken();
       try {
-        if (
-          FIGHTER_ECONOMY_TABLE_ACTIONS.has(tableAction) ||
-          isPsiTableAction(tableAction)
-        ) {
-          const result = await executeFighterTableAction(token, characterId, {
-            actionSlug: tableAction as FighterTableActionSlug,
-            usePsiDie: isPsiTableAction(tableAction) ? usePsiDie : undefined,
-          });
-          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
-          return { note: result.note };
-        }
-        if (SORCERER_ECONOMY_TABLE_ACTIONS.has(tableAction)) {
-          const result = await executeSorcererTableAction(
-            token,
-            characterId,
-            {
-              actionSlug: tableAction as SorcererTableActionSlug,
-              pointsSpent:
-                tableAction === "bastion-of-law" ? spendAmount : undefined,
-            },
-          );
-          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
-          return { note: result.note ?? note?.trim() ?? "" };
-        }
-        if (WARLOCK_ECONOMY_TABLE_ACTIONS.has(tableAction)) {
-          const result = await executeWarlockTableAction(token, characterId, {
-            actionSlug: tableAction as WarlockTableActionSlug,
-            diceCount:
-              tableAction === "healing-light" ? spendAmount : undefined,
-          });
-          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
-          return {
-            note:
-              result.note ??
-              (result.total != null
-                ? `${result.expression ?? ""} → ${result.total}`.trim()
-                : note?.trim() ?? ""),
-          };
-        }
-        if (tableAction === "cast:misseis-magicos-free") {
-          const result = await castCharacterSpell(token, characterId, {
-            spellSlug: MAGIC_MISSILE_SPELL_SLUG,
-            freeCastResourceSlug: MAGIC_MISSILE_FREE_RESOURCE,
-          });
-          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
-          return {
-            note: (result.note?.trim() || note?.trim() || "Mísseis Mágicos conjurados.").trim(),
-          };
-        }
-        if (tableAction === "arm:missile-shield") {
-          const slug = (
-            armed ? "disarm-missile-shield" : "arm-missile-shield"
-          ) as WizardTableActionSlug;
-          const result = await executeWizardTableAction(
-            token,
-            characterId,
-            slug,
-          );
-          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
-          return { note: result.note };
-        }
-        if (tableAction === "arm:giga-missile") {
-          const slug = (
-            armed ? "disarm-giga-missile" : "arm-giga-missile"
-          ) as WizardTableActionSlug;
-          const result = await executeWizardTableAction(
-            token,
-            characterId,
-            slug,
-          );
-          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
-          return { note: result.note };
-        }
-        if (tableAction === "spend-resource") {
+        if (tableAction === SPEND_RESOURCE_TABLE_ACTION) {
           if (!resourceSlug) {
             throw new Error("Recurso não definido para esta ação");
           }
@@ -171,10 +96,90 @@ export function useEconomyTableAction(characterId: string) {
           });
           queryClient.setQueryData(sessionKeys.state(characterId), result.state);
           return {
-            note: (note?.trim() || `Gastou ${spendAmount}× ${resourceSlug}`).trim(),
+            note: (
+              note?.trim() || `Gastou ${spendAmount}× ${resourceSlug}`
+            ).trim(),
           };
         }
-        throw new Error(`Ação de mesa não suportada: ${tableAction}`);
+
+        if (tableAction === MAGIC_MISSILE_FREE_CAST) {
+          const result = await castCharacterSpell(token, characterId, {
+            spellSlug: MAGIC_MISSILE_SPELL_SLUG,
+            freeCastResourceSlug: MAGIC_MISSILE_FREE_RESOURCE,
+          });
+          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
+          return {
+            note: (
+              result.note?.trim() ||
+              note?.trim() ||
+              "Mísseis Mágicos conjurados."
+            ).trim(),
+          };
+        }
+
+        if (isArmTableAction(tableAction)) {
+          const slug = wizardSlugFromArmTableAction(
+            tableAction,
+            Boolean(armed),
+          ) as WizardTableActionSlug;
+          const result = await executeWizardTableAction(
+            token,
+            characterId,
+            slug,
+          );
+          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
+          return { note: result.note };
+        }
+
+        const routeClass = classSlug?.trim() || null;
+        if (!routeClass) {
+          throw new Error(
+            `Ação de mesa sem classSlug no catálogo: ${tableAction}`,
+          );
+        }
+
+        if (routeClass === "fighter") {
+          const result = await executeFighterTableAction(token, characterId, {
+            actionSlug: tableAction as FighterTableActionSlug,
+            usePsiDie: isPsiTableAction(tableAction) ? usePsiDie : undefined,
+          });
+          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
+          return { note: result.note };
+        }
+
+        if (routeClass === "sorcerer") {
+          const result = await executeSorcererTableAction(token, characterId, {
+            actionSlug: tableAction as SorcererTableActionSlug,
+            pointsSpent:
+              tableAction === "bastion-of-law" ? spendAmount : undefined,
+          });
+          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
+          return noteFromResult(result, note);
+        }
+
+        if (routeClass === "warlock") {
+          const result = await executeWarlockTableAction(token, characterId, {
+            actionSlug: tableAction as WarlockTableActionSlug,
+            diceCount:
+              tableAction === "healing-light" ? spendAmount : undefined,
+          });
+          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
+          return noteFromResult(result, note);
+        }
+
+        if (routeClass === "wizard") {
+          const result = await executeWizardTableAction(
+            token,
+            characterId,
+            tableAction as WizardTableActionSlug,
+          );
+          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
+          return noteFromResult(result, note);
+        }
+
+        throw new Error(
+          `Classe sem routing de economia Usar: ${routeClass} (${tableAction})`,
+        );
       } catch (error) {
         return handleUnauthorized(error);
       }

@@ -24,7 +24,8 @@ Mesa, não VTT. **Feito:** painel + Usar wired ao `table_action` + feedback de n
 ## Padrão de ações
 
 - Preferir `execute<Class>TableAction` → `POST …/<class>/table-action`.
-- Aba Ações: `use-economy-table-action.ts` roteia `table_action` do catálogo.
+- Aba Ações: `use-economy-table-action.ts` roteia por `economyActions[].classSlug` → `execute<Class>TableAction`.
+- Protocolos no `table_action` (sem Set de slugs): `spend-resource`, `cast:…`, `arm:…`, `psi:…`.
 - Fallback genérico: `spend-resource` quando a economia só gasta slug.
 
 ## Checklist “classe done” (front)
@@ -33,7 +34,7 @@ Mesa, não VTT. **Feito:** painel + Usar wired ao `table_action` + feedback de n
 2. Case em `class-combat-panel.tsx`
 3. Catálogo: `useCombatMechanicalCatalog` + `resolvePanelActions`
 4. `EMPTY_PANEL_ACTIONS` estável (não `?? []` em deps de `useMemo`)
-5. Slugs de Usar registrados no router de economy (set / branch do `table_action`)
+5. Branch `classSlug` no router de economy (não lista paralela de slugs)
 6. Feedback (`TableActionFeedback` / nota da mutation)
 7. API alinhada — skill `rpg-class-mesa-api`
 
@@ -49,3 +50,4 @@ Mesa, não VTT. **Feito:** painel + Usar wired ao `table_action` + feedback de n
 - Template string `convert-slot-${number}-…` sem literais tipados
 - Botão de painel que não chama o mesmo slug do `table-action`
 - Assumir endpoints dedicados por poder (use `table-action`)
+- Sets hardcoded de slugs de economy no front (SSOT = catálogo + `classSlug`)

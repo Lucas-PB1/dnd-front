@@ -104,11 +104,15 @@ const KIND_LABELS: Record<string, string> = {
 /** Presente das Profundezas: free cast 1×/DL. */
 const ONCE_PER_LONG_REST_SLUGS = new Set(["gift-of-the-depths"]);
 
+export function isEldritchOncePerLongRestInvocation(slug: string): boolean {
+  return ONCE_PER_LONG_REST_SLUGS.has(slug);
+}
+
 export function eldritchInvocationKindLabel(
   kind: string,
   slug?: string,
 ): string {
-  if (kind === "free_cast" && slug && ONCE_PER_LONG_REST_SLUGS.has(slug)) {
+  if (kind === "free_cast" && slug && isEldritchOncePerLongRestInvocation(slug)) {
     return "1× por Descanso Longo";
   }
   return KIND_LABELS[kind] ?? kind;

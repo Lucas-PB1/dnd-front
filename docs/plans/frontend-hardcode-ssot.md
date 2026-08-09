@@ -2,7 +2,7 @@
 
 Data: 2026-08-06  
 Repos: `dnd-front` · API irmã: `dnd-api`  
-Relacionado: [`dnd-api/docs/plans/combat-mechanical-catalog.md`](../../../dnd-api/docs/plans/combat-mechanical-catalog.md) · [`dnd-api/docs/plans/code-health-plan.md`](../../../dnd-api/docs/plans/code-health-plan.md) · [`../API-INTEGRATION.md`](../API-INTEGRATION.md)
+Relacionado: [`../API-INTEGRATION.md`](../API-INTEGRATION.md) · catálogo mecânico na API (`GET /combat-mechanical-catalog`).
 
 ## Meta
 
