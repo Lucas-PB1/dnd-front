@@ -69,11 +69,15 @@ type BeyondSpellRowProps = {
   wizardLayout?: boolean;
   /** Mago dos Mísseis: usos gratuitos restantes. */
   freeMissileUses?: number;
-  /** Dominância de Magias: conjura sem espaço. */
+  /** Conjura sem gastar espaço (Dominância / Invocação free_cast à vontade). */
   isSpellMastery?: boolean;
   onCast: (
     spellSlug: string,
-    options?: { slotLevel?: number; freeCastResourceSlug?: string },
+    options?: {
+      slotLevel?: number;
+      freeCastResourceSlug?: string;
+      useFreeCast?: boolean;
+    },
   ) => Promise<void>;
 };
 
@@ -108,17 +112,28 @@ export function BeyondSpellRow({
   const selectedSlot =
     slotLevel ?? availableUpcastLevels[0] ?? (isCantrip ? undefined : baseLevel);
 
-  const canCast =
-    !cannotCastSpellsInArmor &&
-    (isCantrip ||
-      isSpellMastery ||
-      (selectedSlot != null &&
-        (state?.spellSlotsRemaining[String(selectedSlot)] ?? 0) > 0));
-
   const canFreeCastMissile =
     !cannotCastSpellsInArmor &&
     row.spell.spellSlug === MAGIC_MISSILE_SPELL_SLUG &&
     freeMissileUses > 0;
+
+  const grantedCast = state?.grantedSpellCastOptions?.find(
+    (option) => option.spellSlug === row.spell.spellSlug,
+  );
+  const oncePerFreeRemaining =
+    grantedCast?.castEconomy === "once_per_long_rest"
+      ? (grantedCast.freeCastsRemaining ?? 0)
+      : 0;
+  const canOncePerFreeCast =
+    !cannotCastSpellsInArmor && !isSpellMastery && oncePerFreeRemaining > 0;
+
+  const canCast =
+    !cannotCastSpellsInArmor &&
+    (isCantrip ||
+      isSpellMastery ||
+      canOncePerFreeCast ||
+      (selectedSlot != null &&
+        (state?.spellSlotsRemaining[String(selectedSlot)] ?? 0) > 0));
 
   const listLabel = wizardLayout
     ? WIZARD_LIST_TYPE_LABELS[row.spell.listType]
@@ -149,6 +164,10 @@ export function BeyondSpellRow({
   async function cast() {
     if (isCantrip || isSpellMastery) {
       await onCast(row.spell.spellSlug);
+      return;
+    }
+    if (canOncePerFreeCast) {
+      await onCast(row.spell.spellSlug, { useFreeCast: true });
       return;
     }
     if (selectedSlot == null) return;
@@ -201,9 +220,17 @@ export function BeyondSpellRow({
               {isSpellMastery ? (
                 <span
                   className="rounded border border-secondary/40 bg-secondary/10 px-1.5 py-px text-[0.6rem] font-semibold tracking-wide text-secondary uppercase"
-                  title="Dominância de Magias — sem espaço"
+                  title="Conjura sem gastar espaço de magia"
                 >
                   À vontade
+                </span>
+              ) : null}
+              {canOncePerFreeCast ? (
+                <span
+                  className="rounded border border-secondary/40 bg-secondary/10 px-1.5 py-px text-[0.6rem] font-semibold tracking-wide text-secondary uppercase"
+                  title="1 uso gratuito por Descanso Longo"
+                >
+                  1×/DL
                 </span>
               ) : null}
               {saveBadge ? (
@@ -277,8 +304,10 @@ export function BeyondSpellRow({
                 : isUnknownLevel
                   ? "Aguardando catálogo"
                   : isSpellMastery
-                    ? "Dominância — sem espaço"
-                    : !canCast
+                    ? "Sem espaço"
+                    : canOncePerFreeCast
+                      ? "Uso gratuito (1×/DL)"
+                      : !canCast
                       ? "Sem espaços disponíveis"
                       : undefined
             }

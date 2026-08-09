@@ -27,6 +27,12 @@ export type CharacterState = {
   deathSaveSuccesses: number;
   deathSaveFailures: number;
   inspiration: boolean;
+  grantedSpellUses?: Record<string, number>;
+  grantedSpellCastOptions?: Array<{
+    spellSlug: string;
+    castEconomy: "at_will" | "once_per_long_rest" | "slot_only";
+    freeCastsRemaining: number | null;
+  }>;
   firearmChambers?: Record<string, number>;
   rageActive?: boolean;
   recklessActive?: boolean;

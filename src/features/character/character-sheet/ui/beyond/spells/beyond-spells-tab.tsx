@@ -89,10 +89,16 @@ export function BeyondSpellsTab({
     isWizard && character.level >= SPELL_MASTERY_UNLOCK_LEVEL;
   const masterySlugs = useMemo(() => {
     const { level1, level2 } = readSpellMasterySlugs(character.classOptions);
-    return new Set(
+    const set = new Set(
       [level1, level2].filter((slug): slug is string => Boolean(slug)),
     );
-  }, [character.classOptions]);
+    for (const option of state?.grantedSpellCastOptions ?? []) {
+      if (option.castEconomy === "at_will") {
+        set.add(option.spellSlug);
+      }
+    }
+    return set;
+  }, [character.classOptions, state?.grantedSpellCastOptions]);
 
   const freeMissileUses = !isMissileMage
     ? 0
@@ -154,12 +160,17 @@ export function BeyondSpellsTab({
 
   async function handleCast(
     spellSlug: string,
-    options?: { slotLevel?: number; freeCastResourceSlug?: string },
+    options?: {
+      slotLevel?: number;
+      freeCastResourceSlug?: string;
+      useFreeCast?: boolean;
+    },
   ) {
     const result = await castSpell.mutateAsync({
       spellSlug,
       slotLevel: options?.slotLevel,
       freeCastResourceSlug: options?.freeCastResourceSlug,
+      useFreeCast: options?.useFreeCast,
     });
     if (result?.note?.trim()) {
       setCastNote(result.note.trim());
@@ -374,7 +385,11 @@ function SpellLevelGroup({
   masterySlugs: Set<string>;
   onCast: (
     spellSlug: string,
-    options?: { slotLevel?: number; freeCastResourceSlug?: string },
+    options?: {
+      slotLevel?: number;
+      freeCastResourceSlug?: string;
+      useFreeCast?: boolean;
+    },
   ) => Promise<void>;
 }) {
   return (
