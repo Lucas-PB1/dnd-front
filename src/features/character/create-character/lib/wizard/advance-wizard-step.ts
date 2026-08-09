@@ -23,6 +23,10 @@ import {
   type CreateCharacterInput,
 } from "@/features/character/create-character/model/create-character.schema";
 import type { WizardStepId } from "@/features/character/create-character/model/wizard-steps";
+import {
+  readEldritchInvocationSlugs,
+  warlockInvocationLimit,
+} from "@/features/character/character-sheet/lib/warlock/eldritch-invocations";
 
 export type WizardAdvanceDeps = {
   step: WizardStepId;
@@ -47,6 +51,7 @@ export type WizardAdvanceDeps = {
   hasFeatsStep: boolean;
   hasSubclassStep: boolean;
   hasSpellStep: boolean;
+  hasInvocationsStep: boolean;
 };
 
 /** Valida o passo atual e avança o wizard; retorna sem mudar o step se inválido. */
@@ -74,6 +79,7 @@ export async function advanceWizardStep(deps: WizardAdvanceDeps): Promise<void> 
     hasFeatsStep,
     hasSubclassStep,
     hasSpellStep,
+    hasInvocationsStep,
   } = deps;
 
   clearStepErrors();
@@ -262,11 +268,26 @@ export async function advanceWizardStep(deps: WizardAdvanceDeps): Promise<void> 
   }
 
   if (step === "equipment") {
-    setStep(hasSpellStep ? "spells" : "languages");
+    setStep(hasSpellStep ? "spells" : hasInvocationsStep ? "invocations" : "languages");
     return;
   }
 
   if (step === "spells") {
+    setStep(hasInvocationsStep ? "invocations" : "languages");
+    return;
+  }
+
+  if (step === "invocations") {
+    const values = getValues();
+    const limit = warlockInvocationLimit(values.level);
+    const picks = readEldritchInvocationSlugs(values.classOptions ?? []);
+    if (picks.length !== limit) {
+      setSubclassError(
+        `Escolha exatamente ${limit} invocação(ões) mística(s) para o nível ${values.level}.`,
+      );
+      return;
+    }
+    setSubclassError(undefined);
     setStep("languages");
     return;
   }

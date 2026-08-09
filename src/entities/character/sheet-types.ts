@@ -17,6 +17,7 @@ export type SubclassOption = {
 export type ClassOption = {
   optionKey: string;
   valueId: string;
+  instanceIndex?: number;
 };
 
 export type FeatOption = {

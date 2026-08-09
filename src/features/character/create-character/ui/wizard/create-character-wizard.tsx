@@ -107,6 +107,7 @@ export function CreateCharacterWizard() {
     skipSpells: !hasSpellStep,
     skipFeats: !hasFeatsStep,
     skipSubclass: !hasSubclassStep,
+    skipInvocations: classSlug !== "warlock",
   };
   const visibleSteps = visibleWizardSteps(wizardNav);
 
@@ -145,6 +146,7 @@ export function CreateCharacterWizard() {
       hasFeatsStep,
       hasSubclassStep,
       hasSpellStep,
+      hasInvocationsStep: classSlug === "warlock",
     });
   }
 

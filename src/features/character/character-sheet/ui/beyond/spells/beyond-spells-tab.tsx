@@ -24,6 +24,7 @@ import {
   type SpellRowModel,
 } from "@/features/character/character-sheet/ui/beyond/spells/beyond-spell-row";
 import { BeyondSpellMasteryPanel } from "@/features/character/character-sheet/ui/beyond/spells/beyond-spell-mastery-panel";
+import { BeyondEldritchInvocationsPanel } from "@/features/character/character-sheet/ui/beyond/warlock/beyond-eldritch-invocations-panel";
 import { BeyondSpellSlotsPanel } from "@/features/character/character-sheet/ui/beyond/spells/beyond-spell-slots-panel";
 import {
   SPELL_MASTERY_UNLOCK_LEVEL,
@@ -280,6 +281,11 @@ export function BeyondSpellsTab({
           rows={rows}
         />
       ) : null}
+
+      <BeyondEldritchInvocationsPanel
+        characterId={characterId}
+        character={character}
+      />
 
       {spellsCatalog.isPending && spellBySlug.size === 0 ? (
         <p className="text-sm text-muted-foreground">Carregando magias…</p>

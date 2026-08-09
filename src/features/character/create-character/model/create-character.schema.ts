@@ -29,6 +29,12 @@ const subclassOptionSchema = z.object({
   valueId: z.string().min(1),
 });
 
+const classOptionSchema = z.object({
+  optionKey: z.string().min(1),
+  valueId: z.string().min(1),
+  instanceIndex: z.number().int().min(0).optional(),
+});
+
 const featOptionSchema = z.object({
   featSlug: z.string().min(1),
   instanceIndex: z.number().int().min(0),
@@ -78,7 +84,7 @@ export const createCharacterBaseSchema = z.object({
   abilityRawValues: z.array(z.number().int()).length(6).optional(),
   speciesChoices: z.array(speciesChoiceSchema),
   subclassOptions: z.array(subclassOptionSchema),
-  classOptions: z.array(subclassOptionSchema),
+  classOptions: z.array(classOptionSchema),
   featOptions: z.array(featOptionSchema),
   /** Um slug por marco ASI (níveis 4/8/12/16/19); vazio = +2/+1 em atributos */
   asiFeatSlotSlugs: z.array(z.string()),

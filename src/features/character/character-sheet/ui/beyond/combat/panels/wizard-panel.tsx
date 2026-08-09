@@ -49,6 +49,12 @@ export function CombatWizardPanel({
 
   if (classSlug !== "wizard") return null;
 
+  const resources = state?.classResources ?? [];
+
+  function getRemaining(slug: string): number | null {
+    return resources.find((entry) => entry.slug === slug)?.remaining ?? null;
+  }
+
   const maxSlotLevelsToRecover = Math.ceil(level / 2);
   const slotsMax = state?.spellSlotsMax ?? {};
 
@@ -93,6 +99,7 @@ export function CombatWizardPanel({
       <div className="space-y-2">
         <CombatPanelActionButtons
           actions={subclassActions}
+          getRemaining={getRemaining}
           isPending={action.isPending}
           variant="secondary"
           onAction={(slug) => action.mutate(slug as WizardTableActionSlug)}
