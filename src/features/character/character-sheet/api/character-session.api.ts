@@ -516,7 +516,8 @@ export type SorcererTableActionSlug =
   | "dragon-wings"
   | "bend-luck"
   | "heroic-soul"
-  | "mystical-maneuver";
+  | "mystical-maneuver"
+  | "warp-implosion";
 
 export type SorcererTableActionInput = {
   actionSlug: SorcererTableActionSlug;

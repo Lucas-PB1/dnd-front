@@ -42,6 +42,7 @@ const SORCERER_ECONOMY_TABLE_ACTIONS = new Set<string>([
   "mystical-maneuver",
   "innate-sorcery",
   "sorcerous-restoration",
+  "warp-implosion",
 ]);
 
 const WARLOCK_ECONOMY_TABLE_ACTIONS = new Set<string>([

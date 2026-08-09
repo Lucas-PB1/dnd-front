@@ -4,6 +4,7 @@ import { useMemo } from "react";
 
 import type { CharacterState } from "@/entities/character/session-types";
 import type { ClassOption } from "@/entities/character/sheet-types";
+import type { ClassPanelActionRecord } from "@/entities/combat-mechanical/types";
 import {
   executeSorcererTableAction,
   type SorcererTableActionInput,
@@ -18,6 +19,8 @@ import { CombatPanelActionButtons } from "../shared/panel-action-buttons";
 import { CombatResourceSummary } from "../shared/resource-summary";
 import { TableActionFeedback } from "../shared/table-action-feedback";
 import { Button } from "@/shared/ui/button";
+
+const EMPTY_PANEL_ACTIONS: ClassPanelActionRecord[] = [];
 
 type CombatSorcererPanelProps = {
   characterId: string;
@@ -50,7 +53,8 @@ export function CombatSorcererPanel({
     classSlug,
     subclassSlug,
   });
-  const panelCatalog = mechanicalCatalog.data?.panelActions ?? [];
+  const panelCatalog =
+    mechanicalCatalog.data?.panelActions ?? EMPTY_PANEL_ACTIONS;
   const metamagicsQuery = useMetamagics();
 
   const baseActions = useMemo(
@@ -120,6 +124,7 @@ export function CombatSorcererPanel({
           "tides-of-chaos",
           "restore-balance",
           "dragon-wings",
+          "warp-implosion",
         ]}
       />
 
@@ -139,10 +144,16 @@ export function CombatSorcererPanel({
             Converter Slot de Magia → Pontos (+1 Ponto / nível do Slot):
           </p>
           <div className="flex flex-wrap gap-1.5">
-            {[1, 2, 3, 4, 5].map((slotLvl) => {
+            {(
+              [
+                { slotLvl: 1, slug: "convert-slot-1-to-points" },
+                { slotLvl: 2, slug: "convert-slot-2-to-points" },
+                { slotLvl: 3, slug: "convert-slot-3-to-points" },
+                { slotLvl: 4, slug: "convert-slot-4-to-points" },
+                { slotLvl: 5, slug: "convert-slot-5-to-points" },
+              ] as const
+            ).map(({ slotLvl, slug }) => {
               const remaining = slotsRemaining[String(slotLvl)] ?? 0;
-              const slug =
-                `convert-slot-${slotLvl}-to-points` as const;
               return (
                 <Button
                   key={slug}
@@ -163,16 +174,17 @@ export function CombatSorcererPanel({
             pts):
           </p>
           <div className="flex flex-wrap gap-1.5">
-            {[
-              { lvl: 1, cost: 2 },
-              { lvl: 2, cost: 3 },
-              { lvl: 3, cost: 5 },
-              { lvl: 4, cost: 6 },
-              { lvl: 5, cost: 7 },
-            ].map(({ lvl, cost }) => {
+            {(
+              [
+                { lvl: 1, cost: 2, slug: "convert-points-to-slot-1" },
+                { lvl: 2, cost: 3, slug: "convert-points-to-slot-2" },
+                { lvl: 3, cost: 5, slug: "convert-points-to-slot-3" },
+                { lvl: 4, cost: 6, slug: "convert-points-to-slot-4" },
+                { lvl: 5, cost: 7, slug: "convert-points-to-slot-5" },
+              ] as const
+            ).map(({ lvl, cost, slug }) => {
               const max = slotsMax[String(lvl)] ?? 0;
               if (max <= 0) return null;
-              const slug = `convert-points-to-slot-${lvl}` as const;
               return (
                 <Button
                   key={slug}
