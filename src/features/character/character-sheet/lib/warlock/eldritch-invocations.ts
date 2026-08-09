@@ -92,17 +92,6 @@ export function mergeEldritchInvocationsIntoClassOptions(
   return next;
 }
 
-/** @deprecated Use mergeEldritchInvocationsIntoClassOptions with picks. */
-export function mergeEldritchInvocationSlugsIntoClassOptions(
-  classOptions: readonly ClassOption[],
-  invocationSlugs: readonly string[],
-): ClassOption[] {
-  return mergeEldritchInvocationsIntoClassOptions(
-    classOptions,
-    invocationSlugs.map((slug) => ({ slug })),
-  );
-}
-
 const KIND_LABELS: Record<string, string> = {
   free_cast: "Conjura sem espaço",
   passive: "Passiva",

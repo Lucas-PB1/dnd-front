@@ -6,8 +6,7 @@ import { useEffect, useState } from "react";
 import {
   type BattleMasterManeuver,
   type FighterTableActionResult,
-  castDungeonPrecaution,
-  executeBattleMasterManeuver,
+  executeFighterTableAction,
   sessionKeys,
 } from "@/features/character/character-sheet/api/character-session.api";
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
@@ -55,12 +54,11 @@ export function FighterSubclassActions({
   const maneuverMutation = useMutation({
     mutationFn: async (maneuverSlug: string) => {
       try {
-        return await executeBattleMasterManeuver(
-          requireToken(),
-          characterId,
+        return await executeFighterTableAction(requireToken(), characterId, {
+          actionSlug: "use-maneuver",
           maneuverSlug,
           useRelentless,
-        );
+        });
       } catch (error) {
         return handleUnauthorized(error);
       }
@@ -71,11 +69,10 @@ export function FighterSubclassActions({
   const precautionMutation = useMutation({
     mutationFn: async () => {
       try {
-        return await castDungeonPrecaution(
-          requireToken(),
-          characterId,
-          precautionSpell,
-        );
+        return await executeFighterTableAction(requireToken(), characterId, {
+          actionSlug: "dungeon-precaution",
+          spellSlug: precautionSpell,
+        });
       } catch (error) {
         return handleUnauthorized(error);
       }

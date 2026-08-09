@@ -192,29 +192,6 @@ export async function recoverAllRage(accessToken: string, characterId: string) {
   );
 }
 
-export type SecondWindResult = {
-  state: CharacterState;
-  expression: string;
-  healAmount: number;
-  hitPointsCurrent: number;
-  note?: string;
-};
-
-export type TacticalMindResult = {
-  state: CharacterState;
-  expression: string;
-  roll: number;
-  newTotal?: number;
-  success?: boolean;
-  resourceSpent: boolean;
-  note: string;
-};
-
-export type ActionSurgeResult = {
-  state: CharacterState;
-  note: string;
-};
-
 export type BattleMasterManeuver = {
   slug: string;
   name: string;
@@ -237,13 +214,28 @@ export type FighterTableActionResult = {
 
 export type TableActionResult = FighterTableActionResult;
 
-export type PsiWarriorActionSlug =
-  | "protective-field"
-  | "telekinetic-movement"
-  | "psychic-leap"
-  | "mental-guard"
-  | "energy-bulwark"
-  | "telekinetic-master";
+export type FighterTableActionSlug =
+  | "second-wind"
+  | "action-surge"
+  | "tactical-mind"
+  | "use-maneuver"
+  | "dungeon-precaution"
+  | "psi:protective-field"
+  | "psi:telekinetic-movement"
+  | "psi:psychic-leap"
+  | "psi:mental-guard"
+  | "psi:energy-bulwark"
+  | "psi:telekinetic-master";
+
+export type FighterTableActionInput = {
+  actionSlug: FighterTableActionSlug;
+  maneuverSlug?: string;
+  useRelentless?: boolean;
+  spellSlug?: string;
+  usePsiDie?: boolean;
+  checkTotal?: number;
+  dc?: number;
+};
 
 export type RogueTableActionSlug =
   | "psychic-blade-main"
@@ -258,39 +250,6 @@ export type RogueTableActionSlug =
   | "arachnoid-web"
   | "magic-device-charge";
 
-export async function activateSecondWind(
-  accessToken: string,
-  characterId: string,
-) {
-  return gameFetch<SecondWindResult>(
-    `/characters/${characterId}/fighter/second-wind`,
-    accessToken,
-    { method: "POST", body: "{}" },
-  );
-}
-
-export async function applyTacticalMind(
-  accessToken: string,
-  characterId: string,
-) {
-  return gameFetch<TacticalMindResult>(
-    `/characters/${characterId}/fighter/tactical-mind`,
-    accessToken,
-    { method: "POST", body: "{}" },
-  );
-}
-
-export async function activateActionSurge(
-  accessToken: string,
-  characterId: string,
-) {
-  return gameFetch<ActionSurgeResult>(
-    `/characters/${characterId}/fighter/action-surge`,
-    accessToken,
-    { method: "POST", body: "{}" },
-  );
-}
-
 export async function listBattleMasterManeuvers(
   accessToken: string,
   characterId: string,
@@ -301,49 +260,17 @@ export async function listBattleMasterManeuvers(
   );
 }
 
-export async function executeBattleMasterManeuver(
+export async function executeFighterTableAction(
   accessToken: string,
   characterId: string,
-  maneuverSlug: string,
-  useRelentless = false,
+  input: FighterTableActionInput,
 ) {
   return gameFetch<FighterTableActionResult>(
-    `/characters/${characterId}/fighter/maneuvers/use`,
+    `/characters/${characterId}/fighter/table-action`,
     accessToken,
     {
       method: "POST",
-      body: JSON.stringify({ maneuverSlug, useRelentless }),
-    },
-  );
-}
-
-export async function executePsiWarriorAction(
-  accessToken: string,
-  characterId: string,
-  actionSlug: PsiWarriorActionSlug,
-  usePsiDie = false,
-) {
-  return gameFetch<FighterTableActionResult>(
-    `/characters/${characterId}/fighter/psi-action`,
-    accessToken,
-    {
-      method: "POST",
-      body: JSON.stringify({ actionSlug, usePsiDie }),
-    },
-  );
-}
-
-export async function castDungeonPrecaution(
-  accessToken: string,
-  characterId: string,
-  spellSlug: string,
-) {
-  return gameFetch<FighterTableActionResult>(
-    `/characters/${characterId}/fighter/dungeon-precaution`,
-    accessToken,
-    {
-      method: "POST",
-      body: JSON.stringify({ spellSlug }),
+      body: JSON.stringify(input),
     },
   );
 }

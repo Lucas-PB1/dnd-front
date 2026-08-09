@@ -3,17 +3,14 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import {
-  activateActionSurge,
-  activateSecondWind,
-  applyTacticalMind,
   castCharacterSpell,
-  executePsiWarriorAction,
+  executeFighterTableAction,
   executeSorcererTableAction,
   executeWarlockTableAction,
   executeWizardTableAction,
   sessionKeys,
   spendClassResource,
-  type PsiWarriorActionSlug,
+  type FighterTableActionSlug,
   type SorcererTableActionSlug,
   type WarlockTableActionSlug,
   type WizardTableActionSlug,
@@ -21,7 +18,6 @@ import {
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
 import {
   isPsiTableAction,
-  psiSlugFromTableAction,
   type EconomyTableAction,
 } from "@/features/character/character-sheet/lib/combat/economy-table-actions";
 
@@ -31,6 +27,12 @@ export type EconomyTableActionResultNote = {
 
 const MAGIC_MISSILE_SPELL_SLUG = "misseis-magicos";
 const MAGIC_MISSILE_FREE_RESOURCE = "magic-missile-free";
+
+const FIGHTER_ECONOMY_TABLE_ACTIONS = new Set<string>([
+  "second-wind",
+  "action-surge",
+  "tactical-mind",
+]);
 
 const SORCERER_ECONOMY_TABLE_ACTIONS = new Set<string>([
   "tides-of-chaos",
@@ -86,35 +88,14 @@ export function useEconomyTableAction(characterId: string) {
     }): Promise<EconomyTableActionResultNote> => {
       const token = requireToken();
       try {
-        if (tableAction === "second-wind") {
-          const result = await activateSecondWind(token, characterId);
-          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
-          return {
-            note:
-              `Recuperar Fôlego: ${result.expression} → +${result.healAmount} PV` +
-              (result.note ? ` · ${result.note}` : ""),
-          };
-        }
-        if (tableAction === "action-surge") {
-          const result = await activateActionSurge(token, characterId);
-          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
-          return { note: result.note };
-        }
-        if (tableAction === "tactical-mind") {
-          const result = await applyTacticalMind(token, characterId);
-          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
-          return { note: result.note };
-        }
-        if (isPsiTableAction(tableAction)) {
-          const actionSlug = psiSlugFromTableAction(
-            tableAction,
-          ) as PsiWarriorActionSlug;
-          const result = await executePsiWarriorAction(
-            token,
-            characterId,
-            actionSlug,
-            usePsiDie,
-          );
+        if (
+          FIGHTER_ECONOMY_TABLE_ACTIONS.has(tableAction) ||
+          isPsiTableAction(tableAction)
+        ) {
+          const result = await executeFighterTableAction(token, characterId, {
+            actionSlug: tableAction as FighterTableActionSlug,
+            usePsiDie: isPsiTableAction(tableAction) ? usePsiDie : undefined,
+          });
           queryClient.setQueryData(sessionKeys.state(characterId), result.state);
           return { note: result.note };
         }

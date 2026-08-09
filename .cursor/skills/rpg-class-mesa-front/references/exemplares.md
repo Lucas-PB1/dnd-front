@@ -26,10 +26,12 @@ Base comum:
 - `executeWizardTableAction`
 - Economy especiais: `cast:misseis-magicos-free`, `arm:missile-shield`, `arm:giga-missile`
 
-## Guerreiro — legado
+## Guerreiro
 
-- Painel: `…/panels/fighter-panel.tsx` (+ manobras em `maneuvers-panel.tsx`)
-- Client chama rotas dedicadas (`activateSecondWind`, `actionSurge`, psi…) — **não** o padrão table-action
-- Economy Usar mapeia alguns `table_action` fighter/psi para esses endpoints
+- Painel: `…/panels/fighter-panel.tsx` (+ `fighter-subclass-actions.tsx` para BM/Dungeon)
+- `executeFighterTableAction` → `POST …/fighter/table-action`
+- Catálogo painel: base + psi (`C010`/`C019`); BM/Dungeon com seletor
+- Economy Usar: `second-wind` / `action-surge` / `tactical-mind` / `psi:*`
+- Lista BM: `GET …/fighter/maneuvers` (não é ação)
 
-Classe nova: copiar **sorcerer/warlock/wizard**, não fighter.
+Classe nova: copiar **sorcerer/warlock/wizard/fighter** (table-action).

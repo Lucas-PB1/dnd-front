@@ -25,7 +25,6 @@ Mesa, não VTT. **Feito:** painel + Usar wired ao `table_action` + feedback de n
 
 - Preferir `execute<Class>TableAction` → `POST …/<class>/table-action`.
 - Aba Ações: `use-economy-table-action.ts` roteia `table_action` do catálogo.
-- Guerreiro (endpoints dedicados no client) = **legado** — não copiar para classe nova.
 - Fallback genérico: `spend-resource` quando a economia só gasta slug.
 
 ## Checklist “classe done” (front)
@@ -49,4 +48,4 @@ Mesa, não VTT. **Feito:** painel + Usar wired ao `table_action` + feedback de n
 - `?? []` para `panelActions` (deps instáveis)
 - Template string `convert-slot-${number}-…` sem literais tipados
 - Botão de painel que não chama o mesmo slug do `table-action`
-- Assumir endpoints dedicados estilo fighter
+- Assumir endpoints dedicados por poder (use `table-action`)
