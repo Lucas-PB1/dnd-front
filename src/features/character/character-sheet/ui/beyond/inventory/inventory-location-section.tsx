@@ -31,6 +31,7 @@ type InventoryLocationSectionProps = {
   attunementSlotsFull: boolean;
   equipmentWarnings: EquipmentWarning[];
   weaponOptions?: { value: string; label: string }[];
+  canBindPactWeapon?: boolean;
   onToggleLocation: (item: InventoryItem) => void;
   onToggleAttunement: (item: InventoryItem) => void;
   onPatch: (slug: string, payload: PatchInventoryItemPayload) => void;
@@ -49,6 +50,7 @@ export function InventoryLocationSection({
   attunementSlotsFull,
   equipmentWarnings,
   weaponOptions = [],
+  canBindPactWeapon = false,
   onToggleLocation,
   onToggleAttunement,
   onPatch,
@@ -75,6 +77,7 @@ export function InventoryLocationSection({
             attunementSlotsFull={attunementSlotsFull}
             warnings={warnings}
             weaponOptions={weaponOptions}
+            canBindPactWeapon={canBindPactWeapon}
             onToggleLocation={onToggleLocation}
             onToggleAttunement={onToggleAttunement}
             onPatch={onPatch}
@@ -87,6 +90,7 @@ export function InventoryLocationSection({
     });
   }, [
     attunementSlotsFull,
+    canBindPactWeapon,
     equipmentWarnings,
     isPending,
     items,

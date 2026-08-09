@@ -536,19 +536,28 @@ export type WarlockTableActionSlug =
   | "dark-ones-luck"
   | "fey-step-effect"
   | "awakened-mind"
-  | "fiendish-resilience";
+  | "fiendish-resilience"
+  | "invoke-pact-weapon"
+  | "hurl-through-hell"
+  | "searing-vengeance"
+  | "beguiling-defenses"
+  | "clairvoyant-combatant";
 
 export async function executeWarlockTableAction(
   accessToken: string,
   characterId: string,
-  actionSlug: WarlockTableActionSlug,
+  payload: {
+    actionSlug: WarlockTableActionSlug;
+    itemSlug?: string;
+    diceCount?: number;
+  },
 ) {
   return gameFetch<TableActionResult>(
     `/characters/${characterId}/warlock/table-action`,
     accessToken,
     {
       method: "POST",
-      body: JSON.stringify({ actionSlug }),
+      body: JSON.stringify(payload),
     },
   );
 }

@@ -34,6 +34,7 @@ type InventoryItemDetailProps = {
   attunementSlotsFull: boolean;
   warnings: EquipmentWarning[];
   weaponOptions?: { value: string; label: string }[];
+  canBindPactWeapon?: boolean;
   onToggleLocation: (item: InventoryItem) => void;
   onToggleAttunement: (item: InventoryItem) => void;
   onPatch: (slug: string, payload: PatchInventoryItemPayload) => void;
@@ -53,6 +54,7 @@ export function InventoryItemDetail({
   attunementSlotsFull,
   warnings,
   weaponOptions = [],
+  canBindPactWeapon = false,
   onToggleLocation,
   onToggleAttunement,
   onPatch,
@@ -75,6 +77,9 @@ export function InventoryItemDetail({
     weaponOptions.length > 0;
   const showDetach =
     Boolean(item.attachedCharmSlug) && Boolean(onDetachCharm);
+  const showPactWeapon =
+    canBindPactWeapon && item.itemType === "weapon";
+  const isPactWeapon = Boolean(item.isPactWeapon);
 
   function commitQuantity(nextRaw: number) {
     const next = Math.max(1, Math.trunc(nextRaw) || 1);
@@ -229,6 +234,25 @@ export function InventoryItemDetail({
             {item.attuned ? "Dessintonizar" : "Sintonizar"}
           </Button>
         ) : null}
+        {showPactWeapon ? (
+          <Button
+            type="button"
+            variant={isPactWeapon ? "secondary" : "outline"}
+            size="sm"
+            className="gap-1"
+            disabled={isPending}
+            title={
+              isPactWeapon
+                ? "Remover vínculo de Arma de Pacto"
+                : "Marcar como Arma de Pacto"
+            }
+            onClick={() =>
+              onPatch(item.itemSlug, { pactWeapon: !isPactWeapon })
+            }
+          >
+            {isPactWeapon ? "Remover vínculo" : "Arma de Pacto"}
+          </Button>
+        ) : null}
         <Button
           type="button"
           variant={equipped ? "outline" : "secondary"}
@@ -284,6 +308,7 @@ export function inventoryItemTileMeta(item: InventoryItem): {
       : null;
   const parts = [
     item.quantity > 1 ? `×${item.quantity}` : null,
+    item.isPactWeapon ? "Arma de Pacto" : null,
     item.attuned
       ? "Sintonizado"
       : item.requiresAttunement
@@ -293,8 +318,14 @@ export function inventoryItemTileMeta(item: InventoryItem): {
   ].filter(Boolean);
 
   return {
-    badge: slotLabel ?? typeLabel,
+    badge: item.isPactWeapon
+      ? "Pacto"
+      : (slotLabel ?? typeLabel),
     subtitle: parts.length > 0 ? parts.join(" · ") : typeLabel,
-    accent: equipped || item.attuned || Boolean(item.attachedCharmSlug),
+    accent:
+      equipped ||
+      item.attuned ||
+      Boolean(item.isPactWeapon) ||
+      Boolean(item.attachedCharmSlug),
   };
 }

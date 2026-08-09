@@ -39,6 +39,7 @@ export function EditLanguagesInlineForm({
         hint={selection.hint}
         onToggle={selection.toggle}
         languageRows={selection.languages.data?.data ?? []}
+        variant="settings"
       />
 
       {formError ? (
@@ -46,13 +47,16 @@ export function EditLanguagesInlineForm({
           {formError}
         </p>
       ) : null}
-      <Button
-        type="submit"
-        size="sm"
-        disabled={patch.isPending || !selection.grantReady}
-      >
-        {patch.isPending ? "Salvando…" : "Salvar idiomas"}
-      </Button>
+      {selection.grantReady &&
+      selection.chosenCount < selection.quota.choiceCount ? (
+        <Button
+          type="submit"
+          size="sm"
+          disabled={patch.isPending || !selection.grantReady}
+        >
+          {patch.isPending ? "Salvando…" : "Salvar idiomas"}
+        </Button>
+      ) : null}
     </form>
   );
 }

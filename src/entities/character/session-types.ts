@@ -128,6 +128,7 @@ export type InventoryItem = {
   location: "equipped" | "backpack";
   equipmentSlot: string | null;
   attuned: boolean;
+  isPactWeapon?: boolean;
   requiresAttunement: boolean;
   effectsActive: boolean;
   effectsStatus: "active" | "inactive_unequipped" | "inactive_unattuned";
@@ -163,6 +164,8 @@ export type PatchInventoryItemPayload = {
     | "carried";
   quantity?: number;
   attuned?: boolean;
+  /** Marcar / desmarcar Arma de Pacto (Bruxo · Pacto da Lâmina). */
+  pactWeapon?: boolean;
 };
 
 /** Espelha LevelUpPreviewDto */

@@ -59,6 +59,8 @@ export function buildCharacterSheetPagePanels({
           <BeyondInventoryTab
             characterId={characterId}
             equipmentWarnings={character.equipmentWarnings}
+            classSlug={character.classSlug}
+            classOptions={character.classOptions}
           />
         </div>
       </BeyondPanel>

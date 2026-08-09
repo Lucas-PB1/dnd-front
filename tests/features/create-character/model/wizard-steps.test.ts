@@ -55,8 +55,13 @@ describe("computeWizardHasSpellStep", () => {
 });
 
 describe("wizard step navigation", () => {
-  it("skips spells, feats and subclass when configured", () => {
-    const nav = { skipSpells: true, skipFeats: true, skipSubclass: true };
+  it("skips spells, feats, subclass and invocations when configured", () => {
+    const nav = {
+      skipSpells: true,
+      skipFeats: true,
+      skipSubclass: true,
+      skipInvocations: true,
+    };
     expect(visibleWizardSteps(nav).map((step) => step.id)).not.toContain(
       "spells",
     );
@@ -65,19 +70,24 @@ describe("wizard step navigation", () => {
     );
     expect(visibleWizardSteps(nav).map((step) => step.id)).not.toContain(
       "subclass",
+    );
+    expect(visibleWizardSteps(nav).map((step) => step.id)).not.toContain(
+      "invocations",
     );
     expect(skippedWizardSteps(nav).map((step) => step.id)).toEqual([
       "feats",
       "subclass",
       "spells",
+      "invocations",
     ]);
     expect(nextWizardStep("equipment", nav)).toBe("languages");
     expect(nextWizardStep("species", nav)).toBe("equipment");
     expect(prevWizardStep("species", nav)).toBe("background");
   });
 
-  it("keeps spells for casters", () => {
+  it("keeps spells then invocations for casters", () => {
     expect(nextWizardStep("equipment")).toBe("spells");
-    expect(prevWizardStep("languages")).toBe("spells");
+    expect(nextWizardStep("spells")).toBe("invocations");
+    expect(prevWizardStep("languages")).toBe("invocations");
   });
 });

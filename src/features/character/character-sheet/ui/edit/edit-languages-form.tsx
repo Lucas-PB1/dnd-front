@@ -41,6 +41,7 @@ export function EditLanguagesForm({
         hint={null}
         onToggle={selection.toggle}
         languageRows={selection.languages.data?.data ?? []}
+        variant="settings"
       />
     </EditFormShell>
   );

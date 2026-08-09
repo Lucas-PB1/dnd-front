@@ -105,6 +105,11 @@ type LanguagePickerFieldsProps = {
   hint: string | null;
   onToggle: (slug: string) => void;
   languageRows: { slug: string; name: string }[];
+  /**
+   * `settings`: idiomas já escolhidos são definitivos (só lista);
+   * a grade só aparece se ainda houver vaga de extra.
+   */
+  variant?: "wizard" | "settings";
 };
 
 export function LanguagePickerFields({
@@ -116,25 +121,55 @@ export function LanguagePickerFields({
   hint,
   onToggle,
   languageRows,
+  variant = "wizard",
 }: LanguagePickerFieldsProps) {
+  const nameBySlug = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const row of languageRows) map.set(row.slug, row.name);
+    return map;
+  }, [languageRows]);
+
+  const selectedNames = selected.map(
+    (slug) => nameBySlug.get(slug) ?? slug,
+  );
+  const slotsRemaining = Math.max(0, quota.choiceCount - chosenCount);
+  const settingsComplete =
+    variant === "settings" && slotsRemaining === 0 && selected.length > 0;
+
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border px-3 py-2">
-        <p className="text-[11px] text-muted-foreground">
-          {quota.choiceCount === 0
-            ? "Antecedente define os idiomas — sem escolha extra."
-            : `Antecedente: ${quota.granted.length} fixo(s) + ${quota.choiceCount} à escolha.`}
-        </p>
-        <p className="tabular-nums text-sm font-semibold">
-          {selected.length}
-          <span className="font-normal text-muted-foreground">
-            {" "}
-            / {quota.maxTotal}
-          </span>
-        </p>
-      </div>
+      {variant === "settings" ? (
+        <div className="space-y-1.5">
+          <p className="text-xs font-medium text-foreground">
+            Idiomas conhecidos
+          </p>
+          <p className="text-sm text-muted-foreground">
+            {selectedNames.length > 0 ? selectedNames.join(", ") : "—"}
+          </p>
+          {settingsComplete ? (
+            <p className="text-[11px] text-muted-foreground">
+              Definitivos na criação — não há mais vagas para escolher.
+            </p>
+          ) : null}
+        </div>
+      ) : (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border px-3 py-2">
+          <p className="text-[11px] text-muted-foreground">
+            {quota.choiceCount === 0
+              ? "Antecedente define os idiomas — sem escolha extra."
+              : `Antecedente: ${quota.granted.length} fixo(s) + ${quota.choiceCount} à escolha.`}
+          </p>
+          <p className="tabular-nums text-sm font-semibold">
+            {selected.length}
+            <span className="font-normal text-muted-foreground">
+              {" "}
+              / {quota.maxTotal}
+            </span>
+          </p>
+        </div>
+      )}
 
-      {quota.choiceCount > 0 ? (
+      {variant === "wizard" && quota.choiceCount > 0 ? (
         <p className="text-xs text-muted-foreground">
           Extras escolhidos: {chosenCount} / {quota.choiceCount}
         </p>
@@ -148,7 +183,35 @@ export function LanguagePickerFields({
 
       {languagesPending || !grantReady ? (
         <p className="text-sm text-muted-foreground">Carregando idiomas…</p>
-      ) : (
+      ) : settingsComplete ? null : variant === "settings" &&
+        slotsRemaining > 0 ? (
+        <>
+          <p className="text-xs text-muted-foreground">
+            Ainda há {slotsRemaining} idioma(s) extra(s) para escolher.
+          </p>
+          <ul className="grid gap-2 sm:grid-cols-2">
+            {languageRows
+              .filter(
+                (lang) =>
+                  !quota.granted.includes(lang.slug) &&
+                  !selected.includes(lang.slug),
+              )
+              .map((lang) => (
+                <li key={lang.slug}>
+                  <label className="flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 text-sm hover:bg-muted/40">
+                    <input
+                      type="checkbox"
+                      checked={false}
+                      onChange={() => onToggle(lang.slug)}
+                      className="size-4 rounded border-input"
+                    />
+                    <span className="font-medium">{lang.name}</span>
+                  </label>
+                </li>
+              ))}
+          </ul>
+        </>
+      ) : variant === "wizard" ? (
         <ul className="grid gap-2 sm:grid-cols-2">
           {languageRows.map((lang) => {
             const granted = quota.granted.includes(lang.slug);
@@ -185,7 +248,7 @@ export function LanguagePickerFields({
             );
           })}
         </ul>
-      )}
+      ) : null}
     </div>
   );
 }

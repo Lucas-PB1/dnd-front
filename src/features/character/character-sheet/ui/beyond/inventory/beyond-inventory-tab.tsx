@@ -7,6 +7,7 @@ import type {
   InventoryItem,
   PatchInventoryItemPayload,
 } from "@/entities/character/session-types";
+import type { ClassOption } from "@/entities/character/sheet-types";
 import type { EquipmentWarning } from "@/entities/character/types";
 import {
   useAddInventoryItem,
@@ -16,6 +17,7 @@ import {
   usePatchInventoryItem,
   useRemoveInventoryItem,
 } from "@/features/character/character-sheet/api/use-character-inventory";
+import { readEldritchInvocationSlugs } from "@/features/character/character-sheet/lib/warlock/eldritch-invocations";
 import { MAX_ATTUNED_ITEMS } from "@/features/character/character-sheet/ui/beyond/inventory/inventory-item-meta";
 import { InventoryLocationSection } from "@/features/character/character-sheet/ui/beyond/inventory/inventory-location-section";
 import { QuantityStepper } from "@/features/character/character-sheet/ui/beyond/inventory/quantity-stepper";
@@ -35,6 +37,8 @@ import { FieldLabel } from "@/shared/ui/field";
 type BeyondInventoryTabProps = {
   characterId: string;
   equipmentWarnings?: EquipmentWarning[];
+  classSlug?: string | null;
+  classOptions?: ClassOption[] | null;
 };
 
 /**
@@ -44,6 +48,8 @@ type BeyondInventoryTabProps = {
 export function BeyondInventoryTab({
   characterId,
   equipmentWarnings = [],
+  classSlug,
+  classOptions,
 }: BeyondInventoryTabProps) {
   const inventory = useCharacterInventory(characterId);
   const addItem = useAddInventoryItem(characterId);
@@ -55,6 +61,10 @@ export function BeyondInventoryTab({
   const [addOpen, setAddOpen] = useState(false);
   const [selectedSlug, setSelectedSlug] = useState("");
   const [newQty, setNewQty] = useState("1");
+
+  const canBindPactWeapon =
+    classSlug === "warlock" &&
+    readEldritchInvocationSlugs(classOptions).includes("pact-of-the-blade");
 
   const items = inventory.data?.items ?? [];
   const equipped = items.filter((item) => item.location === "equipped");
@@ -182,6 +192,7 @@ export function BeyondInventoryTab({
             attunementSlotsFull={attunementSlotsFull}
             equipmentWarnings={equipmentWarnings}
             weaponOptions={weaponOptions}
+            canBindPactWeapon={canBindPactWeapon}
             onToggleLocation={toggleLocation}
             onToggleAttunement={toggleAttunement}
             onPatch={patchFields}
@@ -201,6 +212,7 @@ export function BeyondInventoryTab({
             attunementSlotsFull={attunementSlotsFull}
             equipmentWarnings={equipmentWarnings}
             weaponOptions={weaponOptions}
+            canBindPactWeapon={canBindPactWeapon}
             onToggleLocation={toggleLocation}
             onToggleAttunement={toggleAttunement}
             onPatch={patchFields}

@@ -1,18 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import type { CharacterDetail } from "@/entities/character";
 import type { ClassOption } from "@/entities/character/sheet-types";
 import { usePatchCharacter } from "@/features/character/character-sheet/api/use-patch-character";
 import {
   mergeEldritchInvocationsIntoClassOptions,
-  readEldritchInvocationSlugs,
+  readEldritchInvocationPicks,
   warlockInvocationLimit,
+  type EldritchInvocationPick,
 } from "@/features/character/character-sheet/lib/warlock/eldritch-invocations";
-import { EldritchInvocationPicker } from "@/features/character/character-sheet/ui/beyond/warlock/eldritch-invocation-picker";
+import {
+  EldritchInvocationPicker,
+  type EldritchCantripOption,
+} from "@/features/character/character-sheet/ui/beyond/warlock/eldritch-invocation-picker";
 import { useEldritchInvocations } from "@/features/catalog/eldritch-invocation-catalog/api/use-eldritch-invocations";
+import { useSpellLabels } from "@/features/catalog/spell-catalog/api/use-spells";
 import { Button } from "@/shared/ui/button";
+import { CollapsibleCard } from "@/shared/ui/collapsible-card";
 
 type BeyondEldritchInvocationsPanelProps = {
   characterId: string;
@@ -39,66 +45,83 @@ function BeyondEldritchInvocationsPanelInner({
 }: BeyondEldritchInvocationsPanelProps) {
   const patchCharacter = usePatchCharacter(characterId);
   const catalogQuery = useEldritchInvocations(character.level);
-  const saved = readEldritchInvocationSlugs(character.classOptions);
-  const [slugs, setSlugs] = useState(saved);
+  const spellLabels = useSpellLabels();
+  const saved = readEldritchInvocationPicks(character.classOptions);
+  const [picks, setPicks] = useState<EldritchInvocationPick[]>(saved);
 
+  const savedKey = JSON.stringify(saved);
   useEffect(() => {
-    setSlugs(saved);
-  }, [saved.join("|")]);
+    setPicks(saved);
+  }, [savedKey]);
 
-  const dirty = slugs.join("|") !== saved.join("|");
+  const dirty = JSON.stringify(picks) !== savedKey;
   const limit = warlockInvocationLimit(character.level);
+
+  const cantripOptions = useMemo((): EldritchCantripOption[] => {
+    const nameBySlug = new Map(
+      (spellLabels.data?.data ?? []).map((spell) => [spell.slug, spell.name]),
+    );
+    const seen = new Set<string>();
+    const options: EldritchCantripOption[] = [];
+    for (const spell of character.characterSpells ?? []) {
+      if (seen.has(spell.spellSlug)) continue;
+      seen.add(spell.spellSlug);
+      options.push({
+        value: spell.spellSlug,
+        label: nameBySlug.get(spell.spellSlug) ?? spell.spellSlug,
+        dealsDamage: true,
+        requiresAttackRoll: true,
+        rangeMeters: 36,
+      });
+    }
+    return options;
+  }, [character.characterSpells, spellLabels.data]);
 
   async function save() {
     const next = mergeEldritchInvocationsIntoClassOptions(
       (character.classOptions ?? []) as ClassOption[],
-      slugs,
+      picks,
     );
     await patchCharacter.mutateAsync({ classOptions: next });
   }
 
   return (
-    <section
-      className="space-y-2 rounded-xl border border-border/50 bg-card/40 p-3"
-      aria-labelledby="eldritch-invocations-heading"
+    <CollapsibleCard
+      size="compact"
+      defaultOpen={false}
+      className="border-border/50 bg-card/40"
+      title={`Invocações Místicas (${picks.length}/${limit})`}
+      subtitle="Escolha e troque invocações na ficha (pré-requisitos de nível/pacto validados na API)."
     >
-      <div>
-        <h3
-          id="eldritch-invocations-heading"
-          className="text-sm font-semibold text-foreground"
-        >
-          Invocações Místicas ({slugs.length}/{limit})
-        </h3>
-        <p className="text-xs text-muted-foreground">
-          Escolha e troque invocações na ficha (pré-requisitos de nível/pacto
-          validados na API).
-        </p>
-      </div>
+      <div className="space-y-2">
+        {catalogQuery.isPending ? (
+          <p className="text-xs text-muted-foreground">Carregando catálogo…</p>
+        ) : catalogQuery.isError ? (
+          <p className="text-xs text-destructive">
+            Falha ao carregar invocações.
+          </p>
+        ) : (
+          <EldritchInvocationPicker
+            level={character.level}
+            catalog={catalogQuery.data ?? []}
+            selectedPicks={picks}
+            cantripOptions={cantripOptions}
+            onChange={setPicks}
+            disabled={patchCharacter.isPending}
+          />
+        )}
 
-      {catalogQuery.isPending ? (
-        <p className="text-xs text-muted-foreground">Carregando catálogo…</p>
-      ) : catalogQuery.isError ? (
-        <p className="text-xs text-destructive">Falha ao carregar invocações.</p>
-      ) : (
-        <EldritchInvocationPicker
-          level={character.level}
-          catalog={catalogQuery.data ?? []}
-          selectedSlugs={slugs}
-          onChange={setSlugs}
-          disabled={patchCharacter.isPending}
-        />
-      )}
-
-      <div className="flex justify-end">
-        <Button
-          type="button"
-          size="sm"
-          disabled={!dirty || patchCharacter.isPending || slugs.length > limit}
-          onClick={() => void save()}
-        >
-          Salvar invocações
-        </Button>
+        <div className="flex justify-end">
+          <Button
+            type="button"
+            size="sm"
+            disabled={!dirty || patchCharacter.isPending || picks.length > limit}
+            onClick={() => void save()}
+          >
+            Salvar invocações
+          </Button>
+        </div>
       </div>
-    </section>
+    </CollapsibleCard>
   );
 }
