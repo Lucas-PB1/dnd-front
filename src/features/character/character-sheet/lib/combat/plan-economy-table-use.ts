@@ -47,8 +47,8 @@ export function planEconomyTableUse(input: {
       canUse: false,
       usePsiDie: false,
       buttonLabel: "Usar",
-      /** Lembrete / choice: sem contador (±) nem Usar. */
-      counterSlug: null,
+      /** Ainda mostra ± se a linha tiver resource_slug (controle de recurso). */
+      counterSlug: poolSlug,
     };
   }
 

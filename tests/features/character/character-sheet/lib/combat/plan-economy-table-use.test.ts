@@ -135,7 +135,7 @@ describe("planEconomyTableUse", () => {
     expect(disarm.armed).toBe(true);
   });
 
-  it("reminder rows without tableAction have no counter", () => {
+  it("reminder rows without tableAction have no counter when there is no resource", () => {
     const plan = planEconomyTableUse({
       action: action({
         id: "versatile",
@@ -149,5 +149,24 @@ describe("planEconomyTableUse", () => {
     });
     expect(plan.canUse).toBe(false);
     expect(plan.counterSlug).toBeNull();
+  });
+
+  it("keeps resource counter when tableAction is missing but resourceSlug is set", () => {
+    const remaining = new Map([
+      ["favoredEnemy", { remaining: 6, max: 6 }],
+    ]);
+    const plan = planEconomyTableUse({
+      action: action({
+        id: "ranger-hunters-mark",
+        name: "Marca do Predador",
+        classSlug: "ranger",
+        tableAction: undefined,
+        resourceSlug: "favoredEnemy",
+      }),
+      remainingBySlug: remaining,
+      preferSpendPool: false,
+    });
+    expect(plan.canUse).toBe(false);
+    expect(plan.counterSlug).toBe("favoredEnemy");
   });
 });

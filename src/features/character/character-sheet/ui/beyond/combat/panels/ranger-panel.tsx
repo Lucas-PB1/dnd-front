@@ -3,15 +3,21 @@
 import { useEffect, useMemo, useState } from "react";
 
 import type { CharacterState } from "@/entities/character/session-types";
-import { executeRangerTableAction } from "@/features/character/character-sheet/api/character-session.api";
+import type { ClassPanelActionRecord } from "@/entities/combat-mechanical/types";
+import {
+  executeRangerTableAction,
+  type RangerTableActionSlug,
+} from "@/features/character/character-sheet/api/character-session.api";
 import { useTableActionMutation } from "@/features/character/character-sheet/api/use-table-action-mutation";
 import { useCombatMechanicalCatalog } from "@/features/catalog/reference-catalog/api/use-reference";
 import { resolvePanelActions } from "@/features/character/character-sheet/lib/combat/resolve-panel-actions";
 import { CombatClassPanelShell } from "../shared/class-panel-shell";
 import { CombatPanelActionButtons } from "../shared/panel-action-buttons";
-import { CombatResourceSummary } from "../shared/resource-summary";
 import { TableActionFeedback } from "../shared/table-action-feedback";
 import { Button } from "@/shared/ui/button";
+
+const EMPTY_PANEL_ACTIONS: ClassPanelActionRecord[] = [];
+const FERAL_HOWL_SLUG = "feral-howl";
 
 type CombatRangerPanelProps = {
   characterId: string;
@@ -35,19 +41,13 @@ export function CombatRangerPanel({
   state,
 }: CombatRangerPanelProps) {
   const action = useTableActionMutation(characterId, executeRangerTableAction);
-  const mechanicalCatalog = useCombatMechanicalCatalog({ classSlug, subclassSlug });
-  const panelCatalog = mechanicalCatalog.data?.panelActions ?? [];
+  const mechanicalCatalog = useCombatMechanicalCatalog({
+    classSlug,
+    subclassSlug,
+  });
+  const panelCatalog =
+    mechanicalCatalog.data?.panelActions ?? EMPTY_PANEL_ACTIONS;
 
-  const baseActions = useMemo(
-    () =>
-      resolvePanelActions(panelCatalog, {
-        classSlug: "ranger",
-        level,
-        subclassSlug,
-        section: "base",
-      }),
-    [panelCatalog, level, subclassSlug],
-  );
   const subclassActions = useMemo(
     () =>
       resolvePanelActions(panelCatalog, {
@@ -55,7 +55,7 @@ export function CombatRangerPanel({
         level,
         subclassSlug,
         section: "subclass",
-      }),
+      }).filter((entry) => entry.slug !== FERAL_HOWL_SLUG),
     [panelCatalog, level, subclassSlug],
   );
 
@@ -73,6 +73,10 @@ export function CombatRangerPanel({
 
   function getRemaining(slug: string): number | null {
     return resources.find((entry) => entry.slug === slug)?.remaining ?? null;
+  }
+
+  function run(slug: string) {
+    action.mutate({ actionSlug: slug as RangerTableActionSlug });
   }
 
   const beastborneContent = isBeastborne ? (
@@ -125,7 +129,7 @@ export function CombatRangerPanel({
             variant="ghost"
             disabled={action.isPending || !state}
             title="Na iniciativa: role 1d4 e defina o Aspecto Bestial"
-            onClick={() => action.mutate({ actionSlug: "feral-howl" })}
+            onClick={() => run(FERAL_HOWL_SLUG)}
           >
             Uivo Feral
           </Button>
@@ -133,27 +137,6 @@ export function CombatRangerPanel({
       </div>
     </div>
   ) : null;
-
-  const actionsContent = (
-    <div className="space-y-2">
-      <CombatResourceSummary
-        resources={resources}
-        slugs={["favoredEnemy", "tireless", "naturesVeil", "dread-strike"]}
-      />
-
-      <CombatPanelActionButtons
-        actions={baseActions}
-        getRemaining={getRemaining}
-        isPending={action.isPending}
-        onAction={(slug) => action.mutate({ actionSlug: slug as never })}
-      />
-
-      <TableActionFeedback
-        lastResultNote={action.lastResult?.note}
-        error={action.error}
-      />
-    </div>
-  );
 
   const powersContent =
     subclassActions.length > 0 || beastborneContent ? (
@@ -163,7 +146,8 @@ export function CombatRangerPanel({
           actions={subclassActions}
           getRemaining={getRemaining}
           isPending={action.isPending}
-          onAction={(slug) => action.mutate({ actionSlug: slug as never })}
+          variant="secondary"
+          onAction={run}
         />
 
         <TableActionFeedback
@@ -176,7 +160,7 @@ export function CombatRangerPanel({
   return (
     <CombatClassPanelShell
       title="Combate do Patrulheiro"
-      actionsContent={actionsContent}
+      actionsContent={null}
       powersContent={powersContent}
       combatNotes={combatNotes}
     />

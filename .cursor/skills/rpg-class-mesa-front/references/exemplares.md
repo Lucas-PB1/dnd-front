@@ -34,4 +34,11 @@ Base comum:
 - Economy Usar: slugs do catálogo + `psi:*` (payload `usePsiDie`)
 - Lista BM: `GET …/fighter/maneuvers` (não é ação)
 
-Classe nova: copiar **sorcerer/warlock/wizard/fighter** (table-action).
+Classe nova: copiar **sorcerer/warlock/wizard/fighter/ranger** (table-action).
+
+## Patrulheiro
+
+- Painel: `…/panels/ranger-panel.tsx` — só Poderes (subclasse + Aspecto); **sem** summary de pools base
+- `executeRangerTableAction` via `classSlug: ranger`
+- Economy (controle de recurso): linhas C009 com `resource_slug` → ± na lista; `table_action` (`hunters-mark-free`, `tireless`, `natures-veil`, …) → Usar
+- `plan-economy-table-use`: `counterSlug` mesmo sem `tableAction` se houver `resourceSlug`

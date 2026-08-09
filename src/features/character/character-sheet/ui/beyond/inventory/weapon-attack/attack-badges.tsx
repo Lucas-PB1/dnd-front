@@ -15,7 +15,14 @@ export function modeLabel(attack: WeaponAttackSummary): string {
   return base;
 }
 
-export function AttackBadges({ attack }: { attack: WeaponAttackSummary }) {
+export function AttackBadges({
+  attack,
+  carnificinaBonus = 0,
+}: {
+  attack: WeaponAttackSummary;
+  /** Bônus flat de Carnificina (Aspecto Bestial ≥ 1). */
+  carnificinaBonus?: number;
+}) {
   const { shortOf } = useAbilityLabels();
 
   return (
@@ -41,6 +48,9 @@ export function AttackBadges({ attack }: { attack: WeaponAttackSummary }) {
       ) : null}
       {attack.rageDamageBonus ? (
         <SheetChip active>Fúria +{attack.rageDamageBonus}</SheetChip>
+      ) : null}
+      {carnificinaBonus > 0 ? (
+        <SheetChip active>Carnificina +{carnificinaBonus}</SheetChip>
       ) : null}
       {attack.brutalStrikeDice ? (
         <SheetChip>Golpe Brutal {attack.brutalStrikeDice}</SheetChip>

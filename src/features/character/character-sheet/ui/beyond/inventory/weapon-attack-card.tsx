@@ -43,6 +43,8 @@ type WeaponAttackCardProps = {
   ranger?: {
     level: number;
     subclassSlug?: string | null;
+    /** Aspecto Bestial na mesa (Beastborne); Carnificina no dano se ≥ 1. */
+    bestialAspectLevel?: number;
   };
   onDreadAmbusherResolved?: () => void | Promise<void>;
   cleric?: {
@@ -119,6 +121,14 @@ export function WeaponAttackCard({
   const canDreadAmbusher = Boolean(
     ranger?.subclassSlug === "gloom-stalker" && ranger.level >= 3,
   );
+  const carnificinaBonus =
+    ranger?.subclassSlug === "beastborne" &&
+    ranger.level >= 3 &&
+    (ranger.bestialAspectLevel ?? 0) >= 1
+      ? ranger.level >= 11
+        ? 3
+        : 2
+      : 0;
   const hasChamber = attack.reloadCapacity != null;
   const shotsLeft =
     chamberRemaining ?? (hasChamber ? attack.reloadCapacity : null);
@@ -161,7 +171,7 @@ export function WeaponAttackCard({
                 {modeLabel(attack)}
               </span>
             </p>
-            <AttackBadges attack={attack} />
+            <AttackBadges attack={attack} carnificinaBonus={carnificinaBonus} />
             {hasChamber ? (
               <p className="mt-1 text-[0.7rem] text-muted-foreground">
                 Câmara: {shotsLeft ?? "—"}/{attack.reloadCapacity}

@@ -305,6 +305,8 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
                     ? {
                         level: character.level,
                         subclassSlug: character.subclassSlug,
+                        bestialAspectLevel:
+                          stateQuery.data?.bestialAspectLevel ?? 0,
                       }
                     : undefined
                 }
@@ -541,7 +543,7 @@ function EconomyBucketSection({
                     {plan.buttonLabel}
                   </Button>
                 ) : null}
-                {counter && plan.counterSlug && action.tableAction ? (
+                {counter && plan.counterSlug ? (
                   <div className="flex items-center gap-1">
                     <Button
                       type="button"

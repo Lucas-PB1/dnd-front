@@ -350,6 +350,8 @@ export type RangerTableActionSlug =
   | "fey-reinforcements"
   | "misty-wanderer"
   | "primal-companion"
+  | "hunter-defense"
+  | "gloom-stalker-dodge"
   | "set-bestial-aspect"
   | "feral-howl";
 
