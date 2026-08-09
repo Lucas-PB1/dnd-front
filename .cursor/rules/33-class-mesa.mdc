@@ -1,0 +1,14 @@
+---
+description: Classe mesa (front) — carregar skill rpg-class-mesa-front ao tocar painel/Usar
+alwaysApply: true
+---
+
+# Classe mesa — front
+
+Ao implementar ou revisar **painel de combate**, **Usar** da economia ou routing de `table_action`:
+
+1. Abrir a skill **`rpg-class-mesa-front`** (e `references/` se precisar de exemplares).
+2. Preferir `execute*TableAction` alinhado ao catálogo; não inventar rotas estilo Guerreiro.
+3. API: skill irmã `rpg-class-mesa-api` no `dnd-api`.
+
+Detalhe e checklist vivem na skill — não duplicar aqui.
