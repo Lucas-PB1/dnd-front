@@ -124,7 +124,7 @@ export type EquipmentWarning = {
   itemSlug?: string;
 };
 
-/** Lista resumida (mesmos campos base do detail) */
+/** Lista resumida (mesmos campos base do detail + nomes do catálogo) */
 export type CharacterSummary = Pick<
   CharacterDetail,
   | "id"
@@ -137,7 +137,11 @@ export type CharacterSummary = Pick<
   | "campaigns"
   | "createdAt"
   | "updatedAt"
->;
+> & {
+  className: string;
+  speciesName: string;
+  subclassName: string | null;
+};
 
 /** Payload para POST /characters — espelha CreateCharacterDto */
 export type CreateCharacterPayload = {

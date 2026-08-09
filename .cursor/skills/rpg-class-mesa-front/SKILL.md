@@ -51,7 +51,7 @@ Detalhe: skill API `references/economia-painel.md` § Controle de recursos.
 
 | Situação | Arquivo |
 |----------|---------|
-| Quatro exemplares + paths | [`references/exemplares.md`](references/exemplares.md) |
+| Classes concluídas + paths | [`references/exemplares.md`](references/exemplares.md) |
 
 ## Anti-padrões
 

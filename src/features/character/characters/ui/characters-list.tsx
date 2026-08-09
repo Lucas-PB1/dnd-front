@@ -67,8 +67,14 @@ export function CharactersList() {
           <div className="min-w-0 flex-1">
             <p className="font-medium">{character.name}</p>
             <p className="text-sm text-muted-foreground">
-              Nv. {character.level} · {character.speciesSlug} ·{" "}
-              {character.classSlug}
+              {[
+                `Nv. ${character.level}`,
+                character.speciesName,
+                character.className,
+                character.subclassName,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
             </p>
             {character.campaigns?.length ? (
               <p className="mt-1 text-xs text-muted-foreground">
