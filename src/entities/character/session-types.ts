@@ -131,6 +131,8 @@ export type InventoryItem = {
   isPactWeapon?: boolean;
   requiresAttunement: boolean;
   effectsActive: boolean;
+  /** Poção/óleo/pergaminho — economy ativa com quantity > 0. */
+  consumable?: boolean;
   effectsStatus: "active" | "inactive_unequipped" | "inactive_unattuned";
   weightKg: number;
   attachedCharmSlug?: string | null;

@@ -19,23 +19,50 @@ type ItemDetailViewProps = {
 
 function ItemHero({ item, backHref }: { item: ItemSummary; backHref: string }) {
   const typeLabel = ITEM_TYPE_LABELS_PT[item.itemType] ?? item.itemType;
+  const props = item.properties ?? null;
+  const rarityLabel =
+    typeof props?.rarityLabel === "string" ? props.rarityLabel : null;
+  const category =
+    typeof props?.category === "string" ? props.category : null;
+  const header = typeof props?.header === "string" ? props.header : null;
+  const attunement =
+    typeof props?.attunement === "string"
+      ? props.attunement
+      : props?.requiresAttunement === true
+        ? "Requer Sintonização"
+        : null;
+  const editionSlug =
+    typeof props?.editionSlug === "string" ? props.editionSlug : null;
+  const magic = props?.magic === true;
+  const consumable = props?.consumable === true;
+
   const stats: { label: string; value: string }[] = [
-    { label: "Tipo", value: typeLabel },
+    { label: "Tipo", value: category ?? typeLabel },
   ];
+  if (magic) stats.push({ label: "Mágico", value: "Sim" });
+  if (rarityLabel) stats.push({ label: "Raridade", value: rarityLabel });
+  if (attunement) stats.push({ label: "Sintonização", value: attunement });
+  if (consumable) stats.push({ label: "Consumível", value: "Sim" });
+  if (editionSlug) stats.push({ label: "Fonte", value: editionSlug });
   if (item.costText) stats.push({ label: "Custo", value: item.costText });
   if (item.weight) stats.push({ label: "Peso", value: item.weight });
 
-  const attribute = item.properties?.attribute;
+  const attribute = props?.attribute;
   if (typeof attribute === "string" && attribute.trim()) {
     stats.push({ label: "Atributo", value: attribute.toUpperCase() });
   }
+
+  const eyebrow = [magic ? "Item mágico" : null, rarityLabel, typeLabel]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
     <CatalogDetailHero
       backHref={backHref}
       backLabel="Equipamento"
       title={item.name}
-      eyebrow={typeLabel}
+      eyebrow={eyebrow || typeLabel}
+      summary={header && header !== rarityLabel ? header : undefined}
       stats={stats}
     />
   );
@@ -43,7 +70,10 @@ function ItemHero({ item, backHref }: { item: ItemSummary; backHref: string }) {
 
 function ItemDetailBody({ slug }: ItemDetailViewProps) {
   const { data, isPending, isError, error } = useItemDetail(slug);
-  const backHref = useCatalogBackHref("/equipment?tab=items");
+  const magic = data?.properties?.magic === true;
+  const backHref = useCatalogBackHref(
+    magic ? "/equipment?tab=magic" : "/equipment?tab=items",
+  );
   const { links } = useEquipmentCatalogLinks();
 
   if (isPending) {

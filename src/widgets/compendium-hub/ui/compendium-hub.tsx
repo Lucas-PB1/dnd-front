@@ -85,7 +85,7 @@ const SECTIONS: ReadonlyArray<{
     href: "/equipment",
     title: "Equipamento",
     eyebrow: "Arsenal",
-    description: "Armas, armaduras e itens — dano, CA, custo e propriedades.",
+    description: "Armas, armaduras, itens e itens mágicos (PHB, Valdas, DMG).",
     icon: CubeIcon,
   },
   {

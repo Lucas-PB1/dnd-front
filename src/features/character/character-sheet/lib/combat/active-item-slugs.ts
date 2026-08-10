@@ -1,10 +1,13 @@
-/** Slugs de itens mágicos ativos na Economia (espelha itemEffectsActive + charms). */
+/** Slugs de itens mágicos ativos na Economia (espelha itemEffectsActive + charms + consumíveis). */
 
 export type ActiveItemInventoryLike = {
   itemSlug: string;
   effectsActive: boolean;
   location?: "equipped" | "backpack";
   attachedCharmSlug?: string | null;
+  /** Poção / óleo / pergaminho: ativo na Economia com quantity > 0 (mesmo na mochila). */
+  consumable?: boolean;
+  quantity?: number;
 };
 
 export type ActiveItemWeaponLike = {
@@ -19,6 +22,12 @@ export function collectActiveItemSlugs(input: {
 
   for (const item of input.inventoryItems ?? []) {
     if (item.effectsActive) slugs.add(item.itemSlug);
+    if (
+      item.consumable &&
+      (item.quantity == null || item.quantity > 0)
+    ) {
+      slugs.add(item.itemSlug);
+    }
     if (item.location === "equipped" && item.attachedCharmSlug) {
       slugs.add(item.attachedCharmSlug);
     }

@@ -44,4 +44,26 @@ describe("collectActiveItemSlugs", () => {
       "weapon-charm-lightning",
     ]);
   });
+
+  it("includes backpack consumables with quantity", () => {
+    const slugs = collectActiveItemSlugs({
+      inventoryItems: [
+        {
+          itemSlug: "pocao-de-cura",
+          effectsActive: false,
+          location: "backpack",
+          consumable: true,
+          quantity: 2,
+        },
+        {
+          itemSlug: "pocao-de-voo",
+          effectsActive: false,
+          location: "backpack",
+          consumable: true,
+          quantity: 0,
+        },
+      ],
+    });
+    expect(slugs).toEqual(["pocao-de-cura"]);
+  });
 });

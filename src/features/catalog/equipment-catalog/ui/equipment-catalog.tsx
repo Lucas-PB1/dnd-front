@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { ArmorGrid } from "@/features/catalog/equipment-catalog/ui/armor-grid";
 import { GearItemsGrid } from "@/features/catalog/equipment-catalog/ui/gear-items-grid";
+import { MagicItemsGrid } from "@/features/catalog/equipment-catalog/ui/magic-items-grid";
 import { WeaponsGrid } from "@/features/catalog/equipment-catalog/ui/weapons-grid";
 import { motion } from "@/shared/lib/motion";
 import { cn } from "@/shared/lib/utils";
@@ -23,14 +24,19 @@ const TABS = [
   {
     id: "items",
     label: "Itens",
-    description: "Kits, ferramentas, focos e utilitários.",
+    description: "Kits, ferramentas, focos e utilitários mundanos.",
+  },
+  {
+    id: "magic",
+    label: "Itens mágicos",
+    description: "DMG e outros — raridade, sintonização e fonte (menu Fontes).",
   },
 ] as const;
 
 type EquipmentTab = (typeof TABS)[number]["id"];
 
 function parseTab(value: string | null): EquipmentTab {
-  if (value === "armor" || value === "items") return value;
+  if (value === "armor" || value === "items" || value === "magic") return value;
   return "weapons";
 }
 
@@ -46,11 +52,11 @@ export function EquipmentCatalog() {
       const params = new URLSearchParams(searchParams.toString());
       if (next === "weapons") params.delete("tab");
       else params.set("tab", next);
-      // Cada aba tem seu próprio universo de busca/paginação/filtros.
       params.delete("q");
       params.delete("page");
       params.delete("category");
       params.delete("itemType");
+      params.delete("rarity");
       const query = params.toString();
       router.replace(query ? `${pathname}?${query}` : pathname, {
         scroll: false,
@@ -102,6 +108,7 @@ export function EquipmentCatalog() {
         {tab === "weapons" ? <WeaponsGrid /> : null}
         {tab === "armor" ? <ArmorGrid /> : null}
         {tab === "items" ? <GearItemsGrid /> : null}
+        {tab === "magic" ? <MagicItemsGrid /> : null}
       </div>
     </div>
   );

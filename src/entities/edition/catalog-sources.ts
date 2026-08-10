@@ -4,6 +4,7 @@ export const CATALOG_SOURCES_STORAGE_KEY = "grimoire.catalogSources";
 
 export const PHB_EDITION_SLUG = "phb-2024-pt";
 export const VALDAS_EDITION_SLUG = "valdas-spire-2024-en";
+export const DMG_EDITION_SLUG = "dmg-2024-pt";
 
 const LEGACY_VALDA_EDITION_SLUG = "valda-spire-2024-en";
 
@@ -16,6 +17,7 @@ export function editionShortLabel(slug: string | null | undefined): string {
   if (!slug) return "PHB";
   if (slug === PHB_EDITION_SLUG || slug.startsWith("phb-")) return "PHB";
   if (slug.startsWith("valdas-") || slug.startsWith("valda-")) return "Valdas";
+  if (slug === DMG_EDITION_SLUG || slug.startsWith("dmg-")) return "DMG";
   return slug;
 }
 
@@ -26,6 +28,9 @@ export function editionMenuLabel(edition: Pick<Edition, "slug" | "label" | "book
   }
   if (edition.slug.startsWith("valdas-") || edition.slug.startsWith("valda-")) {
     return "Valdas";
+  }
+  if (edition.slug === DMG_EDITION_SLUG || edition.slug.startsWith("dmg-")) {
+    return "DMG 2024";
   }
   return edition.label || edition.book || edition.slug;
 }

@@ -95,3 +95,29 @@ export const ITEM_TYPE_FILTER: CatalogFilterField = {
     { value: "other", label: "Outro" },
   ],
 };
+
+export const MAGIC_ITEM_RARITY_FILTER: CatalogFilterField = {
+  key: "rarity",
+  label: "Raridade",
+  options: [
+    { value: "common", label: "Comum" },
+    { value: "uncommon", label: "Incomum" },
+    { value: "rare", label: "Raro" },
+    { value: "very-rare", label: "Muito raro" },
+    { value: "legendary", label: "Lendário" },
+    { value: "artifact", label: "Artefato" },
+    { value: "varies", label: "Variável" },
+  ],
+};
+
+/** Tipos na aba Itens mágicos (compõe com raridade + Fontes). */
+export const MAGIC_ITEM_TYPE_FILTER: CatalogFilterField = {
+  key: "itemType",
+  label: "Tipo",
+  options: [
+    { value: "weapon", label: "Arma" },
+    { value: "armor", label: "Armadura" },
+    { value: "gear", label: "Equipamento" },
+    { value: "other", label: "Outro / anel / etc." },
+  ],
+};

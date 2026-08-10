@@ -106,7 +106,7 @@ export function useGearCatalog(params: {
         ...itemKeys.all,
         "list",
         "page",
-        { page: p.page, limit: p.limit, q: p.q ?? "", itemType },
+        { page: p.page, limit: p.limit, q: p.q ?? "", itemType, magic: false },
       ] as const,
     queryFn: (p) =>
       fetchItems({
@@ -114,6 +114,50 @@ export function useGearCatalog(params: {
         limit: p.limit,
         q: p.q,
         itemType,
+        magic: false,
+      }),
+  });
+}
+
+export function useMagicItemsCatalog(params: {
+  page: number;
+  q?: string;
+  rarity?: string;
+  itemType?: string;
+  editionSlugs?: string;
+}) {
+  const rarity = params.rarity?.trim() || undefined;
+  const itemType = params.itemType?.trim() || undefined;
+  const editionSlugs = params.editionSlugs?.trim() || undefined;
+
+  return useCatalogListQuery({
+    page: params.page,
+    filters: { q: params.q, rarity, itemType, editionSlugs },
+    clearPlaceholderOnFilter: true,
+    queryKey: (p) =>
+      [
+        ...itemKeys.all,
+        "list",
+        "magic",
+        {
+          page: p.page,
+          limit: p.limit,
+          q: p.q ?? "",
+          rarity: p.rarity ?? "",
+          itemType: p.itemType ?? "",
+          editionSlugs: p.editionSlugs ?? "all",
+          magic: true,
+        },
+      ] as const,
+    queryFn: (p) =>
+      fetchItems({
+        page: p.page,
+        limit: p.limit,
+        q: p.q,
+        magic: true,
+        rarity: p.rarity,
+        itemType: p.itemType,
+        editionSlugs: p.editionSlugs,
       }),
   });
 }
