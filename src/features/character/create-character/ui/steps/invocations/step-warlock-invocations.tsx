@@ -31,7 +31,7 @@ export function StepWarlockInvocations({
   const level = useWatch({ control, name: "level" }) ?? 1;
   const classOptions = useWatch({ control, name: "classOptions" }) ?? [];
   const characterSpells = useWatch({ control, name: "characterSpells" }) ?? [];
-  const characterFeats = useWatch({ control, name: "characterFeats" }) ?? [];
+  const asiFeatSlotSlugs = useWatch({ control, name: "asiFeatSlotSlugs" }) ?? [];
   const catalogQuery = useEldritchInvocations(level);
   const originFeatsQuery = useFeatsCatalog({
     page: 1,
@@ -76,11 +76,11 @@ export function StepWarlockInvocations({
         .filter((slug): slug is string => Boolean(slug)),
     );
     return new Set(
-      characterFeats
-        .map((feat) => feat.featSlug)
-        .filter((slug) => !lessonsFeats.has(slug)),
+      asiFeatSlotSlugs.filter(
+        (slug): slug is string => Boolean(slug) && !lessonsFeats.has(slug),
+      ),
     );
-  }, [characterFeats, selected]);
+  }, [asiFeatSlotSlugs, selected]);
 
   return (
     <WizardFormSection

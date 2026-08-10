@@ -173,6 +173,7 @@ export function useUpdateCampaign(campaignId: string) {
     mutationFn: async (payload: {
       name?: string;
       description?: string | null;
+      allowPlayerSkipPayment?: boolean;
     }) => {
       if (!accessToken) throw new Error("Sessão expirada");
       return updateCampaign(accessToken, campaignId, payload);

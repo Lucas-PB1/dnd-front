@@ -85,6 +85,13 @@ export function previewCreateCharacter(
     subclassOptions: values.subclassOptions,
     classOptions: values.classOptions ?? [],
     characterFeats: [],
+    coins: {
+      copper: 0,
+      silver: 0,
+      electrum: 0,
+      gold: 0,
+      platinum: 0,
+    },
     featOptions: values.featOptions,
     characterSpells: values.characterSpells,
     equipment: values.equipment,

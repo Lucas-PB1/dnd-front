@@ -41,14 +41,7 @@ export function ClassCombatPanel({
 
   switch (character.classSlug) {
     case "barbarian":
-      return (
-        <CombatBarbarianPanel
-          characterId={characterId}
-          classSlug={character.classSlug}
-          combatNotes={character.classCombatNotes}
-          state={state}
-        />
-      );
+      return <CombatBarbarianPanel {...shared} />;
     case "fighter":
       return (
         <CombatFighterPanel
