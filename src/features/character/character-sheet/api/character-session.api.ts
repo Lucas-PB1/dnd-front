@@ -326,7 +326,9 @@ export type PaladinTableActionSlug =
   | "cure-poison"
   | "divine-sense"
   | "abjure-enemies"
-  | "oath-channel";
+  | "oath-channel"
+  | "inspiring-smite"
+  | "peerless-athlete";
 
 export async function executePaladinTableAction(
   accessToken: string,

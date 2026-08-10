@@ -17,6 +17,7 @@ Base comum:
 | Guerreiro | **Concluída** |
 | Patrulheiro | **Concluída** |
 | Ladino | **Concluída** |
+| Paladino | **Concluída** |
 
 Classe nova: copiar uma destas (table-action + Economia com `resource_slug` / ±).
 
@@ -26,6 +27,7 @@ Classe nova: copiar uma destas (table-action + Economia com `resource_slug` / ±
 - API client: `executeSorcererTableAction` em `character-session.api.ts`
 - Economy Usar: `classSlug: sorcerer` + `table_action` do catálogo (Bastião usa `spendAmount` → `pointsSpent`)
 - Painel: base + subclass do catálogo; Fonte de Magia e metamagia locais; Bastião 1–5 pts
+- **Sem** `CombatResourceSummary` (pools ± só na Economia — anti-padrão espelho no Ferramentas)
 
 ## Bruxo — **concluída**
 
@@ -64,3 +66,12 @@ Classe nova: copiar uma destas (table-action + Economia com `resource_slug` / ±
 - **Lâminas Psíquicas:** cards de ataque virtuais na ficha (`psychic-blade`) — Furtivo/Golpe Astuto no `rogue-attack-options` (não no painel)
 - Ataque: `rogue-attack-options.tsx` (Furtivo / Golpe Astuto / Assassino)
 - Polish adiado: Teia/posição, condições persistentes — ver exemplares API
+
+## Paladino — **concluída**
+
+- Painel: `…/panels/paladin-panel.tsx` — Mãos Consagradas (amount + Curar / Curar Veneno); canais via `resolvePanelActions` (C010)
+- `executePaladinTableAction` via `classSlug: paladin` na economy (`oath-channel`, `peerless-athlete`, …)
+- Economy: base (`layOnHands` / `channelDivinity`) + **linhas por juramento** (canais nomeados, auras L7, pools L15/L20 incl. Folia)
+- **Sem** espelho de Canalizar `remaining/max` no Ferramentas (só ± na Economia)
+- Ataque: Destruição Divina / Golpes Radiantes nos cards
+- Polish adiado: Defesa Gloriosa / Destruição Protetora Usar dedicado

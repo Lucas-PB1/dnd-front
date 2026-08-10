@@ -19,9 +19,11 @@ export {
   skillBonus,
 } from "@/entities/character/lib/ability";
 export {
+  auraOfProtectionSaveBonus,
   collectSaveProficiencyAbilities,
   computePassiveSkill,
   initiativeBonus,
+  savingThrowDisplayBonus,
   skillCheckBonus,
   skillProficiencyRank,
 } from "@/entities/character/lib/check-bonuses";

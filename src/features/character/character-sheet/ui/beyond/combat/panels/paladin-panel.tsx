@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 
 import type { CharacterState } from "@/entities/character/session-types";
+import type { ClassPanelActionRecord } from "@/entities/combat-mechanical/types";
 import { executePaladinTableAction } from "@/features/character/character-sheet/api/character-session.api";
 import { useTableActionMutation } from "@/features/character/character-sheet/api/use-table-action-mutation";
 import { useCombatMechanicalCatalog } from "@/features/catalog/reference-catalog/api/use-reference";
@@ -11,6 +12,8 @@ import { CombatClassPanelShell } from "../shared/class-panel-shell";
 import { CombatPanelActionButtons } from "../shared/panel-action-buttons";
 import { TableActionFeedback } from "../shared/table-action-feedback";
 import { Button } from "@/shared/ui/button";
+
+const EMPTY_PANEL_ACTIONS: ClassPanelActionRecord[] = [];
 
 type CombatPaladinPanelProps = {
   characterId: string;
@@ -31,8 +34,12 @@ export function CombatPaladinPanel({
 }: CombatPaladinPanelProps) {
   const [healAmount, setHealAmount] = useState(1);
   const action = useTableActionMutation(characterId, executePaladinTableAction);
-  const mechanicalCatalog = useCombatMechanicalCatalog({ classSlug, subclassSlug });
-  const panelCatalog = mechanicalCatalog.data?.panelActions ?? [];
+  const mechanicalCatalog = useCombatMechanicalCatalog({
+    classSlug,
+    subclassSlug,
+  });
+  const panelCatalog =
+    mechanicalCatalog.data?.panelActions ?? EMPTY_PANEL_ACTIONS;
 
   const channelActions = useMemo(
     () =>
@@ -55,6 +62,15 @@ export function CombatPaladinPanel({
   );
   const poolRemaining = layOnHands?.remaining ?? 0;
   const channelRemaining = channel?.remaining ?? 0;
+
+  function getRemaining(slug: string): number | null {
+    if (slug === "layOnHands") return poolRemaining;
+    if (slug === "channelDivinity") return channelRemaining;
+    return (
+      state?.classResources?.find((entry) => entry.slug === slug)?.remaining ??
+      null
+    );
+  }
 
   const actionsContent = (
     <div className="space-y-2">
@@ -107,20 +123,10 @@ export function CombatPaladinPanel({
         </div>
       ) : null}
 
-      {channel ? (
-        <p className="text-sm text-muted-foreground">
-          Canalizar Divindade:{" "}
-          <span className="font-semibold text-foreground">
-            {channelRemaining}/{channel.max}
-          </span>
-        </p>
-      ) : null}
-
       <CombatPanelActionButtons
         actions={channelActions}
+        getRemaining={getRemaining}
         isPending={action.isPending}
-        disabled={channelRemaining <= 0}
-        displayRemaining={channelRemaining}
         variant="outline"
         onAction={(slug) => action.mutate({ actionSlug: slug as never })}
       />

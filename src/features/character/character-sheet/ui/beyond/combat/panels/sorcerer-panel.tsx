@@ -16,7 +16,6 @@ import { readMetamagicSlugs } from "@/features/character/character-sheet/lib/sor
 import { useMetamagics } from "@/features/catalog/metamagic-catalog/api/use-metamagics";
 import { CombatClassPanelShell } from "../shared/class-panel-shell";
 import { CombatPanelActionButtons } from "../shared/panel-action-buttons";
-import { CombatResourceSummary } from "../shared/resource-summary";
 import { TableActionFeedback } from "../shared/table-action-feedback";
 import { Button } from "@/shared/ui/button";
 
@@ -114,20 +113,6 @@ export function CombatSorcererPanel({
 
   const actionsContent = (
     <div className="space-y-2">
-      <CombatResourceSummary
-        resources={resources}
-        slugs={[
-          "sorceryPoints",
-          "sorcery-points",
-          "innate-sorcery",
-          "sorcerous-restoration",
-          "tides-of-chaos",
-          "restore-balance",
-          "dragon-wings",
-          "warp-implosion",
-        ]}
-      />
-
       {baseActions.length > 0 ? (
         <CombatPanelActionButtons
           actions={baseActions}

@@ -10,9 +10,11 @@ import { useState } from "react";
 import type { CharacterDetail } from "@/entities/character/types";
 import {
   abilityModifierValue,
+  auraOfProtectionSaveBonus,
   collectSaveProficiencyAbilities,
   computePassiveSkill,
   formatSkillBonus,
+  savingThrowDisplayBonus,
   sheetAbilityScores,
 } from "@/entities/character";
 import { useClassDetail } from "@/features/catalog/class-catalog/api/use-classes";
@@ -68,6 +70,11 @@ export function BeyondLeftColumn({
   }
   const pb = character.proficiencyBonus;
   const scores = sheetAbilityScores(character);
+  const auraSaveBonus = auraOfProtectionSaveBonus(
+    character.classSlug,
+    character.level,
+    abilityModifierValue(scores.carisma),
+  );
   const skillSources = {
     classSkillSlugs: character.classSkillSlugs,
     backgroundSkillSlugs: character.backgroundSkillSlugs,
@@ -113,7 +120,12 @@ export function BeyondLeftColumn({
             {orderedKeys.map((slug) => {
               const mod = abilityModifierValue(scores[slug]);
               const isProficient = proficient.has(slug);
-              const total = mod + (isProficient ? pb : 0);
+              const total = savingThrowDisplayBonus(
+                mod,
+                isProficient,
+                pb,
+                auraSaveBonus,
+              );
               return (
                 <li key={slug}>
                   <button
@@ -133,7 +145,11 @@ export function BeyondLeftColumn({
                       isProficient ? "bg-primary/10" : "hover:bg-muted/40",
                       "disabled:opacity-60",
                     )}
-                    title={`Rolar salvaguarda de ${labelOf(slug)}`}
+                    title={
+                      auraSaveBonus > 0
+                        ? `Rolar salvaguarda de ${labelOf(slug)} (inclui Aura de Proteção +${auraSaveBonus})`
+                        : `Rolar salvaguarda de ${labelOf(slug)}`
+                    }
                   >
                     <span
                       className={cn(
