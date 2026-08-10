@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import {
   castCharacterSpell,
+  executeClericTableAction,
   executeFighterTableAction,
   executeGunslingerTableAction,
   executeMonkTableAction,
@@ -15,6 +16,7 @@ import {
   executeWizardTableAction,
   sessionKeys,
   spendClassResource,
+  type ClericTableActionSlug,
   type FighterTableActionSlug,
   type GunslingerTableActionSlug,
   type MonkTableActionSlug,
@@ -178,6 +180,16 @@ export function useEconomyTableAction(characterId: string) {
             token,
             characterId,
             tableAction as MonkTableActionSlug,
+          );
+          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
+          return noteFromResult(result, note);
+        }
+
+        if (routeClass === "cleric") {
+          const result = await executeClericTableAction(
+            token,
+            characterId,
+            tableAction as ClericTableActionSlug,
           );
           queryClient.setQueryData(sessionKeys.state(characterId), result.state);
           return noteFromResult(result, note);

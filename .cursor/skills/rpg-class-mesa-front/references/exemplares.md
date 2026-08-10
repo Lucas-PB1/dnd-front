@@ -20,6 +20,7 @@ Base comum:
 | Paladino | **Concluída** |
 | Pistoleiro | **Concluída** |
 | Monge | **Concluída** |
+| Clérigo | **Concluída** |
 
 Classe nova: copiar uma destas (table-action + Economia com `resource_slug` / ±).
 
@@ -96,3 +97,12 @@ Classe nova: copiar uma destas (table-action + Economia com `resource_slug` / ±
 - Economy: C009 com `focusPoints` (±) + `table_action` (Usar) alinhado ao handler
 - Subs: open-hand / elements / mercy / shadow / **warrior-of-the-street** (C009+C010+handlers)
 - Polish adiado: Defletir/Queda Lenta Usar; trackers de duração
+
+## Clérigo — **concluída**
+
+- Painel: `…/panels/cleric-panel.tsx` — base + subclass via `resolvePanelActions` (C010)
+- **Sem** `CombatResourceSummary` (Canalizar ± só na Economia)
+- `executeClericTableAction` via `classSlug: cleric` na economy
+- Economy: C009 `cleric-channel` (±) + Usar alinhado (Centelha, Expulsar, Intervenção, domínios PHB + Dragão)
+- Subs: life / light / trickery / war / **dragon-domain** (Afinidade, Majestade, Serpe, Aspecto ×3)
+- Polish adiado: recarregar Aspecto com espaço 2+; tipo de Afinidade no estado; Transposição Trapaça Usar

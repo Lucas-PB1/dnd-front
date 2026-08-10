@@ -11,5 +11,6 @@ Ao implementar ou revisar **painel de combate**, **Usar** da economia ou routing
 2. Preferir `execute*TableAction` alinhado ao catálogo; não inventar rotas estilo Guerreiro.
 3. API: skill irmã `rpg-class-mesa-api` no `dnd-api`.
 4. **Sem hardcode de domínio no front** — não espelhar `classSlug` + `level >= N`, nem `Set` de slugs de sub/manobra/economy; consumir catálogo/DTO da API.
+5. **PV temp.:** `state.tempHp` da sessão + edição manual (dialog Condições); não duplicar contador no painel de classe.
 
 Detalhe e checklist vivem na skill — não duplicar aqui.

@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 
 import type { CharacterState } from "@/entities/character/session-types";
+import type { ClassPanelActionRecord } from "@/entities/combat-mechanical/types";
 import {
   executeClericTableAction,
   type ClericTableActionSlug,
@@ -12,8 +13,9 @@ import { useCombatMechanicalCatalog } from "@/features/catalog/reference-catalog
 import { resolvePanelActions } from "@/features/character/character-sheet/lib/combat/resolve-panel-actions";
 import { CombatClassPanelShell } from "../shared/class-panel-shell";
 import { CombatPanelActionButtons } from "../shared/panel-action-buttons";
-import { CombatResourceSummary } from "../shared/resource-summary";
 import { TableActionFeedback } from "../shared/table-action-feedback";
+
+const EMPTY_PANEL_ACTIONS: ClassPanelActionRecord[] = [];
 
 type CombatClericPanelProps = {
   characterId: string;
@@ -24,14 +26,9 @@ type CombatClericPanelProps = {
   state: CharacterState | undefined;
 };
 
-const CLERIC_RESOURCE_SLUGS = [
-  "channelDivinity",
-  "divineIntervention",
-  "warding-flare",
-  "corona-of-light",
-  "war-priest",
-] as const;
-
+/**
+ * Clérigo: base/domínio pelo catálogo C010; pools ± só na Economia.
+ */
 export function CombatClericPanel({
   characterId,
   classSlug,
@@ -40,9 +37,14 @@ export function CombatClericPanel({
   combatNotes,
   state,
 }: CombatClericPanelProps) {
+  const enabled = classSlug === "cleric";
   const action = useTableActionMutation(characterId, executeClericTableAction);
-  const mechanicalCatalog = useCombatMechanicalCatalog({ classSlug, subclassSlug });
-  const panelCatalog = mechanicalCatalog.data?.panelActions ?? [];
+  const mechanicalCatalog = useCombatMechanicalCatalog({
+    classSlug,
+    subclassSlug,
+  });
+  const panelCatalog =
+    mechanicalCatalog.data?.panelActions ?? EMPTY_PANEL_ACTIONS;
 
   const baseActions = useMemo(
     () =>
@@ -65,7 +67,7 @@ export function CombatClericPanel({
     [panelCatalog, level, subclassSlug],
   );
 
-  if (classSlug !== "cleric") return null;
+  if (!enabled) return null;
 
   const resources = state?.classResources ?? [];
 
@@ -75,19 +77,12 @@ export function CombatClericPanel({
 
   const actionsContent = (
     <div className="space-y-2">
-      <CombatResourceSummary
-        resources={resources}
-        slugs={CLERIC_RESOURCE_SLUGS}
-      />
-
       <CombatPanelActionButtons
         actions={baseActions}
         getRemaining={getRemaining}
         isPending={action.isPending}
-        showRemaining={false}
         onAction={(slug) => action.mutate(slug as ClericTableActionSlug)}
       />
-
       <TableActionFeedback
         lastResultNote={action.lastResult?.note}
         error={action.error}
@@ -102,10 +97,8 @@ export function CombatClericPanel({
           actions={subclassActions}
           getRemaining={getRemaining}
           isPending={action.isPending}
-          showRemaining={false}
           onAction={(slug) => action.mutate(slug as ClericTableActionSlug)}
         />
-
         <TableActionFeedback
           lastResultNote={action.lastResult?.note}
           error={action.error}
@@ -115,7 +108,7 @@ export function CombatClericPanel({
 
   return (
     <CombatClassPanelShell
-      title="Combate do Clérigo"
+      title="Clérigo"
       actionsContent={actionsContent}
       powersContent={powersContent}
       combatNotes={combatNotes}

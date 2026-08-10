@@ -21,6 +21,8 @@ Skill irmã (API): `rpg-class-mesa-api` no repo `dnd-api`.
 
 Mesa, não VTT. **Feito:** painel + Usar wired ao `table_action` + feedback de nota.
 
+**PV temporários:** o estado `tempHp` vem da API (ação ou patch). A ficha mantém edição **manual** (dialog Condições / PV temp.) — não remova. Não inventar segundo contador no painel de classe.
+
 **Controle de recurso (Economia de Ação):**
 
 - `resource_slug` + pool no estado → sempre mostrar − / `remaining/max` / + (não depende de `table_action`)
@@ -45,8 +47,8 @@ Detalhe: skill API `references/economia-painel.md` § Controle de recursos.
 4. `EMPTY_PANEL_ACTIONS` estável (não `?? []` em deps de `useMemo`)
 5. Branch `classSlug` no router de economy (não lista paralela de slugs)
 6. Economia: ± visível para linhas com `resourceSlug` (`plan-economy-table-use` + `beyond-actions-tab`)
-7. Feedback (`TableActionFeedback` / nota da mutation)
-8. API alinhada — skill `rpg-class-mesa-api`
+7. Feedback (`TableActionFeedback` / nota da mutation); `tempHp` da resposta reflete na ficha
+8. API alinhada — skill `rpg-class-mesa-api` (incl. PV temp. aplicados no handler)
 
 ## References
 

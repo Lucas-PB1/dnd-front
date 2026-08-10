@@ -424,7 +424,13 @@ export type ClericTableActionSlug =
   | "invoke-duplicity"
   | "guided-strike"
   | "war-priest"
-  | "war-gods-blessing";
+  | "war-gods-blessing"
+  | "dragon-majesty"
+  | "serpent-blessing"
+  | "chromatic-affinity"
+  | "legendary-aspect-rend"
+  | "legendary-aspect-tail"
+  | "legendary-aspect-wings";
 
 export async function executeClericTableAction(
   accessToken: string,
