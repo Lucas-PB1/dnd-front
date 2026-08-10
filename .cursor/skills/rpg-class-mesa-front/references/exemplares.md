@@ -21,6 +21,7 @@ Base comum:
 | Pistoleiro | **Concluída** |
 | Monge | **Concluída** |
 | Clérigo | **Concluída** |
+| Bardo | **Concluída** |
 
 Classe nova: copiar uma destas (table-action + Economia com `resource_slug` / ±).
 
@@ -106,3 +107,12 @@ Classe nova: copiar uma destas (table-action + Economia com `resource_slug` / ±
 - Economy: C009 `cleric-channel` (±) + Usar alinhado (Centelha, Expulsar, Intervenção, domínios PHB + Dragão)
 - Subs: life / light / trickery / war / **dragon-domain** (Afinidade, Majestade, Serpe, Aspecto ×3)
 - Polish adiado: recarregar Aspecto com espaço 2+; tipo de Afinidade no estado; Transposição Trapaça Usar
+
+## Bardo — **concluída**
+
+- Painel: `…/panels/bard-panel.tsx` — base + subclass via C010; máscaras (college-of-masks) locais
+- **Sem** `CombatResourceSummary` (Inspiração ± só na Economia)
+- `executeBardTableAction` via `classSlug: bard` na economy (`{ actionSlug }`)
+- Economy: C009 `bard-inspiration` (±) + Usar (grant, cutting-words, peerless, glamour PHB 2024, dance DES, valor, máscaras `persona-*`, virtuoso, superior)
+- Sem legado 2014 (`enthralling-performance` / Desempenho Cativante → `mantle-of-inspiration`)
+- Polish adiado: restaurar Manto com espaço 3+; devolver Inspiração em Perícia Inigualável se falhar

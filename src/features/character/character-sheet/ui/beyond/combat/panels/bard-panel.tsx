@@ -3,15 +3,20 @@
 import { useEffect, useMemo, useState } from "react";
 
 import type { CharacterState } from "@/entities/character/session-types";
-import { executeBardTableAction } from "@/features/character/character-sheet/api/character-session.api";
+import type { ClassPanelActionRecord } from "@/entities/combat-mechanical/types";
+import {
+  executeBardTableAction,
+  type BardTableActionSlug,
+} from "@/features/character/character-sheet/api/character-session.api";
 import { useTableActionMutation } from "@/features/character/character-sheet/api/use-table-action-mutation";
 import { useCombatMechanicalCatalog } from "@/features/catalog/reference-catalog/api/use-reference";
 import { resolvePanelActions } from "@/features/character/character-sheet/lib/combat/resolve-panel-actions";
 import { CombatClassPanelShell } from "../shared/class-panel-shell";
 import { CombatPanelActionButtons } from "../shared/panel-action-buttons";
-import { CombatResourceSummary } from "../shared/resource-summary";
 import { TableActionFeedback } from "../shared/table-action-feedback";
 import { Button } from "@/shared/ui/button";
+
+const EMPTY_PANEL_ACTIONS: ClassPanelActionRecord[] = [];
 
 type CombatBardPanelProps = {
   characterId: string;
@@ -30,6 +35,9 @@ function maxEquippedMasks(level: number): number {
   return level >= 14 ? 2 : 1;
 }
 
+/**
+ * Bardo: base/colégio pelo catálogo C010; Inspiração ± só na Economia; máscaras no painel.
+ */
 export function CombatBardPanel({
   characterId,
   classSlug,
@@ -38,10 +46,15 @@ export function CombatBardPanel({
   combatNotes,
   state,
 }: CombatBardPanelProps) {
+  const enabled = classSlug === "bard";
   const action = useTableActionMutation(characterId, executeBardTableAction);
-  const mechanicalCatalog = useCombatMechanicalCatalog({ classSlug, subclassSlug });
+  const mechanicalCatalog = useCombatMechanicalCatalog({
+    classSlug,
+    subclassSlug,
+  });
   const personaMasks = mechanicalCatalog.data?.personaMasks ?? [];
-  const panelCatalog = mechanicalCatalog.data?.panelActions ?? [];
+  const panelCatalog =
+    mechanicalCatalog.data?.panelActions ?? EMPTY_PANEL_ACTIONS;
 
   const baseActions = useMemo(
     () =>
@@ -84,7 +97,7 @@ export function CombatBardPanel({
     [activeKey, maskLabelBySlug],
   );
 
-  if (classSlug !== "bard") return null;
+  if (!enabled) return null;
 
   const resources = state?.classResources ?? [];
   const bardicResource = resources.find((item) =>
@@ -156,19 +169,15 @@ export function CombatBardPanel({
 
   const actionsContent = (
     <div className="space-y-2">
-      <CombatResourceSummary
-        resources={resources}
-        slugs={["bardicInspiration", "bardic-inspiration"]}
-      />
-
       <CombatPanelActionButtons
         actions={baseActions}
         getRemaining={getRemaining}
         isPending={action.isPending}
         disabled={!state}
-        onAction={(slug) => action.mutate({ actionSlug: slug as never })}
+        onAction={(slug) =>
+          action.mutate({ actionSlug: slug as BardTableActionSlug })
+        }
       />
-
       <TableActionFeedback
         lastResultNote={action.lastResult?.note}
         error={action.error}
@@ -185,7 +194,9 @@ export function CombatBardPanel({
           getRemaining={getRemaining}
           isPending={action.isPending}
           disabled={!state}
-          onAction={(slug) => action.mutate({ actionSlug: slug as never })}
+          onAction={(slug) =>
+            action.mutate({ actionSlug: slug as BardTableActionSlug })
+          }
         />
         <TableActionFeedback
           lastResultNote={action.lastResult?.note}
@@ -196,11 +207,10 @@ export function CombatBardPanel({
 
   return (
     <CombatClassPanelShell
-      title="Combate do Bardo"
+      title="Bardo"
       actionsContent={actionsContent}
       powersContent={powersContent}
       combatNotes={combatNotes}
-      actionsIcon="🎵"
     />
   );
 }
