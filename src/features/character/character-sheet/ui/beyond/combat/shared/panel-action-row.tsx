@@ -40,11 +40,11 @@ export function CombatPanelActionRow({
   const body = description?.trim() ?? "";
 
   return (
-    <li className={cn("flex items-start gap-2 px-2.5 py-2", className)}>
-      <div className="min-w-0 flex-1 space-y-0.5">
-        <p className="text-sm font-medium text-foreground">{name}</p>
+    <li className={cn("flex items-start gap-2 px-2.5 py-2.5", className)}>
+      <div className="min-w-0 flex-1 space-y-1">
+        <p className="text-sm font-medium leading-snug text-foreground">{name}</p>
         {body ? (
-          <p className="text-xs leading-snug text-muted-foreground">{body}</p>
+          <p className="text-xs leading-relaxed text-muted-foreground">{body}</p>
         ) : null}
       </div>
       <Button

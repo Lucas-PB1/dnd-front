@@ -19,7 +19,6 @@ import { resolvePanelActions } from "@/features/character/character-sheet/lib/co
 import { FighterSubclassActions } from "./fighter-subclass-actions";
 import { CombatClassPanelShell } from "../shared/class-panel-shell";
 import { CombatPanelActionButtons } from "../shared/panel-action-buttons";
-import { CombatResourceSummary } from "../shared/resource-summary";
 import { TableActionFeedback } from "../shared/table-action-feedback";
 
 const EMPTY_PANEL_ACTIONS: ClassPanelActionRecord[] = [];
@@ -117,17 +116,6 @@ export function CombatFighterPanel({
 
   const actionsContent = (
     <div className="space-y-2">
-      <CombatResourceSummary
-        resources={resources}
-        slugs={[
-          "secondWind",
-          "actionSurge",
-          "indomitable",
-          "psi-energy-dice",
-          "superiority-dice",
-          "dungeon-precautions",
-        ]}
-      />
       <CombatPanelActionButtons
         actions={baseActions}
         getRemaining={getRemaining}

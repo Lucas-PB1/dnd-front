@@ -46,9 +46,10 @@ Classe nova: copiar uma destas (table-action + Economia com `resource_slug` / ±
 ## Guerreiro — **concluída**
 
 - Painel: `…/panels/fighter-panel.tsx` (+ `fighter-subclass-actions.tsx` para BM/Dungeon)
+- **Sem** `CombatResourceSummary` (pools ± só na Economia)
 - `executeFighterTableAction` → `POST …/fighter/table-action` (`classSlug: fighter`)
 - Catálogo painel: base + psi (`C010`); BM/Dungeon com seletor
-- Economy Usar: slugs do catálogo + `psi:*` (payload `usePsiDie`)
+- Economy: C009 base/psi/BM + pool `dungeon-precautions` (±); `psi:*` no Usar com `usePsiDie`
 - Lista BM: `GET …/fighter/maneuvers` (não é ação)
 
 ## Patrulheiro — **concluída**

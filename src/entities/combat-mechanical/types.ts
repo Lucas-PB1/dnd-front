@@ -98,7 +98,10 @@ export type ClassPanelActionRecord = {
   subclassSlug?: string;
   slug: string;
   name: string;
+  /** Resumo curto (C010). */
   title?: string;
+  /** Texto jogável completo (C009 quando há match por table_action). */
+  description?: string;
   minLevel: number;
   resourceSlug?: string;
   section: PanelActionSection | string;
