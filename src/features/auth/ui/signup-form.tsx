@@ -19,7 +19,7 @@ export function SignupForm() {
   const router = useRouter();
   const { signUpWithPassword, isConfigured } = useAuth();
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [confirmationSent, setConfirmationSent] = useState(false);
+  const [createdWithoutSession, setCreatedWithoutSession] = useState(false);
 
   const {
     register,
@@ -38,12 +38,11 @@ export function SignupForm() {
     );
   }
 
-  if (confirmationSent) {
+  if (createdWithoutSession) {
     return (
       <div className="flex flex-col gap-4 text-center">
         <p className="text-sm text-muted-foreground">
-          Enviamos um link de confirmação para seu e-mail. Após confirmar, faça
-          login para continuar.
+          Conta criada. Faça login para continuar.
         </p>
         <Link
           href="/login"
@@ -66,8 +65,9 @@ export function SignupForm() {
             values.password,
           );
 
+          // Sem sessão = edge case (ex.: confirm reativado); não falar em e-mail.
           if (needsEmailConfirmation) {
-            setConfirmationSent(true);
+            setCreatedWithoutSession(true);
             return;
           }
 

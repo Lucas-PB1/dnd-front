@@ -2,23 +2,19 @@ import Link from "next/link";
 
 import { CreateCharacterWizard } from "@/features/character/create-character/ui/wizard/create-character-wizard";
 import { cn } from "@/shared/lib/utils";
-import { BackLink } from "@/shared/ui/back-link";
+import { AppPageShell } from "@/shared/ui/app-page-shell";
 import { buttonVariants } from "@/shared/ui/button";
-import { PageMain } from "@/shared/ui/page-main";
-import { AppHeader } from "@/widgets/app-header/ui/app-header";
+import { PageHeader } from "@/shared/ui/catalog-page-header";
 
 export default function NewCharacterPage() {
   return (
-    <div className="flex flex-1 flex-col bg-background text-foreground">
-      <AppHeader />
-      <PageMain className="gap-4 py-4 sm:py-6">
-        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <BackLink href="/characters">Fichas</BackLink>
-            <h1 className="font-heading text-xl font-semibold tracking-tight sm:text-2xl">
-              Nova ficha
-            </h1>
-          </div>
+    <AppPageShell mainClassName="gap-4 py-4 sm:py-6">
+      <PageHeader
+        title="Nova ficha"
+        description="Monte o personagem passo a passo — regras PHB 2024 e Valdas."
+        backHref="/characters"
+        backLabel="Fichas"
+        actions={
           <Link
             href="/compendium"
             className={cn(
@@ -28,9 +24,9 @@ export default function NewCharacterPage() {
           >
             Compêndio
           </Link>
-        </div>
-        <CreateCharacterWizard />
-      </PageMain>
-    </div>
+        }
+      />
+      <CreateCharacterWizard />
+    </AppPageShell>
   );
 }

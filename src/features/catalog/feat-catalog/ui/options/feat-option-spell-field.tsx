@@ -49,10 +49,13 @@ function resolveSpellRows({
         def.spellSchoolSlugs?.includes(spell.schoolSlug),
     );
   }
-  if (def.spellMaxLevel === 0) {
-    return classSpellsLevel0;
+  const exactLevel = def.spellMaxLevel ?? 1;
+  // `GET /classes/:slug/spells?maxLevel=` filtra com `<=`; aqui precisamos do círculo exato
+  // (ex.: Magia de 1º círculo do Iniciado em Magia não pode listar truques).
+  if (exactLevel === 0) {
+    return classSpellsLevel0.filter((spell) => spell.level === 0);
   }
-  return classSpellsLevel1;
+  return classSpellsLevel1.filter((spell) => spell.level === exactLevel);
 }
 
 function resolveSpellLoading({

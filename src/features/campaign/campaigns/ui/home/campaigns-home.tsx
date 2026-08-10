@@ -68,12 +68,9 @@ export function CampaignsHome() {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="grid gap-6 lg:grid-cols-2">
-        <form
-          onSubmit={onCreate}
-          className="space-y-3 rounded-xl border border-border p-4"
-        >
+    <div className="space-y-10">
+      <div className="grid gap-8 lg:grid-cols-2 lg:gap-0">
+        <form onSubmit={onCreate} className="space-y-3 lg:pr-10">
           <h2 className="inline-flex items-center gap-2 font-heading text-lg font-semibold">
             <PlusCircleIcon className="size-5 text-secondary" aria-hidden />
             Nova campanha
@@ -102,7 +99,7 @@ export function CampaignsHome() {
 
         <form
           onSubmit={onJoin}
-          className="space-y-3 rounded-xl border border-border p-4"
+          className="space-y-3 border-t border-border pt-8 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-10"
         >
           <h2 className="inline-flex items-center gap-2 font-heading text-lg font-semibold">
             <KeyIcon className="size-5 text-accent" aria-hidden />

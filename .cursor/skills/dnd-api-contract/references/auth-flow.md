@@ -39,6 +39,8 @@ Header enviado: `Authorization: Bearer <access_token>`
 | CRUD personagem | gameFetch    | ✅ handlers | RLS            |
 | Catálogo PHB    | catalogFetch | ✅ queries  | SELECT público |
 
+**Confirmação de e-mail:** desligada no projeto (`mailer_autoconfirm` / Confirm email off). Após `signUp` com sessão, o front redireciona para `/`. Se o projeto voltar a exigir confirmação, o cadastro cai no fallback “Conta criada; faça login” (sem pedir link de e-mail).
+
 ## Rotas protegidas no front
 
 Config: `shared/lib/auth-routes.ts` + `proxy.ts`

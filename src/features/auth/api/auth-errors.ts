@@ -14,7 +14,7 @@ export function mapAuthError(message: string): string {
   }
 
   if (lower.includes("email not confirmed")) {
-    return "Confirme seu e-mail antes de entrar.";
+    return "Conta ainda não ativada. Tente entrar de novo ou crie a conta novamente.";
   }
 
   if (lower.includes("signup is disabled")) {

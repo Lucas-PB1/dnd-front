@@ -625,7 +625,7 @@ export function WeaponAttackCard({
                 })
               }
             >
-              Erro (Garantido · {formatSkillBonus(attack.grazeOnMissDamage)})
+              Erro (Resvalar · {formatSkillBonus(attack.grazeOnMissDamage)})
             </Button>
           ) : null}
           {hasChamber && onReload ? (

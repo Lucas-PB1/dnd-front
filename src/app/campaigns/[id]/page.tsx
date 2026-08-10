@@ -1,7 +1,5 @@
 import { CampaignDetailView } from "@/features/campaign/campaigns/ui/detail/campaign-detail-view";
-import { SourceEditionBadge } from "@/shared/ui/source-edition-badge";
-import { PageMain } from "@/shared/ui/page-main";
-import { AppHeader } from "@/widgets/app-header/ui/app-header";
+import { AppPageShell } from "@/shared/ui/app-page-shell";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -11,14 +9,8 @@ export default async function CampaignDetailPage({ params }: PageProps) {
   const { id } = await params;
 
   return (
-    <div className="flex flex-1 flex-col bg-background text-foreground">
-      <AppHeader />
-      <PageMain>
-        <div className="mb-4">
-          <SourceEditionBadge live />
-        </div>
-        <CampaignDetailView campaignId={id} />
-      </PageMain>
-    </div>
+    <AppPageShell>
+      <CampaignDetailView campaignId={id} />
+    </AppPageShell>
   );
 }

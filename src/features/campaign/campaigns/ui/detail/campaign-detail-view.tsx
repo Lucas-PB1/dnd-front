@@ -20,8 +20,11 @@ import { CampaignCharactersSection } from "@/features/campaign/campaigns/ui/deta
 import { CampaignInviteBar } from "@/features/campaign/campaigns/ui/detail/campaign-invite-bar";
 import { CampaignMembersSection } from "@/features/campaign/campaigns/ui/detail/campaign-members-section";
 import { cn } from "@/shared/lib/utils";
+import { BackLink } from "@/shared/ui/back-link";
+import { InkFlourish } from "@/shared/ui/brand-marks";
 import { Button, buttonVariants } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
+import { SourceEditionBadge } from "@/shared/ui/source-edition-badge";
 
 export function CampaignDetailView({ campaignId }: { campaignId: string }) {
   const { user } = useAuth();
@@ -92,9 +95,10 @@ export function CampaignDetailView({ campaignId }: { campaignId: string }) {
 
   return (
     <div className="space-y-8">
-      <div className="space-y-3">
+      <div className="space-y-4">
+        <BackLink href="/campaigns">Campanhas</BackLink>
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="min-w-0 space-y-1">
+          <div className="min-w-0 space-y-2">
             {editing ? (
               <form onSubmit={onSaveMeta} className="space-y-2">
                 <Input
@@ -126,33 +130,27 @@ export function CampaignDetailView({ campaignId }: { campaignId: string }) {
               </form>
             ) : (
               <>
-                <h1 className="font-heading text-2xl font-semibold tracking-tight sm:text-3xl">
+                <h1 className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
                   {data.name}
                 </h1>
+                <InkFlourish className="h-3 w-36 text-secondary/60 sm:w-44" />
                 <p className="text-sm text-muted-foreground">
                   Seu papel: {campaignRoleLabel(data.myRole)}
                 </p>
                 {data.description ? (
-                  <p className="text-sm text-muted-foreground">
+                  <p className="max-w-2xl text-sm text-muted-foreground">
                     {data.description}
                   </p>
                 ) : null}
+                <SourceEditionBadge live />
               </>
             )}
           </div>
-          <div className="flex flex-wrap gap-2">
-            {isDm && !editing ? (
-              <Button type="button" size="sm" variant="outline" onClick={startEdit}>
-                Editar
-              </Button>
-            ) : null}
-            <Link
-              href="/campaigns"
-              className={cn(buttonVariants({ size: "sm", variant: "ghost" }))}
-            >
-              Voltar
-            </Link>
-          </div>
+          {isDm && !editing ? (
+            <Button type="button" size="sm" variant="outline" onClick={startEdit}>
+              Editar
+            </Button>
+          ) : null}
         </div>
 
         <CampaignInviteBar

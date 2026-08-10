@@ -25,6 +25,7 @@ type AuthContextValue = {
     email: string,
     password: string,
   ) => Promise<{
+    /** true quando o Auth não devolve sessão (ex.: confirmação de e-mail ainda ligada). */
     needsEmailConfirmation: boolean;
   }>;
   signOut: () => Promise<void>;
