@@ -33,6 +33,8 @@ import {
 } from "@/features/character/character-sheet/api/character-session.api";
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
 import {
+  CAST_ITEM_FREE_TABLE_ACTION,
+  ITEM_REMINDER_TABLE_ACTION,
   isArmTableAction,
   isPsiTableAction,
   SPEND_RESOURCE_TABLE_ACTION,
@@ -87,8 +89,10 @@ export function useEconomyTableAction(characterId: string) {
       usePsiDie = false,
       resourceSlug,
       spendAmount = 1,
+      spellSlug,
       note,
       armed,
+      itemSlug,
     }: {
       tableAction: EconomyTableAction;
       /** `economyActions[].classSlug` — obrigatório para slugs de classe. */
@@ -96,15 +100,60 @@ export function useEconomyTableAction(characterId: string) {
       usePsiDie?: boolean;
       resourceSlug?: string;
       spendAmount?: number;
+      /** Cast de item (fase 6) quando tableAction = spend-resource. */
+      spellSlug?: string;
       note?: string;
       /** Para arm:* — se true, desarma em vez de armar. */
       armed?: boolean;
+      /** Cast gratuito de item (cast-item-free). */
+      itemSlug?: string | null;
     }): Promise<EconomyTableActionResultNote> => {
       const token = requireToken();
       try {
+        if (tableAction === CAST_ITEM_FREE_TABLE_ACTION) {
+          if (!spellSlug || !itemSlug) {
+            throw new Error(
+              "Magia ou item não definidos para conjuração gratuita",
+            );
+          }
+          const result = await castCharacterSpell(token, characterId, {
+            spellSlug,
+            itemCastItemSlug: itemSlug,
+          });
+          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
+          return {
+            note: (
+              result.note?.trim() ||
+              note?.trim() ||
+              `Conjurou ${spellSlug}`
+            ).trim(),
+          };
+        }
+
+        if (tableAction === ITEM_REMINDER_TABLE_ACTION) {
+          return {
+            note: (note?.trim() || "Lembrete de item").trim(),
+          };
+        }
+
         if (tableAction === SPEND_RESOURCE_TABLE_ACTION) {
           if (!resourceSlug) {
             throw new Error("Recurso não definido para esta ação");
+          }
+          if (spellSlug) {
+            const result = await castCharacterSpell(token, characterId, {
+              spellSlug,
+              itemCastResourceSlug: resourceSlug,
+              itemCastSpendAmount: spendAmount,
+            });
+            queryClient.setQueryData(sessionKeys.state(characterId), result.state);
+            return {
+              note: (
+                result.note?.trim() ||
+                note?.trim() ||
+                `Conjurou ${spellSlug}`
+              ).trim(),
+            };
           }
           const result = await spendClassResource(token, characterId, {
             resourceSlug,

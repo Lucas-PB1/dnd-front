@@ -8,13 +8,14 @@ import {
   ShieldExclamationIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import type {
   InventoryItem,
   PatchInventoryItemPayload,
 } from "@/entities/character/session-types";
 import type { EquipmentWarning } from "@/entities/character/types";
+import { useSpellLabels } from "@/features/catalog/spell-catalog/api/use-spells";
 import {
   MAX_ATTUNED_ITEMS,
   SLOT_LABELS,
@@ -46,6 +47,7 @@ type InventoryItemDetailProps = {
     baseItemSlug: string,
     coverageSlug: string,
     bonus?: 1 | 2 | 3,
+    spellSlug?: string,
   ) => void;
   onDetachCoverage?: (baseItemSlug: string) => void;
 };
@@ -63,6 +65,33 @@ function coverageNeedsTier(slug: string): boolean {
     slug === "varinha-do-mago-de-guerra-1-2-ou-3"
   );
 }
+
+const ENSPELLED_COVERAGE_PROFILES: Record<
+  string,
+  { schools: Set<string> | null; maxLevel: number }
+> = {
+  "arma-magificada": {
+    schools: new Set([
+      "adivinhacao",
+      "evocacao",
+      "invocacao",
+      "necromancia",
+      "transmutacao",
+    ]),
+    maxLevel: 8,
+  },
+  "armadura-magificada": {
+    schools: new Set(["abjuracao", "ilusao"]),
+    maxLevel: 8,
+  },
+};
+
+const ENSPELLED_UNIQUE_PROFILES: Record<
+  string,
+  { schools: Set<string> | null; maxLevel: number }
+> = {
+  "cajado-magificado": { schools: null, maxLevel: 8 },
+};
 
 /** Controles e avisos do item (usado no modal do tile). */
 export function InventoryItemDetail({
@@ -86,6 +115,32 @@ export function InventoryItemDetail({
   const [attachWeaponSlug, setAttachWeaponSlug] = useState("");
   const [attachBaseSlug, setAttachBaseSlug] = useState("");
   const [coverageBonus, setCoverageBonus] = useState<"1" | "2" | "3">("1");
+  const [enspelledSpellSlug, setEnspelledSpellSlug] = useState("");
+  const [boundSpellDraft, setBoundSpellDraft] = useState(
+    item.boundSpellSlug ?? "",
+  );
+  const spellLabels = useSpellLabels();
+  const coverageEnspelledProfile = ENSPELLED_COVERAGE_PROFILES[item.itemSlug];
+  const uniqueEnspelledProfile = ENSPELLED_UNIQUE_PROFILES[item.itemSlug];
+  const enspelledSpellOptions = useMemo(() => {
+    const profile = coverageEnspelledProfile ?? uniqueEnspelledProfile;
+    if (!profile) return [];
+    const rows = spellLabels.data?.data ?? [];
+    return rows
+      .filter(
+        (spell) =>
+          spell.level <= profile.maxLevel &&
+          (profile.schools == null || profile.schools.has(spell.schoolSlug)),
+      )
+      .map((spell) => ({
+        value: spell.slug,
+        label: `${spell.name} (${spell.level === 0 ? "Truque" : `${spell.level}º`} · ${spell.schoolName})`,
+      }));
+  }, [
+    coverageEnspelledProfile,
+    uniqueEnspelledProfile,
+    spellLabels.data?.data,
+  ]);
   const qtyDisplay = qtyDraft ?? String(item.quantity);
   const qtyId = `qty-${item.itemSlug}`;
   const slotId = `slot-${item.itemSlug}`;
@@ -106,6 +161,9 @@ export function InventoryItemDetail({
     Boolean(item.attachedCharmSlug) && Boolean(onDetachCharm);
   const showDetachCoverage =
     Boolean(item.attachedCoverageSlug) && Boolean(onDetachCoverage);
+  const canAttuneCoverage =
+    Boolean(item.attachedCoverageRequiresAttunement) &&
+    (item.attachedCoverageAttuned || !attunementSlotsFull);
   const showPactWeapon =
     canBindPactWeapon && item.itemType === "weapon";
   const isPactWeapon = Boolean(item.isPactWeapon);
@@ -148,6 +206,19 @@ export function InventoryItemDetail({
           {item.attachedCoverageBonus
             ? ` (+${item.attachedCoverageBonus})`
             : ""}
+          {item.attachedCoverageRequiresAttunement
+            ? item.attachedCoverageAttuned
+              ? " · sintonizada"
+              : " · exige sintonia"
+            : null}
+          {item.attachedCoverageSpellSlug
+            ? ` · ${item.attachedCoverageSpellSlug}`
+            : null}
+        </p>
+      ) : null}
+      {item.boundSpellSlug ? (
+        <p className="text-xs text-muted-foreground">
+          Magia vinculada: {item.boundSpellSlug}
         </p>
       ) : null}
 
@@ -288,11 +359,32 @@ export function InventoryItemDetail({
               />
             </label>
           ) : null}
+          {coverageEnspelledProfile ? (
+            <label className="flex min-w-[12rem] flex-1 flex-col gap-1">
+              <span className="text-[0.65rem] font-medium tracking-wide text-muted-foreground uppercase">
+                Magia vinculada
+              </span>
+              <SearchableSelect
+                id={`coverage-spell-${item.itemSlug}`}
+                aria-label={`Magia de ${item.itemName}`}
+                className="h-7 text-xs"
+                value={enspelledSpellSlug}
+                disabled={isPending || spellLabels.isPending}
+                placeholder="Escolher magia…"
+                options={enspelledSpellOptions}
+                onValueChange={setEnspelledSpellSlug}
+              />
+            </label>
+          ) : null}
           <Button
             type="button"
             variant="secondary"
             size="sm"
-            disabled={isPending || !attachBaseSlug}
+            disabled={
+              isPending ||
+              !attachBaseSlug ||
+              (Boolean(coverageEnspelledProfile) && !enspelledSpellSlug)
+            }
             onClick={() => {
               if (!attachBaseSlug || !onAttachCoverage) return;
               onAttachCoverage(
@@ -301,10 +393,42 @@ export function InventoryItemDetail({
                 coverageNeedsTier(item.itemSlug)
                   ? (Number(coverageBonus) as 1 | 2 | 3)
                   : undefined,
+                coverageEnspelledProfile ? enspelledSpellSlug : undefined,
               );
             }}
           >
             Aplicar
+          </Button>
+        </div>
+      ) : null}
+
+      {uniqueEnspelledProfile ? (
+        <div className="flex flex-wrap items-end gap-2">
+          <label className="flex min-w-[12rem] flex-1 flex-col gap-1">
+            <span className="text-[0.65rem] font-medium tracking-wide text-muted-foreground uppercase">
+              Magia vinculada
+            </span>
+            <SearchableSelect
+              id={`bound-spell-${item.itemSlug}`}
+              aria-label={`Magia de ${item.itemName}`}
+              className="h-7 text-xs"
+              value={boundSpellDraft}
+              disabled={isPending || spellLabels.isPending}
+              placeholder="Escolher magia…"
+              options={enspelledSpellOptions}
+              onValueChange={setBoundSpellDraft}
+            />
+          </label>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            disabled={isPending || !boundSpellDraft}
+            onClick={() =>
+              onPatch(item.itemSlug, { boundSpellSlug: boundSpellDraft })
+            }
+          >
+            Vincular
           </Button>
         </div>
       ) : null}
@@ -390,6 +514,36 @@ export function InventoryItemDetail({
             Remover cobertura
           </Button>
         ) : null}
+        {item.attachedCoverageRequiresAttunement ? (
+          <Button
+            type="button"
+            variant={item.attachedCoverageAttuned ? "secondary" : "outline"}
+            size="sm"
+            className="gap-1"
+            disabled={isPending || !canAttuneCoverage}
+            title={
+              !canAttuneCoverage && !item.attachedCoverageAttuned
+                ? `Limite de ${MAX_ATTUNED_ITEMS} sintonias atingido`
+                : item.attachedCoverageAttuned
+                  ? "Dessintonizar cobertura"
+                  : "Sintonizar cobertura"
+            }
+            onClick={() =>
+              onPatch(item.itemSlug, {
+                attachedCoverageAttuned: !item.attachedCoverageAttuned,
+              })
+            }
+          >
+            {item.attachedCoverageAttuned ? (
+              <LinkSlashIcon className="size-3.5" aria-hidden />
+            ) : (
+              <LinkIcon className="size-3.5" aria-hidden />
+            )}
+            {item.attachedCoverageAttuned
+              ? "Dessintonizar cobertura"
+              : "Sintonizar cobertura"}
+          </Button>
+        ) : null}
         <Button
           type="button"
           variant="ghost"
@@ -429,6 +583,12 @@ export function inventoryItemTileMeta(item: InventoryItem): {
     item.attachedCoverageName
       ? `Cobertura: ${item.attachedCoverageName}${
           item.attachedCoverageBonus ? ` (+${item.attachedCoverageBonus})` : ""
+        }${
+          item.attachedCoverageRequiresAttunement
+            ? item.attachedCoverageAttuned
+              ? " · sintonizada"
+              : " · sem sintonia"
+            : ""
         }`
       : null,
   ].filter(Boolean);

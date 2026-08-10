@@ -95,6 +95,11 @@ export type CastSpellPayload = {
   slotLevel?: number;
   useFreeCast?: boolean;
   freeCastResourceSlug?: string;
+  /** Cast via carga de item (fase 6). */
+  itemCastResourceSlug?: string;
+  itemCastSpendAmount?: number;
+  /** Cast gratuito de item (Magi custo 0). */
+  itemCastItemSlug?: string;
 };
 
 export type CastSpellResult = {
@@ -141,6 +146,9 @@ export type InventoryItem = {
   attachedCoverageName?: string | null;
   attachedCoverageBonus?: number | null;
   attachedCoverageAttuned?: boolean;
+  attachedCoverageRequiresAttunement?: boolean;
+  attachedCoverageSpellSlug?: string | null;
+  boundSpellSlug?: string | null;
   isCoverage?: boolean;
 };
 
@@ -171,6 +179,10 @@ export type PatchInventoryItemPayload = {
     | "carried";
   quantity?: number;
   attuned?: boolean;
+  /** Sintonizar / dessintonizar cobertura anexada. */
+  attachedCoverageAttuned?: boolean;
+  /** Vincular magia (Cajado Magificado). */
+  boundSpellSlug?: string | null;
   /** Marcar / desmarcar Arma de Pacto (Bruxo · Pacto da Lâmina). */
   pactWeapon?: boolean;
 };

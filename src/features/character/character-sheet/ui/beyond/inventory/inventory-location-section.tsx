@@ -43,6 +43,7 @@ type InventoryLocationSectionProps = {
     baseItemSlug: string,
     coverageSlug: string,
     bonus?: 1 | 2 | 3,
+    spellSlug?: string,
   ) => void;
   onDetachCoverage?: (baseItemSlug: string) => void;
 };

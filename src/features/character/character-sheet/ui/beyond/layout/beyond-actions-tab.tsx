@@ -117,26 +117,64 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
   );
 
   const economyActions = useMemo(
-    () =>
-      resolveClassEconomyActions(mechanicalCatalog.data?.economyActions ?? [], {
-        classSlug: character.classSlug,
-        level: character.level,
-        subclassSlug: character.subclassSlug,
-        speciesSlug: character.speciesSlug,
-        speciesChoices: character.speciesChoices,
-        featSlugs: [
-          ...(character.characterFeats?.map((feat) => feat.featSlug) ?? []),
-          ...(character.subclassOptions ?? [])
-            .filter(
-              (option) =>
-                option.optionKey === "fighting_style" ||
-                option.optionKey === "additionalFightingStyle" ||
-                option.optionKey.endsWith("FightingStyle"),
-            )
-            .map((option) => option.valueId),
-        ],
-        activeItemSlugs,
-      }),
+    () => {
+      const resolved = resolveClassEconomyActions(
+        mechanicalCatalog.data?.economyActions ?? [],
+        {
+          classSlug: character.classSlug,
+          level: character.level,
+          subclassSlug: character.subclassSlug,
+          speciesSlug: character.speciesSlug,
+          speciesChoices: character.speciesChoices,
+          featSlugs: [
+            ...(character.characterFeats?.map((feat) => feat.featSlug) ?? []),
+            ...(character.subclassOptions ?? [])
+              .filter(
+                (option) =>
+                  option.optionKey === "fighting_style" ||
+                  option.optionKey === "additionalFightingStyle" ||
+                  option.optionKey.endsWith("FightingStyle"),
+              )
+              .map((option) => option.valueId),
+          ],
+          activeItemSlugs,
+        },
+      );
+      const items = inventoryQuery.data?.items ?? [];
+      return resolved
+        .map((action) => {
+          if (action.spellSlug) return action;
+          if (
+            action.itemSlug === "arma-magificada" ||
+            action.itemSlug === "armadura-magificada"
+          ) {
+            const bound = items.find(
+              (item) =>
+                item.location === "equipped" &&
+                item.attachedCoverageSlug === action.itemSlug &&
+                item.attachedCoverageSpellSlug,
+            );
+            if (!bound?.attachedCoverageSpellSlug) return null;
+            return {
+              ...action,
+              spellSlug: bound.attachedCoverageSpellSlug,
+            };
+          }
+          if (action.itemSlug === "cajado-magificado") {
+            const staff = items.find(
+              (item) =>
+                item.itemSlug === "cajado-magificado" &&
+                item.location === "equipped" &&
+                item.boundSpellSlug &&
+                (item.attuned || !item.requiresAttunement),
+            );
+            if (!staff?.boundSpellSlug) return null;
+            return { ...action, spellSlug: staff.boundSpellSlug };
+          }
+          return action;
+        })
+        .filter((action): action is NonNullable<typeof action> => action != null);
+    },
     [
       mechanicalCatalog.data?.economyActions,
       character.classSlug,
@@ -147,6 +185,7 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
       character.characterFeats,
       character.subclassOptions,
       activeItemSlugs,
+      inventoryQuery.data?.items,
     ],
   );
   const grouped = useMemo(
@@ -378,6 +417,8 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
                     usePsiDie: plan.usePsiDie,
                     resourceSlug: action.resourceSlug,
                     spendAmount: action.spendAmount ?? 1,
+                    spellSlug: action.spellSlug,
+                    itemSlug: action.itemSlug,
                     note: action.description ?? action.summary,
                     armed: plan.armed,
                   },

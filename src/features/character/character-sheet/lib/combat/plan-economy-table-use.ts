@@ -87,18 +87,41 @@ export function planEconomyTableUse(input: {
     };
   }
 
+  if (action.tableAction === "cast-item-free") {
+    return {
+      canUse: Boolean(action.spellSlug && action.itemSlug),
+      usePsiDie: false,
+      buttonLabel: "Conjurar",
+      counterSlug: null,
+    };
+  }
+
+  if (action.tableAction === "item-reminder") {
+    return {
+      canUse: true,
+      usePsiDie: false,
+      buttonLabel: "Usar",
+      counterSlug: null,
+    };
+  }
+
   if (action.alwaysSpendsResource) {
     const amount = action.spendAmount ?? 1;
     const isPsi =
       action.tableAction != null && isPsiTableAction(action.tableAction);
+    const isItemCast = Boolean(action.spellSlug);
     return {
       canUse: poolLeft >= amount,
       usePsiDie: true,
-      buttonLabel: isPsi
-        ? "Usar (1 dado)"
-        : amount > 1
-          ? `Usar (${amount})`
-          : "Usar",
+      buttonLabel: isItemCast
+        ? amount > 1
+          ? `Conjurar (${amount})`
+          : "Conjurar"
+        : isPsi
+          ? "Usar (1 dado)"
+          : amount > 1
+            ? `Usar (${amount})`
+            : "Usar",
       counterSlug: poolSlug,
     };
   }

@@ -108,6 +108,7 @@ export type AttachCoveragePayload = {
   baseItemSlug: string;
   coverageSlug: string;
   bonus?: 1 | 2 | 3;
+  spellSlug?: string;
 };
 
 export type DetachCoveragePayload = {

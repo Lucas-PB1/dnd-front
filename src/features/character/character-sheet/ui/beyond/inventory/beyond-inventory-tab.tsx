@@ -36,6 +36,23 @@ import {
 } from "@/shared/ui/dialog";
 import { FieldLabel } from "@/shared/ui/field";
 
+function isAmmunitionInventoryCandidate(item: InventoryItem): boolean {
+  const slug = item.itemSlug.toLowerCase();
+  const name = item.itemName.toLowerCase();
+  if (slug === "municao" || name === "munição" || name === "municao") {
+    return true;
+  }
+  if (
+    /aljava|estojo|quiver/.test(slug) ||
+    /aljava|estojo/.test(name)
+  ) {
+    return false;
+  }
+  return /flecha|virote|municao|munição|bala|agulha|arrow|bolt|bullet|needle/.test(
+    `${slug} ${name}`,
+  );
+}
+
 type BeyondInventoryTabProps = {
   characterId: string;
   equipmentWarnings?: EquipmentWarning[];
@@ -91,7 +108,9 @@ export function BeyondInventoryTab({
     .filter(
       (item) =>
         !item.isCoverage &&
-        (item.itemType === "weapon" || item.itemType === "armor"),
+        (item.itemType === "weapon" ||
+          item.itemType === "armor" ||
+          isAmmunitionInventoryCandidate(item)),
     )
     .map((item) => ({ value: item.itemSlug, label: item.itemName }));
 
@@ -139,6 +158,8 @@ export function BeyondInventoryTab({
     removeItem.error ??
     attachCharm.error ??
     detachCharm.error ??
+    attachCoverage.error ??
+    detachCoverage.error ??
     inventory.error;
 
   return (
@@ -217,8 +238,13 @@ export function BeyondInventoryTab({
               attachCharm.mutate({ weaponSlug, charmSlug })
             }
             onDetachCharm={(weaponSlug) => detachCharm.mutate(weaponSlug)}
-            onAttachCoverage={(baseItemSlug, coverageSlug, bonus) =>
-              attachCoverage.mutate({ baseItemSlug, coverageSlug, bonus })
+            onAttachCoverage={(baseItemSlug, coverageSlug, bonus, spellSlug) =>
+              attachCoverage.mutate({
+                baseItemSlug,
+                coverageSlug,
+                bonus,
+                spellSlug,
+              })
             }
             onDetachCoverage={(baseItemSlug) =>
               detachCoverage.mutate(baseItemSlug)
@@ -244,8 +270,13 @@ export function BeyondInventoryTab({
               attachCharm.mutate({ weaponSlug, charmSlug })
             }
             onDetachCharm={(weaponSlug) => detachCharm.mutate(weaponSlug)}
-            onAttachCoverage={(baseItemSlug, coverageSlug, bonus) =>
-              attachCoverage.mutate({ baseItemSlug, coverageSlug, bonus })
+            onAttachCoverage={(baseItemSlug, coverageSlug, bonus, spellSlug) =>
+              attachCoverage.mutate({
+                baseItemSlug,
+                coverageSlug,
+                bonus,
+                spellSlug,
+              })
             }
             onDetachCoverage={(baseItemSlug) =>
               detachCoverage.mutate(baseItemSlug)

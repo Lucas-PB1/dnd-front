@@ -18,6 +18,12 @@ export type PsiTableActionSlug = string;
 
 export const SPEND_RESOURCE_TABLE_ACTION = "spend-resource";
 
+/** Cast de item sem gastar carga (ex. Magi custo 0). */
+export const CAST_ITEM_FREE_TABLE_ACTION = "cast-item-free";
+
+/** Lembrete jogável (sem gasto) — só ecoa a nota na mesa. */
+export const ITEM_REMINDER_TABLE_ACTION = "item-reminder";
+
 export function isPsiTableAction(
   action: string,
 ): action is `psi:${PsiTableActionSlug}` {

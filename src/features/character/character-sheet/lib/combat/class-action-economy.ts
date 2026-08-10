@@ -38,6 +38,8 @@ export type ClassEconomyAction = {
   tableAction?: EconomyTableAction;
   /** Quantidade gasta por Usar quando tableAction é spend-resource (padrão 1). */
   spendAmount?: number;
+  /** Magia vinculada — Usar conjura via motor de cast. */
+  spellSlug?: string;
 };
 
 export type ResolveClassEconomyInput = {
@@ -98,6 +100,7 @@ export function mapEconomyActionRecord(
     description: record.description,
     tableAction: record.tableAction,
     spendAmount: record.spendAmount,
+    spellSlug: record.spellSlug,
   };
 }
 

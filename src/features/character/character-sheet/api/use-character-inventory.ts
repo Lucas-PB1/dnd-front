@@ -170,6 +170,7 @@ export function useAttachCoverage(characterId: string) {
       baseItemSlug: string;
       coverageSlug: string;
       bonus?: 1 | 2 | 3;
+      spellSlug?: string;
     }) => {
       try {
         return await attachCoverage(requireToken(), characterId, payload);

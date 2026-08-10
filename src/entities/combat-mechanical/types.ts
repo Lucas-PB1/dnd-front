@@ -83,6 +83,8 @@ export type ClassEconomyActionRecord = {
   description?: string;
   tableAction?: string;
   spendAmount?: number;
+  /** Magia vinculada (cast de item). */
+  spellSlug?: string;
 };
 
 export type PanelActionSection =
