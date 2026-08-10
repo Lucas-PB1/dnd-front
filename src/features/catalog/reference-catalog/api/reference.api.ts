@@ -29,6 +29,7 @@ export const referenceKeys = {
     [
       ...referenceKeys.all,
       "combat-mechanical-catalog",
+      "v2-playable-desc",
       filters?.classSlug ?? "all",
       filters?.subclassSlug ?? "all",
     ] as const,
@@ -108,8 +109,9 @@ export async function fetchCombatMechanicalCatalog(filters?: {
   search.delete("page");
   search.delete("limit");
   const qs = search.toString();
+  // Catálogo de mesa muda com reseed — não usar Next Data Cache de 1h.
   return catalogFetch<CombatMechanicalCatalog>(
     qs ? `/combat-mechanical-catalog?${qs}` : `/combat-mechanical-catalog`,
-    CATALOG_FETCH_INIT,
+    { cache: "no-store" },
   );
 }

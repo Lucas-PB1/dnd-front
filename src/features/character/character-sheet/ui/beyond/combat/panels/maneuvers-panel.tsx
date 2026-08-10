@@ -125,7 +125,7 @@ export function CombatManeuversPanel({
           <CombatPanelActionRow
             key={action.panelKey}
             name={action.name}
-            description={action.title}
+            description={action.description?.trim() || action.title?.trim() || null}
             variant="secondary"
             disabled={busy}
             pending={busy}

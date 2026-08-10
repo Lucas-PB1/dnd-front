@@ -16,7 +16,7 @@ import {
   referenceKeys,
 } from "@/features/catalog/reference-catalog/api/reference.api";
 import { useCatalogSources } from "@/features/catalog/catalog-sources/model/catalog-sources-provider";
-import { CATALOG_DETAIL_STALE_MS } from "@/shared/lib/catalog-query";
+import { CATALOG_DETAIL_STALE_MS, CATALOG_LIST_STALE_MS } from "@/shared/lib/catalog-query";
 
 export function useSkills() {
   return useQuery({
@@ -106,6 +106,7 @@ export function useCombatMechanicalCatalog(filters?: {
     }),
     queryFn: () =>
       fetchCombatMechanicalCatalog({ classSlug, subclassSlug }),
-    staleTime: CATALOG_DETAIL_STALE_MS,
+    // Mesa: reseed e texto jogável — não ficar 1h com catálogo velho.
+    staleTime: CATALOG_LIST_STALE_MS,
   });
 }

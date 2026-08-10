@@ -118,11 +118,7 @@ export function CombatPanelActionButtons({
           focusRemaining <= 0;
 
         const description =
-          action.description?.trim() ||
-          action.title?.trim() ||
-          (action.spendsFocus && focusRemaining != null
-            ? `Gasta 1 Ponto de Foco (${focusRemaining} restantes).`
-            : null);
+          action.description?.trim() || action.title?.trim() || null;
 
         return (
           <CombatPanelActionRow

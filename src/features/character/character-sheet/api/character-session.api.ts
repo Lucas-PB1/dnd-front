@@ -325,10 +325,25 @@ export type MonkTableActionSlug =
   | "step-of-the-wind"
   | "stunning-strike"
   | "open-hand-technique"
+  | "wholeness-of-body"
+  | "vibrating-palm"
+  | "elemental-attunement"
   | "elemental-blast"
   | "hand-of-healing"
   | "hand-of-harm"
-  | "shadow-step";
+  | "flurry-of-healing-and-harm"
+  | "hand-of-ultimate-mercy"
+  | "shadow-arts"
+  | "shadow-step"
+  | "improved-shadow-step"
+  | "cloak-of-shadows"
+  | "street-combo"
+  | "energy-burst"
+  | "guard-breaker"
+  | "uppercut"
+  | "air-dash"
+  | "knockout"
+  | "recover-knockout";
 
 export async function executeMonkTableAction(
   accessToken: string,

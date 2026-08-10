@@ -19,6 +19,7 @@ Base comum:
 | Ladino | **Concluída** |
 | Paladino | **Concluída** |
 | Pistoleiro | **Concluída** |
+| Monge | **Concluída** |
 
 Classe nova: copiar uma destas (table-action + Economia com `resource_slug` / ±).
 
@@ -86,3 +87,12 @@ Classe nova: copiar uma destas (table-action + Economia com `resource_slug` / ±
 - **Sem** espelho de risk `remaining/max` no Ferramentas (só ± na Economia)
 - Manobras: C001 base + todas as 7 subs (painel via `GET …/maneuvers`)
 - Polish adiado: Assumidor de risco; condições White Hat; Bang cast; polish câmaras
+
+## Monge — **concluída**
+
+- Painel: `…/panels/monk-panel.tsx` — base + subclass via `resolvePanelActions` (C010)
+- **Sem** `CombatResourceSummary` (Foco ± só na Economia; botões mostram remaining via `spendsFocus`)
+- `executeMonkTableAction` via `classSlug: monk` na economy
+- Economy: C009 com `focusPoints` (±) + `table_action` (Usar) alinhado ao handler
+- Subs: open-hand / elements / mercy / shadow / **warrior-of-the-street** (C009+C010+handlers)
+- Polish adiado: Defletir/Queda Lenta Usar; trackers de duração

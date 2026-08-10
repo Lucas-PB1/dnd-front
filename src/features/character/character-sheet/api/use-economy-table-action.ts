@@ -6,6 +6,7 @@ import {
   castCharacterSpell,
   executeFighterTableAction,
   executeGunslingerTableAction,
+  executeMonkTableAction,
   executePaladinTableAction,
   executeRangerTableAction,
   executeRogueTableAction,
@@ -16,6 +17,7 @@ import {
   spendClassResource,
   type FighterTableActionSlug,
   type GunslingerTableActionSlug,
+  type MonkTableActionSlug,
   type PaladinTableActionSlug,
   type RangerTableActionSlug,
   type RogueTableActionSlug,
@@ -167,6 +169,16 @@ export function useEconomyTableAction(characterId: string) {
           const result = await executeRangerTableAction(token, characterId, {
             actionSlug: tableAction as RangerTableActionSlug,
           });
+          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
+          return noteFromResult(result, note);
+        }
+
+        if (routeClass === "monk") {
+          const result = await executeMonkTableAction(
+            token,
+            characterId,
+            tableAction as MonkTableActionSlug,
+          );
           queryClient.setQueryData(sessionKeys.state(characterId), result.state);
           return noteFromResult(result, note);
         }

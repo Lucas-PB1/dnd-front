@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 
 import type { CharacterState } from "@/entities/character/session-types";
+import type { ClassPanelActionRecord } from "@/entities/combat-mechanical/types";
 import {
   executeMonkTableAction,
   type MonkTableActionSlug,
@@ -12,8 +13,9 @@ import { useCombatMechanicalCatalog } from "@/features/catalog/reference-catalog
 import { resolvePanelActions } from "@/features/character/character-sheet/lib/combat/resolve-panel-actions";
 import { CombatClassPanelShell } from "../shared/class-panel-shell";
 import { CombatPanelActionButtons } from "../shared/panel-action-buttons";
-import { CombatResourceSummary } from "../shared/resource-summary";
 import { TableActionFeedback } from "../shared/table-action-feedback";
+
+const EMPTY_PANEL_ACTIONS: ClassPanelActionRecord[] = [];
 
 type CombatMonkPanelProps = {
   characterId: string;
@@ -24,6 +26,9 @@ type CombatMonkPanelProps = {
   state: CharacterState | undefined;
 };
 
+/**
+ * Monge: base/subclasse pelo catálogo C010; Foco ± só na Economia.
+ */
 export function CombatMonkPanel({
   characterId,
   classSlug,
@@ -32,9 +37,14 @@ export function CombatMonkPanel({
   combatNotes,
   state,
 }: CombatMonkPanelProps) {
+  const enabled = classSlug === "monk";
   const action = useTableActionMutation(characterId, executeMonkTableAction);
-  const mechanicalCatalog = useCombatMechanicalCatalog({ classSlug, subclassSlug });
-  const panelCatalog = mechanicalCatalog.data?.panelActions ?? [];
+  const mechanicalCatalog = useCombatMechanicalCatalog({
+    classSlug,
+    subclassSlug,
+  });
+  const panelCatalog =
+    mechanicalCatalog.data?.panelActions ?? EMPTY_PANEL_ACTIONS;
 
   const baseActions = useMemo(
     () =>
@@ -57,28 +67,22 @@ export function CombatMonkPanel({
     [panelCatalog, level, subclassSlug],
   );
 
-  if (classSlug !== "monk") return null;
+  if (!enabled) return null;
 
   const resources = state?.classResources ?? [];
-  const focus = resources.find((item) => item.slug === "focusPoints");
-  const focusRemaining = focus?.remaining ?? 0;
 
   function getRemaining(slug: string): number | null {
-    if (slug === "focusPoints") return focusRemaining;
     return resources.find((entry) => entry.slug === slug)?.remaining ?? null;
   }
 
   const actionsContent = (
     <div className="space-y-2">
-      <CombatResourceSummary resources={resources} slugs={["focusPoints"]} />
-
       <CombatPanelActionButtons
         actions={baseActions}
         getRemaining={getRemaining}
         isPending={action.isPending}
         onAction={(slug) => action.mutate(slug as MonkTableActionSlug)}
       />
-
       <TableActionFeedback
         lastResultNote={action.lastResult?.note}
         error={action.error}
@@ -95,7 +99,6 @@ export function CombatMonkPanel({
           isPending={action.isPending}
           onAction={(slug) => action.mutate(slug as MonkTableActionSlug)}
         />
-
         <TableActionFeedback
           lastResultNote={action.lastResult?.note}
           error={action.error}
@@ -105,7 +108,7 @@ export function CombatMonkPanel({
 
   return (
     <CombatClassPanelShell
-      title="Combate do Monge"
+      title="Monge"
       actionsContent={actionsContent}
       powersContent={powersContent}
       combatNotes={combatNotes}
