@@ -38,6 +38,13 @@ type InventoryLocationSectionProps = {
   onRemove: (slug: string) => void;
   onAttachCharm?: (weaponSlug: string, charmSlug: string) => void;
   onDetachCharm?: (weaponSlug: string) => void;
+  baseOptions?: { value: string; label: string }[];
+  onAttachCoverage?: (
+    baseItemSlug: string,
+    coverageSlug: string,
+    bonus?: 1 | 2 | 3,
+  ) => void;
+  onDetachCoverage?: (baseItemSlug: string) => void;
 };
 
 export function InventoryLocationSection({
@@ -50,6 +57,7 @@ export function InventoryLocationSection({
   attunementSlotsFull,
   equipmentWarnings,
   weaponOptions = [],
+  baseOptions = [],
   canBindPactWeapon = false,
   onToggleLocation,
   onToggleAttunement,
@@ -57,6 +65,8 @@ export function InventoryLocationSection({
   onRemove,
   onAttachCharm,
   onDetachCharm,
+  onAttachCoverage,
+  onDetachCoverage,
 }: InventoryLocationSectionProps) {
   const tiles = useMemo((): DetailTileItem[] => {
     return items.map((item) => {
@@ -77,6 +87,7 @@ export function InventoryLocationSection({
             attunementSlotsFull={attunementSlotsFull}
             warnings={warnings}
             weaponOptions={weaponOptions}
+            baseOptions={baseOptions}
             canBindPactWeapon={canBindPactWeapon}
             onToggleLocation={onToggleLocation}
             onToggleAttunement={onToggleAttunement}
@@ -84,18 +95,23 @@ export function InventoryLocationSection({
             onRemove={onRemove}
             onAttachCharm={onAttachCharm}
             onDetachCharm={onDetachCharm}
+            onAttachCoverage={onAttachCoverage}
+            onDetachCoverage={onDetachCoverage}
           />
         ),
       };
     });
   }, [
     attunementSlotsFull,
+    baseOptions,
     canBindPactWeapon,
     equipmentWarnings,
     isPending,
     items,
     onAttachCharm,
+    onAttachCoverage,
     onDetachCharm,
+    onDetachCoverage,
     onPatch,
     onRemove,
     onToggleAttunement,

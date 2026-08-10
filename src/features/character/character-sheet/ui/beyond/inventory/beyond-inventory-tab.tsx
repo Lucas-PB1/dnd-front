@@ -11,8 +11,10 @@ import type { ClassOption } from "@/entities/character/sheet-types";
 import type { EquipmentWarning } from "@/entities/character/types";
 import {
   useAddInventoryItem,
+  useAttachCoverage,
   useAttachWeaponCharm,
   useCharacterInventory,
+  useDetachCoverage,
   useDetachWeaponCharm,
   usePatchInventoryItem,
   useRemoveInventoryItem,
@@ -57,6 +59,8 @@ export function BeyondInventoryTab({
   const removeItem = useRemoveInventoryItem(characterId);
   const attachCharm = useAttachWeaponCharm(characterId);
   const detachCharm = useDetachWeaponCharm(characterId);
+  const attachCoverage = useAttachCoverage(characterId);
+  const detachCoverage = useDetachCoverage(characterId);
 
   const [addOpen, setAddOpen] = useState(false);
   const [selectedSlug, setSelectedSlug] = useState("");
@@ -69,15 +73,26 @@ export function BeyondInventoryTab({
   const items = inventory.data?.items ?? [];
   const equipped = items.filter((item) => item.location === "equipped");
   const backpack = items.filter((item) => item.location === "backpack");
-  const attunedCount = items.filter((item) => item.attuned).length;
+  const attunedCount =
+    items.filter((item) => item.attuned).length +
+    items.filter((item) => item.attachedCoverageAttuned).length;
   const attunementSlotsFull = attunedCount >= MAX_ATTUNED_ITEMS;
   const isPending =
     patchItem.isPending ||
     removeItem.isPending ||
     attachCharm.isPending ||
-    detachCharm.isPending;
+    detachCharm.isPending ||
+    attachCoverage.isPending ||
+    detachCoverage.isPending;
   const weaponOptions = items
-    .filter((item) => item.itemType === "weapon")
+    .filter((item) => item.itemType === "weapon" && !item.isCoverage)
+    .map((item) => ({ value: item.itemSlug, label: item.itemName }));
+  const baseOptions = items
+    .filter(
+      (item) =>
+        !item.isCoverage &&
+        (item.itemType === "weapon" || item.itemType === "armor"),
+    )
     .map((item) => ({ value: item.itemSlug, label: item.itemName }));
 
   function resetAddForm() {
@@ -192,6 +207,7 @@ export function BeyondInventoryTab({
             attunementSlotsFull={attunementSlotsFull}
             equipmentWarnings={equipmentWarnings}
             weaponOptions={weaponOptions}
+            baseOptions={baseOptions}
             canBindPactWeapon={canBindPactWeapon}
             onToggleLocation={toggleLocation}
             onToggleAttunement={toggleAttunement}
@@ -201,6 +217,12 @@ export function BeyondInventoryTab({
               attachCharm.mutate({ weaponSlug, charmSlug })
             }
             onDetachCharm={(weaponSlug) => detachCharm.mutate(weaponSlug)}
+            onAttachCoverage={(baseItemSlug, coverageSlug, bonus) =>
+              attachCoverage.mutate({ baseItemSlug, coverageSlug, bonus })
+            }
+            onDetachCoverage={(baseItemSlug) =>
+              detachCoverage.mutate(baseItemSlug)
+            }
           />
           <InventoryLocationSection
             id="backpack"
@@ -212,6 +234,7 @@ export function BeyondInventoryTab({
             attunementSlotsFull={attunementSlotsFull}
             equipmentWarnings={equipmentWarnings}
             weaponOptions={weaponOptions}
+            baseOptions={baseOptions}
             canBindPactWeapon={canBindPactWeapon}
             onToggleLocation={toggleLocation}
             onToggleAttunement={toggleAttunement}
@@ -221,6 +244,12 @@ export function BeyondInventoryTab({
               attachCharm.mutate({ weaponSlug, charmSlug })
             }
             onDetachCharm={(weaponSlug) => detachCharm.mutate(weaponSlug)}
+            onAttachCoverage={(baseItemSlug, coverageSlug, bonus) =>
+              attachCoverage.mutate({ baseItemSlug, coverageSlug, bonus })
+            }
+            onDetachCoverage={(baseItemSlug) =>
+              detachCoverage.mutate(baseItemSlug)
+            }
           />
         </div>
       )}

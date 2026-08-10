@@ -45,6 +45,29 @@ describe("collectActiveItemSlugs", () => {
     ]);
   });
 
+  it("includes coverages attached to equipped pieces when attuned", () => {
+    const slugs = collectActiveItemSlugs({
+      inventoryItems: [
+        {
+          itemSlug: "longsword",
+          effectsActive: true,
+          location: "equipped",
+          attachedCoverageSlug: "arma-1-2-ou-3",
+          attachedCoverageAttuned: true,
+        },
+        {
+          itemSlug: "shield",
+          effectsActive: true,
+          location: "equipped",
+          attachedCoverageSlug: "escudo-1-2-ou-3",
+          attachedCoverageAttuned: false,
+        },
+      ],
+      weaponAttacks: [{ attachedCoverageSlug: "arma-vorpal" }],
+    });
+    expect(slugs).toEqual(["arma-1-2-ou-3", "arma-vorpal", "longsword", "shield"]);
+  });
+
   it("includes backpack consumables with quantity", () => {
     const slugs = collectActiveItemSlugs({
       inventoryItems: [

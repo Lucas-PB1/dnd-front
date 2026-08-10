@@ -137,6 +137,11 @@ export type InventoryItem = {
   weightKg: number;
   attachedCharmSlug?: string | null;
   attachedCharmName?: string | null;
+  attachedCoverageSlug?: string | null;
+  attachedCoverageName?: string | null;
+  attachedCoverageBonus?: number | null;
+  attachedCoverageAttuned?: boolean;
+  isCoverage?: boolean;
 };
 
 export type InventoryEncumbrance = {

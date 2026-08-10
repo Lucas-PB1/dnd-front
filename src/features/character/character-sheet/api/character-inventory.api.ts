@@ -103,3 +103,43 @@ export async function detachWeaponCharm(
     },
   );
 }
+
+export type AttachCoveragePayload = {
+  baseItemSlug: string;
+  coverageSlug: string;
+  bonus?: 1 | 2 | 3;
+};
+
+export type DetachCoveragePayload = {
+  baseItemSlug: string;
+};
+
+export async function attachCoverage(
+  accessToken: string,
+  characterId: string,
+  payload: AttachCoveragePayload,
+) {
+  return gameFetch<InventoryItem>(
+    `/characters/${characterId}/inventory/coverage/attach`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
+export async function detachCoverage(
+  accessToken: string,
+  characterId: string,
+  payload: DetachCoveragePayload,
+) {
+  return gameFetch<InventoryItem>(
+    `/characters/${characterId}/inventory/coverage/detach`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+  );
+}

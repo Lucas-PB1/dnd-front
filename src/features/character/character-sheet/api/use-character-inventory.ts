@@ -8,7 +8,9 @@ import type {
 } from "@/entities/character/session-types";
 import {
   addInventoryItem,
+  attachCoverage,
   attachWeaponCharm,
+  detachCoverage,
   detachWeaponCharm,
   fetchCharacterInventory,
   inventoryKeys,
@@ -148,6 +150,48 @@ export function useDetachWeaponCharm(characterId: string) {
       try {
         return await detachWeaponCharm(requireToken(), characterId, {
           weaponSlug,
+        });
+      } catch (error) {
+        return handleUnauthorized(error);
+      }
+    },
+    onSuccess: invalidate,
+  });
+}
+
+export function useAttachCoverage(characterId: string) {
+  const { requireToken, handleUnauthorized } = useGameAuth(
+    `/characters/${characterId}`,
+  );
+  const invalidate = useInvalidateInventory(characterId);
+
+  return useMutation({
+    mutationFn: async (payload: {
+      baseItemSlug: string;
+      coverageSlug: string;
+      bonus?: 1 | 2 | 3;
+    }) => {
+      try {
+        return await attachCoverage(requireToken(), characterId, payload);
+      } catch (error) {
+        return handleUnauthorized(error);
+      }
+    },
+    onSuccess: invalidate,
+  });
+}
+
+export function useDetachCoverage(characterId: string) {
+  const { requireToken, handleUnauthorized } = useGameAuth(
+    `/characters/${characterId}`,
+  );
+  const invalidate = useInvalidateInventory(characterId);
+
+  return useMutation({
+    mutationFn: async (baseItemSlug: string) => {
+      try {
+        return await detachCoverage(requireToken(), characterId, {
+          baseItemSlug,
         });
       } catch (error) {
         return handleUnauthorized(error);

@@ -41,10 +41,27 @@ type InventoryItemDetailProps = {
   onRemove: (slug: string) => void;
   onAttachCharm?: (weaponSlug: string, charmSlug: string) => void;
   onDetachCharm?: (weaponSlug: string) => void;
+  baseOptions?: { value: string; label: string }[];
+  onAttachCoverage?: (
+    baseItemSlug: string,
+    coverageSlug: string,
+    bonus?: 1 | 2 | 3,
+  ) => void;
+  onDetachCoverage?: (baseItemSlug: string) => void;
 };
 
 function isWeaponCharmSlug(slug: string): boolean {
   return slug.startsWith("weapon-charm-");
+}
+
+function coverageNeedsTier(slug: string): boolean {
+  return (
+    slug === "arma-1-2-ou-3" ||
+    slug === "armadura-1-2-ou-3" ||
+    slug === "escudo-1-2-ou-3" ||
+    slug === "municao-1-2-ou-3" ||
+    slug === "varinha-do-mago-de-guerra-1-2-ou-3"
+  );
 }
 
 /** Controles e avisos do item (usado no modal do tile). */
@@ -54,6 +71,7 @@ export function InventoryItemDetail({
   attunementSlotsFull,
   warnings,
   weaponOptions = [],
+  baseOptions = [],
   canBindPactWeapon = false,
   onToggleLocation,
   onToggleAttunement,
@@ -61,9 +79,13 @@ export function InventoryItemDetail({
   onRemove,
   onAttachCharm,
   onDetachCharm,
+  onAttachCoverage,
+  onDetachCoverage,
 }: InventoryItemDetailProps) {
   const [qtyDraft, setQtyDraft] = useState<string | null>(null);
   const [attachWeaponSlug, setAttachWeaponSlug] = useState("");
+  const [attachBaseSlug, setAttachBaseSlug] = useState("");
+  const [coverageBonus, setCoverageBonus] = useState<"1" | "2" | "3">("1");
   const qtyDisplay = qtyDraft ?? String(item.quantity);
   const qtyId = `qty-${item.itemSlug}`;
   const slotId = `slot-${item.itemSlug}`;
@@ -75,8 +97,15 @@ export function InventoryItemDetail({
     item.location === "backpack" &&
     Boolean(onAttachCharm) &&
     weaponOptions.length > 0;
+  const showAttachCoverage =
+    Boolean(item.isCoverage) &&
+    item.location === "backpack" &&
+    Boolean(onAttachCoverage) &&
+    baseOptions.length > 0;
   const showDetach =
     Boolean(item.attachedCharmSlug) && Boolean(onDetachCharm);
+  const showDetachCoverage =
+    Boolean(item.attachedCoverageSlug) && Boolean(onDetachCoverage);
   const showPactWeapon =
     canBindPactWeapon && item.itemType === "weapon";
   const isPactWeapon = Boolean(item.isPactWeapon);
@@ -110,6 +139,15 @@ export function InventoryItemDetail({
       {item.attachedCharmName ? (
         <p className="text-xs text-muted-foreground">
           Encanto: {item.attachedCharmName}
+        </p>
+      ) : null}
+
+      {item.attachedCoverageName ? (
+        <p className="text-xs text-muted-foreground">
+          Cobertura: {item.attachedCoverageName}
+          {item.attachedCoverageBonus
+            ? ` (+${item.attachedCoverageBonus})`
+            : ""}
         </p>
       ) : null}
 
@@ -209,6 +247,68 @@ export function InventoryItemDetail({
         </div>
       ) : null}
 
+      {showAttachCoverage ? (
+        <div className="flex flex-wrap items-end gap-2">
+          <label className="flex min-w-[10rem] flex-1 flex-col gap-1">
+            <span className="text-[0.65rem] font-medium tracking-wide text-muted-foreground uppercase">
+              Aplicar em
+            </span>
+            <SearchableSelect
+              id={`coverage-attach-${item.itemSlug}`}
+              aria-label={`Peça base para ${item.itemName}`}
+              className="h-7 text-xs"
+              value={attachBaseSlug}
+              disabled={isPending}
+              placeholder="Escolher peça…"
+              options={baseOptions}
+              onValueChange={setAttachBaseSlug}
+            />
+          </label>
+          {coverageNeedsTier(item.itemSlug) ? (
+            <label className="flex flex-col gap-1">
+              <span className="text-[0.65rem] font-medium tracking-wide text-muted-foreground uppercase">
+                Bônus
+              </span>
+              <SearchableSelect
+                id={`coverage-bonus-${item.itemSlug}`}
+                aria-label="Tier da cobertura"
+                className="h-7 w-20 text-xs"
+                value={coverageBonus}
+                disabled={isPending}
+                options={[
+                  { value: "1", label: "+1" },
+                  { value: "2", label: "+2" },
+                  { value: "3", label: "+3" },
+                ]}
+                onValueChange={(next) => {
+                  if (next === "1" || next === "2" || next === "3") {
+                    setCoverageBonus(next);
+                  }
+                }}
+              />
+            </label>
+          ) : null}
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            disabled={isPending || !attachBaseSlug}
+            onClick={() => {
+              if (!attachBaseSlug || !onAttachCoverage) return;
+              onAttachCoverage(
+                attachBaseSlug,
+                item.itemSlug,
+                coverageNeedsTier(item.itemSlug)
+                  ? (Number(coverageBonus) as 1 | 2 | 3)
+                  : undefined,
+              );
+            }}
+          >
+            Aplicar
+          </Button>
+        </div>
+      ) : null}
+
       <div className="flex flex-wrap items-center gap-2">
         {item.requiresAttunement ? (
           <Button
@@ -279,6 +379,17 @@ export function InventoryItemDetail({
             Remover encanto
           </Button>
         ) : null}
+        {showDetachCoverage ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={isPending}
+            onClick={() => onDetachCoverage?.(item.itemSlug)}
+          >
+            Remover cobertura
+          </Button>
+        ) : null}
         <Button
           type="button"
           variant="ghost"
@@ -315,6 +426,11 @@ export function inventoryItemTileMeta(item: InventoryItem): {
         ? "Exige sintonia"
         : null,
     item.attachedCharmName ? `Encanto: ${item.attachedCharmName}` : null,
+    item.attachedCoverageName
+      ? `Cobertura: ${item.attachedCoverageName}${
+          item.attachedCoverageBonus ? ` (+${item.attachedCoverageBonus})` : ""
+        }`
+      : null,
   ].filter(Boolean);
 
   return {
@@ -326,6 +442,7 @@ export function inventoryItemTileMeta(item: InventoryItem): {
       equipped ||
       item.attuned ||
       Boolean(item.isPactWeapon) ||
-      Boolean(item.attachedCharmSlug),
+      Boolean(item.attachedCharmSlug) ||
+      Boolean(item.attachedCoverageSlug),
   };
 }
