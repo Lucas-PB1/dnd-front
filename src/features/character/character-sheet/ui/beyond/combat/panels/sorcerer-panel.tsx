@@ -16,6 +16,10 @@ import { readMetamagicSlugs } from "@/features/character/character-sheet/lib/sor
 import { useMetamagics } from "@/features/catalog/metamagic-catalog/api/use-metamagics";
 import { CombatClassPanelShell } from "../shared/class-panel-shell";
 import { CombatPanelActionButtons } from "../shared/panel-action-buttons";
+import {
+  CombatPanelActionList,
+  CombatPanelActionRow,
+} from "../shared/panel-action-row";
 import { TableActionFeedback } from "../shared/table-action-feedback";
 import { Button } from "@/shared/ui/button";
 
@@ -193,28 +197,29 @@ export function CombatSorcererPanel({
             Metamagia conhecida:
           </p>
           {knownMetamagics.length > 0 ? (
-            <div className="flex flex-wrap gap-1.5">
+            <CombatPanelActionList
+              title="Metamagia"
+              count={knownMetamagics.length}
+            >
               {knownMetamagics.map((option) => (
-                <Button
+                <CombatPanelActionRow
                   key={option.slug}
-                  type="button"
-                  size="xs"
+                  name={`${option.name} (${option.cost} pt)`}
+                  description={option.description}
                   variant="secondary"
-                  title={option.description}
                   disabled={
                     action.isPending || pointsRemaining < option.cost
                   }
-                  onClick={() =>
+                  pending={action.isPending}
+                  onAction={() =>
                     run({
                       actionSlug: "use-metamagic",
                       metamagicSlug: option.slug,
                     })
                   }
-                >
-                  {option.name} ({option.cost} pt)
-                </Button>
+                />
               ))}
-            </div>
+            </CombatPanelActionList>
           ) : (
             <p className="text-xs text-muted-foreground">
               Nenhuma opção salva na ficha — escolha Metamagias na aba Magias /

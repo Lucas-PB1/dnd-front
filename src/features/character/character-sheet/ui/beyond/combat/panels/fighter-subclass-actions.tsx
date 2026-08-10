@@ -11,7 +11,10 @@ import {
 } from "@/features/character/character-sheet/api/character-session.api";
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
 import { useCombatMechanicalCatalog } from "@/features/catalog/reference-catalog/api/use-reference";
-import { FeatureDetailTrigger } from "@/features/character/character-sheet/ui/sheet/feature-detail-dialog";
+import {
+  CombatPanelActionList,
+  CombatPanelActionRow,
+} from "../shared/panel-action-row";
 import { Button } from "@/shared/ui/button";
 import { SearchableSelect } from "@/shared/ui/searchable-select";
 
@@ -82,48 +85,30 @@ export function FighterSubclassActions({
 
   if (subclassSlug === "battle-master") {
     return (
-      <div className="mt-1">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-[0.58rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
-            Manobras
-          </p>
-          {level >= 15 ? (
-            <label className="text-[0.65rem] text-muted-foreground">
-              <input
-                className="mr-1 align-middle"
-                type="checkbox"
-                checked={useRelentless}
-                onChange={(event) => setUseRelentless(event.target.checked)}
-              />
-              Implacável (d8, sem gasto)
-            </label>
-          ) : null}
-        </div>
-        <div className="mt-1 flex flex-wrap gap-1.5">
+      <div className="mt-1 space-y-1">
+        {level >= 15 ? (
+          <label className="text-[0.65rem] text-muted-foreground">
+            <input
+              className="mr-1 align-middle"
+              type="checkbox"
+              checked={useRelentless}
+              onChange={(event) => setUseRelentless(event.target.checked)}
+            />
+            Implacável (d8, sem gasto)
+          </label>
+        ) : null}
+        <CombatPanelActionList title="Manobras" count={maneuvers.length}>
           {maneuvers.map((maneuver) => (
-            <span
+            <CombatPanelActionRow
               key={maneuver.slug}
-              className="inline-flex items-center gap-0.5"
-            >
-              {maneuver.description ? (
-                <FeatureDetailTrigger
-                  title={maneuver.name}
-                  subtitle="Manobra · Mestre de Batalha"
-                  description={maneuver.description}
-                />
-              ) : null}
-              <Button
-                type="button"
-                size="xs"
-                variant="outline"
-                disabled={maneuverMutation.isPending}
-                onClick={() => maneuverMutation.mutate(maneuver.slug)}
-              >
-                {maneuver.name}
-              </Button>
-            </span>
+              name={maneuver.name}
+              description={maneuver.description}
+              disabled={maneuverMutation.isPending}
+              pending={maneuverMutation.isPending}
+              onAction={() => maneuverMutation.mutate(maneuver.slug)}
+            />
           ))}
-        </div>
+        </CombatPanelActionList>
         <MutationError error={maneuverMutation.error} />
       </div>
     );

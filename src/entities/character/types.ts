@@ -71,6 +71,8 @@ export type CharacterDetail = {
   itemSpeedBonusMeters?: number;
   classCombatNotes?: string[];
   attacksPerAction?: number;
+  /** Bônus de salvaguarda de auras (API). Front não recalcula. */
+  savingThrowAuraBonus?: number;
   spellcastingAbilitySlug?: string | null;
   spellSaveDc?: number | null;
   spellAttackBonus?: number | null;

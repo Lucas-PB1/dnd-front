@@ -33,6 +33,7 @@ Detalhe: skill API `references/economia-painel.md` § Controle de recursos.
 
 - Preferir `execute<Class>TableAction` → `POST …/<class>/table-action`.
 - Aba Ações: `use-economy-table-action.ts` roteia por `economyActions[].classSlug` → `execute<Class>TableAction`.
+- Ferramentas do painel: lista **colapsável como bloco** (`CombatPanelActionList`) — ao abrir, cada linha mostra nome + descrição + Usar.
 - Protocolos no `table_action` (sem Set de slugs): `spend-resource`, `cast:…`, `arm:…`, `psi:…`.
 - Fallback genérico: `spend-resource` quando a economia só gasta slug.
 

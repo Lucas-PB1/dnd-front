@@ -1,7 +1,10 @@
 "use client";
 
 import type { ClassPanelActionRecord } from "@/entities/combat-mechanical/types";
-import { Button } from "@/shared/ui/button";
+import {
+  CombatPanelActionList,
+  CombatPanelActionRow,
+} from "./panel-action-row";
 
 type ButtonSize = "xs" | "sm";
 type ButtonVariant = "outline" | "ghost" | "secondary" | "default";
@@ -23,6 +26,9 @@ export type CombatPanelActionButtonsProps = {
   /** When false, never append remaining to the label (still used for disable). */
   showRemaining?: boolean;
   focusResourceSlug?: string;
+  /** Cabeçalho da lista colapsável. */
+  listTitle?: string;
+  listDefaultOpen?: boolean;
 };
 
 function lookupRemaining(
@@ -38,7 +44,6 @@ function lookupRemaining(
   if (remainingByResourceSlug instanceof Map) {
     return remainingByResourceSlug.get(slug) ?? null;
   }
-  // Record (ReadonlyMap is rare; callers use Map or plain object)
   const value = (remainingByResourceSlug as Record<string, number>)[slug];
   return value == null ? null : value;
 }
@@ -53,7 +58,8 @@ function resolveVariant(
 }
 
 /**
- * Botões de ação de painel a partir do catálogo (`panelActions`).
+ * Ações de painel a partir do catálogo (`panelActions`).
+ * Lista colapsável (bloco inteiro): ao abrir, cada linha mostra nome + descrição + Usar.
  */
 export function CombatPanelActionButtons({
   actions,
@@ -67,11 +73,17 @@ export function CombatPanelActionButtons({
   displayRemaining = null,
   showRemaining = true,
   focusResourceSlug = "focusPoints",
+  listTitle = "Ações",
+  listDefaultOpen = false,
 }: CombatPanelActionButtonsProps) {
   if (actions.length === 0) return null;
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <CombatPanelActionList
+      title={listTitle}
+      count={actions.length}
+      defaultOpen={listDefaultOpen}
+    >
       {actions.map((action) => {
         const focusRemaining = action.spendsFocus
           ? lookupRemaining(
@@ -105,28 +117,29 @@ export function CombatPanelActionButtons({
           focusRemaining != null &&
           focusRemaining <= 0;
 
+        const description =
+          action.title?.trim() ||
+          (action.spendsFocus && focusRemaining != null
+            ? `Gasta 1 Ponto de Foco (${focusRemaining} restantes).`
+            : null);
+
         return (
-          <Button
+          <CombatPanelActionRow
             key={action.panelKey || action.slug}
-            type="button"
+            name={
+              shownRemaining != null
+                ? `${action.name} (${shownRemaining})`
+                : action.name
+            }
+            description={description}
             size={size}
             variant={resolveVariant(action, variant)}
-            title={
-              action.title ??
-              (action.spendsFocus && focusRemaining != null
-                ? `Gasta 1 Ponto de Foco (${focusRemaining})`
-                : undefined)
-            }
-            disabled={
-              disabled || isPending || resourceDepleted || focusDepleted
-            }
-            onClick={() => onAction(action.slug)}
-          >
-            {action.name}
-            {shownRemaining != null ? ` (${shownRemaining})` : ""}
-          </Button>
+            disabled={disabled || resourceDepleted || focusDepleted}
+            pending={isPending}
+            onAction={() => onAction(action.slug)}
+          />
         );
       })}
-    </div>
+    </CombatPanelActionList>
   );
 }

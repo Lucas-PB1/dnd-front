@@ -13,7 +13,8 @@ alwaysApply: true
 ## Stack local (deltas)
 
 - Proxy: `src/proxy.ts` (**não** `middleware.ts`); key `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-- Fetch: `catalogFetch` (público) · `gameFetch(path, token)` (Bearer) · nunca recalcular HP/PB/slots
+- Fetch: `catalogFetch` (público) · `gameFetch(path, token)` (Bearer) · nunca recalcular HP/PB/slots/**regras de classe** (níveis, auras, bônus) — SSOT na **dnd-api**
+- **Proibido no front:** `classSlug === "paladin"` (ou outra classe) + `level >= N` para espelhar feature PHB — expor número/flag na API e só renderizar
 - Auth front: login/sessão Supabase; sem `service_role`
 - UI: shadcn em `src/shared/ui/`; ícones **Heroicons** outline; voltar via `BackLink`
 - Query: keys em `features/*/api`; catálogo `CATALOG_*_STALE_MS` em `shared/lib/catalog-query.ts`

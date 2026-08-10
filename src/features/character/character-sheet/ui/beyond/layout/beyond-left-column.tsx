@@ -10,7 +10,6 @@ import { useState } from "react";
 import type { CharacterDetail } from "@/entities/character/types";
 import {
   abilityModifierValue,
-  auraOfProtectionSaveBonus,
   collectSaveProficiencyAbilities,
   computePassiveSkill,
   formatSkillBonus,
@@ -70,11 +69,8 @@ export function BeyondLeftColumn({
   }
   const pb = character.proficiencyBonus;
   const scores = sheetAbilityScores(character);
-  const auraSaveBonus = auraOfProtectionSaveBonus(
-    character.classSlug,
-    character.level,
-    abilityModifierValue(scores.carisma),
-  );
+  /** SSOT na API (`savingThrowAuraBonus`) — não recalcular Aura/classe no front. */
+  const auraSaveBonus = character.savingThrowAuraBonus ?? 0;
   const skillSources = {
     classSkillSlugs: character.classSkillSlugs,
     backgroundSkillSlugs: character.backgroundSkillSlugs,

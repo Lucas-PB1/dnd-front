@@ -202,20 +202,7 @@ export function collectSaveProficiencyAbilities(
   return [...set];
 }
 
-/**
- * Aura de Proteção (paladino 6+) — espelha dnd-api `paladin/features`
- * (`hasAuraOfProtection` + `auraOfProtectionBonus`). Mínimo +1.
- */
-export function auraOfProtectionSaveBonus(
-  classSlug: string | null | undefined,
-  level: number,
-  charismaModifier: number,
-): number {
-  if (classSlug !== "paladin" || level < 6) return 0;
-  return Math.max(1, charismaModifier);
-}
-
-/** Bônus de salvaguarda na ficha: atributo + PB + Aura de Proteção (se houver). */
+/** Bônus de salvaguarda na ficha: atributo + PB + aura (valor já resolvido pela API). */
 export function savingThrowDisplayBonus(
   abilityModifier: number,
   proficient: boolean,

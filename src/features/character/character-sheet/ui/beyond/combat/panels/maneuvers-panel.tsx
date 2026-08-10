@@ -13,7 +13,10 @@ import { useGameAuth } from "@/features/character/character-sheet/api/use-game-a
 import { useCombatMechanicalCatalog } from "@/features/catalog/reference-catalog/api/use-reference";
 import { resolvePanelActions } from "@/features/character/character-sheet/lib/combat/resolve-panel-actions";
 import { CombatClassPanelShell } from "../shared/class-panel-shell";
-import { Button } from "@/shared/ui/button";
+import {
+  CombatPanelActionList,
+  CombatPanelActionRow,
+} from "../shared/panel-action-row";
 
 const EMPTY_PANEL_ACTIONS: never[] = [];
 
@@ -99,43 +102,41 @@ export function CombatManeuversPanel({
   const busy = tableAction.isPending;
   const actionsContent = (
     <div className="space-y-2">
-      <div className="flex flex-wrap gap-2">
+      <CombatPanelActionList
+        title="Manobras"
+        count={maneuvers.length + panelActions.length}
+      >
         {maneuvers.map((maneuver) => (
-          <Button
+          <CombatPanelActionRow
             key={maneuver.slug}
-            type="button"
-            size="xs"
-            variant="outline"
+            name={maneuver.name}
+            description={maneuver.description}
             disabled={busy}
-            title={maneuver.description}
-            onClick={() =>
+            pending={busy}
+            onAction={() =>
               tableAction.mutate({
                 actionSlug: "use-maneuver",
                 maneuverSlug: maneuver.slug,
               })
             }
-          >
-            {maneuver.name}
-          </Button>
+          />
         ))}
         {panelActions.map((action) => (
-          <Button
+          <CombatPanelActionRow
             key={action.panelKey}
-            type="button"
-            size="xs"
+            name={action.name}
+            description={action.title}
             variant="secondary"
             disabled={busy}
-            title={action.title ?? action.name}
-            onClick={() =>
+            pending={busy}
+            onAction={() =>
               tableAction.mutate({
                 actionSlug: action.slug as "recover-risk",
               })
             }
-          >
-            {action.name}
-          </Button>
+          />
         ))}
-      </div>
+      </CombatPanelActionList>
 
       {lastResult ? (
         <div className="space-y-1 text-sm" role="status">
