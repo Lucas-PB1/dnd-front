@@ -81,6 +81,7 @@ Classe nova: copiar uma destas (table-action + Economia com `resource_slug` / ±
 
 - Painel: `…/panels/maneuvers-panel.tsx` — manobras via `executeGunslingerTableAction` (`use-maneuver`); Gambito Terrível (C010 `recover-risk`)
 - `executeGunslingerTableAction` via `classSlug: gunslinger` na economy
-- Economy: `risk` (±); Tempo Bala / Tiro na Cabeça lembretes; head-shot gasta 3× risk no card de ataque
+- Economy: `risk` (±); Tempo Bala / Tiro na Cabeça + lembretes por sub Valdas (saída, pinball, Tiro Focado, …)
 - **Sem** espelho de risk `remaining/max` no Ferramentas (só ± na Economia)
-- Polish adiado: manobras C001 das outras subs; polish câmaras
+- Manobras: C001 base + todas as 7 subs (painel via `GET …/maneuvers`)
+- Polish adiado: Assumidor de risco; condições White Hat; Bang cast; polish câmaras
