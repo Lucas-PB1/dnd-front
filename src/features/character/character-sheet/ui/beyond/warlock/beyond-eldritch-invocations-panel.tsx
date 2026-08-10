@@ -6,6 +6,7 @@ import type { CharacterDetail } from "@/entities/character";
 import type { ClassOption } from "@/entities/character/sheet-types";
 import { usePatchCharacter } from "@/features/character/character-sheet/api/use-patch-character";
 import {
+  isLessonsOfTheFirstOnesSlug,
   mergeEldritchInvocationsIntoClassOptions,
   readEldritchInvocationPicks,
   warlockInvocationLimit,
@@ -14,8 +15,10 @@ import {
 import {
   EldritchInvocationPicker,
   type EldritchCantripOption,
+  type EldritchOriginFeatOption,
 } from "@/features/character/character-sheet/ui/beyond/warlock/eldritch-invocation-picker";
 import { useEldritchInvocations } from "@/features/catalog/eldritch-invocation-catalog/api/use-eldritch-invocations";
+import { useFeatsCatalog } from "@/features/catalog/feat-catalog/api/use-feats";
 import { useSpellLabels } from "@/features/catalog/spell-catalog/api/use-spells";
 import { Button } from "@/shared/ui/button";
 import { CollapsibleCard } from "@/shared/ui/collapsible-card";
@@ -45,6 +48,11 @@ function BeyondEldritchInvocationsPanelInner({
 }: BeyondEldritchInvocationsPanelProps) {
   const patchCharacter = usePatchCharacter(characterId);
   const catalogQuery = useEldritchInvocations(character.level);
+  const originFeatsQuery = useFeatsCatalog({
+    page: 1,
+    q: "",
+    category: "origin",
+  });
   const spellLabels = useSpellLabels();
   const saved = readEldritchInvocationPicks(character.classOptions);
   const [picks, setPicks] = useState<EldritchInvocationPick[]>(saved);
@@ -77,6 +85,27 @@ function BeyondEldritchInvocationsPanelInner({
     return options;
   }, [character.characterSpells, spellLabels.data]);
 
+  const originFeatOptions = useMemo((): EldritchOriginFeatOption[] => {
+    return (originFeatsQuery.data?.data ?? []).map((feat) => ({
+      value: feat.slug,
+      label: feat.name,
+    }));
+  }, [originFeatsQuery.data]);
+
+  const occupiedOriginFeatSlugs = useMemo(() => {
+    const lessonsFeats = new Set(
+      picks
+        .filter((pick) => isLessonsOfTheFirstOnesSlug(pick.slug))
+        .map((pick) => pick.originFeatSlug)
+        .filter((slug): slug is string => Boolean(slug)),
+    );
+    return new Set(
+      (character.characterFeats ?? [])
+        .map((feat) => feat.featSlug)
+        .filter((slug) => !lessonsFeats.has(slug)),
+    );
+  }, [character.characterFeats, picks]);
+
   async function save() {
     const next = mergeEldritchInvocationsIntoClassOptions(
       (character.classOptions ?? []) as ClassOption[],
@@ -94,7 +123,7 @@ function BeyondEldritchInvocationsPanelInner({
       subtitle="Escolha e troque invocações na ficha (pré-requisitos de nível/pacto validados na API)."
     >
       <div className="space-y-2">
-        {catalogQuery.isPending ? (
+        {catalogQuery.isPending || originFeatsQuery.isPending ? (
           <p className="text-xs text-muted-foreground">Carregando catálogo…</p>
         ) : catalogQuery.isError ? (
           <p className="text-xs text-destructive">
@@ -106,6 +135,8 @@ function BeyondEldritchInvocationsPanelInner({
             catalog={catalogQuery.data ?? []}
             selectedPicks={picks}
             cantripOptions={cantripOptions}
+            originFeatOptions={originFeatOptions}
+            occupiedOriginFeatSlugs={occupiedOriginFeatSlugs}
             onChange={setPicks}
             disabled={patchCharacter.isPending}
           />

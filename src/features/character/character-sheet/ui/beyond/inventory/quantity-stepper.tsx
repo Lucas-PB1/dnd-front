@@ -12,6 +12,8 @@ type QuantityStepperProps = {
   onCommit: (next: number) => void;
   disabled?: boolean;
   ariaLabel: string;
+  /** Default 1 (quantidade de itens). Use 0 para moedas. */
+  min?: number;
 };
 
 export function QuantityStepper({
@@ -21,8 +23,12 @@ export function QuantityStepper({
   onCommit,
   disabled,
   ariaLabel,
+  min = 1,
 }: QuantityStepperProps) {
-  const numeric = Math.max(1, Math.trunc(Number(value)) || 1);
+  const parsed = Math.trunc(Number(value));
+  const numeric = Number.isFinite(parsed)
+    ? Math.max(min, parsed)
+    : min;
 
   return (
     <div className="inline-flex items-center rounded-md border border-border/80 bg-background/60">
@@ -32,7 +38,7 @@ export function QuantityStepper({
         size="icon-xs"
         className="rounded-none rounded-l-md"
         aria-label="Diminuir quantidade"
-        disabled={disabled || numeric <= 1}
+        disabled={disabled || numeric <= min}
         onClick={() => onCommit(numeric - 1)}
       >
         <MinusIcon className="size-3.5" aria-hidden />
@@ -40,7 +46,7 @@ export function QuantityStepper({
       <Input
         id={id}
         type="number"
-        min={1}
+        min={min}
         inputMode="numeric"
         aria-label={ariaLabel}
         className="h-7 w-11 rounded-none border-0 border-x border-border/80 bg-transparent px-1 text-center font-mono text-xs tabular-nums shadow-none focus-visible:ring-0"

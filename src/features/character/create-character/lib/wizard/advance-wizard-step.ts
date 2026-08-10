@@ -240,6 +240,7 @@ export async function advanceWizardStep(deps: WizardAdvanceDeps): Promise<void> 
           : []),
       ],
       values.speciesChoices ?? [],
+      values.classOptions ?? [],
     );
     if (previewFeats.length > 0) {
       const incomplete = await findIncompleteCreateFeatOptions(

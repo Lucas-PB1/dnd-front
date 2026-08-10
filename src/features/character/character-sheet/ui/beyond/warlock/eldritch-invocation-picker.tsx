@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import type { EldritchInvocation } from "@/features/catalog/eldritch-invocation-catalog/api/eldritch-invocations.api";
 import {
   isBlastInvocationSlug,
+  isLessonsOfTheFirstOnesSlug,
   warlockInvocationLimit,
   type EldritchInvocationPick,
 } from "@/features/character/character-sheet/lib/warlock/eldritch-invocations";
@@ -20,11 +21,19 @@ export type EldritchCantripOption = {
   rangeMeters?: number | null;
 };
 
+export type EldritchOriginFeatOption = {
+  value: string;
+  label: string;
+};
+
 type EldritchInvocationPickerProps = {
   level: number;
   catalog: readonly EldritchInvocation[];
   selectedPicks: readonly EldritchInvocationPick[];
   cantripOptions?: readonly EldritchCantripOption[];
+  originFeatOptions?: readonly EldritchOriginFeatOption[];
+  /** Talentos já na ficha (exceto os desta invocação) — indisponíveis. */
+  occupiedOriginFeatSlugs?: ReadonlySet<string>;
   onChange: (picks: EldritchInvocationPick[]) => void;
   disabled?: boolean;
 };
@@ -54,6 +63,8 @@ export function EldritchInvocationPicker({
   catalog,
   selectedPicks,
   cantripOptions = [],
+  originFeatOptions = [],
+  occupiedOriginFeatSlugs,
   onChange,
   disabled = false,
 }: EldritchInvocationPickerProps) {
@@ -68,6 +79,14 @@ export function EldritchInvocationPicker({
   const selectedSlugs = selectedPicks.map((pick) => pick.slug);
   const selectedSet = useMemo(() => new Set(selectedSlugs), [selectedSlugs]);
   const hasPact = (slug: string) => selectedSet.has(slug);
+
+  const selectedOriginFeats = useMemo(() => {
+    const set = new Set<string>();
+    for (const pick of selectedPicks) {
+      if (pick.originFeatSlug) set.add(pick.originFeatSlug);
+    }
+    return set;
+  }, [selectedPicks]);
 
   const options = useMemo(() => {
     return catalog
@@ -89,6 +108,16 @@ export function EldritchInvocationPicker({
       }));
   }, [catalog, level, selectedSet, selectedSlugs]);
 
+  function eligibleOriginFeatsFor(index: number) {
+    const current = selectedPicks[index]?.originFeatSlug ?? null;
+    return originFeatOptions.filter((option) => {
+      if (option.value === current) return true;
+      if (selectedOriginFeats.has(option.value)) return false;
+      if (occupiedOriginFeatSlugs?.has(option.value)) return false;
+      return true;
+    });
+  }
+
   function add() {
     if (!draft || selectedPicks.length >= limit) return;
     const next: EldritchInvocationPick = { slug: draft };
@@ -97,6 +126,14 @@ export function EldritchInvocationPicker({
         cantripEligible(draft, option),
       );
       next.cantripSlug = eligible[0]?.value ?? null;
+    }
+    if (isLessonsOfTheFirstOnesSlug(draft)) {
+      const eligible = originFeatOptions.filter((option) => {
+        if (selectedOriginFeats.has(option.value)) return false;
+        if (occupiedOriginFeatSlugs?.has(option.value)) return false;
+        return true;
+      });
+      next.originFeatSlug = eligible[0]?.value ?? null;
     }
     onChange([...selectedPicks, next]);
     setDraft("");
@@ -114,12 +151,21 @@ export function EldritchInvocationPicker({
     );
   }
 
+  function setOriginFeatAt(index: number, originFeatSlug: string) {
+    onChange(
+      selectedPicks.map((pick, i) =>
+        i === index ? { ...pick, originFeatSlug } : pick,
+      ),
+    );
+  }
+
   return (
     <div className="space-y-3">
       <p className="text-xs text-muted-foreground">
         Escolha até {limit} invocação(ões) para o nível {level}. Pactos (Tomo /
         Lâmina / Corrente) também contam nesse limite. Explosão Agonizante /
-        Repulsiva / Lança Mística exigem um truque de Bruxo vinculado.
+        Repulsiva / Lança Mística exigem um truque vinculado. Lições dos
+        Primeiros exige um talento de Origem.
       </p>
 
       <ul className="space-y-1.5">
@@ -129,9 +175,11 @@ export function EldritchInvocationPicker({
           selectedPicks.map((pick, index) => {
             const row = bySlug.get(pick.slug);
             const needsCantrip = isBlastInvocationSlug(pick.slug);
+            const needsOriginFeat = isLessonsOfTheFirstOnesSlug(pick.slug);
             const eligibleCantrips = cantripOptions.filter((option) =>
               cantripEligible(pick.slug, option),
             );
+            const eligibleOriginFeats = eligibleOriginFeatsFor(index);
             return (
               <li
                 key={`${pick.slug}-${index}`}
@@ -174,6 +222,27 @@ export function EldritchInvocationPicker({
                           : "Escolher truque…"
                       }
                       disabled={disabled || eligibleCantrips.length === 0}
+                    />
+                  </div>
+                ) : null}
+                {needsOriginFeat ? (
+                  <div className="space-y-1">
+                    <label className="text-[0.65rem] font-medium text-muted-foreground">
+                      Talento de Origem
+                    </label>
+                    <SearchableSelect
+                      value={pick.originFeatSlug ?? ""}
+                      onValueChange={(value) => setOriginFeatAt(index, value)}
+                      options={eligibleOriginFeats.map((option) => ({
+                        value: option.value,
+                        label: option.label,
+                      }))}
+                      placeholder={
+                        eligibleOriginFeats.length === 0
+                          ? "Nenhum talento de Origem disponível"
+                          : "Escolher talento…"
+                      }
+                      disabled={disabled || eligibleOriginFeats.length === 0}
                     />
                   </div>
                 ) : null}

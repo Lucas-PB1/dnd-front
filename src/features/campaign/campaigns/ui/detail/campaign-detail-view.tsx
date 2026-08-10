@@ -163,6 +163,29 @@ export function CampaignDetailView({ campaignId }: { campaignId: string }) {
         />
       </div>
 
+      {isDm ? (
+        <section className="space-y-2 rounded-md border border-border/70 bg-muted/20 px-3 py-3">
+          <h2 className="font-heading text-sm font-semibold">Inventário</h2>
+          <label className="flex items-start gap-2 text-sm">
+            <input
+              type="checkbox"
+              className="mt-0.5"
+              checked={data.allowPlayerSkipPayment}
+              disabled={update.isPending}
+              onChange={(e) =>
+                update.mutate({ allowPlayerSkipPayment: e.target.checked })
+              }
+            />
+            <span>
+              Players podem pegar item sem pagar
+              <span className="mt-0.5 block text-xs text-muted-foreground">
+                Libera o checkbox “Não pagar” no inventário Beyond.
+              </span>
+            </span>
+          </label>
+        </section>
+      ) : null}
+
       {canOpenEncounter ? (
         <section className="space-y-3">
           <h2 className="font-heading text-lg font-semibold">Combate</h2>

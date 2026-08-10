@@ -28,6 +28,21 @@ export type AbilityScores = {
   carisma: number;
 };
 
+export type CoinPurse = {
+  copper: number;
+  silver: number;
+  electrum: number;
+  gold: number;
+  platinum: number;
+};
+
+export type CharacterCampaignRef = {
+  id: string;
+  name: string;
+  allowPlayerSkipPayment: boolean;
+  myRole: "dm" | "player" | "assistant" | null;
+};
+
 /** Espelha CharacterResponseDto da dnd-api */
 export type CharacterDetail = {
   id: string;
@@ -77,13 +92,10 @@ export type CharacterDetail = {
   spellSaveDc?: number | null;
   spellAttackBonus?: number | null;
   campaigns: CharacterCampaignRef[];
+  /** Saldo das 5 moedas (PC/PP/PE/PO/PL). */
+  coins: CoinPurse;
   createdAt: string;
   updatedAt: string;
-};
-
-export type CharacterCampaignRef = {
-  id: string;
-  name: string;
 };
 
 export type WeaponAttackSummary = {

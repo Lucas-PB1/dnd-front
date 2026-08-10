@@ -1,4 +1,8 @@
 /** Espelha CharacterStateResponseDto da dnd-api */
+import type { CoinPurse } from "@/entities/character/types";
+
+export type { CoinPurse };
+
 export type SpellSlotsMap = Record<string, number>;
 
 export type ClassResourceState = {
@@ -161,11 +165,26 @@ export type InventoryEncumbrance = {
 export type CharacterInventory = {
   items: InventoryItem[];
   encumbrance: InventoryEncumbrance;
+  wealth: CoinPurse;
+  paymentContext: InventoryPaymentContext;
+};
+
+export type InventoryPaymentContext = {
+  inCampaign: boolean;
+  viewerIsDmOrAssistant: boolean;
+  allowPlayerSkipPayment: boolean;
+  chargeApplies: boolean;
 };
 
 export type AddInventoryItemPayload = {
   itemSlug: string;
   quantity?: number;
+  /** Default true quando cobrança se aplica. */
+  pay?: boolean;
+};
+
+export type PatchCharacterWealthPayload = {
+  coins: Partial<CoinPurse>;
 };
 
 export type PatchInventoryItemPayload = {

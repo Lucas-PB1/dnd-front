@@ -66,6 +66,11 @@ export function useStepFeats(
     name: "speciesChoices",
     defaultValue: [],
   });
+  const classOptions = useWatch({
+    control,
+    name: "classOptions",
+    defaultValue: [],
+  });
   const subclassOptions = useWatch({
     control,
     name: "subclassOptions",
@@ -184,8 +189,9 @@ export function useStepFeats(
       originFeatSlug,
       withStyle,
       speciesChoices,
+      classOptions,
     );
-  }, [originFeatSlug, asiFeats, speciesChoices, fightingStyleSlug]);
+  }, [originFeatSlug, asiFeats, speciesChoices, classOptions, fightingStyleSlug]);
 
   const classFightingStyleSlugs = useMemo(
     () => classDetail.data?.fightingStyleSlugs ?? [],
@@ -240,6 +246,7 @@ export function useStepFeats(
       originFeatSlug,
       [...asiFeatSlotsToCharacterFeats(nextSlots), ...styleFeat],
       speciesChoices,
+      classOptions,
     );
     setValue("featOptions", pruneFeatOptions(nextPreview, featOptions));
   }

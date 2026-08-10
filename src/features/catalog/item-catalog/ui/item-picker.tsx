@@ -21,6 +21,8 @@ type ItemPickerProps = {
   id: string;
   value: string;
   onChange: (slug: string) => void;
+  /** Item selecionado (para preço etc.) ou null se limpar. */
+  onItemChange?: (item: ItemSummary | null) => void;
   excludeSlugs?: string[];
   disabled?: boolean;
 };
@@ -30,6 +32,7 @@ export function ItemPicker({
   id,
   value,
   onChange,
+  onItemChange,
   excludeSlugs = [],
   disabled,
 }: ItemPickerProps) {
@@ -160,7 +163,10 @@ export function ItemPicker({
                 item={item}
                 selected={value === item.slug}
                 disabled={disabled}
-                onSelect={() => onChange(item.slug)}
+                onSelect={() => {
+                  onChange(item.slug);
+                  onItemChange?.(item);
+                }}
               />
             ))}
           </ul>

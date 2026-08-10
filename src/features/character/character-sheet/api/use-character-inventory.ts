@@ -17,7 +17,9 @@ import {
   patchInventoryItem,
   removeInventoryItem,
 } from "@/features/character/character-sheet/api/character-inventory.api";
+import { patchCharacterWealth } from "@/features/character/characters/api/characters.api";
 import { charactersKeys } from "@/features/character/characters/api/characters.api";
+import type { CoinPurse } from "@/entities/character/types";
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
 
 export function useCharacterInventory(characterId: string) {
@@ -92,6 +94,26 @@ export function usePatchInventoryItem(characterId: string) {
           itemSlug,
           payload,
         );
+      } catch (error) {
+        return handleUnauthorized(error);
+      }
+    },
+    onSuccess: invalidate,
+  });
+}
+
+export function usePatchCharacterWealth(characterId: string) {
+  const { requireToken, handleUnauthorized } = useGameAuth(
+    `/characters/${characterId}`,
+  );
+  const invalidate = useInvalidateInventory(characterId);
+
+  return useMutation({
+    mutationFn: async (coins: Partial<CoinPurse>) => {
+      try {
+        return await patchCharacterWealth(requireToken(), characterId, {
+          coins,
+        });
       } catch (error) {
         return handleUnauthorized(error);
       }

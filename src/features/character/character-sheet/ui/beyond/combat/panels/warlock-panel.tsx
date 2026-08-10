@@ -455,17 +455,18 @@ export function CombatWarlockPanel({
               const grantedSpellName = row.grantedSpellSlug
                 ? (spellNameBySlug.get(row.grantedSpellSlug) ?? null)
                 : null;
-              const boundCantripSlug = knownPicks.find(
-                (pick) => pick.slug === row.slug,
-              )?.cantripSlug;
+              const boundPick = knownPicks.find((pick) => pick.slug === row.slug);
+              const boundCantripSlug = boundPick?.cantripSlug;
               const boundCantripName = boundCantripSlug
                 ? (spellNameBySlug.get(boundCantripSlug) ?? boundCantripSlug)
                 : null;
+              const boundOriginFeatName = boundPick?.originFeatSlug ?? null;
               const kindLabel = eldritchInvocationKindLabel(row.kind, row.slug);
               const meta = eldritchInvocationMetaLine({
                 kindLabel,
                 grantedSpellName,
                 boundCantripName,
+                boundOriginFeatName,
               });
               const summary =
                 row.description.trim().length > 0

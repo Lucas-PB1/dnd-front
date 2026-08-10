@@ -105,6 +105,7 @@ export function useStepReview(control: Control<CreateCharacterInput>) {
         : []),
     ],
     values.speciesChoices ?? [],
+    values.classOptions ?? [],
   );
   const featNameBySlug = Object.fromEntries(
     (featsQuery.data?.data ?? []).map((feat) => [feat.slug, feat.name]),

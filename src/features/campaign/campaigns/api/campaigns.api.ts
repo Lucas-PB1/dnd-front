@@ -8,6 +8,7 @@ export type CampaignSummary = {
   description: string | null;
   inviteCode: string;
   myRole: CampaignRole;
+  allowPlayerSkipPayment: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -101,7 +102,11 @@ export async function deleteCampaign(accessToken: string, campaignId: string) {
 export async function updateCampaign(
   accessToken: string,
   campaignId: string,
-  payload: { name?: string; description?: string | null },
+  payload: {
+    name?: string;
+    description?: string | null;
+    allowPlayerSkipPayment?: boolean;
+  },
 ) {
   return gameFetch<CampaignSummary>(`/campaigns/${campaignId}`, accessToken, {
     method: "PATCH",

@@ -5,14 +5,17 @@ import { useWatch, type Control, type UseFormSetValue } from "react-hook-form";
 
 import type { CreateCharacterInput } from "@/features/character/create-character/model/create-character.schema";
 import {
+  isLessonsOfTheFirstOnesSlug,
   mergeEldritchInvocationsIntoClassOptions,
   readEldritchInvocationPicks,
 } from "@/features/character/character-sheet/lib/warlock/eldritch-invocations";
 import {
   EldritchInvocationPicker,
   type EldritchCantripOption,
+  type EldritchOriginFeatOption,
 } from "@/features/character/character-sheet/ui/beyond/warlock/eldritch-invocation-picker";
 import { useEldritchInvocations } from "@/features/catalog/eldritch-invocation-catalog/api/use-eldritch-invocations";
+import { useFeatsCatalog } from "@/features/catalog/feat-catalog/api/use-feats";
 import { useSpellLabels } from "@/features/catalog/spell-catalog/api/use-spells";
 import { WizardFormSection } from "@/features/character/create-character/ui/wizard/wizard-form-section";
 
@@ -28,7 +31,13 @@ export function StepWarlockInvocations({
   const level = useWatch({ control, name: "level" }) ?? 1;
   const classOptions = useWatch({ control, name: "classOptions" }) ?? [];
   const characterSpells = useWatch({ control, name: "characterSpells" }) ?? [];
+  const characterFeats = useWatch({ control, name: "characterFeats" }) ?? [];
   const catalogQuery = useEldritchInvocations(level);
+  const originFeatsQuery = useFeatsCatalog({
+    page: 1,
+    q: "",
+    category: "origin",
+  });
   const spellLabels = useSpellLabels();
   const selected = readEldritchInvocationPicks(classOptions);
 
@@ -52,12 +61,33 @@ export function StepWarlockInvocations({
     return options;
   }, [characterSpells, spellLabels.data]);
 
+  const originFeatOptions = useMemo((): EldritchOriginFeatOption[] => {
+    return (originFeatsQuery.data?.data ?? []).map((feat) => ({
+      value: feat.slug,
+      label: feat.name,
+    }));
+  }, [originFeatsQuery.data]);
+
+  const occupiedOriginFeatSlugs = useMemo(() => {
+    const lessonsFeats = new Set(
+      selected
+        .filter((pick) => isLessonsOfTheFirstOnesSlug(pick.slug))
+        .map((pick) => pick.originFeatSlug)
+        .filter((slug): slug is string => Boolean(slug)),
+    );
+    return new Set(
+      characterFeats
+        .map((feat) => feat.featSlug)
+        .filter((slug) => !lessonsFeats.has(slug)),
+    );
+  }, [characterFeats, selected]);
+
   return (
     <WizardFormSection
       title="Invocações Místicas"
-      description="Fragmentos de conhecimento proibido. No nível 1 você recebe 1 invocação (ex.: um Pacto). Invocações de blast pedem um truque vinculado."
+      description="Fragmentos de conhecimento proibido. No nível 1 você recebe 1 invocação (ex.: um Pacto). Blast pede truque; Lições dos Primeiros pede talento de Origem."
     >
-      {catalogQuery.isPending ? (
+      {catalogQuery.isPending || originFeatsQuery.isPending ? (
         <p className="text-sm text-muted-foreground">Carregando catálogo…</p>
       ) : catalogQuery.isError ? (
         <p className="text-sm text-destructive">Falha ao carregar invocações.</p>
@@ -67,6 +97,8 @@ export function StepWarlockInvocations({
           catalog={catalogQuery.data ?? []}
           selectedPicks={selected}
           cantripOptions={cantripOptions}
+          originFeatOptions={originFeatOptions}
+          occupiedOriginFeatSlugs={occupiedOriginFeatSlugs}
           onChange={(picks) => {
             setValue(
               "classOptions",

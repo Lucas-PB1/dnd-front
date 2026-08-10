@@ -2,6 +2,7 @@ import { gameFetch } from "@/shared/api/dnd-api/api-client";
 import type {
   CharacterDetail,
   CharacterSummary,
+  CoinPurse,
   CreateCharacterPayload,
   UpdateCharacterPayload,
 } from "@/entities/character/types";
@@ -70,6 +71,17 @@ export async function patchCharacter(
   payload: UpdateCharacterPayload,
 ) {
   return gameFetch<CharacterDetail>(`/characters/${id}`, accessToken, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function patchCharacterWealth(
+  accessToken: string,
+  id: string,
+  payload: { coins: Partial<CoinPurse> },
+) {
+  return gameFetch<CoinPurse>(`/characters/${id}/wealth`, accessToken, {
     method: "PATCH",
     body: JSON.stringify(payload),
   });

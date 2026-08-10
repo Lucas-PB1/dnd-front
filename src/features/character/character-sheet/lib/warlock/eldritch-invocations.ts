@@ -3,6 +3,10 @@ import type { ClassOption } from "@/entities/character/sheet-types";
 export const ELDRITCH_INVOCATION_OPTION_KEY = "eldritch-invocation";
 export const ELDRITCH_INVOCATION_CANTRIP_OPTION_KEY =
   "eldritch-invocation-cantrip";
+export const ELDRITCH_INVOCATION_ORIGIN_FEAT_OPTION_KEY =
+  "eldritch-invocation-origin-feat";
+
+export const LESSONS_OF_THE_FIRST_ONES_SLUG = "lessons-of-the-first-ones";
 
 export const BLAST_INVOCATION_SLUGS = [
   "agonizing-blast",
@@ -16,6 +20,10 @@ export function isBlastInvocationSlug(
   slug: string,
 ): slug is BlastInvocationSlug {
   return (BLAST_INVOCATION_SLUGS as readonly string[]).includes(slug);
+}
+
+export function isLessonsOfTheFirstOnesSlug(slug: string): boolean {
+  return slug === LESSONS_OF_THE_FIRST_ONES_SLUG;
 }
 
 /** Contagem PHB 2024 — coluna Invocações. */
@@ -34,6 +42,7 @@ export function warlockInvocationLimit(level: number): number {
 export type EldritchInvocationPick = {
   slug: string;
   cantripSlug?: string | null;
+  originFeatSlug?: string | null;
 };
 
 export function readEldritchInvocationSlugs(
@@ -46,20 +55,28 @@ export function readEldritchInvocationPicks(
   classOptions: readonly ClassOption[] | null | undefined,
 ): EldritchInvocationPick[] {
   const cantripByIndex = new Map<number, string>();
+  const originFeatByIndex = new Map<number, string>();
   for (const option of classOptions ?? []) {
-    if (option.optionKey !== ELDRITCH_INVOCATION_CANTRIP_OPTION_KEY) continue;
-    cantripByIndex.set(option.instanceIndex ?? 0, option.valueId);
+    const index = option.instanceIndex ?? 0;
+    if (option.optionKey === ELDRITCH_INVOCATION_CANTRIP_OPTION_KEY) {
+      cantripByIndex.set(index, option.valueId);
+    }
+    if (option.optionKey === ELDRITCH_INVOCATION_ORIGIN_FEAT_OPTION_KEY) {
+      originFeatByIndex.set(index, option.valueId);
+    }
   }
   return (classOptions ?? [])
     .filter((option) => option.optionKey === ELDRITCH_INVOCATION_OPTION_KEY)
     .sort((a, b) => (a.instanceIndex ?? 0) - (b.instanceIndex ?? 0))
     .map((option) => {
       const index = option.instanceIndex ?? 0;
-      const cantripSlug = cantripByIndex.get(index) ?? null;
       return {
         slug: option.valueId,
         cantripSlug: isBlastInvocationSlug(option.valueId)
-          ? cantripSlug
+          ? (cantripByIndex.get(index) ?? null)
+          : null,
+        originFeatSlug: isLessonsOfTheFirstOnesSlug(option.valueId)
+          ? (originFeatByIndex.get(index) ?? null)
           : null,
       };
     });
@@ -72,7 +89,8 @@ export function mergeEldritchInvocationsIntoClassOptions(
   const kept = classOptions.filter(
     (option) =>
       option.optionKey !== ELDRITCH_INVOCATION_OPTION_KEY &&
-      option.optionKey !== ELDRITCH_INVOCATION_CANTRIP_OPTION_KEY,
+      option.optionKey !== ELDRITCH_INVOCATION_CANTRIP_OPTION_KEY &&
+      option.optionKey !== ELDRITCH_INVOCATION_ORIGIN_FEAT_OPTION_KEY,
   );
   const next: ClassOption[] = [...kept];
   picks.forEach((pick, index) => {
@@ -85,6 +103,13 @@ export function mergeEldritchInvocationsIntoClassOptions(
       next.push({
         optionKey: ELDRITCH_INVOCATION_CANTRIP_OPTION_KEY,
         valueId: pick.cantripSlug,
+        instanceIndex: index,
+      });
+    }
+    if (isLessonsOfTheFirstOnesSlug(pick.slug) && pick.originFeatSlug) {
+      next.push({
+        optionKey: ELDRITCH_INVOCATION_ORIGIN_FEAT_OPTION_KEY,
+        valueId: pick.originFeatSlug,
         instanceIndex: index,
       });
     }
@@ -115,6 +140,9 @@ export function eldritchInvocationKindLabel(
   if (kind === "free_cast" && slug && isEldritchOncePerLongRestInvocation(slug)) {
     return "1× por Descanso Longo";
   }
+  if (slug && isLessonsOfTheFirstOnesSlug(slug)) {
+    return "Talento de Origem";
+  }
   return KIND_LABELS[kind] ?? kind;
 }
 
@@ -122,9 +150,11 @@ export function eldritchInvocationMetaLine(input: {
   kindLabel: string;
   grantedSpellName?: string | null;
   boundCantripName?: string | null;
+  boundOriginFeatName?: string | null;
 }): string {
   const parts = [input.kindLabel];
   if (input.boundCantripName) parts.push(input.boundCantripName);
+  if (input.boundOriginFeatName) parts.push(input.boundOriginFeatName);
   if (input.grantedSpellName) parts.push(input.grantedSpellName);
   return parts.join(" · ");
 }

@@ -8,7 +8,9 @@ import type {
   PatchInventoryItemPayload,
 } from "@/entities/character/session-types";
 import type { ClassOption } from "@/entities/character/sheet-types";
+import type { CoinPurse } from "@/entities/character/types";
 import type { EquipmentWarning } from "@/entities/character/types";
+import type { ItemSummary } from "@/entities/item/types";
 import {
   useAddInventoryItem,
   useAttachCoverage,
@@ -16,10 +18,12 @@ import {
   useCharacterInventory,
   useDetachCoverage,
   useDetachWeaponCharm,
+  usePatchCharacterWealth,
   usePatchInventoryItem,
   useRemoveInventoryItem,
 } from "@/features/character/character-sheet/api/use-character-inventory";
 import { readEldritchInvocationSlugs } from "@/features/character/character-sheet/lib/warlock/eldritch-invocations";
+import { BeyondCoinPurse } from "@/features/character/character-sheet/ui/beyond/inventory/beyond-coin-purse";
 import { MAX_ATTUNED_ITEMS } from "@/features/character/character-sheet/ui/beyond/inventory/inventory-item-meta";
 import { InventoryLocationSection } from "@/features/character/character-sheet/ui/beyond/inventory/inventory-location-section";
 import { QuantityStepper } from "@/features/character/character-sheet/ui/beyond/inventory/quantity-stepper";
@@ -73,6 +77,7 @@ export function BeyondInventoryTab({
   const inventory = useCharacterInventory(characterId);
   const addItem = useAddInventoryItem(characterId);
   const patchItem = usePatchInventoryItem(characterId);
+  const patchWealth = usePatchCharacterWealth(characterId);
   const removeItem = useRemoveInventoryItem(characterId);
   const attachCharm = useAttachWeaponCharm(characterId);
   const detachCharm = useDetachWeaponCharm(characterId);
@@ -81,13 +86,21 @@ export function BeyondInventoryTab({
 
   const [addOpen, setAddOpen] = useState(false);
   const [selectedSlug, setSelectedSlug] = useState("");
+  const [selectedItem, setSelectedItem] = useState<ItemSummary | null>(null);
   const [newQty, setNewQty] = useState("1");
+  const [skipPayment, setSkipPayment] = useState(false);
 
   const canBindPactWeapon =
     classSlug === "warlock" &&
     readEldritchInvocationSlugs(classOptions).includes("pact-of-the-blade");
 
   const items = inventory.data?.items ?? [];
+  const wealth = inventory.data?.wealth;
+  const payment = inventory.data?.paymentContext;
+  const chargeApplies = Boolean(payment?.chargeApplies);
+  const canSkipPayment =
+    chargeApplies && Boolean(payment?.allowPlayerSkipPayment);
+
   const equipped = items.filter((item) => item.location === "equipped");
   const backpack = items.filter((item) => item.location === "backpack");
   const attunedCount =
@@ -96,6 +109,7 @@ export function BeyondInventoryTab({
   const attunementSlotsFull = attunedCount >= MAX_ATTUNED_ITEMS;
   const isPending =
     patchItem.isPending ||
+    patchWealth.isPending ||
     removeItem.isPending ||
     attachCharm.isPending ||
     detachCharm.isPending ||
@@ -116,7 +130,9 @@ export function BeyondInventoryTab({
 
   function resetAddForm() {
     setSelectedSlug("");
+    setSelectedItem(null);
     setNewQty("1");
+    setSkipPayment(false);
   }
 
   const addQuantity = Math.max(1, Math.trunc(Number(newQty)) || 1);
@@ -131,6 +147,7 @@ export function BeyondInventoryTab({
     await addItem.mutateAsync({
       itemSlug: selectedSlug.trim(),
       quantity: addQuantity,
+      pay: chargeApplies ? !skipPayment : undefined,
     });
     resetAddForm();
     setAddOpen(false);
@@ -152,15 +169,26 @@ export function BeyondInventoryTab({
     patchFields(item.itemSlug, { attuned: !item.attuned });
   }
 
+  function onChangeCoin(key: keyof CoinPurse, value: number) {
+    patchWealth.mutate({ [key]: value });
+  }
+
   const mutationError =
     addItem.error ??
     patchItem.error ??
+    patchWealth.error ??
     removeItem.error ??
     attachCharm.error ??
     detachCharm.error ??
     attachCoverage.error ??
     detachCoverage.error ??
     inventory.error;
+
+  const priceNote = selectedItem?.costText
+    ? selectedItem.costText
+    : selectedItem
+      ? "Sem preço de catálogo"
+      : null;
 
   return (
     <div className="space-y-4">
@@ -195,6 +223,14 @@ export function BeyondInventoryTab({
           </Button>
         </div>
       </div>
+
+      {wealth ? (
+        <BeyondCoinPurse
+          wealth={wealth}
+          disabled={patchWealth.isPending}
+          onChangeCoin={onChangeCoin}
+        />
+      ) : null}
 
       {inventory.data?.encumbrance ? (
         <p
@@ -308,7 +344,11 @@ export function BeyondInventoryTab({
             <DialogHeader>
               <DialogTitle>Adicionar item</DialogTitle>
               <DialogDescription>
-                Filtre o catálogo e escolha um item para a mochila.
+                {chargeApplies
+                  ? "O preço do catálogo será debitado das suas moedas."
+                  : payment?.viewerIsDmOrAssistant
+                    ? "Presente do mestre — sem cobrança."
+                    : "Filtre o catálogo e escolha um item para a mochila."}
               </DialogDescription>
             </DialogHeader>
 
@@ -317,9 +357,31 @@ export function BeyondInventoryTab({
                 id="inventory-item"
                 value={selectedSlug}
                 onChange={setSelectedSlug}
+                onItemChange={setSelectedItem}
                 disabled={addItem.isPending}
               />
             </div>
+
+            {priceNote ? (
+              <p className="font-mono text-xs text-muted-foreground">
+                Preço: {priceNote}
+                {addQuantity > 1 && selectedItem?.costText
+                  ? ` × ${addQuantity}`
+                  : ""}
+              </p>
+            ) : null}
+
+            {canSkipPayment ? (
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={skipPayment}
+                  onChange={(e) => setSkipPayment(e.target.checked)}
+                  disabled={addItem.isPending}
+                />
+                Não pagar
+              </label>
+            ) : null}
 
             <DialogFooter className="flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex w-full items-center justify-between gap-3 sm:w-auto">

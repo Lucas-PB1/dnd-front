@@ -103,6 +103,7 @@ export function useWizardFormFieldSync({
         originFeatSlug || null,
         asiFeatSlotsToCharacterFeats(slots.slice(0, count)),
         getValues("speciesChoices") ?? [],
+        getValues("classOptions") ?? [],
       );
       const keys = new Set(
         preview.map((f) => `${f.featSlug}:${f.instanceIndex}`),
