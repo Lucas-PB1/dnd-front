@@ -18,6 +18,7 @@ Base comum:
 | Patrulheiro | **Concluída** |
 | Ladino | **Concluída** |
 | Paladino | **Concluída** |
+| Pistoleiro | **Concluída** |
 
 Classe nova: copiar uma destas (table-action + Economia com `resource_slug` / ±).
 
@@ -75,3 +76,11 @@ Classe nova: copiar uma destas (table-action + Economia com `resource_slug` / ±
 - **Sem** espelho de Canalizar `remaining/max` no Ferramentas (só ± na Economia)
 - Ataque: Destruição Divina / Golpes Radiantes nos cards
 - Polish adiado: Defesa Gloriosa / Destruição Protetora Usar dedicado
+
+## Pistoleiro — **concluída**
+
+- Painel: `…/panels/maneuvers-panel.tsx` — manobras via `executeGunslingerTableAction` (`use-maneuver`); Gambito Terrível (C010 `recover-risk`)
+- `executeGunslingerTableAction` via `classSlug: gunslinger` na economy
+- Economy: `risk` (±); Tempo Bala / Tiro na Cabeça lembretes; head-shot gasta 3× risk no card de ataque
+- **Sem** espelho de risk `remaining/max` no Ferramentas (só ± na Economia)
+- Polish adiado: manobras C001 das outras subs; polish câmaras

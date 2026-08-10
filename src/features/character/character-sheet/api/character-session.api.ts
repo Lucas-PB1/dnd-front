@@ -214,6 +214,30 @@ export type FighterTableActionResult = {
 
 export type TableActionResult = FighterTableActionResult;
 
+export type GunslingerTableActionSlug = "use-maneuver" | "recover-risk";
+
+export type GunslingerTableActionResult =
+  | UseManeuverResult
+  | FighterTableActionResult;
+
+export async function executeGunslingerTableAction(
+  accessToken: string,
+  characterId: string,
+  payload: {
+    actionSlug: GunslingerTableActionSlug;
+    maneuverSlug?: string;
+  },
+) {
+  return gameFetch<GunslingerTableActionResult>(
+    `/characters/${characterId}/gunslinger/table-action`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
 export type FighterTableActionSlug =
   | "second-wind"
   | "action-surge"

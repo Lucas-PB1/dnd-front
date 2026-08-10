@@ -5,20 +5,29 @@ import { useState } from "react";
 
 import type { UseManeuverResult } from "@/entities/character/session-types";
 import {
-  executeGunslingerManeuver,
+  executeGunslingerTableAction,
   listManeuvers,
-  recoverRisk,
   sessionKeys,
 } from "@/features/character/character-sheet/api/character-session.api";
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
+import { useCombatMechanicalCatalog } from "@/features/catalog/reference-catalog/api/use-reference";
+import { resolvePanelActions } from "@/features/character/character-sheet/lib/combat/resolve-panel-actions";
 import { CombatClassPanelShell } from "../shared/class-panel-shell";
 import { Button } from "@/shared/ui/button";
+
+const EMPTY_PANEL_ACTIONS: never[] = [];
 
 type CombatManeuversPanelProps = {
   characterId: string;
   classSlug: string;
   level: number;
 };
+
+function isManeuverResult(
+  result: Awaited<ReturnType<typeof executeGunslingerTableAction>>,
+): result is UseManeuverResult {
+  return "maneuverName" in result && "riskRoll" in result;
+}
 
 export function CombatManeuversPanel({
   characterId,
@@ -31,6 +40,15 @@ export function CombatManeuversPanel({
   );
   const queryClient = useQueryClient();
   const [lastResult, setLastResult] = useState<UseManeuverResult | null>(null);
+  const [tableNote, setTableNote] = useState<string | null>(null);
+  const mechanicalCatalog = useCombatMechanicalCatalog({
+    classSlug: "gunslinger",
+  });
+  const panelActions =
+    resolvePanelActions(mechanicalCatalog.data?.panelActions ?? EMPTY_PANEL_ACTIONS, {
+      classSlug: "gunslinger",
+      level,
+    }) ?? EMPTY_PANEL_ACTIONS;
 
   const maneuversQuery = useQuery({
     queryKey: [...sessionKeys.state(characterId), "maneuvers"],
@@ -44,13 +62,16 @@ export function CombatManeuversPanel({
     },
   });
 
-  const useMutationManeuver = useMutation({
-    mutationFn: async (maneuverSlug: string) => {
+  const tableAction = useMutation({
+    mutationFn: async (payload: {
+      actionSlug: "use-maneuver" | "recover-risk";
+      maneuverSlug?: string;
+    }) => {
       try {
-        return await executeGunslingerManeuver(
+        return await executeGunslingerTableAction(
           requireToken(),
           characterId,
-          maneuverSlug,
+          payload,
         );
       } catch (error) {
         return handleUnauthorized(error);
@@ -58,16 +79,24 @@ export function CombatManeuversPanel({
     },
     onSuccess: (result) => {
       if (!result) return;
-      setLastResult(result);
       queryClient.setQueryData(sessionKeys.state(characterId), result.state);
+      if (isManeuverResult(result)) {
+        setLastResult(result);
+        setTableNote(null);
+      } else {
+        setTableNote(result.note);
+      }
     },
   });
 
   if (!enabled) return null;
 
   const maneuvers = maneuversQuery.data ?? [];
-  if (maneuvers.length === 0 && !maneuversQuery.isPending) return null;
+  if (maneuvers.length === 0 && !maneuversQuery.isPending && panelActions.length === 0) {
+    return null;
+  }
 
+  const busy = tableAction.isPending;
   const actionsContent = (
     <div className="space-y-2">
       <div className="flex flex-wrap gap-2">
@@ -77,11 +106,33 @@ export function CombatManeuversPanel({
             type="button"
             size="xs"
             variant="outline"
-            disabled={useMutationManeuver.isPending}
+            disabled={busy}
             title={maneuver.description}
-            onClick={() => useMutationManeuver.mutate(maneuver.slug)}
+            onClick={() =>
+              tableAction.mutate({
+                actionSlug: "use-maneuver",
+                maneuverSlug: maneuver.slug,
+              })
+            }
           >
             {maneuver.name}
+          </Button>
+        ))}
+        {panelActions.map((action) => (
+          <Button
+            key={action.panelKey}
+            type="button"
+            size="xs"
+            variant="secondary"
+            disabled={busy}
+            title={action.title ?? action.name}
+            onClick={() =>
+              tableAction.mutate({
+                actionSlug: action.slug as "recover-risk",
+              })
+            }
+          >
+            {action.name}
           </Button>
         ))}
       </div>
@@ -108,11 +159,17 @@ export function CombatManeuversPanel({
         </div>
       ) : null}
 
-      {useMutationManeuver.isError ? (
+      {tableNote ? (
+        <p className="text-sm text-secondary" role="status">
+          {tableNote}
+        </p>
+      ) : null}
+
+      {tableAction.isError ? (
         <p className="text-sm text-destructive" role="alert">
-          {useMutationManeuver.error instanceof Error
-            ? useMutationManeuver.error.message
-            : "Não foi possível usar a manobra"}
+          {tableAction.error instanceof Error
+            ? tableAction.error.message
+            : "Não foi possível executar a ação"}
         </p>
       ) : null}
     </div>
@@ -124,26 +181,4 @@ export function CombatManeuversPanel({
       actionsContent={actionsContent}
     />
   );
-}
-
-/** Hook auxiliar para Gambito Terrível no painel de recursos. */
-export function useRecoverRisk(characterId: string) {
-  const { requireToken, handleUnauthorized } = useGameAuth(
-    `/characters/${characterId}`,
-  );
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async () => {
-      try {
-        return await recoverRisk(requireToken(), characterId);
-      } catch (error) {
-        return handleUnauthorized(error);
-      }
-    },
-    onSuccess: (state) => {
-      if (!state) return;
-      queryClient.setQueryData(sessionKeys.state(characterId), state);
-    },
-  });
 }
