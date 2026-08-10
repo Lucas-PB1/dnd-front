@@ -114,6 +114,7 @@ export type WeaponAttackSummary = {
   hasRecoil?: boolean;
   rageDamageBonus?: number;
   brutalStrikeDice?: string | null;
+  divineFuryDice?: string | null;
   sneakAttackEligible?: boolean;
   martialArtsDie?: string | null;
   attachedCharmSlug?: string | null;

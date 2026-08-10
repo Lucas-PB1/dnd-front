@@ -534,6 +534,24 @@ export function WeaponAttackCard({
               Golpe Brutal (+{attack.brutalStrikeDice})
             </Button>
           ) : null}
+          {attack.divineFuryDice ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              disabled={busy}
+              title={`Fúria Divina: +${attack.divineFuryDice} Necrótico ou Radiante (1º acerto/turno com Fúria ativa)`}
+              onClick={() =>
+                rolls.damage.mutate({
+                  itemSlug: attack.itemSlug,
+                  mode: attack.mode,
+                  divineFury: true,
+                })
+              }
+            >
+              Fúria Divina (+{attack.divineFuryDice})
+            </Button>
+          ) : null}
           {canPsiStrike ? (
             <Button
               type="button"

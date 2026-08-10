@@ -192,6 +192,47 @@ export async function recoverAllRage(accessToken: string, characterId: string) {
   );
 }
 
+export type BarbarianTableActionSlug =
+  | "toggle-rage"
+  | "toggle-reckless"
+  | "recover-all-rage"
+  | "frenzy"
+  | "wild-heart-eagle"
+  | "fanatical-focus"
+  | "retaliation"
+  | "intimidating-presence"
+  | "restore-intimidating-presence"
+  | "champion-of-the-gods"
+  | "zealous-presence"
+  | "restore-zealous-presence"
+  | "rage-of-the-gods"
+  | "revitalizing-strength"
+  | "branches-of-the-tree"
+  | "traverse-the-tree"
+  | "undeniable-magic-rage"
+  | "cantrip-mage-hand"
+  | "cantrip-shocking-grasp"
+  | "cantrip-sure-strike"
+  | "burning-hands-slap"
+  | "magic-missile-throws"
+  | "shield-block"
+  | "i-cast-fist";
+
+export async function executeBarbarianTableAction(
+  accessToken: string,
+  characterId: string,
+  payload: { actionSlug: BarbarianTableActionSlug; diceCount?: number },
+) {
+  return gameFetch<TableActionResult>(
+    `/characters/${characterId}/barbarian/table-action`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
 export type BattleMasterManeuver = {
   slug: string;
   name: string;

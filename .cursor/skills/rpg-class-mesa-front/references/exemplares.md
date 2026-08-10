@@ -22,6 +22,7 @@ Base comum:
 | Monge | **Concluída** |
 | Clérigo | **Concluída** |
 | Bardo | **Concluída** |
+| Bárbaro | **Concluída** |
 
 Classe nova: copiar uma destas (table-action + Economia com `resource_slug` / ±).
 
@@ -116,3 +117,12 @@ Classe nova: copiar uma destas (table-action + Economia com `resource_slug` / ±
 - Economy: C009 `bard-inspiration` (±) + Usar (grant, cutting-words, peerless, glamour PHB 2024, dance DES, valor, máscaras `persona-*`, virtuoso, superior)
 - Sem legado 2014 (`enthralling-performance` / Desempenho Cativante → `mantle-of-inspiration`)
 - Polish adiado: restaurar Manto com espaço 3+; devolver Inspiração em Perícia Inigualável se falhar
+
+## Bárbaro — **concluída**
+
+- Painel: `…/panels/barbarian-panel.tsx` — base + trilha via C010; status Fúria/Imprudente
+- **Sem** `CombatResourceSummary` (Fúria ± só na Economia)
+- `executeBarbarianTableAction` via `classSlug: barbarian` na economy
+- Economy: C009 `barbarian-rage` (± + `toggle-rage`) + Imprudente, Persistente L15, trilhas PHB + Valdas muscle-wizard
+- Fanático: botão **Fúria Divina** no card de ataque (`divineFuryDice`)
+- Endpoints legado `rage/toggle` / `reckless/toggle` mantidos; front usa table-action

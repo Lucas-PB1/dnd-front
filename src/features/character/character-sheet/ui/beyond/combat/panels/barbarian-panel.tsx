@@ -1,112 +1,146 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMemo } from "react";
 
 import type { CharacterState } from "@/entities/character/session-types";
+import type { ClassPanelActionRecord } from "@/entities/combat-mechanical/types";
 import {
-  sessionKeys,
-  toggleRage,
-  toggleReckless,
+  executeBarbarianTableAction,
+  type BarbarianTableActionSlug,
 } from "@/features/character/character-sheet/api/character-session.api";
-import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
+import { useTableActionMutation } from "@/features/character/character-sheet/api/use-table-action-mutation";
+import { useCombatMechanicalCatalog } from "@/features/catalog/reference-catalog/api/use-reference";
+import { resolvePanelActions } from "@/features/character/character-sheet/lib/combat/resolve-panel-actions";
 import { CombatClassPanelShell } from "../shared/class-panel-shell";
-import { Button } from "@/shared/ui/button";
+import { CombatPanelActionButtons } from "../shared/panel-action-buttons";
+import { TableActionFeedback } from "../shared/table-action-feedback";
+
+const EMPTY_PANEL_ACTIONS: ClassPanelActionRecord[] = [];
 
 type CombatBarbarianPanelProps = {
   characterId: string;
   classSlug: string;
+  subclassSlug?: string | null;
+  level: number;
   combatNotes?: string[];
   state: CharacterState | undefined;
 };
 
+function isRageSlug(slug: string): boolean {
+  return slug === "rage";
+}
+
+/**
+ * Bárbaro: Fúria/Imprudente e poderes de trilha via C010; pool de Fúria ± na Economia.
+ */
 export function CombatBarbarianPanel({
   characterId,
   classSlug,
+  subclassSlug,
+  level,
   combatNotes,
   state,
 }: CombatBarbarianPanelProps) {
   const enabled = classSlug === "barbarian";
-  const { requireToken, handleUnauthorized } = useGameAuth(
-    `/characters/${characterId}`,
+  const action = useTableActionMutation(characterId, executeBarbarianTableAction);
+  const mechanicalCatalog = useCombatMechanicalCatalog({
+    classSlug,
+    subclassSlug,
+  });
+  const panelCatalog =
+    mechanicalCatalog.data?.panelActions ?? EMPTY_PANEL_ACTIONS;
+
+  const baseActions = useMemo(
+    () =>
+      resolvePanelActions(panelCatalog, {
+        classSlug: "barbarian",
+        level,
+        subclassSlug,
+        section: "base",
+      }),
+    [panelCatalog, level, subclassSlug],
   );
-  const queryClient = useQueryClient();
-
-  const rageMutation = useMutation({
-    mutationFn: async (active?: boolean) => {
-      try {
-        return await toggleRage(requireToken(), characterId, active);
-      } catch (error) {
-        return handleUnauthorized(error);
-      }
-    },
-    onSuccess: (next) => {
-      if (next) queryClient.setQueryData(sessionKeys.state(characterId), next);
-    },
-  });
-
-  const recklessMutation = useMutation({
-    mutationFn: async (active?: boolean) => {
-      try {
-        return await toggleReckless(requireToken(), characterId, active);
-      } catch (error) {
-        return handleUnauthorized(error);
-      }
-    },
-    onSuccess: (next) => {
-      if (next) queryClient.setQueryData(sessionKeys.state(characterId), next);
-    },
-  });
+  const subclassActions = useMemo(
+    () =>
+      resolvePanelActions(panelCatalog, {
+        classSlug: "barbarian",
+        level,
+        subclassSlug,
+        section: "subclass",
+      }),
+    [panelCatalog, level, subclassSlug],
+  );
 
   if (!enabled) return null;
 
+  const resources = state?.classResources ?? [];
   const rageActive = state?.rageActive ?? false;
   const recklessActive = state?.recklessActive ?? false;
-  const busy = rageMutation.isPending || recklessMutation.isPending;
-  const mutationError = rageMutation.error ?? recklessMutation.error;
+
+  function getRemaining(slug: string): number | null {
+    if (isRageSlug(slug)) {
+      return resources.find((item) => isRageSlug(item.slug))?.remaining ?? null;
+    }
+    return resources.find((entry) => entry.slug === slug)?.remaining ?? null;
+  }
+
+  const statusLine = (
+    <p className="text-sm text-muted-foreground">
+      Fúria:{" "}
+      <span className="font-medium text-foreground">
+        {rageActive ? "ativa" : "inativa"}
+      </span>
+      {" · "}
+      Imprudente:{" "}
+      <span className="font-medium text-foreground">
+        {recklessActive ? "ativo" : "inativo"}
+      </span>
+    </p>
+  );
 
   const actionsContent = (
     <div className="space-y-2">
-      <div className="flex flex-wrap gap-2">
-        <Button
-          type="button"
-          size="sm"
-          variant={rageActive ? "default" : "outline"}
-          disabled={busy || !state}
-          title={
-            rageActive
-              ? "Encerrar a Fúria"
-              : "Entrar em Fúria (gasta 1 uso de Fúria)"
-          }
-          onClick={() => rageMutation.mutate(!rageActive)}
-        >
-          {rageActive ? "Fúria ativa" : "Entrar em Fúria"}
-        </Button>
-        <Button
-          type="button"
-          size="sm"
-          variant={recklessActive ? "default" : "outline"}
-          disabled={busy || !state}
-          title="Ataque Imprudente: vantagem em ataques corpo a corpo com Força; ataques contra você têm vantagem"
-          onClick={() => recklessMutation.mutate(!recklessActive)}
-        >
-          {recklessActive ? "Imprudente ativo" : "Ataque Imprudente"}
-        </Button>
-      </div>
-
-      {mutationError ? (
-        <p className="text-sm text-destructive" role="alert">
-          {mutationError instanceof Error
-            ? mutationError.message
-            : "Não foi possível atualizar o estado de combate"}
-        </p>
-      ) : null}
+      {statusLine}
+      <CombatPanelActionButtons
+        actions={baseActions}
+        getRemaining={getRemaining}
+        isPending={action.isPending}
+        disabled={!state}
+        onAction={(slug) =>
+          action.mutate({ actionSlug: slug as BarbarianTableActionSlug })
+        }
+      />
+      <TableActionFeedback
+        lastResultNote={action.lastResult?.note}
+        error={action.error}
+      />
     </div>
   );
 
+  const powersContent =
+    subclassActions.length > 0 ? (
+      <div className="space-y-2">
+        <CombatPanelActionButtons
+          actions={subclassActions}
+          getRemaining={getRemaining}
+          isPending={action.isPending}
+          disabled={!state}
+          onAction={(slug) =>
+            action.mutate({ actionSlug: slug as BarbarianTableActionSlug })
+          }
+        />
+        <TableActionFeedback
+          lastResultNote={action.lastResult?.note}
+          error={action.error}
+        />
+      </div>
+    ) : null;
+
   return (
     <CombatClassPanelShell
-      title="Combate do Bárbaro"
+      title="Bárbaro"
       actionsContent={actionsContent}
+      powersContent={powersContent}
       combatNotes={combatNotes}
     />
   );
