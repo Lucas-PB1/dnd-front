@@ -10,5 +10,6 @@ Ao implementar ou revisar **painel de combate**, **Usar** da economia ou routing
 1. Abrir a skill **`rpg-class-mesa-front`** (e `references/` se precisar de exemplares).
 2. Preferir `execute*TableAction` alinhado ao catálogo; não inventar rotas estilo Guerreiro.
 3. API: skill irmã `rpg-class-mesa-api` no `dnd-api`.
+4. **Sem hardcode de domínio no front** — não espelhar `classSlug` + `level >= N`, nem `Set` de slugs de sub/manobra/economy; consumir catálogo/DTO da API.
 
 Detalhe e checklist vivem na skill — não duplicar aqui.

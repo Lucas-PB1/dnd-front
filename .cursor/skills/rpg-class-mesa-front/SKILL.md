@@ -59,6 +59,8 @@ Detalhe: skill API `references/economia-painel.md` § Controle de recursos.
 - Template string `convert-slot-${number}-…` sem literais tipados
 - Botão de painel que não chama o mesmo slug do `table-action`
 - Assumir endpoints dedicados por poder (use `table-action`)
-- Sets hardcoded de slugs de economy no front (SSOT = catálogo + `classSlug`)
+- Sets hardcoded de slugs de economy **ou de subclass** no front (SSOT = catálogo + `classSlug` / `subclassSlug` vindos da API)
+- **Hardcode de feature de classe no front** (`classSlug === "paladin" && level >= 6`, Aura, Indomável, etc.) — números/flags vêm da API; o front só exibe
+- Espelhar no front listas de manobras/opções que já existem em `GET /combat-mechanical-catalog` ou endpoints de personagem
 - `CombatResourceSummary` no Ferramentas espelhando pools que a Economia já controla
 - Esconder −/`remaining/max`/+ na Economia quando falta `tableAction` (contador segue o `resourceSlug`)

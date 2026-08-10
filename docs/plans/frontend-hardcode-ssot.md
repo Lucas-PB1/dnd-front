@@ -8,6 +8,10 @@ Relacionado: [`../API-INTEGRATION.md`](../API-INTEGRATION.md) · catálogo mecâ
 
 Zero listas de domínio RPG hardcoded no front. Catálogo, opções de mesa e labels de referência vêm da **dnd-api**. O cliente só renderiza e envia intenções.
 
+**Também proibido:** recalcular features de classe no front (`classSlug === "paladin" && level >= 6`, Aura de Proteção, Indomável por nível, etc.). Números/flags saem na ficha (`savingThrowAuraBonus`, …) ou no catálogo; o front **só exibe**.
+
+**Também proibido (API e front):** `Set`/`array` hardcoded de `subclassSlug`, manobras ou features de classe no código de filtro/UI. SSOT = seeds `C00*` + `GET /combat-mechanical-catalog` (ou endpoints do personagem). Nova sub = seed; não editar lista de slugs no TS.
+
 Exceção explícita (não é gap): brand (`shared/config/brand.ts`), env (`NEXT_PUBLIC_API_URL`), layout/tabs de UI, query keys.
 
 ## Contexto
