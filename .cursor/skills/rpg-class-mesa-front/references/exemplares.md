@@ -23,6 +23,7 @@ Base comum:
 | Clérigo | **Concluída** |
 | Bardo | **Concluída** |
 | Bárbaro | **Concluída** |
+| Druida | **Concluída** |
 
 Classe nova: copiar uma destas (table-action + Economia com `resource_slug` / ±).
 
@@ -126,3 +127,12 @@ Classe nova: copiar uma destas (table-action + Economia com `resource_slug` / ±
 - Economy: C009 `barbarian-rage` (± + `toggle-rage`) + Imprudente, Persistente L15, trilhas PHB + Valdas muscle-wizard
 - Fanático: botão **Fúria Divina** no card de ataque (`divineFuryDice`)
 - Endpoints legado `rage/toggle` / `reckless/toggle` mantidos; front usa table-action
+
+## Druida — **concluída**
+
+- Painel: `…/panels/druid-panel.tsx` — Ressurgimento + círculo via C010
+- **Sem** `CombatResourceSummary` (`wildShape` ± só na Economia)
+- `executeDruidTableAction` via `classSlug: druid` na economy
+- Economy: C009 `wildShape` (± sem Usar de besta) + Lua / Terra / Estrelas / Mar / Cidade com `table_action`
+- Painel: sem botão Forma Selvagem (besta); Estrelas / Mar / Lua / Terra / Cidade / Ressurgimento
+- Polish adiado: seletor/ficha de besta; Companheiro Selvagem tracker

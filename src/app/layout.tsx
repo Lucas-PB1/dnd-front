@@ -27,6 +27,11 @@ export const metadata: Metadata = {
     template: `%s · ${BRAND_NAME}`,
   },
   description: BRAND_DESCRIPTION,
+  applicationName: BRAND_NAME,
+  icons: {
+    icon: [{ url: "/icon", type: "image/png" }],
+    apple: [{ url: "/apple-icon", type: "image/png" }],
+  },
 };
 
 export default function RootLayout({

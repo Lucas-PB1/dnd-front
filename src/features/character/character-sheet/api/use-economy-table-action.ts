@@ -7,6 +7,7 @@ import {
   executeBarbarianTableAction,
   executeBardTableAction,
   executeClericTableAction,
+  executeDruidTableAction,
   executeFighterTableAction,
   executeGunslingerTableAction,
   executeMonkTableAction,
@@ -21,6 +22,7 @@ import {
   type BarbarianTableActionSlug,
   type BardTableActionSlug,
   type ClericTableActionSlug,
+  type DruidTableActionSlug,
   type FighterTableActionSlug,
   type GunslingerTableActionSlug,
   type MonkTableActionSlug,
@@ -261,6 +263,16 @@ export function useEconomyTableAction(characterId: string) {
             actionSlug: tableAction as BarbarianTableActionSlug,
             diceCount:
               tableAction === "champion-of-the-gods" ? spendAmount : undefined,
+          });
+          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
+          return noteFromResult(result, note);
+        }
+
+        if (routeClass === "druid") {
+          const result = await executeDruidTableAction(token, characterId, {
+            actionSlug: tableAction as DruidTableActionSlug,
+            slotLevel:
+              tableAction === "restore-lunar-step" ? spendAmount : undefined,
           });
           queryClient.setQueryData(sessionKeys.state(characterId), result.state);
           return noteFromResult(result, note);

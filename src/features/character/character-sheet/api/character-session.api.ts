@@ -607,20 +607,36 @@ export type DruidTableActionSlug =
   | "starry-form-archer"
   | "starry-form-chalice"
   | "starry-form-dragon"
+  | "stellar-guidance"
+  | "cosmic-omen"
   | "wrath-of-the-sea"
-  | "moon-combat-wild-shape";
+  | "ocean-manifestation"
+  | "moon-combat-wild-shape"
+  | "lunar-step"
+  | "restore-lunar-step"
+  | "land-aid"
+  | "nature-sanctuary"
+  | "natural-recovery-1"
+  | "natural-recovery-2"
+  | "natural-recovery-3"
+  | "natural-recovery-4"
+  | "natural-recovery-5"
+  | "city-shape"
+  | "wall-warp";
 
 export async function executeDruidTableAction(
   accessToken: string,
   characterId: string,
-  actionSlug: DruidTableActionSlug,
+  actionSlug: DruidTableActionSlug | { actionSlug: DruidTableActionSlug; slotLevel?: number },
 ) {
+  const payload =
+    typeof actionSlug === "string" ? { actionSlug } : actionSlug;
   return gameFetch<TableActionResult>(
     `/characters/${characterId}/druid/table-action`,
     accessToken,
     {
       method: "POST",
-      body: JSON.stringify({ actionSlug }),
+      body: JSON.stringify(payload),
     },
   );
 }
