@@ -23,7 +23,7 @@ import {
   useRemoveInventoryItem,
 } from "@/features/character/character-sheet/api/use-character-inventory";
 import { readEldritchInvocationSlugs } from "@/features/character/character-sheet/lib/warlock/eldritch-invocations";
-import { BeyondCoinPurse } from "@/features/character/character-sheet/ui/beyond/inventory/beyond-coin-purse";
+import { BeyondCoinPurse, formatCoinPurse, parseCostTextClient, scaleCoinPurseClient } from "@/features/character/character-sheet/ui/beyond/inventory/beyond-coin-purse";
 import { MAX_ATTUNED_ITEMS } from "@/features/character/character-sheet/ui/beyond/inventory/inventory-item-meta";
 import { InventoryLocationSection } from "@/features/character/character-sheet/ui/beyond/inventory/inventory-location-section";
 import { QuantityStepper } from "@/features/character/character-sheet/ui/beyond/inventory/quantity-stepper";
@@ -190,6 +190,13 @@ export function BeyondInventoryTab({
       ? "Sem preço de catálogo"
       : null;
 
+  const unitPurse = parseCostTextClient(selectedItem?.costText);
+  const totalPurse =
+    unitPurse && chargeApplies && !skipPayment
+      ? scaleCoinPurseClient(unitPurse, addQuantity)
+      : null;
+  const totalPriceLabel = totalPurse ? formatCoinPurse(totalPurse) : null;
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-2">
@@ -285,6 +292,7 @@ export function BeyondInventoryTab({
             onDetachCoverage={(baseItemSlug) =>
               detachCoverage.mutate(baseItemSlug)
             }
+            sellCreditApplies={chargeApplies}
           />
           <InventoryLocationSection
             id="backpack"
@@ -317,6 +325,7 @@ export function BeyondInventoryTab({
             onDetachCoverage={(baseItemSlug) =>
               detachCoverage.mutate(baseItemSlug)
             }
+            sellCreditApplies={chargeApplies}
           />
         </div>
       )}
@@ -368,6 +377,15 @@ export function BeyondInventoryTab({
                 {addQuantity > 1 && selectedItem?.costText
                   ? ` × ${addQuantity}`
                   : ""}
+                {totalPriceLabel
+                  ? ` → debitar ${totalPriceLabel} (com câmbio)`
+                  : ""}
+              </p>
+            ) : null}
+
+            {chargeApplies ? (
+              <p className="text-[11px] text-muted-foreground">
+                Remover item na campanha vende por metade do catálogo (PHB).
               </p>
             ) : null}
 

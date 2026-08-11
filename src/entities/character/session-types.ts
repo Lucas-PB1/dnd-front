@@ -104,6 +104,16 @@ export type CastSpellPayload = {
   itemCastSpendAmount?: number;
   /** Cast gratuito de item (Magi custo 0). */
   itemCastItemSlug?: string;
+  /** Magia rolada em prop de artefato (1× até DL). */
+  artifactRandomCast?: {
+    itemSlug: string;
+    bucket:
+      | "minorBeneficial"
+      | "majorBeneficial"
+      | "minorDetrimental"
+      | "majorDetrimental";
+    index: number;
+  };
 };
 
 export type CastSpellResult = {
@@ -154,6 +164,10 @@ export type InventoryItem = {
   attachedCoverageSpellSlug?: string | null;
   boundSpellSlug?: string | null;
   isCoverage?: boolean;
+  /** Estado por instância (artefato rolado, senciência, etc.). */
+  instanceProperties?: Record<string, unknown> | null;
+  /** Preço de catálogo (compra/venda). */
+  costText?: string | null;
 };
 
 export type InventoryEncumbrance = {

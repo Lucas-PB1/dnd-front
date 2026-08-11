@@ -43,6 +43,12 @@ import {
   wizardSlugFromArmTableAction,
   type EconomyTableAction,
 } from "@/features/character/character-sheet/lib/combat/economy-table-actions";
+import {
+  ARTIFACT_RANDOM_CAST_TABLE_ACTION,
+  ARTIFACT_REGEN_TABLE_ACTION,
+} from "@/features/character/character-sheet/lib/combat/artifact-instance-actions";
+import { inventoryKeys } from "@/features/character/character-sheet/api/character-inventory.api";
+import { gameFetch } from "@/shared/api/dnd-api/api-client";
 
 export type EconomyTableActionResultNote = {
   note: string;
@@ -130,6 +136,68 @@ export function useEconomyTableAction(characterId: string) {
               `Conjurou ${spellSlug}`
             ).trim(),
           };
+        }
+
+        if (tableAction === ARTIFACT_RANDOM_CAST_TABLE_ACTION) {
+          if (!spellSlug || !itemSlug || !resourceSlug) {
+            throw new Error(
+              "Magia/item/prop não definidos para cast de artefato",
+            );
+          }
+          const [bucket, indexRaw] = resourceSlug.split(":");
+          const index = Number(indexRaw);
+          if (
+            (bucket !== "minorBeneficial" &&
+              bucket !== "majorBeneficial" &&
+              bucket !== "minorDetrimental" &&
+              bucket !== "majorDetrimental") ||
+            !Number.isFinite(index)
+          ) {
+            throw new Error("Prop de artefato inválida");
+          }
+          const result = await castCharacterSpell(token, characterId, {
+            spellSlug,
+            artifactRandomCast: {
+              itemSlug,
+              bucket,
+              index,
+            },
+          });
+          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
+          void queryClient.invalidateQueries({
+            queryKey: inventoryKeys.list(characterId),
+          });
+          return {
+            note: (
+              result.note?.trim() ||
+              note?.trim() ||
+              `Conjurou ${spellSlug} (artefato)`
+            ).trim(),
+          };
+        }
+
+        if (tableAction === ARTIFACT_REGEN_TABLE_ACTION) {
+          if (!itemSlug) {
+            throw new Error("Item não definido para regeneração de artefato");
+          }
+          const result = await gameFetch<{
+            note: string;
+            hitPointsCurrent: number;
+          }>(
+            `/characters/${characterId}/inventory/${encodeURIComponent(itemSlug)}/artifact-regen`,
+            token,
+            { method: "POST" },
+          );
+          void queryClient.invalidateQueries({
+            queryKey: sessionKeys.state(characterId),
+          });
+          void queryClient.invalidateQueries({
+            queryKey: inventoryKeys.list(characterId),
+          });
+          void queryClient.invalidateQueries({
+            queryKey: ["characters", characterId],
+          });
+          return { note: result.note?.trim() || "Regeneração do artefato" };
         }
 
         if (tableAction === ITEM_REMINDER_TABLE_ACTION) {

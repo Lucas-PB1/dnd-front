@@ -33,6 +33,7 @@ import { useCharacterInventory } from "@/features/character/character-sheet/api/
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
 import { useCombatMechanicalCatalog } from "@/features/catalog/reference-catalog/api/use-reference";
 import { collectActiveItemSlugs } from "@/features/character/character-sheet/lib/combat/active-item-slugs";
+import { artifactInstanceEconomyActions } from "@/features/character/character-sheet/lib/combat/artifact-instance-actions";
 import {
   groupClassEconomyActions,
   resolveClassEconomyActions,
@@ -141,7 +142,7 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
         },
       );
       const items = inventoryQuery.data?.items ?? [];
-      return resolved
+      const withBoundSpells = resolved
         .map((action) => {
           if (action.spellSlug) return action;
           if (
@@ -174,6 +175,11 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
           return action;
         })
         .filter((action): action is NonNullable<typeof action> => action != null);
+
+      return [
+        ...withBoundSpells,
+        ...artifactInstanceEconomyActions(items),
+      ];
     },
     [
       mechanicalCatalog.data?.economyActions,

@@ -46,6 +46,7 @@ type InventoryLocationSectionProps = {
     spellSlug?: string,
   ) => void;
   onDetachCoverage?: (baseItemSlug: string) => void;
+  sellCreditApplies?: boolean;
 };
 
 export function InventoryLocationSection({
@@ -68,6 +69,7 @@ export function InventoryLocationSection({
   onDetachCharm,
   onAttachCoverage,
   onDetachCoverage,
+  sellCreditApplies = false,
 }: InventoryLocationSectionProps) {
   const tiles = useMemo((): DetailTileItem[] => {
     return items.map((item) => {
@@ -98,6 +100,7 @@ export function InventoryLocationSection({
             onDetachCharm={onDetachCharm}
             onAttachCoverage={onAttachCoverage}
             onDetachCoverage={onDetachCoverage}
+            sellCreditApplies={sellCreditApplies}
           />
         ),
       };
@@ -117,6 +120,7 @@ export function InventoryLocationSection({
     onRemove,
     onToggleAttunement,
     onToggleLocation,
+    sellCreditApplies,
     weaponOptions,
   ]);
 

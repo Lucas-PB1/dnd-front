@@ -25,6 +25,12 @@ import {
   type EquipmentSlot,
 } from "@/features/character/character-sheet/ui/beyond/inventory/inventory-item-meta";
 import { QuantityStepper } from "@/features/character/character-sheet/ui/beyond/inventory/quantity-stepper";
+import {
+  formatCoinPurse,
+  halfCoinPurseClient,
+  parseCostTextClient,
+  scaleCoinPurseClient,
+} from "@/features/character/character-sheet/ui/beyond/inventory/beyond-coin-purse";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
 import { SearchableSelect } from "@/shared/ui/searchable-select";
@@ -50,6 +56,8 @@ type InventoryItemDetailProps = {
     spellSlug?: string,
   ) => void;
   onDetachCoverage?: (baseItemSlug: string) => void;
+  /** Em campanha (player): remover vende por ½ do catálogo. */
+  sellCreditApplies?: boolean;
 };
 
 function isWeaponCharmSlug(slug: string): boolean {
@@ -93,6 +101,168 @@ const ENSPELLED_UNIQUE_PROFILES: Record<
   "cajado-magificado": { schools: null, maxLevel: 8 },
 };
 
+type RolledProp = {
+  slug?: string;
+  summaryPt?: string;
+  effect?: Record<string, unknown>;
+};
+
+function readRolledList(value: unknown): RolledProp[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter(
+    (entry): entry is RolledProp =>
+      entry != null && typeof entry === "object" && !Array.isArray(entry),
+  );
+}
+
+function formatRolledPropLabel(prop: RolledProp): string {
+  const base = prop.summaryPt ?? prop.slug ?? "Propriedade";
+  const effect =
+    prop.effect != null &&
+    typeof prop.effect === "object" &&
+    !Array.isArray(prop.effect)
+      ? prop.effect
+      : null;
+  if (!effect || typeof effect.type !== "string") return base;
+  if (effect.type === "artifactSpell") {
+    const spent = effect.spentUntilLongRest === true ? " · usado até DL" : "";
+    const slug =
+      typeof effect.spellSlug === "string" ? ` → ${effect.spellSlug}` : "";
+    return `${base}${slug}${spent}`;
+  }
+  if (effect.type === "artifactRegen") {
+    return `${base} (ação na ficha)`;
+  }
+  if (effect.type === "abilityPenalty") {
+    return `${base} (até Restauração Maior)`;
+  }
+  return base;
+}
+
+function InstancePropertiesSummary({
+  instanceProperties,
+}: {
+  instanceProperties?: Record<string, unknown> | null;
+}) {
+  if (!instanceProperties) return null;
+  const artifactRandom =
+    instanceProperties.artifactRandom != null &&
+    typeof instanceProperties.artifactRandom === "object" &&
+    !Array.isArray(instanceProperties.artifactRandom)
+      ? (instanceProperties.artifactRandom as Record<string, unknown>)
+      : null;
+  const sentience =
+    instanceProperties.sentience != null &&
+    typeof instanceProperties.sentience === "object" &&
+    !Array.isArray(instanceProperties.sentience)
+      ? (instanceProperties.sentience as Record<string, unknown>)
+      : null;
+  const abilityPenalties =
+    instanceProperties.abilityPenalties != null &&
+    typeof instanceProperties.abilityPenalties === "object" &&
+    !Array.isArray(instanceProperties.abilityPenalties)
+      ? (instanceProperties.abilityPenalties as Record<string, unknown>)
+      : null;
+
+  const beneficial = [
+    ...readRolledList(artifactRandom?.minorBeneficial),
+    ...readRolledList(artifactRandom?.majorBeneficial),
+  ];
+  const detrimental = [
+    ...readRolledList(artifactRandom?.minorDetrimental),
+    ...readRolledList(artifactRandom?.majorDetrimental),
+  ];
+
+  const penaltyParts = abilityPenalties
+    ? Object.entries(abilityPenalties)
+        .filter(([, value]) => typeof value === "number" && value !== 0)
+        .map(([ability, value]) => `${ability} ${Number(value)}`)
+    : [];
+
+  if (!artifactRandom && !sentience && penaltyParts.length === 0) return null;
+
+  return (
+    <div className="space-y-2 rounded-md border border-border/60 p-3 text-xs">
+      {sentience ? (
+        <div className="space-y-1">
+          <p className="font-medium text-foreground">Senciência</p>
+          <p className="text-muted-foreground">
+            {[
+              sentience.alignment ? `Alinhamento ${String(sentience.alignment)}` : null,
+              typeof sentience.inteligencia === "number"
+                ? `INT ${sentience.inteligencia}`
+                : null,
+              typeof sentience.sabedoria === "number"
+                ? `SAB ${sentience.sabedoria}`
+                : null,
+              typeof sentience.carisma === "number"
+                ? `CAR ${sentience.carisma}`
+                : null,
+            ]
+              .filter(Boolean)
+              .join(" · ")}
+          </p>
+          {sentience.senses ? (
+            <p className="text-muted-foreground">
+              Sentidos: {String(sentience.senses)}
+            </p>
+          ) : null}
+          {sentience.communication ? (
+            <p className="text-muted-foreground">
+              Comunicação: {String(sentience.communication)}
+              {Array.isArray(sentience.languages) && sentience.languages.length > 0
+                ? ` (${sentience.languages.map(String).join(", ")})`
+                : ""}
+            </p>
+          ) : null}
+          {sentience.purposeSummary ? (
+            <p className="text-muted-foreground">
+              Propósito: {String(sentience.purposeSummary)}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+
+      {penaltyParts.length > 0 ? (
+        <div className="space-y-1">
+          <p className="font-medium text-foreground">
+            Penalidade de atributo (artefato)
+          </p>
+          <p className="text-muted-foreground">
+            {penaltyParts.join(" · ")} — até Restauração Maior
+          </p>
+        </div>
+      ) : null}
+
+      {beneficial.length > 0 ? (
+        <div className="space-y-1">
+          <p className="font-medium text-foreground">Propriedades benéficas</p>
+          <ul className="list-disc space-y-0.5 pl-4 text-muted-foreground">
+            {beneficial.map((prop, index) => (
+              <li key={`${prop.slug ?? "b"}-${index}`}>
+                {formatRolledPropLabel(prop)}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
+      {detrimental.length > 0 ? (
+        <div className="space-y-1">
+          <p className="font-medium text-foreground">Propriedades prejudiciais</p>
+          <ul className="list-disc space-y-0.5 pl-4 text-muted-foreground">
+            {detrimental.map((prop, index) => (
+              <li key={`${prop.slug ?? "d"}-${index}`}>
+                {formatRolledPropLabel(prop)}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 /** Controles e avisos do item (usado no modal do tile). */
 export function InventoryItemDetail({
   item,
@@ -110,6 +280,7 @@ export function InventoryItemDetail({
   onDetachCharm,
   onAttachCoverage,
   onDetachCoverage,
+  sellCreditApplies = false,
 }: InventoryItemDetailProps) {
   const [qtyDraft, setQtyDraft] = useState<string | null>(null);
   const [attachWeaponSlug, setAttachWeaponSlug] = useState("");
@@ -120,6 +291,16 @@ export function InventoryItemDetail({
     item.boundSpellSlug ?? "",
   );
   const spellLabels = useSpellLabels();
+  const sellHint = (() => {
+    if (!sellCreditApplies || !item.costText) return null;
+    const unit = parseCostTextClient(item.costText);
+    if (!unit) return null;
+    const half = halfCoinPurseClient(
+      scaleCoinPurseClient(unit, item.quantity),
+    );
+    const label = formatCoinPurse(half);
+    return label ? `Vende por ${label}` : null;
+  })();
   const coverageEnspelledProfile = ENSPELLED_COVERAGE_PROFILES[item.itemSlug];
   const uniqueEnspelledProfile = ENSPELLED_UNIQUE_PROFILES[item.itemSlug];
   const enspelledSpellOptions = useMemo(() => {
@@ -221,6 +402,8 @@ export function InventoryItemDetail({
           Magia vinculada: {item.boundSpellSlug}
         </p>
       ) : null}
+
+      <InstancePropertiesSummary instanceProperties={item.instanceProperties} />
 
       {warnings.length > 0 ? (
         <ul className="space-y-1">
@@ -550,10 +733,11 @@ export function InventoryItemDetail({
           size="sm"
           className="gap-1 text-destructive hover:bg-destructive/10 hover:text-destructive"
           disabled={isPending}
+          title={sellHint ?? undefined}
           onClick={() => onRemove(item.itemSlug)}
         >
           <TrashIcon className="size-3.5" aria-hidden />
-          Remover
+          {sellHint ? `Remover (${sellHint})` : "Remover"}
         </Button>
       </div>
     </div>
