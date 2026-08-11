@@ -10,9 +10,7 @@ export default async function CharacterDetailPage({ params }: PageProps) {
 
   return (
     <AppPageShell
-      atmosphere={false}
       width="sheet"
-      muteMotion
       className="min-h-dvh"
       mainClassName="gap-0 py-3 sm:py-4"
     >

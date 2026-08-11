@@ -14,7 +14,7 @@ type AppPageShellProps = {
   muteMotion?: boolean;
   /**
    * Camada Atmosphere (grain + gradiente).
-   * Desligar em layouts densos (ficha Beyond, encontro).
+   * Desligar só em ferramentas densas sem brand (ex.: encontro).
    */
   atmosphere?: boolean;
 };
@@ -32,7 +32,8 @@ export function AppPageShell({
     <div
       className={cn(
         "relative flex flex-1 flex-col bg-background text-foreground",
-        atmosphere && "overflow-hidden",
+        // Só corta overflow horizontal — fichas longas precisam rolar no eixo Y.
+        atmosphere && "overflow-x-hidden",
         className,
       )}
     >

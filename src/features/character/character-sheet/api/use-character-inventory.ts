@@ -17,6 +17,7 @@ import {
   patchInventoryItem,
   removeInventoryItem,
 } from "@/features/character/character-sheet/api/character-inventory.api";
+import { CHARACTER_INVENTORY_STALE_MS } from "@/features/character/characters/api/character-query";
 import { patchCharacterWealth } from "@/features/character/characters/api/characters.api";
 import { charactersKeys } from "@/features/character/characters/api/characters.api";
 import type { CoinPurse } from "@/entities/character/types";
@@ -40,6 +41,7 @@ export function useCharacterInventory(characterId: string) {
       }
     },
     enabled: !!accessToken && !!characterId,
+    staleTime: CHARACTER_INVENTORY_STALE_MS,
   });
 }
 

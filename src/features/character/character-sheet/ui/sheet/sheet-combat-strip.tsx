@@ -65,16 +65,16 @@ function HeaderMetric({
   const className = cn(
     metricShellClass,
     emphasize
-      ? "border-primary/45 bg-primary/10"
+      ? "border-secondary/50 bg-secondary/12"
       : "border-border/65 bg-background/40",
     onClick &&
-      "cursor-pointer transition-colors hover:border-primary/50 disabled:pointer-events-none disabled:opacity-60",
+      "cursor-pointer transition-colors hover:border-secondary/55 disabled:pointer-events-none disabled:opacity-60",
   );
 
   const body = (
     <>
       <span className="inline-flex items-center gap-1 text-[0.55rem] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
-        {Icon ? <Icon className="size-3 text-primary" aria-hidden /> : null}
+        {Icon ? <Icon className="size-3 text-secondary" aria-hidden /> : null}
         {label}
       </span>
       <span className="font-heading mt-0.5 text-lg font-semibold leading-none tabular-nums">

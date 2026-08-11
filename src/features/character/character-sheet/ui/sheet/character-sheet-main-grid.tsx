@@ -33,7 +33,7 @@ export function CharacterSheetMainGrid({
 }: CharacterSheetMainGridProps) {
   return (
     <>
-      <div className="shrink-0 rounded-xl border border-border/60 bg-card/45 p-2 shadow-sm">
+      <div className="shrink-0 rounded-xl border border-border/80 bg-card/50 p-2 shadow-sm backdrop-blur-[2px]">
         <BeyondCharacterStatsBar
           characterId={characterId}
           character={character}
@@ -65,11 +65,11 @@ export function CharacterSheetMainGrid({
         <aside className="order-2 flex min-w-0 flex-col gap-2 xl:order-3">
           {character.attacksPerAction != null &&
           character.attacksPerAction > 1 ? (
-            <div className="flex items-center justify-between gap-2 rounded-lg border border-border/60 bg-card/50 px-2.5 py-2 shadow-sm">
+            <div className="flex items-center justify-between gap-2 rounded-lg border border-border/80 bg-card/50 px-2.5 py-2 shadow-sm backdrop-blur-[2px]">
               <span className="text-[0.7rem] font-semibold tracking-wide text-muted-foreground uppercase">
                 Ataques por ação
               </span>
-              <span className="font-mono text-sm font-semibold tabular-nums text-foreground">
+              <span className="font-heading text-sm font-semibold tabular-nums text-foreground">
                 {character.attacksPerAction}
               </span>
             </div>

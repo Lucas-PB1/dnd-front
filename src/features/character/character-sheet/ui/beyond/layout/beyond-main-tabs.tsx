@@ -113,7 +113,7 @@ export function BeyondMainTabs({
                   "inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold tracking-wide uppercase transition-colors",
                   "border-b-2",
                   active
-                    ? "border-primary text-primary"
+                    ? "border-secondary text-secondary"
                     : "border-transparent text-muted-foreground hover:text-foreground",
                 )}
               >

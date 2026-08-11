@@ -25,13 +25,13 @@ export function BeyondPanel({
   return (
     <section
       className={cn(
-        "flex min-h-0 flex-col overflow-hidden rounded-xl border border-border/70 bg-card/60",
+        "flex min-h-0 flex-col overflow-hidden rounded-xl border border-border/80 bg-card/55 backdrop-blur-[2px]",
         className,
       )}
     >
       {title ? (
-        <header className="flex shrink-0 items-center justify-between gap-2 border-b border-border/60 bg-muted/30 px-3 py-2">
-          <h2 className="inline-flex items-center gap-1.5 text-[0.7rem] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+        <header className="flex shrink-0 items-center justify-between gap-2 border-b border-border/60 bg-muted/25 px-3 py-2">
+          <h2 className="inline-flex items-center gap-1.5 font-heading text-[0.75rem] font-semibold tracking-[0.08em] text-secondary uppercase">
             {Icon ? (
               <Icon className="size-3.5 text-secondary" aria-hidden />
             ) : null}

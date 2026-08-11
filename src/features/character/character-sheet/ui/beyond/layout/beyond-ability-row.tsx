@@ -48,7 +48,7 @@ function StatCell({
       className={cn(
         "flex h-full min-h-[3.75rem] w-full flex-col items-center justify-center rounded-lg border px-1.5 py-1 text-center",
         emphasize
-          ? "border-primary/45 bg-primary/8"
+          ? "border-secondary/50 bg-secondary/10"
           : "border-border/70 bg-card/70",
         className,
       )}
@@ -136,7 +136,7 @@ export function BeyondCharacterStatsBar({
         title="Bônus de proficiência"
       />
 
-      <div className="col-span-3 rounded-lg border border-primary/45 bg-primary/8 px-2 py-1.5 sm:col-span-6 lg:col-span-2">
+      <div className="col-span-3 rounded-lg border border-secondary/50 bg-secondary/10 px-2 py-1.5 sm:col-span-6 lg:col-span-2">
         <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5">
           <span className="inline-flex items-center gap-1 text-[0.55rem] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
             <HeartIcon className="size-3 text-secondary" aria-hidden />

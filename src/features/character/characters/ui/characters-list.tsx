@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowRightIcon, PlusIcon } from "@heroicons/react/24/outline";
 
 import { useCharacters } from "@/features/character/characters/api/use-characters";
+import { usePrefetchCharacterSheet } from "@/features/character/character-sheet/api/use-prefetch-character-sheet";
 import { DeleteCharacterButton } from "@/features/character/character-sheet/ui/sheet/delete-character-button";
 import { motion } from "@/shared/lib/motion";
 import { cn } from "@/shared/lib/utils";
@@ -13,6 +14,7 @@ import { EmptyState } from "@/shared/ui/empty-state";
 
 export function CharactersList() {
   const { data, isPending, isError, error } = useCharacters();
+  const prefetchSheet = usePrefetchCharacterSheet();
 
   if (isPending) {
     return <p className="text-sm text-muted-foreground">Carregando fichas…</p>;
@@ -63,6 +65,8 @@ export function CharactersList() {
             "flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between",
             motion.hoverRow,
           )}
+          onPointerEnter={() => prefetchSheet(character.id)}
+          onFocusCapture={() => prefetchSheet(character.id)}
         >
           <div className="min-w-0 flex-1">
             <p className="font-medium">{character.name}</p>
@@ -105,6 +109,8 @@ export function CharactersList() {
                 buttonVariants({ size: "sm" }),
                 "inline-flex items-center gap-1",
               )}
+              onPointerEnter={() => prefetchSheet(character.id)}
+              onFocus={() => prefetchSheet(character.id)}
             >
               Abrir / editar
               <ArrowRightIcon className="size-3.5" aria-hidden />

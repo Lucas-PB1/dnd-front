@@ -130,7 +130,7 @@ export function SheetChip({
       className={cn(
         "inline-flex items-baseline gap-1 rounded-md border px-2 py-0.5 text-xs",
         active
-          ? "border-primary/45 bg-primary/10 font-medium text-foreground"
+          ? "border-secondary/50 bg-secondary/10 font-medium text-foreground"
           : "border-border/80 bg-muted/25 text-foreground",
         className,
       )}

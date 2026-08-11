@@ -23,7 +23,7 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
   const sheet = useCharacterSheetView(id);
 
   if (sheet.isPending) {
-    return <CharacterSheetLoadingSkeleton />;
+    return <CharacterSheetLoadingSkeleton summary={sheet.listSummary} />;
   }
 
   if (sheet.isError || !sheet.data || !sheet.sectionProps || !sheet.editForms) {

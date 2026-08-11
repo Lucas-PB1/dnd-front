@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
 import { ApiError } from "@/shared/api/dnd-api/api-error";
+import { CHARACTER_DETAIL_STALE_MS } from "@/features/character/characters/api/character-query";
 import {
   charactersKeys,
   fetchCharacterById,
@@ -31,6 +32,7 @@ export function useCharacterDetail(id: string) {
       }
     },
     enabled: !authLoading && !!accessToken && !!id,
+    staleTime: CHARACTER_DETAIL_STALE_MS,
     retry: (failureCount, error) => {
       if (error instanceof ApiError && error.isUnauthorized) {
         return false;

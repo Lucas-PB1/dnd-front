@@ -18,6 +18,7 @@ import {
   recoverClassResource,
 } from "@/features/character/character-sheet/api/character-session.api";
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
+import { CHARACTER_STATE_STALE_MS } from "@/features/character/characters/api/character-query";
 import { charactersKeys } from "@/features/character/characters/api/characters.api";
 
 export function useCharacterState(characterId: string) {
@@ -38,6 +39,7 @@ export function useCharacterState(characterId: string) {
       }
     },
     enabled: !!accessToken && !!characterId,
+    staleTime: CHARACTER_STATE_STALE_MS,
   });
 }
 
