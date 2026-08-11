@@ -326,8 +326,11 @@ export function InventoryItemDetail({
   const qtyId = `qty-${item.itemSlug}`;
   const slotId = `slot-${item.itemSlug}`;
   const equipped = item.location === "equipped";
+  const cursedBlocksUnattune =
+    Boolean(item.cursed) && item.attuned && !item.curseBroken;
   const canAttune =
-    item.requiresAttunement && (item.attuned || !attunementSlotsFull);
+    item.requiresAttunement &&
+    (item.attuned ? !cursedBlocksUnattune : !attunementSlotsFull);
   const showAttach =
     isWeaponCharmSlug(item.itemSlug) &&
     item.location === "backpack" &&
@@ -625,11 +628,13 @@ export function InventoryItemDetail({
             className="gap-1"
             disabled={isPending || !canAttune}
             title={
-              !canAttune && !item.attuned
-                ? `Limite de ${MAX_ATTUNED_ITEMS} sintonias atingido`
-                : item.attuned
-                  ? "Dessintonizar"
-                  : "Sintonizar"
+              cursedBlocksUnattune
+                ? "Amaldiçoado — Remover Maldição para dessintonizar"
+                : !canAttune && !item.attuned
+                  ? `Limite de ${MAX_ATTUNED_ITEMS} sintonias atingido`
+                  : item.attuned
+                    ? "Dessintonizar"
+                    : "Sintonizar"
             }
             onClick={() => onToggleAttunement(item)}
           >

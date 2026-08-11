@@ -126,7 +126,7 @@ Classe nova: copiar uma destas (table-action + Economia com `resource_slug` / ±
 - `executeBarbarianTableAction` via `classSlug: barbarian` na economy
 - Economy: C009 `barbarian-rage` (± + `toggle-rage`) + Imprudente, Persistente L15, trilhas PHB + Valdas muscle-wizard
 - Fanático: botão **Fúria Divina** no card de ataque (`divineFuryDice`)
-- Endpoints legado `rage/toggle` / `reckless/toggle` mantidos; front usa table-action
+- Endpoints canônicos: `POST …/barbarian/table-action` (sem `rage/toggle` / `reckless/toggle`)
 
 ## Druida — **concluída**
 

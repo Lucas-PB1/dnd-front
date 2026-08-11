@@ -166,6 +166,7 @@ export function BeyondInventoryTab({
   function toggleAttunement(item: InventoryItem) {
     if (!item.requiresAttunement) return;
     if (!item.attuned && attunementSlotsFull) return;
+    if (item.attuned && item.cursed && !item.curseBroken) return;
     patchFields(item.itemSlug, { attuned: !item.attuned });
   }
 

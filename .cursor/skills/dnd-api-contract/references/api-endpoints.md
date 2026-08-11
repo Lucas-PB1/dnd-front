@@ -32,9 +32,11 @@ Fonte canônica: `dnd-api/.cursor/skills/api-consumer-next/references/api-endpoi
 | GET/POST/PATCH/DELETE | `/characters`, `/characters/:id`                               |
 | POST                  | `/characters/roll-abilities`                                   |
 | GET/POST              | `/characters/:id/level-up/preview`, `/characters/:id/level-up` |
-| GET/POST/PATCH/DELETE | `/characters/:id/inventory`, `.../inventory/:itemSlug`         |
+| GET/POST/PATCH/DELETE | `/characters/:id/inventory`, `.../inventory/:itemSlug` |
+| POST                  | `/characters/:id/inventory/actions` (`actionSlug`)     |
 | GET/PATCH             | `/characters/:id/state`                                        |
 | POST                  | `/characters/:id/spells/cast`, `/characters/:id/rest`          |
+| POST                  | `/characters/:id/*/table-action` (classes mesa)                |
 
 ## Slugs
 

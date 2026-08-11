@@ -183,11 +183,13 @@ export function useEconomyTableAction(characterId: string) {
           const result = await gameFetch<{
             note: string;
             hitPointsCurrent: number;
-          }>(
-            `/characters/${characterId}/inventory/${encodeURIComponent(itemSlug)}/artifact-regen`,
-            token,
-            { method: "POST" },
-          );
+          }>(`/characters/${characterId}/inventory/actions`, token, {
+            method: "POST",
+            body: JSON.stringify({
+              actionSlug: "artifact-regen",
+              itemSlug,
+            }),
+          });
           void queryClient.invalidateQueries({
             queryKey: sessionKeys.state(characterId),
           });

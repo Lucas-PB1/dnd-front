@@ -149,6 +149,10 @@ export type InventoryItem = {
   attuned: boolean;
   isPactWeapon?: boolean;
   requiresAttunement: boolean;
+  /** Item amaldiçoado (properties.cursed). */
+  cursed?: boolean;
+  /** Maldição quebrada (instance_properties.curseBroken). */
+  curseBroken?: boolean;
   effectsActive: boolean;
   /** Poção/óleo/pergaminho — economy ativa com quantity > 0. */
   consumable?: boolean;

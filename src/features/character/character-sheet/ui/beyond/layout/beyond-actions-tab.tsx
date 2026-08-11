@@ -19,8 +19,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import type { CharacterDetail } from "@/entities/character/types";
 import {
-  fireChamber,
-  reloadFirearm,
+  executeGunslingerTableAction,
   sessionKeys,
 } from "@/features/character/character-sheet/api/character-session.api";
 import { useEconomyTableAction } from "@/features/character/character-sheet/api/use-economy-table-action";
@@ -227,7 +226,11 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
   const reload = useMutation({
     mutationFn: async (itemSlug: string) => {
       try {
-        return await reloadFirearm(requireToken(), character.id, itemSlug);
+        return await executeGunslingerTableAction(
+          requireToken(),
+          character.id,
+          { actionSlug: "reload-firearm", itemSlug },
+        );
       } catch (error) {
         return handleUnauthorized(error);
       }
@@ -244,7 +247,11 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
       shots?: number;
     }) => {
       try {
-        return await fireChamber(requireToken(), character.id, itemSlug, shots);
+        return await executeGunslingerTableAction(
+          requireToken(),
+          character.id,
+          { actionSlug: "fire-chamber", itemSlug, shots },
+        );
       } catch (error) {
         return handleUnauthorized(error);
       }

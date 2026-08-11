@@ -106,92 +106,6 @@ export async function listManeuvers(accessToken: string, characterId: string) {
   );
 }
 
-export async function executeGunslingerManeuver(
-  accessToken: string,
-  characterId: string,
-  maneuverSlug: string,
-) {
-  return gameFetch<UseManeuverResult>(
-    `/characters/${characterId}/maneuvers/use`,
-    accessToken,
-    {
-      method: "POST",
-      body: JSON.stringify({ maneuverSlug }),
-    },
-  );
-}
-
-export async function reloadFirearm(
-  accessToken: string,
-  characterId: string,
-  itemSlug: string,
-) {
-  return gameFetch<CharacterState>(
-    `/characters/${characterId}/firearms/reload`,
-    accessToken,
-    {
-      method: "POST",
-      body: JSON.stringify({ itemSlug }),
-    },
-  );
-}
-
-export async function fireChamber(
-  accessToken: string,
-  characterId: string,
-  itemSlug: string,
-  shots = 1,
-) {
-  return gameFetch<CharacterState>(
-    `/characters/${characterId}/firearms/fire`,
-    accessToken,
-    {
-      method: "POST",
-      body: JSON.stringify({ itemSlug, shots }),
-    },
-  );
-}
-
-export async function recoverRisk(accessToken: string, characterId: string) {
-  return gameFetch<CharacterState>(
-    `/characters/${characterId}/resources/risk/recover`,
-    accessToken,
-    { method: "POST", body: "{}" },
-  );
-}
-
-export async function toggleRage(
-  accessToken: string,
-  characterId: string,
-  active?: boolean,
-) {
-  return gameFetch<CharacterState>(
-    `/characters/${characterId}/rage/toggle`,
-    accessToken,
-    { method: "POST", body: JSON.stringify(active == null ? {} : { active }) },
-  );
-}
-
-export async function toggleReckless(
-  accessToken: string,
-  characterId: string,
-  active?: boolean,
-) {
-  return gameFetch<CharacterState>(
-    `/characters/${characterId}/reckless/toggle`,
-    accessToken,
-    { method: "POST", body: JSON.stringify(active == null ? {} : { active }) },
-  );
-}
-
-export async function recoverAllRage(accessToken: string, characterId: string) {
-  return gameFetch<CharacterState>(
-    `/characters/${characterId}/resources/rage/recover-all`,
-    accessToken,
-    { method: "POST", body: "{}" },
-  );
-}
-
 export type BarbarianTableActionSlug =
   | "toggle-rage"
   | "toggle-reckless"
@@ -255,7 +169,11 @@ export type FighterTableActionResult = {
 
 export type TableActionResult = FighterTableActionResult;
 
-export type GunslingerTableActionSlug = "use-maneuver" | "recover-risk";
+export type GunslingerTableActionSlug =
+  | "use-maneuver"
+  | "recover-risk"
+  | "reload-firearm"
+  | "fire-chamber";
 
 export type GunslingerTableActionResult =
   | UseManeuverResult
@@ -267,6 +185,8 @@ export async function executeGunslingerTableAction(
   payload: {
     actionSlug: GunslingerTableActionSlug;
     maneuverSlug?: string;
+    itemSlug?: string;
+    shots?: number;
   },
 ) {
   return gameFetch<GunslingerTableActionResult>(

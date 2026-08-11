@@ -268,6 +268,7 @@ export function BeyondRestActions({ characterId }: { characterId: string }) {
         variant="outline"
         className="h-8 gap-1.5"
         disabled={takeRest.isPending}
+        title="Inclui recuperação de cargas de itens mágicos (MVP ≈ próximo amanhecer)"
         onClick={() => {
           setLastHeal(null);
           takeRest.mutate({ type: "long" });
