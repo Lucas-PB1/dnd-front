@@ -6,7 +6,8 @@ export const userProfileSchema = z.object({
     .trim()
     .min(2, "Use pelo menos 2 caracteres")
     .max(40, "No máximo 40 caracteres"),
-  bio: z.string().trim().max(160, "No máximo 160 caracteres").default(""),
+  // Sem `.default()` — RHF + zodResolver exige input/output alinhados.
+  bio: z.string().trim().max(160, "No máximo 160 caracteres"),
 });
 
 export type UserProfileFormValues = z.infer<typeof userProfileSchema>;
