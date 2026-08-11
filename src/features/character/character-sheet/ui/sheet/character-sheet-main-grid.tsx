@@ -18,6 +18,8 @@ type CharacterSheetMainGridProps = {
   languageNames: string[];
   skillsQuery: ReturnType<typeof useSkills>;
   pagePanels: Record<CharacterSheetPageSectionId, ReactNode>;
+  activeSection?: CharacterSheetPageSectionId;
+  onActiveSectionChange?: (section: CharacterSheetPageSectionId) => void;
   onEditSkills: () => void;
   onEditAbilities: () => void;
 };
@@ -28,6 +30,8 @@ export function CharacterSheetMainGrid({
   languageNames,
   skillsQuery,
   pagePanels,
+  activeSection,
+  onActiveSectionChange,
   onEditSkills,
   onEditAbilities,
 }: CharacterSheetMainGridProps) {
@@ -59,6 +63,8 @@ export function CharacterSheetMainGrid({
           <CharacterSheetPageSections
             panels={pagePanels}
             character={character}
+            activeSection={activeSection}
+            onActiveSectionChange={onActiveSectionChange}
           />
         </div>
 

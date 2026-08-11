@@ -21,13 +21,22 @@ type Props = {
   onRemove?: () => void;
 };
 
-function hpLabel(combatant: EncounterCombatant): string {
-  if (combatant.hpCurrent != null && combatant.hpMax != null) {
-    return `${combatant.hpCurrent}/${combatant.hpMax}`;
+function hpPercentValue(combatant: EncounterCombatant): number | null {
+  if (combatant.hpPercent != null) return combatant.hpPercent;
+  if (
+    combatant.hpCurrent != null &&
+    combatant.hpMax != null &&
+    combatant.hpMax > 0
+  ) {
+    return Math.round((combatant.hpCurrent / combatant.hpMax) * 100);
   }
-  if (combatant.hpPercent != null) return `${combatant.hpPercent}%`;
-  if (combatant.kind === "creature") return "PV oculto";
-  return "—";
+  return null;
+}
+
+function hpBarClass(percent: number): string {
+  if (percent > 50) return "bg-chart-3";
+  if (percent >= 25) return "bg-chart-2";
+  return "bg-chart-1";
 }
 
 export function EncounterCombatantRow({
@@ -45,14 +54,12 @@ export function EncounterCombatantRow({
     hpDraft ??
     (combatant.hpCurrent != null ? String(combatant.hpCurrent) : "");
 
-  const init =
-    combatant.initiativeTotal != null
-      ? `${combatant.initiativeTotal}`
-      : "—";
+  const initTotal = combatant.initiativeTotal;
   const mod =
     combatant.initiativeModifier != null
-      ? ` (${combatant.initiativeModifier >= 0 ? "+" : ""}${combatant.initiativeModifier})`
-      : "";
+      ? `${combatant.initiativeModifier >= 0 ? "+" : ""}${combatant.initiativeModifier}`
+      : null;
+  const percent = hpPercentValue(combatant);
 
   function commitHp() {
     if (!onHpSet || combatant.hpCurrent == null) return;
@@ -70,61 +77,122 @@ export function EncounterCombatantRow({
   return (
     <li
       className={cn(
-        "flex flex-col gap-2 border-b border-border px-3 py-3 last:border-b-0 sm:flex-row sm:items-center sm:justify-between",
-        combatant.isCurrentTurn && "bg-secondary/15",
+        "relative flex flex-col gap-3 border-b border-border/70 px-3 py-3 last:border-b-0 sm:flex-row sm:items-center sm:gap-4 sm:px-4",
+        combatant.isCurrentTurn && "bg-secondary/12",
         !combatant.isActive && "opacity-50",
+        combatant.kind === "creature" && !combatant.isCurrentTurn && "bg-muted/15",
       )}
     >
-      <div className="min-w-0 space-y-1">
-        <div className="flex flex-wrap items-center gap-2">
-          {combatant.isCurrentTurn ? (
-            <span className="rounded bg-secondary px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-secondary-foreground">
-              Turno
-            </span>
-          ) : null}
-          <p className="truncate text-sm font-semibold">{combatant.displayName}</p>
-          <span className="text-xs text-muted-foreground">
-            {combatant.kind === "pc" ? "PC" : "Criatura"}
-            {combatant.level != null ? ` · Nv ${combatant.level}` : null}
+      {combatant.isCurrentTurn ? (
+        <span
+          className="absolute inset-y-0 left-0 w-1 bg-secondary"
+          aria-hidden
+        />
+      ) : null}
+
+      <div className="flex w-16 shrink-0 flex-col items-center justify-center text-center sm:w-20">
+        <span className="text-[0.55rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
+          Init
+        </span>
+        <span className="font-heading text-2xl font-semibold tabular-nums leading-none">
+          {initTotal != null ? initTotal : "—"}
+        </span>
+        {mod ? (
+          <span className="mt-0.5 text-[0.65rem] tabular-nums text-muted-foreground">
+            {mod}
           </span>
-        </div>
-        <p className="text-xs text-muted-foreground">
-          Init {init}
-          {mod}
-          {combatant.armorClass != null ? ` · CA ${combatant.armorClass}` : null}
-          {` · ${hpLabel(combatant)}`}
-        </p>
-        {combatant.kind === "pc" && combatant.featSlugs.length > 0 ? (
-          <p className="truncate text-xs text-muted-foreground">
-            Talentos: {combatant.featSlugs.join(", ")}
-          </p>
-        ) : null}
-        {combatant.kind === "pc" && combatant.conditions.length > 0 ? (
-          <p className="text-xs text-amber-700 dark:text-amber-400">
-            {combatant.conditions.join(", ")}
-          </p>
-        ) : null}
-        {combatant.kind === "pc" && combatant.inspiration ? (
-          <p className="text-xs text-muted-foreground">Inspiração</p>
-        ) : null}
-        {combatant.hpPercent != null &&
-        combatant.hpCurrent == null &&
-        combatant.kind === "creature" ? (
-          <div className="h-1.5 w-40 overflow-hidden rounded-full bg-muted">
-            <div
-              className="h-full bg-secondary"
-              style={{ width: `${combatant.hpPercent}%` }}
-            />
-          </div>
         ) : null}
       </div>
 
-      <div className="flex flex-wrap items-center gap-1.5">
+      <div className="min-w-0 flex-1 space-y-1.5">
+        <div className="flex flex-wrap items-center gap-1.5">
+          {combatant.isCurrentTurn ? (
+            <span className="rounded-sm border border-secondary/50 bg-secondary/20 px-1.5 py-0.5 text-[0.6rem] font-semibold tracking-wide text-secondary uppercase">
+              Turno
+            </span>
+          ) : null}
+          <p className="truncate font-heading text-sm font-semibold sm:text-base">
+            {combatant.displayName}
+          </p>
+          <span
+            className={cn(
+              "rounded-md border px-1.5 py-0.5 text-[0.65rem]",
+              combatant.kind === "pc"
+                ? "border-secondary/40 bg-secondary/10 text-secondary"
+                : "border-border/80 bg-muted/30 text-muted-foreground",
+            )}
+          >
+            {combatant.kind === "pc" ? "PC" : "Criatura"}
+            {combatant.level != null ? ` · Nv ${combatant.level}` : null}
+          </span>
+          {combatant.inspiration ? (
+            <span className="rounded-md border border-accent/40 bg-accent/10 px-1.5 py-0.5 text-[0.65rem] text-accent">
+              Inspiração
+            </span>
+          ) : null}
+        </div>
+
+        {combatant.conditions.length > 0 ? (
+          <div className="flex flex-wrap gap-1">
+            {combatant.conditions.map((condition) => (
+              <span
+                key={condition}
+                className="rounded-md border border-amber-600/35 bg-amber-500/10 px-1.5 py-0.5 text-[0.65rem] text-amber-800 dark:text-amber-300"
+              >
+                {condition}
+              </span>
+            ))}
+          </div>
+        ) : null}
+
+        {combatant.kind === "pc" && combatant.featSlugs.length > 0 ? (
+          <p className="truncate text-[0.7rem] text-muted-foreground" title={combatant.featSlugs.join(", ")}>
+            Talentos: {combatant.featSlugs.join(", ")}
+          </p>
+        ) : null}
+      </div>
+
+      <div className="flex shrink-0 flex-col items-start gap-1 sm:w-16 sm:items-center">
+        <span className="text-[0.55rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
+          CA
+        </span>
+        <span className="font-heading text-lg font-semibold tabular-nums leading-none">
+          {combatant.armorClass ?? "—"}
+        </span>
+      </div>
+
+      <div className="flex min-w-[7.5rem] shrink-0 flex-col gap-1 sm:w-36">
+        <div className="flex items-baseline justify-between gap-2">
+          <span className="text-[0.55rem] font-semibold tracking-[0.1em] text-muted-foreground uppercase">
+            PV
+          </span>
+          <span className="text-xs tabular-nums text-muted-foreground">
+            {combatant.hpCurrent != null && combatant.hpMax != null
+              ? `${combatant.hpCurrent}/${combatant.hpMax}`
+              : combatant.hpPercent != null
+                ? `${combatant.hpPercent}%`
+                : combatant.kind === "creature"
+                  ? "oculto"
+                  : "—"}
+          </span>
+        </div>
+        {percent != null ? (
+          <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+            <div
+              className={cn("h-full transition-[width]", hpBarClass(percent))}
+              style={{ width: `${Math.max(0, Math.min(100, percent))}%` }}
+            />
+          </div>
+        ) : (
+          <div className="h-1.5 rounded-full bg-muted/50" aria-hidden />
+        )}
+      </div>
+
+      <div className="flex flex-wrap items-center gap-1.5 sm:justify-end">
         {canRoll && combatant.initiativeTotal == null ? (
           <Button
             type="button"
             size="sm"
-            variant="outline"
             disabled={busy}
             onClick={onRoll}
             title={

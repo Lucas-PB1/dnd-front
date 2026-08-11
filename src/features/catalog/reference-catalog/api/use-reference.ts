@@ -35,21 +35,22 @@ export function useFeats() {
   });
 }
 
-/** Labels slim (`fields=summary`) — ficha / review. */
-export function useFeatLabels() {
+export function useFeatLabels(options?: { enabled?: boolean }) {
   const { editionSlugsParam } = useCatalogSources();
   return useQuery({
     queryKey: [...referenceKeys.feats(), "labels", editionSlugsParam ?? "all"],
     queryFn: () => fetchFeatLabels(editionSlugsParam),
     staleTime: CATALOG_DETAIL_STALE_MS,
+    enabled: options?.enabled ?? true,
   });
 }
 
-export function useAlignments() {
+export function useAlignments(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: referenceKeys.alignments(),
     queryFn: () => fetchAlignments(),
     staleTime: CATALOG_DETAIL_STALE_MS,
+    enabled: options?.enabled ?? true,
   });
 }
 
@@ -96,9 +97,12 @@ export function useCharacterLevels() {
 export function useCombatMechanicalCatalog(filters?: {
   classSlug?: string;
   subclassSlug?: string | null;
+  /** Default true. Use false to skip fetch (ex.: card de arma sem Rogue). */
+  enabled?: boolean;
 }) {
   const classSlug = filters?.classSlug?.trim() || undefined;
   const subclassSlug = filters?.subclassSlug?.trim() || undefined;
+  const enabled = filters?.enabled ?? true;
   return useQuery({
     queryKey: referenceKeys.combatMechanicalCatalog({
       classSlug,
@@ -108,5 +112,6 @@ export function useCombatMechanicalCatalog(filters?: {
       fetchCombatMechanicalCatalog({ classSlug, subclassSlug }),
     // Mesa: reseed e texto jogável — não ficar 1h com catálogo velho.
     staleTime: CATALOG_LIST_STALE_MS,
+    enabled,
   });
 }

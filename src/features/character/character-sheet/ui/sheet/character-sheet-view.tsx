@@ -68,6 +68,8 @@ export function CharacterSheetView({ id }: CharacterSheetViewProps) {
           languageNames={sheet.languageNames}
           skillsQuery={sheet.skillsQuery}
           pagePanels={pagePanels}
+          activeSection={sheet.activeSection}
+          onActiveSectionChange={sheet.setActiveSection}
           onEditSkills={() => sheet.setEditing("skills")}
           onEditAbilities={() => sheet.setEditing("abilities")}
         />

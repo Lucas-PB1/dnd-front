@@ -32,10 +32,20 @@ export type CharacterCatalogLabels = {
   featLabels: Record<string, string>;
   languageLabels: Record<string, string>;
   spellLabels: Record<string, string>;
+  skillsQuery: ReturnType<typeof useSkills>;
   resolveSkill: (slug: string) => string;
   resolveFeat: (slug: string) => string;
   resolveLanguage: (slug: string) => string;
   resolveSpell: (slug: string) => string;
+};
+
+export type CharacterCatalogLabelsOptions = {
+  /** Labels de magia (aba Magias / inventário com magias). Default true (review/wizard). */
+  loadSpellLabels?: boolean;
+  /** Labels de talentos (aba Traços). Default true. */
+  loadFeatLabels?: boolean;
+  /** Alinhamentos (quase só edit). Default true. */
+  loadAlignments?: boolean;
 };
 
 function toLabelMap<T extends { slug: string; name: string }>(
@@ -58,8 +68,12 @@ function resolveFromMap(
 
 export function useCharacterCatalogLabels(
   character: CharacterDetail | undefined,
+  options: CharacterCatalogLabelsOptions = {},
 ): CharacterCatalogLabels {
   const enabled = !!character;
+  const loadSpellLabels = options.loadSpellLabels ?? true;
+  const loadFeatLabels = options.loadFeatLabels ?? true;
+  const loadAlignments = options.loadAlignments ?? true;
 
   const classDetail = useClassDetail(character?.classSlug ?? "", enabled);
   const speciesDetail = useSpeciesDetail(character?.speciesSlug ?? "", enabled);
@@ -68,11 +82,13 @@ export function useCharacterCatalogLabels(
     enabled,
   );
   const subclasses = useClassSubclasses(character?.classSlug ?? "", enabled);
-  const alignments = useAlignments();
+  const alignments = useAlignments({
+    enabled: enabled && loadAlignments,
+  });
   const skills = useSkills();
-  const feats = useFeatLabels();
+  const feats = useFeatLabels({ enabled: enabled && loadFeatLabels });
   const languages = useLanguages();
-  const spells = useSpellLabels();
+  const spells = useSpellLabels({ enabled: enabled && loadSpellLabels });
 
   const skillLabels = useMemo(
     () => toLabelMap(skills.data?.data),
@@ -118,10 +134,10 @@ export function useCharacterCatalogLabels(
     (enabled && backgroundDetail.isPending) ||
     (enabled && subclasses.isPending) ||
     skills.isPending ||
-    feats.isPending ||
+    (loadFeatLabels && feats.isPending) ||
     languages.isPending ||
-    spells.isPending ||
-    alignments.isPending;
+    (loadSpellLabels && spells.isPending) ||
+    (loadAlignments && alignments.isPending);
 
   return {
     isLoading,
@@ -130,6 +146,7 @@ export function useCharacterCatalogLabels(
     featLabels,
     languageLabels,
     spellLabels,
+    skillsQuery: skills,
     resolveSkill: (slug) => skillLabels[slug] ?? slug,
     resolveFeat: (slug) => featLabels[slug] ?? slug,
     resolveLanguage: (slug) => languageLabels[slug] ?? slug,

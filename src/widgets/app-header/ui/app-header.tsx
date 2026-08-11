@@ -90,9 +90,7 @@ export function AppHeader({ className }: { className?: string }) {
 
         <div className="flex items-center gap-1 sm:gap-2">
           <CatalogSourcesMenu />
-          <div className="hidden sm:block">
-            <AuthNav />
-          </div>
+          <AuthNav />
           <ThemeToggle />
           <Button
             type="button"
@@ -127,9 +125,6 @@ export function AppHeader({ className }: { className?: string }) {
               />
             ))}
           </nav>
-          <div className="mt-3 border-t border-border/60 pt-3 sm:hidden">
-            <AuthNav />
-          </div>
         </div>
       ) : null}
     </header>

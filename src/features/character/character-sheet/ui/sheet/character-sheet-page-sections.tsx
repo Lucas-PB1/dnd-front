@@ -66,11 +66,15 @@ export function characterHasSpellcasting(character: CharacterDetail): boolean {
 type CharacterSheetPageSectionsProps = {
   panels: Record<CharacterSheetPageSectionId, ReactNode>;
   character: CharacterDetail;
+  activeSection?: CharacterSheetPageSectionId;
+  onActiveSectionChange?: (section: CharacterSheetPageSectionId) => void;
 };
 
 export function CharacterSheetPageSections({
   panels,
   character,
+  activeSection: controlledSection,
+  onActiveSectionChange,
 }: CharacterSheetPageSectionsProps) {
   const baseId = useId();
   const sections = useMemo(
@@ -81,9 +85,13 @@ export function CharacterSheetPageSections({
       ),
     [character],
   );
-  const [openSection, setOpenSection] = useState<CharacterSheetPageSectionId>(
-    "actions",
-  );
+  const [uncontrolledSection, setUncontrolledSection] =
+    useState<CharacterSheetPageSectionId>("actions");
+  const openSection = controlledSection ?? uncontrolledSection;
+  const setOpenSection = (section: CharacterSheetPageSectionId) => {
+    onActiveSectionChange?.(section);
+    if (controlledSection == null) setUncontrolledSection(section);
+  };
   const activeId = sections.some((s) => s.id === openSection)
     ? openSection
     : (sections[0]?.id ?? "actions");

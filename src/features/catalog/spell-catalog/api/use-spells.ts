@@ -28,12 +28,13 @@ export function useSpells() {
 }
 
 /** Só nome/nível/escola — ficha e labels. */
-export function useSpellLabels() {
+export function useSpellLabels(options?: { enabled?: boolean }) {
   const { editionSlugsParam } = useCatalogSources();
   return useQuery({
     queryKey: [...spellKeys.labelsAll(), editionSlugsParam ?? "all"],
     queryFn: () => fetchSpellLabels(editionSlugsParam),
     staleTime: CATALOG_DETAIL_STALE_MS,
+    enabled: options?.enabled ?? true,
   });
 }
 

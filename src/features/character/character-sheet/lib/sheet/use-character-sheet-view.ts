@@ -9,17 +9,27 @@ import { charactersKeys } from "@/features/character/characters/api/characters.a
 import { useCharacterCatalogLabels } from "@/features/character/character-sheet/api/use-character-catalog-labels";
 import { useWarmCharacterSheetQueries } from "@/features/character/character-sheet/api/use-prefetch-character-sheet";
 import type { SheetEditId } from "@/features/character/character-sheet/lib/edit/sheet-edit-types";
-import { useSkills } from "@/features/catalog/reference-catalog/api/use-reference";
+import type { CharacterSheetPageSectionId } from "@/features/character/character-sheet/ui/sheet/character-sheet-tab-panels";
 
 export function useCharacterSheetView(id: string) {
   useWarmCharacterSheetQueries(id);
 
   const { data, isPending, isError, error } = useCharacterDetail(id);
-  const labels = useCharacterCatalogLabels(data);
-  const skillsQuery = useSkills();
-  const queryClient = useQueryClient();
+  const [activeSection, setActiveSection] =
+    useState<CharacterSheetPageSectionId>("actions");
   const [editing, setEditing] = useState<SheetEditId>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+
+  const labels = useCharacterCatalogLabels(data, {
+    loadSpellLabels:
+      activeSection === "spells" ||
+      activeSection === "inventory" ||
+      editing === "spells",
+    loadFeatLabels: activeSection === "features" || editing === "feats",
+    loadAlignments: settingsOpen,
+  });
+
+  const queryClient = useQueryClient();
 
   const listSummary = useMemo(() => {
     const list = queryClient.getQueryData<CharacterSummary[]>(
@@ -48,11 +58,13 @@ export function useCharacterSheetView(id: string) {
   return {
     data,
     labels,
-    skillsQuery,
+    skillsQuery: labels.skillsQuery,
     isPending,
     isError,
     error,
     listSummary,
+    activeSection,
+    setActiveSection,
     editing,
     setEditing,
     closeEdit,

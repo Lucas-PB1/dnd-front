@@ -13,6 +13,7 @@ import {
   usePatchEncounter,
   useRollAllInitiative,
 } from "@/features/campaign/campaigns/api/use-encounters";
+import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { SearchableSelect } from "@/shared/ui/searchable-select";
@@ -70,139 +71,167 @@ export function EncounterDmControls({
     addCreature.isPending;
 
   return (
-    <div className="space-y-4 rounded-xl border border-border p-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <label className="flex items-center gap-2 text-sm">
-          Iniciativa
-          <SearchableSelect
-            className="h-8 w-auto min-w-[8rem] text-sm"
-            value={advantage}
+    <div
+      className={cn(
+        "sticky top-2 z-20 space-y-3 rounded-xl border border-border/80 bg-background/90 p-3 shadow-sm backdrop-blur-md sm:p-4",
+      )}
+    >
+      <div className="space-y-2">
+        <p className="font-heading text-[0.7rem] font-semibold tracking-[0.08em] text-secondary uppercase">
+          Mesa
+        </p>
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="flex items-center gap-2 text-sm">
+            <span className="text-muted-foreground">Iniciativa</span>
+            <SearchableSelect
+              className="h-8 w-auto min-w-[8rem] text-sm"
+              value={advantage}
+              disabled={busy}
+              options={[
+                { value: "normal", label: "Normal" },
+                { value: "advantage", label: "Vantagem" },
+                { value: "disadvantage", label: "Desvantagem" },
+              ]}
+              onValueChange={(next) =>
+                onAdvantageChange(next as AdvantageMode)
+              }
+            />
+          </label>
+          <Button
+            type="button"
+            size="sm"
             disabled={busy}
-            options={[
-              { value: "normal", label: "Normal" },
-              { value: "advantage", label: "Vantagem" },
-              { value: "disadvantage", label: "Desvantagem" },
-            ]}
-            onValueChange={(next) =>
-              onAdvantageChange(next as AdvantageMode)
+            onClick={() => nextTurn.mutate(encounter.id)}
+          >
+            Próximo turno
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            disabled={busy}
+            onClick={() =>
+              rollAll.mutate({
+                encounterId: encounter.id,
+                advantage:
+                  advantage === "normal" ? undefined : advantage,
+              })
             }
-          />
-        </label>
-        <Button
-          type="button"
-          size="sm"
-          disabled={busy}
-          onClick={() => nextTurn.mutate(encounter.id)}
-        >
-          Próximo turno
-        </Button>
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          disabled={busy}
-          onClick={() =>
-            rollAll.mutate({
-              encounterId: encounter.id,
-              advantage:
-                advantage === "normal" ? undefined : advantage,
-            })
-          }
-        >
-          Rolar todas as iniciativas
-        </Button>
-        <Button
-          type="button"
-          size="sm"
-          variant="destructive"
-          disabled={busy}
-          onClick={() => {
-            if (window.confirm("Encerrar este encontro?")) {
-              close.mutate(encounter.id);
-            }
-          }}
-        >
-          Encerrar
-        </Button>
+          >
+            Rolar todas
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="destructive"
+            disabled={busy}
+            onClick={() => {
+              if (window.confirm("Encerrar este encontro?")) {
+                close.mutate(encounter.id);
+              }
+            }}
+          >
+            Encerrar
+          </Button>
+        </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 text-sm">
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={encounter.playersCanView}
-            disabled={busy}
-            onChange={(e) =>
-              patch.mutate({
-                encounterId: encounter.id,
-                payload: { playersCanView: e.target.checked },
-              })
-            }
-          />
-          Jogadores podem ver
-        </label>
-        <label className="flex items-center gap-2">
-          PV criaturas
-          <SearchableSelect
-            className="h-8 w-auto min-w-[8rem] text-sm"
-            value={encounter.creatureHpVisibility}
-            disabled={busy}
-            options={[
-              { value: "percent", label: "Percentual" },
-              { value: "hidden", label: "Oculto" },
-              { value: "exact", label: "Exato" },
-            ]}
-            onValueChange={(next) =>
-              patch.mutate({
-                encounterId: encounter.id,
-                payload: {
-                  creatureHpVisibility: next as
-                    | "hidden"
-                    | "percent"
-                    | "exact",
-                },
-              })
-            }
-          />
-        </label>
+      <div className="space-y-2 border-t border-border/60 pt-3">
+        <p className="font-heading text-[0.7rem] font-semibold tracking-[0.08em] text-secondary uppercase">
+          Visibilidade
+        </p>
+        <div className="flex flex-wrap items-center gap-4 text-sm">
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              className="size-4 accent-[var(--secondary)]"
+              checked={encounter.playersCanView}
+              disabled={busy}
+              onChange={(e) =>
+                patch.mutate({
+                  encounterId: encounter.id,
+                  payload: { playersCanView: e.target.checked },
+                })
+              }
+            />
+            Jogadores podem ver
+          </label>
+          <label className="flex items-center gap-2">
+            <span className="text-muted-foreground">PV criaturas</span>
+            <SearchableSelect
+              className="h-8 w-auto min-w-[8rem] text-sm"
+              value={encounter.creatureHpVisibility}
+              disabled={busy}
+              options={[
+                { value: "percent", label: "Percentual" },
+                { value: "hidden", label: "Oculto" },
+                { value: "exact", label: "Exato" },
+              ]}
+              onValueChange={(next) =>
+                patch.mutate({
+                  encounterId: encounter.id,
+                  payload: {
+                    creatureHpVisibility: next as
+                      | "hidden"
+                      | "percent"
+                      | "exact",
+                  },
+                })
+              }
+            />
+          </label>
+        </div>
       </div>
 
       <form
         onSubmit={onAddCreature}
-        className="grid gap-2 sm:grid-cols-[1fr_5rem_5rem_5rem_auto]"
+        className="space-y-2 border-t border-border/60 pt-3"
       >
-        <Input
-          placeholder="Nome da criatura"
-          value={creatureName}
-          onChange={(e) => setCreatureName(e.target.value)}
-          maxLength={120}
-          required
-        />
-        <Input
-          type="number"
-          min={1}
-          placeholder="PV máx"
-          value={hpMax}
-          onChange={(e) => setHpMax(e.target.value)}
-          required
-        />
-        <Input
-          type="number"
-          min={1}
-          placeholder="CA"
-          value={armorClass}
-          onChange={(e) => setArmorClass(e.target.value)}
-          required
-        />
-        <Input
-          type="number"
-          placeholder="Init"
-          value={initMod}
-          onChange={(e) => setInitMod(e.target.value)}
-        />
-        <Button type="submit" size="sm" disabled={busy || !creatureName.trim()}>
-          Add
-        </Button>
+        <p className="font-heading text-[0.7rem] font-semibold tracking-[0.08em] text-secondary uppercase">
+          Adicionar criatura
+        </p>
+        <div className="grid gap-2 sm:grid-cols-[1fr_5rem_5rem_5rem_auto]">
+          <Input
+            placeholder="Nome"
+            value={creatureName}
+            onChange={(e) => setCreatureName(e.target.value)}
+            maxLength={120}
+            required
+            aria-label="Nome da criatura"
+          />
+          <Input
+            type="number"
+            min={1}
+            placeholder="PV máx"
+            value={hpMax}
+            onChange={(e) => setHpMax(e.target.value)}
+            required
+            aria-label="PV máximo"
+          />
+          <Input
+            type="number"
+            min={1}
+            placeholder="CA"
+            value={armorClass}
+            onChange={(e) => setArmorClass(e.target.value)}
+            required
+            aria-label="Classe de armadura"
+          />
+          <Input
+            type="number"
+            placeholder="Init"
+            value={initMod}
+            onChange={(e) => setInitMod(e.target.value)}
+            aria-label="Modificador de iniciativa"
+          />
+          <Button
+            type="submit"
+            size="sm"
+            disabled={busy || !creatureName.trim()}
+          >
+            Adicionar
+          </Button>
+        </div>
       </form>
     </div>
   );

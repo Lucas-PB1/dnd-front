@@ -17,6 +17,11 @@ export type CampaignMember = {
   userId: string;
   role: CampaignRole;
   joinedAt: string;
+  displayName?: string | null;
+  email?: string | null;
+  avatarUrl?: string | null;
+  bio?: string | null;
+  characterNames?: string[];
 };
 
 export type CampaignCharacterSummary = {
