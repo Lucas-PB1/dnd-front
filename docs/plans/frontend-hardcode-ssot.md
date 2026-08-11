@@ -37,8 +37,8 @@ Já consome API (contraste bom):
 | Golpe Astuto | Feito — `cunningStrikeEffects` |
 | Máscaras do Bardo | Feito — `personaMasks` |
 | Precaução (Dungeoneer) | Feito — `precautionSpells` |
-| Economia de ação (aba Ações) | Feito — `economyActions` (C009) |
-| Painéis `*_ACTIONS` | Feito — `panelActions` (C010) |
+| Economia de ação (aba Ações) | Parcial — `economyActions` (C009); textos + Usar ligados onde há handler; manobras BM/gunslinger e alguns lembretes sem Usar de propósito |
+| Painéis `*_ACTIONS` | Feito — `panelActions` (C010); paladino também consome section `subclass` |
 | `managed-class-resources` | Removido (código morto) |
 | Helpers `economy-table-actions` | Mantidos só como dispatch (`psi:`), não SSOT |
 
@@ -146,7 +146,7 @@ Detalhe de arquitetura: [`../ARCHITECTURE.md`](../ARCHITECTURE.md).
 | Máscaras | `personaMasks` (`slug`+`name`) | `combat-bard-panel.tsx` — drift Bufão/Bobão eliminado |
 | Precaução | `precautionSpells` | `fighter-subclass-actions.tsx` |
 | Economia (aba Ações) | `economyActions` (C009) | `resolveClassEconomyActions(catalog, …)` |
-| Painéis de classe | `panelActions` (C010) | `resolvePanelActions` + `CombatPanelActionButtons` |
+| Painéis de classe | `panelActions` (C010) | `resolvePanelActions` + `CombatPanelActionButtons` (paladino: `channel` + `subclass`) |
 
 ## Feito — fase 3 (P1)
 

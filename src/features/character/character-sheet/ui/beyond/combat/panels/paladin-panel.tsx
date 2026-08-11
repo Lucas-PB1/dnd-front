@@ -52,6 +52,17 @@ export function CombatPaladinPanel({
     [panelCatalog, level, subclassSlug],
   );
 
+  const subclassActions = useMemo(
+    () =>
+      resolvePanelActions(panelCatalog, {
+        classSlug: "paladin",
+        level,
+        section: "subclass",
+        subclassSlug,
+      }),
+    [panelCatalog, level, subclassSlug],
+  );
+
   if (classSlug !== "paladin") return null;
 
   const layOnHands = state?.classResources?.find(
@@ -129,6 +140,16 @@ export function CombatPaladinPanel({
         isPending={action.isPending}
         variant="outline"
         onAction={(slug) => action.mutate({ actionSlug: slug as never })}
+        listTitle="Canalizar"
+      />
+
+      <CombatPanelActionButtons
+        actions={subclassActions}
+        getRemaining={getRemaining}
+        isPending={action.isPending}
+        variant="outline"
+        onAction={(slug) => action.mutate({ actionSlug: slug as never })}
+        listTitle="Juramento"
       />
 
       <TableActionFeedback
