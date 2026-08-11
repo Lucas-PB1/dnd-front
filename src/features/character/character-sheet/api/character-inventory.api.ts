@@ -57,11 +57,44 @@ export async function removeInventoryItem(
   accessToken: string,
   characterId: string,
   itemSlug: string,
+  options?: { quantity?: number; mode?: "sell" | "discard" },
 ) {
+  const params = new URLSearchParams();
+  if (options?.quantity != null) {
+    params.set("quantity", String(options.quantity));
+  }
+  if (options?.mode) {
+    params.set("mode", options.mode);
+  }
+  const qs = params.toString();
   return gameFetch<void>(
-    `/characters/${characterId}/inventory/${itemSlug}`,
+    `/characters/${characterId}/inventory/${itemSlug}${qs ? `?${qs}` : ""}`,
     accessToken,
     { method: "DELETE" },
+  );
+}
+
+export async function purchaseInventory(
+  accessToken: string,
+  characterId: string,
+  payload: {
+    lines: Array<{
+      itemSlug: string;
+      quantity?: number;
+      attachCoverageSlug?: string;
+      attachCoverageBonus?: 1 | 2 | 3;
+      attachToBaseSlug?: string;
+    }>;
+    pay?: boolean;
+  },
+) {
+  return gameFetch<CharacterInventory>(
+    `/characters/${characterId}/inventory/purchase`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
   );
 }
 

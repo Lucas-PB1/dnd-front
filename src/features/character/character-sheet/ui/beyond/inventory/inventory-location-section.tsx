@@ -38,7 +38,13 @@ type InventoryLocationSectionProps = {
   onRemove: (slug: string) => void;
   onAttachCharm?: (weaponSlug: string, charmSlug: string) => void;
   onDetachCharm?: (weaponSlug: string) => void;
-  baseOptions?: { value: string; label: string }[];
+  baseOptions?: {
+    value: string;
+    label: string;
+    itemType?: string;
+    equipmentSlot?: string | null;
+  }[];
+  containerOptions?: { value: string; label: string }[];
   onAttachCoverage?: (
     baseItemSlug: string,
     coverageSlug: string,
@@ -60,6 +66,7 @@ export function InventoryLocationSection({
   equipmentWarnings,
   weaponOptions = [],
   baseOptions = [],
+  containerOptions = [],
   canBindPactWeapon = false,
   onToggleLocation,
   onToggleAttunement,
@@ -91,6 +98,7 @@ export function InventoryLocationSection({
             warnings={warnings}
             weaponOptions={weaponOptions}
             baseOptions={baseOptions}
+            containerOptions={containerOptions}
             canBindPactWeapon={canBindPactWeapon}
             onToggleLocation={onToggleLocation}
             onToggleAttunement={onToggleAttunement}
@@ -108,6 +116,7 @@ export function InventoryLocationSection({
   }, [
     attunementSlotsFull,
     baseOptions,
+    containerOptions,
     canBindPactWeapon,
     equipmentWarnings,
     isPending,

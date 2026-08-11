@@ -1,20 +1,25 @@
-import { catalogFetch } from "@/shared/api/dnd-api/api-client";
+import { catalogFetch, gameFetch } from "@/shared/api/dnd-api/api-client";
 import type { ItemListResponse, ItemSummary } from "@/entities/item/types";
 import {
   buildCatalogSearchParams,
   CATALOG_FETCH_INIT,
 } from "@/shared/lib/catalog-query";
 
-export async function fetchItems(params?: {
+export type FetchItemsParams = {
   q?: string;
   itemType?: string;
   magic?: boolean;
   rarity?: string;
   editionSlugs?: string;
+  hasCost?: boolean;
+  kind?: string;
+  consumable?: boolean;
   limit?: number;
   page?: number;
   fields?: "summary";
-}) {
+};
+
+export async function fetchItems(params?: FetchItemsParams) {
   const search = buildCatalogSearchParams({
     page: params?.page ?? 1,
     limit: params?.limit ?? 100,
@@ -30,23 +35,51 @@ export async function fetchItems(params?: {
       rarity: params?.rarity,
       editionSlugs: params?.editionSlugs,
       fields: params?.fields,
+      hasCost:
+        params?.hasCost === undefined
+          ? undefined
+          : params.hasCost
+            ? "true"
+            : "false",
+      kind: params?.kind,
+      consumable:
+        params?.consumable === undefined
+          ? undefined
+          : params.consumable
+            ? "true"
+            : "false",
     },
   });
 
   return catalogFetch<ItemListResponse>(`/items?${search}`, CATALOG_FETCH_INIT);
 }
 
+export async function fetchPopularItems(params?: {
+  metric?: "purchase" | "view";
+  limit?: number;
+}) {
+  const search = new URLSearchParams();
+  if (params?.metric) search.set("metric", params.metric);
+  if (params?.limit != null) search.set("limit", String(params.limit));
+  const qs = search.toString();
+  return catalogFetch<ItemSummary[]>(
+    `/items/popular${qs ? `?${qs}` : ""}`,
+    CATALOG_FETCH_INIT,
+  );
+}
+
+export async function recordItemView(accessToken: string, slug: string) {
+  return gameFetch<void>(`/items/${slug}/view`, accessToken, {
+    method: "POST",
+  });
+}
+
 export const itemKeys = {
   all: ["items"] as const,
-  list: (params?: {
-    q?: string;
-    itemType?: string;
-    magic?: boolean;
-    rarity?: string;
-    editionSlugs?: string;
-    limit?: number;
-    page?: number;
-  }) => [...itemKeys.all, "list", params ?? {}] as const,
+  list: (params?: FetchItemsParams) =>
+    [...itemKeys.all, "list", params ?? {}] as const,
+  popular: (metric?: string) =>
+    [...itemKeys.all, "popular", metric ?? "purchase"] as const,
   detail: (slug: string) => [...itemKeys.all, "detail", slug] as const,
 };
 

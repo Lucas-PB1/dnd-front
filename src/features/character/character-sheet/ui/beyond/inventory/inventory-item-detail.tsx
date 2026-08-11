@@ -48,7 +48,13 @@ type InventoryItemDetailProps = {
   onRemove: (slug: string) => void;
   onAttachCharm?: (weaponSlug: string, charmSlug: string) => void;
   onDetachCharm?: (weaponSlug: string) => void;
-  baseOptions?: { value: string; label: string }[];
+  baseOptions?: {
+    value: string;
+    label: string;
+    itemType?: string;
+    equipmentSlot?: string | null;
+  }[];
+  containerOptions?: { value: string; label: string }[];
   onAttachCoverage?: (
     baseItemSlug: string,
     coverageSlug: string,
@@ -59,6 +65,37 @@ type InventoryItemDetailProps = {
   /** Em campanha (player): remover vende por ½ do catálogo. */
   sellCreditApplies?: boolean;
 };
+
+function hostsForCoverageSlug(
+  coverageSlug: string,
+  options: Array<{
+    value: string;
+    label: string;
+    itemType?: string;
+    equipmentSlot?: string | null;
+  }>,
+) {
+  const slug = coverageSlug.toLowerCase();
+  if (slug.includes("escudo")) {
+    return options.filter(
+      (o) =>
+        o.equipmentSlot === "shield" ||
+        /escudo|shield/i.test(`${o.value} ${o.label}`),
+    );
+  }
+  if (slug.includes("armadura")) {
+    return options.filter(
+      (o) =>
+        o.itemType === "armor" &&
+        o.equipmentSlot !== "shield" &&
+        !/escudo|shield/i.test(`${o.value} ${o.label}`),
+    );
+  }
+  if (slug.includes("arma") || slug.includes("municao") || slug.includes("varinha")) {
+    return options.filter((o) => o.itemType === "weapon");
+  }
+  return options;
+}
 
 function isWeaponCharmSlug(slug: string): boolean {
   return slug.startsWith("weapon-charm-");
@@ -271,6 +308,7 @@ export function InventoryItemDetail({
   warnings,
   weaponOptions = [],
   baseOptions = [],
+  containerOptions = [],
   canBindPactWeapon = false,
   onToggleLocation,
   onToggleAttunement,
@@ -340,7 +378,11 @@ export function InventoryItemDetail({
     Boolean(item.isCoverage) &&
     item.location === "backpack" &&
     Boolean(onAttachCoverage) &&
-    baseOptions.length > 0;
+    hostsForCoverageSlug(item.itemSlug, baseOptions).length > 0;
+  const coverageHostOptions = hostsForCoverageSlug(
+    item.itemSlug,
+    baseOptions,
+  );
   const showDetach =
     Boolean(item.attachedCharmSlug) && Boolean(onDetachCharm);
   const showDetachCoverage =
@@ -407,6 +449,29 @@ export function InventoryItemDetail({
       ) : null}
 
       <InstancePropertiesSummary instanceProperties={item.instanceProperties} />
+
+      {containerOptions.length > 0 && item.location === "backpack" ? (
+        <div className="space-y-1">
+          <p className="text-[11px] font-medium text-muted-foreground">
+            Recipiente
+          </p>
+          <SearchableSelect
+            id={`container-${item.itemSlug}`}
+            value={item.containedInItemSlug ?? ""}
+            onValueChange={(next) =>
+              onPatch(item.itemSlug, {
+                containedInItemSlug: next.trim() ? next : null,
+              })
+            }
+            options={[
+              { value: "", label: "Mochila (raiz)" },
+              ...containerOptions.filter((c) => c.value !== item.itemSlug),
+            ]}
+            placeholder="Onde guardar…"
+            disabled={isPending}
+          />
+        </div>
+      ) : null}
 
       {warnings.length > 0 ? (
         <ul className="space-y-1">
@@ -517,7 +582,7 @@ export function InventoryItemDetail({
               value={attachBaseSlug}
               disabled={isPending}
               placeholder="Escolher peça…"
-              options={baseOptions}
+              options={coverageHostOptions}
               onValueChange={setAttachBaseSlug}
             />
           </label>
@@ -742,9 +807,15 @@ export function InventoryItemDetail({
           onClick={() => onRemove(item.itemSlug)}
         >
           <TrashIcon className="size-3.5" aria-hidden />
-          {sellHint ? `Remover (${sellHint})` : "Remover"}
+          {sellCreditApplies ? "Vender / descartar" : "Remover"}
         </Button>
       </div>
+      {item.consumable ? (
+        <p className="text-[11px] text-muted-foreground">
+          Consumível — ao usar (poção etc.), o efeito aparece nas ações de
+          economia / mesa; a quantidade diminui.
+        </p>
+      ) : null}
     </div>
   );
 }

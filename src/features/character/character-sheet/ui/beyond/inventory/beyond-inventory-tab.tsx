@@ -10,9 +10,7 @@ import type {
 import type { ClassOption } from "@/entities/character/sheet-types";
 import type { CoinPurse } from "@/entities/character/types";
 import type { EquipmentWarning } from "@/entities/character/types";
-import type { ItemSummary } from "@/entities/item/types";
 import {
-  useAddInventoryItem,
   useAttachCoverage,
   useAttachWeaponCharm,
   useCharacterInventory,
@@ -20,25 +18,21 @@ import {
   useDetachWeaponCharm,
   usePatchCharacterWealth,
   usePatchInventoryItem,
+  usePurchaseInventory,
   useRemoveInventoryItem,
 } from "@/features/character/character-sheet/api/use-character-inventory";
 import { readEldritchInvocationSlugs } from "@/features/character/character-sheet/lib/warlock/eldritch-invocations";
-import { BeyondCoinPurse, formatCoinPurse, parseCostTextClient, scaleCoinPurseClient } from "@/features/character/character-sheet/ui/beyond/inventory/beyond-coin-purse";
+import { BeyondCoinPurse } from "@/features/character/character-sheet/ui/beyond/inventory/beyond-coin-purse";
+import { BeyondEconomyBanner } from "@/features/character/character-sheet/ui/beyond/inventory/beyond-economy-banner";
+import {
+  BeyondShopDialog,
+  type BeyondShopCartLine,
+} from "@/features/character/character-sheet/ui/beyond/inventory/beyond-shop-dialog";
+import { BeyondSellDialog } from "@/features/character/character-sheet/ui/beyond/inventory/beyond-sell-dialog";
 import { MAX_ATTUNED_ITEMS } from "@/features/character/character-sheet/ui/beyond/inventory/inventory-item-meta";
 import { InventoryLocationSection } from "@/features/character/character-sheet/ui/beyond/inventory/inventory-location-section";
-import { QuantityStepper } from "@/features/character/character-sheet/ui/beyond/inventory/quantity-stepper";
-import { ItemPicker } from "@/features/catalog/item-catalog/ui/item-picker";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/shared/ui/dialog";
-import { FieldLabel } from "@/shared/ui/field";
 
 function isAmmunitionInventoryCandidate(item: InventoryItem): boolean {
   const slug = item.itemSlug.toLowerCase();
@@ -46,15 +40,16 @@ function isAmmunitionInventoryCandidate(item: InventoryItem): boolean {
   if (slug === "municao" || name === "munição" || name === "municao") {
     return true;
   }
-  if (
-    /aljava|estojo|quiver/.test(slug) ||
-    /aljava|estojo/.test(name)
-  ) {
+  if (/aljava|estojo|quiver/.test(slug) || /aljava|estojo/.test(name)) {
     return false;
   }
   return /flecha|virote|municao|munição|bala|agulha|arrow|bolt|bullet|needle/.test(
     `${slug} ${name}`,
   );
+}
+
+function isContainerSlug(slug: string): boolean {
+  return /^(mochila|saca|cesta|algibeira|bolsa|estojo|aljava)/i.test(slug);
 }
 
 type BeyondInventoryTabProps = {
@@ -64,10 +59,6 @@ type BeyondInventoryTabProps = {
   classOptions?: ClassOption[] | null;
 };
 
-/**
- * Inventário estilo Beyond: só itens (Equipado / Mochila).
- * Pacotes de criação viram itens no inventário (API).
- */
 export function BeyondInventoryTab({
   characterId,
   equipmentWarnings = [],
@@ -75,7 +66,7 @@ export function BeyondInventoryTab({
   classOptions,
 }: BeyondInventoryTabProps) {
   const inventory = useCharacterInventory(characterId);
-  const addItem = useAddInventoryItem(characterId);
+  const purchase = usePurchaseInventory(characterId);
   const patchItem = usePatchInventoryItem(characterId);
   const patchWealth = usePatchCharacterWealth(characterId);
   const removeItem = useRemoveInventoryItem(characterId);
@@ -84,11 +75,8 @@ export function BeyondInventoryTab({
   const attachCoverage = useAttachCoverage(characterId);
   const detachCoverage = useDetachCoverage(characterId);
 
-  const [addOpen, setAddOpen] = useState(false);
-  const [selectedSlug, setSelectedSlug] = useState("");
-  const [selectedItem, setSelectedItem] = useState<ItemSummary | null>(null);
-  const [newQty, setNewQty] = useState("1");
-  const [skipPayment, setSkipPayment] = useState(false);
+  const [shopOpen, setShopOpen] = useState(false);
+  const [sellTarget, setSellTarget] = useState<InventoryItem | null>(null);
 
   const canBindPactWeapon =
     classSlug === "warlock" &&
@@ -101,8 +89,11 @@ export function BeyondInventoryTab({
   const canSkipPayment =
     chargeApplies && Boolean(payment?.allowPlayerSkipPayment);
 
-  const equipped = items.filter((item) => item.location === "equipped");
-  const backpack = items.filter((item) => item.location === "backpack");
+  const rootItems = items.filter((item) => !item.containedInItemSlug);
+  const equipped = rootItems.filter((item) => item.location === "equipped");
+  const backpack = rootItems.filter((item) => item.location === "backpack");
+  const containers = backpack.filter((item) => isContainerSlug(item.itemSlug));
+
   const attunedCount =
     items.filter((item) => item.attuned).length +
     items.filter((item) => item.attachedCoverageAttuned).length;
@@ -111,10 +102,12 @@ export function BeyondInventoryTab({
     patchItem.isPending ||
     patchWealth.isPending ||
     removeItem.isPending ||
+    purchase.isPending ||
     attachCharm.isPending ||
     detachCharm.isPending ||
     attachCoverage.isPending ||
     detachCoverage.isPending;
+
   const weaponOptions = items
     .filter((item) => item.itemType === "weapon" && !item.isCoverage)
     .map((item) => ({ value: item.itemSlug, label: item.itemName }));
@@ -126,32 +119,16 @@ export function BeyondInventoryTab({
           item.itemType === "armor" ||
           isAmmunitionInventoryCandidate(item)),
     )
-    .map((item) => ({ value: item.itemSlug, label: item.itemName }));
-
-  function resetAddForm() {
-    setSelectedSlug("");
-    setSelectedItem(null);
-    setNewQty("1");
-    setSkipPayment(false);
-  }
-
-  const addQuantity = Math.max(1, Math.trunc(Number(newQty)) || 1);
-
-  function setAddQuantity(next: number) {
-    setNewQty(String(Math.max(1, Math.trunc(next) || 1)));
-  }
-
-  async function handleAdd(e: React.FormEvent) {
-    e.preventDefault();
-    if (!selectedSlug.trim()) return;
-    await addItem.mutateAsync({
-      itemSlug: selectedSlug.trim(),
-      quantity: addQuantity,
-      pay: chargeApplies ? !skipPayment : undefined,
-    });
-    resetAddForm();
-    setAddOpen(false);
-  }
+    .map((item) => ({
+      value: item.itemSlug,
+      label: item.itemName,
+      itemType: item.itemType,
+      equipmentSlot: item.equipmentSlot,
+    }));
+  const containerOptions = containers.map((item) => ({
+    value: item.itemSlug,
+    label: item.itemName,
+  }));
 
   function patchFields(slug: string, payload: PatchInventoryItemPayload) {
     patchItem.mutate({ itemSlug: slug, payload });
@@ -174,8 +151,23 @@ export function BeyondInventoryTab({
     patchWealth.mutate({ [key]: value });
   }
 
+  async function handleCheckout(input: {
+    lines: BeyondShopCartLine[];
+    pay: boolean;
+  }) {
+    await purchase.mutateAsync({
+      pay: input.pay,
+      lines: input.lines.map((line) => ({
+        itemSlug: line.item.slug,
+        quantity: line.quantity,
+        attachToBaseSlug: line.attachToBaseSlug,
+        attachCoverageBonus: line.attachCoverageBonus,
+      })),
+    });
+  }
+
   const mutationError =
-    addItem.error ??
+    purchase.error ??
     patchItem.error ??
     patchWealth.error ??
     removeItem.error ??
@@ -185,18 +177,44 @@ export function BeyondInventoryTab({
     detachCoverage.error ??
     inventory.error;
 
-  const priceNote = selectedItem?.costText
-    ? selectedItem.costText
-    : selectedItem
-      ? "Sem preço de catálogo"
-      : null;
-
-  const unitPurse = parseCostTextClient(selectedItem?.costText);
-  const totalPurse =
-    unitPurse && chargeApplies && !skipPayment
-      ? scaleCoinPurseClient(unitPurse, addQuantity)
-      : null;
-  const totalPriceLabel = totalPurse ? formatCoinPurse(totalPurse) : null;
+  const sectionProps = {
+    isPending,
+    attunementSlotsFull,
+    equipmentWarnings,
+    weaponOptions,
+    baseOptions,
+    containerOptions,
+    canBindPactWeapon,
+    onToggleLocation: toggleLocation,
+    onToggleAttunement: toggleAttunement,
+    onPatch: patchFields,
+    onRemove: (slug: string) => {
+      const item = items.find((row) => row.itemSlug === slug);
+      if (item && chargeApplies) {
+        setSellTarget(item);
+        return;
+      }
+      removeItem.mutate({ itemSlug: slug, options: { mode: "discard" } });
+    },
+    onAttachCharm: (weaponSlug: string, charmSlug: string) =>
+      attachCharm.mutate({ weaponSlug, charmSlug }),
+    onDetachCharm: (weaponSlug: string) => detachCharm.mutate(weaponSlug),
+    onAttachCoverage: (
+      baseItemSlug: string,
+      coverageSlug: string,
+      bonus?: 1 | 2 | 3,
+      spellSlug?: string,
+    ) =>
+      attachCoverage.mutate({
+        baseItemSlug,
+        coverageSlug,
+        bonus,
+        spellSlug,
+      }),
+    onDetachCoverage: (baseItemSlug: string) =>
+      detachCoverage.mutate(baseItemSlug),
+    sellCreditApplies: chargeApplies,
+  };
 
   return (
     <div className="space-y-4">
@@ -224,18 +242,21 @@ export function BeyondInventoryTab({
             size="xs"
             variant="outline"
             className="gap-1"
-            onClick={() => setAddOpen(true)}
+            onClick={() => setShopOpen(true)}
           >
             <PlusIcon className="size-3.5" aria-hidden />
-            Adicionar
+            {chargeApplies ? "Comprar" : "Adicionar"}
           </Button>
         </div>
       </div>
+
+      <BeyondEconomyBanner payment={payment} />
 
       {wealth ? (
         <BeyondCoinPurse
           wealth={wealth}
           disabled={patchWealth.isPending}
+          readOnly={chargeApplies}
           onChangeCoin={onChangeCoin}
         />
       ) : null}
@@ -268,66 +289,32 @@ export function BeyondInventoryTab({
             icon={ShieldCheckIcon}
             items={equipped}
             emptyMessage="Nada equipado — equipe algo da mochila."
-            isPending={isPending}
-            attunementSlotsFull={attunementSlotsFull}
-            equipmentWarnings={equipmentWarnings}
-            weaponOptions={weaponOptions}
-            baseOptions={baseOptions}
-            canBindPactWeapon={canBindPactWeapon}
-            onToggleLocation={toggleLocation}
-            onToggleAttunement={toggleAttunement}
-            onPatch={patchFields}
-            onRemove={(slug) => removeItem.mutate(slug)}
-            onAttachCharm={(weaponSlug, charmSlug) =>
-              attachCharm.mutate({ weaponSlug, charmSlug })
-            }
-            onDetachCharm={(weaponSlug) => detachCharm.mutate(weaponSlug)}
-            onAttachCoverage={(baseItemSlug, coverageSlug, bonus, spellSlug) =>
-              attachCoverage.mutate({
-                baseItemSlug,
-                coverageSlug,
-                bonus,
-                spellSlug,
-              })
-            }
-            onDetachCoverage={(baseItemSlug) =>
-              detachCoverage.mutate(baseItemSlug)
-            }
-            sellCreditApplies={chargeApplies}
+            {...sectionProps}
           />
           <InventoryLocationSection
             id="backpack"
             title="Mochila"
             icon={ArchiveBoxIcon}
             items={backpack}
-            emptyMessage="Mochila vazia — adicione itens do catálogo."
-            isPending={isPending}
-            attunementSlotsFull={attunementSlotsFull}
-            equipmentWarnings={equipmentWarnings}
-            weaponOptions={weaponOptions}
-            baseOptions={baseOptions}
-            canBindPactWeapon={canBindPactWeapon}
-            onToggleLocation={toggleLocation}
-            onToggleAttunement={toggleAttunement}
-            onPatch={patchFields}
-            onRemove={(slug) => removeItem.mutate(slug)}
-            onAttachCharm={(weaponSlug, charmSlug) =>
-              attachCharm.mutate({ weaponSlug, charmSlug })
-            }
-            onDetachCharm={(weaponSlug) => detachCharm.mutate(weaponSlug)}
-            onAttachCoverage={(baseItemSlug, coverageSlug, bonus, spellSlug) =>
-              attachCoverage.mutate({
-                baseItemSlug,
-                coverageSlug,
-                bonus,
-                spellSlug,
-              })
-            }
-            onDetachCoverage={(baseItemSlug) =>
-              detachCoverage.mutate(baseItemSlug)
-            }
-            sellCreditApplies={chargeApplies}
+            emptyMessage="Mochila vazia — compre ou adicione itens."
+            {...sectionProps}
           />
+          {containers.map((container) => {
+            const nested = items.filter(
+              (item) => item.containedInItemSlug === container.itemSlug,
+            );
+            return (
+              <InventoryLocationSection
+                key={container.itemSlug}
+                id={`container-${container.itemSlug}`}
+                title={container.itemName}
+                icon={ArchiveBoxIcon}
+                items={nested}
+                emptyMessage="Vazio — mova itens para este recipiente no detalhe."
+                {...sectionProps}
+              />
+            );
+          })}
         </div>
       )}
 
@@ -339,107 +326,34 @@ export function BeyondInventoryTab({
         </p>
       ) : null}
 
-      <Dialog
-        open={addOpen}
+      <BeyondShopDialog
+        open={shopOpen}
+        onOpenChange={setShopOpen}
+        chargeApplies={chargeApplies}
+        canSkipPayment={canSkipPayment}
+        viewerIsDmOrAssistant={Boolean(payment?.viewerIsDmOrAssistant)}
+        wealth={wealth}
+        inventoryItems={items}
+        pending={purchase.isPending}
+        onCheckout={handleCheckout}
+      />
+
+      <BeyondSellDialog
+        item={sellTarget}
+        open={sellTarget != null}
         onOpenChange={(open) => {
-          setAddOpen(open);
-          if (!open) resetAddForm();
+          if (!open) setSellTarget(null);
         }}
-      >
-        <DialogContent className="sm:max-w-xl" aria-describedby={undefined}>
-          <form
-            onSubmit={handleAdd}
-            className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden"
-          >
-            <DialogHeader>
-              <DialogTitle>Adicionar item</DialogTitle>
-              <DialogDescription>
-                {chargeApplies
-                  ? "O preço do catálogo será debitado das suas moedas."
-                  : payment?.viewerIsDmOrAssistant
-                    ? "Presente do mestre — sem cobrança."
-                    : "Filtre o catálogo e escolha um item para a mochila."}
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="min-h-0 flex-1 overflow-hidden">
-              <ItemPicker
-                id="inventory-item"
-                value={selectedSlug}
-                onChange={setSelectedSlug}
-                onItemChange={setSelectedItem}
-                disabled={addItem.isPending}
-              />
-            </div>
-
-            {priceNote ? (
-              <p className="font-mono text-xs text-muted-foreground">
-                Preço: {priceNote}
-                {addQuantity > 1 && selectedItem?.costText
-                  ? ` × ${addQuantity}`
-                  : ""}
-                {totalPriceLabel
-                  ? ` → debitar ${totalPriceLabel} (com câmbio)`
-                  : ""}
-              </p>
-            ) : null}
-
-            {chargeApplies ? (
-              <p className="text-[11px] text-muted-foreground">
-                Remover item na campanha vende por metade do catálogo (PHB).
-              </p>
-            ) : null}
-
-            {canSkipPayment ? (
-              <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={skipPayment}
-                  onChange={(e) => setSkipPayment(e.target.checked)}
-                  disabled={addItem.isPending}
-                />
-                Não pagar
-              </label>
-            ) : null}
-
-            <DialogFooter className="flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex w-full items-center justify-between gap-3 sm:w-auto">
-                <FieldLabel htmlFor="item-qty" className="shrink-0">
-                  Quantidade
-                </FieldLabel>
-                <QuantityStepper
-                  id="item-qty"
-                  value={newQty}
-                  onChange={setNewQty}
-                  onCommit={setAddQuantity}
-                  disabled={addItem.isPending}
-                  ariaLabel="Quantidade a adicionar"
-                />
-              </div>
-              <div className="flex w-full flex-wrap justify-end gap-2 sm:w-auto">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setAddOpen(false)}
-                  disabled={addItem.isPending}
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={addItem.isPending || !selectedSlug.trim()}
-                >
-                  {addItem.isPending
-                    ? "Adicionando…"
-                    : addQuantity > 1
-                      ? `Adicionar ×${addQuantity}`
-                      : "Adicionar"}
-                </Button>
-              </div>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+        pending={removeItem.isPending}
+        onConfirm={async ({ quantity, mode }) => {
+          if (!sellTarget) return;
+          await removeItem.mutateAsync({
+            itemSlug: sellTarget.itemSlug,
+            options: { quantity, mode },
+          });
+          setSellTarget(null);
+        }}
+      />
     </div>
   );
 }

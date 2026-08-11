@@ -30,6 +30,8 @@ const COIN_ROWS: Array<{
 type BeyondCoinPurseProps = {
   wealth: CoinPurse;
   disabled?: boolean;
+  /** Player em campanha: saldo só muda via compra/venda. */
+  readOnly?: boolean;
   onChangeCoin: (key: keyof CoinPurse, value: number) => void;
 };
 
@@ -40,10 +42,11 @@ export function purseToCopperClient(purse: CoinPurse): number {
   );
 }
 
-/** Saldo das 5 moedas + steppers para ajuste (dono/DM). */
+/** Saldo das 5 moedas + steppers (ou read-only sob economia ativa). */
 export function BeyondCoinPurse({
   wealth,
   disabled,
+  readOnly,
   onChangeCoin,
 }: BeyondCoinPurseProps) {
   const totalCopper = purseToCopperClient(wealth);
@@ -62,8 +65,9 @@ export function BeyondCoinPurse({
         </p>
       </div>
       <p className="text-[11px] leading-snug text-muted-foreground">
-        Câmbio PHB: 100 PC = 10 PP = 2 PE = 1 PO = 1/10 PL. A loja aceita
-        qualquer mistura.
+        {readOnly
+          ? "Saldo (compra/venda usa câmbio PHB). Edição manual bloqueada na economia ativa."
+          : "Câmbio PHB: 100 PC = 10 PP = 2 PE = 1 PO = 1/10 PL."}
       </p>
       <div className="grid gap-2 sm:grid-cols-5">
         {COIN_ROWS.map((row) => (
@@ -80,15 +84,24 @@ export function BeyondCoinPurse({
             >
               {row.label}
             </FieldLabel>
-            <QuantityStepper
-              id={`coin-${row.key}`}
-              value={String(wealth[row.key])}
-              onChange={() => undefined}
-              onCommit={(next) => onChangeCoin(row.key, Math.max(0, next))}
-              disabled={disabled}
-              ariaLabel={`${row.title} (${row.label})`}
-              min={0}
-            />
+            {readOnly ? (
+              <span
+                id={`coin-${row.key}`}
+                className="font-mono text-sm tabular-nums"
+              >
+                {wealth[row.key]}
+              </span>
+            ) : (
+              <QuantityStepper
+                id={`coin-${row.key}`}
+                value={String(wealth[row.key])}
+                onChange={() => undefined}
+                onCommit={(next) => onChangeCoin(row.key, Math.max(0, next))}
+                disabled={disabled}
+                ariaLabel={`${row.title} (${row.label})`}
+                min={0}
+              />
+            )}
           </div>
         ))}
       </div>

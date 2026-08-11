@@ -2,10 +2,6 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import type {
-  AddInventoryItemPayload,
-  PatchInventoryItemPayload,
-} from "@/entities/character/session-types";
 import {
   addInventoryItem,
   attachCoverage,
@@ -15,8 +11,15 @@ import {
   fetchCharacterInventory,
   inventoryKeys,
   patchInventoryItem,
+  purchaseInventory,
   removeInventoryItem,
 } from "@/features/character/character-sheet/api/character-inventory.api";
+import type {
+  AddInventoryItemPayload,
+  PatchInventoryItemPayload,
+  PurchaseInventoryPayload,
+  RemoveInventoryOptions,
+} from "@/entities/character/session-types";
 import { CHARACTER_INVENTORY_STALE_MS } from "@/features/character/characters/api/character-query";
 import { patchCharacterWealth } from "@/features/character/characters/api/characters.api";
 import { charactersKeys } from "@/features/character/characters/api/characters.api";
@@ -124,6 +127,24 @@ export function usePatchCharacterWealth(characterId: string) {
   });
 }
 
+export function usePurchaseInventory(characterId: string) {
+  const { requireToken, handleUnauthorized } = useGameAuth(
+    `/characters/${characterId}`,
+  );
+  const invalidate = useInvalidateInventory(characterId);
+
+  return useMutation({
+    mutationFn: async (payload: PurchaseInventoryPayload) => {
+      try {
+        return await purchaseInventory(requireToken(), characterId, payload);
+      } catch (error) {
+        return handleUnauthorized(error);
+      }
+    },
+    onSuccess: invalidate,
+  });
+}
+
 export function useRemoveInventoryItem(characterId: string) {
   const { requireToken, handleUnauthorized } = useGameAuth(
     `/characters/${characterId}`,
@@ -131,9 +152,20 @@ export function useRemoveInventoryItem(characterId: string) {
   const invalidate = useInvalidateInventory(characterId);
 
   return useMutation({
-    mutationFn: async (itemSlug: string) => {
+    mutationFn: async ({
+      itemSlug,
+      options,
+    }: {
+      itemSlug: string;
+      options?: RemoveInventoryOptions;
+    }) => {
       try {
-        await removeInventoryItem(requireToken(), characterId, itemSlug);
+        await removeInventoryItem(
+          requireToken(),
+          characterId,
+          itemSlug,
+          options,
+        );
       } catch (error) {
         return handleUnauthorized(error);
       }

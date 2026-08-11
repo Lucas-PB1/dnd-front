@@ -172,6 +172,8 @@ export type InventoryItem = {
   instanceProperties?: Record<string, unknown> | null;
   /** Preço de catálogo (compra/venda). */
   costText?: string | null;
+  /** Recipiente (bolsa/saca/…); null = raiz. */
+  containedInItemSlug?: string | null;
 };
 
 export type InventoryEncumbrance = {
@@ -222,6 +224,26 @@ export type PatchInventoryItemPayload = {
   boundSpellSlug?: string | null;
   /** Marcar / desmarcar Arma de Pacto (Bruxo · Pacto da Lâmina). */
   pactWeapon?: boolean;
+  /** Mover para recipiente ou null = raiz. */
+  containedInItemSlug?: string | null;
+};
+
+export type PurchaseInventoryLine = {
+  itemSlug: string;
+  quantity?: number;
+  attachCoverageSlug?: string;
+  attachCoverageBonus?: 1 | 2 | 3;
+  attachToBaseSlug?: string;
+};
+
+export type PurchaseInventoryPayload = {
+  lines: PurchaseInventoryLine[];
+  pay?: boolean;
+};
+
+export type RemoveInventoryOptions = {
+  quantity?: number;
+  mode?: "sell" | "discard";
 };
 
 /** Espelha LevelUpPreviewDto */
