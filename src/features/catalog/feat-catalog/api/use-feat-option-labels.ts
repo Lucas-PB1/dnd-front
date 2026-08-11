@@ -43,7 +43,7 @@ export function useFeatOptionLabels({
     enabled: slugs.length > 0,
   });
 
-  const tools = useItems({ itemType: "tool", limit: 200, fields: "summary" });
+  const tools = useItems({ itemType: "tool", limit: 100, fields: "summary" });
   const featsCatalog = useFeatLabels();
 
   const featLabels = useMemo(

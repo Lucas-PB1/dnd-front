@@ -106,12 +106,25 @@ export function StepBackground({
       {bg.toolProficiencyKind === "choice" ? (
         <CatalogSelect
           id="background-tool"
-          label="Ferramenta"
+          label={
+            bg.toolCategorySlug === "instrument"
+              ? "Instrumento musical"
+              : bg.toolCategorySlug === "kit"
+                ? "Kit de jogos"
+                : bg.toolCategorySlug === "artisan"
+                  ? "Ferramentas de artesão"
+                  : "Ferramenta"
+          }
           options={toolOptions}
           isLoading={tools.isPending}
           value={toolSlug}
           onChange={(e) => setValue("backgroundToolItemSlug", e.target.value)}
-          error={errors.backgroundToolItemSlug}
+          error={
+            errors.backgroundToolItemSlug ??
+            (tools.isError
+              ? { message: "Não foi possível carregar as opções de ferramenta." }
+              : undefined)
+          }
         />
       ) : null}
     </WizardFormSection>

@@ -1,5 +1,3 @@
-"use client";
-
 import type { CharacterFeat, FeatOption } from "@/entities/character/sheet-types";
 import type { FeatOptionDefinition } from "@/entities/feat/types";
 import {
@@ -7,6 +5,7 @@ import {
   siblingFeatOptionValueIds,
 } from "@/features/character/create-character/lib/class-skills/granted-proficiencies";
 import { applyFeatOptionChange } from "@/features/catalog/feat-catalog/lib/apply-feat-option-change";
+import { resolveFeatProficiencyOptions } from "@/features/catalog/feat-catalog/lib/resolve-feat-proficiency-options";
 import { CatalogSelect } from "@/features/character/create-character/ui/catalog-select";
 
 type CatalogOption = {
@@ -35,12 +34,10 @@ export function FeatOptionProficiencyField({
   grantedProficiencySlugs,
   catalogLoading,
 }: FeatOptionProficiencyFieldProps) {
-  const whitelist = def.values?.length
-    ? def.values.map((item) => ({
-        value: item.valueId,
-        label: item.label,
-      }))
-    : catalogProficiencyOptions;
+  const whitelist = resolveFeatProficiencyOptions(
+    def,
+    catalogProficiencyOptions,
+  );
   const siblingTaken = siblingFeatOptionValueIds(
     value,
     feat.featSlug,
@@ -52,6 +49,7 @@ export function FeatOptionProficiencyField({
     [...grantedProficiencySlugs, ...siblingTaken],
     selected,
   );
+  const usesApiWhitelist = (def.values?.length ?? 0) > 0;
 
   return (
     <CatalogSelect
@@ -59,7 +57,7 @@ export function FeatOptionProficiencyField({
       label={def.label}
       description="Se já tiver a proficiência, escolha outra."
       options={options}
-      isLoading={!def.values?.length && catalogLoading}
+      isLoading={!usesApiWhitelist && catalogLoading && options.length === 0}
       value={selected}
       onChange={(e) =>
         onChange(

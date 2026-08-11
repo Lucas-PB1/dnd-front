@@ -59,6 +59,7 @@ export function CatalogSelect({
       {showLabel ? <FieldLabel htmlFor={id}>{label}</FieldLabel> : null}
       {description ? <FieldDescription>{description}</FieldDescription> : null}
       <SearchableSelect
+        key={`${id}-${selectOptions.length}-${selectOptions[1]?.value ?? ""}`}
         id={id}
         name={name}
         options={selectOptions}

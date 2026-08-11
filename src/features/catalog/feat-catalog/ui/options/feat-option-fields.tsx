@@ -76,7 +76,7 @@ export function FeatOptionFields({
   const classSpellsLevel1 = useClassSpells(spellList ?? "", 1, !!spellList);
   const allSpells = useSpellLabels();
   const skills = useSkills();
-  const tools = useItems({ itemType: "tool", limit: 200, fields: "summary" });
+  const tools = useItems({ itemType: "tool", limit: 100, fields: "summary" });
 
   const catalogProficiencyOptions = useMemo(() => {
     const skillOpts = (skills.data?.data ?? []).map((skill) => ({
@@ -99,6 +99,14 @@ export function FeatOptionFields({
 
   if (optionsQuery.isPending || proficiencyBonus === undefined) {
     return <p className="text-sm text-muted-foreground">Carregando opções…</p>;
+  }
+
+  if (optionsQuery.isError) {
+    return (
+      <p className="text-sm text-destructive" role="alert">
+        Não foi possível carregar as opções deste talento.
+      </p>
+    );
   }
 
   if (defs.length === 0) {
