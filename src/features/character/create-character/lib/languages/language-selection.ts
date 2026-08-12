@@ -2,6 +2,44 @@
  * Idiomas iniciais PHB 2024 — concedidos pelo antecedente (API).
  */
 
+import {
+  DRUIDIC_LANGUAGE_SLUG,
+  THIEVES_CANT_LANGUAGE_SLUG,
+} from "@/entities/character/lib/class-language-grant";
+
+export const CLASS_EXCLUSIVE_LANGUAGE_SLUGS = [
+  DRUIDIC_LANGUAGE_SLUG,
+  THIEVES_CANT_LANGUAGE_SLUG,
+] as const;
+
+const CLASS_EXCLUSIVE_SET = new Set<string>(CLASS_EXCLUSIVE_LANGUAGE_SLUGS);
+
+export type LanguageCatalogEntry = {
+  slug: string;
+  isRare: boolean;
+};
+
+/** PHB 2024: escolhas usam idiomas padrão; Druídico/Gíria só por classe. */
+export function isPickableLanguage(
+  slug: string,
+  language: LanguageCatalogEntry,
+): boolean {
+  if (language.isRare) return false;
+  if (CLASS_EXCLUSIVE_SET.has(slug)) return false;
+  return true;
+}
+
+export function filterPickableLanguages<T extends LanguageCatalogEntry>(
+  catalog: T[],
+  granted: string[],
+): T[] {
+  const grantedSet = new Set(granted);
+  return catalog.filter(
+    (language) =>
+      !grantedSet.has(language.slug) && isPickableLanguage(language.slug, language),
+  );
+}
+
 export type BackgroundLanguageGrant = {
   grantedSlugs: string[];
   choiceCount: number;
@@ -70,9 +108,15 @@ export function syncLanguagesForBackground(
     extraGrantedSlugs?: string[];
     extraChoiceCount?: number;
   } | null,
+  catalog?: LanguageCatalogEntry[],
 ): string[] {
   const { granted, choiceCount } = languageQuota(grant);
-  const chosen = chosenLanguageSlugs(selected, granted).slice(0, choiceCount);
+  const pickable = catalog
+    ? new Set(filterPickableLanguages(catalog, granted).map((row) => row.slug))
+    : null;
+  const chosen = chosenLanguageSlugs(selected, granted)
+    .filter((slug) => !pickable || pickable.has(slug))
+    .slice(0, choiceCount);
   return [...granted, ...chosen];
 }
 
@@ -85,6 +129,7 @@ export function toggleLanguageSelection(
     extraGrantedSlugs?: string[];
     extraChoiceCount?: number;
   } | null,
+  catalog?: LanguageCatalogEntry[],
 ): { ok: true; next: string[] } | { ok: false; reason: string } {
   const { granted, choiceCount, maxTotal } = languageQuota(grant);
   const grantedSet = new Set(granted);
@@ -93,6 +138,14 @@ export function toggleLanguageSelection(
     return {
       ok: false,
       reason: "Este idioma é concedido e não pode ser removido.",
+    };
+  }
+
+  const language = catalog?.find((row) => row.slug === slug);
+  if (language && !isPickableLanguage(slug, language)) {
+    return {
+      ok: false,
+      reason: "Escolha apenas idiomas padrão do PHB (não raros).",
     };
   }
 

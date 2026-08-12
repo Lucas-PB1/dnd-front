@@ -6,6 +6,7 @@ import { useWatch } from "react-hook-form";
 
 import { classLanguageGrant } from "@/entities/character/lib/class-language-grant";
 import {
+  filterPickableLanguages,
   languageQuota,
   syncLanguagesForBackground,
   toggleLanguageSelection,
@@ -74,6 +75,11 @@ export function StepLanguages({ control, setValue }: StepLanguagesProps) {
   );
 
   const quota = useMemo(() => languageQuota(grant), [grant]);
+  const catalog = languages.data?.data ?? [];
+  const pickableLanguages = useMemo(
+    () => filterPickableLanguages(catalog, quota.granted),
+    [catalog, quota.granted],
+  );
   const grantReady =
     !!backgroundSlug &&
     !background.isPending &&
@@ -83,25 +89,26 @@ export function StepLanguages({ control, setValue }: StepLanguagesProps) {
 
   useEffect(() => {
     if (!grantReady) return;
-    const next = syncLanguagesForBackground(selected, grant);
+    const next = syncLanguagesForBackground(selected, grant, catalog);
     const same =
       next.length === selected.length &&
       next.every((slug, i) => slug === selected[i]);
     if (!same) {
       setValue("languageSlugs", next, { shouldDirty: true });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- sync por antecedente/classe
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- sync por antecedente/classe/catálogo
   }, [
     grantReady,
     grant.grantedSlugs.join(","),
     grant.languageChoiceCount,
     classGrant.grantedSlugs.join(","),
     classGrant.choiceCount,
+    catalog.map((row) => row.slug).join(","),
     setValue,
   ]);
 
   function toggle(slug: string) {
-    const result = toggleLanguageSelection(selected, slug, grant);
+    const result = toggleLanguageSelection(selected, slug, grant, catalog);
     if (!result.ok) {
       setHint(result.reason);
       return;
@@ -121,7 +128,7 @@ export function StepLanguages({ control, setValue }: StepLanguagesProps) {
                 ? "Selecione um antecedente para ver a cota de idiomas."
                 : quota.choiceCount === 0
                   ? "Seus idiomas vêm do antecedente e da classe — sem escolha extra."
-                  : `Concedidos ${quota.granted.length} idioma(s) + ${quota.choiceCount} à escolha.`}
+                  : `Concedidos ${quota.granted.length} idioma(s) + ${quota.choiceCount} à escolha (idiomas padrão).`}
             </p>
           </div>
           <p className="tabular-nums text-sm font-semibold">
@@ -160,42 +167,34 @@ export function StepLanguages({ control, setValue }: StepLanguagesProps) {
 
         {languages.isPending || !grantReady ? (
           <p className="text-sm text-muted-foreground">Carregando…</p>
+        ) : quota.choiceCount === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            Nenhuma escolha extra — revise os concedidos acima.
+          </p>
         ) : (
           <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {(languages.data?.data ?? []).map((lang) => {
-              const granted = quota.granted.includes(lang.slug);
+            {pickableLanguages.map((lang) => {
               const checked = selected.includes(lang.slug);
               const atLimit =
-                !checked && !granted && chosenCount >= quota.choiceCount;
+                !checked && chosenCount >= quota.choiceCount;
               return (
                 <li key={lang.slug}>
                   <label
                     className={cn(
-                      "flex cursor-pointer items-center gap-2 rounded-lg border px-2.5 py-2 text-sm",
+                      "flex h-11 cursor-pointer items-center gap-2 rounded-lg border px-2.5 text-sm",
                       checked && "border-primary bg-primary/5",
-                      granted && "border-primary/40 bg-primary/5",
                       atLimit && "cursor-not-allowed opacity-50",
                     )}
                   >
                     <input
                       type="checkbox"
                       checked={checked}
-                      disabled={granted || atLimit}
+                      disabled={atLimit}
                       onChange={() => toggle(lang.slug)}
-                      className="size-4 rounded border-input"
+                      className="size-4 shrink-0 rounded border-input"
                     />
-                    <span className="min-w-0">
-                      <span className="font-medium">{lang.name}</span>
-                      {granted ? (
-                        <span className="mt-0.5 block text-[10px] tracking-wide text-muted-foreground uppercase">
-                          Concedido
-                        </span>
-                      ) : null}
-                      {lang.isRare && !granted ? (
-                        <span className="mt-0.5 block text-[10px] text-muted-foreground">
-                          Raro
-                        </span>
-                      ) : null}
+                    <span className="min-w-0 truncate font-medium">
+                      {lang.name}
                     </span>
                   </label>
                 </li>
