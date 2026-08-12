@@ -16,7 +16,7 @@ export function useCoverageBaseItems(
 ) {
   const itemType = params?.itemType;
   return useQuery({
-    queryKey: [...itemKeys.list({ itemType, excludeCoverage: true, allPages: true })],
+    queryKey: [...itemKeys.list({ itemType, excludeCoverage: true })],
     queryFn: () =>
       fetchAllItems({
         itemType,

@@ -40,7 +40,7 @@ export function filterStarryFormPanelActions(
         state.stellarConstellation &&
         action.slug === `starry-form-${state.stellarConstellation}`
       ) {
-        return { ...action, resourceSlug: null };
+        return { ...action, resourceSlug: undefined };
       }
       return action;
     });

@@ -162,6 +162,7 @@ export function itemCatalogListQuickHint(
       | {
           type?: string;
           base?: number;
+          bonus?: number;
           dexMax?: number;
           dexCap?: number | null;
         }

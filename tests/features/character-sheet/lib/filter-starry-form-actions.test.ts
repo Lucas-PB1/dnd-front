@@ -16,6 +16,7 @@ describe("filterStarryFormPanelActions", () => {
       section: "subclass" as const,
       sortOrder: 1,
       resourceSlug: "wildShape",
+      spendsFocus: false,
     },
     {
       panelKey: "b",
@@ -26,6 +27,7 @@ describe("filterStarryFormPanelActions", () => {
       section: "subclass" as const,
       sortOrder: 2,
       resourceSlug: "wildShape",
+      spendsFocus: false,
     },
     {
       panelKey: "c",
@@ -35,7 +37,8 @@ describe("filterStarryFormPanelActions", () => {
       minLevel: 3,
       section: "subclass" as const,
       sortOrder: 3,
-      resourceSlug: null,
+      resourceSlug: undefined,
+      spendsFocus: false,
     },
   ];
 
@@ -57,7 +60,7 @@ describe("filterStarryFormPanelActions", () => {
       "starry-form-archer",
       "starry-form-end",
     ]);
-    expect(filtered[0]?.resourceSlug).toBeNull();
+    expect(filtered[0]?.resourceSlug).toBeUndefined();
   });
 });
 

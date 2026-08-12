@@ -92,7 +92,7 @@ export function DetailTileGrid({
           if (!open) setActiveId(null);
         }}
       >
-        <DialogContent className="flex max-h-[min(92vh,40rem)] flex-col gap-3 overflow-hidden sm:max-w-lg">
+        <DialogContent className="flex max-h-[min(92vh,44rem)] flex-col gap-3 overflow-hidden sm:max-w-2xl">
           {active ? (
             <>
               <DialogHeader className="shrink-0">

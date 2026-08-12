@@ -118,6 +118,7 @@ describe("coverage-base-option-label", () => {
           attuned: false,
           effectsActive: false,
           effectsStatus: "inactive_unequipped",
+          requiresAttunement: false,
           weightKg: 27,
         },
         {
