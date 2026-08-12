@@ -80,6 +80,11 @@ export function useStepSpeciesChoices(
       control,
       name: "backgroundToolItemSlug",
     }) ?? "";
+  const backgroundOriginFeatSlug =
+    useWatch({
+      control,
+      name: "backgroundOriginFeatSlug",
+    }) ?? "";
 
   const traitChoices = useSpeciesTraitChoices(speciesSlug, !!speciesSlug);
   const backgroundDetail = useBackgroundDetail(
@@ -111,13 +116,21 @@ export function useStepSpeciesChoices(
   const featSlugsFromOtherSources = useMemo(
     () =>
       featSlugsGrantedOutsideSpecies({
-        backgroundOriginFeatSlug: backgroundDetail.data?.originFeatSlug,
+        backgroundOriginFeatSlug:
+          backgroundDetail.data?.originFeatSlug?.trim() ||
+          backgroundOriginFeatSlug?.trim() ||
+          null,
         asiFeatSlotSlugs,
         selectedOriginFeatSlug: speciesChoices.find(
           (choice) => choice.choiceKind === HUMAN_ORIGIN_FEAT_KIND,
         )?.choiceSlug,
       }),
-    [asiFeatSlotSlugs, backgroundDetail.data?.originFeatSlug, speciesChoices],
+    [
+      asiFeatSlotSlugs,
+      backgroundDetail.data?.originFeatSlug,
+      backgroundOriginFeatSlug,
+      speciesChoices,
+    ],
   );
 
   const groups = useMemo((): SpeciesTraitChoiceGroup[] => {
@@ -132,12 +145,21 @@ export function useStepSpeciesChoices(
     const elfLineage = speciesChoices.find(
       (c) => c.choiceKind === "elf_lineage",
     )?.choiceSlug;
+    const bearfolkLineage = speciesChoices.find(
+      (c) => c.choiceKind === "bearfolk_lineage",
+    )?.choiceSlug;
     const geppettinConstruction = speciesChoices.find(
       (c) => c.choiceKind === "geppettin_construction",
     )?.choiceSlug;
 
     for (const row of traitChoices.data?.data ?? []) {
       if (row.choiceKind === "high_elf_cantrip" && elfLineage !== "high-elf") {
+        continue;
+      }
+      if (
+        row.choiceKind === "andari_druid_cantrip" &&
+        bearfolkLineage !== "andari"
+      ) {
         continue;
       }
       if (
@@ -181,11 +203,18 @@ export function useStepSpeciesChoices(
   const previewFeats = useMemo(
     () =>
       resolveCreateCharacterFeats(
-        backgroundDetail.data?.originFeatSlug ?? null,
+        backgroundDetail.data?.originFeatSlug?.trim() ||
+          backgroundOriginFeatSlug?.trim() ||
+          null,
         asiFeatSlotsToCharacterFeats(asiFeatSlotSlugs),
         speciesChoices,
       ),
-    [asiFeatSlotSlugs, backgroundDetail.data?.originFeatSlug, speciesChoices],
+    [
+      asiFeatSlotSlugs,
+      backgroundDetail.data?.originFeatSlug,
+      backgroundOriginFeatSlug,
+      speciesChoices,
+    ],
   );
 
   const humanOriginFeatKeys = useMemo(() => {
@@ -208,10 +237,15 @@ export function useStepSpeciesChoices(
     if (kind === "elf_lineage" && slug !== "high-elf") {
       next = next.filter((c) => c.choiceKind !== "high_elf_cantrip");
     }
+    if (kind === "bearfolk_lineage" && slug !== "andari") {
+      next = next.filter((c) => c.choiceKind !== "andari_druid_cantrip");
+    }
     setValue("speciesChoices", next);
 
     const nextPreview = resolveCreateCharacterFeats(
-      backgroundDetail.data?.originFeatSlug ?? null,
+      backgroundDetail.data?.originFeatSlug?.trim() ||
+        backgroundOriginFeatSlug?.trim() ||
+        null,
       asiFeatSlotsToCharacterFeats(asiFeatSlotSlugs),
       next,
     );

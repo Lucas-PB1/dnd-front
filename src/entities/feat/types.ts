@@ -32,6 +32,21 @@ export type FeatSummary = {
   requiresSpellcasting: boolean;
   requiredArmorTrainingSlug: string | null;
   requiresFightingStyle: boolean;
+  requiresWeaponMastery: boolean;
+  /** Talentos que devem constar na ficha antes deste. */
+  requiredFeatSlugs: string[];
+  /** Perícias exigidas (todas). */
+  requiredSkillSlugs: string[];
+  /** Espécies aceitas (qualquer uma). */
+  requiredSpeciesSlugs: string[];
+  /** Proficiências de arma exigidas (todas). */
+  requiredWeaponProficiencySlugs: string[];
+  /** Opções de talento já adquirido exigidas. */
+  requiredFeatOptions: {
+    featSlug: string;
+    optionKey: string;
+    valueId: string;
+  }[];
   sourceChapter: number | null;
   sourceChapterTitle: string | null;
   editionSlug: string | null;

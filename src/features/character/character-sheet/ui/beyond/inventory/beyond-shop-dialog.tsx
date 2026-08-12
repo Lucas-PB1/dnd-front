@@ -464,16 +464,18 @@ export function BeyondShopDialog({
           </aside>
         </div>
 
-        <DialogFooter className="shrink-0 border-t border-border/70 px-4 py-3">
+        <DialogFooter className="mx-0 mb-0 shrink-0 gap-3 border-t border-border/70 px-4 py-3 sm:gap-3">
           <Button
             type="button"
             variant="ghost"
+            className="px-4"
             onClick={() => handleOpenChange(false)}
           >
             Cancelar
           </Button>
           <Button
             type="button"
+            className="px-4"
             disabled={cart.length === 0 || pending || insufficient}
             onClick={() => void handleCheckout()}
           >

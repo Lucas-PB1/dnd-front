@@ -5,7 +5,7 @@ export default function CompendiumPage() {
   return (
     <CatalogShell
       title="Compêndio"
-      description="PHB 2024 e Valdas Spire — classes, espécies, subclasses, talentos, equipamento e magias. Filtre as fontes no topo."
+      description="PHB 2024, Valdas Spire e Eldritch Hunt — classes, espécies, subclasses, talentos, equipamento e magias. Filtre as fontes no topo."
     >
       <CompendiumHub />
     </CatalogShell>

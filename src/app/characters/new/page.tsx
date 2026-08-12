@@ -11,7 +11,7 @@ export default function NewCharacterPage() {
     <AppPageShell mainClassName="gap-4 py-4 sm:py-6">
       <PageHeader
         title="Nova ficha"
-        description="Monte o personagem passo a passo — regras PHB 2024 e Valdas."
+            description="Monte o personagem passo a passo — regras PHB 2024, Valdas e Eldritch Hunt."
         backHref="/characters"
         backLabel="Fichas"
         actions={

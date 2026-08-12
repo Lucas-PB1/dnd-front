@@ -90,12 +90,19 @@ export function CreateCharacterWizard() {
     isSubclassRequired(level) && !!subclassSlug,
   );
   const originFeatSlug = backgroundDetail.data?.originFeatSlug ?? "";
+  const originFeatChoiceSlugs =
+    backgroundDetail.data?.originFeatChoiceSlugs ?? [];
+  const hasOriginFeatChoice =
+    !originFeatSlug && originFeatChoiceSlugs.length > 0;
   const asiSlotCount = countAsiFeatSlots(classSlug, level);
   const hasFightingStylePick =
     classHasFightingStylePick(classSlug, level) &&
     (classDetail.data?.fightingStyleSlugs?.length ?? 0) > 0;
   const hasFeatsStep =
-    !!originFeatSlug || asiSlotCount > 0 || hasFightingStylePick;
+    !!originFeatSlug ||
+    hasOriginFeatChoice ||
+    asiSlotCount > 0 ||
+    hasFightingStylePick;
   const { hasSpellStep } = useWizardHasSpellStep(
     classSlug,
     subclassSlug ?? "",

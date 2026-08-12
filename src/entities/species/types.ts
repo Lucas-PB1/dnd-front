@@ -10,6 +10,8 @@ export type SpeciesSummary = {
   speed: string;
   description: string;
   editionSlug?: string | null;
+  /** Espécie-base quando esta linha é variante cultural (ex.: baugsmidr-dwarf → dwarf). */
+  variantOf?: string | null;
 };
 
 export type SpeciesListResponse = PaginatedResponse<SpeciesSummary>;
@@ -31,4 +33,6 @@ export type SpeciesTraitChoice = {
   spellLevel3Slug: string | null;
   spellLevel5Slug: string | null;
   damageType: string | null;
+  /** null = sempre com a espécie; senão só se a edição estiver habilitada. */
+  editionSlug?: string | null;
 };

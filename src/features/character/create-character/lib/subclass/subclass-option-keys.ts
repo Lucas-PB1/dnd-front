@@ -3,6 +3,11 @@ export const LORE_MAGICAL_DISCOVERY_KEYS = new Set([
   "magicalDiscovery2",
 ]);
 
+export const BLADE_HOLY_CANTRIP_KEYS = new Set([
+  "holyRevelationCantrip1",
+  "holyRevelationCantrip2",
+]);
+
 export const LORE_BONUS_SKILL_KEYS = new Set([
   "loreBonusSkill1",
   "loreBonusSkill2",

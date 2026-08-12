@@ -9,6 +9,7 @@ import type {
   SpeciesTraitChoice,
 } from "@/entities/species/types";
 import {
+  useSpecies,
   useSpeciesDetail,
   useSpeciesTraitChoices,
   useSpeciesTraits,
@@ -32,18 +33,33 @@ function SpeciesHero({
   species: SpeciesSummary;
   backHref: string;
 }) {
+  const speciesList = useSpecies();
+  const variantBaseName = useMemo(() => {
+    if (!species.variantOf) return null;
+    return (
+      speciesList.data?.data.find((s) => s.slug === species.variantOf)?.name ??
+      species.variantOf
+    );
+  }, [species.variantOf, speciesList.data?.data]);
+
   const stats = [
     { label: "Tipo", value: species.creatureType },
     { label: "Tamanho", value: shortSpeciesSize(species.size) },
     { label: "Deslocamento", value: species.speed },
   ];
 
+  const variantHint = species.variantOf
+    ? `Variante de ${variantBaseName}`
+    : null;
+  const eyebrow =
+    [species.tagline, variantHint].filter(Boolean).join(" · ") || null;
+
   return (
     <CatalogDetailHero
       backHref={backHref}
       backLabel="Espécies"
       title={species.name}
-      eyebrow={species.tagline}
+      eyebrow={eyebrow}
       summary={species.summary}
       stats={stats}
     />

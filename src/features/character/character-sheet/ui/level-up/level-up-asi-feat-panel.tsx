@@ -10,6 +10,7 @@ import type { LevelUpAsiDistributionMode } from "@/entities/character/session-ty
 import type { FeatSummary } from "@/entities/feat/types";
 import { LevelUpAsiPicker } from "@/features/character/character-sheet/ui/level-up/level-up-asi-picker";
 import { CatalogSelect } from "@/features/character/create-character/ui/catalog-select";
+import { skillChoiceKinds } from "@/features/character/create-character/lib/class-skills/granted-proficiencies";
 import { useClassDetail } from "@/features/catalog/class-catalog/api/use-classes";
 import { useFeatOptions } from "@/features/catalog/feat-catalog/api/use-feat-options";
 import { meetsFeatRequirements } from "@/features/catalog/feat-catalog/lib/feat-eligibility";
@@ -26,6 +27,12 @@ type FeatCatalogItem = Pick<
   | "requiresSpellcasting"
   | "requiredArmorTrainingSlug"
   | "requiresFightingStyle"
+  | "requiresWeaponMastery"
+  | "requiredFeatSlugs"
+  | "requiredSkillSlugs"
+  | "requiredSpeciesSlugs"
+  | "requiredWeaponProficiencySlugs"
+  | "requiredFeatOptions"
 >;
 
 type LevelUpAsiFeatPanelProps = {
@@ -72,6 +79,16 @@ export function LevelUpAsiFeatPanel({
   );
   const hasFeatOptions = (selectedFeatOptionDefs.data?.data.length ?? 0) > 0;
   const nextLevel = character.level + 1;
+  const skillKinds = skillChoiceKinds();
+  const skillSlugs = [
+    ...new Set([
+      ...character.classSkillSlugs,
+      ...character.backgroundSkillSlugs,
+      ...character.speciesChoices
+        .filter((choice) => skillKinds.has(choice.choiceKind))
+        .map((choice) => choice.choiceSlug),
+    ]),
+  ];
   const eligibility = {
     level: nextLevel,
     abilityScores: character.abilityScores,
@@ -79,6 +96,17 @@ export function LevelUpAsiFeatPanel({
     armorTrainingSlugs: classDetail.data?.armorTrainingSlugs ?? [],
     hasFightingStyleFeature:
       (classDetail.data?.fightingStyleSlugs?.length ?? 0) > 0,
+    hasWeaponMasteryFeature:
+      classDetail.data?.weaponMasteryEligibility != null,
+    ownedFeatSlugs: character.characterFeats.map((feat) => feat.featSlug),
+    skillSlugs,
+    speciesSlug: character.speciesSlug,
+    weaponProficiencySlugs: classDetail.data?.weaponProficiencySlugs ?? [],
+    ownedFeatOptions: character.featOptions.map((option) => ({
+      featSlug: option.featSlug,
+      optionKey: option.optionKey,
+      valueId: option.valueId,
+    })),
   };
 
   return (

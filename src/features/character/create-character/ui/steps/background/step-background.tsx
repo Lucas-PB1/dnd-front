@@ -84,7 +84,11 @@ export function StepBackground({
         <div>
           <dt className="text-xs text-muted-foreground">Talento de origem</dt>
           <dd className="font-medium">
-            {bg.originFeatName ?? bg.originFeatSlug ?? "—"}
+            {bg.originFeatName ??
+              bg.originFeatSlug ??
+              (bg.originFeatChoiceSlugs.length > 0
+                ? "À escolha (etapa Talentos)"
+                : "—")}
           </dd>
         </div>
         {(skills.data?.data.length ?? 0) > 0 ? (

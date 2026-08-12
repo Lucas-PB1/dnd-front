@@ -7,6 +7,7 @@ import {
   filterByEnabledEditions,
   isEditionAllowed,
   PHB_EDITION_SLUG,
+  STEINHARDT_EDITION_SLUG,
   VALDAS_EDITION_SLUG,
 } from "@/entities/edition/catalog-sources";
 
@@ -15,6 +16,7 @@ describe("catalog-sources helpers", () => {
     expect(editionShortLabel(PHB_EDITION_SLUG)).toBe("PHB");
     expect(editionShortLabel(VALDAS_EDITION_SLUG)).toBe("Valdas");
     expect(editionShortLabel("dmg-2024-pt")).toBe("DMG");
+    expect(editionShortLabel(STEINHARDT_EDITION_SLUG)).toBe("Steinhardt");
     expect(editionShortLabel(null)).toBe("PHB");
   });
 
@@ -58,5 +60,12 @@ describe("catalog-sources helpers", () => {
         book: "DMG",
       }),
     ).toBe("DMG 2024");
+    expect(
+      editionMenuLabel({
+        slug: STEINHARDT_EDITION_SLUG,
+        label: "Steinhardt Eldritch Hunt 2024",
+        book: "Player Pack",
+      }),
+    ).toBe("Eldritch Hunt");
   });
 });

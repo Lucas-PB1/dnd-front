@@ -4,12 +4,12 @@ import { useMemo } from "react";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import { Controller, useWatch } from "react-hook-form";
 
-import { editionShortLabel } from "@/entities/edition/catalog-sources";
 import { useBackgrounds } from "@/features/catalog/background-catalog/api/use-backgrounds";
 import {
   useClasses,
   useClassSubclasses,
 } from "@/features/catalog/class-catalog/api/use-classes";
+import { buildSpeciesSelectOptions } from "@/features/character/create-character/lib/species/build-species-select-options";
 import {
   LEVEL_OPTIONS,
   SUBCLASS_REQUIRED_FROM_LEVEL,
@@ -31,14 +31,6 @@ type StepIdentityProps = {
 
 function sortByLabel<T extends { label: string }>(items: T[]): T[] {
   return [...items].sort((a, b) => a.label.localeCompare(b.label, "pt"));
-}
-
-function withEditionLabel(
-  name: string,
-  editionSlug: string | null | undefined,
-): string {
-  const source = editionShortLabel(editionSlug);
-  return source === "PHB" ? name : `${name} · ${source}`;
 }
 
 export function StepIdentity({ register, control, errors }: StepIdentityProps) {
@@ -71,20 +63,14 @@ export function StepIdentity({ register, control, errors }: StepIdentityProps) {
       sortByLabel(
         (classes.data?.data ?? []).map((c) => ({
           value: c.slug,
-          label: withEditionLabel(c.name, c.editionSlug),
+          label: c.name,
         })),
       ),
     [classes.data?.data],
   );
 
   const speciesOptions = useMemo(
-    () =>
-      sortByLabel(
-        (species.data?.data ?? []).map((s) => ({
-          value: s.slug,
-          label: withEditionLabel(s.name, s.editionSlug),
-        })),
-      ),
+    () => buildSpeciesSelectOptions(species.data?.data ?? []),
     [species.data?.data],
   );
 
@@ -93,7 +79,7 @@ export function StepIdentity({ register, control, errors }: StepIdentityProps) {
       sortByLabel(
         (backgrounds.data?.data ?? []).map((b) => ({
           value: b.slug,
-          label: withEditionLabel(b.name, b.editionSlug),
+          label: b.name,
         })),
       ),
     [backgrounds.data?.data],
@@ -104,7 +90,7 @@ export function StepIdentity({ register, control, errors }: StepIdentityProps) {
       sortByLabel(
         (subclasses.data?.data ?? []).map((s) => ({
           value: s.slug,
-          label: withEditionLabel(s.name, s.editionSlug),
+          label: s.name,
         })),
       ),
     [subclasses.data?.data],

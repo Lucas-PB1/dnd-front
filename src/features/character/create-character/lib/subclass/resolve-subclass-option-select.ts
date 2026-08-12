@@ -3,6 +3,7 @@ import type { SubclassOptionGroup } from "@/entities/class/types";
 import type { SubclassOption } from "@/entities/character/sheet-types";
 import { filterOptionsExcludingTaken } from "@/features/character/create-character/lib/class-skills/granted-proficiencies";
 import {
+  BLADE_HOLY_CANTRIP_KEYS,
   LORE_BONUS_SKILL_KEYS,
   LORE_MAGICAL_DISCOVERY_KEYS,
   loreMagicalDiscoveryMaxLevel,
@@ -91,11 +92,19 @@ export function resolveSubclassSpellSelectOptions(params: {
   level: number;
   loreSpells: readonly ClassSpellOption[];
   wizardSpells: readonly ClassSpellOption[];
+  clericCantrips?: readonly ClassSpellOption[];
   subclassOptions: readonly SubclassOption[];
   selected: string;
 }): SelectOption[] {
-  const { group, level, loreSpells, wizardSpells, subclassOptions, selected } =
-    params;
+  const {
+    group,
+    level,
+    loreSpells,
+    wizardSpells,
+    clericCantrips = [],
+    subclassOptions,
+    selected,
+  } = params;
 
   if (LORE_MAGICAL_DISCOVERY_KEYS.has(group.optionKey)) {
     const maxLevel = loreMagicalDiscoveryMaxLevel(level);
@@ -106,6 +115,20 @@ export function resolveSubclassSpellSelectOptions(params: {
       subclassOptions,
       group.optionKey,
       LORE_MAGICAL_DISCOVERY_KEYS,
+    );
+    return filterOptionsExcludingTaken(
+      spells.map((spell) => ({ value: spell.slug, label: spell.name })),
+      siblingTaken,
+      selected,
+    );
+  }
+
+  if (BLADE_HOLY_CANTRIP_KEYS.has(group.optionKey)) {
+    const spells = clericCantrips.filter((spell) => spell.level === 0);
+    const siblingTaken = siblingSubclassOptionValueIds(
+      subclassOptions,
+      group.optionKey,
+      BLADE_HOLY_CANTRIP_KEYS,
     );
     return filterOptionsExcludingTaken(
       spells.map((spell) => ({ value: spell.slug, label: spell.name })),

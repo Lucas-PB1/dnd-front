@@ -272,8 +272,17 @@ export async function advanceWizardStep(deps: WizardAdvanceDeps): Promise<void> 
       setFeatsError("Estilo de Luta inválido para esta classe.");
       return;
     }
+    const originChoices = backgroundDetail?.originFeatChoiceSlugs ?? [];
+    const originPick = values.backgroundOriginFeatSlug?.trim() ?? "";
+    if (!originFeatSlug && originChoices.length > 0) {
+      if (!originPick || !originChoices.includes(originPick)) {
+        setFeatsError("Escolha o talento de origem do antecedente.");
+        return;
+      }
+    }
+    const effectiveOriginFeatSlug = originFeatSlug || originPick;
     const previewFeats = resolveCreateCharacterFeats(
-      originFeatSlug || null,
+      effectiveOriginFeatSlug || null,
       [
         ...asiFeatSlotsToCharacterFeats(values.asiFeatSlotSlugs ?? []),
         ...(fightingStyle

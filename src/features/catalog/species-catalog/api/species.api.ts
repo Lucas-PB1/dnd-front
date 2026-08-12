@@ -22,8 +22,8 @@ export const speciesKeys = {
   }) => [...speciesKeys.all, "list", "page", params] as const,
   detail: (slug: string) => [...speciesKeys.all, "detail", slug] as const,
   traits: (slug: string) => [...speciesKeys.all, "traits", slug] as const,
-  traitChoices: (slug: string) =>
-    [...speciesKeys.all, "trait-choices", slug] as const,
+  traitChoices: (slug: string, editionSlugs?: string) =>
+    [...speciesKeys.all, "trait-choices", slug, editionSlugs ?? "all"] as const,
 };
 
 export async function fetchSpeciesPage(params?: {
@@ -68,8 +68,15 @@ export async function fetchSpeciesTraits(slug: string) {
   );
 }
 
-export async function fetchSpeciesTraitChoices(slug: string) {
-  const search = buildCatalogSearchParams({ page: 1, limit: 100 });
+export async function fetchSpeciesTraitChoices(
+  slug: string,
+  editionSlugs?: string,
+) {
+  const search = buildCatalogSearchParams({
+    page: 1,
+    limit: 100,
+    filters: { editionSlugs },
+  });
   return catalogFetch<PaginatedResponse<SpeciesTraitChoice>>(
     `/species/${slug}/trait-choices?${search}`,
     CATALOG_FETCH_INIT,

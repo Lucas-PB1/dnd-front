@@ -7,7 +7,7 @@ export default function SpellsPage() {
   return (
     <CatalogShell
       title="Magias"
-      description="Truques e círculos do PHB 2024 e Valdas — escola, tempo e duração."
+      description="Truques e círculos do PHB 2024, Valdas e Eldritch Hunt — escola, tempo e duração."
       backHref="/compendium"
       backLabel="Compêndio"
     >

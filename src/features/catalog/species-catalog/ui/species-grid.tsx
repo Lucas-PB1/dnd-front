@@ -73,13 +73,19 @@ export function SpeciesGrid() {
               isFetching && "opacity-70 transition-opacity",
             )}
           >
-            {data.data.map((species) => (
+            {data.data.map((species) => {
+              const variantBaseName = species.variantOf
+                ? data.data.find((s) => s.slug === species.variantOf)?.name
+                : undefined;
+              return (
               <SpeciesCard
                 key={species.slug}
                 species={species}
                 listPath={listPath}
+                variantBaseName={variantBaseName}
               />
-            ))}
+              );
+            })}
           </div>
           <CatalogPagination
             page={safePage}

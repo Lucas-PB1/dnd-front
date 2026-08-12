@@ -19,6 +19,7 @@ type SubclassOptionFieldProps = {
   fighterClassSkills: readonly { slug: string; name: string }[];
   loreSpells: readonly ClassSpellOption[];
   wizardSpells: readonly ClassSpellOption[];
+  clericCantrips?: readonly ClassSpellOption[];
   isLoading?: boolean;
   onChange: (valueId: string) => void;
 };
@@ -33,6 +34,7 @@ export function SubclassOptionField({
   fighterClassSkills,
   loreSpells,
   wizardSpells,
+  clericCantrips = [],
   isLoading = false,
   onChange,
 }: SubclassOptionFieldProps) {
@@ -66,6 +68,7 @@ export function SubclassOptionField({
       level,
       loreSpells,
       wizardSpells,
+      clericCantrips,
       subclassOptions,
       selected,
     });

@@ -8,19 +8,27 @@ type SpeciesCardProps = {
   species: SpeciesSummary;
   listPath?: string;
   className?: string;
+  /** Nome da espécie-base (quando `variantOf` e a base está na lista). */
+  variantBaseName?: string | null;
 };
 
 export function SpeciesCard({
   species,
   listPath,
   className,
+  variantBaseName,
 }: SpeciesCardProps) {
+  const variantHint = species.variantOf
+    ? `Variante de ${variantBaseName ?? species.variantOf}`
+    : null;
+  const eyebrow = [species.tagline, variantHint].filter(Boolean).join(" · ") || null;
+
   return (
     <CatalogTileCard
       href={withCatalogReturn(`/species/${species.slug}`, listPath)}
       title={species.name}
       titleExtra={<CatalogEditionChip editionSlug={species.editionSlug} />}
-      eyebrow={species.tagline}
+      eyebrow={eyebrow}
       teaser={species.summary}
       meta={
         <>

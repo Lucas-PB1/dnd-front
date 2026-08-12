@@ -26,6 +26,10 @@ export function traitChoiceLabel(kind: string, traitName: string): string {
       return "Tamanho";
     case "high_elf_cantrip":
       return "Truque de Alto Elfo (opcional)";
+    case "andari_druid_cantrip":
+      return "Dádiva da Natureza — truque de Druida";
+    case "bearfolk_lineage":
+      return "Linhagem do Povo-urso";
     default:
       return traitName;
   }

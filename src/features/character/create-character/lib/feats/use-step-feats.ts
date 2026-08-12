@@ -62,6 +62,11 @@ export function useStepFeats(
     name: "fightingStyleFeatSlug",
     defaultValue: "",
   });
+  const backgroundOriginFeatSlug = useWatch({
+    control,
+    name: "backgroundOriginFeatSlug",
+    defaultValue: "",
+  });
   const speciesChoices = useWatch({
     control,
     name: "speciesChoices",
@@ -81,6 +86,11 @@ export function useStepFeats(
     control,
     name: "classSkillSlugs",
     defaultValue: [],
+  });
+  const speciesSlug = useWatch({
+    control,
+    name: "speciesSlug",
+    defaultValue: "",
   });
   const backgroundToolItemSlug = useWatch({
     control,
@@ -118,6 +128,13 @@ export function useStepFeats(
   );
   const originFeatSlug = backgroundDetail.data?.originFeatSlug ?? null;
   const originFeatName = backgroundDetail.data?.originFeatName ?? null;
+  const originFeatChoiceSlugs =
+    backgroundDetail.data?.originFeatChoiceSlugs ?? [];
+  const originFeatPick = backgroundOriginFeatSlug?.trim() ?? "";
+  const effectiveOriginFeatSlug =
+    originFeatSlug?.trim() ||
+    (originFeatChoiceSlugs.includes(originFeatPick) ? originFeatPick : "") ||
+    null;
 
   const asiSlotCount = countAsiFeatSlots(classSlug, level);
   const asiLevels = asiFeatLevelsUpTo(classSlug, level);
@@ -187,12 +204,18 @@ export function useStepFeats(
         ? [...asiFeats, { featSlug: fightingStyleSlug, instanceIndex: 0 }]
         : asiFeats;
     return resolveCreateCharacterFeats(
-      originFeatSlug,
+      effectiveOriginFeatSlug,
       withStyle,
       speciesChoices,
       classOptions,
     );
-  }, [originFeatSlug, asiFeats, speciesChoices, classOptions, fightingStyleSlug]);
+  }, [
+    effectiveOriginFeatSlug,
+    asiFeats,
+    speciesChoices,
+    classOptions,
+    fightingStyleSlug,
+  ]);
 
   const classFightingStyleSlugs = useMemo(
     () => classDetail.data?.fightingStyleSlugs ?? [],
@@ -246,8 +269,27 @@ export function useStepFeats(
         ? [{ featSlug: fightingStyleSlug, instanceIndex: 0 as const }]
         : [];
     const nextPreview = resolveCreateCharacterFeats(
-      originFeatSlug,
+      effectiveOriginFeatSlug,
       [...asiFeatSlotsToCharacterFeats(nextSlots), ...styleFeat],
+      speciesChoices,
+      classOptions,
+    );
+    setValue("featOptions", pruneFeatOptions(nextPreview, featOptions));
+  }
+
+  function setBackgroundOriginFeat(slug: string) {
+    setValue("backgroundOriginFeatSlug", slug);
+    const styleFeat =
+      fightingStyleSlug && !asiFeatSlotSlugs.includes(fightingStyleSlug)
+        ? [{ featSlug: fightingStyleSlug, instanceIndex: 0 as const }]
+        : [];
+    const nextOrigin =
+      originFeatSlug?.trim() ||
+      (originFeatChoiceSlugs.includes(slug.trim()) ? slug.trim() : "") ||
+      null;
+    const nextPreview = resolveCreateCharacterFeats(
+      nextOrigin,
+      [...asiFeatSlotsToCharacterFeats(asiFeatSlotSlugs), ...styleFeat],
       speciesChoices,
       classOptions,
     );
@@ -284,7 +326,7 @@ export function useStepFeats(
     return sortedAsiSlotFeatOptions({
       slotIndex,
       asiFeatSlotSlugs,
-      originFeatSlug,
+      originFeatSlug: effectiveOriginFeatSlug,
       speciesChoices,
       fightingStyleSlug,
       fightingStyleFeatSlugs,
@@ -297,12 +339,31 @@ export function useStepFeats(
         hasSpellcasting,
         armorTrainingSlugs: classDetail.data?.armorTrainingSlugs ?? [],
         hasFightingStyleFeature: classFightingStyleSlugs.length > 0,
+        hasWeaponMasteryFeature:
+          classDetail.data?.weaponMasteryEligibility != null,
+        skillSlugs: grantedSkillSlugs,
+        speciesSlug,
+        weaponProficiencySlugs: classDetail.data?.weaponProficiencySlugs ?? [],
+        ownedFeatOptions: featOptions.map((option) => ({
+          featSlug: option.featSlug,
+          optionKey: option.optionKey,
+          valueId: option.valueId,
+        })),
       },
     });
   }
 
-  const showOriginSection = !!originFeatSlug;
+  const showOriginFixed = !!originFeatSlug;
+  const showOriginPick = !originFeatSlug && originFeatChoiceSlugs.length > 0;
+  const showOriginSection = showOriginFixed || showOriginPick;
   const showAsiSection = asiSlotCount > 0;
+
+  const originFeatChoiceOptions = useMemo(() => {
+    const allowed = new Set(originFeatChoiceSlugs);
+    return (feats.data?.data ?? [])
+      .filter((feat) => allowed.has(feat.slug))
+      .sort((a, b) => a.name.localeCompare(b.name, "pt"));
+  }, [feats.data?.data, originFeatChoiceSlugs]);
 
   return {
     ASI_FEAT_SLUG,
@@ -316,6 +377,8 @@ export function useStepFeats(
     backgroundDetail,
     originFeatSlug,
     originFeatName,
+    originFeatPick,
+    originFeatChoiceOptions,
     asiLevels,
     featNameBySlug,
     previewFeats,
@@ -323,11 +386,14 @@ export function useStepFeats(
     fightingStyleOptions,
     fightingStyleSlug,
     showOriginSection,
+    showOriginFixed,
+    showOriginPick,
     showAsiSection,
     grantedSkillSlugs,
     grantedToolSlugs,
     updateAsiSlot,
     sortedSlotFeatOptions,
+    setBackgroundOriginFeat,
     setFightingStyle: (slug: string) => setValue("fightingStyleFeatSlug", slug),
     setFeatOptions: (next: FeatOption[]) => setValue("featOptions", next),
   };

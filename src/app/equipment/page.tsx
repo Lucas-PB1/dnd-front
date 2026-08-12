@@ -7,7 +7,7 @@ export default function EquipmentPage() {
   return (
     <CatalogShell
       title="Equipamento"
-      description="Armas, armaduras e itens do PHB 2024 e Valdas — custo, peso e traços mecânicos."
+      description="Armas, armaduras e itens do PHB 2024, Valdas, DMG e Eldritch Hunt — custo, peso e traços mecânicos."
       backHref="/compendium"
       backLabel="Compêndio"
     >

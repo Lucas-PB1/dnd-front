@@ -22,6 +22,7 @@ import { useClassDetail } from "@/features/catalog/class-catalog/api/use-classes
 import { meetsFeatRequirements } from "@/features/catalog/feat-catalog/lib/feat-eligibility";
 import { FeatOptionsEditor } from "@/features/catalog/feat-catalog/ui/options/feat-options-editor";
 import { useFeats } from "@/features/catalog/reference-catalog/api/use-reference";
+import { skillChoiceKinds } from "@/features/character/create-character/lib/class-skills/granted-proficiencies";
 import { Button } from "@/shared/ui/button";
 
 export function EditFeatsForm({
@@ -43,6 +44,16 @@ export function EditFeatsForm({
   const featNameBySlug = Object.fromEntries(
     (feats.data?.data ?? []).map((feat) => [feat.slug, feat.name]),
   );
+  const skillKinds = skillChoiceKinds();
+  const skillSlugs = [
+    ...new Set([
+      ...character.classSkillSlugs,
+      ...character.backgroundSkillSlugs,
+      ...character.speciesChoices
+        .filter((choice) => skillKinds.has(choice.choiceKind))
+        .map((choice) => choice.choiceSlug),
+    ]),
+  ];
   const eligibility = {
     level: character.level,
     abilityScores: character.abilityScores,
@@ -50,6 +61,17 @@ export function EditFeatsForm({
     armorTrainingSlugs: classDetail.data?.armorTrainingSlugs ?? [],
     hasFightingStyleFeature:
       (classDetail.data?.fightingStyleSlugs?.length ?? 0) > 0,
+    hasWeaponMasteryFeature:
+      classDetail.data?.weaponMasteryEligibility != null,
+    ownedFeatSlugs: characterFeats.map((feat) => feat.featSlug),
+    skillSlugs,
+    speciesSlug: character.speciesSlug,
+    weaponProficiencySlugs: classDetail.data?.weaponProficiencySlugs ?? [],
+    ownedFeatOptions: featOptions.map((option) => ({
+      featSlug: option.featSlug,
+      optionKey: option.optionKey,
+      valueId: option.valueId,
+    })),
   };
 
   function removeFeat(feat: CharacterFeat) {

@@ -106,15 +106,35 @@ export function StepFeats({ control, setValue, error }: StepFeatsProps) {
 
       {data.showOriginSection ? (
         <WizardFormSection title="Origem" compact>
-          <p className="text-sm">
-            <span className="font-medium">
-              {data.originFeatName ?? data.originFeatSlug}
-            </span>
-            <span className="text-muted-foreground">
-              {" "}
-              · {data.backgroundDetail.data?.name}
-            </span>
-          </p>
+          {data.showOriginPick ? (
+            data.feats.isPending ? (
+              <p className="text-sm text-muted-foreground">Carregando…</p>
+            ) : (
+              <CatalogSelect
+                id="background-origin-feat"
+                label="Talento de origem"
+                options={[
+                  { value: "", label: "Escolha…" },
+                  ...data.originFeatChoiceOptions.map((feat) => ({
+                    value: feat.slug,
+                    label: feat.name,
+                  })),
+                ]}
+                value={data.originFeatPick}
+                onChange={(e) => data.setBackgroundOriginFeat(e.target.value)}
+              />
+            )
+          ) : (
+            <p className="text-sm">
+              <span className="font-medium">
+                {data.originFeatName ?? data.originFeatSlug}
+              </span>
+              <span className="text-muted-foreground">
+                {" "}
+                · {data.backgroundDetail.data?.name}
+              </span>
+            </p>
+          )}
         </WizardFormSection>
       ) : null}
 

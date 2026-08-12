@@ -5,11 +5,25 @@ export const CATALOG_SOURCES_STORAGE_KEY = "grimoire.catalogSources";
 export const PHB_EDITION_SLUG = "phb-2024-pt";
 export const VALDAS_EDITION_SLUG = "valdas-spire-2024-en";
 export const DMG_EDITION_SLUG = "dmg-2024-pt";
+export const STEINHARDT_EDITION_SLUG = "steinhardt-eldritch-hunt-2024-en";
+export const NORTHLANDS_EDITION_SLUG = "northlands-heroes-2024-en";
 
 const LEGACY_VALDA_EDITION_SLUG = "valda-spire-2024-en";
 
 function normalizeEditionSlug(slug: string): string {
   return slug === LEGACY_VALDA_EDITION_SLUG ? VALDAS_EDITION_SLUG : slug;
+}
+
+function isSteinhardtEditionSlug(slug: string): boolean {
+  return (
+    slug === STEINHARDT_EDITION_SLUG || slug.startsWith("steinhardt-")
+  );
+}
+
+function isNorthlandsEditionSlug(slug: string): boolean {
+  return (
+    slug === NORTHLANDS_EDITION_SLUG || slug.startsWith("northlands-")
+  );
 }
 
 /** Rótulo curto na UI (badge / menu). */
@@ -18,6 +32,8 @@ export function editionShortLabel(slug: string | null | undefined): string {
   if (slug === PHB_EDITION_SLUG || slug.startsWith("phb-")) return "PHB";
   if (slug.startsWith("valdas-") || slug.startsWith("valda-")) return "Valdas";
   if (slug === DMG_EDITION_SLUG || slug.startsWith("dmg-")) return "DMG";
+  if (isSteinhardtEditionSlug(slug)) return "Steinhardt";
+  if (isNorthlandsEditionSlug(slug)) return "Northlands";
   return slug;
 }
 
@@ -31,6 +47,12 @@ export function editionMenuLabel(edition: Pick<Edition, "slug" | "label" | "book
   }
   if (edition.slug === DMG_EDITION_SLUG || edition.slug.startsWith("dmg-")) {
     return "DMG 2024";
+  }
+  if (isSteinhardtEditionSlug(edition.slug)) {
+    return "Eldritch Hunt";
+  }
+  if (isNorthlandsEditionSlug(edition.slug)) {
+    return "Northlands";
   }
   return edition.label || edition.book || edition.slug;
 }

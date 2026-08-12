@@ -69,10 +69,11 @@ export function useSpeciesTraits(slug: string, enabled = true) {
 }
 
 export function useSpeciesTraitChoices(slug: string, enabled = true) {
+  const { editionSlugsParam } = useCatalogSources();
   return useCatalogDetailQuery({
     slug,
-    queryKey: speciesKeys.traitChoices(slug),
-    queryFn: () => fetchSpeciesTraitChoices(slug),
+    queryKey: speciesKeys.traitChoices(slug, editionSlugsParam),
+    queryFn: () => fetchSpeciesTraitChoices(slug, editionSlugsParam),
     enabled,
   });
 }

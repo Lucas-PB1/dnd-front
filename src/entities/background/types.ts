@@ -12,6 +12,7 @@ export type BackgroundSummary = {
   abilityOptionNames: string[];
   originFeatSlug: string | null;
   originFeatName: string | null;
+  originFeatChoiceSlugs: string[];
   toolProficiencyKind: string | null;
   toolProficiencyDescription: string | null;
   toolItemSlug: string | null;

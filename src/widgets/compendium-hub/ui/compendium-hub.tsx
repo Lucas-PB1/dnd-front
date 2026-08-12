@@ -62,7 +62,7 @@ const SECTIONS: ReadonlyArray<{
     title: "Talentos",
     eyebrow: "Especialização",
     description:
-      "Origem, geral e estilo de luta — pré-requisitos e benefícios (PHB e Valdas).",
+      "Origem, geral e estilo de luta — pré-requisitos e benefícios (PHB, Valdas, Eldritch Hunt).",
     icon: SparklesIcon,
   },
   {
@@ -78,14 +78,15 @@ const SECTIONS: ReadonlyArray<{
     title: "Subclasses",
     eyebrow: "Arquétipos",
     description:
-      "Caminhos de cada classe (PHB e Valdas) — tagline, resumo e características por nível.",
+      "Caminhos de cada classe (PHB, Valdas, Eldritch Hunt) — tagline, resumo e características por nível.",
     icon: Squares2X2Icon,
   },
   {
     href: "/equipment",
     title: "Equipamento",
     eyebrow: "Arsenal",
-    description: "Armas, armaduras, itens e itens mágicos (PHB, Valdas, DMG).",
+    description:
+      "Armas, armaduras, itens e itens mágicos (PHB, Valdas, DMG, Eldritch Hunt).",
     icon: CubeIcon,
   },
   {
@@ -128,13 +129,13 @@ export function CompendiumHub() {
           <div className="flex items-center gap-2">
             <SealMark className="size-5" />
             <p className="text-xs font-medium tracking-wider text-secondary uppercase">
-              PHB 2024 · Valdas
+              PHB 2024 · Valdas · Eldritch Hunt
             </p>
           </div>
           <p className="max-w-2xl font-heading text-lg leading-snug text-foreground/90 sm:text-xl">
-            Explore o catálogo público — sem login. PHB 2024 e Valdas Spire
-            (Player Pack, Pistoleiro e Pack 2): classes, subclasses, talentos,
-            equipamento e magias. Use Fontes no topo para filtrar.
+            Explore o catálogo público — sem login. PHB 2024, Valdas Spire e
+            Steinhardt Eldritch Hunt (Player Pack): classes, subclasses,
+            talentos, equipamento e magias. Use Fontes no topo para filtrar.
           </p>
         </div>
       </div>

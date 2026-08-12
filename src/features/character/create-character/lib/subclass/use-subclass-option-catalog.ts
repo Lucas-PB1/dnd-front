@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import type { SubclassOptionGroup } from "@/entities/class/types";
 import { mergeClassSpellLists } from "@/features/character/create-character/lib/subclass/resolve-subclass-option-select";
 import {
+  BLADE_HOLY_CANTRIP_KEYS,
   LORE_MAGICAL_DISCOVERY_KEYS,
   loreMagicalDiscoveryMaxLevel,
 } from "@/features/character/create-character/lib/subclass/subclass-option-keys";
@@ -22,10 +23,14 @@ export function useSubclassOptionCatalog(
   const needsLoreSpells = groups.some((group) =>
     LORE_MAGICAL_DISCOVERY_KEYS.has(group.optionKey),
   );
+  const needsBladeCantrips = groups.some((group) =>
+    BLADE_HOLY_CANTRIP_KEYS.has(group.optionKey),
+  );
   const needsWizardVersatility = groups.some(
     (group) =>
       group.valueType === "spell" &&
-      !LORE_MAGICAL_DISCOVERY_KEYS.has(group.optionKey),
+      !LORE_MAGICAL_DISCOVERY_KEYS.has(group.optionKey) &&
+      !BLADE_HOLY_CANTRIP_KEYS.has(group.optionKey),
   );
   const needsFighterSkills = groups.some(
     (group) => group.optionKey === "warScholarSkill",
@@ -38,6 +43,7 @@ export function useSubclassOptionCatalog(
     loreMaxLevel,
     needsLoreSpells,
   );
+  const clericCantrips = useClassSpells("cleric", 0, needsBladeCantrips);
   const druidSpells = useClassSpells("druid", loreMaxLevel, needsLoreSpells);
   const wizardLoreSpells = useClassSpells(
     "wizard",
@@ -81,6 +87,8 @@ export function useSubclassOptionCatalog(
       (clericSpells.isPending ||
         druidSpells.isPending ||
         wizardLoreSpells.isPending),
+    clericCantrips: clericCantrips.data?.data ?? [],
+    clericCantripsLoading: needsBladeCantrips && clericCantrips.isPending,
     wizardSpells: wizardVersatilitySpells.data?.data ?? [],
     wizardSpellsLoading:
       needsWizardVersatility && wizardVersatilitySpells.isPending,

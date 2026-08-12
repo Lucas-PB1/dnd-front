@@ -207,6 +207,7 @@ export function StepSubclassOptions({
                 fighterClassSkills={catalog.fighterClassSkills}
                 loreSpells={catalog.loreSpells}
                 wizardSpells={catalog.wizardSpells}
+                clericCantrips={catalog.clericCantrips}
                 onChange={(valueId) => setOption(group.optionKey, valueId)}
               />
             );
@@ -219,7 +220,9 @@ export function StepSubclassOptions({
             (group.valueType === "spell" &&
               (group.optionKey.startsWith("magicalDiscovery")
                 ? catalog.loreSpellsLoading
-                : catalog.wizardSpellsLoading));
+                : group.optionKey.startsWith("holyRevelationCantrip")
+                  ? catalog.clericCantripsLoading
+                  : catalog.wizardSpellsLoading));
 
           return (
             <SubclassOptionField
@@ -233,6 +236,7 @@ export function StepSubclassOptions({
               fighterClassSkills={catalog.fighterClassSkills}
               loreSpells={catalog.loreSpells}
               wizardSpells={catalog.wizardSpells}
+              clericCantrips={catalog.clericCantrips}
               isLoading={isLoading}
               onChange={(valueId) => setOption(group.optionKey, valueId)}
             />

@@ -56,6 +56,7 @@ export function useWizardFormFieldSync({
       setValue("backgroundAbilityBoostPlus1Slug", "");
       setValue("backgroundAbilityBoostPlus1Slugs", ["", "", ""]);
       setValue("backgroundToolItemSlug", "");
+      setValue("backgroundOriginFeatSlug", "");
       setValue("featOptions", []);
       setValue("asiFeatSlotSlugs", []);
       setValue("classSkillSlugs", []);

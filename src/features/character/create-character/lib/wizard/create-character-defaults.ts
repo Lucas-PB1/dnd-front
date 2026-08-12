@@ -25,6 +25,7 @@ export const CREATE_CHARACTER_DEFAULT_VALUES: CreateCharacterInput = {
   classOptions: [],
   featOptions: [],
   asiFeatSlotSlugs: [],
+  backgroundOriginFeatSlug: "",
   fightingStyleFeatSlug: "",
   alignmentSlug: "",
   languageSlugs: [],

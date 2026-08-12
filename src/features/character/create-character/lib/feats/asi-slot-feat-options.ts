@@ -25,6 +25,12 @@ type FeatCatalogRow = Pick<
   | "requiresSpellcasting"
   | "requiredArmorTrainingSlug"
   | "requiresFightingStyle"
+  | "requiresWeaponMastery"
+  | "requiredFeatSlugs"
+  | "requiredSkillSlugs"
+  | "requiredSpeciesSlugs"
+  | "requiredWeaponProficiencySlugs"
+  | "requiredFeatOptions"
 >;
 
 type SubclassOption = { optionKey: string; valueId: string };
@@ -75,6 +81,14 @@ export function sortedAsiSlotFeatOptions(args: {
     subclassOptions,
   });
   const allowedStyles = new Set(classFightingStyleSlugs);
+  const ownedFeatSlugs = [
+    ...previewWithoutSlot.map((feat: CharacterFeat) => feat.featSlug),
+    ...(fightingStyleSlug ? [fightingStyleSlug] : []),
+  ];
+  const slotEligibility = {
+    ...eligibility,
+    ownedFeatSlugs,
+  };
 
   const list = feats.filter((feat) => {
     if (!canAddCharacterFeat(previewWithoutSlot, feat.slug)) {
@@ -84,7 +98,7 @@ export function sortedAsiSlotFeatOptions(args: {
       feat.categorySlug === "general" ||
       (feat.categorySlug === "epic-boon" && eligibility.level >= 19) ||
       feat.categorySlug === FIGHTING_STYLE_FEAT_CATEGORY;
-    if (!categoryAllowed || !meetsFeatRequirements(feat, eligibility)) {
+    if (!categoryAllowed || !meetsFeatRequirements(feat, slotEligibility)) {
       return false;
     }
     if (feat.categorySlug !== FIGHTING_STYLE_FEAT_CATEGORY) {

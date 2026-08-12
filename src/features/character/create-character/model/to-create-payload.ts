@@ -57,7 +57,17 @@ export function toCreateCharacterPayload(
   }
   const asiFeats = asiFeatSlotsToCharacterFeats(values.asiFeatSlotSlugs ?? []);
   const fightingStyle = values.fightingStyleFeatSlug?.trim();
+  const backgroundOriginPick = values.backgroundOriginFeatSlug?.trim();
   const characterFeats = [...asiFeats];
+  if (
+    backgroundOriginPick &&
+    !characterFeats.some((feat) => feat.featSlug === backgroundOriginPick)
+  ) {
+    characterFeats.unshift({
+      featSlug: backgroundOriginPick,
+      instanceIndex: 0,
+    });
+  }
   if (
     fightingStyle &&
     !characterFeats.some((feat) => feat.featSlug === fightingStyle)

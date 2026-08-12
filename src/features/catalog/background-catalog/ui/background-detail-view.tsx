@@ -54,6 +54,11 @@ function BackgroundHero({
       label: "Talento",
       value: background.originFeatName ?? background.originFeatSlug!,
     });
+  } else if (background.originFeatChoiceSlugs?.length) {
+    stats.push({
+      label: "Talento",
+      value: `À escolha (${background.originFeatChoiceSlugs.length})`,
+    });
   }
   if (skillNames.length) {
     stats.push({ label: "Perícias", value: skillNames.join(", ") });

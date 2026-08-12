@@ -103,9 +103,14 @@ export function useStepReview(control: Control<CreateCharacterInput>) {
   const spellsCatalog = useSpellLabels();
 
   const originFeatSlug = backgroundDetail.data?.originFeatSlug ?? "";
+  const originChoices = backgroundDetail.data?.originFeatChoiceSlugs ?? [];
+  const originPick = values.backgroundOriginFeatSlug?.trim() ?? "";
+  const effectiveOriginFeatSlug =
+    originFeatSlug ||
+    (originChoices.includes(originPick) ? originPick : "");
   const fightingStyle = values.fightingStyleFeatSlug?.trim() ?? "";
   const previewFeats = resolveCreateCharacterFeats(
-    originFeatSlug || null,
+    effectiveOriginFeatSlug || null,
     [
       ...asiFeatSlotsToCharacterFeats(values.asiFeatSlotSlugs ?? []),
       ...(fightingStyle
@@ -286,7 +291,7 @@ export function useStepReview(control: Control<CreateCharacterInput>) {
     featNameBySlug,
     optionsByFeatInstance,
     asiLevelByFeatKey,
-    originFeatSlug,
+    originFeatSlug: effectiveOriginFeatSlug,
     resolveFeatOption,
     featOptionDefsFor,
     featOptionsLoading,
