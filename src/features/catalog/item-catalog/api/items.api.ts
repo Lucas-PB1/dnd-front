@@ -17,6 +17,9 @@ export type FetchItemsParams = {
   limit?: number;
   page?: number;
   fields?: "summary";
+  excludeCoverage?: boolean;
+  requiresAttunement?: boolean;
+  sort?: "name" | "name_desc" | "cost_asc" | "cost_desc";
 };
 
 export async function fetchItems(params?: FetchItemsParams) {
@@ -48,10 +51,45 @@ export async function fetchItems(params?: FetchItemsParams) {
           : params.consumable
             ? "true"
             : "false",
+      excludeCoverage:
+        params?.excludeCoverage === undefined
+          ? undefined
+          : params.excludeCoverage
+            ? "true"
+            : "false",
+      requiresAttunement:
+        params?.requiresAttunement === undefined
+          ? undefined
+          : params.requiresAttunement
+            ? "true"
+            : "false",
+      sort: params?.sort,
     },
   });
 
   return catalogFetch<ItemListResponse>(`/items?${search}`, CATALOG_FETCH_INIT);
+}
+
+export async function fetchAllItems(params?: Omit<FetchItemsParams, "page">) {
+  const limit = params?.limit ?? 100;
+  const first = await fetchItems({ ...params, page: 1, limit });
+  if (first.meta.totalPages <= 1) return first;
+
+  const rest = await Promise.all(
+    Array.from({ length: first.meta.totalPages - 1 }, (_, index) =>
+      fetchItems({ ...params, page: index + 2, limit }),
+    ),
+  );
+  const data = [...first.data, ...rest.flatMap((page) => page.data)];
+  return {
+    data,
+    meta: {
+      page: 1,
+      limit: data.length,
+      total: first.meta.total,
+      totalPages: 1,
+    },
+  };
 }
 
 export async function fetchPopularItems(params?: {

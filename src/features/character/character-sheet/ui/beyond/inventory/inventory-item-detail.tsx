@@ -25,6 +25,7 @@ import {
   type EquipmentSlot,
 } from "@/features/character/character-sheet/ui/beyond/inventory/inventory-item-meta";
 import { QuantityStepper } from "@/features/character/character-sheet/ui/beyond/inventory/quantity-stepper";
+import { ItemCatalogDescriptionBlock } from "@/features/catalog/item-catalog/ui/item-catalog-description-block";
 import {
   formatCoinPurse,
   halfCoinPurseClient,
@@ -409,6 +410,8 @@ export function InventoryItemDetail({
 
   return (
     <div className="space-y-4">
+      <ItemCatalogDescriptionBlock slug={item.itemSlug} itemType={item.itemType} />
+
       {effectsLabel ? (
         <p
           className={cn(

@@ -170,6 +170,8 @@ export type InventoryItem = {
   attachedCoverageSpellSlug?: string | null;
   boundSpellSlug?: string | null;
   isCoverage?: boolean;
+  /** Peça mágica de catálogo — não recebe cobertura. */
+  isMagic?: boolean;
   /** Estado por instância (artefato rolado, senciência, etc.). */
   instanceProperties?: Record<string, unknown> | null;
   /** Preço de catálogo (compra/venda). */

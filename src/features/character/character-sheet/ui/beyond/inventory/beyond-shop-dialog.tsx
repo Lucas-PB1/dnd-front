@@ -1,12 +1,11 @@
 "use client";
 
-import { MagnifyingGlassIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { useMemo, useRef, useState } from "react";
 
 import type { CoinPurse } from "@/entities/character/types";
 import type { InventoryItem } from "@/entities/character/session-types";
 import {
-  ITEM_TYPE_LABELS_PT,
   SHOP_KIND_CHIPS,
   type ItemSummary,
 } from "@/entities/item/types";
@@ -17,13 +16,32 @@ import {
   scaleCoinPurseClient,
 } from "@/features/character/character-sheet/ui/beyond/inventory/beyond-coin-purse";
 import {
+  BeyondShopCoveragePanel,
+  type CoverageCartPayload,
+} from "@/features/character/character-sheet/ui/beyond/inventory/beyond-shop-coverage-panel";
+import { isCoverageItem } from "@/features/character/character-sheet/lib/inventory/coverage-shop";
+import type { BeyondShopCartLine } from "@/features/character/character-sheet/lib/inventory/beyond-shop-cart-line";
+import {
+  isPlainShopLine,
+  shopCartLineKey,
+} from "@/features/character/character-sheet/lib/inventory/beyond-shop-cart-line";
+import { resolveCoverageShopCostText } from "@/features/character/character-sheet/lib/inventory/coverage-tier-cost";
+import {
+  BeyondShopFilters,
+  EMPTY_SHOP_ADVANCED_FILTERS,
+  type ShopAdvancedFilters,
+} from "@/features/character/character-sheet/ui/beyond/inventory/beyond-shop-filters";
+import {
   useItems,
   usePopularItems,
 } from "@/features/catalog/item-catalog/api/use-items";
+import { useShopEquipmentIndex } from "@/features/catalog/item-catalog/api/use-shop-equipment-index";
+import { ItemCatalogDetailTrigger } from "@/features/catalog/item-catalog/ui/item-catalog-detail-trigger";
+import { BeyondShopCartLineRow } from "@/features/character/character-sheet/ui/beyond/inventory/beyond-shop-cart-line-row";
+import { BeyondShopListItemInfo } from "@/features/character/character-sheet/ui/beyond/inventory/beyond-shop-list-item-info";
 import { recordItemView } from "@/features/catalog/item-catalog/api/items.api";
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
 import { useDebouncedValue } from "@/shared/lib/use-debounced-value";
-import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
 import {
   Dialog,
@@ -34,14 +52,8 @@ import {
   DialogTitle,
 } from "@/shared/ui/dialog";
 import { Input } from "@/shared/ui/input";
-import { SearchableSelect } from "@/shared/ui/searchable-select";
 
-export type BeyondShopCartLine = {
-  item: ItemSummary;
-  quantity: number;
-  attachToBaseSlug?: string;
-  attachCoverageBonus?: 1 | 2 | 3;
-};
+export type { BeyondShopCartLine } from "@/features/character/character-sheet/lib/inventory/beyond-shop-cart-line";
 
 type BeyondShopDialogProps = {
   open: boolean;
@@ -58,33 +70,6 @@ type BeyondShopDialogProps = {
   }) => Promise<void>;
 };
 
-function coverageAppliesTo(
-  item: ItemSummary,
-): "weapon" | "armor" | "shield" | null {
-  const kind = item.kind ?? item.properties?.kind;
-  if (kind !== "coverage") return null;
-  const applies = item.properties?.appliesTo;
-  if (applies === "weapon" || applies === "armor" || applies === "shield") {
-    return applies;
-  }
-  return null;
-}
-
-function hostMatchesCoverage(
-  host: InventoryItem,
-  appliesTo: "weapon" | "armor" | "shield",
-): boolean {
-  if (host.isCoverage) return false;
-  if (appliesTo === "weapon") return host.itemType === "weapon";
-  if (appliesTo === "armor") {
-    return host.itemType === "armor" && host.equipmentSlot !== "shield";
-  }
-  return (
-    host.equipmentSlot === "shield" ||
-    /escudo|shield/i.test(`${host.itemSlug} ${host.itemName}`)
-  );
-}
-
 /** Modal fluido Beyond: catálogo + filtros + carrinho + checkout. */
 export function BeyondShopDialog({
   open,
@@ -100,23 +85,34 @@ export function BeyondShopDialog({
   const [search, setSearch] = useState("");
   const [chipId, setChipId] = useState("all");
   const [hasCostOnly, setHasCostOnly] = useState(false);
+  const [advancedFilters, setAdvancedFilters] = useState<ShopAdvancedFilters>(
+    EMPTY_SHOP_ADVANCED_FILTERS,
+  );
   const [cart, setCart] = useState<BeyondShopCartLine[]>([]);
   const [skipPayment, setSkipPayment] = useState(false);
-  const [attachBonus, setAttachBonus] = useState<1 | 2 | 3>(1);
-  const [attachBase, setAttachBase] = useState("");
   const viewed = useRef(new Set<string>());
   const { accessToken } = useGameAuth("/characters");
   const debouncedSearch = useDebouncedValue(search, 300);
 
   const chip = SHOP_KIND_CHIPS.find((c) => c.id === chipId) ?? SHOP_KIND_CHIPS[0];
+  const itemKind = advancedFilters.coverageOnly ? "coverage" : chip.kind;
 
   const itemsQuery = useItems(
     {
       q: debouncedSearch.trim() || undefined,
       itemType: chip.itemType,
-      kind: chip.kind,
+      kind: itemKind,
       consumable: chip.consumable,
       magic: chip.magic === null || chip.magic === undefined ? undefined : chip.magic,
+      rarity: advancedFilters.rarity || undefined,
+      editionSlugs: advancedFilters.editionSlug || undefined,
+      requiresAttunement:
+        advancedFilters.requiresAttunement === "true"
+          ? true
+          : advancedFilters.requiresAttunement === "false"
+            ? false
+            : undefined,
+      sort: advancedFilters.sort || undefined,
       hasCost: hasCostOnly || chargeApplies ? true : undefined,
       limit: 80,
     },
@@ -124,28 +120,55 @@ export function BeyondShopDialog({
   );
 
   const tips = usePopularItems("purchase", 5, open);
+  const equipmentIndex = useShopEquipmentIndex(open);
 
   const items = itemsQuery.data?.data ?? [];
   const mustPay = chargeApplies && !skipPayment;
 
   const checkoutTotal = useMemo(() => {
     let acc: CoinPurse | null = null;
-    for (const line of cart) {
-      const unit = parseCostTextClient(line.item.costText);
-      if (!unit) continue;
-      const scaled = scaleCoinPurseClient(unit, line.quantity);
-      if (!scaled) continue;
+    const addPurse = (next: CoinPurse | null) => {
+      if (!next) return;
       if (!acc) {
-        acc = { ...scaled };
-        continue;
+        acc = { ...next };
+        return;
       }
       acc = {
-        copper: acc.copper + scaled.copper,
-        silver: acc.silver + scaled.silver,
-        electrum: acc.electrum + scaled.electrum,
-        gold: acc.gold + scaled.gold,
-        platinum: acc.platinum + scaled.platinum,
+        copper: acc.copper + next.copper,
+        silver: acc.silver + next.silver,
+        electrum: acc.electrum + next.electrum,
+        gold: acc.gold + next.gold,
+        platinum: acc.platinum + next.platinum,
       };
+    };
+    const addLineCost = (
+      costText: string | null | undefined,
+      quantity: number,
+    ) => {
+      const unit = parseCostTextClient(costText);
+      if (!unit) return;
+      addPurse(scaleCoinPurseClient(unit, quantity));
+    };
+    for (const line of cart) {
+      if (line.attachCoverageSlug && line.coverageItem) {
+        addLineCost(line.item.costText, line.quantity);
+        addLineCost(
+          resolveCoverageShopCostText(
+            line.coverageItem,
+            line.attachCoverageBonus,
+          ),
+          line.quantity,
+        );
+        continue;
+      }
+      if (line.attachToBaseSlug) {
+        addLineCost(
+          resolveCoverageShopCostText(line.item, line.attachCoverageBonus),
+          line.quantity,
+        );
+        continue;
+      }
+      addLineCost(line.item.costText, line.quantity);
     }
     return acc;
   }, [cart]);
@@ -156,15 +179,22 @@ export function BeyondShopDialog({
     : 0;
   const insufficient = mustPay && totalCopper > wealthCopper;
 
-  useEffect(() => {
-    if (!open) {
-      setCart([]);
-      setSkipPayment(false);
-      setSearch("");
-      setChipId("all");
-      viewed.current.clear();
+  function resetShopState() {
+    setCart([]);
+    setSkipPayment(false);
+    setSearch("");
+    setChipId("all");
+    setHasCostOnly(false);
+    setAdvancedFilters(EMPTY_SHOP_ADVANCED_FILTERS);
+    viewed.current.clear();
+  }
+
+  function handleOpenChange(next: boolean) {
+    if (!next) {
+      resetShopState();
     }
-  }, [open]);
+    onOpenChange(next);
+  }
 
   function markViewed(slug: string) {
     if (!accessToken || viewed.current.has(slug)) return;
@@ -173,31 +203,57 @@ export function BeyondShopDialog({
   }
 
   function addToCart(item: ItemSummary) {
+    if (isCoverageItem(item)) return;
     markViewed(item.slug);
-    const applies = coverageAppliesTo(item);
-    if (applies) {
-      if (!attachBase) return;
-      setCart((prev) => [
-        ...prev.filter((line) => line.item.slug !== item.slug),
-        {
-          item,
-          quantity: 1,
-          attachToBaseSlug: attachBase,
-          attachCoverageBonus: attachBonus,
-        },
-      ]);
-      return;
-    }
     setCart((prev) => {
-      const existing = prev.find((line) => line.item.slug === item.slug);
+      const existing = prev.find(
+        (line) => isPlainShopLine(line) && line.item.slug === item.slug,
+      );
       if (existing) {
         return prev.map((line) =>
-          line.item.slug === item.slug
+          shopCartLineKey(line) === shopCartLineKey(existing)
             ? { ...line, quantity: line.quantity + 1 }
             : line,
         );
       }
       return [...prev, { item, quantity: 1 }];
+    });
+  }
+
+  function addCoverageToCart(payload: CoverageCartPayload) {
+    markViewed(payload.coverage.slug);
+    if (payload.mode === "existing") {
+      const nextLine: BeyondShopCartLine = {
+        item: payload.coverage,
+        quantity: 1,
+        attachToBaseSlug: payload.attachToBaseSlug,
+        attachCoverageBonus: payload.attachCoverageBonus,
+      };
+      setCart((prev) => [
+        ...prev.filter((line) => shopCartLineKey(line) !== shopCartLineKey(nextLine)),
+        nextLine,
+      ]);
+      return;
+    }
+    const nextLine: BeyondShopCartLine = {
+      item: payload.base,
+      quantity: 1,
+      attachCoverageSlug: payload.attachCoverageSlug,
+      attachCoverageBonus: payload.attachCoverageBonus,
+      coverageItem: payload.coverage,
+    };
+    setCart((prev) => {
+      const existing = prev.find(
+        (line) => shopCartLineKey(line) === shopCartLineKey(nextLine),
+      );
+      if (existing) {
+        return prev.map((line) =>
+          shopCartLineKey(line) === shopCartLineKey(existing)
+            ? { ...line, quantity: line.quantity + 1 }
+            : line,
+        );
+      }
+      return [...prev, nextLine];
     });
   }
 
@@ -207,7 +263,7 @@ export function BeyondShopDialog({
       lines: cart,
       pay: chargeApplies ? !skipPayment : true,
     });
-    onOpenChange(false);
+    handleOpenChange(false);
   }
 
   const title = chargeApplies ? "Comprar" : "Adicionar à mochila";
@@ -218,14 +274,14 @@ export function BeyondShopDialog({
       : "Sem cobrança — itens entram de graça.";
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex h-[min(92vh,52rem)] w-full max-w-[calc(100%-1rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-5xl">
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="flex h-[min(92vh,52rem)] w-full max-w-[calc(100%-1rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-6xl">
         <DialogHeader className="shrink-0 border-b border-border/70 px-4 py-3 pr-12">
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{modeHint}</DialogDescription>
         </DialogHeader>
 
-        <div className="grid min-h-0 flex-1 gap-0 md:grid-cols-[1fr_16rem]">
+        <div className="grid min-h-0 flex-1 gap-0 md:grid-cols-[1fr_18rem]">
           <div className="flex min-h-0 flex-col gap-3 overflow-hidden border-b border-border/70 p-4 md:border-r md:border-b-0">
             <label className="relative block">
               <span className="sr-only">Buscar item</span>
@@ -243,44 +299,15 @@ export function BeyondShopDialog({
               />
             </label>
 
-            <div
-              role="group"
-              aria-label="Categorias"
-              className="flex flex-wrap gap-1.5"
-            >
-              {SHOP_KIND_CHIPS.map((filter) => {
-                const active = chipId === filter.id;
-                return (
-                  <button
-                    key={filter.id}
-                    type="button"
-                    aria-pressed={active}
-                    onClick={() => setChipId(filter.id)}
-                    className={cn(
-                      "rounded-md border px-2 py-1 text-xs font-medium transition-colors",
-                      active
-                        ? "border-primary/50 bg-primary/15 text-foreground"
-                        : "border-border/70 bg-background/40 text-muted-foreground hover:bg-muted/50",
-                    )}
-                  >
-                    {filter.label}
-                  </button>
-                );
-              })}
-              <button
-                type="button"
-                aria-pressed={hasCostOnly}
-                onClick={() => setHasCostOnly((v) => !v)}
-                className={cn(
-                  "rounded-md border px-2 py-1 text-xs font-medium",
-                  hasCostOnly
-                    ? "border-primary/50 bg-primary/15"
-                    : "border-border/70 text-muted-foreground",
-                )}
-              >
-                Tem preço
-              </button>
-            </div>
+            <BeyondShopFilters
+              open={open}
+              chipId={chipId}
+              onChipChange={setChipId}
+              hasCostOnly={hasCostOnly}
+              onHasCostOnlyChange={setHasCostOnly}
+              advanced={advancedFilters}
+              onAdvancedChange={setAdvancedFilters}
+            />
 
             {tips.data && tips.data.length > 0 ? (
               <div className="rounded-md border border-border/60 bg-muted/20 px-2 py-1.5">
@@ -293,7 +320,10 @@ export function BeyondShopDialog({
                       key={tip.slug}
                       type="button"
                       className="rounded border border-border/70 px-1.5 py-0.5 text-[11px] hover:bg-muted/50"
-                      onClick={() => addToCart(tip)}
+                      onClick={() =>
+                        isCoverageItem(tip) ? undefined : addToCart(tip)
+                      }
+                      disabled={isCoverageItem(tip)}
                     >
                       {tip.name}
                     </button>
@@ -312,77 +342,40 @@ export function BeyondShopDialog({
               ) : (
                 <ul className="divide-y divide-border/60">
                   {items.map((item) => {
-                    const applies = coverageAppliesTo(item);
-                    const typeLabel =
-                      ITEM_TYPE_LABELS_PT[item.itemType] ?? item.itemType;
-                    const kindLabel =
-                      item.kind === "service"
-                        ? "Serviço"
-                        : item.consumable
-                          ? "Consumível"
-                          : typeLabel;
+                    const coverage = isCoverageItem(item);
                     return (
                       <li key={item.slug}>
                         <div className="flex items-start gap-2 px-3 py-2">
-                          <button
-                            type="button"
-                            className="min-w-0 flex-1 text-left"
-                            onClick={() => markViewed(item.slug)}
-                          >
-                            <p className="truncate text-sm font-medium">
-                              {item.name}
-                            </p>
-                            <p className="font-mono text-[11px] tabular-nums text-muted-foreground">
-                              {kindLabel}
-                              {item.costText ? ` · ${item.costText}` : " · sem preço"}
-                              {item.kind === "service"
-                                ? " · não vai à mochila"
-                                : ""}
-                            </p>
-                          </button>
-                          {applies ? (
-                            <div className="flex w-40 shrink-0 flex-col gap-1">
-                              <SearchableSelect
-                                id={`host-${item.slug}`}
-                                value={attachBase}
-                                onValueChange={setAttachBase}
-                                options={inventoryItems
-                                  .filter((host) =>
-                                    hostMatchesCoverage(host, applies),
-                                  )
-                                  .map((host) => ({
-                                    value: host.itemSlug,
-                                    label: host.itemName,
-                                  }))}
-                                placeholder="Aplicar em…"
-                              />
-                              <div className="flex gap-1">
-                                {([1, 2, 3] as const).map((tier) => (
-                                  <button
-                                    key={tier}
-                                    type="button"
-                                    className={cn(
-                                      "rounded border px-1.5 text-[11px]",
-                                      attachBonus === tier
-                                        ? "border-primary/50 bg-primary/15"
-                                        : "border-border/70",
-                                    )}
-                                    onClick={() => setAttachBonus(tier)}
-                                  >
-                                    +{tier}
-                                  </button>
-                                ))}
-                              </div>
-                              <Button
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-start gap-0.5">
+                              <button
                                 type="button"
-                                size="xs"
-                                variant="outline"
-                                disabled={!attachBase}
-                                onClick={() => addToCart(item)}
+                                className="min-w-0 flex-1 text-left"
+                                onClick={() => markViewed(item.slug)}
                               >
-                                Aplicar
-                              </Button>
+                                <p className="truncate text-sm font-medium">
+                                  {item.name}
+                                </p>
+                                <BeyondShopListItemInfo
+                                  item={item}
+                                  weapon={equipmentIndex.weaponsBySlug?.get(
+                                    item.slug,
+                                  )}
+                                  armor={equipmentIndex.armorBySlug?.get(
+                                    item.slug,
+                                  )}
+                                />
+                              </button>
+                              <ItemCatalogDetailTrigger item={item} />
                             </div>
+                          </div>
+                          {coverage ? (
+                            <BeyondShopCoveragePanel
+                              coverageItem={item}
+                              inventoryItems={inventoryItems}
+                              shopOpen={open}
+                              onAdd={addCoverageToCart}
+                            />
                           ) : (
                             <Button
                               type="button"
@@ -412,73 +405,33 @@ export function BeyondShopDialog({
               </p>
             ) : (
               <ul className="min-h-0 flex-1 space-y-2 overflow-y-auto">
-                {cart.map((line) => (
-                  <li
-                    key={`${line.item.slug}-${line.attachToBaseSlug ?? ""}`}
-                    className="rounded-md border border-border/70 px-2 py-1.5"
-                  >
-                    <div className="flex items-start justify-between gap-1">
-                      <p className="text-xs font-medium leading-snug">
-                        {line.item.name}
-                        {line.attachToBaseSlug
-                          ? ` → ${line.attachToBaseSlug}`
-                          : ""}
-                      </p>
-                      <button
-                        type="button"
-                        className="text-muted-foreground hover:text-destructive"
-                        aria-label="Remover"
-                        onClick={() =>
-                          setCart((prev) =>
-                            prev.filter((c) => c.item.slug !== line.item.slug),
-                          )
-                        }
-                      >
-                        <TrashIcon className="size-3.5" />
-                      </button>
-                    </div>
-                    <div className="mt-1 flex items-center gap-1">
-                      <Button
-                        type="button"
-                        size="xs"
-                        variant="ghost"
-                        onClick={() =>
-                          setCart((prev) =>
-                            prev.map((c) =>
-                              c.item.slug === line.item.slug
-                                ? {
-                                    ...c,
-                                    quantity: Math.max(1, c.quantity - 1),
-                                  }
-                                : c,
-                            ),
-                          )
-                        }
-                      >
-                        −
-                      </Button>
-                      <span className="font-mono text-xs tabular-nums">
-                        {line.quantity}
-                      </span>
-                      <Button
-                        type="button"
-                        size="xs"
-                        variant="ghost"
-                        onClick={() =>
-                          setCart((prev) =>
-                            prev.map((c) =>
-                              c.item.slug === line.item.slug
-                                ? { ...c, quantity: c.quantity + 1 }
-                                : c,
-                            ),
-                          )
-                        }
-                      >
-                        +
-                      </Button>
-                    </div>
-                  </li>
-                ))}
+                {cart.map((line) => {
+                  const lineKey = shopCartLineKey(line);
+                  return (
+                    <BeyondShopCartLineRow
+                      key={lineKey}
+                      line={line}
+                      inventoryItems={inventoryItems}
+                      onRemove={() =>
+                        setCart((prev) =>
+                          prev.filter((c) => shopCartLineKey(c) !== lineKey),
+                        )
+                      }
+                      onQuantityChange={(delta) =>
+                        setCart((prev) =>
+                          prev.map((c) =>
+                            shopCartLineKey(c) === lineKey
+                              ? {
+                                  ...c,
+                                  quantity: Math.max(1, c.quantity + delta),
+                                }
+                              : c,
+                          ),
+                        )
+                      }
+                    />
+                  );
+                })}
               </ul>
             )}
 
@@ -515,7 +468,7 @@ export function BeyondShopDialog({
           <Button
             type="button"
             variant="ghost"
-            onClick={() => onOpenChange(false)}
+            onClick={() => handleOpenChange(false)}
           >
             Cancelar
           </Button>

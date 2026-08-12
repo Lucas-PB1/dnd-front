@@ -8,6 +8,8 @@ import { cn } from "@/shared/lib/utils";
 export type SearchableSelectOption = {
   value: string;
   label: string;
+  /** Segunda linha (stats, CA, dano…). */
+  hint?: string;
 };
 
 export type SearchableSelectProps = {
@@ -19,6 +21,8 @@ export type SearchableSelectProps = {
   placeholder?: string;
   searchPlaceholder?: string;
   emptyMessage?: string;
+  /** Densidade tipográfica — `compact` para painéis estreitos (loja). */
+  size?: "default" | "compact";
   className?: string;
   "aria-invalid"?: boolean;
   "aria-label"?: string;
@@ -43,6 +47,7 @@ export function SearchableSelect({
   placeholder = "Selecione",
   searchPlaceholder = "Buscar…",
   emptyMessage = "Nenhum resultado",
+  size = "default",
   className,
   name,
   onBlur,
@@ -52,6 +57,8 @@ export function SearchableSelect({
   const selected =
     options.find((option) => option.value === value) ??
     (value === "" ? null : { value, label: value });
+  const compact = size === "compact";
+  const hasHint = Boolean(selected?.hint);
 
   return (
     <Combobox.Root
@@ -61,7 +68,9 @@ export function SearchableSelect({
         onValueChange?.(next?.value ?? "");
       }}
       disabled={disabled}
-      itemToStringLabel={(item) => item?.label ?? ""}
+      itemToStringLabel={(item) =>
+        [item?.label, item?.hint].filter(Boolean).join(" ")
+      }
       isItemEqualToValue={optionEquals}
       autoHighlight
     >
@@ -74,21 +83,60 @@ export function SearchableSelect({
         aria-label={ariaLabel}
         onBlur={onBlur}
         className={cn(
-          "flex h-8 w-full items-center justify-between gap-2 rounded-lg border border-input bg-background px-2.5 text-left text-sm text-foreground outline-none",
+          "flex w-full items-center justify-between gap-1.5 rounded-lg border border-input bg-background px-2 text-left text-foreground outline-none",
           "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
           "disabled:cursor-not-allowed disabled:opacity-50",
           "dark:bg-card dark:text-foreground",
           "data-placeholder:text-muted-foreground",
+          compact
+            ? hasHint
+              ? "min-h-9 py-1"
+              : "h-7 py-0"
+            : hasHint
+              ? "min-h-10 py-1.5"
+              : "h-8",
+          compact ? "text-[11px] leading-tight" : "px-2.5 text-sm",
           ariaInvalid &&
             "border-destructive ring-3 ring-destructive/20 dark:border-destructive/50 dark:ring-destructive/40",
           className,
         )}
       >
-        <span className="min-w-0 flex-1 truncate">
-          <Combobox.Value placeholder={placeholder} />
+        <span className="min-w-0 flex-1 overflow-hidden">
+          {selected ? (
+            <span className="flex min-w-0 flex-col gap-0.5 leading-tight">
+              <span className="truncate font-medium">{selected.label}</span>
+              {selected.hint ? (
+                <span
+                  className={cn(
+                    "truncate text-muted-foreground",
+                    compact ? "text-[10px]" : "text-[11px]",
+                  )}
+                >
+                  {selected.hint}
+                </span>
+              ) : null}
+            </span>
+          ) : (
+            <span
+              className={cn(
+                "block truncate text-muted-foreground",
+                compact ? "text-[11px]" : "text-sm",
+              )}
+            >
+              {placeholder}
+            </span>
+          )}
         </span>
-        <Combobox.Icon className="size-4 shrink-0 text-muted-foreground">
-          <ChevronUpDownIcon aria-hidden className="size-4" />
+        <Combobox.Icon
+          className={cn(
+            "shrink-0 text-muted-foreground",
+            compact ? "size-3.5" : "size-4",
+          )}
+        >
+          <ChevronUpDownIcon
+            aria-hidden
+            className={compact ? "size-3.5" : "size-4"}
+          />
         </Combobox.Icon>
       </Combobox.Trigger>
 
@@ -111,14 +159,20 @@ export function SearchableSelect({
               <Combobox.Input
                 placeholder={searchPlaceholder}
                 className={cn(
-                  "h-8 w-full rounded-md border border-input bg-background px-2.5 text-sm text-foreground outline-none",
+                  "h-8 w-full rounded-md border border-input bg-background px-2.5 text-foreground outline-none",
                   "placeholder:text-muted-foreground",
                   "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
                   "dark:bg-card",
+                  compact ? "text-xs" : "text-sm",
                 )}
               />
             </div>
-            <Combobox.Empty className="px-3 py-4 text-sm text-muted-foreground">
+            <Combobox.Empty
+              className={cn(
+                "px-3 py-3 text-muted-foreground",
+                compact ? "text-xs" : "text-sm",
+              )}
+            >
               {emptyMessage}
             </Combobox.Empty>
             <Combobox.List className="max-h-60 overflow-y-auto overscroll-contain p-1 empty:p-0">
@@ -127,14 +181,29 @@ export function SearchableSelect({
                   key={option.value === "" ? "__empty__" : option.value}
                   value={option}
                   className={cn(
-                    "grid cursor-default grid-cols-[1rem_1fr] items-center gap-2 rounded-md px-2 py-1.5 text-sm outline-none select-none",
+                    "grid cursor-default grid-cols-[1rem_1fr] items-center gap-2 rounded-md px-2 outline-none select-none",
                     "data-highlighted:bg-accent data-highlighted:text-accent-foreground",
+                    compact ? "py-1 text-xs" : "py-1.5 text-sm",
                   )}
                 >
                   <Combobox.ItemIndicator className="col-start-1 flex items-center justify-center">
                     <CheckIcon aria-hidden className="size-3.5" />
                   </Combobox.ItemIndicator>
-                  <span className="col-start-2 truncate">{option.label}</span>
+                  <span className="col-start-2 min-w-0">
+                    <span className="block truncate font-medium">
+                      {option.label}
+                    </span>
+                    {option.hint ? (
+                      <span
+                        className={cn(
+                          "block truncate leading-snug text-muted-foreground",
+                          compact ? "text-[10px]" : "text-[11px]",
+                        )}
+                      >
+                        {option.hint}
+                      </span>
+                    ) : null}
+                  </span>
                 </Combobox.Item>
               )}
             </Combobox.List>

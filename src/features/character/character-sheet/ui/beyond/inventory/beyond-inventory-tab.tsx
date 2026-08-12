@@ -157,12 +157,22 @@ export function BeyondInventoryTab({
   }) {
     await purchase.mutateAsync({
       pay: input.pay,
-      lines: input.lines.map((line) => ({
-        itemSlug: line.item.slug,
-        quantity: line.quantity,
-        attachToBaseSlug: line.attachToBaseSlug,
-        attachCoverageBonus: line.attachCoverageBonus,
-      })),
+      lines: input.lines.map((line) => {
+        if (line.attachCoverageSlug) {
+          return {
+            itemSlug: line.item.slug,
+            quantity: line.quantity,
+            attachCoverageSlug: line.attachCoverageSlug,
+            attachCoverageBonus: line.attachCoverageBonus,
+          };
+        }
+        return {
+          itemSlug: line.item.slug,
+          quantity: line.quantity,
+          attachToBaseSlug: line.attachToBaseSlug,
+          attachCoverageBonus: line.attachCoverageBonus,
+        };
+      }),
     });
   }
 

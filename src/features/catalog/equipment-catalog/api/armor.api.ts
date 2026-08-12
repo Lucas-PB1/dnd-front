@@ -3,6 +3,7 @@ import type { ArmorListResponse, ArmorSummary } from "@/entities/armor/types";
 import {
   buildCatalogSearchParams,
   CATALOG_FETCH_INIT,
+  fetchAllCatalogPages,
 } from "@/shared/lib/catalog-query";
 import { CATALOG_PAGE_SIZE } from "@/shared/lib/catalog-pagination";
 
@@ -38,4 +39,12 @@ export async function fetchArmorBySlug(slug: string) {
     `/armor/${encodeURIComponent(slug)}`,
     CATALOG_FETCH_INIT,
   );
+}
+
+/** Todas as armaduras do catálogo (lookup rápido na loja). */
+export async function fetchAllArmor() {
+  return fetchAllCatalogPages<ArmorSummary>(({ page, limit }) => {
+    const search = buildCatalogSearchParams({ page, limit });
+    return catalogFetch<ArmorListResponse>(`/armor?${search}`, CATALOG_FETCH_INIT);
+  });
 }
