@@ -48,6 +48,11 @@ export function useSpellStepFormValues(
     name: "characterSpells",
     defaultValue: [],
   });
+  const classOptions = useWatch({
+    control,
+    name: "classOptions",
+    defaultValue: [],
+  });
 
   const characterFeats = useMemo(() => {
     const feats = [...asiFeatSlotsToCharacterFeats(asiFeatSlotSlugs ?? [])];
@@ -85,6 +90,7 @@ export function useSpellStepFormValues(
     speciesChoices: speciesChoices ?? [],
     featOptions: featOptions ?? [],
     characterSpells: characterSpells ?? [],
+    classOptions: classOptions ?? [],
     characterFeats,
     playerPickedSpells,
   };

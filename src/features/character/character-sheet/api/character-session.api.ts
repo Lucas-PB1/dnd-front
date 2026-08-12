@@ -527,6 +527,7 @@ export type DruidTableActionSlug =
   | "starry-form-archer"
   | "starry-form-chalice"
   | "starry-form-dragon"
+  | "starry-form-end"
   | "stellar-guidance"
   | "cosmic-omen"
   | "wrath-of-the-sea"

@@ -3,7 +3,9 @@
 import { useMemo } from "react";
 
 import { isSubclassRequired } from "@/entities/character/lib/subclass";
+import { resolveSubclassOptionValueLabel } from "@/features/character/create-character/lib/subclass/resolve-subclass-option-select";
 import { useSubclassOptions } from "@/features/catalog/class-catalog/api/use-classes";
+import { useCharacterCatalogLabels } from "@/features/character/character-sheet/api/use-character-catalog-labels";
 import {
   DetailTileGrid,
   type DetailTileItem,
@@ -20,14 +22,19 @@ export function SubclassOptionsSection({
     character.level,
     enabled && character.subclassOptions.length > 0,
   );
+  const labels = useCharacterCatalogLabels(character);
 
   const items = useMemo((): DetailTileItem[] => {
     const groups = optionsQuery.data?.data ?? [];
     return character.subclassOptions.map((opt) => {
-      const group = groups.find((g) => g.optionKey === opt.optionKey);
-      const value = group?.values.find((v) => v.valueId === opt.valueId);
+      const group = groups.find((entry) => entry.optionKey === opt.optionKey);
+      const valueLabel = resolveSubclassOptionValueLabel(
+        group,
+        opt.valueId,
+        labels.resolveSkill,
+        labels.resolveSpell,
+      );
       const label = group?.label ?? opt.optionKey;
-      const valueLabel = value?.label ?? opt.valueId;
       return {
         id: opt.optionKey,
         title: valueLabel,
@@ -46,7 +53,12 @@ export function SubclassOptionsSection({
         ),
       };
     });
-  }, [character.subclassOptions, optionsQuery.data?.data]);
+  }, [
+    character.subclassOptions,
+    labels.resolveSkill,
+    labels.resolveSpell,
+    optionsQuery.data?.data,
+  ]);
 
   if (!enabled || character.subclassOptions.length === 0) {
     return (

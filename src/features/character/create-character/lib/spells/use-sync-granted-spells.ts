@@ -10,6 +10,7 @@ import type { CreateCharacterInput } from "@/features/character/create-character
 
 type SyncGrantedSpellsInput = {
   speciesSlug: string;
+  classSlug: string;
   level: number;
   subclassSlug: string;
   speciesChoices: CreateCharacterInput["speciesChoices"];
@@ -23,6 +24,7 @@ type SyncGrantedSpellsInput = {
 /** Mantém magias always_prepared sincronizadas com o preview da API. */
 export function useSyncGrantedSpells({
   speciesSlug,
+  classSlug,
   level,
   subclassSlug,
   speciesChoices,
@@ -36,6 +38,7 @@ export function useSyncGrantedSpells({
     speciesSlug
       ? {
           speciesSlug,
+          classSlug: classSlug || undefined,
           level,
           subclassSlug:
             isSubclassRequired(level) && subclassSlug
@@ -65,8 +68,12 @@ export function useSyncGrantedSpells({
       .join("|");
     if (nextGrantedKey === currentGrantedKey) return;
 
+    const grantedSlugs = new Set(granted.map((spell) => spell.spellSlug));
+    const playerWithoutGranted = playerPickedSpells.filter(
+      (spell) => !grantedSlugs.has(spell.spellSlug),
+    );
     setValue("characterSpells", [
-      ...playerPickedSpells,
+      ...playerWithoutGranted,
       ...granted.map((spell) => ({
         spellSlug: spell.spellSlug,
         listType: "always_prepared" as const,

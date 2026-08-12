@@ -44,6 +44,8 @@ export type CharacterState = {
   bestialAspectLevel?: number;
   missileShieldArmed?: boolean;
   gigaMissileArmed?: boolean;
+  starryFormActive?: boolean;
+  stellarConstellation?: string | null;
 };
 
 export type ResourceDieRoll = {

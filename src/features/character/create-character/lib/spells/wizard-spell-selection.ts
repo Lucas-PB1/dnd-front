@@ -115,7 +115,14 @@ export function toggleCantrip(
   if (spell.level !== 0) {
     return { ok: false, reason: "Não é um truque." };
   }
-  if (findEntry(characterSpells, spell.slug)) {
+  const cantripEntry = findEntry(characterSpells, spell.slug);
+  if (cantripEntry?.listType === "always_prepared") {
+    return {
+      ok: false,
+      reason: "Magia sempre preparada não pode ser alterada.",
+    };
+  }
+  if (cantripEntry) {
     return { ok: true, next: withoutSlug(characterSpells, spell.slug) };
   }
   const { cantrips } = countSpellsByType(characterSpells, catalog);
@@ -150,6 +157,12 @@ export function toggleLeveledSpell(
   }
 
   const entry = findEntry(characterSpells, spell.slug);
+  if (entry?.listType === "always_prepared") {
+    return {
+      ok: false,
+      reason: "Magia sempre preparada não pode ser alterada.",
+    };
+  }
   const counts = countSpellsByType(characterSpells, catalog);
 
   if (mode === "known") {

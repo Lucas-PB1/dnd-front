@@ -3,6 +3,7 @@
  */
 
 import { hasJackOfAllTrades } from "@/entities/character/lib/class-expertise-slots";
+import { collectClassExtraSkillSlugs } from "@/entities/character/lib/class-extra-skill-slots";
 
 export const SKILL_SPECIES_CHOICE_KINDS = new Set([
   "human_skill",
@@ -104,6 +105,7 @@ function collectPriorProficientSkillSlugs(input: SkillBonusSources): string[] {
       ...(input.backgroundSkillSlugs ?? []),
       ...collectSpeciesSkillSlugs(input.speciesChoices),
       ...collectFeatSkillOptionSlugs(featOptions),
+      ...collectClassExtraSkillSlugs(input.classOptions),
     ]),
   ];
 }

@@ -11,6 +11,7 @@ import type {
   SubclassListResponse,
   SubclassMechanic,
   SubclassOptionGroup,
+  ClassFeatureOptionGroup,
   SubclassSpellOption,
   SubclassSpellSlots,
   SubclassSpellcasting,
@@ -41,6 +42,8 @@ export const classKeys = {
     [...classKeys.all, "progression", slug] as const,
   features: (slug: string, maxLevel?: number) =>
     [...classKeys.all, "features", slug, maxLevel ?? "all"] as const,
+  options: (slug: string, level: number) =>
+    [...classKeys.all, "options", slug, level] as const,
   spells: (slug: string, maxLevel?: number) =>
     [...classKeys.all, "spells", slug, maxLevel ?? "all"] as const,
 };
@@ -216,6 +219,17 @@ export async function fetchSubclassOptions(
 ) {
   return catalogFetch<PaginatedResponse<SubclassOptionGroup>>(
     `/subclasses/${slug}/options?level=${level}&limit=${limit}`,
+    CATALOG_FETCH_INIT,
+  );
+}
+
+export async function fetchClassOptions(
+  slug: string,
+  level: number,
+  limit = 50,
+) {
+  return catalogFetch<PaginatedResponse<ClassFeatureOptionGroup>>(
+    `/classes/${slug}/options?level=${level}&limit=${limit}`,
     CATALOG_FETCH_INIT,
   );
 }

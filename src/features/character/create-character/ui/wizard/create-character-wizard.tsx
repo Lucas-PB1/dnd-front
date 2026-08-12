@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
+import { classHasFightingStylePick } from "@/entities/character/lib/fighting-style-unlock";
 import { isSubclassRequired } from "@/entities/character/lib/subclass";
 import {
   useClassDetail,
@@ -13,6 +14,7 @@ import {
 } from "@/features/catalog/class-catalog/api/use-classes";
 import { useCreateCharacter } from "@/features/character/create-character/api/use-create-character";
 import { useWizardHasSubclassStep } from "@/features/character/create-character/api/use-wizard-has-subclass-step";
+import { useWizardHasClassFeaturesStep } from "@/features/character/create-character/api/use-wizard-has-class-features-step";
 import { useWizardHasSpellStep } from "@/features/character/create-character/api/use-wizard-has-spell-step";
 import { advanceWizardStep } from "@/features/character/create-character/lib/wizard/advance-wizard-step";
 import { countAsiFeatSlots } from "@/features/character/create-character/lib/feats/asi-feat-slots";
@@ -90,6 +92,7 @@ export function CreateCharacterWizard() {
   const originFeatSlug = backgroundDetail.data?.originFeatSlug ?? "";
   const asiSlotCount = countAsiFeatSlots(classSlug, level);
   const hasFightingStylePick =
+    classHasFightingStylePick(classSlug, level) &&
     (classDetail.data?.fightingStyleSlugs?.length ?? 0) > 0;
   const hasFeatsStep =
     !!originFeatSlug || asiSlotCount > 0 || hasFightingStylePick;
@@ -102,11 +105,14 @@ export function CreateCharacterWizard() {
     level,
     subclassSlug ?? "",
   );
+  const { hasClassFeaturesStep, classFeatureOptions } =
+    useWizardHasClassFeaturesStep(classSlug, level);
 
   const wizardNav: WizardNavOptions = {
     skipSpells: !hasSpellStep,
     skipFeats: !hasFeatsStep,
     skipSubclass: !hasSubclassStep,
+    skipClassFeatures: !hasClassFeaturesStep,
     skipInvocations: classSlug !== "warlock",
     skipMetamagics: classSlug !== "sorcerer" || level < 2,
   };
@@ -136,16 +142,19 @@ export function CreateCharacterWizard() {
       setSpeciesError: stepErrors.setSpeciesError,
       setFeatsError: stepErrors.setFeatsError,
       setSubclassError: stepErrors.setSubclassError,
+      setClassFeaturesError: stepErrors.setClassFeaturesError,
       classDetail: classDetail.data,
       classProgression: classProgression.data?.data,
       backgroundDetail: backgroundDetail.data,
       speciesTraitChoices: speciesTraits.data?.data,
       subclassOptions: subclassOpts.data?.data,
+      classFeatureOptions,
       originFeatSlug,
       hasFightingStylePick,
       fightingStyleSlugs: classDetail.data?.fightingStyleSlugs ?? [],
       hasFeatsStep,
       hasSubclassStep,
+      hasClassFeaturesStep,
       hasSpellStep,
       hasInvocationsStep: classSlug === "warlock",
       hasMetamagicsStep: classSlug === "sorcerer" && level >= 2,
@@ -181,6 +190,7 @@ export function CreateCharacterWizard() {
         featsError={stepErrors.featsError}
         speciesError={stepErrors.speciesError}
         subclassError={stepErrors.subclassError}
+        classFeaturesError={stepErrors.classFeaturesError}
       />
 
       {create.isError ? <WizardSubmitError error={create.error} /> : null}

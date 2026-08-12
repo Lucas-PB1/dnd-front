@@ -17,8 +17,11 @@ import {
   isFightingStyleSubclassOptionKey,
 } from "@/features/catalog/feat-catalog/lib/fighting-style-feat-options";
 import { useFeats } from "@/features/catalog/reference-catalog/api/use-reference";
+import { useBackgroundSkills } from "@/features/catalog/background-catalog/api/use-backgrounds";
+import { skillChoiceKinds } from "@/features/character/create-character/lib/class-skills/granted-proficiencies";
+import { useSubclassOptionCatalog } from "@/features/character/create-character/lib/subclass/use-subclass-option-catalog";
 import type { CreateCharacterInput } from "@/features/character/create-character/model/create-character.schema";
-import { CatalogSelect } from "@/features/character/create-character/ui/catalog-select";
+import { SubclassOptionField } from "@/features/character/create-character/ui/steps/subclass/subclass-option-field";
 import { WizardFormSection } from "@/features/character/create-character/ui/wizard/wizard-form-section";
 import { FieldError } from "@/shared/ui/field";
 
@@ -39,6 +42,21 @@ export function StepSubclassOptions({
     name: "classSlug",
     defaultValue: "",
   });
+  const backgroundSlug = useWatch({
+    control,
+    name: "backgroundSlug",
+    defaultValue: "",
+  });
+  const classSkillSlugs = useWatch({
+    control,
+    name: "classSkillSlugs",
+    defaultValue: [],
+  });
+  const speciesChoices = useWatch({
+    control,
+    name: "speciesChoices",
+    defaultValue: [],
+  });
   const asiFeatSlotSlugs = useWatch({
     control,
     name: "asiFeatSlotSlugs",
@@ -58,7 +76,13 @@ export function StepSubclassOptions({
   const enabled = isSubclassRequired(level) && !!subclassSlug;
   const optionsQuery = useSubclassOptions(subclassSlug ?? "", level, enabled);
   const classDetail = useClassDetail(classSlug, enabled && !!classSlug);
+  const backgroundSkills = useBackgroundSkills(
+    backgroundSlug,
+    enabled && !!backgroundSlug,
+  );
   const featsCatalog = useFeats();
+  const groups = optionsQuery.data?.data ?? [];
+  const catalog = useSubclassOptionCatalog(groups, level, classSlug);
 
   const fightingStyleFeatSlugs = useMemo(
     () =>
@@ -71,7 +95,24 @@ export function StepSubclassOptions({
   );
 
   const classFightingStyles = classDetail.data?.fightingStyleSlugs ?? [];
-  const groups = optionsQuery.data?.data ?? [];
+  const skillKinds = useMemo(() => skillChoiceKinds(), []);
+
+  const proficientSlugs = useMemo(() => {
+    const fromSpecies = speciesChoices
+      .filter((choice) => skillKinds.has(choice.choiceKind))
+      .map((choice) => choice.choiceSlug);
+    const fromBackground = (backgroundSkills.data?.data ?? []).map(
+      (skill) => skill.slug,
+    );
+    return [
+      ...new Set([...classSkillSlugs, ...fromBackground, ...fromSpecies]),
+    ];
+  }, [
+    backgroundSkills.data?.data,
+    classSkillSlugs,
+    skillKinds,
+    speciesChoices,
+  ]);
 
   useEffect(() => {
     if (!enabled) {
@@ -81,7 +122,7 @@ export function StepSubclassOptions({
 
   function setOption(optionKey: string, valueId: string) {
     const next: SubclassOption[] = subclassOptions.filter(
-      (o) => o.optionKey !== optionKey,
+      (option) => option.optionKey !== optionKey,
     );
     if (valueId) {
       next.push({ optionKey, valueId });
@@ -122,47 +163,78 @@ export function StepSubclassOptions({
       <FieldError errors={error ? [{ message: error }] : []} />
       <div className="grid gap-4 sm:grid-cols-2">
         {groups.map((group) => {
-          const selected = subclassOptions.find(
-            (o) => o.optionKey === group.optionKey,
-          )?.valueId;
+          const selected =
+            subclassOptions.find((option) => option.optionKey === group.optionKey)
+              ?.valueId ?? "";
 
           const isFightingStyle =
             group.valueType === "fighting_style" ||
             isFightingStyleSubclassOptionKey(group.optionKey);
 
-          let valueOptions = group.values;
           if (isFightingStyle && classFightingStyles.length > 0) {
             const taken = collectTakenFightingStyleSlugs({
               characterFeatSlugs: asiFeatSlotSlugs.filter(Boolean),
-              fightingStyleFeatSlugs: fightingStyleFeatSlugs,
+              fightingStyleFeatSlugs,
               subclassOptions: subclassOptions.filter(
-                (o) => o.optionKey !== group.optionKey,
+                (option) => option.optionKey !== group.optionKey,
               ),
             });
-            valueOptions = filterAllowedFightingStyleValues(
+            let valueOptions = filterAllowedFightingStyleValues(
               group.values,
               classFightingStyles,
               taken,
             );
-            if (selected && !valueOptions.some((v) => v.valueId === selected)) {
-              const current = group.values.find((v) => v.valueId === selected);
+            if (
+              selected &&
+              !valueOptions.some((value) => value.valueId === selected)
+            ) {
+              const current = group.values.find(
+                (value) => value.valueId === selected,
+              );
               if (current) {
                 valueOptions = [current, ...valueOptions];
               }
             }
+            return (
+              <SubclassOptionField
+                key={group.optionKey}
+                group={{ ...group, values: valueOptions }}
+                level={level}
+                selected={selected}
+                subclassOptions={subclassOptions}
+                proficientSlugs={proficientSlugs}
+                allSkills={catalog.allSkills}
+                fighterClassSkills={catalog.fighterClassSkills}
+                loreSpells={catalog.loreSpells}
+                wizardSpells={catalog.wizardSpells}
+                onChange={(valueId) => setOption(group.optionKey, valueId)}
+              />
+            );
           }
 
+          const isLoading =
+            (group.valueType === "skill_list" && catalog.allSkillsLoading) ||
+            (group.optionKey === "warScholarSkill" &&
+              catalog.fighterSkillsLoading) ||
+            (group.valueType === "spell" &&
+              (group.optionKey.startsWith("magicalDiscovery")
+                ? catalog.loreSpellsLoading
+                : catalog.wizardSpellsLoading));
+
           return (
-            <CatalogSelect
+            <SubclassOptionField
               key={group.optionKey}
-              id={`subclass-opt-${group.optionKey}`}
-              label={`${group.label} (nv. ${group.unlockLevel})`}
-              options={valueOptions.map((v) => ({
-                value: v.valueId,
-                label: v.label,
-              }))}
-              value={selected ?? ""}
-              onChange={(e) => setOption(group.optionKey, e.target.value)}
+              group={group}
+              level={level}
+              selected={selected}
+              subclassOptions={subclassOptions}
+              proficientSlugs={proficientSlugs}
+              allSkills={catalog.allSkills}
+              fighterClassSkills={catalog.fighterClassSkills}
+              loreSpells={catalog.loreSpells}
+              wizardSpells={catalog.wizardSpells}
+              isLoading={isLoading}
+              onChange={(valueId) => setOption(group.optionKey, valueId)}
             />
           );
         })}

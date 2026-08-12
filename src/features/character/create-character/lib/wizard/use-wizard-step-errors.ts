@@ -5,6 +5,7 @@ export type WizardStepErrors = {
   abilitiesError: string | undefined;
   speciesError: string | undefined;
   subclassError: string | undefined;
+  classFeaturesError: string | undefined;
   backgroundError: string | undefined;
   featsError: string | undefined;
 };
@@ -14,6 +15,9 @@ export function useWizardStepErrors() {
   const [abilitiesError, setAbilitiesError] = useState<string | undefined>();
   const [speciesError, setSpeciesError] = useState<string | undefined>();
   const [subclassError, setSubclassError] = useState<string | undefined>();
+  const [classFeaturesError, setClassFeaturesError] = useState<
+    string | undefined
+  >();
   const [backgroundError, setBackgroundError] = useState<string | undefined>();
   const [featsError, setFeatsError] = useState<string | undefined>();
 
@@ -22,6 +26,7 @@ export function useWizardStepErrors() {
     setAbilitiesError(undefined);
     setSpeciesError(undefined);
     setSubclassError(undefined);
+    setClassFeaturesError(undefined);
     setBackgroundError(undefined);
     setFeatsError(undefined);
   }, []);
@@ -31,12 +36,14 @@ export function useWizardStepErrors() {
     abilitiesError,
     speciesError,
     subclassError,
+    classFeaturesError,
     backgroundError,
     featsError,
     setSkillsError,
     setAbilitiesError,
     setSpeciesError,
     setSubclassError,
+    setClassFeaturesError,
     setBackgroundError,
     setFeatsError,
     clearStepErrors,

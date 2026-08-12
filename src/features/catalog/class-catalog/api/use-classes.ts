@@ -16,6 +16,7 @@ import {
   fetchClassSubclasses,
   fetchSubclassMechanics,
   fetchSubclassOptions,
+  fetchClassOptions,
   fetchSubclassSpells,
   fetchSubclassSpellSlots,
   fetchSubclassSpellcasting,
@@ -193,6 +194,19 @@ export function useSubclassOptions(
   return useQuery({
     queryKey: subclassKeys.options(slug, level),
     queryFn: () => fetchSubclassOptions(slug, level),
+    enabled: enabled && !!slug && level > 0,
+    staleTime: CATALOG_DETAIL_STALE_MS,
+  });
+}
+
+export function useClassFeatureOptions(
+  slug: string,
+  level: number,
+  enabled = true,
+) {
+  return useQuery({
+    queryKey: classKeys.options(slug, level),
+    queryFn: () => fetchClassOptions(slug, level),
     enabled: enabled && !!slug && level > 0,
     staleTime: CATALOG_DETAIL_STALE_MS,
   });

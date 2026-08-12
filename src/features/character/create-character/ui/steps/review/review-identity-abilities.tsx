@@ -106,8 +106,18 @@ export function ReviewSkillsSection({ data }: { data: ReviewData }) {
 }
 
 export function ReviewChoicesSection({ data }: { data: ReviewData }) {
-  const { values, speciesChoiceLabel, subclassOptionLabel } = data;
-  if (values.speciesChoices.length === 0 && values.subclassOptions.length === 0) {
+  const {
+    values,
+    speciesChoiceLabel,
+    subclassOptionLabel,
+    classFeatureOptionLabel,
+    classFeaturePicks,
+  } = data;
+  if (
+    values.speciesChoices.length === 0 &&
+    values.subclassOptions.length === 0 &&
+    classFeaturePicks.length === 0
+  ) {
     return null;
   }
 
@@ -122,6 +132,19 @@ export function ReviewChoicesSection({ data }: { data: ReviewData }) {
             items={values.speciesChoices.map((c) => ({
               key: `${c.choiceKind}-${c.choiceSlug}`,
               label: speciesChoiceLabel(c.choiceKind, c.choiceSlug),
+            }))}
+          />
+        </div>
+      ) : null}
+      {classFeaturePicks.length > 0 ? (
+        <div className="space-y-1.5">
+          <p className="text-[0.65rem] font-medium tracking-wider text-muted-foreground uppercase">
+            Classe
+          </p>
+          <ReviewChipList
+            items={classFeaturePicks.map((o) => ({
+              key: `${o.optionKey}-${o.valueId}`,
+              label: classFeatureOptionLabel(o.optionKey, o.valueId),
             }))}
           />
         </div>

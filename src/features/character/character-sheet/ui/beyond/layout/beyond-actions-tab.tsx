@@ -33,6 +33,7 @@ import { useGameAuth } from "@/features/character/character-sheet/api/use-game-a
 import { useCombatMechanicalCatalog } from "@/features/catalog/reference-catalog/api/use-reference";
 import { collectActiveItemSlugs } from "@/features/character/character-sheet/lib/combat/active-item-slugs";
 import { artifactInstanceEconomyActions } from "@/features/character/character-sheet/lib/combat/artifact-instance-actions";
+import { filterStarryFormEconomyActions } from "@/features/character/character-sheet/lib/combat/filter-starry-form-actions";
 import {
   groupClassEconomyActions,
   resolveClassEconomyActions,
@@ -175,8 +176,13 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
         })
         .filter((action): action is NonNullable<typeof action> => action != null);
 
+      const starryFiltered = filterStarryFormEconomyActions(withBoundSpells, {
+        starryFormActive: stateQuery.data?.starryFormActive ?? false,
+        stellarConstellation: stateQuery.data?.stellarConstellation ?? null,
+      });
+
       return [
-        ...withBoundSpells,
+        ...starryFiltered,
         ...artifactInstanceEconomyActions(items),
       ];
     },
@@ -191,6 +197,8 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
       character.subclassOptions,
       activeItemSlugs,
       inventoryQuery.data?.items,
+      stateQuery.data?.starryFormActive,
+      stateQuery.data?.stellarConstellation,
     ],
   );
   const grouped = useMemo(

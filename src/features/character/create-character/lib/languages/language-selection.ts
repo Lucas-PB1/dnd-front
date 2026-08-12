@@ -27,16 +27,21 @@ export function backgroundLanguageGrant(input?: {
 export function languageQuota(input?: {
   grantedSlugs?: string[];
   languageChoiceCount?: number;
+  extraGrantedSlugs?: string[];
+  extraChoiceCount?: number;
 } | null): {
   granted: string[];
   choiceCount: number;
   maxTotal: number;
 } {
   const { grantedSlugs, choiceCount } = backgroundLanguageGrant(input);
+  const extraGranted = [...new Set(input?.extraGrantedSlugs ?? [])];
+  const granted = [...new Set([...grantedSlugs, ...extraGranted])];
+  const totalChoice = choiceCount + (input?.extraChoiceCount ?? 0);
   return {
-    granted: grantedSlugs,
-    choiceCount,
-    maxTotal: grantedSlugs.length + choiceCount,
+    granted,
+    choiceCount: totalChoice,
+    maxTotal: granted.length + totalChoice,
   };
 }
 
@@ -62,6 +67,8 @@ export function syncLanguagesForBackground(
   grant?: {
     grantedSlugs?: string[];
     languageChoiceCount?: number;
+    extraGrantedSlugs?: string[];
+    extraChoiceCount?: number;
   } | null,
 ): string[] {
   const { granted, choiceCount } = languageQuota(grant);
@@ -75,6 +82,8 @@ export function toggleLanguageSelection(
   grant?: {
     grantedSlugs?: string[];
     languageChoiceCount?: number;
+    extraGrantedSlugs?: string[];
+    extraChoiceCount?: number;
   } | null,
 ): { ok: true; next: string[] } | { ok: false; reason: string } {
   const { granted, choiceCount, maxTotal } = languageQuota(grant);
@@ -83,7 +92,7 @@ export function toggleLanguageSelection(
   if (grantedSet.has(slug)) {
     return {
       ok: false,
-      reason: "Este idioma vem do antecedente e não pode ser removido.",
+      reason: "Este idioma é concedido e não pode ser removido.",
     };
   }
 

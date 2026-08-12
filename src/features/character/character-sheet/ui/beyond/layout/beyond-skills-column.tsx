@@ -14,6 +14,7 @@ import {
   skillProficiencyRank,
   abilityModifierValue,
 } from "@/entities/character";
+import { classOrderSkillCheckBonus } from "@/entities/character/lib/class-order-effects";
 import type { SkillSummary } from "@/entities/skill/types";
 import { useAbilityLabels } from "@/features/catalog/reference-catalog/api/use-ability-labels";
 import { BeyondPanel } from "@/features/character/character-sheet/ui/beyond/layout/beyond-panel";
@@ -67,11 +68,17 @@ export function BeyondSkillsColumn({
       isProficient,
       isExpertise,
       isJack,
-      bonus: skillCheckBonus(
-        abilityModifierValue(score),
-        character.proficiencyBonus,
-        rank,
-      ),
+      bonus:
+        skillCheckBonus(
+          abilityModifierValue(score),
+          character.proficiencyBonus,
+          rank,
+        ) +
+        classOrderSkillCheckBonus(
+          skill.slug,
+          character.classOptions,
+          abilityModifierValue(scores.sabedoria),
+        ),
     };
   });
 

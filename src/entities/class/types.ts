@@ -135,4 +135,19 @@ export type SubclassOptionGroup = {
   unlockLevel: number;
   valueType: string;
   values: SubclassOptionValue[];
+  spellMaxLevel?: number | null;
+  spellSchoolSlugs?: string[] | null;
+};
+
+/** Espelha ClassOptionResponseDto */
+export type ClassFeatureOptionValue = SubclassOptionValue & {
+  benefit?: string | null;
+};
+
+export type ClassFeatureOptionGroup = {
+  optionKey: string;
+  label: string;
+  unlockLevel: number;
+  valueType: string;
+  values: ClassFeatureOptionValue[];
 };

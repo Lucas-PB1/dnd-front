@@ -20,6 +20,7 @@ import { StepSpells } from "@/features/character/create-character/ui/steps/spell
 import { StepWarlockInvocations } from "@/features/character/create-character/ui/steps/invocations/step-warlock-invocations";
 import { StepSorcererMetamagics } from "@/features/character/create-character/ui/steps/metamagics/step-sorcerer-metamagics";
 import { StepSubclassOptions } from "@/features/character/create-character/ui/steps/subclass/step-subclass-options";
+import { StepClassFeatureOptions } from "@/features/character/create-character/ui/steps/class-features/step-class-feature-options";
 
 type WizardStepContentProps = {
   step: WizardStepId;
@@ -33,6 +34,7 @@ type WizardStepContentProps = {
   featsError: string | undefined;
   speciesError: string | undefined;
   subclassError: string | undefined;
+  classFeaturesError: string | undefined;
 };
 
 function StepInlineError({ message }: { message: string }) {
@@ -55,6 +57,7 @@ export function WizardStepContent({
   featsError,
   speciesError,
   subclassError,
+  classFeaturesError,
 }: WizardStepContentProps) {
   return (
     <div
@@ -98,6 +101,14 @@ export function WizardStepContent({
           control={control}
           setValue={setValue}
           error={speciesError}
+        />
+      ) : null}
+
+      {step === "classFeatures" ? (
+        <StepClassFeatureOptions
+          control={control}
+          setValue={setValue}
+          error={classFeaturesError}
         />
       ) : null}
 

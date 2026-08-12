@@ -5,6 +5,7 @@ import type { Control, UseFormSetValue } from "react-hook-form";
 import { useStepSpells } from "@/features/character/create-character/lib/spells/use-step-spells";
 import type { CreateCharacterInput } from "@/features/character/create-character/model/create-character.schema";
 import { SpellPreviewDialog } from "@/features/character/create-character/ui/spell-preview-dialog";
+import { SpellClassOptionPicks } from "@/features/character/create-character/ui/steps/spells/spell-class-option-picks";
 import { SpellListPicker } from "@/features/character/create-character/ui/steps/spells/spell-list-picker";
 import { SpellResourcesPanel } from "@/features/character/create-character/ui/steps/spells/spell-resources-panel";
 import { SubclassSpellsSection } from "@/features/character/create-character/ui/steps/spells/subclass-spells-section";
@@ -115,6 +116,15 @@ export function StepSpells({ control, setValue }: StepSpellsProps) {
           onPreview={(slug, kind) => spells.setPreview({ slug, kind })}
         />
       ) : null}
+
+      <SpellClassOptionPicks
+        classSlug={spells.classSlug}
+        level={spells.level}
+        availableClass={spells.availableClass}
+        characterSpells={spells.characterSpells}
+        classOptions={spells.classOptions}
+        onSetOption={spells.onSetClassOption}
+      />
 
       <SubclassSpellsSection
         spells={spells.availableSubclass}

@@ -4,6 +4,7 @@ import type { Control, UseFormSetValue } from "react-hook-form";
 
 import { useStepClassSkills } from "@/features/character/create-character/lib/class-skills/use-step-class-skills";
 import type { CreateCharacterInput } from "@/features/character/create-character/model/create-character.schema";
+import { ClassExtraSkillSection } from "@/features/character/create-character/ui/steps/class-skills/class-extra-skill-section";
 import { ClassExpertiseSection } from "@/features/character/create-character/ui/steps/class-skills/class-expertise-section";
 import { ClassSkillsPickerSection } from "@/features/character/create-character/ui/steps/class-skills/class-skills-picker-section";
 import { ClassWeaponMasterySection } from "@/features/character/create-character/ui/steps/class-skills/class-weapon-mastery-section";
@@ -51,6 +52,14 @@ export function StepClassSkills({
       ) : (
         <FieldError errors={error ? [{ message: error }] : []} />
       )}
+
+      <ClassExtraSkillSection
+        extraSkillSlots={data.extraSkillSlots}
+        extraSkillCandidates={data.extraSkillCandidates}
+        classOptions={data.classOptions}
+        extraSkillFilled={data.extraSkillFilled}
+        onSetExtraSkill={data.setExpertise}
+      />
 
       <ClassExpertiseSection
         expertiseSlots={data.expertiseSlots}

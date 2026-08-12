@@ -11,6 +11,10 @@ import {
   isClassExpertiseOptionKey,
 } from "@/entities/character/lib/class-expertise-slots";
 import {
+  classExtraSkillSlotsAtLevel,
+  isClassExtraSkillOptionKey,
+} from "@/entities/character/lib/class-extra-skill-slots";
+import {
   classWeaponMasterySlotsAtLevel,
   isClassWeaponMasteryOptionKey,
   parseWeaponMasteryEligibility,
@@ -96,6 +100,10 @@ export function useStepClassSkills(
     ];
   }, [backgroundSkillSlugs, classSkillSlugs, skillKinds, speciesChoices]);
 
+  const extraSkillSlots = useMemo(
+    () => classExtraSkillSlotsAtLevel(classSlug, level),
+    [classSlug, level],
+  );
   const expertiseSlots = useMemo(
     () => classExpertiseSlotsAtLevel(classSlug, level),
     [classSlug, level],
@@ -127,6 +135,17 @@ export function useStepClassSkills(
     }
     return map;
   }, [allSkills.data?.data, options]);
+
+  const extraSkillCandidates = useMemo(() => {
+    const proficient = new Set(proficientSlugs);
+    return options
+      .filter((skill) => !proficient.has(skill.slug) && !backgroundSkillSlugs.has(skill.slug))
+      .map((skill) => ({
+        value: skill.slug,
+        label: skill.name,
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label, "pt"));
+  }, [options, proficientSlugs, backgroundSkillSlugs]);
 
   const expertiseCandidates = useMemo(() => {
     let slugs = proficientSlugs;
@@ -210,6 +229,9 @@ export function useStepClassSkills(
     setExpertise(optionKey, valueId);
   }
 
+  const extraSkillFilled = classOptions.filter((option) =>
+    isClassExtraSkillOptionKey(option.optionKey),
+  ).length;
   const expertiseFilled = classOptions.filter((option) =>
     isClassExpertiseOptionKey(option.optionKey),
   ).length;
@@ -228,6 +250,9 @@ export function useStepClassSkills(
     requiredCount,
     options,
     atLimit,
+    extraSkillSlots,
+    extraSkillCandidates,
+    extraSkillFilled,
     expertiseSlots,
     masterySlots,
     masteryEligibility,

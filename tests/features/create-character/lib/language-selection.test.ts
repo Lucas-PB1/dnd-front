@@ -47,6 +47,39 @@ describe("language-selection", () => {
     expect(result.ok).toBe(false);
   });
 
+  it("adds class extra language choices", () => {
+    const rogue = {
+      grantedSlugs: ["common"],
+      languageChoiceCount: 2,
+      extraGrantedSlugs: ["thieves-cant"],
+      extraChoiceCount: 1,
+    };
+    expect(languageQuota(rogue)).toEqual({
+      granted: ["common", "thieves-cant"],
+      choiceCount: 3,
+      maxTotal: 5,
+    });
+  });
+
+  it("locks druidic as a class grant without extra choices", () => {
+    const druid = {
+      grantedSlugs: ["common"],
+      languageChoiceCount: 2,
+      extraGrantedSlugs: ["druidic"],
+      extraChoiceCount: 0,
+    };
+    expect(languageQuota(druid)).toEqual({
+      granted: ["common", "druidic"],
+      choiceCount: 2,
+      maxTotal: 4,
+    });
+    expect(syncLanguagesForBackground(["common", "elvish"], druid)).toEqual([
+      "common",
+      "druidic",
+      "elvish",
+    ]);
+  });
+
   it("syncs selection when background grant changes", () => {
     expect(
       syncLanguagesForBackground(

@@ -4,6 +4,7 @@ import { useEffect, useMemo } from "react";
 import type { Control, UseFormSetValue } from "react-hook-form";
 import { useWatch } from "react-hook-form";
 
+import { classHasFightingStylePick } from "@/entities/character/lib/fighting-style-unlock";
 import type { FeatOption } from "@/entities/character/sheet-types";
 import { useBackgroundDetail } from "@/features/catalog/background-catalog/api/use-backgrounds";
 import { useBackgroundSkills } from "@/features/catalog/background-catalog/api/use-backgrounds";
@@ -197,7 +198,9 @@ export function useStepFeats(
     () => classDetail.data?.fightingStyleSlugs ?? [],
     [classDetail.data?.fightingStyleSlugs],
   );
-  const showFightingStyleSection = classFightingStyleSlugs.length > 0;
+  const showFightingStyleSection =
+    classHasFightingStylePick(classSlug, level) &&
+    classFightingStyleSlugs.length > 0;
 
   const fightingStyleOptions = useMemo(() => {
     const allowed = new Set(classFightingStyleSlugs);

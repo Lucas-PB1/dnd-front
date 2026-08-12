@@ -90,4 +90,16 @@ describe("wizard-spell-selection", () => {
       expect(result.next[0]?.listType).toBe("prepared");
     }
   });
+
+  it("does not retoggle always_prepared domain spells", () => {
+    const result = toggleLeveledSpell(
+      [{ spellSlug: "cure-wounds", listType: "always_prepared" }],
+      catalog[2]!,
+      catalog,
+      "prepared",
+      { leveledKnownMax: null, leveledPreparedMax: 4 },
+      "prepared",
+    );
+    expect(result.ok).toBe(false);
+  });
 });

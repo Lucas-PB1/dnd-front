@@ -17,12 +17,14 @@ import {
 import { useCharacterCatalogLabels } from "@/features/character/character-sheet/api/use-character-catalog-labels";
 import {
   useClassEquipment,
+  useClassFeatureOptions,
   useSubclassOptions,
 } from "@/features/catalog/class-catalog/api/use-classes";
 import { asiFeatLevelsUpTo } from "@/features/character/create-character/lib/feats/asi-feat-slots";
 import { asiFeatSlotsToCharacterFeats } from "@/features/character/create-character/lib/feats/asi-feat-slots-to-feats";
 import { toolNameForSlug } from "@/features/character/create-character/lib/equipment/equipment-choice-resolve";
 import { groupEquipmentPackages } from "@/features/character/create-character/lib/equipment";
+import { classLanguageGrant } from "@/entities/character/lib/class-language-grant";
 import { languageQuota } from "@/features/character/create-character/lib/languages/language-selection";
 import { previewCreateCharacter } from "@/features/character/create-character/lib/review/preview-create-character";
 import {
@@ -32,6 +34,7 @@ import {
   resolveReviewPackageLabel,
 } from "@/features/character/create-character/lib/review/review-display";
 import { resolveCreateCharacterFeats } from "@/features/character/create-character/lib/feats/preview-create-character-feats";
+import { resolveSubclassOptionValueLabel } from "@/features/character/create-character/lib/subclass/resolve-subclass-option-select";
 import type { CreateCharacterInput } from "@/features/character/create-character/model/create-character.schema";
 import { useFeatOptionLabels } from "@/features/catalog/feat-catalog/api/use-feat-option-labels";
 import {
@@ -69,6 +72,11 @@ export function useStepReview(control: Control<CreateCharacterInput>) {
     values.subclassSlug ?? "",
     values.level,
     isSubclassRequired(values.level) && !!values.subclassSlug,
+  );
+  const classFeatureOpts = useClassFeatureOptions(
+    values.classSlug,
+    values.level,
+    !!values.classSlug,
   );
   const backgroundDetail = useBackgroundDetail(
     values.backgroundSlug,
@@ -123,9 +131,12 @@ export function useStepReview(control: Control<CreateCharacterInput>) {
     values.backgroundSlug,
     !!values.backgroundSlug,
   );
+  const classLangGrant = classLanguageGrant(values.classSlug, values.level);
   const langQuota = languageQuota({
     grantedSlugs: (backgroundLanguages.data?.data ?? []).map((row) => row.slug),
     languageChoiceCount: backgroundDetail.data?.languageChoiceCount ?? 2,
+    extraGrantedSlugs: classLangGrant.grantedSlugs,
+    extraChoiceCount: classLangGrant.choiceCount,
   });
 
   const classPackages = useMemo(
@@ -166,11 +177,33 @@ export function useStepReview(control: Control<CreateCharacterInput>) {
 
   function subclassOptionLabel(optionKey: string, valueId: string) {
     const group = subclassOpts.data?.data.find(
+      (entry) => entry.optionKey === optionKey,
+    );
+    const valueLabel = resolveSubclassOptionValueLabel(
+      group,
+      valueId,
+      labels.resolveSkill,
+      (slug) =>
+        spellsCatalog.data?.data.find((spell) => spell.slug === slug)?.name ??
+        slug,
+    );
+    return `${group?.label ?? optionKey}: ${valueLabel}`;
+  }
+
+  function classFeatureOptionLabel(optionKey: string, valueId: string) {
+    const group = classFeatureOpts.data?.data.find(
       (g) => g.optionKey === optionKey,
     );
     const value = group?.values.find((v) => v.valueId === valueId);
     return `${group?.label ?? optionKey}: ${value?.label ?? valueId}`;
   }
+
+  const classFeatureOptionKeys = new Set(
+    (classFeatureOpts.data?.data ?? []).map((group) => group.optionKey),
+  );
+  const classFeaturePicks = (values.classOptions ?? []).filter((option) =>
+    classFeatureOptionKeys.has(option.optionKey),
+  );
 
   function resolveEquipmentItemName(
     source: "class" | "background",
@@ -262,6 +295,8 @@ export function useStepReview(control: Control<CreateCharacterInput>) {
     resolveEquipmentItemName,
     speciesChoiceLabel,
     subclassOptionLabel,
+    classFeatureOptionLabel,
+    classFeaturePicks,
     cantrips,
     leveledSpells,
     langQuota,

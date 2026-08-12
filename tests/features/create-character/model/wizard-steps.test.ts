@@ -60,6 +60,7 @@ describe("wizard step navigation", () => {
       skipSpells: true,
       skipFeats: true,
       skipSubclass: true,
+      skipClassFeatures: true,
       skipInvocations: true,
       skipMetamagics: true,
     };
@@ -80,6 +81,7 @@ describe("wizard step navigation", () => {
     );
     expect(skippedWizardSteps(nav).map((step) => step.id)).toEqual([
       "feats",
+      "classFeatures",
       "subclass",
       "spells",
       "invocations",

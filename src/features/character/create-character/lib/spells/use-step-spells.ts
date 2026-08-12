@@ -31,10 +31,12 @@ export function useStepSpells(
     classSlug: form.classSlug,
     subclassSlug: form.subclassSlug,
     characterSpells: form.characterSpells,
+    classOptions: form.classOptions,
   });
 
   useSyncGrantedSpells({
     speciesSlug: form.speciesSlug,
+    classSlug: form.classSlug,
     level: form.level,
     subclassSlug: form.subclassSlug,
     speciesChoices: form.speciesChoices,
@@ -95,6 +97,17 @@ export function useStepSpells(
     applySpells(toggleSubclassSpell(form.characterSpells, slug));
   }
 
+  function onSetClassOption(optionKey: string, valueId: string) {
+    const without = (form.classOptions ?? []).filter(
+      (option) => option.optionKey !== optionKey,
+    );
+    setValue(
+      "classOptions",
+      valueId ? [...without, { optionKey, valueId }] : without,
+      { shouldDirty: true },
+    );
+  }
+
   function previewActions(target: SpellPreviewTarget) {
     return buildSpellPreviewActions({
       target,
@@ -120,6 +133,8 @@ export function useStepSpells(
     availableClass: catalog.availableClass,
     availableSubclass: catalog.availableSubclass,
     characterSpells: form.characterSpells,
+    classOptions: form.classOptions,
+    onSetClassOption,
     uiProfile: catalog.uiProfile,
     mode: catalog.mode,
     counts: catalog.counts,

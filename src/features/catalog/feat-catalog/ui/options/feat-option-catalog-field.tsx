@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+
 import type { CharacterFeat, FeatOption } from "@/entities/character/sheet-types";
 import type { FeatOptionDefinition } from "@/entities/feat/types";
 import { applyFeatOptionChange } from "@/features/catalog/feat-catalog/lib/apply-feat-option-change";
@@ -38,6 +40,13 @@ export function FeatOptionCatalogField({
     def.values,
     classSavingThrowSlugs,
   );
+
+  useEffect(() => {
+    if (selected || catalogOptions.length !== 1) return;
+    onChange(
+      applyFeatOptionChange(value, feat, def.optionKey, catalogOptions[0].valueId),
+    );
+  }, [catalogOptions, def.optionKey, feat, onChange, selected, value]);
 
   return (
     <CatalogSelect

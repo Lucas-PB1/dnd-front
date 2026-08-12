@@ -2,6 +2,8 @@
 
 import { useMemo } from "react";
 
+import { extraCantripsFromClassOrder } from "@/entities/character/lib/class-order-effects";
+import { magicalSecretsListSlugs } from "@/entities/character/lib/magical-secrets";
 import { isSubclassRequired } from "@/entities/character/lib/subclass";
 import { resolveSpellcastingUiProfile } from "@/features/character/create-character/lib/spells/class-spellcasting-ui";
 import { resolveLevelProgression } from "@/features/character/create-character/lib/progression/resolve-level-progression";
@@ -28,6 +30,7 @@ type SpellStepCatalogInput = {
   classSlug: string;
   subclassSlug: string;
   characterSpells: CreateCharacterInput["characterSpells"];
+  classOptions?: CreateCharacterInput["classOptions"];
 };
 
 /** Catálogo, progressão, cotas e perfil de UI do passo de magias. */
@@ -36,6 +39,7 @@ export function useSpellStepCatalog({
   classSlug,
   subclassSlug,
   characterSpells,
+  classOptions,
 }: SpellStepCatalogInput) {
   const classDetail = useClassDetail(classSlug, !!classSlug);
   const classSpellSlotsQuery = useClassSpellSlots(classSlug, !!classSlug);
@@ -74,11 +78,43 @@ export function useSpellStepCatalog({
     maxLevel,
     slotsReady && !!spellListClassSlug,
   );
-
-  const availableClass = useMemo(
-    () => classSpells.data?.data ?? [],
-    [classSpells.data?.data],
+  const secretsLists = magicalSecretsListSlugs(classSlug, level);
+  const secretsCleric = useClassSpells(
+    "cleric",
+    maxLevel,
+    secretsLists.includes("cleric"),
   );
+  const secretsDruid = useClassSpells(
+    "druid",
+    maxLevel,
+    secretsLists.includes("druid"),
+  );
+  const secretsWizard = useClassSpells(
+    "wizard",
+    maxLevel,
+    secretsLists.includes("wizard"),
+  );
+
+  const availableClass = useMemo(() => {
+    const bySlug = new Map(
+      (classSpells.data?.data ?? []).map((spell) => [spell.slug, spell]),
+    );
+    for (const extra of [
+      secretsCleric.data?.data ?? [],
+      secretsDruid.data?.data ?? [],
+      secretsWizard.data?.data ?? [],
+    ]) {
+      for (const spell of extra) {
+        if (!bySlug.has(spell.slug)) bySlug.set(spell.slug, spell);
+      }
+    }
+    return [...bySlug.values()];
+  }, [
+    classSpells.data?.data,
+    secretsCleric.data?.data,
+    secretsDruid.data?.data,
+    secretsWizard.data?.data,
+  ]);
   const availableSubclass = useMemo(
     () =>
       (subclassSpells.data?.data ?? []).filter(
@@ -102,7 +138,10 @@ export function useSpellStepCatalog({
     subclassSlug || undefined,
   );
 
-  const cantripMax = progressionRow?.cantrips ?? null;
+  const cantripMax =
+    progressionRow?.cantrips == null
+      ? null
+      : progressionRow.cantrips + extraCantripsFromClassOrder(classOptions);
   const leveledPreparedMax = progressionRow?.preparedSpells ?? null;
   const leveledKnownMax =
     mode === "wizard"

@@ -54,7 +54,7 @@ export function StepFeats({ control, setValue, error }: StepFeatsProps) {
           ) : (
             <CatalogSelect
               id="fighting-style-feat"
-              label="Estilo (nível 1)"
+              label="Estilo de Luta"
               options={[
                 { value: "", label: "Escolha…" },
                 ...data.fightingStyleOptions.map((feat) => ({

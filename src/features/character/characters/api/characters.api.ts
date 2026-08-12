@@ -11,6 +11,7 @@ export type { CharacterSummary, CharacterDetail };
 
 export type PreviewGrantedSpellsPayload = {
   speciesSlug: string;
+  classSlug?: string | null;
   level?: number;
   subclassSlug?: string | null;
   speciesChoices?: Array<{ choiceKind: string; choiceSlug: string }>;
