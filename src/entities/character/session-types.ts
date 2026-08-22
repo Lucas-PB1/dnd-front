@@ -58,6 +58,7 @@ export type ResourceDieRoll = {
 export type UseClassResourceResult = {
   state: CharacterState;
   roll?: ResourceDieRoll | null;
+  note?: string | null;
 };
 
 export type GunslingerManeuver = {

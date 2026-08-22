@@ -237,9 +237,19 @@ export async function advanceWizardStep(deps: WizardAdvanceDeps): Promise<void> 
 
   if (step === "species") {
     const values = getValues();
+    const elfLineage = values.speciesChoices.find(
+      (c) => c.choiceKind === "elf_lineage",
+    )?.choiceSlug;
+    const bearfolkLineage = values.speciesChoices.find(
+      (c) => c.choiceKind === "bearfolk_lineage",
+    )?.choiceSlug;
     const requiredKinds = [
       ...new Set((speciesTraitChoices ?? []).map((r) => r.choiceKind)),
-    ];
+    ].filter((kind) => {
+      if (kind === "high_elf_cantrip") return elfLineage === "high-elf";
+      if (kind === "andari_druid_cantrip") return bearfolkLineage === "andari";
+      return true;
+    });
     if (requiredKinds.length > 0) {
       const provided = values.speciesChoices.map((c) => c.choiceKind);
       const missing = requiredKinds.filter((k) => !provided.includes(k));

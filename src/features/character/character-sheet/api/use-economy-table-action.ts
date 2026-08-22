@@ -234,7 +234,9 @@ export function useEconomyTableAction(characterId: string) {
           queryClient.setQueryData(sessionKeys.state(characterId), result.state);
           return {
             note: (
-              note?.trim() || `Gastou ${spendAmount}× ${resourceSlug}`
+              result.note?.trim() ||
+              note?.trim() ||
+              `Gastou ${spendAmount}× ${resourceSlug}`
             ).trim(),
           };
         }
