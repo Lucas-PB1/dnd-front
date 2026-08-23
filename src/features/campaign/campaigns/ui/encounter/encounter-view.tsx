@@ -214,7 +214,7 @@ export function EncounterView({ campaignId }: { campaignId: string }) {
               <label className="flex items-center gap-2 text-sm">
                 <span className="text-muted-foreground">Iniciativa</span>
                 <SearchableSelect
-                  className="h-8 w-auto min-w-[8rem] text-sm"
+                  className="h-8 w-auto min-w-32 text-sm"
                   value={advantage}
                   options={[
                     { value: "normal", label: "Normal" },
@@ -326,13 +326,13 @@ function EncounterHeader({
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,color-mix(in_oklch,var(--muted)_75%,transparent),transparent_55%),radial-gradient(ellipse_at_bottom_right,color-mix(in_oklch,var(--secondary)_16%,transparent),transparent_50%)]"
         aria-hidden
       />
-      <MarginCorner className="pointer-events-none absolute top-2.5 left-2.5 size-8 sm:size-10" />
+      <MarginCorner className="pointer-events-none absolute top-2 left-2 size-7 sm:size-8" />
       <MarginCorner
         mirror
-        className="pointer-events-none absolute right-2.5 bottom-2.5 size-8 sm:size-10"
+        className="pointer-events-none absolute right-2 bottom-2 size-7 sm:size-8"
       />
 
-      <div className="relative flex flex-col gap-3 p-3 sm:gap-3.5 sm:p-4">
+      <div className="relative flex flex-col gap-3 p-4 sm:gap-3.5 sm:p-5">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <BackLink href={`/campaigns/${campaignId}`}>
             {campaignName}

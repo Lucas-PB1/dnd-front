@@ -35,13 +35,13 @@ export function CharacterSheetHeader({
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,color-mix(in_oklch,var(--muted)_75%,transparent),transparent_55%),radial-gradient(ellipse_at_bottom_right,color-mix(in_oklch,var(--secondary)_16%,transparent),transparent_50%),radial-gradient(ellipse_at_bottom_left,color-mix(in_oklch,var(--accent)_10%,transparent),transparent_45%)]"
         aria-hidden
       />
-      <MarginCorner className="pointer-events-none absolute top-2.5 left-2.5 size-8 sm:size-10" />
+      <MarginCorner className="pointer-events-none absolute top-2 left-2 size-7 sm:size-8" />
       <MarginCorner
         mirror
-        className="pointer-events-none absolute right-2.5 bottom-2.5 size-8 sm:size-10"
+        className="pointer-events-none absolute right-2 bottom-2 size-7 sm:size-8"
       />
 
-      <div className="relative flex flex-col gap-3 p-3 sm:gap-3.5 sm:p-4">
+      <div className="relative flex flex-col gap-3 p-4 sm:gap-3.5 sm:p-5">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <BackLink href="/characters">Minhas fichas</BackLink>
           <div className="flex flex-wrap items-center gap-2">
@@ -67,7 +67,7 @@ export function CharacterSheetHeader({
         <div className="flex min-w-0 flex-wrap items-start gap-x-3 gap-y-2">
           <SealMark className="size-10 shrink-0 text-secondary sm:size-11" />
           <div className="min-w-0 space-y-1.5">
-            <h1 className="font-heading max-w-[14rem] truncate text-2xl font-semibold leading-none tracking-tight sm:max-w-[20rem] sm:text-3xl">
+            <h1 className="font-heading max-w-56 truncate text-2xl font-semibold leading-none tracking-tight sm:max-w-[20rem] sm:text-3xl">
               {character.name}
             </h1>
             <InkFlourish className="h-3 w-32 text-secondary/60 sm:w-40" />

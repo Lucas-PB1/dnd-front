@@ -44,13 +44,13 @@ export function CharacterSheetLoadingSkeleton({
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,color-mix(in_oklch,var(--muted)_75%,transparent),transparent_55%),radial-gradient(ellipse_at_bottom_right,color-mix(in_oklch,var(--secondary)_16%,transparent),transparent_50%)]"
           aria-hidden
         />
-        <MarginCorner className="pointer-events-none absolute top-2.5 left-2.5 size-8 sm:size-10" />
+        <MarginCorner className="pointer-events-none absolute top-2 left-2 size-7 sm:size-8" />
         <MarginCorner
           mirror
-          className="pointer-events-none absolute right-2.5 bottom-2.5 size-8 sm:size-10"
+          className="pointer-events-none absolute right-2 bottom-2 size-7 sm:size-8"
         />
 
-        <div className="relative flex flex-col gap-3 p-3 sm:p-4">
+        <div className="relative flex flex-col gap-3 p-4 sm:p-5">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <SkeletonBlock className="h-4 w-28" />
             <div className="flex gap-2">
@@ -64,7 +64,7 @@ export function CharacterSheetLoadingSkeleton({
             <div className="min-w-0 space-y-1.5">
               {summary?.name ? (
                 <>
-                  <h1 className="font-heading max-w-[14rem] truncate text-2xl font-semibold leading-none tracking-tight sm:max-w-[20rem] sm:text-3xl">
+                  <h1 className="font-heading max-w-56 truncate text-2xl font-semibold leading-none tracking-tight sm:max-w-[20rem] sm:text-3xl">
                     {summary.name}
                   </h1>
                   <InkFlourish className="h-3 w-32 text-secondary/50 sm:w-40" />
@@ -103,7 +103,7 @@ export function CharacterSheetLoadingSkeleton({
 
           <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4 lg:grid-cols-6">
             {Array.from({ length: 6 }, (_, index) => (
-              <SkeletonBlock key={index} className="h-[4.25rem]" />
+              <SkeletonBlock key={index} className="h-17" />
             ))}
           </div>
         </div>
@@ -115,7 +115,7 @@ export function CharacterSheetLoadingSkeleton({
             <SkeletonBlock
               key={index}
               className={cn(
-                "min-h-[3.75rem]",
+                "min-h-15",
                 index === 8 && "col-span-3 sm:col-span-6 lg:col-span-2",
               )}
             />

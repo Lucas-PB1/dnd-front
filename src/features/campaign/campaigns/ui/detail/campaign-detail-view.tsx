@@ -133,13 +133,13 @@ export function CampaignDetailView({ campaignId }: { campaignId: string }) {
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,color-mix(in_oklch,var(--muted)_75%,transparent),transparent_55%),radial-gradient(ellipse_at_bottom_right,color-mix(in_oklch,var(--secondary)_16%,transparent),transparent_50%)]"
           aria-hidden
         />
-        <MarginCorner className="pointer-events-none absolute top-2.5 left-2.5 size-8 sm:size-10" />
+        <MarginCorner className="pointer-events-none absolute top-2 left-2 size-7 sm:size-8" />
         <MarginCorner
           mirror
-          className="pointer-events-none absolute right-2.5 bottom-2.5 size-8 sm:size-10"
+          className="pointer-events-none absolute right-2 bottom-2 size-7 sm:size-8"
         />
 
-        <div className="relative flex flex-col gap-3 p-3 sm:gap-4 sm:p-4">
+        <div className="relative flex flex-col gap-3 p-4 sm:gap-4 sm:p-5">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <BackLink href="/campaigns">Campanhas</BackLink>
             <div className="flex flex-wrap items-center gap-2">
@@ -250,7 +250,7 @@ export function CampaignDetailView({ campaignId }: { campaignId: string }) {
             <label className="flex items-start gap-2 text-sm">
               <input
                 type="checkbox"
-                className="mt-0.5 size-4 accent-[var(--secondary)]"
+                className="mt-0.5 size-4 accent-secondary"
                 checked={data.allowPlayerSkipPayment}
                 disabled={update.isPending}
                 onChange={(e) =>
