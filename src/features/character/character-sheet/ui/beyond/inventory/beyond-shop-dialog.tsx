@@ -32,7 +32,7 @@ import {
   type ShopAdvancedFilters,
 } from "@/features/character/character-sheet/ui/beyond/inventory/beyond-shop-filters";
 import {
-  useItems,
+  useAllItems,
   usePopularItems,
 } from "@/features/catalog/item-catalog/api/use-items";
 import { useShopEquipmentIndex } from "@/features/catalog/item-catalog/api/use-shop-equipment-index";
@@ -97,7 +97,7 @@ export function BeyondShopDialog({
   const chip = SHOP_KIND_CHIPS.find((c) => c.id === chipId) ?? SHOP_KIND_CHIPS[0];
   const itemKind = advancedFilters.coverageOnly ? "coverage" : chip.kind;
 
-  const itemsQuery = useItems(
+  const itemsQuery = useAllItems(
     {
       q: debouncedSearch.trim() || undefined,
       itemType: chip.itemType,
@@ -114,7 +114,6 @@ export function BeyondShopDialog({
             : undefined,
       sort: advancedFilters.sort || undefined,
       hasCost: hasCostOnly || chargeApplies ? true : undefined,
-      limit: 80,
     },
     open,
   );

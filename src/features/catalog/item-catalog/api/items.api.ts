@@ -3,6 +3,7 @@ import type { ItemListResponse, ItemSummary } from "@/entities/item/types";
 import {
   buildCatalogSearchParams,
   CATALOG_FETCH_INIT,
+  fetchAllCatalogPages,
 } from "@/shared/lib/catalog-query";
 
 export type FetchItemsParams = {
@@ -16,6 +17,7 @@ export type FetchItemsParams = {
   consumable?: boolean;
   limit?: number;
   page?: number;
+  cursor?: string;
   fields?: "summary";
   excludeCoverage?: boolean;
   requiresAttunement?: boolean;
@@ -26,6 +28,7 @@ export async function fetchItems(params?: FetchItemsParams) {
   const search = buildCatalogSearchParams({
     page: params?.page ?? 1,
     limit: params?.limit ?? 100,
+    cursor: params?.cursor,
     q: params?.q,
     filters: {
       itemType: params?.itemType,
@@ -70,26 +73,13 @@ export async function fetchItems(params?: FetchItemsParams) {
   return catalogFetch<ItemListResponse>(`/items?${search}`, CATALOG_FETCH_INIT);
 }
 
-export async function fetchAllItems(params?: Omit<FetchItemsParams, "page">) {
+export async function fetchAllItems(params?: Omit<FetchItemsParams, "page" | "cursor">) {
   const limit = params?.limit ?? 100;
-  const first = await fetchItems({ ...params, page: 1, limit });
-  if (first.meta.totalPages <= 1) return first;
-
-  const rest = await Promise.all(
-    Array.from({ length: first.meta.totalPages - 1 }, (_, index) =>
-      fetchItems({ ...params, page: index + 2, limit }),
-    ),
+  return fetchAllCatalogPages(
+    ({ page, limit: pageLimit, cursor }) =>
+      fetchItems({ ...params, page, limit: pageLimit, cursor }),
+    limit,
   );
-  const data = [...first.data, ...rest.flatMap((page) => page.data)];
-  return {
-    data,
-    meta: {
-      page: 1,
-      limit: data.length,
-      total: first.meta.total,
-      totalPages: 1,
-    },
-  };
 }
 
 export async function fetchPopularItems(params?: {

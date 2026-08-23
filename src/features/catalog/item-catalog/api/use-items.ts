@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import {
+  fetchAllItems,
   fetchItems,
   fetchPopularItems,
   itemKeys,
@@ -14,6 +15,18 @@ export function useItems(params?: FetchItemsParams, enabled = true) {
   return useQuery({
     queryKey: itemKeys.list(params),
     queryFn: () => fetchItems(params),
+    enabled,
+    staleTime: CATALOG_DETAIL_STALE_MS,
+  });
+}
+
+export function useAllItems(
+  params?: Omit<FetchItemsParams, "page" | "cursor">,
+  enabled = true,
+) {
+  return useQuery({
+    queryKey: [...itemKeys.list(params), "all"],
+    queryFn: () => fetchAllItems(params),
     enabled,
     staleTime: CATALOG_DETAIL_STALE_MS,
   });

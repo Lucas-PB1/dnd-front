@@ -73,8 +73,8 @@ export async function fetchBackgroundBySlug(slug: string) {
 }
 
 export async function fetchBackgroundEquipment(slug: string) {
-  return fetchAllCatalogPages<BackgroundEquipmentOption>(({ page, limit }) => {
-    const search = buildCatalogSearchParams({ page, limit });
+  return fetchAllCatalogPages<BackgroundEquipmentOption>(({ page, limit, cursor }) => {
+    const search = buildCatalogSearchParams({ page, limit, cursor });
     return catalogFetch<PaginatedResponse<BackgroundEquipmentOption>>(
       `/backgrounds/${slug}/equipment?${search}`,
       CATALOG_FETCH_INIT,

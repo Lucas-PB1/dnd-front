@@ -25,12 +25,14 @@ export const weaponKeys = {
 export async function fetchWeaponsPage(params?: {
   page?: number;
   limit?: number;
+  cursor?: string;
   q?: string;
   category?: string;
 }): Promise<WeaponListResponse> {
   const search = buildCatalogSearchParams({
     page: params?.page,
     limit: params?.limit ?? CATALOG_PAGE_SIZE,
+    cursor: params?.cursor,
     q: params?.q,
     filters: { category: params?.category },
   });
@@ -50,8 +52,8 @@ export async function fetchWeaponBySlug(slug: string) {
 
 /** Todas as armas do catálogo (para escolha de Maestria em Arma). */
 export async function fetchAllWeapons() {
-  return fetchAllCatalogPages<WeaponSummary>(({ page, limit }) => {
-    const search = buildCatalogSearchParams({ page, limit });
+  return fetchAllCatalogPages<WeaponSummary>(({ page, limit, cursor }) => {
+    const search = buildCatalogSearchParams({ page, limit, cursor });
     return catalogFetch<WeaponListResponse>(
       `/weapons?${search}`,
       CATALOG_FETCH_INIT,

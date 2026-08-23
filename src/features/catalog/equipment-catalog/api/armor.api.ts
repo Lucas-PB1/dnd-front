@@ -21,12 +21,14 @@ export const armorKeys = {
 export async function fetchArmorPage(params?: {
   page?: number;
   limit?: number;
+  cursor?: string;
   q?: string;
   category?: string;
 }): Promise<ArmorListResponse> {
   const search = buildCatalogSearchParams({
     page: params?.page,
     limit: params?.limit ?? CATALOG_PAGE_SIZE,
+    cursor: params?.cursor,
     q: params?.q,
     filters: { category: params?.category },
   });
@@ -43,8 +45,8 @@ export async function fetchArmorBySlug(slug: string) {
 
 /** Todas as armaduras do catálogo (lookup rápido na loja). */
 export async function fetchAllArmor() {
-  return fetchAllCatalogPages<ArmorSummary>(({ page, limit }) => {
-    const search = buildCatalogSearchParams({ page, limit });
+  return fetchAllCatalogPages<ArmorSummary>(({ page, limit, cursor }) => {
+    const search = buildCatalogSearchParams({ page, limit, cursor });
     return catalogFetch<ArmorListResponse>(`/armor?${search}`, CATALOG_FETCH_INIT);
   });
 }

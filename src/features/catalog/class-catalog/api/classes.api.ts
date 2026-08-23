@@ -1,4 +1,4 @@
-﻿import { catalogFetch } from "@/shared/api/dnd-api/api-client";
+import { catalogFetch } from "@/shared/api/dnd-api/api-client";
 import type {
   ClassEquipmentOption,
   ClassListResponse,
@@ -120,8 +120,8 @@ export async function fetchClassSkills(slug: string) {
 }
 
 export async function fetchClassEquipment(slug: string) {
-  return fetchAllCatalogPages<ClassEquipmentOption>(({ page, limit }) => {
-    const search = buildCatalogSearchParams({ page, limit });
+  return fetchAllCatalogPages<ClassEquipmentOption>(({ page, limit, cursor }) => {
+    const search = buildCatalogSearchParams({ page, limit, cursor });
     return catalogFetch<PaginatedResponse<ClassEquipmentOption>>(
       `/classes/${slug}/equipment?${search}`,
       CATALOG_FETCH_INIT,
@@ -149,24 +149,23 @@ export async function fetchClassSpells(
   maxLevel?: number,
   limit = 100,
 ) {
-  return fetchAllCatalogPages<ClassSpellOption>(({ page, limit: pageLimit }) => {
-    const params = new URLSearchParams({
-      page: String(page),
-      limit: String(pageLimit),
+  return fetchAllCatalogPages<ClassSpellOption>(({ page, limit: pageLimit, cursor }) => {
+    const search = buildCatalogSearchParams({
+      page,
+      limit: pageLimit,
+      cursor,
+      filters: maxLevel !== undefined ? { maxLevel } : undefined,
     });
-    if (maxLevel !== undefined) {
-      params.set("maxLevel", String(maxLevel));
-    }
     return catalogFetch<PaginatedResponse<ClassSpellOption>>(
-      `/classes/${slug}/spells?${params}`,
+      `/classes/${slug}/spells?${search}`,
       CATALOG_FETCH_INIT,
     );
   }, limit);
 }
 
 export async function fetchClassSpellSlots(slug: string) {
-  return fetchAllCatalogPages<ClassSpellSlots>(({ page, limit }) => {
-    const search = buildCatalogSearchParams({ page, limit });
+  return fetchAllCatalogPages<ClassSpellSlots>(({ page, limit, cursor }) => {
+    const search = buildCatalogSearchParams({ page, limit, cursor });
     return catalogFetch<PaginatedResponse<ClassSpellSlots>>(
       `/classes/${slug}/spell-slots?${search}`,
       CATALOG_FETCH_INIT,
@@ -175,8 +174,8 @@ export async function fetchClassSpellSlots(slug: string) {
 }
 
 export async function fetchClassProgression(slug: string) {
-  return fetchAllCatalogPages<ClassProgressionRow>(({ page, limit }) => {
-    const search = buildCatalogSearchParams({ page, limit });
+  return fetchAllCatalogPages<ClassProgressionRow>(({ page, limit, cursor }) => {
+    const search = buildCatalogSearchParams({ page, limit, cursor });
     return catalogFetch<PaginatedResponse<ClassProgressionRow>>(
       `/classes/${slug}/progression?${search}`,
       CATALOG_FETCH_INIT,

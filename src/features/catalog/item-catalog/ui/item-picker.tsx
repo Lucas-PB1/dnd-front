@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 import { ITEM_TYPE_LABELS_PT, type ItemSummary } from "@/entities/item/types";
-import { useItems } from "@/features/catalog/item-catalog/api/use-items";
+import { useAllItems } from "@/features/catalog/item-catalog/api/use-items";
 import { useDebouncedValue } from "@/shared/lib/use-debounced-value";
 import { cn } from "@/shared/lib/utils";
 import { Input } from "@/shared/ui/input";
@@ -40,11 +40,10 @@ export function ItemPicker({
   const [itemType, setItemType] = useState("");
   const debouncedSearch = useDebouncedValue(search, 300);
 
-  const itemsQuery = useItems(
+  const itemsQuery = useAllItems(
     {
       q: debouncedSearch.trim() || undefined,
       itemType: itemType || undefined,
-      limit: 80,
     },
     true,
   );
