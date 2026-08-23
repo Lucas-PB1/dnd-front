@@ -17,6 +17,7 @@ export const CATALOG_FETCH_INIT = {
 export type CatalogSearchParamsInput = {
   page?: number;
   limit?: number;
+  cursor?: string;
   q?: string;
   /** Filtros opcionais; strings vazias / null / undefined são omitidos. */
   filters?: Record<string, string | number | boolean | null | undefined>;
@@ -27,7 +28,11 @@ export function buildCatalogSearchParams(
   input: CatalogSearchParamsInput = {},
 ): URLSearchParams {
   const search = new URLSearchParams();
-  search.set("page", String(input.page ?? 1));
+  if (input.cursor) {
+    search.set("cursor", input.cursor);
+  } else {
+    search.set("page", String(input.page ?? 1));
+  }
   search.set("limit", String(input.limit ?? CATALOG_PAGE_SIZE));
 
   const q = input.q?.trim();
@@ -58,26 +63,55 @@ export async function fetchAllCatalogPages<T>(
   fetchPage: (params: {
     page: number;
     limit: number;
+    cursor?: string;
   }) => Promise<PaginatedResponse<T>>,
   limit = 100,
 ): Promise<PaginatedResponse<T>> {
   const first = await fetchPage({ page: 1, limit });
-  const pages =
-    first.meta.totalPages <= 1
-      ? []
-      : await Promise.all(
-          Array.from({ length: first.meta.totalPages - 1 }, (_, index) =>
-            fetchPage({ page: index + 2, limit }),
-          ),
-        );
+  const totalPages = first.meta.totalPages;
 
-  const all = [...first.data, ...pages.flatMap((page) => page.data)];
+  if (typeof totalPages === "number" && totalPages > 0) {
+    const pages =
+      totalPages <= 1
+        ? []
+        : await Promise.all(
+            Array.from({ length: totalPages - 1 }, (_, index) =>
+              fetchPage({ page: index + 2, limit }),
+            ),
+          );
+
+    const all = [...first.data, ...pages.flatMap((page) => page.data)];
+    return {
+      data: all,
+      meta: {
+        page: 1,
+        limit: all.length,
+        total: first.meta.total ?? all.length,
+        totalPages: 1,
+      },
+    };
+  }
+
+  // Se a paginação for por cursor (ex.: backend Nest com cursor e hasMore)
+  const all: T[] = [...first.data];
+  let currentMeta = first.meta;
+
+  while (currentMeta.hasMore && currentMeta.nextCursor) {
+    const next = await fetchPage({
+      page: 1,
+      limit,
+      cursor: currentMeta.nextCursor,
+    });
+    all.push(...next.data);
+    currentMeta = next.meta;
+  }
+
   return {
     data: all,
     meta: {
       page: 1,
       limit: all.length,
-      total: first.meta.total,
+      total: all.length,
       totalPages: 1,
     },
   };

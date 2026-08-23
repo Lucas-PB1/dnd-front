@@ -37,6 +37,7 @@ const FETCH_PAGE_SIZE = 100;
 export async function fetchFeatsPage(params?: {
   page?: number;
   limit?: number;
+  cursor?: string;
   q?: string;
   category?: string;
   editionSlugs?: string;
@@ -45,6 +46,7 @@ export async function fetchFeatsPage(params?: {
   const search = buildCatalogSearchParams({
     page: params?.page,
     limit: params?.limit ?? CATALOG_PAGE_SIZE,
+    cursor: params?.cursor,
     q: params?.q,
     filters: {
       category: params?.category,

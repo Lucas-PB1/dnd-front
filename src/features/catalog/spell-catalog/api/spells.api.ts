@@ -31,6 +31,7 @@ const FETCH_PAGE_SIZE = 100;
 export async function fetchSpellsPage(params?: {
   page?: number;
   limit?: number;
+  cursor?: string;
   q?: string;
   level?: number | string;
   school?: string;
@@ -40,6 +41,7 @@ export async function fetchSpellsPage(params?: {
   const search = buildCatalogSearchParams({
     page: params?.page,
     limit: params?.limit ?? CATALOG_PAGE_SIZE,
+    cursor: params?.cursor,
     q: params?.q,
     filters: {
       level: params?.level,
