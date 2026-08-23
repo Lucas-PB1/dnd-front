@@ -7,7 +7,7 @@ export default function SpeciesPage() {
   return (
     <CatalogShell
       title="Espécies"
-      description="Povos do PHB 2024, Valdas e Eldritch Hunt — tamanho, deslocamento e traços."
+      description="Povos do PHB 2024, Valdas, Eldritch Hunt e Northlands Heroes (Nórdico) — tamanho, deslocamento e traços."
       backHref="/compendium"
       backLabel="Compêndio"
     >

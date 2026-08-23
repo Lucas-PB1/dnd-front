@@ -62,7 +62,7 @@ const SECTIONS: ReadonlyArray<{
     title: "Talentos",
     eyebrow: "Especialização",
     description:
-      "Origem, geral e estilo de luta — pré-requisitos e benefícios (PHB, Valdas, Eldritch Hunt).",
+      "Origem, geral e estilo de luta — pré-requisitos e benefícios (PHB, Valdas, Eldritch Hunt, Northlands Nórdico).",
     icon: SparklesIcon,
   },
   {
@@ -78,7 +78,7 @@ const SECTIONS: ReadonlyArray<{
     title: "Subclasses",
     eyebrow: "Arquétipos",
     description:
-      "Caminhos de cada classe (PHB, Valdas, Eldritch Hunt) — tagline, resumo e características por nível.",
+      "Caminhos de cada classe (PHB, Valdas, Eldritch Hunt, Northlands Nórdico) — tagline, resumo e características por nível.",
     icon: Squares2X2Icon,
   },
   {
@@ -86,7 +86,7 @@ const SECTIONS: ReadonlyArray<{
     title: "Equipamento",
     eyebrow: "Arsenal",
     description:
-      "Armas, armaduras, itens e itens mágicos (PHB, Valdas, DMG, Eldritch Hunt).",
+      "Armas, armaduras, itens e itens mágicos (PHB, Valdas, DMG, Eldritch Hunt, Northlands Nórdico).",
     icon: CubeIcon,
   },
   {
@@ -102,7 +102,7 @@ const SECTIONS: ReadonlyArray<{
     title: "Magias",
     eyebrow: "Arcano",
     description:
-      "Truques aos círculos superiores — escolas, componentes e duração.",
+      "Truques aos círculos superiores — escolas, componentes e duração (PHB, Valdas, Eldritch Hunt, Northlands Nórdico).",
     icon: SparklesIcon,
   },
 ];
@@ -129,13 +129,13 @@ export function CompendiumHub() {
           <div className="flex items-center gap-2">
             <SealMark className="size-5" />
             <p className="text-xs font-medium tracking-wider text-secondary uppercase">
-              PHB 2024 · Valdas · Eldritch Hunt
+              PHB 2024 · Valdas · Eldritch Hunt · Northlands (Nórdico)
             </p>
           </div>
           <p className="max-w-2xl font-heading text-lg leading-snug text-foreground/90 sm:text-xl">
-            Explore o catálogo público — sem login. PHB 2024, Valdas Spire e
-            Steinhardt Eldritch Hunt (Player Pack): classes, subclasses,
-            talentos, equipamento e magias. Use Fontes no topo para filtrar.
+            Explore o catálogo público — sem login. PHB 2024, Valdas Spire,
+            Steinhardt Eldritch Hunt e Northlands Heroes (Nórdico): classes,
+            subclasses, espécies, antecedentes, talentos, equipamento e magias. Use Fontes no topo para filtrar.
           </p>
         </div>
       </div>

@@ -52,7 +52,7 @@ export function editionMenuLabel(edition: Pick<Edition, "slug" | "label" | "book
     return "Eldritch Hunt";
   }
   if (isNorthlandsEditionSlug(edition.slug)) {
-    return "Northlands";
+    return "Northlands (Nórdico)";
   }
   return edition.label || edition.book || edition.slug;
 }

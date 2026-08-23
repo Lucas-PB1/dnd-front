@@ -7,7 +7,7 @@ export default function FeatsPage() {
   return (
     <CatalogShell
       title="Talentos"
-      description="Origem, geral, estilo de luta e mais — pré-requisitos e benefícios (PHB, Valdas, Eldritch Hunt)."
+      description="Origem, geral, estilo de luta e mais — pré-requisitos e benefícios (PHB, Valdas, Eldritch Hunt e Northlands Nórdico)."
       backHref="/compendium"
       backLabel="Compêndio"
     >

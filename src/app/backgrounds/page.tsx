@@ -7,7 +7,7 @@ export default function BackgroundsPage() {
   return (
     <CatalogShell
       title="Antecedentes"
-      description="Origens do PHB 2024, Valdas e Eldritch Hunt — atributos, perícias e equipamento."
+      description="Origens do PHB 2024, Valdas, Eldritch Hunt e Northlands Heroes (Nórdico) — atributos, perícias e equipamento."
       backHref="/compendium"
       backLabel="Compêndio"
     >
