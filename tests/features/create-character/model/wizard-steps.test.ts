@@ -89,7 +89,8 @@ describe("wizard step navigation", () => {
     ]);
     expect(nextWizardStep("equipment", nav)).toBe("languages");
     expect(nextWizardStep("species", nav)).toBe("equipment");
-    expect(prevWizardStep("species", nav)).toBe("background");
+    expect(prevWizardStep("species", nav)).toBe("thread");
+    expect(prevWizardStep("thread", nav)).toBe("background");
   });
 
   it("keeps spells then invocations for warlocks when metamagics skipped", () => {
