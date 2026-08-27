@@ -8,7 +8,6 @@ import {
   ShieldExclamationIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
-import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import type {
@@ -21,6 +20,7 @@ import {
   useCharacterActors,
   useLinkVehicle,
 } from "@/features/actor/api/use-actors";
+import { ActorSheetDialog } from "@/features/actor/ui/actor-sheet-dialog";
 import { useSpellLabels } from "@/features/catalog/spell-catalog/api/use-spells";
 import {
   MAX_ATTUNED_ITEMS,
@@ -348,6 +348,7 @@ export function InventoryItemDetail({
   const linkVehicle = useLinkVehicle(characterId ?? "");
   const boardVehicle = useBoardVehicle(characterId ?? "");
   const linkedActors = useCharacterActors(characterId ?? "");
+  const [transportSheetOpen, setTransportSheetOpen] = useState(false);
   const linkedTransport = (linkedActors.data ?? []).find(
     (actor) =>
       actor.templateSlug === item.itemSlug &&
@@ -786,12 +787,19 @@ export function InventoryItemDetail({
                 >
                   Entrar
                 </Button>
-                <Link
-                  href={`/actors/${linkedTransport.id}`}
-                  className="inline-flex items-center text-xs font-medium text-primary underline-offset-2 hover:underline"
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setTransportSheetOpen(true)}
                 >
                   Abrir ficha
-                </Link>
+                </Button>
+                <ActorSheetDialog
+                  actorId={linkedTransport.id}
+                  open={transportSheetOpen}
+                  onOpenChange={setTransportSheetOpen}
+                />
               </>
             ) : null}
             {linkVehicle.isError ? (

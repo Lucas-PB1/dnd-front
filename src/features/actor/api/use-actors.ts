@@ -9,8 +9,10 @@ import {
   fetchActorById,
   fetchCharacterActors,
   linkCharacterVehicle,
+  patchActorState,
   spawnActorFromTemplate,
   updateActor,
+  type ActorStatePatchPayload,
 } from "@/features/catalog/creature-template-catalog/api/creature-templates.api";
 import { sessionKeys } from "@/features/character/character-sheet/api/character-session.api";
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
@@ -81,7 +83,12 @@ export function useUpdateActor(actorId: string) {
   const { accessToken } = useAuth();
 
   return useMutation({
-    mutationFn: async (payload: { hitPointsCurrent?: number | null }) => {
+    mutationFn: async (payload: {
+      hitPointsCurrent?: number | null;
+      hitPointsMax?: number | null;
+      armorClass?: number | null;
+      notes?: string | null;
+    }) => {
       if (!accessToken) throw new Error("Não autenticado");
       return updateActor(accessToken, actorId, payload);
     },
@@ -90,6 +97,54 @@ export function useUpdateActor(actorId: string) {
       if (actor.parentCharacterId) {
         void queryClient.invalidateQueries({
           queryKey: actorKeys.byCharacter(actor.parentCharacterId),
+        });
+      }
+    },
+  });
+}
+
+export function usePatchActorState(actorId: string) {
+  const queryClient = useQueryClient();
+  const { accessToken } = useAuth();
+
+  return useMutation({
+    mutationFn: async (payload: ActorStatePatchPayload) => {
+      if (!accessToken) throw new Error("Não autenticado");
+      return patchActorState(accessToken, actorId, payload);
+    },
+    onSuccess: (state) => {
+      queryClient.setQueryData(
+        actorKeys.detail(state.actorId),
+        (prev: import("@/entities/actor/types").ActorDetail | undefined) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            hitPointsCurrent: state.hitPointsCurrent,
+            hitPointsMax: state.hitPointsMax,
+            armorClass: state.armorClass,
+            state: prev.state
+              ? {
+                  ...prev.state,
+                  tempHp: state.tempHp,
+                  conditions: state.conditions,
+                  concentratingOn: state.concentratingOn,
+                  innateSpellUses: state.innateSpellUses,
+                }
+              : {
+                  conditions: state.conditions,
+                  tempHp: state.tempHp,
+                  concentratingOn: state.concentratingOn,
+                  innateSpellUses: state.innateSpellUses,
+                },
+          };
+        },
+      );
+      const detail = queryClient.getQueryData<
+        import("@/entities/actor/types").ActorDetail
+      >(actorKeys.detail(state.actorId));
+      if (detail?.parentCharacterId) {
+        void queryClient.invalidateQueries({
+          queryKey: actorKeys.byCharacter(detail.parentCharacterId),
         });
       }
     },

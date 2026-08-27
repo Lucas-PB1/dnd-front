@@ -84,10 +84,50 @@ export async function fetchActorById(accessToken: string, id: string) {
 export async function updateActor(
   accessToken: string,
   id: string,
-  payload: { hitPointsCurrent?: number | null },
+  payload: {
+    hitPointsCurrent?: number | null;
+    hitPointsMax?: number | null;
+    armorClass?: number | null;
+    notes?: string | null;
+  },
 ) {
   return gameFetch<import("@/entities/actor/types").ActorDetail>(
     `/actors/${id}`,
+    accessToken,
+    {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
+export type ActorStatePatchPayload = {
+  hitPointsCurrent?: number;
+  hitPointsMax?: number;
+  armorClass?: number;
+  tempHp?: number;
+  conditions?: string[];
+  concentratingOn?: string | null;
+};
+
+export type ActorStateResponse = {
+  actorId: string;
+  hitPointsCurrent: number | null;
+  hitPointsMax: number | null;
+  armorClass: number | null;
+  tempHp: number;
+  conditions: string[];
+  concentratingOn: string | null;
+  innateSpellUses: Record<string, number>;
+};
+
+export async function patchActorState(
+  accessToken: string,
+  id: string,
+  payload: ActorStatePatchPayload,
+) {
+  return gameFetch<ActorStateResponse>(
+    `/actors/${id}/state`,
     accessToken,
     {
       method: "PATCH",

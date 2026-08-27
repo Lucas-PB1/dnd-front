@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { useState } from "react";
 import { MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
 
 import {
@@ -10,9 +10,9 @@ import {
 import {
   useActorDetail,
   useBoardVehicle,
-  useUpdateActor,
+  usePatchActorState,
 } from "@/features/actor/api/use-actors";
-import { StatBlockCard } from "@/features/catalog/template-stat-block/ui/stat-block-card";
+import { ActorSheetDialog } from "@/features/actor/ui/actor-sheet-dialog";
 import {
   SheetSectionHeader,
   SheetSubheader,
@@ -25,14 +25,14 @@ type BoardedVehiclePanelProps = {
 };
 
 function VehicleHpStepper({ actor }: { actor: ActorDetail }) {
-  const update = useUpdateActor(actor.id);
+  const patch = usePatchActorState(actor.id);
   const current = actor.hitPointsCurrent ?? actor.hitPointsMax ?? 0;
   const max = actor.hitPointsMax;
 
   function setHp(next: number) {
     const clamped =
       max != null ? Math.max(0, Math.min(max, next)) : Math.max(0, next);
-    update.mutate({ hitPointsCurrent: clamped });
+    patch.mutate({ hitPointsCurrent: clamped });
   }
 
   return (
@@ -45,7 +45,7 @@ function VehicleHpStepper({ actor }: { actor: ActorDetail }) {
         variant="outline"
         size="icon"
         className="size-7"
-        disabled={update.isPending || current <= 0}
+        disabled={patch.isPending || current <= 0}
         onClick={() => setHp(current - 1)}
         aria-label="Reduzir PV"
       >
@@ -60,7 +60,7 @@ function VehicleHpStepper({ actor }: { actor: ActorDetail }) {
         variant="outline"
         size="icon"
         className="size-7"
-        disabled={update.isPending || (max != null && current >= max)}
+        disabled={patch.isPending || (max != null && current >= max)}
         onClick={() => setHp(current + 1)}
         aria-label="Aumentar PV"
       >
@@ -76,6 +76,7 @@ export function BoardedVehiclePanel({
 }: BoardedVehiclePanelProps) {
   const actorQuery = useActorDetail(actorId);
   const board = useBoardVehicle(characterId);
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   if (actorQuery.isPending) {
     return (
@@ -107,7 +108,6 @@ export function BoardedVehiclePanel({
   }
 
   const actor = actorQuery.data;
-  const isVehicle = actor.actorKind === "vehicle";
 
   return (
     <section className="space-y-3">
@@ -117,6 +117,14 @@ export function BoardedVehiclePanel({
           <VehicleHpStepper actor={actor} />
           <Button
             type="button"
+            variant="secondary"
+            size="sm"
+            onClick={() => setSheetOpen(true)}
+          >
+            Abrir ficha
+          </Button>
+          <Button
+            type="button"
             variant="outline"
             size="sm"
             disabled={board.isPending}
@@ -124,44 +132,24 @@ export function BoardedVehiclePanel({
           >
             Sair
           </Button>
-          <Link
-            href={`/actors/${actor.id}`}
-            className="text-xs font-medium text-primary underline-offset-2 hover:underline"
-          >
-            Abrir ficha
-          </Link>
         </div>
       </div>
-      <SheetSubheader
-        title={`${actor.name} · ${ACTOR_KIND_LABELS[actor.actorKind]}`}
-      />
-      <StatBlockCard
-        variant={isVehicle ? "vehicle" : "creature"}
-        name={actor.name}
-        armorClass={actor.armorClass}
-        initiativeModifier={actor.initiativeModifier}
-        hitPoints={actor.hitPointsMax}
-        hitPointsCurrent={actor.hitPointsCurrent}
-        damageThreshold={actor.damageThreshold}
-        speeds={actor.speeds}
-        abilityScores={actor.abilityScores}
-        crewCapacity={actor.crewCapacity}
-        passengerCapacity={actor.passengerCapacity}
-        cargoCapacityLabel={
-          actor.cargoCapacityLb != null ? `${actor.cargoCapacityLb} lb` : null
-        }
-        proficiencyBonus={actor.proficiencyBonus}
-        enableRolls
-        actions={actor.actions.map((action, index) => ({
-          id: action.id,
-          name: action.name,
-          actionBucket: action.actionBucket ?? "action",
-          attackBonus: action.attackBonus ?? null,
-          damageExpression: action.damageExpression ?? null,
-          reachFt: action.reachFt ?? null,
-          description: action.description ?? null,
-          sortOrder: action.sortOrder ?? index,
-        }))}
+      <button
+        type="button"
+        className="block w-full text-left"
+        onClick={() => setSheetOpen(true)}
+      >
+        <SheetSubheader
+          title={`${actor.name} · ${ACTOR_KIND_LABELS[actor.actorKind]}`}
+        />
+        <p className="mt-1 text-xs text-muted-foreground">
+          Toque para abrir a ficha completa (PV, ações e estado).
+        </p>
+      </button>
+      <ActorSheetDialog
+        actorId={actorId}
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
       />
     </section>
   );

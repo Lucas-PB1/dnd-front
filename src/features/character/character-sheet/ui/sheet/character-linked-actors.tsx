@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { TruckIcon } from "@heroicons/react/24/outline";
 
 import {
@@ -11,6 +12,7 @@ import {
   useBoardVehicle,
   useCharacterActors,
 } from "@/features/actor/api/use-actors";
+import { ActorSheetDialog } from "@/features/actor/ui/actor-sheet-dialog";
 import { useCharacterState } from "@/features/character/character-sheet/api/use-character-state";
 import { BeyondPanel } from "@/features/character/character-sheet/ui/beyond/layout/beyond-panel";
 import { Button } from "@/shared/ui/button";
@@ -29,12 +31,14 @@ function ActorRow({
   boardedActorId,
   onBoard,
   onLeave,
+  onOpenSheet,
   isPending,
 }: {
   actor: ActorSummary;
   boardedActorId: string | null;
   onBoard: (actorId: string) => void;
   onLeave: () => void;
+  onOpenSheet: (actorId: string) => void;
   isPending: boolean;
 }) {
   const hp =
@@ -53,12 +57,13 @@ function ActorRow({
       )}
     >
       <div className="flex items-center justify-between gap-2">
-        <Link
-          href={`/actors/${actor.id}`}
-          className="min-w-0 flex-1 truncate text-sm font-medium hover:underline"
+        <button
+          type="button"
+          onClick={() => onOpenSheet(actor.id)}
+          className="min-w-0 flex-1 truncate text-left text-sm font-medium hover:underline"
         >
           {actor.name}
-        </Link>
+        </button>
         <span className="shrink-0 text-xs text-muted-foreground">
           {ACTOR_KIND_LABELS[actor.actorKind]}
           {hp ? ` · ${hp}` : actor.armorClass != null ? ` · CA ${actor.armorClass}` : ""}
@@ -94,8 +99,29 @@ function ActorRow({
               Entrar
             </Button>
           )}
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2 text-xs"
+            onClick={() => onOpenSheet(actor.id)}
+          >
+            Ficha
+          </Button>
         </div>
-      ) : null}
+      ) : (
+        <div className="mt-1.5">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2 text-xs"
+            onClick={() => onOpenSheet(actor.id)}
+          >
+            Ficha
+          </Button>
+        </div>
+      )}
     </li>
   );
 }
@@ -105,6 +131,7 @@ export function CharacterLinkedActors({ characterId }: CharacterLinkedActorsProp
   const state = useCharacterState(characterId);
   const board = useBoardVehicle(characterId);
   const boardedActorId = state.data?.boardedActorId ?? null;
+  const [sheetActorId, setSheetActorId] = useState<string | null>(null);
 
   if (actors.isPending) {
     return (
@@ -126,26 +153,36 @@ export function CharacterLinkedActors({ characterId }: CharacterLinkedActorsProp
   });
 
   return (
-    <BeyondPanel title="Navios & companheiros" icon={TruckIcon}>
-      <ul className="space-y-1">
-        {sorted.map((actor) => (
-          <ActorRow
-            key={actor.id}
-            actor={actor}
-            boardedActorId={boardedActorId}
-            isPending={board.isPending}
-            onBoard={(id) => board.mutate(id)}
-            onLeave={() => board.mutate(null)}
-          />
-        ))}
-      </ul>
-      <p className="mt-2 text-xs text-muted-foreground">
-        Adicione criaturas ou veículos pelo{" "}
-        <Link href="/compendium" className="text-primary underline-offset-2 hover:underline">
-          compêndio
-        </Link>
-        , ou vincule um item de transporte no inventário.
-      </p>
-    </BeyondPanel>
+    <>
+      <BeyondPanel title="Navios & companheiros" icon={TruckIcon}>
+        <ul className="space-y-1">
+          {sorted.map((actor) => (
+            <ActorRow
+              key={actor.id}
+              actor={actor}
+              boardedActorId={boardedActorId}
+              isPending={board.isPending}
+              onBoard={(id) => board.mutate(id)}
+              onLeave={() => board.mutate(null)}
+              onOpenSheet={setSheetActorId}
+            />
+          ))}
+        </ul>
+        <p className="mt-2 text-xs text-muted-foreground">
+          Adicione criaturas ou veículos pelo{" "}
+          <Link href="/compendium" className="text-primary underline-offset-2 hover:underline">
+            compêndio
+          </Link>
+          , ou vincule um item de transporte no inventário.
+        </p>
+      </BeyondPanel>
+      <ActorSheetDialog
+        actorId={sheetActorId}
+        open={sheetActorId != null}
+        onOpenChange={(open) => {
+          if (!open) setSheetActorId(null);
+        }}
+      />
+    </>
   );
 }
