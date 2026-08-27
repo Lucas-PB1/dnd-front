@@ -46,6 +46,8 @@ export type CharacterState = {
   gigaMissileArmed?: boolean;
   starryFormActive?: boolean;
   stellarConstellation?: string | null;
+  /** game_actor (veículo/montaria) em que o PC está a bordo */
+  boardedActorId?: string | null;
 };
 
 export type ResourceDieRoll = {
@@ -173,6 +175,8 @@ export type InventoryItem = {
   isCoverage?: boolean;
   /** Peça mágica de catálogo — não recebe cobertura. */
   isMagic?: boolean;
+  /** phb_item.properties.kind (ex.: large-vehicle, mount). */
+  propertiesKind?: string | null;
   /** Estado por instância (artefato rolado, senciência, etc.). */
   instanceProperties?: Record<string, unknown> | null;
   /** Preço de catálogo (compra/venda). */

@@ -4,6 +4,10 @@ import { filterOptionsExcludingTaken } from "@/features/character/create-charact
 import { traitChoiceLabel } from "@/features/character/create-character/lib/species/trait-choice-label";
 import type { SpeciesTraitChoiceGroup } from "@/features/character/create-character/lib/species/use-step-species-choices";
 import { CatalogSelect } from "@/features/character/create-character/ui/catalog-select";
+import {
+  ChoicePreviewPanel,
+  truncateChoiceHint,
+} from "@/features/character/create-character/ui/choice-preview-panel";
 import { cn } from "@/shared/lib/utils";
 
 const COMPACT_LIST_THRESHOLD = 8;
@@ -32,12 +36,17 @@ export function SpeciesTraitChoiceField({
         })),
         grantedSkillSlugs,
         selected,
-      ).map((opt) => ({
-        choiceSlug: opt.value,
-        choiceName: opt.label,
-      }))
+      ).map((opt) => {
+        const source = options.find((row) => row.choiceSlug === opt.value);
+        return {
+          choiceSlug: opt.value,
+          choiceName: opt.label,
+          level1Benefit: source?.level1Benefit ?? null,
+        };
+      })
     : options;
   const useSelect = visibleOptions.length > COMPACT_LIST_THRESHOLD;
+  const selectedOption = options.find((opt) => opt.choiceSlug === selected);
 
   return (
     <div className="space-y-2">
@@ -58,6 +67,7 @@ export function SpeciesTraitChoiceField({
             ...visibleOptions.map((opt) => ({
               value: opt.choiceSlug,
               label: opt.choiceName,
+              hint: truncateChoiceHint(opt.level1Benefit),
             })),
           ]}
           value={selected ?? ""}
@@ -85,6 +95,14 @@ export function SpeciesTraitChoiceField({
           ))}
         </div>
       )}
+      {selectedOption?.level1Benefit ? (
+        <ChoicePreviewPanel
+          title={selectedOption.choiceName}
+          subtitle={traitChoiceLabel(kind, traitName)}
+          teaser={selectedOption.level1Benefit}
+          detailText={selectedOption.level1Benefit}
+        />
+      ) : null}
     </div>
   );
 }

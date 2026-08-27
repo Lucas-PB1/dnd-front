@@ -9,7 +9,11 @@ import type { FeatListResponse } from "@/entities/feat/types";
 import type { LanguageListResponse } from "@/entities/language/types";
 import type { SkillListResponse } from "@/entities/skill/types";
 import type { PaginatedResponse } from "@/shared/api/dnd-api/types";
-import { CATALOG_FETCH_INIT, buildCatalogSearchParams } from "@/shared/lib/catalog-query";
+import {
+  CATALOG_FETCH_INIT,
+  buildCatalogSearchParams,
+  fetchAllCatalogPages,
+} from "@/shared/lib/catalog-query";
 
 export const referenceKeys = {
   all: ["reference"] as const,
@@ -43,14 +47,18 @@ export async function fetchSkills(limit = 100) {
 }
 
 export async function fetchFeats(limit = 100, editionSlugs?: string) {
-  const search = buildCatalogSearchParams({
-    page: 1,
+  return fetchAllCatalogPages<FeatListResponse["data"][number]>(
+    ({ page, limit: pageLimit, cursor }) =>
+      catalogFetch<FeatListResponse>(
+        `/feats?${buildCatalogSearchParams({
+          page,
+          limit: pageLimit ?? limit,
+          cursor,
+          filters: { editionSlugs },
+        })}`,
+        CATALOG_FETCH_INIT,
+      ),
     limit,
-    filters: { editionSlugs },
-  });
-  return catalogFetch<FeatListResponse>(
-    `/feats?${search}`,
-    CATALOG_FETCH_INIT,
   );
 }
 

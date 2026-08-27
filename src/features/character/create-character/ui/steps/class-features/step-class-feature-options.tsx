@@ -8,6 +8,10 @@ import type { ClassOption } from "@/entities/character/sheet-types";
 import { useClassFeatureOptions } from "@/features/catalog/class-catalog/api/use-classes";
 import type { CreateCharacterInput } from "@/features/character/create-character/model/create-character.schema";
 import { CatalogSelect } from "@/features/character/create-character/ui/catalog-select";
+import {
+  ChoicePreviewPanel,
+  truncateChoiceHint,
+} from "@/features/character/create-character/ui/choice-preview-panel";
 import { WizardFormSection } from "@/features/character/create-character/ui/wizard/wizard-form-section";
 import { FieldError } from "@/shared/ui/field";
 
@@ -80,9 +84,9 @@ export function StepClassFeatureOptions({
           const selected = classOptions.find(
             (option) => option.optionKey === group.optionKey,
           )?.valueId;
-          const selectedBenefit = group.values.find(
+          const selectedValue = group.values.find(
             (value) => value.valueId === selected,
-          )?.benefit;
+          );
           return (
             <div key={group.optionKey} className="space-y-1.5">
               <CatalogSelect
@@ -91,14 +95,20 @@ export function StepClassFeatureOptions({
                 options={group.values.map((value) => ({
                   value: value.valueId,
                   label: value.label,
+                  hint: truncateChoiceHint(value.benefit),
                 }))}
                 value={selected ?? ""}
                 onChange={(event) =>
                   setOption(group.optionKey, event.target.value)
                 }
               />
-              {selectedBenefit ? (
-                <p className="text-xs text-muted-foreground">{selectedBenefit}</p>
+              {selectedValue?.benefit ? (
+                <ChoicePreviewPanel
+                  title={selectedValue.label}
+                  subtitle={group.label}
+                  teaser={selectedValue.benefit}
+                  detailText={selectedValue.benefit}
+                />
               ) : null}
             </div>
           );

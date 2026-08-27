@@ -3,23 +3,24 @@ import type { CreateCharacterInput } from "@/features/character/create-character
 type SelectOption = {
   value: string;
   label: string;
+  hint?: string;
 };
 
-type FilterClassOptionSlotSelectOptionsParams = {
-  candidates: SelectOption[];
+type FilterClassOptionSlotSelectOptionsParams<T extends SelectOption> = {
+  candidates: T[];
   classOptions: CreateCharacterInput["classOptions"];
   optionKey: string;
   selected: string;
   isMatchingOptionKey: (key: string) => boolean;
 };
 
-export function filterClassOptionSlotSelectOptions({
+export function filterClassOptionSlotSelectOptions<T extends SelectOption>({
   candidates,
   classOptions,
   optionKey,
   selected,
   isMatchingOptionKey,
-}: FilterClassOptionSlotSelectOptionsParams): SelectOption[] {
+}: FilterClassOptionSlotSelectOptionsParams<T>): T[] {
   const takenElsewhere = new Set(
     classOptions
       .filter(

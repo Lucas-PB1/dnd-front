@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import type { Control, FieldErrors, UseFormSetValue } from "react-hook-form";
 import { useWatch } from "react-hook-form";
 
@@ -10,7 +10,9 @@ import {
   useBackgroundSkills,
   useBackgroundTools,
 } from "@/features/catalog/background-catalog/api/use-backgrounds";
+import { useFeats } from "@/features/catalog/reference-catalog/api/use-reference";
 import { CatalogSelect } from "@/features/character/create-character/ui/catalog-select";
+import { FeatChoicePreview } from "@/features/character/create-character/ui/steps/feats/feat-choice-preview";
 import { WizardFormSection } from "@/features/character/create-character/ui/wizard/wizard-form-section";
 
 type StepBackgroundProps = {
@@ -39,6 +41,7 @@ export function StepBackground({
   const skills = useBackgroundSkills(backgroundSlug, !!backgroundSlug);
   const needsToolChoice = detail.data?.toolProficiencyKind === "choice";
   const tools = useBackgroundTools(backgroundSlug, needsToolChoice);
+  const feats = useFeats();
 
   useEffect(() => {
     if (!detail.data) return;
@@ -49,6 +52,12 @@ export function StepBackground({
       setValue("backgroundToolItemSlug", detail.data.toolItemSlug);
     }
   }, [detail.data, setValue]);
+
+  const originFeat = useMemo(() => {
+    const slug = detail.data?.originFeatSlug?.trim();
+    if (!slug) return undefined;
+    return feats.data?.data?.find((feat) => feat.slug === slug);
+  }, [detail.data?.originFeatSlug, feats.data?.data]);
 
   if (!backgroundSlug) {
     return (
@@ -77,19 +86,19 @@ export function StepBackground({
     value: tool.itemSlug,
     label: tool.itemName,
   }));
+  const originFeatLabel =
+    bg.originFeatName ??
+    bg.originFeatSlug ??
+    (bg.originFeatChoiceSlugs.length > 0
+      ? "À escolha (etapa Talentos)"
+      : "—");
 
   return (
     <WizardFormSection title={bg.name} compact>
       <dl className="grid gap-2 text-sm sm:grid-cols-2">
         <div>
           <dt className="text-xs text-muted-foreground">Talento de origem</dt>
-          <dd className="font-medium">
-            {bg.originFeatName ??
-              bg.originFeatSlug ??
-              (bg.originFeatChoiceSlugs.length > 0
-                ? "À escolha (etapa Talentos)"
-                : "—")}
-          </dd>
+          <dd className="font-medium">{originFeatLabel}</dd>
         </div>
         {(skills.data?.data.length ?? 0) > 0 ? (
           <div>
@@ -106,6 +115,14 @@ export function StepBackground({
           </div>
         ) : null}
       </dl>
+
+      {bg.originFeatSlug ? (
+        <FeatChoicePreview
+          feat={originFeat}
+          loading={feats.isPending}
+          subtitle="Talento de origem"
+        />
+      ) : null}
 
       {bg.toolProficiencyKind === "choice" ? (
         <CatalogSelect

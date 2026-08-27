@@ -8,6 +8,7 @@ import {
   ShieldExclamationIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import type {
@@ -15,6 +16,11 @@ import type {
   PatchInventoryItemPayload,
 } from "@/entities/character/session-types";
 import type { EquipmentWarning } from "@/entities/character/types";
+import {
+  useBoardVehicle,
+  useCharacterActors,
+  useLinkVehicle,
+} from "@/features/actor/api/use-actors";
 import { useSpellLabels } from "@/features/catalog/spell-catalog/api/use-spells";
 import {
   MAX_ATTUNED_ITEMS,
@@ -38,6 +44,7 @@ import { SearchableSelect } from "@/shared/ui/searchable-select";
 
 type InventoryItemDetailProps = {
   item: InventoryItem;
+  characterId?: string;
   isPending: boolean;
   attunementSlotsFull: boolean;
   warnings: EquipmentWarning[];
@@ -66,6 +73,12 @@ type InventoryItemDetailProps = {
   /** Em campanha (player): remover vende por ½ do catálogo. */
   sellCreditApplies?: boolean;
 };
+
+function isBoardableTransportKind(kind: string | null | undefined): boolean {
+  return (
+    kind === "mount" || kind === "drawn-vehicle" || kind === "large-vehicle"
+  );
+}
 
 function hostsForCoverageSlug(
   coverageSlug: string,
@@ -304,6 +317,7 @@ function InstancePropertiesSummary({
 /** Controles e avisos do item (usado no modal do tile). */
 export function InventoryItemDetail({
   item,
+  characterId,
   isPending,
   attunementSlotsFull,
   warnings,
@@ -330,6 +344,15 @@ export function InventoryItemDetail({
     item.boundSpellSlug ?? "",
   );
   const spellLabels = useSpellLabels();
+  const isTransport = isBoardableTransportKind(item.propertiesKind);
+  const linkVehicle = useLinkVehicle(characterId ?? "");
+  const boardVehicle = useBoardVehicle(characterId ?? "");
+  const linkedActors = useCharacterActors(characterId ?? "");
+  const linkedTransport = (linkedActors.data ?? []).find(
+    (actor) =>
+      actor.templateSlug === item.itemSlug &&
+      (actor.actorKind === "vehicle" || actor.actorKind === "mount"),
+  );
   const sellHint = (() => {
     if (!sellCreditApplies || !item.costText) return null;
     const unit = parseCostTextClient(item.costText);
@@ -733,21 +756,68 @@ export function InventoryItemDetail({
             {isPactWeapon ? "Remover vínculo" : "Arma de Pacto"}
           </Button>
         ) : null}
-        <Button
-          type="button"
-          variant={equipped ? "outline" : "secondary"}
-          size="sm"
-          className="gap-1"
-          disabled={isPending}
-          onClick={() => onToggleLocation(item)}
-        >
-          {equipped ? (
-            <ArrowDownTrayIcon className="size-3.5" aria-hidden />
-          ) : (
-            <ArrowUpTrayIcon className="size-3.5" aria-hidden />
-          )}
-          {equipped ? "Desequipar" : "Equipar"}
-        </Button>
+        {isTransport && characterId ? (
+          <>
+            <Button
+              type="button"
+              variant={linkedTransport ? "outline" : "secondary"}
+              size="sm"
+              className="gap-1"
+              disabled={
+                isPending ||
+                linkVehicle.isPending ||
+                boardVehicle.isPending ||
+                Boolean(linkedTransport)
+              }
+              onClick={() =>
+                linkVehicle.mutate({ itemSlug: item.itemSlug })
+              }
+            >
+              {linkedTransport ? "Já vinculado" : "Vincular"}
+            </Button>
+            {linkedTransport ? (
+              <>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  disabled={isPending || boardVehicle.isPending}
+                  onClick={() => boardVehicle.mutate(linkedTransport.id)}
+                >
+                  Entrar
+                </Button>
+                <Link
+                  href={`/actors/${linkedTransport.id}`}
+                  className="inline-flex items-center text-xs font-medium text-primary underline-offset-2 hover:underline"
+                >
+                  Abrir ficha
+                </Link>
+              </>
+            ) : null}
+            {linkVehicle.isError ? (
+              <p className="basis-full text-xs text-destructive">
+                {(linkVehicle.error as Error)?.message ??
+                  "Falha ao vincular transporte"}
+              </p>
+            ) : null}
+          </>
+        ) : (
+          <Button
+            type="button"
+            variant={equipped ? "outline" : "secondary"}
+            size="sm"
+            className="gap-1"
+            disabled={isPending}
+            onClick={() => onToggleLocation(item)}
+          >
+            {equipped ? (
+              <ArrowDownTrayIcon className="size-3.5" aria-hidden />
+            ) : (
+              <ArrowUpTrayIcon className="size-3.5" aria-hidden />
+            )}
+            {equipped ? "Desequipar" : "Equipar"}
+          </Button>
+        )}
         {showDetach ? (
           <Button
             type="button"

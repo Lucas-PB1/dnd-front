@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 
 import type { CharacterThreadRank } from "@/entities/character-thread/types";
+import { CHARACTER_THREAD_RANK_LABEL } from "@/entities/character-thread/rank-label";
 import {
   useCharacterThreadDetail,
   useCharacterThreads,
@@ -23,12 +24,7 @@ import { SheetChip } from "@/features/character/character-sheet/ui/sheet/sheet-u
 import { Button } from "@/shared/ui/button";
 import { PhbProse } from "@/shared/ui/phb-prose";
 
-const RANK_LABEL: Record<CharacterThreadRank, string> = {
-  least: "Least",
-  lesser: "Lesser",
-  greater: "Greater",
-  superior: "Superior",
-};
+const RANK_LABEL = CHARACTER_THREAD_RANK_LABEL;
 
 const RANKS: CharacterThreadRank[] = [
   "least",
@@ -76,7 +72,7 @@ export function CharacterThreadSection({ character }: SheetReadSectionProps) {
       body: detail.data?.summary ? (
         <PhbProse text={detail.data.summary} />
       ) : (
-        <p className="text-sm text-muted-foreground">Character Thread ativo.</p>
+        <p className="text-sm text-muted-foreground">Thread ativo.</p>
       ),
     });
     if (active.goalText) {
@@ -126,7 +122,7 @@ export function CharacterThreadSection({ character }: SheetReadSectionProps) {
     return (
       <div className="space-y-3">
         <p className="text-sm text-muted-foreground">
-          Nenhum Character Thread ativo (opcional — Northlands).
+          Nenhum Thread ativo (opcional — Northlands).
         </p>
         <div className="flex flex-wrap items-end gap-2">
           <label className="flex min-w-[12rem] flex-1 flex-col gap-1 text-sm">

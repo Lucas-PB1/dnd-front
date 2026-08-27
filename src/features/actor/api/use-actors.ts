@@ -5,10 +5,14 @@ import { useRouter } from "next/navigation";
 
 import type { SpawnActorFromTemplatePayload } from "@/entities/actor/types";
 import {
+  boardCharacterVehicle,
   fetchActorById,
   fetchCharacterActors,
+  linkCharacterVehicle,
   spawnActorFromTemplate,
+  updateActor,
 } from "@/features/catalog/creature-template-catalog/api/creature-templates.api";
+import { sessionKeys } from "@/features/character/character-sheet/api/character-session.api";
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
 import { useAuth } from "@/features/auth/model";
 import { charactersKeys } from "@/features/character/characters/api/characters.api";
@@ -68,6 +72,71 @@ export function useSpawnActorFromTemplate(loginNext: string) {
           queryKey: charactersKeys.detail(actor.parentCharacterId),
         });
       }
+    },
+  });
+}
+
+export function useUpdateActor(actorId: string) {
+  const queryClient = useQueryClient();
+  const { accessToken } = useAuth();
+
+  return useMutation({
+    mutationFn: async (payload: { hitPointsCurrent?: number | null }) => {
+      if (!accessToken) throw new Error("Não autenticado");
+      return updateActor(accessToken, actorId, payload);
+    },
+    onSuccess: (actor) => {
+      queryClient.setQueryData(actorKeys.detail(actor.id), actor);
+      if (actor.parentCharacterId) {
+        void queryClient.invalidateQueries({
+          queryKey: actorKeys.byCharacter(actor.parentCharacterId),
+        });
+      }
+    },
+  });
+}
+
+export function useLinkVehicle(characterId: string) {
+  const queryClient = useQueryClient();
+  const { accessToken } = useAuth();
+
+  return useMutation({
+    mutationFn: async (payload: {
+      itemSlug?: string;
+      templateSlug?: string;
+    }) => {
+      if (!accessToken) throw new Error("Não autenticado");
+      return linkCharacterVehicle(accessToken, characterId, payload);
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: actorKeys.byCharacter(characterId),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: charactersKeys.detail(characterId),
+      });
+    },
+  });
+}
+
+export function useBoardVehicle(characterId: string) {
+  const queryClient = useQueryClient();
+  const { accessToken } = useAuth();
+
+  return useMutation({
+    mutationFn: async (actorId: string | null) => {
+      if (!accessToken) throw new Error("Não autenticado");
+      return boardCharacterVehicle(accessToken, characterId, { actorId });
+    },
+    onSuccess: (result) => {
+      queryClient.setQueryData(
+        sessionKeys.state(characterId),
+        (prev: { boardedActorId?: string | null } | undefined) =>
+          prev ? { ...prev, boardedActorId: result.boardedActorId } : prev,
+      );
+      void queryClient.invalidateQueries({
+        queryKey: sessionKeys.state(characterId),
+      });
     },
   });
 }

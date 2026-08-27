@@ -30,7 +30,10 @@ import {
   FIGHTING_STYLE_FEAT_CATEGORY,
   collectTakenFightingStyleSlugs,
 } from "@/features/catalog/feat-catalog/lib/fighting-style-feat-options";
-import { useFeats } from "@/features/catalog/reference-catalog/api/use-reference";
+import {
+  useFeatLabels,
+  useFeats,
+} from "@/features/catalog/reference-catalog/api/use-reference";
 
 export function useStepFeats(
   control: Control<CreateCharacterInput>,
@@ -116,6 +119,7 @@ export function useStepFeats(
   });
 
   const feats = useFeats();
+  const featLabels = useFeatLabels();
   const classDetail = useClassDetail(classSlug, !!classSlug);
   const classSpellSlots = useClassSpellSlots(classSlug, !!classSlug);
   const backgroundDetail = useBackgroundDetail(
@@ -177,13 +181,23 @@ export function useStepFeats(
         (row.cantrips ?? 0) > 0),
   );
 
-  const featNameBySlug = useMemo(
-    () =>
-      Object.fromEntries(
-        (feats.data?.data ?? []).map((feat) => [feat.slug, feat.name]),
-      ),
-    [feats.data?.data],
-  );
+  const featNameBySlug = useMemo(() => {
+    const map = Object.fromEntries(
+      (featLabels.data?.data ?? []).map((feat) => [feat.slug, feat.name]),
+    );
+    for (const feat of feats.data?.data ?? []) {
+      map[feat.slug] = feat.name;
+    }
+    if (originFeatSlug?.trim() && originFeatName?.trim()) {
+      map[originFeatSlug.trim()] = originFeatName.trim();
+    }
+    return map;
+  }, [
+    featLabels.data?.data,
+    feats.data?.data,
+    originFeatName,
+    originFeatSlug,
+  ]);
 
   const asiFeats = useMemo(
     () => asiFeatSlotsToCharacterFeats(asiFeatSlotSlugs),

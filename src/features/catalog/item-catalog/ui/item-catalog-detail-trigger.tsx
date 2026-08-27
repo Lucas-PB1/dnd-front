@@ -62,7 +62,11 @@ export function ItemCatalogDetailTrigger({
       {variant === "text" ? (
         <button
           type="button"
-          onClick={() => setOpen(true)}
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            setOpen(true);
+          }}
           className={cn(
             "min-w-0 text-left underline-offset-2 hover:underline",
             className,
@@ -79,7 +83,11 @@ export function ItemCatalogDetailTrigger({
           className={cn("size-7 shrink-0 p-0 text-muted-foreground", className)}
           aria-label={`Ver detalhe de ${item.name}`}
           title={`Ver o que ${item.name} faz`}
-          onClick={() => setOpen(true)}
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            setOpen(true);
+          }}
         >
           <InformationCircleIcon className="size-4" aria-hidden />
         </Button>

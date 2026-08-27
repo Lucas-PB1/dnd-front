@@ -46,6 +46,7 @@ import {
   planEconomyTableUse,
 } from "@/features/character/character-sheet/lib/combat/plan-economy-table-use";
 import { ClassCombatPanel } from "@/features/character/character-sheet/ui/beyond/combat/class-combat-panel";
+import { BoardedVehiclePanel } from "@/features/character/character-sheet/ui/beyond/combat/boarded-vehicle-panel";
 import { WeaponAttackCard } from "@/features/character/character-sheet/ui/beyond/inventory/weapon-attack-card";
 import { FeatureDetailTrigger } from "@/features/character/character-sheet/ui/sheet/feature-detail-dialog";
 import {
@@ -295,6 +296,12 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
 
   return (
     <div className="space-y-5">
+      {stateQuery.data?.boardedActorId ? (
+        <BoardedVehiclePanel
+          characterId={character.id}
+          actorId={stateQuery.data.boardedActorId}
+        />
+      ) : null}
       <section className="space-y-2" aria-labelledby="weapon-attacks">
         <SheetSectionHeader
           id="weapon-attacks"

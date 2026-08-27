@@ -8,6 +8,7 @@ import type { SubclassOption } from "@/entities/character/sheet-types";
 import { isSubclassRequired } from "@/entities/character/lib/subclass";
 import {
   useClassDetail,
+  useSubclassMechanics,
   useSubclassOptions,
 } from "@/features/catalog/class-catalog/api/use-classes";
 import {
@@ -75,6 +76,10 @@ export function StepSubclassOptions({
 
   const enabled = isSubclassRequired(level) && !!subclassSlug;
   const optionsQuery = useSubclassOptions(subclassSlug ?? "", level, enabled);
+  const mechanicsQuery = useSubclassMechanics(
+    subclassSlug ?? "",
+    enabled && !!subclassSlug,
+  );
   const classDetail = useClassDetail(classSlug, enabled && !!classSlug);
   const backgroundSkills = useBackgroundSkills(
     backgroundSlug,
@@ -96,6 +101,18 @@ export function StepSubclassOptions({
 
   const classFightingStyles = classDetail.data?.fightingStyleSlugs ?? [];
   const skillKinds = useMemo(() => skillChoiceKinds(), []);
+
+  const featureTextByOptionKey = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const row of mechanicsQuery.data?.data ?? []) {
+      const key = row.optionKey?.trim();
+      const text = row.featureDescription?.trim();
+      if (key && text && !map.has(key)) {
+        map.set(key, text);
+      }
+    }
+    return map;
+  }, [mechanicsQuery.data?.data]);
 
   const proficientSlugs = useMemo(() => {
     const fromSpecies = speciesChoices
@@ -208,6 +225,7 @@ export function StepSubclassOptions({
                 loreSpells={catalog.loreSpells}
                 wizardSpells={catalog.wizardSpells}
                 clericCantrips={catalog.clericCantrips}
+                featureFallbackText={featureTextByOptionKey.get(group.optionKey)}
                 onChange={(valueId) => setOption(group.optionKey, valueId)}
               />
             );
@@ -237,6 +255,7 @@ export function StepSubclassOptions({
               loreSpells={catalog.loreSpells}
               wizardSpells={catalog.wizardSpells}
               clericCantrips={catalog.clericCantrips}
+              featureFallbackText={featureTextByOptionKey.get(group.optionKey)}
               isLoading={isLoading}
               onChange={(valueId) => setOption(group.optionKey, valueId)}
             />

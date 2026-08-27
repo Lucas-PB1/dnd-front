@@ -8,6 +8,7 @@ import {
 } from "@heroicons/react/24/outline";
 
 import type { EquipmentLine } from "@/features/character/create-character/lib/equipment";
+import { ItemCatalogDetailTrigger } from "@/features/catalog/item-catalog/ui/item-catalog-detail-trigger";
 import { motion } from "@/shared/lib/motion";
 import { cn } from "@/shared/lib/utils";
 
@@ -143,6 +144,26 @@ export function PackageCard({
   );
 }
 
+function equipmentChipClassName(line: EquipmentLine) {
+  return cn(
+    "inline-flex max-w-full items-center gap-1 rounded-md border px-2 py-1 text-[11px] leading-snug",
+    line.kind === "gold" &&
+      "border-secondary/40 bg-secondary/15 text-foreground",
+    (line.kind === "pick-tool" || line.kind === "mirror-tool") &&
+      "border-accent/30 bg-accent/10 text-foreground",
+    line.kind === "item" &&
+      "border-border/80 bg-background/80 text-foreground/90",
+    line.kind === "text" &&
+      "border-border/60 bg-muted/40 text-muted-foreground",
+  );
+}
+
+function equipmentChipLabel(line: EquipmentLine) {
+  if (line.kind === "pick-tool") return `Escolher: ${line.label}`;
+  if (line.kind === "mirror-tool") return `Usar proficiência: ${line.label}`;
+  return line.label;
+}
+
 export function EquipmentChips({ lines }: { lines: EquipmentLine[] }) {
   if (lines.length === 0) {
     return (
@@ -152,43 +173,42 @@ export function EquipmentChips({ lines }: { lines: EquipmentLine[] }) {
 
   return (
     <ul className="flex flex-wrap gap-1.5">
-      {lines.map((line, index) => (
-        <li key={`${line.kind}-${line.label}-${index}`}>
-          <span
-            className={cn(
-              "inline-flex max-w-full items-center gap-1 rounded-md border px-2 py-1 text-[11px] leading-snug",
-              line.kind === "gold" &&
-                "border-secondary/40 bg-secondary/15 text-foreground",
-              (line.kind === "pick-tool" || line.kind === "mirror-tool") &&
-                "border-accent/30 bg-accent/10 text-foreground",
-              line.kind === "item" &&
-                "border-border/80 bg-background/80 text-foreground/90",
-              line.kind === "text" &&
-                "border-border/60 bg-muted/40 text-muted-foreground",
+      {lines.map((line, index) => {
+        const label = equipmentChipLabel(line);
+        const chipClass = equipmentChipClassName(line);
+        const canOpenDetail = line.kind === "item" && Boolean(line.itemSlug);
+
+        return (
+          <li key={`${line.kind}-${line.label}-${index}`}>
+            {canOpenDetail ? (
+              <ItemCatalogDetailTrigger
+                item={{ slug: line.itemSlug!, name: label }}
+                variant="text"
+                className={cn(
+                  chipClass,
+                  "cursor-pointer underline-offset-2 hover:border-primary/50 hover:underline",
+                )}
+              />
+            ) : (
+              <span className={chipClass}>
+                {line.kind === "pick-tool" || line.kind === "mirror-tool" ? (
+                  <SparklesIcon
+                    className="size-3 shrink-0 text-accent"
+                    aria-hidden
+                  />
+                ) : null}
+                {line.kind === "gold" ? (
+                  <BanknotesIcon
+                    className="size-3 shrink-0 text-secondary-foreground"
+                    aria-hidden
+                  />
+                ) : null}
+                <span className="min-w-0 truncate">{label}</span>
+              </span>
             )}
-          >
-            {line.kind === "pick-tool" || line.kind === "mirror-tool" ? (
-              <SparklesIcon
-                className="size-3 shrink-0 text-accent"
-                aria-hidden
-              />
-            ) : null}
-            {line.kind === "gold" ? (
-              <BanknotesIcon
-                className="size-3 shrink-0 text-secondary-foreground"
-                aria-hidden
-              />
-            ) : null}
-            <span className="min-w-0 truncate">
-              {line.kind === "pick-tool"
-                ? `Escolher: ${line.label}`
-                : line.kind === "mirror-tool"
-                  ? `Usar proficiência: ${line.label}`
-                  : line.label}
-            </span>
-          </span>
-        </li>
-      ))}
+          </li>
+        );
+      })}
     </ul>
   );
 }

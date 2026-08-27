@@ -188,6 +188,7 @@ export function BeyondInventoryTab({
     inventory.error;
 
   const sectionProps = {
+    characterId,
     isPending,
     attunementSlotsFull,
     equipmentWarnings,

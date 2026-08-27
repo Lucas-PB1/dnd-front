@@ -80,3 +80,46 @@ export async function fetchActorById(accessToken: string, id: string) {
     accessToken,
   );
 }
+
+export async function updateActor(
+  accessToken: string,
+  id: string,
+  payload: { hitPointsCurrent?: number | null },
+) {
+  return gameFetch<import("@/entities/actor/types").ActorDetail>(
+    `/actors/${id}`,
+    accessToken,
+    {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
+export async function linkCharacterVehicle(
+  accessToken: string,
+  characterId: string,
+  payload: { itemSlug?: string; templateSlug?: string },
+) {
+  return gameFetch<
+    import("@/entities/actor/types").ActorDetail & { reused: boolean }
+  >(`/characters/${characterId}/vehicles/link`, accessToken, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function boardCharacterVehicle(
+  accessToken: string,
+  characterId: string,
+  payload: { actorId: string | null },
+) {
+  return gameFetch<{ boardedActorId: string | null }>(
+    `/characters/${characterId}/vehicles/board`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+  );
+}

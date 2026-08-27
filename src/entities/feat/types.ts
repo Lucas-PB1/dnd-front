@@ -59,6 +59,7 @@ export type FeatOptionValue = {
   valueId: string;
   label: string;
   sortOrder: number;
+  benefit?: string | null;
 };
 
 export type FeatOptionDefinition = {

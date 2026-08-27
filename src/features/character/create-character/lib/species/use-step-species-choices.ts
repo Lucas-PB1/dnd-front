@@ -22,12 +22,19 @@ import {
   useBackgroundSkills,
 } from "@/features/catalog/background-catalog/api/use-backgrounds";
 import { useSpeciesTraitChoices } from "@/features/catalog/species-catalog/api/use-species";
-import { useFeats } from "@/features/catalog/reference-catalog/api/use-reference";
+import {
+  useFeatLabels,
+  useFeats,
+} from "@/features/catalog/reference-catalog/api/use-reference";
 
 export type SpeciesTraitChoiceGroup = {
   kind: string;
   traitName: string;
-  options: { choiceSlug: string; choiceName: string }[];
+  options: {
+    choiceSlug: string;
+    choiceName: string;
+    level1Benefit: string | null;
+  }[];
 };
 
 export function useStepSpeciesChoices(
@@ -40,21 +47,27 @@ export function useStepSpeciesChoices(
     name: "speciesSlug",
   });
   const speciesSlug = speciesSlugRaw || fallbackSpeciesSlug || "";
-  const speciesChoices =
-    useWatch({
-      control,
-      name: "speciesChoices",
-    }) ?? [];
+  const speciesChoicesWatch = useWatch({
+    control,
+    name: "speciesChoices",
+  });
+  const speciesChoices = useMemo(
+    () => speciesChoicesWatch ?? [],
+    [speciesChoicesWatch],
+  );
   const backgroundSlug =
     useWatch({
       control,
       name: "backgroundSlug",
     }) ?? "";
-  const asiFeatSlotSlugs =
-    useWatch({
-      control,
-      name: "asiFeatSlotSlugs",
-    }) ?? [];
+  const asiFeatSlotSlugsWatch = useWatch({
+    control,
+    name: "asiFeatSlotSlugs",
+  });
+  const asiFeatSlotSlugs = useMemo(
+    () => asiFeatSlotSlugsWatch ?? [],
+    [asiFeatSlotSlugsWatch],
+  );
   const featOptions =
     useWatch({
       control,
@@ -70,11 +83,14 @@ export function useStepSpeciesChoices(
       control,
       name: "classSlug",
     }) ?? "";
-  const classSkillSlugs =
-    useWatch({
-      control,
-      name: "classSkillSlugs",
-    }) ?? [];
+  const classSkillSlugsWatch = useWatch({
+    control,
+    name: "classSkillSlugs",
+  });
+  const classSkillSlugs = useMemo(
+    () => classSkillSlugsWatch ?? [],
+    [classSkillSlugsWatch],
+  );
   const backgroundToolItemSlug =
     useWatch({
       control,
@@ -96,6 +112,7 @@ export function useStepSpeciesChoices(
     !!backgroundSlug,
   );
   const featsCatalog = useFeats();
+  const featLabels = useFeatLabels();
   const skillKinds = useMemo(() => skillChoiceKinds(), []);
 
   const grantedSkillSlugs = useMemo(() => {
@@ -138,7 +155,11 @@ export function useStepSpeciesChoices(
       string,
       {
         traitName: string;
-        options: { choiceSlug: string; choiceName: string }[];
+        options: {
+          choiceSlug: string;
+          choiceName: string;
+          level1Benefit: string | null;
+        }[];
       }
     >();
 
@@ -176,6 +197,7 @@ export function useStepSpeciesChoices(
       group.options.push({
         choiceSlug: row.choiceSlug,
         choiceName: row.choiceName,
+        level1Benefit: row.level1Benefit,
       });
       map.set(row.choiceKind, group);
     }
@@ -192,13 +214,25 @@ export function useStepSpeciesChoices(
     }));
   }, [featSlugsFromOtherSources, speciesChoices, traitChoices.data?.data]);
 
-  const featNameBySlug = useMemo(
-    () =>
-      Object.fromEntries(
-        (featsCatalog.data?.data ?? []).map((feat) => [feat.slug, feat.name]),
-      ),
-    [featsCatalog.data?.data],
-  );
+  const featNameBySlug = useMemo(() => {
+    const map = Object.fromEntries(
+      (featLabels.data?.data ?? []).map((feat) => [feat.slug, feat.name]),
+    );
+    for (const feat of featsCatalog.data?.data ?? []) {
+      map[feat.slug] = feat.name;
+    }
+    const originSlug = backgroundDetail.data?.originFeatSlug?.trim();
+    const originName = backgroundDetail.data?.originFeatName?.trim();
+    if (originSlug && originName) {
+      map[originSlug] = originName;
+    }
+    return map;
+  }, [
+    backgroundDetail.data?.originFeatName,
+    backgroundDetail.data?.originFeatSlug,
+    featLabels.data?.data,
+    featsCatalog.data?.data,
+  ]);
 
   const previewFeats = useMemo(
     () =>

@@ -22,6 +22,7 @@ import {
 import { isWeaponProficient } from "@/entities/character/lib/weapon-proficiency";
 import { skillChoiceKinds } from "@/features/character/create-character/lib/class-skills/granted-proficiencies";
 import type { CreateCharacterInput } from "@/features/character/create-character/model/create-character.schema";
+import { truncateChoiceHint } from "@/features/character/create-character/ui/choice-preview-panel";
 import { useBackgroundSkills } from "@/features/catalog/background-catalog/api/use-backgrounds";
 import {
   useClassDetail,
@@ -192,6 +193,9 @@ export function useStepClassSkills(
       .map((weapon) => ({
         value: weapon.slug,
         label: `${weapon.name}${weapon.mastery ? ` · ${weapon.mastery.name}` : ""}`,
+        hint: truncateChoiceHint(weapon.mastery?.description),
+        masteryName: weapon.mastery?.name ?? null,
+        masteryDescription: weapon.mastery?.description ?? null,
       }))
       .sort((a, b) => a.label.localeCompare(b.label, "pt"));
   }, [weapons.data?.data, masteryEligibility, weaponProficiencySlugs]);

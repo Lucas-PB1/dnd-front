@@ -52,6 +52,12 @@ export function StepIdentity({ register, control, errors }: StepIdentityProps) {
     defaultValue: "",
   });
 
+  const subclassSlug = useWatch({
+    control,
+    name: "subclassSlug",
+    defaultValue: "",
+  });
+
   const needsSubclass = level >= SUBCLASS_REQUIRED_FROM_LEVEL;
   const subclasses = useClassSubclasses(
     classSlug,
@@ -253,6 +259,9 @@ export function StepIdentity({ register, control, errors }: StepIdentityProps) {
       <aside className="lg:sticky lg:top-4">
         <OriginPreview
           classSlug={classSlug || undefined}
+          subclassSlug={
+            needsSubclass && subclassSlug ? subclassSlug : undefined
+          }
           speciesSlug={speciesSlug || undefined}
           backgroundSlug={backgroundSlug || undefined}
           level={level}

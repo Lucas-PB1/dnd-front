@@ -25,6 +25,7 @@ type InventoryLocationSectionProps = {
   id: string;
   title: string;
   icon: HeroIcon;
+  characterId: string;
   items: InventoryItem[];
   emptyMessage: string;
   isPending: boolean;
@@ -59,6 +60,7 @@ export function InventoryLocationSection({
   id,
   title,
   icon: Icon,
+  characterId,
   items,
   emptyMessage,
   isPending,
@@ -93,6 +95,7 @@ export function InventoryLocationSection({
         body: (
           <InventoryItemDetail
             item={item}
+            characterId={characterId}
             isPending={isPending}
             attunementSlotsFull={attunementSlotsFull}
             warnings={warnings}
@@ -116,6 +119,7 @@ export function InventoryLocationSection({
   }, [
     attunementSlotsFull,
     baseOptions,
+    characterId,
     containerOptions,
     canBindPactWeapon,
     equipmentWarnings,

@@ -10,7 +10,15 @@ import {
   type EldritchInvocationPick,
 } from "@/features/character/character-sheet/lib/warlock/eldritch-invocations";
 import { Button } from "@/shared/ui/button";
+import { PhbProse } from "@/shared/ui/phb-prose";
 import { SearchableSelect } from "@/shared/ui/searchable-select";
+
+function truncateHint(text: string | null | undefined, maxChars = 72) {
+  const trimmed = text?.trim();
+  if (!trimmed) return undefined;
+  if (trimmed.length <= maxChars) return trimmed;
+  return `${trimmed.slice(0, maxChars).trim()}…`;
+}
 
 export type EldritchCantripOption = {
   value: string;
@@ -105,6 +113,7 @@ export function EldritchInvocationPicker({
       .map((row) => ({
         value: row.slug,
         label: `${row.name} (nv. ${row.minLevel}+)`,
+        hint: truncateHint(row.description),
       }));
   }, [catalog, level, selectedSet, selectedSlugs]);
 
@@ -158,6 +167,8 @@ export function EldritchInvocationPicker({
       ),
     );
   }
+
+  const draftRow = draft ? bySlug.get(draft) : undefined;
 
   return (
     <div className="space-y-3">
@@ -253,27 +264,38 @@ export function EldritchInvocationPicker({
       </ul>
 
       {selectedPicks.length < limit ? (
-        <div className="flex flex-wrap items-end gap-2">
-          <div className="min-w-[14rem] flex-1 space-y-1">
-            <label className="text-[0.65rem] font-medium text-muted-foreground">
-              Adicionar invocação
-            </label>
-            <SearchableSelect
-              value={draft}
-              onValueChange={setDraft}
-              options={options}
-              placeholder="Buscar…"
-              disabled={disabled}
-            />
+        <div className="space-y-1.5">
+          <div className="flex flex-wrap items-end gap-2">
+            <div className="min-w-[14rem] flex-1 space-y-1">
+              <label className="text-[0.65rem] font-medium text-muted-foreground">
+                Adicionar invocação
+              </label>
+              <SearchableSelect
+                value={draft}
+                onValueChange={setDraft}
+                options={options}
+                placeholder="Buscar…"
+                disabled={disabled}
+              />
+            </div>
+            <Button
+              type="button"
+              size="sm"
+              disabled={disabled || !draft}
+              onClick={add}
+            >
+              Adicionar
+            </Button>
           </div>
-          <Button
-            type="button"
-            size="sm"
-            disabled={disabled || !draft}
-            onClick={add}
-          >
-            Adicionar
-          </Button>
+          {draftRow?.description ? (
+            <div className="rounded-md border border-border/50 bg-muted/15 px-2.5 py-2">
+              <p className="text-xs font-medium">{draftRow.name}</p>
+              <PhbProse
+                text={draftRow.description}
+                className="mt-0.5 text-xs leading-snug text-muted-foreground [&_p]:my-0"
+              />
+            </div>
+          ) : null}
         </div>
       ) : null}
     </div>
