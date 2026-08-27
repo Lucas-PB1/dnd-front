@@ -180,7 +180,16 @@ export function CreateCharacterWizard() {
     <form
       className="flex w-full flex-col gap-4"
       onSubmit={handleSubmit((values) => {
-        create.mutate(toCreateCharacterPayload(values));
+        const threadSlug = values.characterThreadSlug?.trim();
+        create.mutate({
+          payload: toCreateCharacterPayload(values),
+          thread: threadSlug
+            ? {
+                threadSlug,
+                goalIndex: values.characterThreadGoalIndex,
+              }
+            : undefined,
+        });
       })}
     >
       <WizardStepIndicator currentStep={step} navOptions={wizardNav} />

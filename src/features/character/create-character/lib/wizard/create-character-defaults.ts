@@ -10,6 +10,8 @@ export const CREATE_CHARACTER_DEFAULT_VALUES: CreateCharacterInput = {
   classSlug: "",
   speciesSlug: "",
   backgroundSlug: "",
+  characterThreadSlug: "",
+  characterThreadGoalIndex: undefined,
   subclassSlug: "",
   abilityGenerationMethodSlug: "standard-array",
   abilityScores: { ...UNASSIGNED_ABILITY_SCORES },

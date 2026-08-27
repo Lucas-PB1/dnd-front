@@ -22,6 +22,8 @@ import { BeyondPanel } from "@/features/character/character-sheet/ui/beyond/layo
 import { CombatPassivesTrigger } from "@/features/character/character-sheet/ui/beyond/combat/status/passives-trigger";
 import { useSheetRolls } from "@/features/character/character-sheet/ui/beyond/layout/sheet-rolls";
 import { cn } from "@/shared/lib/utils";
+import { CharacterLinkedActors } from "@/features/character/character-sheet/ui/sheet/character-linked-actors";
+import { CharacterQuickNotes } from "../../sheet/character-quick-notes";
 
 const PASSIVE_SENSES = [
   {
@@ -42,11 +44,13 @@ const PASSIVE_SENSES = [
 ] as const;
 
 type BeyondLeftColumnProps = {
+  characterId: string;
   character: CharacterDetail;
   languageNames: string[];
 };
 
 export function BeyondLeftColumn({
+  characterId,
   character,
   languageNames,
 }: BeyondLeftColumnProps) {
@@ -171,7 +175,19 @@ export function BeyondLeftColumn({
         )}
       </BeyondPanel>
 
-      <CombatPassivesTrigger notes={character.classCombatNotes ?? []} />
+      <CombatPassivesTrigger
+        notes={[
+          ...(character.classCombatNotes ?? []),
+          ...((character.thread?.active?.milestones ?? []).map((milestone) => {
+            const label =
+              milestone.benefitName ?? milestone.benefitKey;
+            const detail = milestone.benefitDescription
+              ? ` — ${milestone.benefitDescription}`
+              : "";
+            return `Thread (${milestone.rank}): ${label}${detail}`;
+          }) ?? []),
+        ]}
+      />
 
       <BeyondPanel title="Sentidos" icon={EyeIcon}>
         <ul className="space-y-1.5 text-sm">
@@ -230,6 +246,10 @@ export function BeyondLeftColumn({
           </dl>
         )}
       </BeyondPanel>
+
+      <CharacterLinkedActors characterId={characterId} />
+
+      <CharacterQuickNotes characterId={character.id} />
     </div>
   );
 }

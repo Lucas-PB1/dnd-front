@@ -8,6 +8,7 @@ import type {
   FeatOption,
   CharacterFeat,
 } from "@/entities/character/sheet-types";
+import type { CharacterThreadBundle } from "@/entities/character-thread/types";
 
 export type {
   CharacterEquipment,
@@ -94,6 +95,8 @@ export type CharacterDetail = {
   campaigns: CharacterCampaignRef[];
   /** Saldo das 5 moedas (PC/PP/PE/PO/PL). */
   coins: CoinPurse;
+  /** Character Thread Northlands (ativo + histórico). */
+  thread?: CharacterThreadBundle | null;
   createdAt: string;
   updatedAt: string;
 };

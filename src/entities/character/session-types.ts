@@ -301,3 +301,10 @@ export type LevelUpPayload = {
   asiPrimaryAbilitySlug?: string;
   asiSecondaryAbilitySlug?: string;
 };
+
+export type CharacterQuickNotes = {
+  characterId: string;
+  notes: string;
+  createdAt: string;
+  updatedAt: string;
+};

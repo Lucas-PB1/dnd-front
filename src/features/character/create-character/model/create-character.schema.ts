@@ -72,6 +72,8 @@ export const createCharacterBaseSchema = z.object({
   classSlug: z.string().min(1, "Escolha uma classe"),
   speciesSlug: z.string().min(1, "Escolha uma espécie"),
   backgroundSlug: z.string().min(1, "Escolha um antecedente"),
+  characterThreadSlug: z.string().optional(),
+  characterThreadGoalIndex: z.number().int().min(1).max(6).optional(),
   subclassSlug: z.string().optional(),
   abilityGenerationMethodSlug: abilityGenerationMethodSchema,
   abilityScores: abilityScoresSchema,

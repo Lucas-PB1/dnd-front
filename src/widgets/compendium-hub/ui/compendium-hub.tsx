@@ -9,6 +9,7 @@ import {
   ShieldCheckIcon,
   SparklesIcon,
   Squares2X2Icon,
+  TruckIcon,
 } from "@heroicons/react/24/outline";
 import type { ComponentType, SVGProps } from "react";
 
@@ -104,6 +105,22 @@ const SECTIONS: ReadonlyArray<{
     description:
       "Truques aos círculos superiores — escolas, componentes e duração (PHB, Valdas, Eldritch Hunt, Northlands Nórdico).",
     icon: SparklesIcon,
+  },
+  {
+    href: "/creatures",
+    title: "Criaturas",
+    eyebrow: "Stat blocks",
+    description:
+      "Monstros, companheiros e NPCs — CA, PV, ações e magias inatas para vincular à ficha do personagem.",
+    icon: ShieldCheckIcon,
+  },
+  {
+    href: "/vehicles",
+    title: "Veículos",
+    eyebrow: "Embarcações",
+    description:
+      "Navios e veículos — tripulação, carga, limite de dano e ações de combate.",
+    icon: TruckIcon,
   },
 ];
 

@@ -54,6 +54,7 @@ export function CharacterSheetMainGrid({
       >
         <aside className="order-3 min-w-0 xl:order-1">
           <BeyondLeftColumn
+            characterId={characterId}
             character={character}
             languageNames={languageNames}
           />

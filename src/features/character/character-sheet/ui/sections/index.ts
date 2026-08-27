@@ -1,4 +1,5 @@
 export { BackgroundTraitsSection } from "./background-traits-section";
+export { CharacterThreadSection } from "./character-thread-section";
 export { ClassFeaturesSection } from "./class-features-section";
 export { FeatsSection } from "./feats-section";
 export { SpeciesChoicesSection } from "./species-choices-section";

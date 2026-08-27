@@ -22,6 +22,7 @@ import type { CharacterDetail } from "@/entities/character/types";
 import type { CharacterCatalogLabels } from "@/features/character/character-sheet/api/use-character-catalog-labels";
 import {
   BackgroundTraitsSection,
+  CharacterThreadSection,
   ClassFeaturesSection,
   FeatsSection,
   SpeciesChoicesSection,
@@ -36,21 +37,24 @@ type TraitsSectionId =
   | "species"
   | "subclass"
   | "feats"
-  | "background";
+  | "background"
+  | "thread";
+
+type TraitsEditSectionId = Exclude<TraitsSectionId, "class" | "thread">;
 
 type HeroIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
 type BeyondTraitsTabProps = {
   character: CharacterDetail;
   labels: CharacterCatalogLabels;
-  onEdit?: (section: Exclude<TraitsSectionId, "class">) => void;
+  onEdit?: (section: TraitsEditSectionId) => void;
 };
 
 type TraitsTabDef = {
   id: TraitsSectionId;
   label: string;
   icon: HeroIcon;
-  edit?: Exclude<TraitsSectionId, "class">;
+  edit?: TraitsEditSectionId;
   editLabel?: string;
   content: ReactNode;
 };
@@ -111,6 +115,12 @@ export function BeyondTraitsTab({
           onEditTool={onEdit ? () => onEdit("background") : undefined}
         />
       ),
+    },
+    {
+      id: "thread",
+      label: "Thread",
+      icon: PencilSquareIcon,
+      content: <CharacterThreadSection {...sectionProps} />,
     },
   ];
 

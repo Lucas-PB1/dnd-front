@@ -8,8 +8,17 @@ import {
   charactersKeys,
   createCharacter,
 } from "@/features/character/characters/api/characters.api";
+import { attachCharacterThread } from "@/features/character/character-sheet/api/character-thread.api";
 import type { CreateCharacterPayload } from "@/entities/character/types";
 import { useAuth } from "@/features/auth/model";
+
+export type CreateCharacterMutationInput = {
+  payload: CreateCharacterPayload;
+  thread?: {
+    threadSlug: string;
+    goalIndex?: number;
+  };
+};
 
 export function useCreateCharacter() {
   const router = useRouter();
@@ -17,13 +26,20 @@ export function useCreateCharacter() {
   const { accessToken } = useAuth();
 
   return useMutation({
-    mutationFn: async (payload: CreateCharacterPayload) => {
+    mutationFn: async (input: CreateCharacterMutationInput) => {
       if (!accessToken) {
         throw new Error("Faça login para criar uma ficha");
       }
 
       try {
-        return await createCharacter(accessToken, payload);
+        const character = await createCharacter(accessToken, input.payload);
+        if (input.thread?.threadSlug) {
+          await attachCharacterThread(accessToken, character.id, {
+            threadSlug: input.thread.threadSlug,
+            goalIndex: input.thread.goalIndex,
+          });
+        }
+        return character;
       } catch (error) {
         if (error instanceof ApiError && error.isUnauthorized) {
           router.push("/login?next=/characters/new");

@@ -231,6 +231,11 @@ export async function advanceWizardStep(deps: WizardAdvanceDeps): Promise<void> 
       setBackgroundError("Escolha a ferramenta do antecedente.");
       return;
     }
+    setStep("thread");
+    return;
+  }
+
+  if (step === "thread") {
     setStep("species");
     return;
   }

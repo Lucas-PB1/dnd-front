@@ -9,6 +9,7 @@ import type { CreateCharacterInput } from "@/features/character/create-character
 import type { WizardStepId } from "@/features/character/create-character/model/wizard-steps";
 import { StepAbilities } from "@/features/character/create-character/ui/steps/abilities/step-abilities";
 import { StepBackground } from "@/features/character/create-character/ui/steps/background/step-background";
+import { StepCharacterThread } from "@/features/character/create-character/ui/steps/thread/step-character-thread";
 import { StepClassSkills } from "@/features/character/create-character/ui/steps/class-skills/step-class-skills";
 import { StepEquipment } from "@/features/character/create-character/ui/steps/equipment/step-equipment";
 import { StepFeats } from "@/features/character/create-character/ui/steps/feats/step-feats";
@@ -90,6 +91,10 @@ export function WizardStepContent({
             <StepInlineError message={backgroundError} />
           ) : null}
         </>
+      ) : null}
+
+      {step === "thread" ? (
+        <StepCharacterThread control={control} setValue={setValue} />
       ) : null}
 
       {step === "feats" ? (
