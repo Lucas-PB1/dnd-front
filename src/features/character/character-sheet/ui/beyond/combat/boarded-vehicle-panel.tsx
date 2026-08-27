@@ -36,7 +36,7 @@ function VehicleHpStepper({ actor }: { actor: ActorDetail }) {
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex min-h-11 items-center gap-2">
       <span className="text-xs font-medium text-muted-foreground uppercase">
         PV
       </span>
@@ -44,12 +44,12 @@ function VehicleHpStepper({ actor }: { actor: ActorDetail }) {
         type="button"
         variant="outline"
         size="icon"
-        className="size-7"
+        className="size-11 touch-manipulation sm:size-9"
         disabled={patch.isPending || current <= 0}
         onClick={() => setHp(current - 1)}
         aria-label="Reduzir PV"
       >
-        <MinusIcon className="size-3.5" />
+        <MinusIcon className="size-4" />
       </Button>
       <span className="min-w-[4.5rem] text-center text-sm font-semibold tabular-nums">
         {current}
@@ -59,12 +59,12 @@ function VehicleHpStepper({ actor }: { actor: ActorDetail }) {
         type="button"
         variant="outline"
         size="icon"
-        className="size-7"
+        className="size-11 touch-manipulation sm:size-9"
         disabled={patch.isPending || (max != null && current >= max)}
         onClick={() => setHp(current + 1)}
         aria-label="Aumentar PV"
       >
-        <PlusIcon className="size-3.5" />
+        <PlusIcon className="size-4" />
       </Button>
     </div>
   );
@@ -98,6 +98,7 @@ export function BoardedVehiclePanel({
           type="button"
           variant="outline"
           size="sm"
+          className="min-h-11 touch-manipulation sm:min-h-8"
           disabled={board.isPending}
           onClick={() => board.mutate(null)}
         >
@@ -111,14 +112,15 @@ export function BoardedVehiclePanel({
 
   return (
     <section className="space-y-3">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <SheetSectionHeader title="A bordo" />
-        <div className="flex flex-wrap items-center gap-2">
-          <VehicleHpStepper actor={actor} />
+      <SheetSectionHeader title="A bordo" />
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+        <VehicleHpStepper actor={actor} />
+        <div className="flex flex-wrap gap-2">
           <Button
             type="button"
             variant="secondary"
             size="sm"
+            className="min-h-11 flex-1 touch-manipulation sm:min-h-8 sm:flex-none"
             onClick={() => setSheetOpen(true)}
           >
             Abrir ficha
@@ -127,6 +129,7 @@ export function BoardedVehiclePanel({
             type="button"
             variant="outline"
             size="sm"
+            className="min-h-11 flex-1 touch-manipulation sm:min-h-8 sm:flex-none"
             disabled={board.isPending}
             onClick={() => board.mutate(null)}
           >
@@ -136,7 +139,7 @@ export function BoardedVehiclePanel({
       </div>
       <button
         type="button"
-        className="block w-full text-left"
+        className="block w-full rounded-md border border-border/60 bg-muted/20 px-3 py-3 text-left touch-manipulation active:bg-muted/40"
         onClick={() => setSheetOpen(true)}
       >
         <SheetSubheader

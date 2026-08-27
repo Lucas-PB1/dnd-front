@@ -68,7 +68,7 @@ export function RollChip({
       type="button"
       title={title}
       onClick={onClick}
-      className="inline-flex items-center rounded-md border border-primary/25 bg-primary/5 px-2 py-0.5 font-mono text-xs font-semibold text-primary transition-colors hover:bg-primary/15 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+      className="inline-flex min-h-9 items-center rounded-md border border-primary/25 bg-primary/5 px-2.5 py-1.5 font-mono text-xs font-semibold touch-manipulation text-primary transition-colors hover:bg-primary/15 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none sm:min-h-0 sm:py-0.5"
     >
       {children}
     </button>
@@ -104,7 +104,7 @@ export function RollModeToolbar({
           key={option.id}
           type="button"
           className={cn(
-            "rounded-md border px-2 py-0.5 text-[0.7rem] font-medium transition-colors",
+            "min-h-9 rounded-md border px-2.5 py-1.5 text-[0.7rem] font-medium touch-manipulation transition-colors sm:min-h-0 sm:py-0.5",
             advantage === option.id
               ? "border-primary/50 bg-primary/15 text-primary"
               : "border-border/70 bg-muted/20 text-muted-foreground hover:bg-muted/40",
@@ -118,7 +118,7 @@ export function RollModeToolbar({
       <button
         type="button"
         className={cn(
-          "rounded-md border px-2 py-0.5 text-[0.7rem] font-medium transition-colors",
+          "min-h-9 rounded-md border px-2.5 py-1.5 text-[0.7rem] font-medium touch-manipulation transition-colors sm:min-h-0 sm:py-0.5",
           critical
             ? "border-rose-500/50 bg-rose-500/15 text-rose-700 dark:text-rose-300"
             : "border-border/70 bg-muted/20 text-muted-foreground hover:bg-muted/40",

@@ -60,7 +60,7 @@ function ActorRow({
         <button
           type="button"
           onClick={() => onOpenSheet(actor.id)}
-          className="min-w-0 flex-1 truncate text-left text-sm font-medium hover:underline"
+          className="min-h-11 min-w-0 flex-1 truncate rounded-md px-1 py-2 text-left text-sm font-medium touch-manipulation hover:underline"
         >
           {actor.name}
         </button>
@@ -80,7 +80,7 @@ function ActorRow({
                 type="button"
                 variant="outline"
                 size="sm"
-                className="h-7 px-2 text-xs"
+                className="h-10 min-w-[4.5rem] touch-manipulation px-3 text-xs sm:h-7 sm:px-2"
                 disabled={isPending}
                 onClick={onLeave}
               >
@@ -92,7 +92,7 @@ function ActorRow({
               type="button"
               variant="secondary"
               size="sm"
-              className="h-7 px-2 text-xs"
+              className="h-10 min-w-[4.5rem] touch-manipulation px-3 text-xs sm:h-7 sm:px-2"
               disabled={isPending}
               onClick={() => onBoard(actor.id)}
             >
@@ -103,7 +103,7 @@ function ActorRow({
             type="button"
             variant="ghost"
             size="sm"
-            className="h-7 px-2 text-xs"
+            className="h-10 touch-manipulation px-3 text-xs sm:h-7 sm:px-2"
             onClick={() => onOpenSheet(actor.id)}
           >
             Ficha
@@ -115,7 +115,7 @@ function ActorRow({
             type="button"
             variant="ghost"
             size="sm"
-            className="h-7 px-2 text-xs"
+            className="h-10 touch-manipulation px-3 text-xs sm:h-7 sm:px-2"
             onClick={() => onOpenSheet(actor.id)}
           >
             Ficha

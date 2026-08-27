@@ -36,20 +36,20 @@ function VitalStepper({
   const atMax = max != null && value >= max;
 
   return (
-    <div className="flex items-center gap-2">
-      <span className="text-[0.65rem] font-medium tracking-wide text-muted-foreground uppercase">
+    <div className="flex min-h-11 items-center gap-2">
+      <span className="w-14 shrink-0 text-[0.65rem] font-medium tracking-wide text-muted-foreground uppercase">
         {label}
       </span>
       <Button
         type="button"
         variant="outline"
         size="icon"
-        className="size-7"
+        className="size-11 shrink-0 touch-manipulation sm:size-9"
         disabled={disabled || atMin}
         onClick={() => onChange(value - 1)}
         aria-label={`Reduzir ${label}`}
       >
-        <MinusIcon className="size-3.5" />
+        <MinusIcon className="size-4" />
       </Button>
       <span className="min-w-[4.5rem] text-center text-sm font-semibold tabular-nums">
         {value}
@@ -59,12 +59,12 @@ function VitalStepper({
         type="button"
         variant="outline"
         size="icon"
-        className="size-7"
+        className="size-11 shrink-0 touch-manipulation sm:size-9"
         disabled={disabled || atMax}
         onClick={() => onChange(value + 1)}
         aria-label={`Aumentar ${label}`}
       >
-        <PlusIcon className="size-3.5" />
+        <PlusIcon className="size-4" />
       </Button>
     </div>
   );
@@ -104,7 +104,7 @@ export function ActorSheetBody({
             Vinculado ao personagem
           </p>
         ) : null}
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
           <VitalStepper
             label="PV"
             value={hpCurrent}
@@ -120,7 +120,10 @@ export function ActorSheetBody({
           />
           {actor.armorClass != null ? (
             <span className="text-xs text-muted-foreground">
-              CA <span className="font-semibold text-foreground">{actor.armorClass}</span>
+              CA{" "}
+              <span className="font-semibold text-foreground">
+                {actor.armorClass}
+              </span>
             </span>
           ) : null}
         </div>

@@ -763,7 +763,7 @@ export function InventoryItemDetail({
               type="button"
               variant={linkedTransport ? "outline" : "secondary"}
               size="sm"
-              className="gap-1"
+              className="min-h-11 gap-1 touch-manipulation sm:min-h-8"
               disabled={
                 isPending ||
                 linkVehicle.isPending ||
@@ -782,6 +782,7 @@ export function InventoryItemDetail({
                   type="button"
                   variant="secondary"
                   size="sm"
+                  className="min-h-11 touch-manipulation sm:min-h-8"
                   disabled={isPending || boardVehicle.isPending}
                   onClick={() => boardVehicle.mutate(linkedTransport.id)}
                 >
@@ -791,6 +792,7 @@ export function InventoryItemDetail({
                   type="button"
                   variant="outline"
                   size="sm"
+                  className="min-h-11 touch-manipulation sm:min-h-8"
                   onClick={() => setTransportSheetOpen(true)}
                 >
                   Abrir ficha

@@ -79,12 +79,12 @@ export function ChoicePreviewPanel({
             type="button"
             size="xs"
             variant="ghost"
-            className="mt-0.5 size-7 shrink-0 p-0 text-muted-foreground"
+            className="mt-0.5 size-11 shrink-0 touch-manipulation p-0 text-muted-foreground sm:size-7"
             aria-label={`Ver detalhe de ${title}`}
             title={`Ver detalhe: ${title}`}
             onClick={() => setOpen(true)}
           >
-            <InformationCircleIcon className="size-4" aria-hidden />
+            <InformationCircleIcon className="size-5 sm:size-4" aria-hidden />
           </Button>
           <FeatureDetailDialog
             open={open}
