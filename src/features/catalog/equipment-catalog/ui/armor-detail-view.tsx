@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import type { ArmorSummary } from "@/entities/armor/types";
 import { useArmorDetail } from "@/features/catalog/equipment-catalog/api/use-equipment";
 import { useCatalogBackHref } from "@/shared/lib/use-catalog-back-href";
+import { toMetricProse } from "@/shared/lib/metric";
 import {
   CatalogDetailError,
   CatalogDetailHero,
@@ -28,7 +29,7 @@ function ArmorHero({
     armor.acFormula ?? (armor.acBase != null ? String(armor.acBase) : null);
   if (ac) stats.push({ label: "CA", value: ac });
   if (armor.costText) stats.push({ label: "Custo", value: armor.costText });
-  if (armor.weight) stats.push({ label: "Peso", value: armor.weight });
+  if (armor.weight) stats.push({ label: "Peso", value: toMetricProse(armor.weight) });
   if (armor.strengthReq != null) {
     stats.push({ label: "Força", value: `${armor.strengthReq}+` });
   }

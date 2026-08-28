@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
 
 import {
   ACTOR_KIND_LABELS,
@@ -13,6 +12,7 @@ import {
   usePatchActorState,
 } from "@/features/actor/api/use-actors";
 import { ActorSheetDialog } from "@/features/actor/ui/actor-sheet-dialog";
+import { VitalStepper } from "@/features/actor/ui/vital-stepper";
 import {
   SheetSectionHeader,
   SheetSubheader,
@@ -24,49 +24,20 @@ type BoardedVehiclePanelProps = {
   actorId: string;
 };
 
-function VehicleHpStepper({ actor }: { actor: ActorDetail }) {
+function BoardedVehicleHp({ actor }: { actor: ActorDetail }) {
   const patch = usePatchActorState(actor.id);
   const current = actor.hitPointsCurrent ?? actor.hitPointsMax ?? 0;
   const max = actor.hitPointsMax;
 
-  function setHp(next: number) {
-    const clamped =
-      max != null ? Math.max(0, Math.min(max, next)) : Math.max(0, next);
-    patch.mutate({ hitPointsCurrent: clamped });
-  }
-
   return (
-    <div className="flex min-h-11 items-center gap-2">
-      <span className="text-xs font-medium text-muted-foreground uppercase">
-        PV
-      </span>
-      <Button
-        type="button"
-        variant="outline"
-        size="icon"
-        className="size-11 touch-manipulation sm:size-9"
-        disabled={patch.isPending || current <= 0}
-        onClick={() => setHp(current - 1)}
-        aria-label="Reduzir PV"
-      >
-        <MinusIcon className="size-4" />
-      </Button>
-      <span className="min-w-[4.5rem] text-center text-sm font-semibold tabular-nums">
-        {current}
-        {max != null ? ` / ${max}` : ""}
-      </span>
-      <Button
-        type="button"
-        variant="outline"
-        size="icon"
-        className="size-11 touch-manipulation sm:size-9"
-        disabled={patch.isPending || (max != null && current >= max)}
-        onClick={() => setHp(current + 1)}
-        aria-label="Aumentar PV"
-      >
-        <PlusIcon className="size-4" />
-      </Button>
-    </div>
+    <VitalStepper
+      id={`boarded-hp-${actor.id}`}
+      label="PV"
+      value={current}
+      max={max}
+      disabled={patch.isPending}
+      onChange={(next) => patch.mutate({ hitPointsCurrent: next })}
+    />
   );
 }
 
@@ -114,7 +85,7 @@ export function BoardedVehiclePanel({
     <section className="space-y-3">
       <SheetSectionHeader title="A bordo" />
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-        <VehicleHpStepper actor={actor} />
+        <BoardedVehicleHp actor={actor} />
         <div className="flex flex-wrap gap-2">
           <Button
             type="button"

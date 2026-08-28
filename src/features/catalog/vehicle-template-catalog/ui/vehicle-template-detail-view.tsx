@@ -3,6 +3,7 @@
 import { useVehicleTemplateDetail } from "@/features/catalog/vehicle-template-catalog/api/use-vehicle-templates";
 import { LinkTemplateToCharacter } from "@/features/catalog/template-link/ui/link-template-to-character";
 import { StatBlockCard } from "@/features/catalog/template-stat-block/ui/stat-block-card";
+import { formatKgFromPounds, toMetricProse } from "@/shared/lib/metric";
 import { useCatalogBackHref } from "@/shared/lib/use-catalog-back-href";
 import {
   CatalogDetailError,
@@ -55,7 +56,13 @@ export function VehicleTemplateDetailView({
         abilityScores={template.abilityScores}
         crewCapacity={template.crewCapacity}
         passengerCapacity={template.passengerCapacity}
-        cargoCapacityLabel={template.cargoCapacityLabel}
+        cargoCapacityLabel={
+          template.cargoCapacityLabel
+            ? toMetricProse(template.cargoCapacityLabel)
+            : template.cargoCapacityLb != null
+              ? formatKgFromPounds(template.cargoCapacityLb)
+              : null
+        }
         traits={template.traits}
         actions={template.actions}
       />

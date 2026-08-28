@@ -1,74 +1,20 @@
 "use client";
 
-import { MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
-
 import {
   ACTOR_KIND_LABELS,
   type ActorDetail,
 } from "@/entities/actor/types";
 import { usePatchActorState } from "@/features/actor/api/use-actors";
+import { VitalStepper } from "@/features/actor/ui/vital-stepper";
 import { StatBlockCard } from "@/features/catalog/template-stat-block/ui/stat-block-card";
 import { TemplateSpellsList } from "@/features/catalog/template-stat-block/ui/template-stat-block-sections";
-import { Button } from "@/shared/ui/button";
+import { formatKgFromPounds } from "@/shared/lib/metric";
 
 type ActorSheetBodyProps = {
   actor: ActorDetail;
   /** Esconde link “ver personagem” (útil no modal sobre a ficha). */
   hideParentLink?: boolean;
 };
-
-function VitalStepper({
-  label,
-  value,
-  min = 0,
-  max,
-  disabled,
-  onChange,
-}: {
-  label: string;
-  value: number;
-  min?: number;
-  max?: number | null;
-  disabled?: boolean;
-  onChange: (next: number) => void;
-}) {
-  const atMin = value <= min;
-  const atMax = max != null && value >= max;
-
-  return (
-    <div className="flex min-h-11 items-center gap-2">
-      <span className="w-14 shrink-0 text-[0.65rem] font-medium tracking-wide text-muted-foreground uppercase">
-        {label}
-      </span>
-      <Button
-        type="button"
-        variant="outline"
-        size="icon"
-        className="size-11 shrink-0 touch-manipulation sm:size-9"
-        disabled={disabled || atMin}
-        onClick={() => onChange(value - 1)}
-        aria-label={`Reduzir ${label}`}
-      >
-        <MinusIcon className="size-4" />
-      </Button>
-      <span className="min-w-[4.5rem] text-center text-sm font-semibold tabular-nums">
-        {value}
-        {max != null ? ` / ${max}` : ""}
-      </span>
-      <Button
-        type="button"
-        variant="outline"
-        size="icon"
-        className="size-11 shrink-0 touch-manipulation sm:size-9"
-        disabled={disabled || atMax}
-        onClick={() => onChange(value + 1)}
-        aria-label={`Aumentar ${label}`}
-      >
-        <PlusIcon className="size-4" />
-      </Button>
-    </div>
-  );
-}
 
 /** Conteúdo da ficha de actor (veículo/montaria/criatura) com controles de mesa. */
 export function ActorSheetBody({
@@ -106,6 +52,7 @@ export function ActorSheetBody({
         ) : null}
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
           <VitalStepper
+            id={`actor-hp-${actor.id}`}
             label="PV"
             value={hpCurrent}
             max={hpMax}
@@ -113,6 +60,7 @@ export function ActorSheetBody({
             onChange={setHp}
           />
           <VitalStepper
+            id={`actor-temp-hp-${actor.id}`}
             label="PV temp."
             value={tempHp}
             disabled={patchState.isPending}
@@ -152,7 +100,9 @@ export function ActorSheetBody({
         crewCapacity={actor.crewCapacity}
         passengerCapacity={actor.passengerCapacity}
         cargoCapacityLabel={
-          actor.cargoCapacityLb != null ? `${actor.cargoCapacityLb} lb` : null
+          actor.cargoCapacityLb != null
+            ? formatKgFromPounds(actor.cargoCapacityLb)
+            : null
         }
         proficiencyBonus={actor.proficiencyBonus}
         enableRolls

@@ -7,6 +7,7 @@ import { ITEM_TYPE_LABELS_PT } from "@/entities/item/types";
 import { useEquipmentCatalogLinks } from "@/features/catalog/equipment-catalog/api/use-equipment-catalog-links";
 import { useItemDetail } from "@/features/catalog/equipment-catalog/api/use-equipment";
 import { useCatalogBackHref } from "@/shared/lib/use-catalog-back-href";
+import { toMetricProse } from "@/shared/lib/metric";
 import {
   CatalogDetailError,
   CatalogDetailHero,
@@ -45,7 +46,7 @@ function ItemHero({ item, backHref }: { item: ItemSummary; backHref: string }) {
   if (consumable) stats.push({ label: "Consumível", value: "Sim" });
   if (editionSlug) stats.push({ label: "Fonte", value: editionSlug });
   if (item.costText) stats.push({ label: "Custo", value: item.costText });
-  if (item.weight) stats.push({ label: "Peso", value: item.weight });
+  if (item.weight) stats.push({ label: "Peso", value: toMetricProse(item.weight) });
 
   const attribute = props?.attribute;
   if (typeof attribute === "string" && attribute.trim()) {

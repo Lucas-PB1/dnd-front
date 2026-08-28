@@ -1,5 +1,6 @@
 import type { ArmorSummary } from "@/entities/armor/types";
 import { withCatalogReturn } from "@/shared/lib/catalog-return";
+import { toMetricProse } from "@/shared/lib/metric";
 import { CatalogListCard } from "@/shared/ui/catalog-list-card";
 
 type ArmorCardProps = {
@@ -25,7 +26,7 @@ export function ArmorCard({ armor, listPath, className }: ArmorCardProps) {
       aside={
         <div className="shrink-0 space-y-0.5 text-xs text-muted-foreground sm:max-w-40 sm:text-right">
           {armor.costText ? <p>{armor.costText}</p> : null}
-          {armor.weight ? <p>{armor.weight}</p> : null}
+          {armor.weight ? <p>{toMetricProse(armor.weight)}</p> : null}
           {armor.strengthReq != null ? <p>For {armor.strengthReq}+</p> : null}
         </div>
       }

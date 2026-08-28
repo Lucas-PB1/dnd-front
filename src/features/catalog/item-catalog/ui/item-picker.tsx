@@ -6,6 +6,7 @@ import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { ITEM_TYPE_LABELS_PT, type ItemSummary } from "@/entities/item/types";
 import { useAllItems } from "@/features/catalog/item-catalog/api/use-items";
 import { useDebouncedValue } from "@/shared/lib/use-debounced-value";
+import { toMetricProse } from "@/shared/lib/metric";
 import { cn } from "@/shared/lib/utils";
 import { Input } from "@/shared/ui/input";
 
@@ -187,7 +188,9 @@ function ItemResultRow({
   onSelect: () => void;
 }) {
   const typeLabel = ITEM_TYPE_LABELS_PT[item.itemType] ?? item.itemType;
-  const meta = [typeLabel, item.costText, item.weight].filter(Boolean).join(" · ");
+  const meta = [typeLabel, item.costText, item.weight ? toMetricProse(item.weight) : null]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
     <li role="option" aria-selected={selected}>

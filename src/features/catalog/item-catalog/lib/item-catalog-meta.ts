@@ -12,6 +12,7 @@ import {
 } from "@/features/catalog/item-catalog/lib/item-catalog-equipment-stats";
 import { weaponCategoryLabel } from "@/features/catalog/equipment-catalog/lib/weapon-labels";
 import { editionShortLabel } from "@/entities/edition/catalog-sources";
+import { toMetricProse } from "@/shared/lib/metric";
 
 export type ItemCatalogStat = { label: string; value: string };
 
@@ -219,7 +220,7 @@ export function itemCatalogMetaLine(
         ? "Consumível"
         : category ?? typeLabel,
     item.costText ?? "sem preço",
-    item.weight,
+    item.weight ? toMetricProse(item.weight) : null,
     rarityLabel,
     item.kind === "coverage" ? "cobertura" : null,
     item.kind === "service" ? "não vai à mochila" : null,
@@ -232,7 +233,7 @@ export function itemCatalogTeaser(
   item: Pick<ItemSummary, "description" | "properties">,
 ): string | null {
   const description = item.description?.trim();
-  if (description) return description;
+  if (description) return toMetricProse(description);
   const header =
     typeof item.properties?.header === "string"
       ? item.properties.header.trim()
@@ -264,7 +265,7 @@ export function itemCatalogStats(item: ItemSummary): ItemCatalogStat[] {
   if (attunement) stats.push({ label: "Sintonização", value: attunement });
   if (item.consumable) stats.push({ label: "Consumível", value: "Sim" });
   if (item.costText) stats.push({ label: "Custo", value: item.costText });
-  if (item.weight) stats.push({ label: "Peso", value: item.weight });
+  if (item.weight) stats.push({ label: "Peso", value: toMetricProse(item.weight) });
   if (appliesFilter) stats.push({ label: "Aplica em", value: appliesFilter });
 
   const attribute = props?.attribute;

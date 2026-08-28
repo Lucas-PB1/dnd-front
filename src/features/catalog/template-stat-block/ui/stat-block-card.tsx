@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { formatTemplateSpeeds } from "@/entities/creature-template/format";
+import { formatReachFromFeet, toMetricProse } from "@/shared/lib/metric";
 import {
   collectActionRollTargets,
   extractDiceExpressions,
@@ -399,34 +401,7 @@ export function StatBlockCard({
       : null;
 
   const speedText =
-    speeds.length > 0
-      ? speeds
-          .map((s) => {
-            if (s.movementKind === "mph") {
-              const mph = s.speedFt / 10;
-              return `${mph} mph`;
-            }
-            if (["walk", "fly", "swim", "vela", "remo", "burrow", "climb"].includes(s.movementKind)) {
-              const suffix =
-                s.movementKind === "vela"
-                  ? " vela"
-                  : s.movementKind === "remo"
-                    ? " remo"
-                    : s.movementKind === "fly"
-                      ? " voo"
-                      : s.movementKind === "climb"
-                        ? " escalada"
-                        : s.movementKind === "burrow"
-                          ? " escavação"
-                          : s.movementKind === "swim"
-                            ? " natação"
-                            : "";
-              return `${s.speedFt} pés${suffix}`;
-            }
-            return `${s.speedFt} pés (${s.movementKind})`;
-          })
-          .join(", ")
-      : null;
+    speeds.length > 0 ? formatTemplateSpeeds(speeds) : null;
 
   const actionGroups = orderedActionGroups(actions);
   const turnRules = traits.find((t) => t.name === "Regras de turno");
@@ -443,7 +418,9 @@ export function StatBlockCard({
               {name}
             </h2>
             {subtitle ? (
-              <p className="mt-1 text-sm italic text-muted-foreground">{subtitle}</p>
+              <p className="mt-1 text-sm italic text-muted-foreground">
+                {toMetricProse(subtitle)}
+              </p>
             ) : null}
           </div>
           {enableRolls ? (
@@ -500,7 +477,7 @@ export function StatBlockCard({
               value={[
                 String(crewCapacity),
                 passengerCapacity != null ? `Passageiros ${passengerCapacity}` : null,
-                cargoCapacityLabel ?? null,
+                cargoCapacityLabel ? toMetricProse(cargoCapacityLabel) : null,
               ]
                 .filter(Boolean)
                 .join(" · ")}
@@ -523,7 +500,9 @@ export function StatBlockCard({
             <div key={`${trait.name}-${trait.sortOrder ?? 0}`}>
               <p className="text-sm leading-relaxed">
                 <span className="font-semibold italic">{trait.name}.</span>{" "}
-                <span className="text-muted-foreground">{trait.description}</span>
+                <span className="text-muted-foreground">
+                  {toMetricProse(trait.description)}
+                </span>
               </p>
               {enableRolls ? (
                 <TraitRollChips
@@ -550,7 +529,7 @@ export function StatBlockCard({
         <section className="space-y-4 p-4">
           {turnRules ? (
             <p className="text-sm leading-relaxed text-muted-foreground">
-              {turnRules.description}
+              {toMetricProse(turnRules.description)}
             </p>
           ) : null}
           {actionGroups.map(([bucket, bucketActions]) => {
@@ -569,7 +548,7 @@ export function StatBlockCard({
                     <span className="font-semibold text-foreground">
                       {legendarySplit.usesAction.name}.
                     </span>{" "}
-                    {legendarySplit.usesAction.description}
+                    {toMetricProse(legendarySplit.usesAction.description)}
                   </p>
                 ) : null}
                 <ul className="space-y-3">
@@ -581,19 +560,20 @@ export function StatBlockCard({
                       >
                         <p className="font-semibold italic">{action.name}.</p>
                         <p className="text-muted-foreground">
-                          {action.description ??
-                            [
-                              action.attackBonus != null
-                                ? `+${action.attackBonus} ataque`
-                                : null,
-                              action.damageExpression,
-                              action.reachFt != null
-                                ? `alcance ${action.reachFt} pés`
-                                : null,
-                            ]
-                              .filter(Boolean)
-                              .join(" · ") ??
-                            "—"}
+                          {action.description
+                            ? toMetricProse(action.description)
+                            : ([
+                                action.attackBonus != null
+                                  ? `+${action.attackBonus} ataque`
+                                  : null,
+                                action.damageExpression,
+                                action.reachFt != null
+                                  ? formatReachFromFeet(action.reachFt)
+                                  : null,
+                              ]
+                                .filter(Boolean)
+                                .join(" · ") ||
+                              "—")}
                         </p>
                         {enableRolls ? (
                           <ActionRollChips

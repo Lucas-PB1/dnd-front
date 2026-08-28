@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import { parsePhbText } from "@/shared/lib/parse-phb-text";
+import { toMetricProse } from "@/shared/lib/metric";
 import {
   segmentCatalogText,
   type CatalogLinkEntry,
@@ -27,7 +28,7 @@ export function PhbProse({
   currentSlug,
   returnTo,
 }: PhbProseProps) {
-  const blocks = parsePhbText(text);
+  const blocks = parsePhbText(toMetricProse(text));
 
   if (!blocks.length) return null;
 

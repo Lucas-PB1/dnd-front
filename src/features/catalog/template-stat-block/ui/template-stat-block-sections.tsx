@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { TemplateAction } from "@/entities/creature-template/types";
 import { formatTemplateSpeeds } from "@/entities/creature-template/format";
+import { formatReachFromFeet } from "@/shared/lib/metric";
 import { CollapsibleCard } from "@/shared/ui/collapsible-card";
 import { PhbProse } from "@/shared/ui/phb-prose";
 
@@ -32,7 +33,9 @@ export function TemplateActionsList({ actions }: { actions: TemplateAction[] }) 
                   ? `+${action.attackBonus} ataque`
                   : null,
                 action.damageExpression,
-                action.reachFt != null ? `alcance ${action.reachFt} pés` : null,
+                action.reachFt != null
+                  ? formatReachFromFeet(action.reachFt)
+                  : null,
               ]
                 .filter(Boolean)
                 .join(" · ") || "—"}

@@ -6,6 +6,7 @@ import {
   weaponCostText,
   weaponWeightText,
 } from "@/features/catalog/equipment-catalog/lib/weapon-labels";
+import { toMetricProse } from "@/shared/lib/metric";
 
 export type ItemCatalogTraitLine = {
   title: string;
@@ -66,7 +67,7 @@ export function armorEquipmentStats(armor: ArmorSummary): ItemCatalogStat[] {
   if (ac) stats.push({ label: "CA", value: ac });
 
   if (armor.costText) stats.push({ label: "Custo", value: armor.costText });
-  if (armor.weight) stats.push({ label: "Peso", value: armor.weight });
+  if (armor.weight) stats.push({ label: "Peso", value: toMetricProse(armor.weight) });
 
   if (armor.strengthReq != null) {
     stats.push({ label: "Força mín.", value: `${armor.strengthReq}+` });
@@ -205,9 +206,11 @@ export function resolveCatalogWeightText(
   },
 ): string | null {
   const weight = item.weight?.trim();
-  if (weight && !/^[—–−-]+$/.test(weight)) return weight;
+  if (weight && !/^[—–−-]+$/.test(weight)) return toMetricProse(weight);
   const armorWeight = equipment?.armor?.weight?.trim();
-  if (armorWeight && !/^[—–−-]+$/.test(armorWeight)) return armorWeight;
+  if (armorWeight && !/^[—–−-]+$/.test(armorWeight)) {
+    return toMetricProse(armorWeight);
+  }
   if (equipment?.weapon) return weaponWeightText(equipment.weapon);
   return null;
 }

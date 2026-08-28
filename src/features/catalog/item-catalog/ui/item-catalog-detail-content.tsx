@@ -14,6 +14,7 @@ import {
 } from "@/features/catalog/item-catalog/lib/item-catalog-meta";
 import { PhbProse } from "@/shared/ui/phb-prose";
 import { cn } from "@/shared/lib/utils";
+import { toMetricProse } from "@/shared/lib/metric";
 
 type ItemCatalogDetailContentProps = {
   item: ItemSummary;
@@ -77,7 +78,7 @@ export function ItemCatalogDetailContent({
           className,
         )}
       >
-        {teaser}
+        {toMetricProse(teaser)}
       </p>
     );
   }

@@ -15,6 +15,7 @@ import { useAbilityLabels } from "@/features/catalog/reference-catalog/api/use-a
 import { Button } from "@/shared/ui/button";
 import { PhbProse } from "@/shared/ui/phb-prose";
 import { SearchableSelect } from "@/shared/ui/searchable-select";
+import { toMetricProse } from "@/shared/lib/metric";
 import { cn } from "@/shared/lib/utils";
 
 export const SPELL_SLOT_LEVELS = [
@@ -325,7 +326,9 @@ export function BeyondSpellRow({
             <div className="space-y-2">
               <p className="text-xs text-muted-foreground">
                 {[
-                  row.detail.range ? `Alcance ${row.detail.range}` : null,
+                  row.detail.range
+                    ? `Alcance ${toMetricProse(row.detail.range)}`
+                    : null,
                   row.detail.duration ? `Duração ${row.detail.duration}` : null,
                   row.detail.componentsLabel,
                 ]

@@ -1,22 +1,30 @@
-/** mph armazenado como speed_ft × 10 quando movement_kind é vela|remo|ar */
-const VEHICLE_SPEED_KINDS = new Set(['vela', 'remo', 'ar']);
+import {
+  formatKmhFromMph,
+  formatMetersFromFeet,
+} from "@/shared/lib/metric";
 
-const VEHICLE_SPEED_LABEL: Record<string, string> = {
-  vela: 'vela',
-  remo: 'remo',
-  ar: 'ar',
+/** mph armazenado como speed_ft × 10 quando movement_kind é vela|remo|ar|mph */
+const TRAVEL_SPEED_KINDS = new Set(["vela", "remo", "ar", "mph"]);
+
+const SPEED_KIND_LABEL: Record<string, string> = {
+  vela: "vela",
+  remo: "remo",
+  ar: "ar",
+  fly: "voo",
+  swim: "natação",
+  climb: "escalada",
+  burrow: "escavação",
 };
 
 function formatSpeedEntry(speed: {
   movementKind: string;
   speedFt: number;
 }): string {
-  if (VEHICLE_SPEED_KINDS.has(speed.movementKind)) {
-    const mph = speed.speedFt / 10;
-    const mphText = Number.isInteger(mph) ? String(mph) : mph.toFixed(1);
-    return `${mphText} mph (${VEHICLE_SPEED_LABEL[speed.movementKind]})`;
-  }
-  return `${speed.speedFt} pés (${speed.movementKind})`;
+  const value = TRAVEL_SPEED_KINDS.has(speed.movementKind)
+    ? formatKmhFromMph(speed.speedFt / 10)
+    : formatMetersFromFeet(speed.speedFt);
+  const kindLabel = SPEED_KIND_LABEL[speed.movementKind];
+  return kindLabel ? `${value} (${kindLabel})` : value;
 }
 
 export function formatTemplateSpeeds(

@@ -3,6 +3,7 @@ import { ITEM_TYPE_LABELS_PT } from "@/entities/item/types";
 import { editionShortLabel } from "@/entities/edition/catalog-sources";
 import { withCatalogReturn } from "@/shared/lib/catalog-return";
 import { stripCatalogWikiLinks } from "@/shared/lib/strip-catalog-wiki-links";
+import { toMetricProse } from "@/shared/lib/metric";
 import { CatalogListCard } from "@/shared/ui/catalog-list-card";
 
 type GearItemCardProps = {
@@ -47,13 +48,15 @@ export function GearItemCard({ item, listPath, className }: GearItemCardProps) {
       title={item.name}
       eyebrow={eyebrowParts.join(" · ")}
       teaser={
-        item.description ? stripCatalogWikiLinks(item.description) : null
+        item.description
+          ? toMetricProse(stripCatalogWikiLinks(item.description))
+          : null
       }
       aside={
         <div className="shrink-0 space-y-0.5 text-xs text-muted-foreground sm:max-w-40 sm:text-right">
           {requiresAttunement ? <p>Sintonização</p> : null}
           {item.costText ? <p>{item.costText}</p> : null}
-          {item.weight ? <p>{item.weight}</p> : null}
+          {item.weight ? <p>{toMetricProse(item.weight)}</p> : null}
         </div>
       }
       className={className}
