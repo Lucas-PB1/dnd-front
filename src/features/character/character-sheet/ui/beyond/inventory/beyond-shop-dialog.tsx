@@ -64,6 +64,7 @@ type BeyondShopDialogProps = {
   wealth: CoinPurse | undefined;
   inventoryItems: InventoryItem[];
   pending: boolean;
+  checkoutError?: Error | null;
   onCheckout: (input: {
     lines: BeyondShopCartLine[];
     pay: boolean;
@@ -80,6 +81,7 @@ export function BeyondShopDialog({
   wealth,
   inventoryItems,
   pending,
+  checkoutError = null,
   onCheckout,
 }: BeyondShopDialogProps) {
   const [search, setSearch] = useState("");
@@ -260,7 +262,7 @@ export function BeyondShopDialog({
     if (cart.length === 0 || insufficient) return;
     await onCheckout({
       lines: cart,
-      pay: chargeApplies ? !skipPayment : true,
+      pay: chargeApplies ? !skipPayment : false,
     });
     handleOpenChange(false);
   }
@@ -334,6 +336,12 @@ export function BeyondShopDialog({
             <div className="min-h-0 flex-1 overflow-y-auto rounded-md border border-border/70">
               {itemsQuery.isPending ? (
                 <p className="p-3 text-xs text-muted-foreground">Carregando…</p>
+              ) : itemsQuery.isError ? (
+                <p className="p-3 text-xs text-destructive" role="alert">
+                  {itemsQuery.error instanceof Error
+                    ? itemsQuery.error.message
+                    : "Não foi possível carregar o catálogo de itens."}
+                </p>
               ) : items.length === 0 ? (
                 <p className="p-3 text-xs text-muted-foreground">
                   Nenhum resultado
@@ -455,8 +463,16 @@ export function BeyondShopDialog({
                     : "grátis"}
               </p>
               {insufficient ? (
-                <p className="text-[11px] text-destructive">
+                <p className="text-[11px] text-destructive" role="alert">
                   Saldo insuficiente
+                  {canSkipPayment
+                    ? " — marque “Não pagar” se a campanha permitir."
+                    : " — ajuste o saldo ou peça ao DM."}
+                </p>
+              ) : null}
+              {checkoutError ? (
+                <p className="text-[11px] text-destructive" role="alert">
+                  {checkoutError.message}
                 </p>
               ) : null}
             </div>

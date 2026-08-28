@@ -253,7 +253,10 @@ export function BeyondInventoryTab({
             size="xs"
             variant="outline"
             className="gap-1"
-            onClick={() => setShopOpen(true)}
+            onClick={() => {
+              purchase.reset();
+              setShopOpen(true);
+            }}
           >
             <PlusIcon className="size-3.5" aria-hidden />
             {chargeApplies ? "Comprar" : "Adicionar"}
@@ -346,6 +349,7 @@ export function BeyondInventoryTab({
         wealth={wealth}
         inventoryItems={items}
         pending={purchase.isPending}
+        checkoutError={purchase.error instanceof Error ? purchase.error : null}
         onCheckout={handleCheckout}
       />
 
