@@ -5,6 +5,7 @@
 
 const SIMPLE_PROFICIENCY = "armas-simples";
 const MARTIAL_PROFICIENCY = "armas-marciais";
+const ADVANCED_PROFICIENCY = "armas-avancadas";
 const MARTIAL_LIGHT_PROFICIENCY = "armas-marciais-leves";
 const MARTIAL_RANGED_PROFICIENCY = "armas-marciais-a-distancia";
 
@@ -54,6 +55,9 @@ export function isWeaponProficient(
     ) {
       return true;
     }
+  }
+  if (piece.category === "advanced") {
+    return weaponProficiencySlugs.includes(ADVANCED_PROFICIENCY);
   }
   return false;
 }

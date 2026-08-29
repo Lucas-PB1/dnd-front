@@ -7,6 +7,10 @@ export const VALDAS_EDITION_SLUG = "valdas-spire-2024-en";
 export const DMG_EDITION_SLUG = "dmg-2024-pt";
 export const STEINHARDT_EDITION_SLUG = "steinhardt-eldritch-hunt-2024-en";
 export const NORTHLANDS_EDITION_SLUG = "northlands-heroes-2024-en";
+export const GRIFFONS_SADDLEBAG_EDITION_SLUG =
+  "griffons-saddlebag-book-one-2024-en";
+export const GRIM_HOLLOW_EDITION_SLUG =
+  "grim-hollow-players-guide-2024-en";
 
 const LEGACY_VALDA_EDITION_SLUG = "valda-spire-2024-en";
 
@@ -26,6 +30,19 @@ function isNorthlandsEditionSlug(slug: string): boolean {
   );
 }
 
+function isGriffonsSaddlebagEditionSlug(slug: string): boolean {
+  return (
+    slug === GRIFFONS_SADDLEBAG_EDITION_SLUG ||
+    slug.startsWith("griffons-saddlebag-")
+  );
+}
+
+function isGrimHollowEditionSlug(slug: string): boolean {
+  return (
+    slug === GRIM_HOLLOW_EDITION_SLUG || slug.startsWith("grim-hollow-")
+  );
+}
+
 /** Rótulo curto na UI (badge / menu). */
 export function editionShortLabel(slug: string | null | undefined): string {
   if (!slug) return "PHB";
@@ -34,6 +51,8 @@ export function editionShortLabel(slug: string | null | undefined): string {
   if (slug === DMG_EDITION_SLUG || slug.startsWith("dmg-")) return "DMG";
   if (isSteinhardtEditionSlug(slug)) return "Steinhardt";
   if (isNorthlandsEditionSlug(slug)) return "Northlands";
+  if (isGriffonsSaddlebagEditionSlug(slug)) return "GSB";
+  if (isGrimHollowEditionSlug(slug)) return "GH";
   return slug;
 }
 
@@ -53,6 +72,12 @@ export function editionMenuLabel(edition: Pick<Edition, "slug" | "label" | "book
   }
   if (isNorthlandsEditionSlug(edition.slug)) {
     return "Northlands (Nórdico)";
+  }
+  if (isGriffonsSaddlebagEditionSlug(edition.slug)) {
+    return "Griffon's Saddlebag";
+  }
+  if (isGrimHollowEditionSlug(edition.slug)) {
+    return "Grim Hollow";
   }
   return edition.label || edition.book || edition.slug;
 }
