@@ -25,6 +25,7 @@ import {
   isPlainShopLine,
   shopCartLineKey,
 } from "@/features/character/character-sheet/lib/inventory/beyond-shop-cart-line";
+import { resolveCatalogImageUrl } from "@/shared/lib/resolve-catalog-image-url";
 import { resolveCoverageShopCostText } from "@/features/character/character-sheet/lib/inventory/coverage-tier-cost";
 import {
   BeyondShopFilters,
@@ -356,7 +357,7 @@ export function BeyondShopDialog({
                         <div className="flex items-start gap-2 px-3 py-2">
                           {item.imageUrl ? (
                             <img
-                              src={item.imageUrl}
+                              src={resolveCatalogImageUrl(item.imageUrl) ?? ""}
                               alt=""
                               className="mt-0.5 size-12 shrink-0 rounded-md border border-border/60 bg-muted/30 object-cover object-top"
                             />

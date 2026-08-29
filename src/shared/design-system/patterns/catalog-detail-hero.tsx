@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { resolveCatalogImageUrl } from "@/shared/lib/resolve-catalog-image-url";
 import { motion } from "@/shared/lib/motion";
 import { cn } from "@/shared/lib/utils";
 import { BackLink } from "@/shared/design-system/layout/back-link";
@@ -42,6 +43,7 @@ export function CatalogDetailHero({
   className,
 }: CatalogDetailHeroProps) {
   const hasStats = (stats?.length ?? 0) > 0;
+  const resolvedImageUrl = resolveCatalogImageUrl(imageUrl);
 
   return (
     <header
@@ -89,9 +91,9 @@ export function CatalogDetailHero({
               {summary}
             </p>
           ) : null}
-          {imageUrl ? (
+          {resolvedImageUrl ? (
             <img
-              src={imageUrl}
+              src={resolvedImageUrl}
               alt=""
               className="max-h-48 w-full max-w-xs rounded-lg border border-border/60 bg-muted/30 object-cover object-top"
             />

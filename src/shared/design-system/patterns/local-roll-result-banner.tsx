@@ -1,6 +1,7 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 
 import type { LocalRollResult } from "@/shared/lib/dice";
 import { cn } from "@/shared/lib/utils";
@@ -13,17 +14,18 @@ export function LocalRollResultBanner({
   result: LocalRollResult | null;
   onDismiss: () => void;
 }) {
-  if (!result) return null;
+  const [mounted, setMounted] = useState(false);
 
-  const faces =
-    result.kept && result.kept.length > 0
-      ? `mantido ${result.kept.join(", ")} · rolado [${result.rolls.join(", ")}]`
-      : `rolado [${result.rolls.join(", ")}]`;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-  return (
+  if (!result || !mounted) return null;
+
+  return createPortal(
     <div
       className={cn(
-        "fixed inset-x-3 bottom-3 z-50 mx-auto max-w-md rounded-xl border border-primary/40 bg-card/95 p-3 shadow-lg backdrop-blur",
+        "pointer-events-auto fixed inset-x-3 bottom-3 z-[100] mx-auto max-w-md rounded-xl border border-primary/40 bg-card/95 p-3 shadow-lg backdrop-blur",
         "sm:inset-x-auto sm:right-4 sm:left-auto sm:bottom-4",
       )}
       role="status"
@@ -44,13 +46,18 @@ export function LocalRollResultBanner({
           {result.note ? (
             <p className="mt-0.5 text-[0.7rem] text-secondary">{result.note}</p>
           ) : null}
-          <p className="mt-0.5 text-[0.7rem] text-muted-foreground/90">{faces}</p>
+          <p className="mt-0.5 text-[0.7rem] text-muted-foreground/90">
+            {result.kept && result.kept.length > 0
+              ? `mantido ${result.kept.join(", ")} · rolado [${result.rolls.join(", ")}]`
+              : `rolado [${result.rolls.join(", ")}]`}
+          </p>
         </div>
         <Button type="button" size="sm" variant="ghost" onClick={onDismiss}>
           Fechar
         </Button>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

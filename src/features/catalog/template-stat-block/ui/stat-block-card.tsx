@@ -420,6 +420,8 @@ export function StatBlockCard({
             {imageUrl ? (
               <CatalogMediaImage
                 src={imageUrl}
+                alt={name}
+                expandable
                 className="size-20 shrink-0 rounded-lg border border-border/60 bg-muted/30 object-cover object-top sm:size-24"
               />
             ) : null}

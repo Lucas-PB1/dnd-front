@@ -15,6 +15,7 @@ import {
 import { PhbProse } from "@/shared/ui/phb-prose";
 import { cn } from "@/shared/lib/utils";
 import { toMetricProse } from "@/shared/lib/metric";
+import { resolveCatalogImageUrl } from "@/shared/lib/resolve-catalog-image-url";
 
 type ItemCatalogDetailContentProps = {
   item: ItemSummary;
@@ -90,12 +91,13 @@ export function ItemCatalogDetailContent({
   ]
     .filter(Boolean)
     .join(" · ");
+  const resolvedImageUrl = resolveCatalogImageUrl(item.imageUrl);
 
   return (
     <div className={cn("space-y-4", className)}>
-      {item.imageUrl ? (
+      {resolvedImageUrl ? (
         <img
-          src={item.imageUrl}
+          src={resolvedImageUrl}
           alt=""
           className="mx-auto max-h-48 w-full max-w-xs rounded-lg border border-border/60 bg-muted/30 object-cover object-top"
         />
