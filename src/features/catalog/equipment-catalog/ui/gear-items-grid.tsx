@@ -1,17 +1,23 @@
 "use client";
 
+import { useMemo } from "react";
+
+import type { ItemSummary } from "@/entities/item/types";
 import { useGearCatalog } from "@/features/catalog/equipment-catalog/api/use-equipment";
 import { GearItemCard } from "@/features/catalog/equipment-catalog/ui/gear-item-card";
 import { ITEM_TYPE_FILTER } from "@/shared/lib/catalog-filter-options";
 import { useCatalogListState } from "@/shared/lib/use-catalog-list-state";
-import { isCatalogPageOutOfRange } from "@/shared/lib/catalog-query";
-import { useClampCatalogPage } from "@/shared/lib/use-clamp-catalog-page";
+import { paginateCatalogItems } from "@/shared/lib/catalog-pagination";
 import { CatalogFilters } from "@/shared/ui/catalog-filters";
 import { CatalogPagination } from "@/shared/ui/catalog-pagination";
 import { CatalogSearch } from "@/shared/ui/catalog-search";
 import { CatalogEmptyMessage } from "@/shared/ui/catalog-empty-message";
 import { motion } from "@/shared/lib/motion";
 import { cn } from "@/shared/lib/utils";
+
+function sortByName(a: ItemSummary, b: ItemSummary) {
+  return a.name.localeCompare(b.name, "pt");
+}
 
 export function GearItemsGrid() {
   const {
@@ -22,22 +28,25 @@ export function GearItemsGrid() {
     setPage,
     filters,
     setFilter,
-    pageWindow,
     listPath,
   } = useCatalogListState({ syncUrl: true, filterKeys: ["itemType"] });
 
   const itemType = filters.itemType ?? "";
+  const isFiltered =
+    debouncedQuery.trim().length > 0 || Boolean(itemType);
 
   const { data, isPending, isError, error, isFetching } = useGearCatalog({
-    page,
     q: debouncedQuery,
     itemType,
   });
 
-  const { total, totalPages, safePage, from, to } = pageWindow(data?.meta);
+  const items = useMemo(() => {
+    const rows = data?.data ?? [];
+    return [...rows].sort(sortByName);
+  }, [data?.data]);
 
-  const outOfRange = isCatalogPageOutOfRange(data, page, totalPages);
-  useClampCatalogPage(outOfRange, setPage);
+  const { pageItems, total, totalPages, safePage, from, to } =
+    paginateCatalogItems(items, page, isFiltered);
 
   if (isPending && !data) {
     return <p className="text-sm text-muted-foreground">Carregando itens…</p>;
@@ -66,37 +75,35 @@ export function GearItemsGrid() {
           onChange={setFilter}
         />
       </div>
-      {outOfRange ? (
-        <p className="text-sm text-muted-foreground">Ajustando página…</p>
-      ) : !data?.data.length ? (
+      {pageItems.length === 0 ? (
         <CatalogEmptyMessage
           message={
             debouncedQuery || itemType
-            ? "Nenhum item corresponde aos filtros."
-            : "Nenhum item encontrado."
+              ? "Nenhum item corresponde aos filtros."
+              : "Nenhum item encontrado."
           }
         />
       ) : (
         <>
-          <div
-            className={cn(isFetching && "opacity-70 transition-opacity")}
-          >
+          <div className={cn(isFetching && "opacity-70 transition-opacity")}>
             <ul className={cn("border-t border-border", motion.stagger)}>
-              {data.data.map((item) => (
+              {pageItems.map((item) => (
                 <li key={item.slug}>
                   <GearItemCard item={item} listPath={listPath} />
                 </li>
               ))}
             </ul>
           </div>
-          <CatalogPagination
-            page={safePage}
-            totalPages={totalPages}
-            total={total}
-            from={from}
-            to={to}
-            onPageChange={setPage}
-          />
+          {isFiltered && totalPages > 1 ? (
+            <CatalogPagination
+              page={safePage}
+              totalPages={totalPages}
+              total={total}
+              from={from}
+              to={to}
+              onPageChange={setPage}
+            />
+          ) : null}
         </>
       )}
     </div>

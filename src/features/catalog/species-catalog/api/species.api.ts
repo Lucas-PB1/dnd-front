@@ -9,18 +9,16 @@ import type { PaginatedResponse } from "@/shared/api/dnd-api/types";
 import {
   buildCatalogSearchParams,
   CATALOG_FETCH_INIT,
+  fetchAllCatalogPages,
 } from "@/shared/lib/catalog-query";
+
+const FETCH_PAGE_SIZE = 100;
 
 export const speciesKeys = {
   all: ["species"] as const,
   list: () => [...speciesKeys.all, "list"] as const,
-  listPage: (params: {
-    page: number;
-    limit: number;
-    q: string;
-    editionSlugs?: string;
-  }) => [...speciesKeys.all, "list", "page", params] as const,
-  detail: (slug: string) => [...speciesKeys.all, "detail", slug] as const,
+  detail: (slug: string, editionSlugs?: string) =>
+    [...speciesKeys.all, "detail", slug, editionSlugs ?? "all"] as const,
   traits: (slug: string) => [...speciesKeys.all, "traits", slug] as const,
   traitChoices: (slug: string, editionSlugs?: string) =>
     [...speciesKeys.all, "trait-choices", slug, editionSlugs ?? "all"] as const,
@@ -29,6 +27,7 @@ export const speciesKeys = {
 export async function fetchSpeciesPage(params?: {
   page?: number;
   limit?: number;
+  cursor?: string;
   q?: string;
   editionSlugs?: string;
   fields?: "summary";
@@ -36,6 +35,7 @@ export async function fetchSpeciesPage(params?: {
   const search = buildCatalogSearchParams({
     page: params?.page,
     limit: params?.limit ?? 50,
+    cursor: params?.cursor,
     q: params?.q,
     filters: {
       editionSlugs: params?.editionSlugs,
@@ -49,16 +49,35 @@ export async function fetchSpeciesPage(params?: {
   );
 }
 
+export async function fetchAllSpecies(params?: {
+  q?: string;
+  editionSlugs?: string;
+  fields?: "summary";
+}) {
+  return fetchAllCatalogPages<SpeciesListResponse["data"][number]>(
+    ({ page, limit, cursor }) =>
+      fetchSpeciesPage({ ...params, page, limit, cursor }),
+    FETCH_PAGE_SIZE,
+  );
+}
+
 export async function fetchSpecies(
-  limit = 50,
+  _limit = 50,
   editionSlugs?: string,
   fields?: "summary",
 ) {
-  return fetchSpeciesPage({ page: 1, limit, editionSlugs, fields });
+  return fetchAllSpecies({ editionSlugs, fields });
 }
 
-export async function fetchSpeciesBySlug(slug: string) {
-  return catalogFetch<SpeciesSummary>(`/species/${slug}`, CATALOG_FETCH_INIT);
+export async function fetchSpeciesBySlug(slug: string, editionSlugs?: string) {
+  const search = buildCatalogSearchParams({
+    filters: { editionSlugs },
+  });
+  const suffix = search ? `?${search}` : "";
+  return catalogFetch<SpeciesSummary>(
+    `/species/${slug}${suffix}`,
+    CATALOG_FETCH_INIT,
+  );
 }
 
 export async function fetchSpeciesTraits(slug: string) {

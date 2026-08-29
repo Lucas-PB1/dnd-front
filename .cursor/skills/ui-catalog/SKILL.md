@@ -9,7 +9,7 @@ disable-model-invocation: true
 
 # UI do compêndio / catálogo
 
-Componentes em `src/shared/ui/`. Dados sempre da **dnd-api** (tagline, summary, description) — não hardcodar flavor no front.
+Componentes em `src/shared/design-system/` (reexportados por `src/shared/ui/`). Dados sempre da **dnd-api** (tagline, summary, description) — não hardcodar flavor no front.
 
 ## Componentes
 
@@ -57,5 +57,5 @@ Dados de apresentação vêm da **API** — não hardcodar no front.
 
 ## Ícones / tema
 
-Heroicons outline (`@heroicons/react/24/outline`); shadcn em `src/shared/ui/` (skill global `shadcn`).  
+Heroicons outline (`@heroicons/react/24/outline`); shadcn em `src/shared/design-system/primitives/` (skill global `shadcn`).  
 Tokens visuais: [docs/COLORS.md](docs/COLORS.md).

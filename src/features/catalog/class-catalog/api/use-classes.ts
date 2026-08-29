@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import {
   classKeys,
+  fetchAllClasses,
   fetchClassBySlug,
   fetchClassEquipment,
   fetchClassFeatures,
@@ -11,8 +12,6 @@ import {
   fetchClassSpellSlots,
   fetchClassProgression,
   fetchClassSpells,
-  fetchClasses,
-  fetchClassesPage,
   fetchClassSubclasses,
   fetchSubclassMechanics,
   fetchSubclassOptions,
@@ -24,9 +23,9 @@ import {
 } from "@/features/catalog/class-catalog/api/classes.api";
 import { useCatalogSources } from "@/features/catalog/catalog-sources/model/catalog-sources-provider";
 import { CATALOG_DETAIL_STALE_MS } from "@/shared/lib/catalog-query";
+import { useCatalogCompendium } from "@/shared/lib/use-catalog-compendium";
 import {
   useCatalogDetailQuery,
-  useCatalogListQuery,
 } from "@/shared/lib/use-catalog-query";
 
 /** Listagem slim para selects do wizard (sem description). */
@@ -34,31 +33,16 @@ export function useClasses() {
   const { editionSlugsParam } = useCatalogSources();
   return useQuery({
     queryKey: [...classKeys.list(), "summary", editionSlugsParam ?? "all"],
-    queryFn: () => fetchClasses(50, editionSlugsParam, "summary"),
+    queryFn: () => fetchAllClasses({ editionSlugs: editionSlugsParam, fields: "summary" }),
     staleTime: CATALOG_DETAIL_STALE_MS,
   });
 }
 
-/** Compêndio: busca `q` na API (dataset pequeno). */
-export function useClassesCatalog(params: { page: number; q?: string }) {
-  const { editionSlugsParam } = useCatalogSources();
-  return useCatalogListQuery({
-    page: params.page,
-    filters: { q: params.q, editionSlugs: editionSlugsParam },
-    queryKey: (p) =>
-      classKeys.listPage({
-        page: p.page,
-        limit: p.limit,
-        q: p.q ?? "",
-        editionSlugs: p.editionSlugs,
-      }),
-    queryFn: (p) =>
-      fetchClassesPage({
-        page: p.page,
-        limit: p.limit,
-        q: p.q,
-        editionSlugs: p.editionSlugs,
-      }),
+export function useClassesCatalog(params?: { q?: string }) {
+  return useCatalogCompendium({
+    queryKey: classKeys.all,
+    fetchAll: fetchAllClasses,
+    q: params?.q,
   });
 }
 

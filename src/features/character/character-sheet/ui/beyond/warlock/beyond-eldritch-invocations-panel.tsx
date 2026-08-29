@@ -49,8 +49,6 @@ function BeyondEldritchInvocationsPanelInner({
   const patchCharacter = usePatchCharacter(characterId);
   const catalogQuery = useEldritchInvocations(character.level);
   const originFeatsQuery = useFeatsCatalog({
-    page: 1,
-    q: "",
     category: "origin",
   });
   const spellLabels = useSpellLabels();

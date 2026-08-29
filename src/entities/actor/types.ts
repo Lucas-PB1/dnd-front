@@ -27,6 +27,7 @@ export type ActorDetail = ActorSummary & {
   crewCapacity: number | null;
   passengerCapacity: number | null;
   cargoCapacityLb: number | null;
+  imageUrl: string | null;
   speeds: Array<{ movementKind: string; speedFt: number }>;
   actions: Array<{
     id: string;

@@ -1,13 +1,21 @@
 "use client";
 
+import { useMemo } from "react";
+
+import type { BackgroundSummary } from "@/entities/background/types";
 import { useBackgroundsCatalog } from "@/features/catalog/background-catalog/api/use-backgrounds";
 import { BackgroundCard } from "@/features/catalog/background-catalog/ui/background-card";
 import { useCatalogListState } from "@/shared/lib/use-catalog-list-state";
+import { paginateCatalogItems } from "@/shared/lib/catalog-pagination";
 import { CatalogPagination } from "@/shared/ui/catalog-pagination";
 import { CatalogSearch } from "@/shared/ui/catalog-search";
 import { CatalogEmptyMessage } from "@/shared/ui/catalog-empty-message";
 import { motion } from "@/shared/lib/motion";
 import { cn } from "@/shared/lib/utils";
+
+function sortByName(a: BackgroundSummary, b: BackgroundSummary) {
+  return a.name.localeCompare(b.name, "pt");
+}
 
 export function BackgroundsGrid() {
   const {
@@ -16,18 +24,21 @@ export function BackgroundsGrid() {
     debouncedQuery,
     page,
     setPage,
-    pageWindow,
     listPath,
   } = useCatalogListState({ syncUrl: true });
 
-  const { data, isPending, isError, error, isFetching } = useBackgroundsCatalog(
-    {
-      page,
-      q: debouncedQuery,
-    },
-  );
+  const isFiltered = debouncedQuery.trim().length > 0;
+  const { data, isPending, isError, error, isFetching } = useBackgroundsCatalog({
+    q: debouncedQuery,
+  });
 
-  const { total, totalPages, safePage, from, to } = pageWindow(data?.meta);
+  const backgrounds = useMemo(() => {
+    const rows = data?.data ?? [];
+    return [...rows].sort(sortByName);
+  }, [data?.data]);
+
+  const { pageItems, total, totalPages, safePage, from, to } =
+    paginateCatalogItems(backgrounds, page, isFiltered);
 
   if (isPending && !data) {
     return (
@@ -53,35 +64,35 @@ export function BackgroundsGrid() {
         placeholder="Buscar antecedente…"
         resultCount={total}
       />
-      {!data?.data.length ? (
+      {pageItems.length === 0 ? (
         <CatalogEmptyMessage
           message={
             debouncedQuery
-            ? "Nenhum antecedente corresponde à busca."
-            : "Nenhum antecedente encontrado."
+              ? "Nenhum antecedente corresponde à busca."
+              : "Nenhum antecedente encontrado."
           }
         />
       ) : (
         <>
-          <div
-            className={cn(isFetching && "opacity-70 transition-opacity")}
-          >
+          <div className={cn(isFetching && "opacity-70 transition-opacity")}>
             <ul className={cn("border-t border-border", motion.stagger)}>
-              {data.data.map((background) => (
+              {pageItems.map((background) => (
                 <li key={background.slug}>
                   <BackgroundCard background={background} listPath={listPath} />
                 </li>
               ))}
             </ul>
           </div>
-          <CatalogPagination
-            page={safePage}
-            totalPages={totalPages}
-            total={total}
-            from={from}
-            to={to}
-            onPageChange={setPage}
-          />
+          {isFiltered && totalPages > 1 ? (
+            <CatalogPagination
+              page={safePage}
+              totalPages={totalPages}
+              total={total}
+              from={from}
+              to={to}
+              onPageChange={setPage}
+            />
+          ) : null}
         </>
       )}
     </div>

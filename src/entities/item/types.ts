@@ -12,6 +12,7 @@ export type ItemSummary = {
   kind?: string | null;
   consumable?: boolean;
   magic?: boolean;
+  imageUrl?: string | null;
 };
 
 export type ItemListResponse = PaginatedResponse<ItemSummary>;
@@ -44,6 +45,7 @@ export const SHOP_KIND_CHIPS: Array<{
     label: "Transporte",
     kind: "mount,drawn-vehicle,large-vehicle,saddle,mount-feed,barding",
   },
+  { id: "barding", label: "Armadura de montaria", kind: "barding" },
   { id: "service", label: "Serviços", kind: "service" },
   { id: "mundane", label: "Mundano", magic: false },
   { id: "magic", label: "Mágico", magic: true },

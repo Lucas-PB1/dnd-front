@@ -10,8 +10,9 @@ src/
 ├── widgets/                # blocos compostos (header, system-status)
 ├── features/               # ações do usuário (grupos + slices)
 ├── entities/               # modelos de negócio (class, character, subclass, …)
-├── shared/                 # ui, api, lib, config
-│   ├── ui/                 # shadcn / Base UI
+├── shared/                 # api, lib, config, design system
+│   ├── design-system/      # tokens, primitives, patterns, brand, layout
+│   ├── ui/                 # reexports → design-system (compat shadcn)
 │   ├── api/
 │   │   ├── dnd-api/        # catalogFetch, gameFetch
 │   │   ├── supabase/       # browser/server clients
@@ -109,4 +110,4 @@ features/campaign/campaigns/
 
 Next.js 16 · React 19 · TanStack Query · Supabase SSR · shadcn · Tailwind 4 · Zod · RHF · **dnd-api** Nest
 
-Ver: [API-INTEGRATION.md](./API-INTEGRATION.md) · [COLORS.md](./COLORS.md) · [SUPABASE.md](./SUPABASE.md)
+Ver: [DESIGN-SYSTEM.md](./DESIGN-SYSTEM.md) · [API-INTEGRATION.md](./API-INTEGRATION.md) · [COLORS.md](./COLORS.md) · [SUPABASE.md](./SUPABASE.md)

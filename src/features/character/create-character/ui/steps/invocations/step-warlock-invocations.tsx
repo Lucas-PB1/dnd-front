@@ -30,18 +30,17 @@ export function StepWarlockInvocations({
 }: StepWarlockInvocationsProps) {
   const level = useWatch({ control, name: "level" }) ?? 1;
   const classOptions = useWatch({ control, name: "classOptions" }) ?? [];
-  const characterSpells = useWatch({ control, name: "characterSpells" }) ?? [];
-  const asiFeatSlotSlugs = useWatch({ control, name: "asiFeatSlotSlugs" }) ?? [];
+  const watchedCharacterSpells = useWatch({ control, name: "characterSpells" });
+  const watchedAsiFeatSlotSlugs = useWatch({ control, name: "asiFeatSlotSlugs" });
   const catalogQuery = useEldritchInvocations(level);
   const originFeatsQuery = useFeatsCatalog({
-    page: 1,
-    q: "",
     category: "origin",
   });
   const spellLabels = useSpellLabels();
   const selected = readEldritchInvocationPicks(classOptions);
 
   const cantripOptions = useMemo((): EldritchCantripOption[] => {
+    const characterSpells = watchedCharacterSpells ?? [];
     const nameBySlug = new Map(
       (spellLabels.data?.data ?? []).map((spell) => [spell.slug, spell.name]),
     );
@@ -59,7 +58,7 @@ export function StepWarlockInvocations({
       });
     }
     return options;
-  }, [characterSpells, spellLabels.data]);
+  }, [watchedCharacterSpells, spellLabels.data]);
 
   const originFeatOptions = useMemo((): EldritchOriginFeatOption[] => {
     return (originFeatsQuery.data?.data ?? []).map((feat) => ({
@@ -69,6 +68,7 @@ export function StepWarlockInvocations({
   }, [originFeatsQuery.data]);
 
   const occupiedOriginFeatSlugs = useMemo(() => {
+    const asiFeatSlotSlugs = watchedAsiFeatSlotSlugs ?? [];
     const lessonsFeats = new Set(
       selected
         .filter((pick) => isLessonsOfTheFirstOnesSlug(pick.slug))
@@ -80,7 +80,7 @@ export function StepWarlockInvocations({
         (slug): slug is string => Boolean(slug) && !lessonsFeats.has(slug),
       ),
     );
-  }, [asiFeatSlotSlugs, selected]);
+  }, [watchedAsiFeatSlotSlugs, selected]);
 
   return (
     <WizardFormSection

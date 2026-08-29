@@ -1,15 +1,21 @@
 "use client";
 
+import { useMemo } from "react";
+
+import type { ClassSummary } from "@/entities/class/types";
 import { useClassesCatalog } from "@/features/catalog/class-catalog/api/use-classes";
 import { ClassCard } from "@/features/catalog/class-catalog/ui/class-card";
 import { useCatalogListState } from "@/shared/lib/use-catalog-list-state";
-import { isCatalogPageOutOfRange } from "@/shared/lib/catalog-query";
-import { useClampCatalogPage } from "@/shared/lib/use-clamp-catalog-page";
+import { paginateCatalogItems } from "@/shared/lib/catalog-pagination";
 import { CatalogPagination } from "@/shared/ui/catalog-pagination";
 import { CatalogSearch } from "@/shared/ui/catalog-search";
 import { CatalogEmptyMessage } from "@/shared/ui/catalog-empty-message";
 import { motion } from "@/shared/lib/motion";
 import { cn } from "@/shared/lib/utils";
+
+function sortByName(a: ClassSummary, b: ClassSummary) {
+  return a.name.localeCompare(b.name, "pt");
+}
 
 export function ClassesGrid() {
   const {
@@ -18,19 +24,21 @@ export function ClassesGrid() {
     debouncedQuery,
     page,
     setPage,
-    pageWindow,
     listPath,
   } = useCatalogListState({ syncUrl: true });
 
+  const isFiltered = debouncedQuery.trim().length > 0;
   const { data, isPending, isError, error, isFetching } = useClassesCatalog({
-    page,
     q: debouncedQuery,
   });
 
-  const { total, totalPages, safePage, from, to } = pageWindow(data?.meta);
+  const classes = useMemo(() => {
+    const rows = data?.data ?? [];
+    return [...rows].sort(sortByName);
+  }, [data?.data]);
 
-  const outOfRange = isCatalogPageOutOfRange(data, page, totalPages);
-  useClampCatalogPage(outOfRange, setPage);
+  const { pageItems, total, totalPages, safePage, from, to } =
+    paginateCatalogItems(classes, page, isFiltered);
 
   if (isPending && !data) {
     return <p className="text-sm text-muted-foreground">Carregando classes…</p>;
@@ -52,14 +60,12 @@ export function ClassesGrid() {
         placeholder="Buscar classe…"
         resultCount={total}
       />
-      {outOfRange ? (
-        <p className="text-sm text-muted-foreground">Ajustando página…</p>
-      ) : !data?.data.length ? (
+      {pageItems.length === 0 ? (
         <CatalogEmptyMessage
           message={
             debouncedQuery
-            ? "Nenhuma classe corresponde à busca."
-            : "Nenhuma classe encontrada."
+              ? "Nenhuma classe corresponde à busca."
+              : "Nenhuma classe encontrada."
           }
         />
       ) : (
@@ -71,7 +77,7 @@ export function ClassesGrid() {
               isFetching && "opacity-70 transition-opacity",
             )}
           >
-            {data.data.map((classItem) => (
+            {pageItems.map((classItem) => (
               <ClassCard
                 key={classItem.slug}
                 classItem={classItem}
@@ -79,14 +85,16 @@ export function ClassesGrid() {
               />
             ))}
           </div>
-          <CatalogPagination
-            page={safePage}
-            totalPages={totalPages}
-            total={total}
-            from={from}
-            to={to}
-            onPageChange={setPage}
-          />
+          {isFiltered && totalPages > 1 ? (
+            <CatalogPagination
+              page={safePage}
+              totalPages={totalPages}
+              total={total}
+              from={from}
+              to={to}
+              onPageChange={setPage}
+            />
+          ) : null}
         </>
       )}
     </div>

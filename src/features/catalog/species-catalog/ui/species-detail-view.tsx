@@ -9,7 +9,6 @@ import type {
   SpeciesTraitChoice,
 } from "@/entities/species/types";
 import {
-  useSpecies,
   useSpeciesDetail,
   useSpeciesTraitChoices,
   useSpeciesTraits,
@@ -33,26 +32,13 @@ function SpeciesHero({
   species: SpeciesSummary;
   backHref: string;
 }) {
-  const speciesList = useSpecies();
-  const variantBaseName = useMemo(() => {
-    if (!species.variantOf) return null;
-    return (
-      speciesList.data?.data.find((s) => s.slug === species.variantOf)?.name ??
-      species.variantOf
-    );
-  }, [species.variantOf, speciesList.data?.data]);
-
   const stats = [
     { label: "Tipo", value: species.creatureType },
     { label: "Tamanho", value: shortSpeciesSize(species.size) },
     { label: "Deslocamento", value: species.speed },
   ];
 
-  const variantHint = species.variantOf
-    ? `Variante de ${variantBaseName}`
-    : null;
-  const eyebrow =
-    [species.tagline, variantHint].filter(Boolean).join(" · ") || null;
+  const eyebrow = species.tagline || null;
 
   return (
     <CatalogDetailHero
@@ -203,7 +189,9 @@ function SpeciesDetailBody({ slug }: SpeciesDetailViewProps) {
             Traços
           </h2>
           <p className="text-sm text-muted-foreground">
-            Abra cada card para ler o texto do PHB.
+            Traços fixos e escolhas (linhagem, herança dracônica, variantes
+            culturais, etc.) — abra cada card para ver o texto completo e as
+            opções.
           </p>
         </div>
 

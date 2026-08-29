@@ -6,16 +6,11 @@ import type {
 import {
   buildCatalogSearchParams,
   CATALOG_FETCH_INIT,
+  fetchAllCatalogPages,
 } from "@/shared/lib/catalog-query";
 
 export const creatureTemplateKeys = {
   all: ["creature-templates"] as const,
-  listPage: (params: {
-    page: number;
-    limit: number;
-    q: string;
-    editionSlugs?: string;
-  }) => [...creatureTemplateKeys.all, "list", "page", params] as const,
   detail: (slug: string) =>
     [...creatureTemplateKeys.all, "detail", slug] as const,
 };
@@ -23,6 +18,7 @@ export const creatureTemplateKeys = {
 export async function fetchCreatureTemplatesPage(params?: {
   page?: number;
   limit?: number;
+  cursor?: string;
   q?: string;
   editionSlugs?: string;
   fields?: "summary";
@@ -30,6 +26,7 @@ export async function fetchCreatureTemplatesPage(params?: {
   const search = buildCatalogSearchParams({
     page: params?.page,
     limit: params?.limit ?? 50,
+    cursor: params?.cursor,
     q: params?.q,
     filters: {
       editionSlugs: params?.editionSlugs,
@@ -40,6 +37,25 @@ export async function fetchCreatureTemplatesPage(params?: {
   return catalogFetch<CreatureTemplateListResponse>(
     `/creature-templates?${search}`,
     CATALOG_FETCH_INIT,
+  );
+}
+
+/** Compêndio — percorre cursor até carregar todas as criaturas (catálogo pequeno). */
+export async function fetchAllCreatureTemplates(params?: {
+  q?: string;
+  editionSlugs?: string;
+}) {
+  return fetchAllCatalogPages<CreatureTemplateListResponse["data"][number]>(
+    (page) =>
+      fetchCreatureTemplatesPage({
+        page: page.page,
+        limit: page.limit,
+        cursor: page.cursor,
+        q: params?.q,
+        editionSlugs: params?.editionSlugs,
+        fields: "summary",
+      }),
+    100,
   );
 }
 

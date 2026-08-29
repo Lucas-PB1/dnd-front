@@ -10,8 +10,6 @@ export type SpeciesSummary = {
   speed: string;
   description: string;
   editionSlug?: string | null;
-  /** Espécie-base quando esta linha é variante cultural (ex.: baugsmidr-dwarf → dwarf). */
-  variantOf?: string | null;
 };
 
 export type SpeciesListResponse = PaginatedResponse<SpeciesSummary>;

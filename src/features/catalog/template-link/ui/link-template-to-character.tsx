@@ -19,6 +19,7 @@ import {
 } from "@/features/catalog/creature-template-catalog/api/creature-templates.api";
 import { useAuth } from "@/features/auth/model";
 import { Button, buttonVariants } from "@/shared/ui/button";
+import { NativeSelect } from "@/shared/ui/native-select";
 import { cn } from "@/shared/lib/utils";
 
 type LinkTemplateToCharacterProps = {
@@ -135,8 +136,7 @@ export function LinkTemplateToCharacter({
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
             <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
               <span className="text-muted-foreground">Personagem</span>
-              <select
-                className="rounded-md border border-border bg-background px-2 py-2"
+              <NativeSelect
                 value={characterId}
                 onChange={(event) => setCharacterId(event.target.value)}
               >
@@ -146,7 +146,7 @@ export function LinkTemplateToCharacter({
                     {character.name}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </label>
             <Button
               type="button"

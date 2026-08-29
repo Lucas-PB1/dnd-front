@@ -13,6 +13,7 @@ import type { CharacterState } from "@/entities/character/session-types";
 import type { SpellSummary } from "@/entities/spell/types";
 import { useAbilityLabels } from "@/features/catalog/reference-catalog/api/use-ability-labels";
 import { Button } from "@/shared/ui/button";
+import { Badge } from "@/shared/ui/badge";
 import { PhbProse } from "@/shared/ui/phb-prose";
 import { SearchableSelect } from "@/shared/ui/searchable-select";
 import { toMetricProse } from "@/shared/lib/metric";
@@ -203,46 +204,54 @@ export function BeyondSpellRow({
                 {row.name}
               </span>
               {row.detail?.concentration ? (
-                <span
-                  className="rounded border border-primary/40 px-1 py-px text-[0.6rem] font-semibold tracking-wide text-primary uppercase"
+                <Badge
+                  variant="primary"
+                  size="sm"
+                  className="px-1 py-px text-[0.6rem] tracking-wide uppercase"
                   title="Concentração"
                 >
                   C
-                </span>
+                </Badge>
               ) : null}
               {row.detail?.ritual ? (
-                <span
-                  className="rounded border border-border px-1 py-px text-[0.6rem] font-semibold tracking-wide text-muted-foreground uppercase"
+                <Badge
+                  variant="outline"
+                  size="sm"
+                  className="px-1 py-px text-[0.6rem] tracking-wide uppercase"
                   title="Ritual"
                 >
                   R
-                </span>
+                </Badge>
               ) : null}
               {isSpellMastery ? (
-                <span
-                  className="rounded border border-secondary/40 bg-secondary/10 px-1.5 py-px text-[0.6rem] font-semibold tracking-wide text-secondary uppercase"
+                <Badge
+                  variant="secondary"
+                  size="sm"
+                  className="tracking-wide uppercase"
                   title="Conjura sem gastar espaço de magia"
                 >
                   À vontade
-                </span>
+                </Badge>
               ) : null}
               {canOncePerFreeCast ? (
-                <span
-                  className="rounded border border-secondary/40 bg-secondary/10 px-1.5 py-px text-[0.6rem] font-semibold tracking-wide text-secondary uppercase"
+                <Badge
+                  variant="secondary"
+                  size="sm"
+                  className="tracking-wide uppercase"
                   title="1 uso gratuito por Descanso Longo"
                 >
                   1×/DL
-                </span>
+                </Badge>
               ) : null}
               {saveBadge ? (
-                <span className="rounded border border-secondary/40 bg-secondary/10 px-1.5 py-px font-mono text-[0.65rem] tabular-nums text-secondary">
+                <Badge variant="secondary" size="xs">
                   {saveBadge}
-                </span>
+                </Badge>
               ) : null}
               {attackBadge ? (
-                <span className="rounded border border-primary/35 bg-primary/8 px-1.5 py-px font-mono text-[0.65rem] tabular-nums text-primary">
+                <Badge variant="primary" size="xs">
                   {attackBadge}
-                </span>
+                </Badge>
               ) : null}
             </span>
             {metaParts.length > 0 ? (

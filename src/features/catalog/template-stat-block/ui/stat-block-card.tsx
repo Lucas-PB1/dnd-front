@@ -17,6 +17,7 @@ import {
   RollChip,
   RollModeToolbar,
 } from "@/shared/ui/local-roll-result-banner";
+import { CatalogMediaImage } from "@/shared/ui/catalog-media-image";
 
 type AbilityScores = Record<string, number>;
 
@@ -45,6 +46,7 @@ export type StatBlockSpeed = {
 export type StatBlockCardProps = {
   name: string;
   subtitle?: string | null;
+  imageUrl?: string | null;
   variant?: "creature" | "vehicle";
   armorClass?: number | null;
   initiativeModifier?: number | null;
@@ -359,6 +361,7 @@ function TraitRollChips({
 export function StatBlockCard({
   name,
   subtitle,
+  imageUrl,
   variant = "creature",
   armorClass,
   initiativeModifier,
@@ -413,15 +416,23 @@ export function StatBlockCard({
     >
       <header className={`border-b px-4 py-3 ${borderColor}`}>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div className="min-w-0">
-            <h2 className={`font-heading text-xl font-bold tracking-wide uppercase ${titleColor}`}>
-              {name}
-            </h2>
-            {subtitle ? (
-              <p className="mt-1 text-sm italic text-muted-foreground">
-                {toMetricProse(subtitle)}
-              </p>
+          <div className="flex min-w-0 flex-1 gap-3">
+            {imageUrl ? (
+              <CatalogMediaImage
+                src={imageUrl}
+                className="size-20 shrink-0 rounded-lg border border-border/60 bg-muted/30 object-cover object-top sm:size-24"
+              />
             ) : null}
+            <div className="min-w-0">
+              <h2 className={`font-heading text-xl font-bold tracking-wide uppercase ${titleColor}`}>
+                {name}
+              </h2>
+              {subtitle ? (
+                <p className="mt-1 text-sm italic text-muted-foreground">
+                  {toMetricProse(subtitle)}
+                </p>
+              ) : null}
+            </div>
           </div>
           {enableRolls ? (
             <RollModeToolbar

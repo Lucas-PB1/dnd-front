@@ -76,7 +76,7 @@ export function CombatWarlockPanel({
   const inventory = useCharacterInventory(characterId);
   const weaponsCatalog = useQuery({
     queryKey: ["weapons", "all-pact-blade"],
-    queryFn: fetchAllWeapons,
+    queryFn: () => fetchAllWeapons(),
     staleTime: 60_000,
   });
   const knownPicks = readEldritchInvocationPicks(classOptions);

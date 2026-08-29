@@ -1,3 +1,5 @@
+import type { PaginatedResponse } from "@/shared/api/dnd-api/types";
+
 export type TemplateSpeed = {
   movementKind: string;
   speedFt: number;
@@ -23,6 +25,7 @@ export type CreatureTemplateSummary = {
   challengeRating: string | null;
   armorClass: number | null;
   hitPointsAvg: number | null;
+  imageUrl: string | null;
 };
 
 export type CreatureTemplateSpell = {
@@ -57,11 +60,4 @@ export type CreatureTemplateDetail = CreatureTemplateSummary & {
   traits: CreatureTemplateTrait[];
 };
 
-export type CreatureTemplateListResponse = {
-  data: CreatureTemplateSummary[];
-  meta: {
-    cursor: string | null;
-    hasMore: boolean;
-    total?: number;
-  };
-};
+export type CreatureTemplateListResponse = PaginatedResponse<CreatureTemplateSummary>;

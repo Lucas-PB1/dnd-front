@@ -93,6 +93,13 @@ export function ItemCatalogDetailContent({
 
   return (
     <div className={cn("space-y-4", className)}>
+      {item.imageUrl ? (
+        <img
+          src={item.imageUrl}
+          alt=""
+          className="mx-auto max-h-48 w-full max-w-xs rounded-lg border border-border/60 bg-muted/30 object-cover object-top"
+        />
+      ) : null}
       {eyebrow ? (
         <p className="text-xs font-medium text-muted-foreground">{eyebrow}</p>
       ) : null}

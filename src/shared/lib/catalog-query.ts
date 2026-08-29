@@ -1,4 +1,4 @@
-import type { PaginatedMeta, PaginatedResponse } from "@/shared/api/dnd-api/types";
+import type { PaginatedResponse } from "@/shared/api/dnd-api/types";
 import { CATALOG_PAGE_SIZE } from "@/shared/lib/catalog-pagination";
 
 /** staleTime das listagens paginadas do compêndio (com placeholder). */
@@ -47,15 +47,6 @@ export function buildCatalogSearchParams(
   }
 
   return search;
-}
-
-/** Página pedida sem itens enquanto o total ainda existe (URL stale). */
-export function isCatalogPageOutOfRange(
-  data: { data: unknown[]; meta?: Pick<PaginatedMeta, "total"> } | undefined,
-  page: number,
-  totalPages: number,
-): boolean {
-  return !data?.data.length && (data?.meta?.total ?? 0) > 0 && page > totalPages;
 }
 
 /** Concatena todas as páginas de um endpoint paginado. */

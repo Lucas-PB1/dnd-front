@@ -34,7 +34,7 @@ export function LevelUpWeaponMastery({
   const classDetail = useClassDetail(character.classSlug, true);
   const weapons = useQuery({
     queryKey: weaponKeys.allMastery(),
-    queryFn: fetchAllWeapons,
+    queryFn: () => fetchAllWeapons(),
   });
 
   const eligibility = useMemo(

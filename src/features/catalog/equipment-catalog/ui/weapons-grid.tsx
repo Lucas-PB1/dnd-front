@@ -1,17 +1,23 @@
 "use client";
 
+import { useMemo } from "react";
+
+import type { WeaponSummary } from "@/entities/weapon/types";
 import { useWeaponsCatalog } from "@/features/catalog/equipment-catalog/api/use-equipment";
 import { WeaponCard } from "@/features/catalog/equipment-catalog/ui/weapon-card";
 import { WEAPON_CATEGORY_FILTER } from "@/shared/lib/catalog-filter-options";
 import { useCatalogListState } from "@/shared/lib/use-catalog-list-state";
-import { isCatalogPageOutOfRange } from "@/shared/lib/catalog-query";
-import { useClampCatalogPage } from "@/shared/lib/use-clamp-catalog-page";
+import { paginateCatalogItems } from "@/shared/lib/catalog-pagination";
 import { CatalogFilters } from "@/shared/ui/catalog-filters";
 import { CatalogPagination } from "@/shared/ui/catalog-pagination";
 import { CatalogSearch } from "@/shared/ui/catalog-search";
 import { CatalogEmptyMessage } from "@/shared/ui/catalog-empty-message";
 import { motion } from "@/shared/lib/motion";
 import { cn } from "@/shared/lib/utils";
+
+function sortByName(a: WeaponSummary, b: WeaponSummary) {
+  return a.name.localeCompare(b.name, "pt");
+}
 
 export function WeaponsGrid() {
   const {
@@ -22,22 +28,25 @@ export function WeaponsGrid() {
     setPage,
     filters,
     setFilter,
-    pageWindow,
     listPath,
   } = useCatalogListState({ syncUrl: true, filterKeys: ["category"] });
 
   const category = filters.category ?? "";
+  const isFiltered =
+    debouncedQuery.trim().length > 0 || Boolean(category);
 
   const { data, isPending, isError, error, isFetching } = useWeaponsCatalog({
-    page,
     q: debouncedQuery,
     category,
   });
 
-  const { total, totalPages, safePage, from, to } = pageWindow(data?.meta);
+  const weapons = useMemo(() => {
+    const rows = data?.data ?? [];
+    return [...rows].sort(sortByName);
+  }, [data?.data]);
 
-  const outOfRange = isCatalogPageOutOfRange(data, page, totalPages);
-  useClampCatalogPage(outOfRange, setPage);
+  const { pageItems, total, totalPages, safePage, from, to } =
+    paginateCatalogItems(weapons, page, isFiltered);
 
   if (isPending && !data) {
     return <p className="text-sm text-muted-foreground">Carregando armas…</p>;
@@ -66,37 +75,35 @@ export function WeaponsGrid() {
           onChange={setFilter}
         />
       </div>
-      {outOfRange ? (
-        <p className="text-sm text-muted-foreground">Ajustando página…</p>
-      ) : !data?.data.length ? (
+      {pageItems.length === 0 ? (
         <CatalogEmptyMessage
           message={
             debouncedQuery || category
-            ? "Nenhuma arma corresponde aos filtros."
-            : "Nenhuma arma encontrada."
+              ? "Nenhuma arma corresponde aos filtros."
+              : "Nenhuma arma encontrada."
           }
         />
       ) : (
         <>
-          <div
-            className={cn(isFetching && "opacity-70 transition-opacity")}
-          >
+          <div className={cn(isFetching && "opacity-70 transition-opacity")}>
             <ul className={cn("border-t border-border", motion.stagger)}>
-              {data.data.map((weapon) => (
+              {pageItems.map((weapon) => (
                 <li key={weapon.slug}>
                   <WeaponCard weapon={weapon} listPath={listPath} />
                 </li>
               ))}
             </ul>
           </div>
-          <CatalogPagination
-            page={safePage}
-            totalPages={totalPages}
-            total={total}
-            from={from}
-            to={to}
-            onPageChange={setPage}
-          />
+          {isFiltered && totalPages > 1 ? (
+            <CatalogPagination
+              page={safePage}
+              totalPages={totalPages}
+              total={total}
+              from={from}
+              to={to}
+              onPageChange={setPage}
+            />
+          ) : null}
         </>
       )}
     </div>

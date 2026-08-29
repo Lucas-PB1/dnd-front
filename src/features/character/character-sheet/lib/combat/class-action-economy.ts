@@ -71,6 +71,7 @@ const OPTION_KEY_TO_CHOICE_KIND: Record<string, string> = {
   naturalAdaptationId: "beastkin_adaptation",
   giantkinAncestryId: "giantkin_ancestry",
   trollkinAncestryId: "trollkin_ancestry",
+  dwarfCultureId: "dwarf_culture",
 };
 
 const ECONOMY_BUCKETS = new Set<ActionEconomyBucket>([
@@ -112,18 +113,26 @@ export function mapEconomyActionRecord(
   };
 }
 
+function choiceSlugForOptionKey(
+  optionKey: string,
+  speciesChoices: readonly { choiceKind: string; choiceSlug: string }[],
+): string | null {
+  const choiceKind =
+    OPTION_KEY_TO_CHOICE_KIND[optionKey] ?? optionKey;
+  const found = speciesChoices.find(
+    (choice) => choice.choiceKind === choiceKind,
+  )?.choiceSlug;
+  return found ?? null;
+}
+
 function matchesSpeciesOption(
   action: ClassEconomyActionRecord,
   speciesChoices: readonly { choiceKind: string; choiceSlug: string }[],
 ): boolean {
   if (!action.requiresOptionKey || !action.requiresOptionValue) return true;
-  const choiceKind =
-    OPTION_KEY_TO_CHOICE_KIND[action.requiresOptionKey] ??
-    action.requiresOptionKey;
-  return speciesChoices.some(
-    (choice) =>
-      choice.choiceKind === choiceKind &&
-      choice.choiceSlug === action.requiresOptionValue,
+  return (
+    choiceSlugForOptionKey(action.requiresOptionKey, speciesChoices) ===
+    action.requiresOptionValue
   );
 }
 

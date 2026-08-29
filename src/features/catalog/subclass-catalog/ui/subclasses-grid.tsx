@@ -2,14 +2,14 @@
 
 import { useMemo } from "react";
 
+import type { SubclassSummary } from "@/entities/subclass/types";
 import {
   useSubclassClassOptions,
   useSubclassesCatalog,
 } from "@/features/catalog/subclass-catalog/api/use-subclasses";
 import { SubclassCard } from "@/features/catalog/subclass-catalog/ui/subclass-card";
 import { useCatalogListState } from "@/shared/lib/use-catalog-list-state";
-import { isCatalogPageOutOfRange } from "@/shared/lib/catalog-query";
-import { useClampCatalogPage } from "@/shared/lib/use-clamp-catalog-page";
+import { paginateCatalogItems } from "@/shared/lib/catalog-pagination";
 import {
   CatalogFilters,
   type CatalogFilterField,
@@ -20,6 +20,10 @@ import { CatalogEmptyMessage } from "@/shared/ui/catalog-empty-message";
 import { motion } from "@/shared/lib/motion";
 import { cn } from "@/shared/lib/utils";
 
+function sortByName(a: SubclassSummary, b: SubclassSummary) {
+  return a.name.localeCompare(b.name, "pt");
+}
+
 export function SubclassesGrid() {
   const {
     query,
@@ -29,14 +33,14 @@ export function SubclassesGrid() {
     setPage,
     filters,
     setFilter,
-    pageWindow,
     listPath,
   } = useCatalogListState({ syncUrl: true, filterKeys: ["class"] });
 
   const classSlug = filters.class ?? "";
+  const isFiltered =
+    debouncedQuery.trim().length > 0 || Boolean(classSlug);
 
   const { data, isPending, isError, error, isFetching } = useSubclassesCatalog({
-    page,
     q: debouncedQuery,
     class: classSlug,
   });
@@ -56,10 +60,13 @@ export function SubclassesGrid() {
     };
   }, [classesData]);
 
-  const { total, totalPages, safePage, from, to } = pageWindow(data?.meta);
+  const subclasses = useMemo(() => {
+    const rows = data?.data ?? [];
+    return [...rows].sort(sortByName);
+  }, [data?.data]);
 
-  const outOfRange = isCatalogPageOutOfRange(data, page, totalPages);
-  useClampCatalogPage(outOfRange, setPage);
+  const { pageItems, total, totalPages, safePage, from, to } =
+    paginateCatalogItems(subclasses, page, isFiltered);
 
   if (isPending && !data) {
     return (
@@ -92,37 +99,35 @@ export function SubclassesGrid() {
           onChange={setFilter}
         />
       </div>
-      {outOfRange ? (
-        <p className="text-sm text-muted-foreground">Ajustando página…</p>
-      ) : !data?.data.length ? (
+      {pageItems.length === 0 ? (
         <CatalogEmptyMessage
           message={
             debouncedQuery || classSlug
-            ? "Nenhuma subclasse corresponde aos filtros."
-            : "Nenhuma subclasse encontrada."
+              ? "Nenhuma subclasse corresponde aos filtros."
+              : "Nenhuma subclasse encontrada."
           }
         />
       ) : (
         <>
-          <div
-            className={cn(isFetching && "opacity-70 transition-opacity")}
-          >
+          <div className={cn(isFetching && "opacity-70 transition-opacity")}>
             <ul className={cn("border-t border-border", motion.stagger)}>
-              {data.data.map((subclass) => (
+              {pageItems.map((subclass) => (
                 <li key={subclass.slug}>
                   <SubclassCard subclass={subclass} listPath={listPath} />
                 </li>
               ))}
             </ul>
           </div>
-          <CatalogPagination
-            page={safePage}
-            totalPages={totalPages}
-            total={total}
-            from={from}
-            to={to}
-            onPageChange={setPage}
-          />
+          {isFiltered && totalPages > 1 ? (
+            <CatalogPagination
+              page={safePage}
+              totalPages={totalPages}
+              total={total}
+              from={from}
+              to={to}
+              onPageChange={setPage}
+            />
+          ) : null}
         </>
       )}
     </div>

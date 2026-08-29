@@ -48,6 +48,7 @@ export function CreatureTemplateDetailView({
       <StatBlockCard
         variant="creature"
         name={template.name}
+        imageUrl={template.imageUrl}
         subtitle={
           template.subtitle ??
           [template.sizeSlug, template.creatureType, template.alignment]

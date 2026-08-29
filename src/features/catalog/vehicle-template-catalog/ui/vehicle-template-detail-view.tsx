@@ -47,6 +47,7 @@ export function VehicleTemplateDetailView({
       <StatBlockCard
         variant="vehicle"
         name={template.name}
+        imageUrl={template.imageUrl}
         subtitle={template.subtitle}
         armorClass={template.armorClass}
         initiativeModifier={template.initiativeModifier}

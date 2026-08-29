@@ -67,7 +67,7 @@ export function useStepClassSkills(
   const progression = useClassProgression(classSlug, !!classSlug);
   const weapons = useQuery({
     queryKey: weaponKeys.allMastery(),
-    queryFn: fetchAllWeapons,
+    queryFn: () => fetchAllWeapons(),
     enabled: !!classSlug,
   });
   const backgroundSkills = useBackgroundSkills(

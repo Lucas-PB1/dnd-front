@@ -18,12 +18,6 @@ import { CATALOG_PAGE_SIZE } from "@/shared/lib/catalog-pagination";
 export const backgroundKeys = {
   all: ["backgrounds"] as const,
   listAll: () => [...backgroundKeys.all, "list", "all"] as const,
-  listPage: (params: {
-    page: number;
-    limit: number;
-    q: string;
-    editionSlugs?: string;
-  }) => [...backgroundKeys.all, "list", "page", params] as const,
   detail: (slug: string) => [...backgroundKeys.all, "detail", slug] as const,
   equipment: (slug: string) =>
     [...backgroundKeys.all, "equipment", slug] as const,
@@ -36,6 +30,7 @@ export const backgroundKeys = {
 export async function fetchBackgroundsPage(params?: {
   page?: number;
   limit?: number;
+  cursor?: string;
   q?: string;
   editionSlugs?: string;
   fields?: "summary";
@@ -43,6 +38,7 @@ export async function fetchBackgroundsPage(params?: {
   const search = buildCatalogSearchParams({
     page: params?.page,
     limit: params?.limit ?? CATALOG_PAGE_SIZE,
+    cursor: params?.cursor,
     q: params?.q,
     filters: {
       editionSlugs: params?.editionSlugs,
@@ -56,13 +52,25 @@ export async function fetchBackgroundsPage(params?: {
   );
 }
 
-/** Lista completa (poucos itens) — wizard / ficha. */
+export async function fetchAllBackgrounds(params?: {
+  q?: string;
+  editionSlugs?: string;
+  fields?: "summary";
+}) {
+  return fetchAllCatalogPages<BackgroundListResponse["data"][number]>(
+    ({ page, limit, cursor }) =>
+      fetchBackgroundsPage({ ...params, page, limit, cursor }),
+    100,
+  );
+}
+
+/** Lista completa — wizard / ficha. */
 export async function fetchBackgrounds(
-  limit = 50,
+  _limit = 50,
   editionSlugs?: string,
   fields?: "summary",
 ) {
-  return fetchBackgroundsPage({ page: 1, limit, editionSlugs, fields });
+  return fetchAllBackgrounds({ editionSlugs, fields });
 }
 
 export async function fetchBackgroundBySlug(slug: string) {

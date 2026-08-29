@@ -47,6 +47,7 @@ export function GearItemCard({ item, listPath, className }: GearItemCardProps) {
       href={withCatalogReturn(`/equipment/items/${item.slug}`, listPath)}
       title={item.name}
       eyebrow={eyebrowParts.join(" · ")}
+      imageUrl={item.imageUrl}
       teaser={
         item.description
           ? toMetricProse(stripCatalogWikiLinks(item.description))

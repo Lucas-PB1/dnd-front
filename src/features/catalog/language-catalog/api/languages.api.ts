@@ -6,23 +6,21 @@ import type {
 import {
   buildCatalogSearchParams,
   CATALOG_FETCH_INIT,
+  fetchAllCatalogPages,
 } from "@/shared/lib/catalog-query";
 import { CATALOG_PAGE_SIZE } from "@/shared/lib/catalog-pagination";
 
+const FETCH_PAGE_SIZE = 100;
+
 export const languageKeys = {
   all: ["languages"] as const,
-  listPage: (params: {
-    page: number;
-    limit: number;
-    q: string;
-    rare: string;
-  }) => [...languageKeys.all, "list", "page", params] as const,
   detail: (slug: string) => [...languageKeys.all, "detail", slug] as const,
 };
 
 export async function fetchLanguagesPage(params?: {
   page?: number;
   limit?: number;
+  cursor?: string;
   q?: string;
   rare?: string;
 }): Promise<LanguageListResponse> {
@@ -30,6 +28,7 @@ export async function fetchLanguagesPage(params?: {
   const search = buildCatalogSearchParams({
     page: params?.page,
     limit: params?.limit ?? CATALOG_PAGE_SIZE,
+    cursor: params?.cursor,
     q: params?.q,
     filters: {
       rare: rare === "true" || rare === "false" ? rare : undefined,
@@ -39,6 +38,14 @@ export async function fetchLanguagesPage(params?: {
   return catalogFetch<LanguageListResponse>(
     `/languages?${search}`,
     CATALOG_FETCH_INIT,
+  );
+}
+
+export async function fetchAllLanguages(params?: { q?: string; rare?: string }) {
+  return fetchAllCatalogPages<LanguageListResponse["data"][number]>(
+    ({ page, limit, cursor }) =>
+      fetchLanguagesPage({ ...params, page, limit, cursor }),
+    FETCH_PAGE_SIZE,
   );
 }
 

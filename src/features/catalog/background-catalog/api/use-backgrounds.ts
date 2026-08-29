@@ -4,20 +4,17 @@ import { useQuery } from "@tanstack/react-query";
 
 import {
   backgroundKeys,
+  fetchAllBackgrounds,
   fetchBackgroundBySlug,
   fetchBackgroundEquipment,
   fetchBackgroundLanguages,
   fetchBackgroundSkills,
   fetchBackgroundTools,
-  fetchBackgrounds,
-  fetchBackgroundsPage,
 } from "@/features/catalog/background-catalog/api/backgrounds.api";
 import { useCatalogSources } from "@/features/catalog/catalog-sources/model/catalog-sources-provider";
 import { CATALOG_DETAIL_STALE_MS } from "@/shared/lib/catalog-query";
-import {
-  useCatalogDetailQuery,
-  useCatalogListQuery,
-} from "@/shared/lib/use-catalog-query";
+import { useCatalogCompendium } from "@/shared/lib/use-catalog-compendium";
+import { useCatalogDetailQuery } from "@/shared/lib/use-catalog-query";
 
 /** Listagem slim para selects do wizard (sem description). */
 export function useBackgrounds() {
@@ -28,31 +25,17 @@ export function useBackgrounds() {
       "summary",
       editionSlugsParam ?? "all",
     ],
-    queryFn: () => fetchBackgrounds(50, editionSlugsParam, "summary"),
+    queryFn: () =>
+      fetchAllBackgrounds({ editionSlugs: editionSlugsParam, fields: "summary" }),
     staleTime: CATALOG_DETAIL_STALE_MS,
   });
 }
 
-/** Listagem do compêndio: 20/página + busca `q` na API. */
-export function useBackgroundsCatalog(params: { page: number; q?: string }) {
-  const { editionSlugsParam } = useCatalogSources();
-  return useCatalogListQuery({
-    page: params.page,
-    filters: { q: params.q, editionSlugs: editionSlugsParam },
-    queryKey: (p) =>
-      backgroundKeys.listPage({
-        page: p.page,
-        limit: p.limit,
-        q: p.q ?? "",
-        editionSlugs: p.editionSlugs,
-      }),
-    queryFn: (p) =>
-      fetchBackgroundsPage({
-        page: p.page,
-        limit: p.limit,
-        q: p.q,
-        editionSlugs: p.editionSlugs,
-      }),
+export function useBackgroundsCatalog(params?: { q?: string }) {
+  return useCatalogCompendium({
+    queryKey: backgroundKeys.all,
+    fetchAll: fetchAllBackgrounds,
+    q: params?.q,
   });
 }
 

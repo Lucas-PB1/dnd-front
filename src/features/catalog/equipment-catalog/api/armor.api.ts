@@ -9,12 +9,6 @@ import { CATALOG_PAGE_SIZE } from "@/shared/lib/catalog-pagination";
 
 export const armorKeys = {
   all: ["armor"] as const,
-  listPage: (params: {
-    page: number;
-    limit: number;
-    q: string;
-    category: string;
-  }) => [...armorKeys.all, "list", "page", params] as const,
   detail: (slug: string) => [...armorKeys.all, "detail", slug] as const,
 };
 
@@ -44,9 +38,8 @@ export async function fetchArmorBySlug(slug: string) {
 }
 
 /** Todas as armaduras do catálogo (lookup rápido na loja). */
-export async function fetchAllArmor() {
-  return fetchAllCatalogPages<ArmorSummary>(({ page, limit, cursor }) => {
-    const search = buildCatalogSearchParams({ page, limit, cursor });
-    return catalogFetch<ArmorListResponse>(`/armor?${search}`, CATALOG_FETCH_INIT);
-  });
+export async function fetchAllArmor(params?: { q?: string; category?: string }) {
+  return fetchAllCatalogPages<ArmorSummary>(({ page, limit, cursor }) =>
+    fetchArmorPage({ ...params, page, limit, cursor }),
+  );
 }

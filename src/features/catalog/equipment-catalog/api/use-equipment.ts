@@ -2,48 +2,30 @@
 
 import {
   armorKeys,
+  fetchAllArmor,
   fetchArmorBySlug,
-  fetchArmorPage,
 } from "@/features/catalog/equipment-catalog/api/armor.api";
 import {
   weaponKeys,
+  fetchAllWeapons,
   fetchWeaponBySlug,
-  fetchWeaponsPage,
 } from "@/features/catalog/equipment-catalog/api/weapons.api";
 import {
-  fetchItems,
+  fetchAllItems,
   fetchItemBySlug,
   itemKeys,
 } from "@/features/catalog/item-catalog/api/items.api";
 import { EQUIPMENT_GEAR_ITEM_TYPES } from "@/entities/item/types";
-import {
-  useCatalogDetailQuery,
-  useCatalogListQuery,
-} from "@/shared/lib/use-catalog-query";
+import { useCatalogCompendium } from "@/shared/lib/use-catalog-compendium";
+import { useCatalogDetailQuery } from "@/shared/lib/use-catalog-query";
 
-export function useWeaponsCatalog(params: {
-  page: number;
-  q?: string;
-  category?: string;
-}) {
-  return useCatalogListQuery({
-    page: params.page,
-    filters: { q: params.q, category: params.category },
-    clearPlaceholderOnFilter: true,
-    queryKey: (p) =>
-      weaponKeys.listPage({
-        page: p.page,
-        limit: p.limit,
-        q: p.q ?? "",
-        category: p.category ?? "",
-      }),
-    queryFn: (p) =>
-      fetchWeaponsPage({
-        page: p.page,
-        limit: p.limit,
-        q: p.q,
-        category: p.category,
-      }),
+export function useWeaponsCatalog(params: { q?: string; category?: string }) {
+  return useCatalogCompendium({
+    queryKey: weaponKeys.all,
+    fetchAll: fetchAllWeapons,
+    q: params.q,
+    filters: { category: params.category },
+    editionScoped: false,
   });
 }
 
@@ -56,29 +38,13 @@ export function useWeaponDetail(slug: string, enabled = true) {
   });
 }
 
-export function useArmorCatalog(params: {
-  page: number;
-  q?: string;
-  category?: string;
-}) {
-  return useCatalogListQuery({
-    page: params.page,
-    filters: { q: params.q, category: params.category },
-    clearPlaceholderOnFilter: true,
-    queryKey: (p) =>
-      armorKeys.listPage({
-        page: p.page,
-        limit: p.limit,
-        q: p.q ?? "",
-        category: p.category ?? "",
-      }),
-    queryFn: (p) =>
-      fetchArmorPage({
-        page: p.page,
-        limit: p.limit,
-        q: p.q,
-        category: p.category,
-      }),
+export function useArmorCatalog(params: { q?: string; category?: string }) {
+  return useCatalogCompendium({
+    queryKey: armorKeys.all,
+    fetchAll: fetchAllArmor,
+    q: params.q,
+    filters: { category: params.category },
+    editionScoped: false,
   });
 }
 
@@ -91,74 +57,44 @@ export function useArmorDetail(slug: string, enabled = true) {
   });
 }
 
-export function useGearCatalog(params: {
-  page: number;
-  q?: string;
-  itemType?: string;
-}) {
+export function useGearCatalog(params: { q?: string; itemType?: string }) {
   const itemType = params.itemType?.trim() || EQUIPMENT_GEAR_ITEM_TYPES;
 
-  return useCatalogListQuery({
-    page: params.page,
-    filters: { q: params.q },
-    queryKey: (p) =>
-      [
-        ...itemKeys.all,
-        "list",
-        "page",
-        { page: p.page, limit: p.limit, q: p.q ?? "", itemType, magic: false },
-      ] as const,
-    queryFn: (p) =>
-      fetchItems({
-        page: p.page,
-        limit: p.limit,
-        q: p.q,
+  return useCatalogCompendium({
+    queryKey: [...itemKeys.all, "gear", itemType] as const,
+    fetchAll: (filters) =>
+      fetchAllItems({
+        q: filters.q,
         itemType,
         magic: false,
+        fields: "summary",
       }),
+    q: params.q,
+    editionScoped: false,
   });
 }
 
 export function useMagicItemsCatalog(params: {
-  page: number;
   q?: string;
   rarity?: string;
   itemType?: string;
-  editionSlugs?: string;
 }) {
-  const rarity = params.rarity?.trim() || undefined;
-  const itemType = params.itemType?.trim() || undefined;
-  const editionSlugs = params.editionSlugs?.trim() || undefined;
-
-  return useCatalogListQuery({
-    page: params.page,
-    filters: { q: params.q, rarity, itemType, editionSlugs },
-    clearPlaceholderOnFilter: true,
-    queryKey: (p) =>
-      [
-        ...itemKeys.all,
-        "list",
-        "magic",
-        {
-          page: p.page,
-          limit: p.limit,
-          q: p.q ?? "",
-          rarity: p.rarity ?? "",
-          itemType: p.itemType ?? "",
-          editionSlugs: p.editionSlugs ?? "all",
-          magic: true,
-        },
-      ] as const,
-    queryFn: (p) =>
-      fetchItems({
-        page: p.page,
-        limit: p.limit,
-        q: p.q,
+  return useCatalogCompendium({
+    queryKey: [...itemKeys.all, "magic"] as const,
+    fetchAll: (filters) =>
+      fetchAllItems({
+        q: filters.q,
         magic: true,
-        rarity: p.rarity,
-        itemType: p.itemType,
-        editionSlugs: p.editionSlugs,
+        rarity: filters.rarity,
+        itemType: filters.itemType,
+        editionSlugs: filters.editionSlugs,
+        fields: "summary",
       }),
+    q: params.q,
+    filters: {
+      rarity: params.rarity,
+      itemType: params.itemType,
+    },
   });
 }
 

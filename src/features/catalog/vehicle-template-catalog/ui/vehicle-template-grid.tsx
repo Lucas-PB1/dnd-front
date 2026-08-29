@@ -1,15 +1,21 @@
 "use client";
 
+import { useMemo } from "react";
+
+import type { VehicleTemplateSummary } from "@/entities/vehicle-template/types";
 import { useVehicleTemplatesCatalog } from "@/features/catalog/vehicle-template-catalog/api/use-vehicle-templates";
 import { VehicleTemplateCard } from "@/features/catalog/vehicle-template-catalog/ui/vehicle-template-card";
 import { useCatalogListState } from "@/shared/lib/use-catalog-list-state";
-import { isCatalogPageOutOfRange } from "@/shared/lib/catalog-query";
-import { useClampCatalogPage } from "@/shared/lib/use-clamp-catalog-page";
+import { paginateCatalogItems } from "@/shared/lib/catalog-pagination";
 import { CatalogPagination } from "@/shared/ui/catalog-pagination";
 import { CatalogSearch } from "@/shared/ui/catalog-search";
 import { CatalogEmptyMessage } from "@/shared/ui/catalog-empty-message";
 import { motion } from "@/shared/lib/motion";
 import { cn } from "@/shared/lib/utils";
+
+function sortByName(a: VehicleTemplateSummary, b: VehicleTemplateSummary) {
+  return a.name.localeCompare(b.name, "pt");
+}
 
 export function VehicleTemplateGrid() {
   const {
@@ -18,16 +24,20 @@ export function VehicleTemplateGrid() {
     debouncedQuery,
     page,
     setPage,
-    pageWindow,
     listPath,
   } = useCatalogListState({ syncUrl: true });
 
+  const isFiltered = debouncedQuery.trim().length > 0;
   const { data, isPending, isError, error, isFetching } =
-    useVehicleTemplatesCatalog({ page, q: debouncedQuery });
+    useVehicleTemplatesCatalog({ q: debouncedQuery });
 
-  const { total, totalPages, safePage, from, to } = pageWindow(data?.meta);
-  const outOfRange = isCatalogPageOutOfRange(data, page, totalPages);
-  useClampCatalogPage(outOfRange, setPage);
+  const vehicles = useMemo(() => {
+    const rows = data?.data ?? [];
+    return [...rows].sort(sortByName);
+  }, [data?.data]);
+
+  const { pageItems, total, totalPages, safePage, from, to } =
+    paginateCatalogItems(vehicles, page, isFiltered);
 
   if (isPending && !data) {
     return (
@@ -51,9 +61,7 @@ export function VehicleTemplateGrid() {
         placeholder="Buscar veículo…"
         resultCount={total}
       />
-      {outOfRange ? (
-        <p className="text-sm text-muted-foreground">Ajustando página…</p>
-      ) : !data?.data.length ? (
+      {pageItems.length === 0 ? (
         <CatalogEmptyMessage
           message={
             debouncedQuery
@@ -70,7 +78,7 @@ export function VehicleTemplateGrid() {
               isFetching && "opacity-70 transition-opacity",
             )}
           >
-            {data.data.map((template) => (
+            {pageItems.map((template) => (
               <VehicleTemplateCard
                 key={template.slug}
                 template={template}
@@ -78,14 +86,16 @@ export function VehicleTemplateGrid() {
               />
             ))}
           </div>
-          <CatalogPagination
-            page={safePage}
-            totalPages={totalPages}
-            total={total}
-            from={from}
-            to={to}
-            onPageChange={setPage}
-          />
+          {isFiltered && totalPages > 1 ? (
+            <CatalogPagination
+              page={safePage}
+              totalPages={totalPages}
+              total={total}
+              from={from}
+              to={to}
+              onPageChange={setPage}
+            />
+          ) : null}
         </>
       )}
     </div>

@@ -1,27 +1,21 @@
 import { shortSpeciesSize } from "@/entities/species/short-size";
 import type { SpeciesSummary } from "@/entities/species/types";
 import { withCatalogReturn } from "@/shared/lib/catalog-return";
+import { catalogTeaserFromDescription } from "@/shared/lib/catalog-teaser";
 import { CatalogEditionChip } from "@/shared/ui/catalog-edition-chip";
 import { CatalogTileCard } from "@/shared/ui/catalog-list-card";
+import { cn } from "@/shared/lib/utils";
 
 type SpeciesCardProps = {
   species: SpeciesSummary;
   listPath?: string;
   className?: string;
-  /** Nome da espécie-base (quando `variantOf` e a base está na lista). */
-  variantBaseName?: string | null;
 };
 
-export function SpeciesCard({
-  species,
-  listPath,
-  className,
-  variantBaseName,
-}: SpeciesCardProps) {
-  const variantHint = species.variantOf
-    ? `Variante de ${variantBaseName ?? species.variantOf}`
-    : null;
-  const eyebrow = [species.tagline, variantHint].filter(Boolean).join(" · ") || null;
+export function SpeciesCard({ species, listPath, className }: SpeciesCardProps) {
+  const eyebrow = species.tagline || null;
+  const teaser =
+    species.summary ?? catalogTeaserFromDescription(species.description);
 
   return (
     <CatalogTileCard
@@ -29,7 +23,8 @@ export function SpeciesCard({
       title={species.name}
       titleExtra={<CatalogEditionChip editionSlug={species.editionSlug} />}
       eyebrow={eyebrow}
-      teaser={species.summary}
+      teaser={teaser}
+      className={cn("h-full", className)}
       meta={
         <>
           <span>{species.creatureType}</span>
@@ -37,7 +32,6 @@ export function SpeciesCard({
           <span>{species.speed}</span>
         </>
       }
-      className={className}
     />
   );
 }

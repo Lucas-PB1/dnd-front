@@ -1,15 +1,24 @@
 "use client";
 
+import { useMemo } from "react";
+
+import type { CreatureTemplateSummary } from "@/entities/creature-template/types";
 import { useCreatureTemplatesCatalog } from "@/features/catalog/creature-template-catalog/api/use-creature-templates";
 import { CreatureTemplateCard } from "@/features/catalog/creature-template-catalog/ui/creature-template-card";
 import { useCatalogListState } from "@/shared/lib/use-catalog-list-state";
-import { isCatalogPageOutOfRange } from "@/shared/lib/catalog-query";
-import { useClampCatalogPage } from "@/shared/lib/use-clamp-catalog-page";
-import { CatalogPagination } from "@/shared/ui/catalog-pagination";
+import { paginateCatalogItems } from "@/shared/lib/catalog-pagination";
 import { CatalogSearch } from "@/shared/ui/catalog-search";
 import { CatalogEmptyMessage } from "@/shared/ui/catalog-empty-message";
+import { CatalogPagination } from "@/shared/ui/catalog-pagination";
 import { motion } from "@/shared/lib/motion";
 import { cn } from "@/shared/lib/utils";
+
+function sortByName(
+  a: CreatureTemplateSummary,
+  b: CreatureTemplateSummary,
+) {
+  return a.name.localeCompare(b.name, "pt");
+}
 
 export function CreatureTemplateGrid() {
   const {
@@ -18,16 +27,20 @@ export function CreatureTemplateGrid() {
     debouncedQuery,
     page,
     setPage,
-    pageWindow,
     listPath,
   } = useCatalogListState({ syncUrl: true });
 
+  const isFiltered = debouncedQuery.trim().length > 0;
   const { data, isPending, isError, error, isFetching } =
-    useCreatureTemplatesCatalog({ page, q: debouncedQuery });
+    useCreatureTemplatesCatalog({ q: debouncedQuery });
 
-  const { total, totalPages, safePage, from, to } = pageWindow(data?.meta);
-  const outOfRange = isCatalogPageOutOfRange(data, page, totalPages);
-  useClampCatalogPage(outOfRange, setPage);
+  const creatures = useMemo(() => {
+    const rows = data?.data ?? [];
+    return [...rows].sort(sortByName);
+  }, [data?.data]);
+
+  const { pageItems, total, totalPages, safePage, from, to } =
+    paginateCatalogItems(creatures, page, isFiltered);
 
   if (isPending && !data) {
     return (
@@ -51,9 +64,7 @@ export function CreatureTemplateGrid() {
         placeholder="Buscar criatura…"
         resultCount={total}
       />
-      {outOfRange ? (
-        <p className="text-sm text-muted-foreground">Ajustando página…</p>
-      ) : !data?.data.length ? (
+      {pageItems.length === 0 ? (
         <CatalogEmptyMessage
           message={
             debouncedQuery
@@ -70,7 +81,7 @@ export function CreatureTemplateGrid() {
               isFetching && "opacity-70 transition-opacity",
             )}
           >
-            {data.data.map((template) => (
+            {pageItems.map((template) => (
               <CreatureTemplateCard
                 key={template.slug}
                 template={template}
@@ -78,14 +89,16 @@ export function CreatureTemplateGrid() {
               />
             ))}
           </div>
-          <CatalogPagination
-            page={safePage}
-            totalPages={totalPages}
-            total={total}
-            from={from}
-            to={to}
-            onPageChange={setPage}
-          />
+          {isFiltered && totalPages > 1 ? (
+            <CatalogPagination
+              page={safePage}
+              totalPages={totalPages}
+              total={total}
+              from={from}
+              to={to}
+              onPageChange={setPage}
+            />
+          ) : null}
         </>
       )}
     </div>

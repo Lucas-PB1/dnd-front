@@ -3,35 +3,30 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 
-import { fetchArmorPage } from "@/features/catalog/equipment-catalog/api/armor.api";
-import { fetchWeaponsPage } from "@/features/catalog/equipment-catalog/api/weapons.api";
-import { fetchItems } from "@/features/catalog/item-catalog/api/items.api";
-import {
-  CATALOG_DETAIL_STALE_MS,
-  fetchAllCatalogPages,
-} from "@/shared/lib/catalog-query";
+import { fetchAllArmor } from "@/features/catalog/equipment-catalog/api/armor.api";
+import { fetchAllWeapons } from "@/features/catalog/equipment-catalog/api/weapons.api";
+import { fetchAllItems } from "@/features/catalog/item-catalog/api/items.api";
+import { CATALOG_DETAIL_STALE_MS } from "@/shared/lib/catalog-query";
 import type { CatalogLinkEntry } from "@/shared/lib/segment-catalog-text";
 
 /** Índice nome/slug → href para hyperlinks no catálogo de equipamento. */
 export function useEquipmentCatalogLinks() {
   const weapons = useQuery({
     queryKey: ["equipment-links", "weapons"],
-    queryFn: () => fetchWeaponsPage({ page: 1, limit: 100 }),
+    queryFn: () => fetchAllWeapons(),
     staleTime: CATALOG_DETAIL_STALE_MS,
   });
   const armor = useQuery({
     queryKey: ["equipment-links", "armor"],
-    queryFn: () => fetchArmorPage({ page: 1, limit: 100 }),
+    queryFn: () => fetchAllArmor(),
     staleTime: CATALOG_DETAIL_STALE_MS,
   });
   const items = useQuery({
     queryKey: ["equipment-links", "items"],
     queryFn: async () => {
-      const itemType = "gear,tool,focus,other";
-      const all = await fetchAllCatalogPages(
-        (page) => fetchItems({ ...page, itemType }),
-        100,
-      );
+      const all = await fetchAllItems({
+        itemType: "gear,tool,focus,other",
+      });
       return all.data;
     },
     staleTime: CATALOG_DETAIL_STALE_MS,

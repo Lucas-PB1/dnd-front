@@ -15,13 +15,6 @@ import { CATALOG_PAGE_SIZE } from "@/shared/lib/catalog-pagination";
 export const featKeys = {
   all: ["feats"] as const,
   labelsAll: () => [...featKeys.all, "labels", "all"] as const,
-  listPage: (params: {
-    page: number;
-    limit: number;
-    q: string;
-    category: string;
-    editionSlugs?: string;
-  }) => [...featKeys.all, "list", "page", params] as const,
   detail: (slug: string) => [...featKeys.all, "detail", slug] as const,
   bySlugs: (slugs: string[]) =>
     [...featKeys.all, "by-slugs", [...slugs].sort().join(",")] as const,
@@ -58,6 +51,23 @@ export async function fetchFeatsPage(params?: {
   return catalogFetch<FeatListResponse | FeatCatalogLabelListResponse>(
     `/feats?${search}`,
     CATALOG_FETCH_INIT,
+  );
+}
+
+/** Compêndio — todas as façanhas (summary) com filtros opcionais. */
+export async function fetchAllFeatsSummary(params?: {
+  q?: string;
+  category?: string;
+  editionSlugs?: string;
+}): Promise<FeatListResponse> {
+  return fetchAllCatalogPages(
+    (page) =>
+      fetchFeatsPage({
+        ...page,
+        ...params,
+        fields: "summary",
+      }) as Promise<FeatListResponse>,
+    FETCH_PAGE_SIZE,
   );
 }
 

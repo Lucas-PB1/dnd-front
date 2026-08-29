@@ -51,8 +51,12 @@ export function ItemCatalogDetailTrigger({
 
   const resolved = detail.data ?? (item as ItemSummary);
   const equipment = useItemEquipmentDetail(
-    item.slug,
-    resolved.itemType,
+    {
+      slug: resolved.slug,
+      itemType: resolved.itemType,
+      properties: resolved.properties,
+      kind: resolved.kind,
+    },
     open,
   );
   const subtitle = itemCatalogMetaLine(resolved);

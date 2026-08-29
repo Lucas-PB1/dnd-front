@@ -65,6 +65,7 @@ function ItemHero({ item, backHref }: { item: ItemSummary; backHref: string }) {
       eyebrow={eyebrow || typeLabel}
       summary={header && header !== rarityLabel ? header : undefined}
       stats={stats}
+      imageUrl={item.imageUrl}
     />
   );
 }

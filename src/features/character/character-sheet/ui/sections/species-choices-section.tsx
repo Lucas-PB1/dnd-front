@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 
 import { shortSpeciesSize } from "@/entities/species/short-size";
+import { resolveTraitPackageSlug } from "@/entities/species/species-culture";
 import {
   DetailTileGrid,
   type DetailTileItem,
@@ -31,9 +32,17 @@ export function SpeciesChoicesSection({
     character.speciesSlug,
     !!character.speciesSlug,
   );
+  const traitPackageSlug = useMemo(
+    () =>
+      resolveTraitPackageSlug(
+        character.speciesSlug,
+        character.speciesChoices,
+      ),
+    [character.speciesSlug, character.speciesChoices],
+  );
   const traitsQuery = useSpeciesTraits(
-    character.speciesSlug,
-    !!character.speciesSlug,
+    traitPackageSlug,
+    !!traitPackageSlug,
   );
   const traitChoices = useSpeciesTraitChoices(
     character.speciesSlug,

@@ -4,6 +4,8 @@ import type {
   CreatureTemplateTrait,
 } from "@/entities/creature-template/types";
 
+import type { PaginatedResponse } from "@/shared/api/dnd-api/types";
+
 export type VehicleTemplateSummary = {
   slug: string;
   name: string;
@@ -11,6 +13,7 @@ export type VehicleTemplateSummary = {
   armorClass: number | null;
   hitPoints: number | null;
   crewCapacity: number | null;
+  imageUrl: string | null;
 };
 
 export type VehicleTemplateDetail = VehicleTemplateSummary & {
@@ -26,11 +29,5 @@ export type VehicleTemplateDetail = VehicleTemplateSummary & {
   traits: CreatureTemplateTrait[];
 };
 
-export type VehicleTemplateListResponse = {
-  data: VehicleTemplateSummary[];
-  meta: {
-    cursor: string | null;
-    hasMore: boolean;
-    total?: number;
-  };
-};
+export type VehicleTemplateListResponse =
+  PaginatedResponse<VehicleTemplateSummary>;

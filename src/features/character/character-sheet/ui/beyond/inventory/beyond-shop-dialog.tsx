@@ -36,6 +36,7 @@ import {
   usePopularItems,
 } from "@/features/catalog/item-catalog/api/use-items";
 import { useShopEquipmentIndex } from "@/features/catalog/item-catalog/api/use-shop-equipment-index";
+import { resolveShopArmor } from "@/features/catalog/item-catalog/lib/barding";
 import { ItemCatalogDetailTrigger } from "@/features/catalog/item-catalog/ui/item-catalog-detail-trigger";
 import { BeyondShopCartLineRow } from "@/features/character/character-sheet/ui/beyond/inventory/beyond-shop-cart-line-row";
 import { BeyondShopListItemInfo } from "@/features/character/character-sheet/ui/beyond/inventory/beyond-shop-list-item-info";
@@ -353,6 +354,13 @@ export function BeyondShopDialog({
                     return (
                       <li key={item.slug}>
                         <div className="flex items-start gap-2 px-3 py-2">
+                          {item.imageUrl ? (
+                            <img
+                              src={item.imageUrl}
+                              alt=""
+                              className="mt-0.5 size-12 shrink-0 rounded-md border border-border/60 bg-muted/30 object-cover object-top"
+                            />
+                          ) : null}
                           <div className="min-w-0 flex-1">
                             <div className="flex items-start gap-0.5">
                               <button
@@ -368,8 +376,9 @@ export function BeyondShopDialog({
                                   weapon={equipmentIndex.weaponsBySlug?.get(
                                     item.slug,
                                   )}
-                                  armor={equipmentIndex.armorBySlug?.get(
-                                    item.slug,
+                                  armor={resolveShopArmor(
+                                    item,
+                                    equipmentIndex.armorBySlug,
                                   )}
                                 />
                               </button>

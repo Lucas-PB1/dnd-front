@@ -3,58 +3,41 @@
 import { useQuery } from "@tanstack/react-query";
 
 import {
-  fetchSpecies,
+  fetchAllSpecies,
   fetchSpeciesBySlug,
-  fetchSpeciesPage,
   fetchSpeciesTraitChoices,
   fetchSpeciesTraits,
   speciesKeys,
 } from "@/features/catalog/species-catalog/api/species.api";
 import { useCatalogSources } from "@/features/catalog/catalog-sources/model/catalog-sources-provider";
 import { CATALOG_DETAIL_STALE_MS } from "@/shared/lib/catalog-query";
-import {
-  useCatalogDetailQuery,
-  useCatalogListQuery,
-} from "@/shared/lib/use-catalog-query";
+import { useCatalogCompendium } from "@/shared/lib/use-catalog-compendium";
+import { useCatalogDetailQuery } from "@/shared/lib/use-catalog-query";
 
 /** Listagem slim para selects do wizard (sem description). */
 export function useSpecies() {
   const { editionSlugsParam } = useCatalogSources();
   return useQuery({
     queryKey: [...speciesKeys.list(), "summary", editionSlugsParam ?? "all"],
-    queryFn: () => fetchSpecies(50, editionSlugsParam, "summary"),
+    queryFn: () => fetchAllSpecies({ editionSlugs: editionSlugsParam, fields: "summary" }),
     staleTime: CATALOG_DETAIL_STALE_MS,
   });
 }
 
-/** Compêndio: busca `q` na API. */
-export function useSpeciesCatalog(params: { page: number; q?: string }) {
-  const { editionSlugsParam } = useCatalogSources();
-  return useCatalogListQuery({
-    page: params.page,
-    filters: { q: params.q, editionSlugs: editionSlugsParam },
-    queryKey: (p) =>
-      speciesKeys.listPage({
-        page: p.page,
-        limit: p.limit,
-        q: p.q ?? "",
-        editionSlugs: p.editionSlugs,
-      }),
-    queryFn: (p) =>
-      fetchSpeciesPage({
-        page: p.page,
-        limit: p.limit,
-        q: p.q,
-        editionSlugs: p.editionSlugs,
-      }),
+export function useSpeciesCatalog(params?: { q?: string }) {
+  return useCatalogCompendium({
+    queryKey: speciesKeys.all,
+    fetchAll: fetchAllSpecies,
+    q: params?.q,
   });
 }
 
 export function useSpeciesDetail(slug: string, enabled = true) {
+  const { editionSlugsParam } = useCatalogSources();
   return useCatalogDetailQuery({
     slug,
-    queryKey: speciesKeys.detail(slug),
-    queryFn: () => fetchSpeciesBySlug(slug),
+    queryKey: speciesKeys.detail(slug, editionSlugsParam),
+    queryFn: () => fetchSpeciesBySlug(slug, editionSlugsParam),
     enabled,
   });
 }

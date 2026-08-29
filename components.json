@@ -15,7 +15,7 @@
   "aliases": {
     "components": "@/shared",
     "utils": "@/shared/lib/utils",
-    "ui": "@/shared/ui",
+    "ui": "@/shared/design-system/primitives",
     "lib": "@/shared/lib"
   },
   "menuColor": "default",

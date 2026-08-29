@@ -1,38 +1,20 @@
 "use client";
 
 import {
+  fetchAllLanguages,
   fetchLanguageBySlug,
-  fetchLanguagesPage,
   languageKeys,
 } from "@/features/catalog/language-catalog/api/languages.api";
-import {
-  useCatalogDetailQuery,
-  useCatalogListQuery,
-} from "@/shared/lib/use-catalog-query";
+import { useCatalogCompendium } from "@/shared/lib/use-catalog-compendium";
+import { useCatalogDetailQuery } from "@/shared/lib/use-catalog-query";
 
-/** Compêndio: 20/página + busca e filtro raro/comum. */
-export function useLanguagesCatalog(params: {
-  page: number;
-  q?: string;
-  rare?: string;
-}) {
-  return useCatalogListQuery({
-    page: params.page,
-    filters: { q: params.q, rare: params.rare },
-    queryKey: (p) =>
-      languageKeys.listPage({
-        page: p.page,
-        limit: p.limit,
-        q: p.q ?? "",
-        rare: p.rare ?? "",
-      }),
-    queryFn: (p) =>
-      fetchLanguagesPage({
-        page: p.page,
-        limit: p.limit,
-        q: p.q,
-        rare: p.rare,
-      }),
+export function useLanguagesCatalog(params: { q?: string; rare?: string }) {
+  return useCatalogCompendium({
+    queryKey: languageKeys.all,
+    fetchAll: fetchAllLanguages,
+    q: params.q,
+    filters: { rare: params.rare },
+    editionScoped: false,
   });
 }
 

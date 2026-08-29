@@ -31,8 +31,16 @@ export function ItemCatalogDescriptionBlock({
 
   const resolvedType = detail.data?.itemType ?? itemType;
   const equipment = useItemEquipmentDetail(
-    slug,
-    resolvedType,
+    detail.data
+      ? {
+          slug,
+          itemType: detail.data.itemType,
+          properties: detail.data.properties,
+          kind: detail.data.kind,
+        }
+      : resolvedType
+        ? { slug, itemType: resolvedType, properties: null, kind: null }
+        : null,
     enabled && Boolean(detail.data ?? itemType),
   );
 

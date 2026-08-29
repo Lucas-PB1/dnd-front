@@ -1,11 +1,13 @@
 "use client";
 
+import { useMemo } from "react";
+
+import type { SkillSummary } from "@/entities/skill/types";
 import { useSkillsCatalog } from "@/features/catalog/skill-catalog/api/use-skills";
 import { SkillCard } from "@/features/catalog/skill-catalog/ui/skill-card";
 import { useAbilities } from "@/features/catalog/reference-catalog/api/use-reference";
 import { useCatalogListState } from "@/shared/lib/use-catalog-list-state";
-import { isCatalogPageOutOfRange } from "@/shared/lib/catalog-query";
-import { useClampCatalogPage } from "@/shared/lib/use-clamp-catalog-page";
+import { paginateCatalogItems } from "@/shared/lib/catalog-pagination";
 import { buildAbilityFilter } from "@/shared/lib/catalog-filter-options";
 import { CatalogFilters } from "@/shared/ui/catalog-filters";
 import { CatalogPagination } from "@/shared/ui/catalog-pagination";
@@ -13,6 +15,10 @@ import { CatalogSearch } from "@/shared/ui/catalog-search";
 import { CatalogEmptyMessage } from "@/shared/ui/catalog-empty-message";
 import { motion } from "@/shared/lib/motion";
 import { cn } from "@/shared/lib/utils";
+
+function sortByName(a: SkillSummary, b: SkillSummary) {
+  return a.name.localeCompare(b.name, "pt");
+}
 
 export function SkillsGrid() {
   const {
@@ -23,7 +29,6 @@ export function SkillsGrid() {
     setPage,
     filters,
     setFilter,
-    pageWindow,
     listPath,
   } = useCatalogListState({ syncUrl: true, filterKeys: ["ability"] });
 
@@ -32,17 +37,21 @@ export function SkillsGrid() {
   const abilityFilter = buildAbilityFilter(abilities);
 
   const ability = filters.ability ?? "";
+  const isFiltered =
+    debouncedQuery.trim().length > 0 || Boolean(ability);
 
   const { data, isPending, isError, error, isFetching } = useSkillsCatalog({
-    page,
     q: debouncedQuery,
     ability,
   });
 
-  const { total, totalPages, safePage, from, to } = pageWindow(data?.meta);
+  const skills = useMemo(() => {
+    const rows = data?.data ?? [];
+    return [...rows].sort(sortByName);
+  }, [data?.data]);
 
-  const outOfRange = isCatalogPageOutOfRange(data, page, totalPages);
-  useClampCatalogPage(outOfRange, setPage);
+  const { pageItems, total, totalPages, safePage, from, to } =
+    paginateCatalogItems(skills, page, isFiltered);
 
   if (isPending && !data) {
     return (
@@ -75,37 +84,35 @@ export function SkillsGrid() {
           />
         ) : null}
       </div>
-      {outOfRange ? (
-        <p className="text-sm text-muted-foreground">Ajustando página…</p>
-      ) : !data?.data.length ? (
+      {pageItems.length === 0 ? (
         <CatalogEmptyMessage
           message={
             debouncedQuery || ability
-            ? "Nenhuma perícia corresponde aos filtros."
-            : "Nenhuma perícia encontrada."
+              ? "Nenhuma perícia corresponde aos filtros."
+              : "Nenhuma perícia encontrada."
           }
         />
       ) : (
         <>
-          <div
-            className={cn(isFetching && "opacity-70 transition-opacity")}
-          >
+          <div className={cn(isFetching && "opacity-70 transition-opacity")}>
             <ul className={cn("border-t border-border", motion.stagger)}>
-              {data.data.map((skill) => (
+              {pageItems.map((skill) => (
                 <li key={skill.slug}>
                   <SkillCard skill={skill} listPath={listPath} />
                 </li>
               ))}
             </ul>
           </div>
-          <CatalogPagination
-            page={safePage}
-            totalPages={totalPages}
-            total={total}
-            from={from}
-            to={to}
-            onPageChange={setPage}
-          />
+          {isFiltered && totalPages > 1 ? (
+            <CatalogPagination
+              page={safePage}
+              totalPages={totalPages}
+              total={total}
+              from={from}
+              to={to}
+              onPageChange={setPage}
+            />
+          ) : null}
         </>
       )}
     </div>

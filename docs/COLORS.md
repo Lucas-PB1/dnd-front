@@ -1,5 +1,7 @@
 # Cores — tema Grimoire / Couro
 
+> Índice do design system: [DESIGN-SYSTEM.md](./DESIGN-SYSTEM.md)
+
 Tokens em `src/app/globals.css` (shadcn + Tailwind 4).  
 **Light = Grimoire** (papel frio, tinta). **Dark = Couro** (mesa noturna; classe `.dark` no `<html>`).
 

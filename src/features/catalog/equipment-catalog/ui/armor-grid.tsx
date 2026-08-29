@@ -1,17 +1,23 @@
 "use client";
 
+import { useMemo } from "react";
+
+import type { ArmorSummary } from "@/entities/armor/types";
 import { useArmorCatalog } from "@/features/catalog/equipment-catalog/api/use-equipment";
 import { ArmorCard } from "@/features/catalog/equipment-catalog/ui/armor-card";
 import { ARMOR_CATEGORY_FILTER } from "@/shared/lib/catalog-filter-options";
 import { useCatalogListState } from "@/shared/lib/use-catalog-list-state";
-import { isCatalogPageOutOfRange } from "@/shared/lib/catalog-query";
-import { useClampCatalogPage } from "@/shared/lib/use-clamp-catalog-page";
+import { paginateCatalogItems } from "@/shared/lib/catalog-pagination";
 import { CatalogFilters } from "@/shared/ui/catalog-filters";
 import { CatalogPagination } from "@/shared/ui/catalog-pagination";
 import { CatalogSearch } from "@/shared/ui/catalog-search";
 import { CatalogEmptyMessage } from "@/shared/ui/catalog-empty-message";
 import { motion } from "@/shared/lib/motion";
 import { cn } from "@/shared/lib/utils";
+
+function sortByName(a: ArmorSummary, b: ArmorSummary) {
+  return a.name.localeCompare(b.name, "pt");
+}
 
 export function ArmorGrid() {
   const {
@@ -22,22 +28,25 @@ export function ArmorGrid() {
     setPage,
     filters,
     setFilter,
-    pageWindow,
     listPath,
   } = useCatalogListState({ syncUrl: true, filterKeys: ["category"] });
 
   const category = filters.category ?? "";
+  const isFiltered =
+    debouncedQuery.trim().length > 0 || Boolean(category);
 
   const { data, isPending, isError, error, isFetching } = useArmorCatalog({
-    page,
     q: debouncedQuery,
     category,
   });
 
-  const { total, totalPages, safePage, from, to } = pageWindow(data?.meta);
+  const armor = useMemo(() => {
+    const rows = data?.data ?? [];
+    return [...rows].sort(sortByName);
+  }, [data?.data]);
 
-  const outOfRange = isCatalogPageOutOfRange(data, page, totalPages);
-  useClampCatalogPage(outOfRange, setPage);
+  const { pageItems, total, totalPages, safePage, from, to } =
+    paginateCatalogItems(armor, page, isFiltered);
 
   if (isPending && !data) {
     return (
@@ -68,37 +77,35 @@ export function ArmorGrid() {
           onChange={setFilter}
         />
       </div>
-      {outOfRange ? (
-        <p className="text-sm text-muted-foreground">Ajustando página…</p>
-      ) : !data?.data.length ? (
+      {pageItems.length === 0 ? (
         <CatalogEmptyMessage
           message={
             debouncedQuery || category
-            ? "Nenhuma armadura corresponde aos filtros."
-            : "Nenhuma armadura encontrada."
+              ? "Nenhuma armadura corresponde aos filtros."
+              : "Nenhuma armadura encontrada."
           }
         />
       ) : (
         <>
-          <div
-            className={cn(isFetching && "opacity-70 transition-opacity")}
-          >
+          <div className={cn(isFetching && "opacity-70 transition-opacity")}>
             <ul className={cn("border-t border-border", motion.stagger)}>
-              {data.data.map((armor) => (
-                <li key={armor.slug}>
-                  <ArmorCard armor={armor} listPath={listPath} />
+              {pageItems.map((armorItem) => (
+                <li key={armorItem.slug}>
+                  <ArmorCard armor={armorItem} listPath={listPath} />
                 </li>
               ))}
             </ul>
           </div>
-          <CatalogPagination
-            page={safePage}
-            totalPages={totalPages}
-            total={total}
-            from={from}
-            to={to}
-            onPageChange={setPage}
-          />
+          {isFiltered && totalPages > 1 ? (
+            <CatalogPagination
+              page={safePage}
+              totalPages={totalPages}
+              total={total}
+              from={from}
+              to={to}
+              onPageChange={setPage}
+            />
+          ) : null}
         </>
       )}
     </div>

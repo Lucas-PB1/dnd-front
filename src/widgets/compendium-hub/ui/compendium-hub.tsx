@@ -39,7 +39,7 @@ const SECTIONS: ReadonlyArray<{
     title: "Espécies",
     eyebrow: "Origens",
     description:
-      "Anão, elfo, humano e mais — traços, tamanho e o legado de cada povo.",
+      "Anão, elfo, humano e mais — traços, tamanho e velocidade de cada espécie.",
     icon: GlobeAltIcon,
   },
   {

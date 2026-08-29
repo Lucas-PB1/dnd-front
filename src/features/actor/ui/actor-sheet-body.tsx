@@ -90,6 +90,7 @@ export function ActorSheetBody({
       <StatBlockCard
         variant={isVehicle ? "vehicle" : "creature"}
         name={actor.name}
+        imageUrl={actor.imageUrl}
         armorClass={actor.armorClass}
         initiativeModifier={actor.initiativeModifier}
         hitPoints={actor.hitPointsMax}

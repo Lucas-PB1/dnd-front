@@ -22,6 +22,7 @@ import {
 import type { SheetReadSectionProps } from "@/features/character/character-sheet/ui/sections/sheet-section-types";
 import { SheetChip } from "@/features/character/character-sheet/ui/sheet/sheet-ui";
 import { Button } from "@/shared/ui/button";
+import { NativeSelect } from "@/shared/ui/native-select";
 import { PhbProse } from "@/shared/ui/phb-prose";
 
 const RANK_LABEL = CHARACTER_THREAD_RANK_LABEL;
@@ -129,8 +130,7 @@ export function CharacterThreadSection({ character }: SheetReadSectionProps) {
             <span className="text-xs font-medium text-muted-foreground">
               Thread
             </span>
-            <select
-              className="rounded-md border border-border bg-background px-2 py-1.5"
+            <NativeSelect
               value={pickSlug}
               onChange={(event) => setPickSlug(event.target.value)}
             >
@@ -140,7 +140,7 @@ export function CharacterThreadSection({ character }: SheetReadSectionProps) {
                   {thread.name}
                 </option>
               ))}
-            </select>
+            </NativeSelect>
           </label>
           <Button
             type="button"
@@ -190,8 +190,7 @@ export function CharacterThreadSection({ character }: SheetReadSectionProps) {
         <div className="flex flex-wrap items-end gap-2">
           <label className="flex min-w-[12rem] flex-1 flex-col gap-1 text-sm">
             <span className="text-xs text-muted-foreground">Modelo (1–6)</span>
-            <select
-              className="rounded-md border border-border bg-background px-2 py-1.5"
+            <NativeSelect
               value={goalIndex}
               onChange={(event) =>
                 setGoalIndex(
@@ -205,7 +204,7 @@ export function CharacterThreadSection({ character }: SheetReadSectionProps) {
                   {goal.sortOrder}. {goal.text}
                 </option>
               ))}
-            </select>
+            </NativeSelect>
           </label>
           <Button
             type="button"
@@ -230,8 +229,7 @@ export function CharacterThreadSection({ character }: SheetReadSectionProps) {
         <div className="flex flex-wrap items-end gap-2">
           <label className="flex min-w-[8rem] flex-col gap-1 text-sm">
             <span className="text-xs text-muted-foreground">Rank</span>
-            <select
-              className="rounded-md border border-border bg-background px-2 py-1.5"
+            <NativeSelect
               value={pendingRank}
               onChange={(event) => {
                 setPendingRank(
@@ -246,13 +244,12 @@ export function CharacterThreadSection({ character }: SheetReadSectionProps) {
                   {RANK_LABEL[rank]}
                 </option>
               ))}
-            </select>
+            </NativeSelect>
           </label>
           {choiceBenefits.length > 0 ? (
             <label className="flex min-w-[12rem] flex-1 flex-col gap-1 text-sm">
               <span className="text-xs text-muted-foreground">Benefício</span>
-              <select
-                className="rounded-md border border-border bg-background px-2 py-1.5"
+              <NativeSelect
                 value={pendingBenefit}
                 onChange={(event) => setPendingBenefit(event.target.value)}
               >
@@ -262,7 +259,7 @@ export function CharacterThreadSection({ character }: SheetReadSectionProps) {
                     {benefit.name}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </label>
           ) : null}
           <Button

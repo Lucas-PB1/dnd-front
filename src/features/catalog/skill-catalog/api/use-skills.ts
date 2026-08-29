@@ -1,38 +1,20 @@
 "use client";
 
 import {
+  fetchAllSkills,
   fetchSkillBySlug,
-  fetchSkillsPage,
   skillKeys,
 } from "@/features/catalog/skill-catalog/api/skills.api";
-import {
-  useCatalogDetailQuery,
-  useCatalogListQuery,
-} from "@/shared/lib/use-catalog-query";
+import { useCatalogCompendium } from "@/shared/lib/use-catalog-compendium";
+import { useCatalogDetailQuery } from "@/shared/lib/use-catalog-query";
 
-/** Compêndio: 20/página + busca e filtro por atributo. */
-export function useSkillsCatalog(params: {
-  page: number;
-  q?: string;
-  ability?: string;
-}) {
-  return useCatalogListQuery({
-    page: params.page,
-    filters: { q: params.q, ability: params.ability },
-    queryKey: (p) =>
-      skillKeys.listPage({
-        page: p.page,
-        limit: p.limit,
-        q: p.q ?? "",
-        ability: p.ability ?? "",
-      }),
-    queryFn: (p) =>
-      fetchSkillsPage({
-        page: p.page,
-        limit: p.limit,
-        q: p.q,
-        ability: p.ability,
-      }),
+export function useSkillsCatalog(params: { q?: string; ability?: string }) {
+  return useCatalogCompendium({
+    queryKey: skillKeys.all,
+    fetchAll: fetchAllSkills,
+    q: params.q,
+    filters: { ability: params.ability },
+    editionScoped: false,
   });
 }
 

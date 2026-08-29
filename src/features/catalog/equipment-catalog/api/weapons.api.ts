@@ -12,12 +12,6 @@ import { CATALOG_PAGE_SIZE } from "@/shared/lib/catalog-pagination";
 
 export const weaponKeys = {
   all: ["weapons"] as const,
-  listPage: (params: {
-    page: number;
-    limit: number;
-    q: string;
-    category: string;
-  }) => [...weaponKeys.all, "list", "page", params] as const,
   detail: (slug: string) => [...weaponKeys.all, "detail", slug] as const,
   allMastery: () => [...weaponKeys.all, "all-mastery"] as const,
 };
@@ -51,12 +45,8 @@ export async function fetchWeaponBySlug(slug: string) {
 }
 
 /** Todas as armas do catálogo (para escolha de Maestria em Arma). */
-export async function fetchAllWeapons() {
-  return fetchAllCatalogPages<WeaponSummary>(({ page, limit, cursor }) => {
-    const search = buildCatalogSearchParams({ page, limit, cursor });
-    return catalogFetch<WeaponListResponse>(
-      `/weapons?${search}`,
-      CATALOG_FETCH_INIT,
-    );
-  });
+export async function fetchAllWeapons(params?: { q?: string; category?: string }) {
+  return fetchAllCatalogPages<WeaponSummary>(({ page, limit, cursor }) =>
+    fetchWeaponsPage({ ...params, page, limit, cursor }),
+  );
 }

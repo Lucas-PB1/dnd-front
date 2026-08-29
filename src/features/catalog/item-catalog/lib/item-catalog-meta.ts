@@ -2,6 +2,10 @@ import {
   ITEM_TYPE_LABELS_PT,
   type ItemSummary,
 } from "@/entities/item/types";
+import {
+  bardingShopTypeLabel,
+  isBardingItem,
+} from "@/features/catalog/item-catalog/lib/barding";
 import type { ArmorSummary } from "@/entities/armor/types";
 import type { WeaponSummary } from "@/entities/weapon/types";
 import {
@@ -62,7 +66,9 @@ export function itemCatalogShopBadges(
     (equipment?.weapon
       ? weaponCategoryLabel(equipment.weapon.category)
       : null);
-  const typeLabel = itemCatalogTypeLabel(item);
+  const typeLabel = isBardingItem(item)
+    ? bardingShopTypeLabel()
+    : itemCatalogTypeLabel(item);
   const category =
     equipmentCategory ??
     (typeof props?.category === "string" ? props.category.trim() : null);
@@ -83,7 +89,9 @@ export function itemCatalogShopBadges(
           ? "Serviço"
           : item.consumable
             ? "Consumível"
-            : category ?? typeLabel,
+            : isBardingItem(item)
+              ? bardingShopTypeLabel()
+              : category ?? typeLabel,
     },
     {
       key: "cost",
@@ -99,7 +107,9 @@ export function itemCatalogShopBadges(
   if (magic) {
     badges.push({ key: "magic", label: "Mágico", tone: "magic" });
   } else if (
-    (item.itemType === "weapon" || item.itemType === "armor") &&
+    (item.itemType === "weapon" ||
+      item.itemType === "armor" ||
+      isBardingItem(item)) &&
     !coverage
   ) {
     badges.push({ key: "mundane", label: "Mundano", tone: "muted" });
@@ -208,7 +218,9 @@ export function itemCatalogMetaLine(
   >,
 ): string {
   const props = item.properties;
-  const typeLabel = itemCatalogTypeLabel(item);
+  const typeLabel = isBardingItem(item)
+    ? bardingShopTypeLabel()
+    : itemCatalogTypeLabel(item);
   const category =
     typeof props?.category === "string" ? props.category.trim() : null;
   const rarityLabel =
@@ -218,7 +230,9 @@ export function itemCatalogMetaLine(
       ? "Serviço"
       : item.consumable
         ? "Consumível"
-        : category ?? typeLabel,
+        : isBardingItem(item)
+          ? bardingShopTypeLabel()
+          : category ?? typeLabel,
     item.costText ?? "sem preço",
     item.weight ? toMetricProse(item.weight) : null,
     rarityLabel,
@@ -243,7 +257,9 @@ export function itemCatalogTeaser(
 
 export function itemCatalogStats(item: ItemSummary): ItemCatalogStat[] {
   const props = item.properties ?? null;
-  const typeLabel = itemCatalogTypeLabel(item);
+  const typeLabel = isBardingItem(item)
+    ? bardingShopTypeLabel()
+    : itemCatalogTypeLabel(item);
   const category =
     typeof props?.category === "string" ? props.category.trim() : null;
   const rarityLabel =

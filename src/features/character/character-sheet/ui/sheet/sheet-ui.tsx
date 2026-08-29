@@ -1,5 +1,6 @@
 import type { ComponentType, ReactNode, SVGProps } from "react";
 
+import { Badge } from "@/shared/design-system/primitives/badge";
 import { cn } from "@/shared/lib/utils";
 
 type HeroIcon = ComponentType<SVGProps<SVGSVGElement>>;
@@ -126,12 +127,12 @@ export function SheetChip({
   className?: string;
 }) {
   return (
-    <span
+    <Badge
+      variant={active ? "secondary" : "muted"}
+      size="default"
       className={cn(
-        "inline-flex items-baseline gap-1 rounded-md border px-2 py-0.5 text-xs",
-        active
-          ? "border-secondary/50 bg-secondary/10 font-medium text-foreground"
-          : "border-border/80 bg-muted/25 text-foreground",
+        "items-baseline gap-1",
+        active && "font-medium text-foreground",
         className,
       )}
     >
@@ -139,7 +140,7 @@ export function SheetChip({
       {hint ? (
         <span className="text-[10px] text-muted-foreground">{hint}</span>
       ) : null}
-    </span>
+    </Badge>
   );
 }
 

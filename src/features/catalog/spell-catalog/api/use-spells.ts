@@ -3,19 +3,16 @@
 import { useQuery } from "@tanstack/react-query";
 
 import {
+  fetchAllSpellsSummary,
   fetchSpellBySlug,
   fetchSpellLabels,
   fetchSpells,
-  fetchSpellsPage,
   spellKeys,
 } from "@/features/catalog/spell-catalog/api/spells.api";
 import { useCatalogSources } from "@/features/catalog/catalog-sources/model/catalog-sources-provider";
 import { CATALOG_DETAIL_STALE_MS } from "@/shared/lib/catalog-query";
-import {
-  useCatalogDetailQuery,
-  useCatalogListQuery,
-} from "@/shared/lib/use-catalog-query";
-import type { SpellListResponse } from "@/entities/spell/types";
+import { useCatalogCompendium } from "@/shared/lib/use-catalog-compendium";
+import { useCatalogDetailQuery } from "@/shared/lib/use-catalog-query";
 
 /** Lista completa — wizard / editores (DTO com description). */
 export function useSpells() {
@@ -38,40 +35,22 @@ export function useSpellLabels(options?: { enabled?: boolean }) {
   });
 }
 
-/** Listagem do compêndio: 20/página + busca/filtros na API. */
 export function useSpellsCatalog(params: {
-  page: number;
   q?: string;
   level?: string;
   school?: string;
 }) {
-  const { editionSlugsParam } = useCatalogSources();
-  return useCatalogListQuery({
-    page: params.page,
-    filters: {
-      q: params.q,
-      level: params.level,
-      school: params.school,
-      editionSlugs: editionSlugsParam,
-    },
-    queryKey: (p) =>
-      spellKeys.listPage({
-        page: p.page,
-        limit: p.limit,
-        q: p.q ?? "",
-        level: p.level ?? "",
-        school: p.school ?? "",
-        editionSlugs: p.editionSlugs,
+  return useCatalogCompendium({
+    queryKey: spellKeys.all,
+    fetchAll: (filters) =>
+      fetchAllSpellsSummary({
+        q: filters.q,
+        level: filters.level,
+        school: filters.school,
+        editionSlugs: filters.editionSlugs,
       }),
-    queryFn: (p) =>
-      fetchSpellsPage({
-        page: p.page,
-        limit: p.limit,
-        q: p.q,
-        level: p.level,
-        school: p.school,
-        editionSlugs: p.editionSlugs,
-      }) as Promise<SpellListResponse>,
+    q: params.q,
+    filters: { level: params.level, school: params.school },
   });
 }
 

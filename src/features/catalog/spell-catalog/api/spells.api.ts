@@ -15,14 +15,6 @@ export const spellKeys = {
   all: ["spells"] as const,
   listAll: () => [...spellKeys.all, "list", "all"] as const,
   labelsAll: () => [...spellKeys.all, "labels", "all"] as const,
-  listPage: (params: {
-    page: number;
-    limit: number;
-    q: string;
-    level: string;
-    school: string;
-    editionSlugs?: string;
-  }) => [...spellKeys.all, "list", "page", params] as const,
   detail: (slug: string) => [...spellKeys.all, "detail", slug] as const,
 };
 
@@ -54,6 +46,24 @@ export async function fetchSpellsPage(params?: {
   return catalogFetch<SpellListResponse | SpellCatalogLabelListResponse>(
     `/spells?${search}`,
     CATALOG_FETCH_INIT,
+  );
+}
+
+/** Compêndio — todas as magias (summary) com filtros opcionais. */
+export async function fetchAllSpellsSummary(params?: {
+  q?: string;
+  level?: number | string;
+  school?: string;
+  editionSlugs?: string;
+}): Promise<SpellListResponse> {
+  return fetchAllCatalogPages(
+    (page) =>
+      fetchSpellsPage({
+        ...page,
+        ...params,
+        fields: "summary",
+      }) as Promise<SpellListResponse>,
+    FETCH_PAGE_SIZE,
   );
 }
 

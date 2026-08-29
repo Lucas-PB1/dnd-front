@@ -25,7 +25,7 @@ function toSlugMap<T extends { slug: string }>(
 export function useShopEquipmentIndex(enabled: boolean) {
   const weapons = useQuery({
     queryKey: [...weaponKeys.all, "shop-index"],
-    queryFn: fetchAllWeapons,
+    queryFn: () => fetchAllWeapons(),
     enabled,
     staleTime: CATALOG_DETAIL_STALE_MS,
     select: (response) => toSlugMap(response.data),
@@ -33,7 +33,7 @@ export function useShopEquipmentIndex(enabled: boolean) {
 
   const armor = useQuery({
     queryKey: [...armorKeys.all, "shop-index"],
-    queryFn: fetchAllArmor,
+    queryFn: () => fetchAllArmor(),
     enabled,
     staleTime: CATALOG_DETAIL_STALE_MS,
     select: (response) => toSlugMap(response.data),
