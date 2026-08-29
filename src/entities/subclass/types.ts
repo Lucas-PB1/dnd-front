@@ -12,6 +12,7 @@ export type SubclassSummary = {
   editionSlug: string | null;
   spellSourceSlug: string | null;
   spellSourceLabel: string | null;
+  imageUrl?: string | null;
 };
 
 export type SubclassListResponse = PaginatedResponse<SubclassSummary>;

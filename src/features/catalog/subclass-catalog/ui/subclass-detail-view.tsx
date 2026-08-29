@@ -47,6 +47,7 @@ function SubclassHero({
       title={subclass.name}
       eyebrow={subclass.tagline ?? subclass.className}
       stats={stats}
+      imageUrl={subclass.imageUrl}
     />
   );
 }

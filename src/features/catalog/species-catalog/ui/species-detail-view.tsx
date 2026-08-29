@@ -48,6 +48,7 @@ function SpeciesHero({
       eyebrow={eyebrow}
       summary={species.summary}
       stats={stats}
+      imageUrl={species.imageUrl}
     />
   );
 }

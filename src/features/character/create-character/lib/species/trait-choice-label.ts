@@ -18,6 +18,7 @@ export function traitChoiceLabel(kind: string, traitName: string): string {
     case "gnome_casting_ability":
     case "infernal_casting_ability":
     case "mandrake_casting_ability":
+    case "feathren_casting_ability":
       return "Atributo de conjuração";
     case "aasimar_size":
     case "tiefling_size":
@@ -32,6 +33,10 @@ export function traitChoiceLabel(kind: string, traitName: string): string {
       return "Linhagem do Povo-urso";
     case "dwarf_culture":
       return "Variante cultural";
+    case "feathren_avian_ancestry":
+      return "Ancestria aviária";
+    case "feathren_feline_ancestry":
+      return "Ancestria felina";
     default:
       return traitName;
   }
