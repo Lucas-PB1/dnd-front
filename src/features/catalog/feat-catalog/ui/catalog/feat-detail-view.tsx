@@ -70,6 +70,21 @@ function FeatDetailBody({ slug }: FeatDetailViewProps) {
     <div className="flex flex-col gap-12">
       <FeatHero feat={data} backHref={backHref} />
 
+      {data.categorySlug === "gh-transformation" ? (
+        <aside
+          className="rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm leading-relaxed text-foreground/90"
+          aria-label="Mecânica opcional"
+        >
+          <p className="text-xs font-medium tracking-wider text-amber-700 uppercase dark:text-amber-400">
+            Mecânica opcional
+          </p>
+          <p className="mt-1">
+            Transformações são regras opcionais do Grim Hollow (Cap. 6). Consulte
+            o mestre antes de adotar na campanha.
+          </p>
+        </aside>
+      ) : null}
+
       <section aria-labelledby="feat-benefits" className="space-y-4">
         <div className="space-y-1">
           <p className="text-xs font-medium tracking-wider text-primary uppercase">

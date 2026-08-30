@@ -62,6 +62,7 @@ export const FEAT_CATEGORY_FILTER: CatalogFilterField = {
     { value: "general", label: "Geral" },
     { value: "fighting-style", label: "Estilo de Luta" },
     { value: "epic-boon", label: "Dádiva Épica" },
+    { value: "gh-transformation", label: "Transformação GH" },
   ],
 };
 

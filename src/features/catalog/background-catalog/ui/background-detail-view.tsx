@@ -24,6 +24,12 @@ type BackgroundDetailViewProps = {
   slug: string;
 };
 
+function extractOptionalRule(summary: string | null | undefined): string | null {
+  if (!summary) return null;
+  const match = summary.match(/Regra opcional[^.]*\./);
+  return match?.[0] ?? null;
+}
+
 function BackgroundHero({
   background,
   skillNames,
@@ -144,6 +150,7 @@ function BackgroundDetailBody({ slug }: BackgroundDetailViewProps) {
   }
 
   const background = detailQuery.data;
+  const optionalRule = extractOptionalRule(background.summary);
 
   return (
     <div className="flex flex-col gap-12">
@@ -152,6 +159,18 @@ function BackgroundDetailBody({ slug }: BackgroundDetailViewProps) {
         skillNames={skillNames}
         backHref={backHref}
       />
+
+      {optionalRule ? (
+        <aside
+          className="rounded-lg border border-primary/25 bg-primary/5 px-4 py-3 text-sm leading-relaxed text-foreground/90"
+          aria-label="Regra opcional Grim Hollow"
+        >
+          <p className="text-xs font-medium tracking-wider text-primary uppercase">
+            Regra opcional (GH)
+          </p>
+          <p className="mt-1">{optionalRule}</p>
+        </aside>
+      ) : null}
 
       {background.description ? (
         <section aria-labelledby="background-about" className="space-y-4">
@@ -225,7 +244,7 @@ function BackgroundDetailBody({ slug }: BackgroundDetailViewProps) {
             Equipamento inicial
           </h2>
           <p className="text-sm text-muted-foreground">
-            Pacotes de partida do PHB
+            Pacotes de partida
             {background.equipmentGoldOption != null
               ? ` — ou ${background.equipmentGoldOption} PO no lugar`
               : ""}
