@@ -52,6 +52,13 @@ export function StepSpeciesChoices({
         </p>
       ) : (
         <>
+          {data.isGhHeritage ? (
+            <p className="text-sm text-muted-foreground">
+              Escolha 8 traços modulares do pool Grim Hollow. Traços podem ser
+              repetidos para a versão aprimorada. Algumas heranças permitem
+              trocar 1,5 m de deslocamento por um 9º traço.
+            </p>
+          ) : null}
           <SpeciesTraitChoicesSection
             groups={data.groups}
             speciesChoices={data.speciesChoices}

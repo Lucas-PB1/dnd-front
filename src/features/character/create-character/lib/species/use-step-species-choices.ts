@@ -13,6 +13,10 @@ import { asiFeatSlotsToCharacterFeats } from "@/features/character/create-charac
 import { skillChoiceKinds } from "@/features/character/create-character/lib/class-skills/granted-proficiencies";
 import { featSlugsGrantedOutsideSpecies } from "@/features/character/create-character/lib/feats/origin-feat-options";
 import {
+  isGhHeritageTraitSlot,
+  isGrimHollowHeritageSlug,
+} from "@/features/character/create-character/lib/species/grim-hollow-heritage";
+import {
   HUMAN_ORIGIN_FEAT_KIND,
   resolveCreateCharacterFeats,
 } from "@/features/character/create-character/lib/feats/preview-create-character-feats";
@@ -172,6 +176,9 @@ export function useStepSpeciesChoices(
     const geppettinConstruction = speciesChoices.find(
       (c) => c.choiceKind === "geppettin_construction",
     )?.choiceSlug;
+    const ghSpeedTrade = speciesChoices.find(
+      (c) => c.choiceKind === "gh_heritage_speed_trade",
+    )?.choiceSlug;
 
     for (const row of traitChoices.data?.data ?? []) {
       if (row.choiceKind === "high_elf_cantrip" && elfLineage !== "high-elf") {
@@ -190,6 +197,9 @@ export function useStepSpeciesChoices(
       ) {
         continue;
       }
+      if (row.choiceKind === "gh_heritage_trait_9" && ghSpeedTrade !== "yes") {
+        continue;
+      }
       const group = map.get(row.choiceKind) ?? {
         traitName: row.traitName,
         options: [],
@@ -202,7 +212,20 @@ export function useStepSpeciesChoices(
       map.set(row.choiceKind, group);
     }
 
-    return [...map.entries()].map(([kind, group]) => ({
+    return [...map.entries()]
+      .sort(([left], [right]) => {
+        const ghLeft = left.match(/^gh_heritage_trait_(\d+)$/);
+        const ghRight = right.match(/^gh_heritage_trait_(\d+)$/);
+        if (ghLeft && ghRight) {
+          return Number(ghLeft[1]) - Number(ghRight[1]);
+        }
+        if (left === "gh_heritage_speed_trade") return -1;
+        if (right === "gh_heritage_speed_trade") return 1;
+        if (left === "gh_heritage_size") return 1;
+        if (right === "gh_heritage_size") return -1;
+        return left.localeCompare(right, "pt");
+      })
+      .map(([kind, group]) => ({
       kind,
       traitName: group.traitName,
       options:
@@ -274,6 +297,9 @@ export function useStepSpeciesChoices(
     if (kind === "bearfolk_lineage" && slug !== "andari") {
       next = next.filter((c) => c.choiceKind !== "andari_druid_cantrip");
     }
+    if (kind === "gh_heritage_speed_trade" && slug !== "yes") {
+      next = next.filter((c) => c.choiceKind !== "gh_heritage_trait_9");
+    }
     setValue("speciesChoices", next);
 
     const nextPreview = resolveCreateCharacterFeats(
@@ -300,6 +326,7 @@ export function useStepSpeciesChoices(
 
   return {
     speciesSlug,
+    isGhHeritage: isGrimHollowHeritageSlug(speciesSlug),
     speciesChoices,
     level,
     classSlug,

@@ -37,7 +37,12 @@ export function traitChoiceLabel(kind: string, traitName: string): string {
       return "Ancestria aviária";
     case "feathren_feline_ancestry":
       return "Ancestria felina";
-    default:
+    default: {
+      const ghSlot = kind.match(/^gh_heritage_trait_(\d+)$/);
+      if (ghSlot) return `Traço modular ${ghSlot[1]}`;
+      if (kind === "gh_heritage_speed_trade") return "Trocar deslocamento (+1 traço)";
+      if (kind === "gh_heritage_size") return "Tamanho";
       return traitName;
+    }
   }
 }
