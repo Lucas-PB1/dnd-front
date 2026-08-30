@@ -34,6 +34,7 @@ export async function fetchBackgroundsPage(params?: {
   q?: string;
   editionSlugs?: string;
   fields?: "summary";
+  includeCatalogOnly?: boolean;
 }) {
   const search = buildCatalogSearchParams({
     page: params?.page,
@@ -43,6 +44,7 @@ export async function fetchBackgroundsPage(params?: {
     filters: {
       editionSlugs: params?.editionSlugs,
       fields: params?.fields,
+      includeCatalogOnly: params?.includeCatalogOnly ? "true" : undefined,
     },
   });
 
@@ -56,6 +58,7 @@ export async function fetchAllBackgrounds(params?: {
   q?: string;
   editionSlugs?: string;
   fields?: "summary";
+  includeCatalogOnly?: boolean;
 }) {
   return fetchAllCatalogPages<BackgroundListResponse["data"][number]>(
     ({ page, limit, cursor }) =>

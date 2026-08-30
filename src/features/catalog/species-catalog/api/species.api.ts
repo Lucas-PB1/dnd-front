@@ -31,6 +31,7 @@ export async function fetchSpeciesPage(params?: {
   q?: string;
   editionSlugs?: string;
   fields?: "summary";
+  includeCatalogOnly?: boolean;
 }) {
   const search = buildCatalogSearchParams({
     page: params?.page,
@@ -40,6 +41,7 @@ export async function fetchSpeciesPage(params?: {
     filters: {
       editionSlugs: params?.editionSlugs,
       fields: params?.fields,
+      includeCatalogOnly: params?.includeCatalogOnly ? "true" : undefined,
     },
   });
 
@@ -53,6 +55,7 @@ export async function fetchAllSpecies(params?: {
   q?: string;
   editionSlugs?: string;
   fields?: "summary";
+  includeCatalogOnly?: boolean;
 }) {
   return fetchAllCatalogPages<SpeciesListResponse["data"][number]>(
     ({ page, limit, cursor }) =>

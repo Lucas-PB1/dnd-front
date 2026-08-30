@@ -34,7 +34,7 @@ export function useBackgrounds() {
 export function useBackgroundsCatalog(params?: { q?: string }) {
   return useCatalogCompendium({
     queryKey: backgroundKeys.all,
-    fetchAll: fetchAllBackgrounds,
+    fetchAll: (p) => fetchAllBackgrounds({ ...p, includeCatalogOnly: true }),
     q: params?.q,
   });
 }

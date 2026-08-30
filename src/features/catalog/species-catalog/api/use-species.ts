@@ -27,7 +27,7 @@ export function useSpecies() {
 export function useSpeciesCatalog(params?: { q?: string }) {
   return useCatalogCompendium({
     queryKey: speciesKeys.all,
-    fetchAll: fetchAllSpecies,
+    fetchAll: (p) => fetchAllSpecies({ ...p, includeCatalogOnly: true }),
     q: params?.q,
   });
 }
