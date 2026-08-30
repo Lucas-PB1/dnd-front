@@ -61,6 +61,7 @@ function WeaponHero({
       title={weapon.name}
       eyebrow={weaponCategoryLabel(weapon.category)}
       stats={stats}
+      imageUrl={weapon.imageUrl}
     />
   );
 }

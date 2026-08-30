@@ -24,6 +24,7 @@ export type WeaponSummary = {
   range: WeaponRange | null;
   propertyDetails: WeaponTrait[];
   mastery: WeaponTrait | null;
+  imageUrl?: string | null;
 };
 
 export type WeaponListResponse = PaginatedResponse<WeaponSummary>;
@@ -31,4 +32,5 @@ export type WeaponListResponse = PaginatedResponse<WeaponSummary>;
 export const WEAPON_CATEGORY_LABELS_PT: Record<string, string> = {
   simple: "Arma Simples",
   martial: "Arma Marcial",
+  advanced: "Arma Avançada",
 };
