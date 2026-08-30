@@ -1,6 +1,7 @@
 "use client";
 
 import type { SubclassSummary } from "@/entities/class/types";
+import Link from "next/link";
 import { subclassFeatureKindLabel } from "@/entities/subclass/lib/feature-kind-label";
 import { useSubclassMechanics } from "@/features/catalog/class-catalog/api/use-classes";
 import { CollapsibleCard } from "@/shared/ui/collapsible-card";
@@ -17,6 +18,14 @@ export function SubclassCard({ subclass }: SubclassCardProps) {
   return (
     <CollapsibleCard title={subclass.name} subtitle={teaser}>
       <div className="space-y-5">
+        <p className="text-sm">
+          <Link
+            href={`/subclasses/${subclass.slug}`}
+            className="font-medium text-primary underline-offset-2 hover:underline"
+          >
+            Abrir no compêndio
+          </Link>
+        </p>
         {subclass.summary && subclass.tagline ? (
           <p className="text-sm leading-relaxed text-pretty text-muted-foreground">
             {subclass.summary}

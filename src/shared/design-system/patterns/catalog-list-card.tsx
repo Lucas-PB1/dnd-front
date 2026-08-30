@@ -40,7 +40,7 @@ export function CatalogListCard({
         {imageUrl ? (
           <CatalogMediaImage
             src={imageUrl}
-            className="mt-0.5 size-14 shrink-0 rounded-md border border-border/60 bg-muted/30 object-cover object-top sm:size-16"
+            className="mt-0.5 size-14 shrink-0 rounded-md border border-border/60 bg-muted/30 object-contain object-center p-1 sm:size-16"
           />
         ) : null}
         <div className="min-w-0 flex-1 space-y-1">

@@ -5,6 +5,7 @@ import {
   editionShortLabel,
   editionSlugsQueryParam,
   filterByEnabledEditions,
+  GRIM_HOLLOW_EDITION_SLUG,
   isEditionAllowed,
   PHB_EDITION_SLUG,
   STEINHARDT_EDITION_SLUG,
@@ -40,6 +41,16 @@ describe("catalog-sources helpers", () => {
         (item) => item.slug,
       ),
     ).toEqual(["fighter", "human"]);
+    expect(
+      filterByEnabledEditions(
+        [
+          ...items,
+          { slug: "monster-hunter", editionSlug: GRIM_HOLLOW_EDITION_SLUG },
+        ],
+        new Set([GRIM_HOLLOW_EDITION_SLUG]),
+      ).map((item) => item.slug,
+      ),
+    ).toEqual(["monster-hunter"]);
     expect(
       isEditionAllowed(VALDAS_EDITION_SLUG, new Set([PHB_EDITION_SLUG])),
     ).toBe(false);

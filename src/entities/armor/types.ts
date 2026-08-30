@@ -13,6 +13,8 @@ export type ArmorSummary = {
   stealthDisadvantage: boolean;
   costText: string | null;
   weight: string | null;
+  editionSlug?: string | null;
+  imageUrl?: string | null;
 };
 
 export type ArmorListResponse = PaginatedResponse<ArmorSummary>;

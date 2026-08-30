@@ -1,4 +1,5 @@
 import type { ArmorSummary } from "@/entities/armor/types";
+import { CatalogEditionChip } from "@/shared/ui/catalog-edition-chip";
 import { withCatalogReturn } from "@/shared/lib/catalog-return";
 import { toMetricProse } from "@/shared/lib/metric";
 import { CatalogListCard } from "@/shared/ui/catalog-list-card";
@@ -17,7 +18,9 @@ export function ArmorCard({ armor, listPath, className }: ArmorCardProps) {
     <CatalogListCard
       href={withCatalogReturn(`/equipment/armor/${armor.slug}`, listPath)}
       title={armor.name}
+      titleExtra={<CatalogEditionChip editionSlug={armor.editionSlug} />}
       eyebrow={armor.categoryName}
+      imageUrl={armor.imageUrl}
       teaser={
         ac
           ? `CA ${ac}${armor.stealthDisadvantage ? " · Desvantagem em Furtividade" : ""}`

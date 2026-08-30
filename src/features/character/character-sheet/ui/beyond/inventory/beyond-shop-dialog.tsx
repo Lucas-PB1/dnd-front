@@ -4,7 +4,11 @@ import { MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { useMemo, useRef, useState } from "react";
 
 import type { CoinPurse } from "@/entities/character/types";
+import type { CharacterDetail } from "@/entities/character/types";
 import type { InventoryItem } from "@/entities/character/session-types";
+import {
+  readEditionSlug,
+} from "@/entities/item/lib/catalog-item-properties";
 import {
   SHOP_KIND_CHIPS,
   type ItemSummary,
@@ -41,8 +45,12 @@ import { resolveShopArmor } from "@/features/catalog/item-catalog/lib/barding";
 import { ItemCatalogDetailTrigger } from "@/features/catalog/item-catalog/ui/item-catalog-detail-trigger";
 import { BeyondShopCartLineRow } from "@/features/character/character-sheet/ui/beyond/inventory/beyond-shop-cart-line-row";
 import { BeyondShopListItemInfo } from "@/features/character/character-sheet/ui/beyond/inventory/beyond-shop-list-item-info";
+import { filterShopCatalogItems } from "@/features/character/character-sheet/lib/inventory/shop-item-filters";
+import { shopProficiencyHint } from "@/features/character/character-sheet/lib/inventory/shop-proficiency-hint";
+import { useSheetWeaponProficiency } from "@/features/character/character-sheet/lib/inventory/weapon-proficiency-context";
 import { recordItemView } from "@/features/catalog/item-catalog/api/items.api";
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
+import { CatalogEditionChip } from "@/shared/ui/catalog-edition-chip";
 import { useDebouncedValue } from "@/shared/lib/use-debounced-value";
 import { Button } from "@/shared/ui/button";
 import {
@@ -60,6 +68,7 @@ export type { BeyondShopCartLine } from "@/features/character/character-sheet/li
 type BeyondShopDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  character: CharacterDetail;
   chargeApplies: boolean;
   canSkipPayment: boolean;
   viewerIsDmOrAssistant: boolean;
@@ -77,6 +86,7 @@ type BeyondShopDialogProps = {
 export function BeyondShopDialog({
   open,
   onOpenChange,
+  character,
   chargeApplies,
   canSkipPayment,
   viewerIsDmOrAssistant,
@@ -124,8 +134,22 @@ export function BeyondShopDialog({
 
   const tips = usePopularItems("purchase", 5, open);
   const equipmentIndex = useShopEquipmentIndex(open);
+  const weaponProficiency = useSheetWeaponProficiency(character);
 
-  const items = itemsQuery.data?.data ?? [];
+  const rawItems = itemsQuery.data?.data ?? [];
+  const items = useMemo(
+    () =>
+      filterShopCatalogItems(rawItems, advancedFilters, {
+        weaponsBySlug: equipmentIndex.weaponsBySlug,
+        armorBySlug: equipmentIndex.armorBySlug,
+      }),
+    [
+      rawItems,
+      advancedFilters,
+      equipmentIndex.weaponsBySlug,
+      equipmentIndex.armorBySlug,
+    ],
+  );
   const mustPay = chargeApplies && !skipPayment;
 
   const checkoutTotal = useMemo(() => {
@@ -352,6 +376,27 @@ export function BeyondShopDialog({
                 <ul className="divide-y divide-border/60">
                   {items.map((item) => {
                     const coverage = isCoverageItem(item);
+                    const weapon = equipmentIndex.weaponsBySlug?.get(item.slug);
+                    const armor = resolveShopArmor(
+                      item,
+                      equipmentIndex.armorBySlug,
+                    );
+                    const editionSlug = readEditionSlug(
+                      item.properties,
+                      weapon,
+                      armor?.editionSlug,
+                    );
+                    const proficiencyHint = shopProficiencyHint({
+                      item,
+                      weapon,
+                      characterLevel: character.level,
+                      weaponProficiencySlugs:
+                        weaponProficiency.weaponProficiencySlugs,
+                      proficiencyContext: {
+                        featSlugs: weaponProficiency.featSlugs,
+                        fightingStyleSlugs: weaponProficiency.fightingStyleSlugs,
+                      },
+                    });
                     return (
                       <li key={item.slug}>
                         <div className="flex items-start gap-2 px-3 py-2">
@@ -369,18 +414,18 @@ export function BeyondShopDialog({
                                 className="min-w-0 flex-1 text-left"
                                 onClick={() => markViewed(item.slug)}
                               >
-                                <p className="truncate text-sm font-medium">
-                                  {item.name}
+                                <p className="flex min-w-0 items-center gap-1.5 truncate text-sm font-medium">
+                                  <span className="truncate">{item.name}</span>
+                                  <CatalogEditionChip
+                                    editionSlug={editionSlug}
+                                    className="shrink-0"
+                                  />
                                 </p>
                                 <BeyondShopListItemInfo
                                   item={item}
-                                  weapon={equipmentIndex.weaponsBySlug?.get(
-                                    item.slug,
-                                  )}
-                                  armor={resolveShopArmor(
-                                    item,
-                                    equipmentIndex.armorBySlug,
-                                  )}
+                                  weapon={weapon}
+                                  armor={armor}
+                                  proficiencyHint={proficiencyHint}
                                 />
                               </button>
                               <ItemCatalogDetailTrigger item={item} />

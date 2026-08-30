@@ -21,6 +21,7 @@ export function SubclassCard({
       titleExtra={<CatalogEditionChip editionSlug={subclass.editionSlug} />}
       eyebrow={subclass.tagline}
       teaser={subclass.summary}
+      imageUrl={subclass.imageUrl}
       aside={
         <p className="shrink-0 text-xs text-muted-foreground sm:max-w-56 sm:text-right">
           {subclass.className}

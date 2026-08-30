@@ -11,7 +11,9 @@ import {
   countActiveShopAdvancedFilters,
   EMPTY_SHOP_ADVANCED_FILTERS,
   SHOP_ATTUNEMENT_FILTER,
+  SHOP_CATALOG_KIND_FILTER,
   SHOP_SORT_FILTER,
+  SHOP_WEAPON_CATEGORY_FILTER,
   shopAdvancedFilterLabels,
   clearShopAdvancedFilterKey,
   type ShopAdvancedFilters,
@@ -82,6 +84,12 @@ export function BeyondShopFilters({
     }
     if (key === "rarity") {
       patchAdvanced({ rarity: value });
+    }
+    if (key === "weaponCategory") {
+      patchAdvanced({ weaponCategory: value, catalogKind: "" });
+    }
+    if (key === "catalogKind") {
+      patchAdvanced({ catalogKind: value, weaponCategory: "" });
     }
   }
 
@@ -224,6 +232,48 @@ export function BeyondShopFilters({
                 }
               />
             </label>
+
+            {chipId === "weapon" ? (
+              <label className="flex flex-col gap-1">
+                <span className="text-[0.65rem] font-medium tracking-wider text-muted-foreground uppercase">
+                  {SHOP_WEAPON_CATEGORY_FILTER.label}
+                </span>
+                <SearchableSelect
+                  id="shop-weapon-category"
+                  value={advanced.weaponCategory}
+                  className="h-9 text-xs"
+                  options={[
+                    { value: "", label: "Todas" },
+                    ...SHOP_WEAPON_CATEGORY_FILTER.options,
+                  ]}
+                  placeholder="Todas"
+                  onValueChange={(next) =>
+                    setAdvancedField("weaponCategory", next)
+                  }
+                />
+              </label>
+            ) : null}
+
+            {chipId === "gear" || chipId === "all" ? (
+              <label className="flex flex-col gap-1">
+                <span className="text-[0.65rem] font-medium tracking-wider text-muted-foreground uppercase">
+                  {SHOP_CATALOG_KIND_FILTER.label}
+                </span>
+                <SearchableSelect
+                  id="shop-catalog-kind"
+                  value={advanced.catalogKind}
+                  className="h-9 text-xs"
+                  options={[
+                    { value: "", label: "Todos" },
+                    ...SHOP_CATALOG_KIND_FILTER.options,
+                  ]}
+                  placeholder="Todos"
+                  onValueChange={(next) =>
+                    setAdvancedField("catalogKind", next)
+                  }
+                />
+              </label>
+            ) : null}
 
             <div className="flex flex-col gap-2 sm:justify-end">
               <label className="flex items-center gap-2 text-xs">

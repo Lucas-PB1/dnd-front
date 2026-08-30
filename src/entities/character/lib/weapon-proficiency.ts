@@ -1,6 +1,6 @@
 /**
  * Espelha dnd-api `game/sheet/domain/weapon-attack.ts` → `isProficient`
- * (categorias + grupos; sem feat martial-weapon-training).
+ * (categorias + grupos; feats/estilos martial-weapon-training e advanced-weapon-proficiency).
  */
 
 const SIMPLE_PROFICIENCY = "armas-simples";
@@ -28,11 +28,42 @@ export type WeaponProficiencyPiece = {
   propertySlugs: readonly string[];
 };
 
+export type WeaponProficiencyContext = {
+  weaponProficiencySlugs: readonly string[];
+  featSlugs?: readonly string[];
+  fightingStyleSlugs?: readonly string[];
+};
+
+function expandProficiencySlugs(
+  weaponProficiencySlugs: readonly string[],
+  featSlugs: readonly string[],
+  fightingStyleSlugs: readonly string[],
+): string[] {
+  const proficiencySlugs = [...weaponProficiencySlugs];
+  const has = (slug: string) =>
+    featSlugs.includes(slug) || fightingStyleSlugs.includes(slug);
+
+  if (has("martial-weapon-training")) {
+    proficiencySlugs.push(MARTIAL_PROFICIENCY);
+  }
+  if (has("advanced-weapon-proficiency")) {
+    proficiencySlugs.push(ADVANCED_PROFICIENCY);
+  }
+  return proficiencySlugs;
+}
+
 export function isWeaponProficient(
   piece: WeaponProficiencyPiece,
   weaponProficiencySlugs: readonly string[],
+  context?: Omit<WeaponProficiencyContext, "weaponProficiencySlugs">,
 ): boolean {
-  for (const slug of weaponProficiencySlugs) {
+  const proficiencySlugs = expandProficiencySlugs(
+    weaponProficiencySlugs,
+    context?.featSlugs ?? [],
+    context?.fightingStyleSlugs ?? [],
+  );
+
+  for (const slug of proficiencySlugs) {
     const specific = SPECIFIC_WEAPON_PROFICIENCY[slug];
     if (specific && specific === piece.itemSlug) return true;
     if (

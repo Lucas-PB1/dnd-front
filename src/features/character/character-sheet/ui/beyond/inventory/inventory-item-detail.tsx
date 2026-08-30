@@ -72,6 +72,7 @@ type InventoryItemDetailProps = {
   onDetachCoverage?: (baseItemSlug: string) => void;
   /** Em campanha (player): remover vende por ½ do catálogo. */
   sellCreditApplies?: boolean;
+  proficiencyHint?: string | null;
 };
 
 function isBoardableTransportKind(kind: string | null | undefined): boolean {
@@ -334,6 +335,7 @@ export function InventoryItemDetail({
   onAttachCoverage,
   onDetachCoverage,
   sellCreditApplies = false,
+  proficiencyHint = null,
 }: InventoryItemDetailProps) {
   const [qtyDraft, setQtyDraft] = useState<string | null>(null);
   const [attachWeaponSlug, setAttachWeaponSlug] = useState("");
@@ -498,6 +500,16 @@ export function InventoryItemDetail({
             disabled={isPending}
           />
         </div>
+      ) : null}
+
+      {proficiencyHint ? (
+        <p className="inline-flex max-w-full items-start gap-1 rounded border border-secondary/30 bg-secondary/10 px-1.5 py-1 text-[0.65rem] leading-snug text-secondary">
+          <ShieldExclamationIcon
+            className="mt-0.5 size-3 shrink-0"
+            aria-hidden
+          />
+          <span>{proficiencyHint}</span>
+        </p>
       ) : null}
 
       {warnings.length > 0 ? (
@@ -903,7 +915,14 @@ export function InventoryItemDetail({
   );
 }
 
-export function inventoryItemTileMeta(item: InventoryItem): {
+export function inventoryItemTileMeta(
+  item: InventoryItem,
+  options?: {
+    catalogKindLabel?: string | null;
+    /** @deprecated use catalogKindLabel */
+    catalogEyebrow?: string | null;
+  },
+): {
   subtitle: string;
   badge: string;
   accent: boolean;
@@ -914,7 +933,10 @@ export function inventoryItemTileMeta(item: InventoryItem): {
     equipped && item.equipmentSlot
       ? (SLOT_LABELS[item.equipmentSlot] ?? item.equipmentSlot)
       : null;
+  const catalogKindLabel =
+    options?.catalogKindLabel ?? options?.catalogEyebrow ?? null;
   const parts = [
+    catalogKindLabel,
     item.quantity > 1 ? `×${item.quantity}` : null,
     item.isPactWeapon ? "Arma de Pacto" : null,
     item.attuned

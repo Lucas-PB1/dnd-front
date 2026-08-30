@@ -72,6 +72,7 @@ export const WEAPON_CATEGORY_FILTER: CatalogFilterField = {
   options: [
     { value: "simple", label: "Simples" },
     { value: "martial", label: "Marcial" },
+    { value: "advanced", label: "Avançada" },
   ],
 };
 
@@ -94,6 +95,21 @@ export const ITEM_TYPE_FILTER: CatalogFilterField = {
     { value: "tool", label: "Ferramenta" },
     { value: "focus", label: "Foco" },
     { value: "other", label: "Outro" },
+  ],
+};
+
+/** Filtro de tipo avançado GH no grid de equipamento do compêndio. */
+export const GEAR_CATALOG_KIND_FILTER: CatalogFilterField = {
+  key: "catalogKind",
+  label: "Tipo avançado",
+  options: [
+    { value: "ammunition", label: "Munição avançada" },
+    { value: "weapon-like-gear", label: "Equipamento (arma)" },
+    { value: "armor-upgrade", label: "Melhoria de armadura" },
+    { value: "spellcasting-focus", label: "Foco de conjuração" },
+    { value: "tool-instrument-upgrade", label: "Melhoria de instrumento" },
+    { value: "prosthetic", label: "Prótese" },
+    { value: "poison", label: "Veneno" },
   ],
 };
 

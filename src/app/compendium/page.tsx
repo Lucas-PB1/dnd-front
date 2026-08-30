@@ -5,7 +5,7 @@ export default function CompendiumPage() {
   return (
     <CatalogShell
       title="Compêndio"
-      description="PHB 2024, Valdas Spire, Eldritch Hunt e Northlands Heroes (Nórdico) — classes, espécies, antecedentes, subclasses, talentos, equipamento e magias. Filtre as fontes no topo."
+      description="PHB 2024, Valdas Spire, Eldritch Hunt, Northlands Heroes (Nórdico), Griffon's Saddlebag e Grim Hollow — classes, espécies, antecedentes, subclasses, talentos, equipamento e magias. Filtre as fontes no topo."
     >
       <CompendiumHub />
     </CatalogShell>

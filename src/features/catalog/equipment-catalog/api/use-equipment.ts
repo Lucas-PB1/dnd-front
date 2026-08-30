@@ -57,20 +57,32 @@ export function useArmorDetail(slug: string, enabled = true) {
   });
 }
 
-export function useGearCatalog(params: { q?: string; itemType?: string }) {
+export function useGearCatalog(params: {
+  q?: string;
+  itemType?: string;
+  editionSlug?: string;
+}) {
   const itemType = params.itemType?.trim() || EQUIPMENT_GEAR_ITEM_TYPES;
+  const editionSlug = params.editionSlug?.trim();
 
   return useCatalogCompendium({
-    queryKey: [...itemKeys.all, "gear", itemType] as const,
+    queryKey: [
+      ...itemKeys.all,
+      "gear",
+      itemType,
+      editionSlug ?? "all",
+    ] as const,
     fetchAll: (filters) =>
       fetchAllItems({
         q: filters.q,
         itemType,
         magic: false,
         fields: "summary",
+        editionSlugs: filters.editionSlugs,
       }),
     q: params.q,
-    editionScoped: false,
+    filters: editionSlug ? { editionSlugs: editionSlug } : undefined,
+    editionScoped: !editionSlug,
   });
 }
 

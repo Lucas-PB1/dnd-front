@@ -12,6 +12,7 @@ import {
   InventoryItemDetail,
   inventoryItemTileMeta,
 } from "@/features/character/character-sheet/ui/beyond/inventory/inventory-item-detail";
+import type { InventoryCatalogTileMeta } from "@/features/character/character-sheet/lib/inventory/inventory-catalog-tile-meta";
 import {
   DetailTileGrid,
   type DetailTileItem,
@@ -20,6 +21,7 @@ import {
   SheetEmptyHint,
   SheetSubheader,
 } from "@/features/character/character-sheet/ui/sheet/sheet-ui";
+import { CatalogEditionChip } from "@/shared/ui/catalog-edition-chip";
 
 type InventoryLocationSectionProps = {
   id: string;
@@ -31,6 +33,8 @@ type InventoryLocationSectionProps = {
   isPending: boolean;
   attunementSlotsFull: boolean;
   equipmentWarnings: EquipmentWarning[];
+  resolveCatalogTileMeta?: (item: InventoryItem) => InventoryCatalogTileMeta;
+  resolveProficiencyHint?: (item: InventoryItem) => string | null;
   weaponOptions?: { value: string; label: string }[];
   canBindPactWeapon?: boolean;
   onToggleLocation: (item: InventoryItem) => void;
@@ -66,6 +70,8 @@ export function InventoryLocationSection({
   isPending,
   attunementSlotsFull,
   equipmentWarnings,
+  resolveCatalogTileMeta,
+  resolveProficiencyHint,
   weaponOptions = [],
   baseOptions = [],
   containerOptions = [],
@@ -82,13 +88,19 @@ export function InventoryLocationSection({
 }: InventoryLocationSectionProps) {
   const tiles = useMemo((): DetailTileItem[] => {
     return items.map((item) => {
-      const meta = inventoryItemTileMeta(item);
+      const catalogMeta = resolveCatalogTileMeta?.(item);
+      const meta = inventoryItemTileMeta(item, {
+        catalogKindLabel: catalogMeta?.catalogKindLabel ?? null,
+      });
       const warnings = equipmentWarnings.filter(
         (warning) => warning.itemSlug === item.itemSlug,
       );
       return {
         id: `${item.itemSlug}-${item.equipmentSlot ?? "none"}`,
         title: item.itemName,
+        titleExtra: catalogMeta?.editionSlug ? (
+          <CatalogEditionChip editionSlug={catalogMeta.editionSlug} />
+        ) : undefined,
         subtitle: meta.subtitle,
         badge: meta.badge,
         accent: meta.accent,
@@ -112,6 +124,7 @@ export function InventoryLocationSection({
             onAttachCoverage={onAttachCoverage}
             onDetachCoverage={onDetachCoverage}
             sellCreditApplies={sellCreditApplies}
+            proficiencyHint={resolveProficiencyHint?.(item) ?? null}
           />
         ),
       };
@@ -133,6 +146,8 @@ export function InventoryLocationSection({
     onRemove,
     onToggleAttunement,
     onToggleLocation,
+    resolveCatalogTileMeta,
+    resolveProficiencyHint,
     sellCreditApplies,
     weaponOptions,
   ]);

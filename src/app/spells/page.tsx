@@ -7,7 +7,7 @@ export default function SpellsPage() {
   return (
     <CatalogShell
       title="Magias"
-      description="Truques e círculos do PHB 2024, Valdas, Eldritch Hunt e Northlands Heroes (Nórdico) — escola, tempo e duração."
+      description="Truques e círculos do PHB 2024, Valdas, Eldritch Hunt, Northlands Heroes (Nórdico) e Griffon's Saddlebag — escola, tempo e duração."
       backHref="/compendium"
       backLabel="Compêndio"
     >

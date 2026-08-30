@@ -7,7 +7,7 @@ export default function SubclassesPage() {
   return (
     <CatalogShell
       title="Subclasses"
-      description="Arquétipos de cada classe (PHB, Valdas, Eldritch Hunt e Northlands Heroes Nórdico) — tagline, resumo e características por nível."
+      description="Arquétipos de cada classe (PHB, Valdas, Eldritch Hunt, Northlands Heroes Nórdico, Griffon's Saddlebag e Grim Hollow) — tagline, resumo e características por nível."
       backHref="/compendium"
       backLabel="Compêndio"
     >

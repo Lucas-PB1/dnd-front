@@ -14,6 +14,7 @@ import { skillChoiceKinds } from "@/features/character/create-character/lib/clas
 import { useClassDetail } from "@/features/catalog/class-catalog/api/use-classes";
 import { useFeatOptions } from "@/features/catalog/feat-catalog/api/use-feat-options";
 import { meetsFeatRequirements } from "@/features/catalog/feat-catalog/lib/feat-eligibility";
+import { isGeneralFeatFightingStylePick } from "@/entities/feat/fighting-style-general-feat";
 import { FeatOptionsEditor } from "@/features/catalog/feat-catalog/ui/options/feat-options-editor";
 
 type FeatCatalogItem = Pick<
@@ -150,7 +151,7 @@ export function LevelUpAsiFeatPanel({
                     canAddCharacterFeat(character.characterFeats, feat.slug) &&
                     (feat.categorySlug === "general" ||
                       (feat.categorySlug === "epic-boon" && nextLevel >= 19) ||
-                      feat.categorySlug === "fighting-style") &&
+                      isGeneralFeatFightingStylePick(feat.slug, nextLevel)) &&
                     meetsFeatRequirements(feat, eligibility),
                 )
                 .map((feat) => ({

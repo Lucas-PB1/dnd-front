@@ -39,7 +39,7 @@ const SECTIONS: ReadonlyArray<{
     title: "Espécies",
     eyebrow: "Origens",
     description:
-      "Anão, elfo, humano e mais — traços, tamanho e velocidade de cada espécie.",
+      "Anão, elfo, Feathren e mais (PHB, Valdas, Eldritch Hunt, Northlands Nórdico, Griffon's Saddlebag) — traços, tamanho e deslocamento.",
     icon: GlobeAltIcon,
   },
   {
@@ -79,7 +79,7 @@ const SECTIONS: ReadonlyArray<{
     title: "Subclasses",
     eyebrow: "Arquétipos",
     description:
-      "Caminhos de cada classe (PHB, Valdas, Eldritch Hunt, Northlands Nórdico) — tagline, resumo e características por nível.",
+      "Caminhos de cada classe (PHB, Valdas, Eldritch Hunt, Northlands Nórdico, Griffon's Saddlebag, Grim Hollow) — tagline, resumo e características por nível.",
     icon: Squares2X2Icon,
   },
   {
@@ -103,7 +103,7 @@ const SECTIONS: ReadonlyArray<{
     title: "Magias",
     eyebrow: "Arcano",
     description:
-      "Truques aos círculos superiores — escolas, componentes e duração (PHB, Valdas, Eldritch Hunt, Northlands Nórdico).",
+      "Truques aos círculos superiores — escolas, componentes e duração (PHB, Valdas, Eldritch Hunt, Northlands Nórdico, Griffon's Saddlebag).",
     icon: SparklesIcon,
   },
   {
@@ -146,13 +146,13 @@ export function CompendiumHub() {
           <div className="flex items-center gap-2">
             <SealMark className="size-5" />
             <p className="text-xs font-medium tracking-wider text-secondary uppercase">
-              PHB 2024 · Valdas · Eldritch Hunt · Northlands (Nórdico)
+              PHB 2024 · Valdas · Eldritch Hunt · Northlands (Nórdico) · Griffon's Saddlebag · Grim Hollow
             </p>
           </div>
           <p className="max-w-2xl font-heading text-lg leading-snug text-foreground/90 sm:text-xl">
             Explore o catálogo público — sem login. PHB 2024, Valdas Spire,
-            Steinhardt Eldritch Hunt e Northlands Heroes (Nórdico): classes,
-            subclasses, espécies, antecedentes, talentos, equipamento e magias. Use Fontes no topo para filtrar.
+            Steinhardt Eldritch Hunt, Northlands Heroes (Nórdico), Griffon's Saddlebag e Grim Hollow:
+            classes, subclasses, espécies, antecedentes, talentos, equipamento e magias. Use Fontes no topo para filtrar.
           </p>
         </div>
       </div>

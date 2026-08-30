@@ -5,6 +5,7 @@ import {
   weaponTeaser,
   weaponWeightText,
 } from "@/features/catalog/equipment-catalog/lib/weapon-labels";
+import { CatalogEditionChip } from "@/shared/ui/catalog-edition-chip";
 import { withCatalogReturn } from "@/shared/lib/catalog-return";
 import { CatalogListCard } from "@/shared/ui/catalog-list-card";
 
@@ -23,7 +24,9 @@ export function WeaponCard({ weapon, listPath, className }: WeaponCardProps) {
     <CatalogListCard
       href={withCatalogReturn(`/equipment/weapons/${weapon.slug}`, listPath)}
       title={weapon.name}
+      titleExtra={<CatalogEditionChip editionSlug={weapon.editionSlug} />}
       eyebrow={weaponCategoryLabel(weapon.category)}
+      imageUrl={weapon.imageUrl}
       teaser={teaser}
       aside={
         <div className="shrink-0 space-y-0.5 text-xs text-muted-foreground sm:max-w-40 sm:text-right">

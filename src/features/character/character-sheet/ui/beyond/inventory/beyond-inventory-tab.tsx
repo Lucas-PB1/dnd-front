@@ -1,12 +1,14 @@
 "use client";
 
 import { ArchiveBoxIcon, PlusIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 
+import type { ItemSummary } from "@/entities/item/types";
 import type {
   InventoryItem,
   PatchInventoryItemPayload,
 } from "@/entities/character/session-types";
+import type { CharacterDetail } from "@/entities/character/types";
 import type { ClassOption } from "@/entities/character/sheet-types";
 import type { CoinPurse } from "@/entities/character/types";
 import type { EquipmentWarning } from "@/entities/character/types";
@@ -31,6 +33,10 @@ import {
 import { BeyondSellDialog } from "@/features/character/character-sheet/ui/beyond/inventory/beyond-sell-dialog";
 import { MAX_ATTUNED_ITEMS } from "@/features/character/character-sheet/ui/beyond/inventory/inventory-item-meta";
 import { InventoryLocationSection } from "@/features/character/character-sheet/ui/beyond/inventory/inventory-location-section";
+import { useInventoryCatalogIndex } from "@/features/character/character-sheet/api/use-inventory-catalog-index";
+import { resolveInventoryCatalogTileMeta } from "@/features/character/character-sheet/lib/inventory/inventory-catalog-tile-meta";
+import { shopProficiencyHint } from "@/features/character/character-sheet/lib/inventory/shop-proficiency-hint";
+import { useSheetWeaponProficiency } from "@/features/character/character-sheet/lib/inventory/weapon-proficiency-context";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
 
@@ -53,6 +59,7 @@ function isContainerSlug(slug: string): boolean {
 }
 
 type BeyondInventoryTabProps = {
+  character: CharacterDetail;
   characterId: string;
   equipmentWarnings?: EquipmentWarning[];
   classSlug?: string | null;
@@ -60,6 +67,7 @@ type BeyondInventoryTabProps = {
 };
 
 export function BeyondInventoryTab({
+  character,
   characterId,
   equipmentWarnings = [],
   classSlug,
@@ -77,6 +85,8 @@ export function BeyondInventoryTab({
 
   const [shopOpen, setShopOpen] = useState(false);
   const [sellTarget, setSellTarget] = useState<InventoryItem | null>(null);
+  const catalogIndex = useInventoryCatalogIndex(true);
+  const weaponProficiency = useSheetWeaponProficiency(character);
 
   const canBindPactWeapon =
     classSlug === "warlock" &&
@@ -187,11 +197,65 @@ export function BeyondInventoryTab({
     detachCoverage.error ??
     inventory.error;
 
+  const resolveCatalogTileMeta = useCallback(
+    (item: InventoryItem) =>
+      resolveInventoryCatalogTileMeta({
+        itemSlug: item.itemSlug,
+        itemsBySlug: catalogIndex.itemsBySlug,
+        weaponsBySlug: catalogIndex.weaponsBySlug,
+        armorBySlug: catalogIndex.armorBySlug,
+      }),
+    [
+      catalogIndex.armorBySlug,
+      catalogIndex.itemsBySlug,
+      catalogIndex.weaponsBySlug,
+    ],
+  );
+
+  const resolveProficiencyHint = useCallback(
+    (item: InventoryItem) => {
+      const catalogItem = catalogIndex.itemsBySlug.get(item.itemSlug);
+      const weapon = catalogIndex.weaponsBySlug?.get(item.itemSlug);
+      if (!catalogItem && !weapon) return null;
+      const summary: ItemSummary =
+        catalogItem ??
+        ({
+          slug: item.itemSlug,
+          name: item.itemName,
+          itemType: item.itemType,
+          costText: null,
+          weight: null,
+          description: null,
+          properties: null,
+        } satisfies ItemSummary);
+      return shopProficiencyHint({
+        item: summary,
+        weapon,
+        characterLevel: character.level,
+        weaponProficiencySlugs: weaponProficiency.weaponProficiencySlugs,
+        proficiencyContext: {
+          featSlugs: weaponProficiency.featSlugs,
+          fightingStyleSlugs: weaponProficiency.fightingStyleSlugs,
+        },
+      });
+    },
+    [
+      catalogIndex.itemsBySlug,
+      catalogIndex.weaponsBySlug,
+      character.level,
+      weaponProficiency.featSlugs,
+      weaponProficiency.fightingStyleSlugs,
+      weaponProficiency.weaponProficiencySlugs,
+    ],
+  );
+
   const sectionProps = {
     characterId,
     isPending,
     attunementSlotsFull,
     equipmentWarnings,
+    resolveCatalogTileMeta,
+    resolveProficiencyHint,
     weaponOptions,
     baseOptions,
     containerOptions,
@@ -343,6 +407,7 @@ export function BeyondInventoryTab({
       <BeyondShopDialog
         open={shopOpen}
         onOpenChange={setShopOpen}
+        character={character}
         chargeApplies={chargeApplies}
         canSkipPayment={canSkipPayment}
         viewerIsDmOrAssistant={Boolean(payment?.viewerIsDmOrAssistant)}

@@ -14,6 +14,7 @@ import { cn } from "@/shared/lib/utils";
 export type DetailTileItem = {
   id: string;
   title: string;
+  titleExtra?: ReactNode;
   subtitle?: string;
   badge?: string;
   accent?: boolean;
@@ -74,7 +75,10 @@ export function DetailTileGrid({
                 </span>
               ) : null}
               <span className="line-clamp-2 font-heading text-[0.8rem] leading-snug font-semibold tracking-tight">
-                {item.title}
+                <span className="inline-flex max-w-full items-center gap-1">
+                  <span className="truncate">{item.title}</span>
+                  {item.titleExtra ?? null}
+                </span>
               </span>
               {item.subtitle ? (
                 <span className="mt-0.5 line-clamp-1 text-[0.65rem] text-muted-foreground">
@@ -99,7 +103,12 @@ export function DetailTileGrid({
           {active ? (
             <>
               <DialogHeader className="shrink-0">
-                <DialogTitle>{active.title}</DialogTitle>
+                <DialogTitle>
+                  <span className="inline-flex flex-wrap items-center gap-1.5">
+                    {active.title}
+                    {active.titleExtra ?? null}
+                  </span>
+                </DialogTitle>
                 {active.subtitle || active.badge ? (
                   <DialogDescription>
                     {[active.badge, active.subtitle].filter(Boolean).join(" · ")}

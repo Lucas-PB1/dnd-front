@@ -17,6 +17,7 @@ import {
   executeSorcererTableAction,
   executeWarlockTableAction,
   executeWizardTableAction,
+  executeMonsterHunterTableAction,
   sessionKeys,
   spendClassResource,
   type BarbarianTableActionSlug,
@@ -394,6 +395,16 @@ export function useEconomyTableAction(characterId: string) {
             token,
             characterId,
             tableAction as WizardTableActionSlug,
+          );
+          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
+          return noteFromResult(result, note);
+        }
+
+        if (routeClass === "monster-hunter") {
+          const result = await executeMonsterHunterTableAction(
+            token,
+            characterId,
+            tableAction,
           );
           queryClient.setQueryData(sessionKeys.state(characterId), result.state);
           return noteFromResult(result, note);

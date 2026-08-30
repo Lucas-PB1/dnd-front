@@ -15,6 +15,7 @@ import { CombatRoguePanel } from "./panels/rogue-panel";
 import { CombatSorcererPanel } from "./panels/sorcerer-panel";
 import { CombatWarlockPanel } from "./panels/warlock-panel";
 import { CombatWizardPanel } from "./panels/wizard-panel";
+import { CombatMonsterHunterPanel } from "./panels/monster-hunter-panel";
 
 type ClassCombatPanelProps = {
   characterId: string;
@@ -79,6 +80,13 @@ export function ClassCombatPanel({
       return <CombatDruidPanel {...shared} />;
     case "wizard":
       return <CombatWizardPanel {...shared} />;
+    case "monster-hunter":
+      return (
+        <CombatMonsterHunterPanel
+          {...shared}
+          onTableNote={onTableNote}
+        />
+      );
     case "gunslinger":
       return (
         <CombatManeuversPanel

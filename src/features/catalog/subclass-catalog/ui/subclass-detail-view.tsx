@@ -6,6 +6,7 @@ import type { SubclassSummary } from "@/entities/subclass/types";
 import { useSubclassMechanics } from "@/features/catalog/class-catalog/api/use-classes";
 import { useSubclassDetail } from "@/features/catalog/subclass-catalog/api/use-subclasses";
 import { useCatalogBackHref } from "@/shared/lib/use-catalog-back-href";
+import { CatalogEditionChip } from "@/shared/ui/catalog-edition-chip";
 import {
   CatalogDetailError,
   CatalogDetailHero,
@@ -45,6 +46,7 @@ function SubclassHero({
       backHref={backHref}
       backLabel="Subclasses"
       title={subclass.name}
+      titleExtra={<CatalogEditionChip editionSlug={subclass.editionSlug} />}
       eyebrow={subclass.tagline ?? subclass.className}
       stats={stats}
       imageUrl={subclass.imageUrl}

@@ -20,6 +20,10 @@ import {
   parseWeaponMasteryEligibility,
 } from "@/entities/character/lib/class-weapon-mastery-slots";
 import { isWeaponProficient } from "@/entities/character/lib/weapon-proficiency";
+import {
+  collectTakenFightingStyleSlugs,
+  isFightingStyleSubclassOptionKey,
+} from "@/features/catalog/feat-catalog/lib/fighting-style-feat-options";
 import { skillChoiceKinds } from "@/features/character/create-character/lib/class-skills/granted-proficiencies";
 import type { CreateCharacterInput } from "@/features/character/create-character/model/create-character.schema";
 import { truncateChoiceHint } from "@/features/character/create-character/ui/choice-preview-panel";
@@ -60,6 +64,26 @@ export function useStepClassSkills(
     control,
     name: "classOptions",
     defaultValue: [],
+  });
+  const subclassOptions = useWatch({
+    control,
+    name: "subclassOptions",
+    defaultValue: [],
+  });
+  const asiFeatSlotSlugs = useWatch({
+    control,
+    name: "asiFeatSlotSlugs",
+    defaultValue: [],
+  });
+  const fightingStyleFeatSlug = useWatch({
+    control,
+    name: "fightingStyleFeatSlug",
+    defaultValue: "",
+  });
+  const backgroundOriginFeatSlug = useWatch({
+    control,
+    name: "backgroundOriginFeatSlug",
+    defaultValue: "",
   });
 
   const classDetail = useClassDetail(classSlug, !!classSlug);
@@ -166,6 +190,31 @@ export function useStepClassSkills(
     [classDetail.data?.weaponProficiencySlugs],
   );
 
+  const weaponProficiencyContext = useMemo(() => {
+    const featSlugs = [
+      ...asiFeatSlotSlugs.filter(Boolean),
+      ...(backgroundOriginFeatSlug ? [backgroundOriginFeatSlug] : []),
+      ...(fightingStyleFeatSlug ? [fightingStyleFeatSlug] : []),
+    ];
+    const fightingStyleSlugs = [
+      ...subclassOptions
+        .filter((option) => isFightingStyleSubclassOptionKey(option.optionKey))
+        .map((option) => option.valueId),
+      ...collectTakenFightingStyleSlugs({
+        characterFeatSlugs: featSlugs,
+        fightingStyleFeatSlugs: new Set(classDetail.data?.fightingStyleSlugs ?? []),
+        subclassOptions,
+      }),
+    ];
+    return { featSlugs, fightingStyleSlugs };
+  }, [
+    asiFeatSlotSlugs,
+    backgroundOriginFeatSlug,
+    fightingStyleFeatSlug,
+    subclassOptions,
+    classDetail.data?.fightingStyleSlugs,
+  ]);
+
   const masteryCandidates = useMemo(() => {
     const items = weapons.data?.data ?? [];
     return items
@@ -188,6 +237,7 @@ export function useStepClassSkills(
             propertySlugs: weapon.propertyDetails.map((p) => p.slug),
           },
           weaponProficiencySlugs,
+          weaponProficiencyContext,
         ),
       )
       .map((weapon) => ({
@@ -198,7 +248,7 @@ export function useStepClassSkills(
         masteryDescription: weapon.mastery?.description ?? null,
       }))
       .sort((a, b) => a.label.localeCompare(b.label, "pt"));
-  }, [weapons.data?.data, masteryEligibility, weaponProficiencySlugs]);
+  }, [weapons.data?.data, masteryEligibility, weaponProficiencySlugs, weaponProficiencyContext]);
 
   function toggleSkill(slug: string) {
     if (backgroundSkillSlugs.has(slug)) return;

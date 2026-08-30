@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-import { resolveCatalogImageUrl } from "@/shared/lib/resolve-catalog-image-url";
+import { CatalogMediaImage } from "@/shared/design-system/patterns/catalog-media-image";
 import { motion } from "@/shared/lib/motion";
 import { cn } from "@/shared/lib/utils";
 import { BackLink } from "@/shared/design-system/layout/back-link";
@@ -43,7 +43,7 @@ export function CatalogDetailHero({
   className,
 }: CatalogDetailHeroProps) {
   const hasStats = (stats?.length ?? 0) > 0;
-  const resolvedImageUrl = resolveCatalogImageUrl(imageUrl);
+  const hasImage = Boolean(imageUrl?.trim());
 
   return (
     <header
@@ -65,48 +65,58 @@ export function CatalogDetailHero({
       <div className="relative space-y-6 p-5 sm:p-8">
         <BackLink href={backHref}>{backLabel}</BackLink>
 
-        <div className="space-y-3">
-          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <h1 className="font-heading text-4xl font-semibold tracking-tight sm:text-5xl">
-              {title}
-            </h1>
-            {titleExtra}
-          </div>
-          {eyebrow ? (
-            <p className="max-w-xl text-sm font-medium tracking-wide text-secondary uppercase sm:text-base">
-              {eyebrow}
-            </p>
-          ) : null}
-          {badges && badges.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {badges.map((badge) => (
-                <Badge key={badge} variant="secondary" size="default">
-                  {badge}
-                </Badge>
-              ))}
+        <div
+          className={cn(
+            "gap-6",
+            hasImage
+              ? "grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start"
+              : "space-y-3",
+          )}
+        >
+          <div className="min-w-0 space-y-3">
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <h1 className="font-heading text-4xl font-semibold tracking-tight sm:text-5xl">
+                {title}
+              </h1>
+              {titleExtra}
             </div>
-          ) : null}
-          {summary ? (
-            <p className="max-w-2xl font-heading text-lg leading-snug text-foreground/90 sm:text-xl">
-              {summary}
-            </p>
-          ) : null}
-          {resolvedImageUrl ? (
-            <img
-              src={resolvedImageUrl}
-              alt=""
-              className="max-h-48 w-full max-w-xs rounded-lg border border-border/60 bg-muted/30 object-cover object-top"
-            />
+            {eyebrow ? (
+              <p className="max-w-xl text-sm font-medium tracking-wide text-secondary uppercase sm:text-base">
+                {eyebrow}
+              </p>
+            ) : null}
+            {badges && badges.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {badges.map((badge) => (
+                  <Badge key={badge} variant="secondary" size="default">
+                    {badge}
+                  </Badge>
+                ))}
+              </div>
+            ) : null}
+            {summary ? (
+              <p className="max-w-2xl font-heading text-lg leading-snug text-foreground/90 sm:text-xl">
+                {summary}
+              </p>
+            ) : null}
+          </div>
+
+          {hasImage ? (
+            <div className="flex justify-center lg:justify-end">
+              <div className="flex size-36 items-center justify-center rounded-lg border border-border/60 bg-muted/25 p-4 sm:size-40 lg:size-44">
+                <CatalogMediaImage
+                  src={imageUrl!}
+                  alt=""
+                  expandable
+                  className="max-h-full max-w-full object-contain object-center"
+                />
+              </div>
+            </div>
           ) : null}
         </div>
 
         {hasStats ? (
-          <dl
-            className="grid gap-px overflow-x-auto rounded-lg border border-border bg-border"
-            style={{
-              gridTemplateColumns: `repeat(${stats!.length}, minmax(0, 1fr))`,
-            }}
-          >
+          <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-3 lg:grid-cols-[repeat(auto-fit,minmax(7rem,1fr))]">
             {stats!.map((stat) => (
               <div
                 key={stat.label}

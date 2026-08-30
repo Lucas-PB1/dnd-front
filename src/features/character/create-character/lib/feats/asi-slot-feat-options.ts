@@ -7,6 +7,9 @@ import {
   collectTakenFightingStyleSlugs,
 } from "@/features/catalog/feat-catalog/lib/fighting-style-feat-options";
 import {
+  generalFeatMinLevelForFightingStyle,
+} from "@/entities/feat/fighting-style-general-feat";
+import {
   meetsFeatRequirements,
   type FeatEligibilityContext,
 } from "@/features/catalog/feat-catalog/lib/feat-eligibility";
@@ -103,6 +106,21 @@ export function sortedAsiSlotFeatOptions(args: {
     }
     if (feat.categorySlug !== FIGHTING_STYLE_FEAT_CATEGORY) {
       return true;
+    }
+    const generalMin = generalFeatMinLevelForFightingStyle(feat.slug);
+    if (
+      generalMin != null &&
+      eligibility.level >= generalMin &&
+      feat.slug === currentSlotSlug
+    ) {
+      return true;
+    }
+    if (
+      generalMin != null &&
+      eligibility.level >= generalMin &&
+      feat.slug !== currentSlotSlug
+    ) {
+      return !takenStyles.includes(feat.slug);
     }
     if (feat.slug === currentSlotSlug) {
       return allowedStyles.has(feat.slug);

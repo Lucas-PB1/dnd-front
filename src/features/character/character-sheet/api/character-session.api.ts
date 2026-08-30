@@ -600,3 +600,18 @@ export async function executeWizardTableAction(
     },
   );
 }
+
+export async function executeMonsterHunterTableAction(
+  accessToken: string,
+  characterId: string,
+  actionSlug: string,
+) {
+  return gameFetch<TableActionResult>(
+    `/characters/${characterId}/monster-hunter/table-action`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify({ actionSlug }),
+    },
+  );
+}

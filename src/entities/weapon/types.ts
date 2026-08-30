@@ -25,6 +25,7 @@ export type WeaponSummary = {
   propertyDetails: WeaponTrait[];
   mastery: WeaponTrait | null;
   imageUrl?: string | null;
+  editionSlug?: string | null;
 };
 
 export type WeaponListResponse = PaginatedResponse<WeaponSummary>;

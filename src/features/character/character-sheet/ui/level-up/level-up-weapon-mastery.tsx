@@ -11,6 +11,7 @@ import {
   type ClassWeaponMasterySlot,
 } from "@/entities/character/lib/class-weapon-mastery-slots";
 import { isWeaponProficient } from "@/entities/character/lib/weapon-proficiency";
+import { isFightingStyleSubclassOptionKey } from "@/features/catalog/feat-catalog/lib/fighting-style-feat-options";
 import { useClassDetail } from "@/features/catalog/class-catalog/api/use-classes";
 import { CatalogSelect } from "@/features/character/create-character/ui/catalog-select";
 import {
@@ -50,6 +51,14 @@ export function LevelUpWeaponMastery({
     [classDetail.data?.weaponProficiencySlugs],
   );
 
+  const weaponProficiencyContext = useMemo(() => {
+    const featSlugs = character.characterFeats.map((feat) => feat.featSlug);
+    const fightingStyleSlugs = character.subclassOptions
+      .filter((option) => isFightingStyleSubclassOptionKey(option.optionKey))
+      .map((option) => option.valueId);
+    return { featSlugs, fightingStyleSlugs };
+  }, [character.characterFeats, character.subclassOptions]);
+
   const candidates = useMemo(() => {
     const items = weapons.data?.data ?? [];
     return items
@@ -72,6 +81,7 @@ export function LevelUpWeaponMastery({
             propertySlugs: weapon.propertyDetails.map((p) => p.slug),
           },
           weaponProficiencySlugs,
+          weaponProficiencyContext,
         ),
       )
       .map((weapon) => ({
@@ -79,7 +89,7 @@ export function LevelUpWeaponMastery({
         label: `${weapon.name}${weapon.mastery ? ` · ${weapon.mastery.name}` : ""}`,
       }))
       .sort((a, b) => a.label.localeCompare(b.label, "pt"));
-  }, [weapons.data?.data, eligibility, weaponProficiencySlugs]);
+  }, [weapons.data?.data, eligibility, weaponProficiencySlugs, weaponProficiencyContext]);
 
   function setMastery(optionKey: string, valueId: string) {
     const without = value.filter((option) => option.optionKey !== optionKey);

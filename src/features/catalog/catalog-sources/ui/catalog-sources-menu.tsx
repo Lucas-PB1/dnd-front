@@ -8,7 +8,7 @@ import { useCatalogSources } from "@/features/catalog/catalog-sources/model/cata
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
 
-/** Seletor global de fontes do catálogo (PHB / Valdas / DMG / Eldritch Hunt). */
+/** Seletor global de fontes do catálogo (PHB / Valdas / DMG / Eldritch Hunt / Griffon's Saddlebag). */
 export function CatalogSourcesMenu({ className }: { className?: string }) {
   const { editions, editionsPending, enabledSlugs, setEnabled } =
     useCatalogSources();

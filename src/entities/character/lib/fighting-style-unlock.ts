@@ -6,6 +6,8 @@ const FIGHTING_STYLE_UNLOCK_LEVEL: Readonly<Record<string, number>> = {
   fighter: 1,
   paladin: 2,
   ranger: 2,
+  gunslinger: 1,
+  "monster-hunter": 2,
 };
 
 export function fightingStyleUnlockLevel(

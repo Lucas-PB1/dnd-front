@@ -47,6 +47,12 @@ function hasWeaponProficiency(
   ) {
     return true;
   }
+  if (
+    requiredSlug === "armas-avancadas" &&
+    ownedFeatSlugs.includes("advanced-weapon-proficiency")
+  ) {
+    return true;
+  }
   // Machadinhas cobertas por armas simples
   if (requiredSlug === "machadinhas" && ownedSlugs.includes("armas-simples")) {
     return true;

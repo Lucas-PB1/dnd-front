@@ -1,9 +1,13 @@
 import type { ItemSummary } from "@/entities/item/types";
 import { ITEM_TYPE_LABELS_PT } from "@/entities/item/types";
-import { editionShortLabel } from "@/entities/edition/catalog-sources";
+import {
+  catalogKindLabelFromItem,
+  readEditionSlug,
+} from "@/entities/item/lib/catalog-item-properties";
 import { withCatalogReturn } from "@/shared/lib/catalog-return";
 import { stripCatalogWikiLinks } from "@/shared/lib/strip-catalog-wiki-links";
 import { toMetricProse } from "@/shared/lib/metric";
+import { CatalogEditionChip } from "@/shared/ui/catalog-edition-chip";
 import { CatalogListCard } from "@/shared/ui/catalog-list-card";
 
 type GearItemCardProps = {
@@ -31,21 +35,25 @@ export function GearItemCard({ item, listPath, className }: GearItemCardProps) {
   const typeLabel = ITEM_TYPE_LABELS_PT[item.itemType] ?? item.itemType;
   const rarityLabel = propString(item.properties, "rarityLabel");
   const category = propString(item.properties, "category");
-  const editionSlug = propString(item.properties, "editionSlug");
+  const editionSlug = readEditionSlug(item.properties);
+  const catalogKindLabel = catalogKindLabelFromItem(item);
   const magic = propBool(item.properties, "magic");
   const requiresAttunement = propBool(item.properties, "requiresAttunement");
 
   const eyebrowParts = [
     magic ? "Mágico" : null,
     rarityLabel,
+    catalogKindLabel,
     category ?? typeLabel,
-    editionSlug ? editionShortLabel(editionSlug) : null,
   ].filter(Boolean);
 
   return (
     <CatalogListCard
       href={withCatalogReturn(`/equipment/items/${item.slug}`, listPath)}
       title={item.name}
+      titleExtra={
+        editionSlug ? <CatalogEditionChip editionSlug={editionSlug} /> : undefined
+      }
       eyebrow={eyebrowParts.join(" · ")}
       imageUrl={item.imageUrl}
       teaser={

@@ -57,6 +57,7 @@ export function buildCharacterSheetPagePanels({
       <BeyondPanel flush className="bg-card/70">
         <div className="p-3.5 sm:p-4">
           <BeyondInventoryTab
+            character={character}
             characterId={characterId}
             equipmentWarnings={character.equipmentWarnings}
             classSlug={character.classSlug}

@@ -16,6 +16,11 @@ import {
 } from "@/features/catalog/item-catalog/lib/item-catalog-equipment-stats";
 import { weaponCategoryLabel } from "@/features/catalog/equipment-catalog/lib/weapon-labels";
 import { editionShortLabel } from "@/entities/edition/catalog-sources";
+import {
+  catalogKindLabel,
+  catalogKindLabelFromItem,
+  readEditionSlug,
+} from "@/entities/item/lib/catalog-item-properties";
 import { toMetricProse } from "@/shared/lib/metric";
 
 export type ItemCatalogStat = { label: string; value: string };
@@ -76,8 +81,12 @@ export function itemCatalogShopBadges(
   const weight = resolveCatalogWeightText(item, equipment);
   const rarityLabel =
     typeof props?.rarityLabel === "string" ? props.rarityLabel.trim() : null;
-  const editionSlug =
-    typeof props?.editionSlug === "string" ? props.editionSlug : null;
+  const editionSlug = readEditionSlug(
+    item.properties,
+    equipment?.weapon,
+    equipment?.armor?.editionSlug,
+  );
+  const catalogKindLabel = catalogKindLabelFromItem(item, equipment?.weapon);
   const magic = isMagicItem(item);
   const coverage = isCoverageKind(item);
 
@@ -125,6 +134,14 @@ export function itemCatalogShopBadges(
 
   if (props?.requiresAttunement === true) {
     badges.push({ key: "attune", label: "Sintonização", tone: "warn" });
+  }
+
+  if (catalogKindLabel) {
+    badges.push({
+      key: "catalogKind",
+      label: catalogKindLabel,
+      tone: "warn",
+    });
   }
 
   if (editionSlug) {
@@ -276,6 +293,10 @@ export function itemCatalogStats(item: ItemSummary): ItemCatalogStat[] {
   const stats: ItemCatalogStat[] = [
     { label: "Tipo", value: category ?? typeLabel },
   ];
+  const kindLabel = catalogKindLabel(
+    typeof props?.catalogKind === "string" ? props.catalogKind : null,
+  );
+  if (kindLabel) stats.push({ label: "Catálogo", value: kindLabel });
   if (props?.magic === true) stats.push({ label: "Mágico", value: "Sim" });
   if (rarityLabel) stats.push({ label: "Raridade", value: rarityLabel });
   if (attunement) stats.push({ label: "Sintonização", value: attunement });

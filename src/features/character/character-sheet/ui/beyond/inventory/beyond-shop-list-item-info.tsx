@@ -25,6 +25,7 @@ type BeyondShopListItemInfoProps = {
   item: ItemSummary;
   weapon?: WeaponSummary | null;
   armor?: ArmorSummary | null;
+  proficiencyHint?: string | null;
   className?: string;
 };
 
@@ -33,6 +34,7 @@ export function BeyondShopListItemInfo({
   item,
   weapon,
   armor,
+  proficiencyHint,
   className,
 }: BeyondShopListItemInfoProps) {
   const badges = itemCatalogShopBadges(item, { weapon, armor });
@@ -54,6 +56,11 @@ export function BeyondShopListItemInfo({
           </Badge>
         ))}
       </div>
+      {proficiencyHint ? (
+        <p className="mt-1 text-[11px] font-medium text-amber-700 dark:text-amber-400">
+          {proficiencyHint}
+        </p>
+      ) : null}
       {preview ? (
         <p
           className={cn(
