@@ -44,6 +44,7 @@ export type CharacterEquipment = {
 export type CharacterSheetInput = {
   classSkillSlugs?: string[];
   speciesChoices?: SpeciesChoice[];
+  heritageChoices?: SpeciesChoice[];
   subclassOptions?: SubclassOption[];
   classOptions?: ClassOption[];
   characterFeats?: CharacterFeat[];

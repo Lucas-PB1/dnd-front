@@ -64,9 +64,10 @@ export function useStepReview(control: Control<CreateCharacterInput>) {
   const labels = useCharacterCatalogLabels(preview);
   const finalScores = preview.abilityScores;
 
+  const originSlug = values.heritageSlug?.trim() || values.speciesSlug?.trim() || "";
   const speciesTraits = useSpeciesTraitChoices(
-    values.speciesSlug,
-    !!values.speciesSlug,
+    values.heritageSlug?.trim() ? "" : (values.speciesSlug ?? ""),
+    !values.heritageSlug?.trim() && !!values.speciesSlug,
   );
   const subclassOpts = useSubclassOptions(
     values.subclassSlug ?? "",

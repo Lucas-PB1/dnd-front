@@ -65,6 +65,30 @@ export function nextWizardStep(
   return null;
 }
 
+export type WizardStepLabelContext = {
+  isHeritageOrigin?: boolean;
+};
+
+export function resolveWizardStepLabel(
+  stepId: WizardStepId,
+  context?: WizardStepLabelContext,
+): string {
+  if (stepId === "species" && context?.isHeritageOrigin) {
+    return "Variante";
+  }
+  return WIZARD_STEPS.find((step) => step.id === stepId)?.label ?? stepId;
+}
+
+export function visibleWizardStepsWithLabels(
+  options?: WizardNavOptions,
+  labelContext?: WizardStepLabelContext,
+) {
+  return visibleWizardSteps(options).map((step) => ({
+    ...step,
+    label: resolveWizardStepLabel(step.id, labelContext),
+  }));
+}
+
 export function prevWizardStep(
   step: WizardStepId,
   options?: WizardNavOptions,

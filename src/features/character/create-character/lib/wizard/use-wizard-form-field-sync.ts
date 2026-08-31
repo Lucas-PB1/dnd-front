@@ -17,7 +17,7 @@ import { useCharacterLevels } from "@/features/catalog/reference-catalog/api/use
 type UseWizardFormFieldSyncParams = {
   level: number;
   classSlug: string;
-  speciesSlug: string;
+  speciesSlug?: string;
   subclassSlug: string;
   backgroundSlug: string;
   originFeatSlug: string;

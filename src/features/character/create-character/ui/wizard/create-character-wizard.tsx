@@ -37,6 +37,7 @@ import { WizardStepContent } from "@/features/character/create-character/ui/wiza
 import { WizardStepIndicator } from "@/features/character/create-character/ui/wizard/wizard-step-indicator";
 import { WizardSubmitError } from "@/features/character/create-character/ui/wizard/wizard-submit-error";
 import { useSpeciesTraitChoices } from "@/features/catalog/species-catalog/api/use-species";
+import { useHeritageTraitChoices } from "@/features/catalog/heritage-catalog/api/use-heritages";
 import { useBackgroundDetail } from "@/features/catalog/background-catalog/api/use-backgrounds";
 
 export function CreateCharacterWizard() {
@@ -75,6 +76,12 @@ export function CreateCharacterWizard() {
     name: "subclassSlug",
     defaultValue: "",
   });
+  const heritageSlug = useWatch({
+    control,
+    name: "heritageSlug",
+    defaultValue: "",
+  });
+  const originSlug = heritageSlug || speciesSlug;
   const level = useWatch({ control, name: "level", defaultValue: 1 });
 
   const classDetail = useClassDetail(classSlug, !!classSlug);
@@ -83,7 +90,21 @@ export function CreateCharacterWizard() {
     backgroundSlug,
     !!backgroundSlug,
   );
-  const speciesTraits = useSpeciesTraitChoices(speciesSlug, !!speciesSlug);
+  const speciesTraitsQuery = useSpeciesTraitChoices(
+    speciesSlug ?? "",
+    !!speciesSlug && !heritageSlug,
+  );
+  const heritageTraitsQuery = useHeritageTraitChoices(
+    heritageSlug ?? "",
+    !!heritageSlug,
+  );
+  const speciesTraits = heritageSlug
+    ? {
+        data: (heritageTraitsQuery.data ?? []).map((row) => ({
+          choiceKind: row.choiceKind,
+        })),
+      }
+    : speciesTraitsQuery;
   const subclassOpts = useSubclassOptions(
     subclassSlug ?? "",
     level,
@@ -128,7 +149,7 @@ export function CreateCharacterWizard() {
   useWizardFormFieldSync({
     level,
     classSlug,
-    speciesSlug,
+    speciesSlug: originSlug ?? "",
     subclassSlug: subclassSlug ?? "",
     backgroundSlug,
     originFeatSlug,
@@ -153,7 +174,9 @@ export function CreateCharacterWizard() {
       classDetail: classDetail.data,
       classProgression: classProgression.data?.data,
       backgroundDetail: backgroundDetail.data,
-      speciesTraitChoices: speciesTraits.data?.data,
+      speciesTraitChoices: heritageSlug
+        ? (heritageTraitsQuery.data ?? [])
+        : speciesTraitsQuery.data?.data,
       subclassOptions: subclassOpts.data?.data,
       classFeatureOptions,
       originFeatSlug,
@@ -192,7 +215,11 @@ export function CreateCharacterWizard() {
         });
       })}
     >
-      <WizardStepIndicator currentStep={step} navOptions={wizardNav} />
+      <WizardStepIndicator
+        currentStep={step}
+        navOptions={wizardNav}
+        stepLabelContext={{ isHeritageOrigin: !!heritageSlug }}
+      />
 
       <WizardStepContent
         step={step}

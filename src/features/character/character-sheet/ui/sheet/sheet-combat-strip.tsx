@@ -23,6 +23,8 @@ import { CombatStatusEditor } from "@/features/character/character-sheet/ui/beyo
 import { useSheetRolls } from "@/features/character/character-sheet/ui/beyond/layout/sheet-rolls";
 import { SheetChip } from "@/features/character/character-sheet/ui/sheet/sheet-ui";
 import { useConditions } from "@/features/catalog/reference-catalog/api/use-reference";
+import { resolveHeritageDisplaySpeed } from "@/entities/heritage/types";
+import { useHeritageDetail } from "@/features/catalog/heritage-catalog/api/use-heritages";
 import { useSpeciesDetail } from "@/features/catalog/species-catalog/api/use-species";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
@@ -122,7 +124,12 @@ export function SheetCombatStrip({
   const stateQuery = useCharacterState(characterId);
   const patchState = usePatchCharacterState(characterId);
   const conditionsCatalog = useConditions();
-  const speciesDetail = useSpeciesDetail(character.speciesSlug, true);
+  const isHeritage = Boolean(character.heritageSlug);
+  const speciesDetail = useSpeciesDetail(character.speciesSlug ?? "", !isHeritage);
+  const heritageDetail = useHeritageDetail(
+    character.heritageSlug ?? "",
+    isHeritage,
+  );
   const rolls = useSheetRolls();
 
   const [editing, setEditing] = useState(false);
@@ -144,7 +151,12 @@ export function SheetCombatStrip({
     return names;
   }, [conditionsCatalog.data]);
 
-  const speedLabel = speciesDetail.data?.speed ?? "—";
+  const speedLabel = isHeritage
+    ? (resolveHeritageDisplaySpeed(
+        heritageDetail.data?.speedRule ?? null,
+        character.heritageChoices ?? [],
+      ) ?? "—")
+    : (speciesDetail.data?.speed ?? "—");
   const speedHint =
     (character.speedPenaltyMeters ?? 0) > 0
       ? `−${character.speedPenaltyMeters} m`

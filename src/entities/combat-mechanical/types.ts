@@ -74,6 +74,8 @@ export type ClassEconomyActionRecord = {
   speciesSlug?: string | null;
   featSlug?: string | null;
   itemSlug?: string | null;
+  heritageTraitSlug?: string | null;
+  minTraitTakes?: number;
   requiresOptionKey?: string;
   requiresOptionValue?: string;
   resourceSlug?: string;

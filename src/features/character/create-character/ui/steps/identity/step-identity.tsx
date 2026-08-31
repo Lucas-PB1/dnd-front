@@ -1,7 +1,12 @@
 "use client";
 
 import { useMemo } from "react";
-import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
+import type {
+  Control,
+  FieldErrors,
+  UseFormRegister,
+  UseFormSetValue,
+} from "react-hook-form";
 import { Controller, useWatch } from "react-hook-form";
 
 import { useBackgrounds } from "@/features/catalog/background-catalog/api/use-backgrounds";
@@ -19,7 +24,9 @@ import { CatalogSelect } from "@/features/character/create-character/ui/catalog-
 import { OriginPreview } from "@/features/character/create-character/ui/origin-preview";
 import { WizardFormSection } from "@/features/character/create-character/ui/wizard/wizard-form-section";
 import { useAlignments } from "@/features/catalog/reference-catalog/api/use-reference";
+import { useHeritages } from "@/features/catalog/heritage-catalog/api/use-heritages";
 import { useSpecies } from "@/features/catalog/species-catalog/api/use-species";
+import { formatHeritageVariantLabel } from "@/entities/heritage/origin-label";
 import { Field, FieldError, FieldLabel } from "@/shared/ui/field";
 import { Input } from "@/shared/ui/input";
 
@@ -27,15 +34,26 @@ type StepIdentityProps = {
   register: UseFormRegister<CreateCharacterInput>;
   control: Control<CreateCharacterInput>;
   errors: FieldErrors<CreateCharacterInput>;
+  setValue: UseFormSetValue<CreateCharacterInput>;
 };
 
 function sortByLabel<T extends { label: string }>(items: T[]): T[] {
   return [...items].sort((a, b) => a.label.localeCompare(b.label, "pt"));
 }
 
-export function StepIdentity({ register, control, errors }: StepIdentityProps) {
+function isHeritageOriginSlug(slug: string): boolean {
+  return slug.startsWith("gh-");
+}
+
+export function StepIdentity({
+  register,
+  control,
+  errors,
+  setValue,
+}: StepIdentityProps) {
   const classes = useClasses();
   const species = useSpecies();
+  const heritages = useHeritages();
   const backgrounds = useBackgrounds();
   const alignments = useAlignments();
 
@@ -46,6 +64,12 @@ export function StepIdentity({ register, control, errors }: StepIdentityProps) {
     name: "speciesSlug",
     defaultValue: "",
   });
+  const heritageSlug = useWatch({
+    control,
+    name: "heritageSlug",
+    defaultValue: "",
+  });
+  const originSlug = heritageSlug || speciesSlug;
   const backgroundSlug = useWatch({
     control,
     name: "backgroundSlug",
@@ -75,10 +99,16 @@ export function StepIdentity({ register, control, errors }: StepIdentityProps) {
     [classes.data?.data],
   );
 
-  const speciesOptions = useMemo(
-    () => buildSpeciesSelectOptions(species.data?.data ?? []),
-    [species.data?.data],
-  );
+  const originOptions = useMemo(() => {
+    const phb = buildSpeciesSelectOptions(species.data?.data ?? []);
+    const gh = sortByLabel(
+      (heritages.data ?? []).map((heritage) => ({
+        value: heritage.slug,
+        label: formatHeritageVariantLabel(heritage.name),
+      })),
+    );
+    return sortByLabel([...phb, ...gh]);
+  }, [heritages.data, species.data?.data]);
 
   const backgroundOptions = useMemo(
     () =>
@@ -202,15 +232,26 @@ export function StepIdentity({ register, control, errors }: StepIdentityProps) {
               name="speciesSlug"
               render={({ field }) => (
                 <CatalogSelect
-                  id="speciesSlug"
-                  label="Espécie"
+                  id="originSlug"
+                  label="Espécie / variante"
                   name={field.name}
-                  isLoading={species.isPending}
-                  options={speciesOptions}
-                  value={field.value ?? ""}
+                  isLoading={species.isPending || heritages.isPending}
+                  options={originOptions}
+                  value={originSlug ?? ""}
                   onBlur={field.onBlur}
-                  onChange={(e) => field.onChange(e.target.value)}
-                  error={errors.speciesSlug}
+                  onChange={(event) => {
+                    const slug = event.target.value;
+                    if (isHeritageOriginSlug(slug)) {
+                      setValue("heritageSlug", slug, { shouldDirty: true });
+                      setValue("speciesSlug", "", { shouldDirty: true });
+                      setValue("speciesChoices", [], { shouldDirty: true });
+                    } else {
+                      setValue("speciesSlug", slug, { shouldDirty: true });
+                      setValue("heritageSlug", "", { shouldDirty: true });
+                      setValue("heritageChoices", [], { shouldDirty: true });
+                    }
+                  }}
+                  error={errors.speciesSlug ?? errors.heritageSlug}
                 />
               )}
             />
@@ -263,9 +304,10 @@ export function StepIdentity({ register, control, errors }: StepIdentityProps) {
             needsSubclass && subclassSlug ? subclassSlug : undefined
           }
           speciesSlug={speciesSlug || undefined}
+          heritageSlug={heritageSlug || undefined}
           backgroundSlug={backgroundSlug || undefined}
           level={level}
-          showPlaceholder={!classSlug && !speciesSlug && !backgroundSlug}
+          showPlaceholder={!classSlug && !originSlug && !backgroundSlug}
         />
       </aside>
     </div>

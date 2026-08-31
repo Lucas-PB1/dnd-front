@@ -50,7 +50,8 @@ export type CharacterDetail = {
   name: string;
   level: number;
   classSlug: string;
-  speciesSlug: string;
+  speciesSlug: string | null;
+  heritageSlug?: string | null;
   backgroundSlug: string;
   subclassSlug: string | null;
   alignmentSlug: string | null;
@@ -63,6 +64,14 @@ export type CharacterDetail = {
   classSkillSlugs: string[];
   backgroundSkillSlugs: string[];
   speciesChoices: SpeciesChoice[];
+  heritageChoices?: SpeciesChoice[];
+  aggregatedHeritageTraits?: Array<{
+    traitSlug: string;
+    traitName: string;
+    takeCount: number;
+    slotIndexes: number[];
+    activeBenefits: string[];
+  }>;
   subclassOptions: SubclassOption[];
   classOptions: ClassOption[];
   characterFeats: CharacterFeat[];
@@ -165,7 +174,8 @@ export type CharacterSummary = Pick<
 export type CreateCharacterPayload = {
   name: string;
   classSlug: string;
-  speciesSlug: string;
+  speciesSlug?: string;
+  heritageSlug?: string;
   backgroundSlug: string;
   level?: number;
   subclassSlug?: string;

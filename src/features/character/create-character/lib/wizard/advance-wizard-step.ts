@@ -17,7 +17,6 @@ import type {
   ClassSummary,
   SubclassOptionGroup,
 } from "@/entities/class/types";
-import type { SpeciesTraitChoice } from "@/entities/species/types";
 import { asiFeatSlotsToCharacterFeats } from "@/features/character/create-character/lib/feats/asi-feat-slots-to-feats";
 import { findIncompleteCreateFeatOptions } from "@/features/character/create-character/lib/feats/validate-create-feat-options";
 import { resolveCreateCharacterFeats } from "@/features/character/create-character/lib/feats/preview-create-character-feats";
@@ -57,7 +56,7 @@ export type WizardAdvanceDeps = {
   classDetail: ClassSummary | undefined;
   classProgression: ClassProgressionMasteryRow[] | undefined;
   backgroundDetail: BackgroundSummary | undefined;
-  speciesTraitChoices: SpeciesTraitChoice[] | undefined;
+  speciesTraitChoices: Array<{ choiceKind: string }> | undefined;
   subclassOptions: SubclassOptionGroup[] | undefined;
   classFeatureOptions: ClassFeatureOptionGroup[] | undefined;
   originFeatSlug: string;
@@ -242,25 +241,32 @@ export async function advanceWizardStep(deps: WizardAdvanceDeps): Promise<void> 
 
   if (step === "species") {
     const values = getValues();
+    const originChoices = values.heritageSlug?.trim()
+      ? (values.heritageChoices ?? [])
+      : values.speciesChoices;
     const elfLineage = values.speciesChoices.find(
       (c) => c.choiceKind === "elf_lineage",
     )?.choiceSlug;
     const bearfolkLineage = values.speciesChoices.find(
       (c) => c.choiceKind === "bearfolk_lineage",
     )?.choiceSlug;
-    const ghSpeedTrade = values.speciesChoices.find(
-      (c) => c.choiceKind === "gh_heritage_speed_trade",
+    const ghSpeedTrade = originChoices.find(
+      (c) =>
+        c.choiceKind === "heritage_speed_trade" ||
+        c.choiceKind === "gh_heritage_speed_trade",
     )?.choiceSlug;
     const requiredKinds = [
       ...new Set((speciesTraitChoices ?? []).map((r) => r.choiceKind)),
     ].filter((kind) => {
       if (kind === "high_elf_cantrip") return elfLineage === "high-elf";
       if (kind === "andari_druid_cantrip") return bearfolkLineage === "andari";
-      if (kind === "gh_heritage_trait_9") return ghSpeedTrade === "yes";
+      if (kind === "heritage_trait_9" || kind === "gh_heritage_trait_9") {
+        return ghSpeedTrade === "yes";
+      }
       return true;
     });
     if (requiredKinds.length > 0) {
-      const provided = values.speciesChoices.map((c) => c.choiceKind);
+      const provided = originChoices.map((c) => c.choiceKind);
       const missing = requiredKinds.filter((k) => !provided.includes(k));
       if (missing.length > 0) {
         setSpeciesError("Complete todas as escolhas de traço da espécie.");

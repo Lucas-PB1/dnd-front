@@ -126,8 +126,9 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
           classSlug: character.classSlug,
           level: character.level,
           subclassSlug: character.subclassSlug,
-          speciesSlug: character.speciesSlug,
+          speciesSlug: character.speciesSlug ?? undefined,
           speciesChoices: character.speciesChoices,
+          heritageChoices: character.heritageChoices,
           featSlugs: [
             ...(character.characterFeats?.map((feat) => feat.featSlug) ?? []),
             ...(character.subclassOptions ?? [])

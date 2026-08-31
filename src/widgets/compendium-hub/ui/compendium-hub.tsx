@@ -37,10 +37,18 @@ const SECTIONS: ReadonlyArray<{
   {
     href: "/species",
     title: "Espécies",
-    eyebrow: "Origens",
+    eyebrow: "Origens PHB",
     description:
       "Anão, elfo, Feathren e mais (PHB, Valdas, Eldritch Hunt, Northlands Nórdico, Griffon's Saddlebag) — traços, tamanho e deslocamento.",
     icon: GlobeAltIcon,
+  },
+  {
+    href: "/heritages",
+    title: "Heranças",
+    eyebrow: "Grim Hollow",
+    description:
+      "Identidades de Grim Hollow — lore, build tradicional sugerido e pool global de traços modulares (Combate, Exploração, Interpretação).",
+    icon: SparklesIcon,
   },
   {
     href: "/backgrounds",
@@ -152,7 +160,7 @@ export function CompendiumHub() {
           <p className="max-w-2xl font-heading text-lg leading-snug text-foreground/90 sm:text-xl">
             Explore o catálogo público — sem login. PHB 2024, Valdas Spire,
             Steinhardt Eldritch Hunt, Northlands Heroes (Nórdico), Griffon's Saddlebag e Grim Hollow:
-            classes, subclasses, espécies, antecedentes, talentos, equipamento e magias. Use Fontes no topo para filtrar.
+            classes, subclasses, espécies, heranças, antecedentes, talentos, equipamento e magias. Use Fontes no topo para filtrar.
           </p>
         </div>
       </div>

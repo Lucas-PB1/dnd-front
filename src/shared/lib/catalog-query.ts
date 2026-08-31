@@ -49,8 +49,8 @@ export function buildCatalogSearchParams(
   return search;
 }
 
-/** Concatena todas as páginas de um endpoint paginado. */
-export async function fetchAllCatalogPages<T>(
+/** Percorre todas as páginas de um endpoint com paginação por cursor (`meta.hasMore`). */
+export async function fetchAllCatalogCursorPages<T>(
   fetchPage: (params: {
     page: number;
     limit: number;
@@ -106,4 +106,16 @@ export async function fetchAllCatalogPages<T>(
       totalPages: 1,
     },
   };
+}
+
+/** Concatena páginas (cursor ou `totalPages`, conforme a resposta da API). */
+export async function fetchAllCatalogPages<T>(
+  fetchPage: (params: {
+    page: number;
+    limit: number;
+    cursor?: string;
+  }) => Promise<PaginatedResponse<T>>,
+  limit = 100,
+): Promise<PaginatedResponse<T>> {
+  return fetchAllCatalogCursorPages(fetchPage, limit);
 }

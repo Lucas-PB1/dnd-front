@@ -17,15 +17,18 @@ import {
   useSpeciesTraits,
   useSpeciesTraitChoices,
 } from "@/features/catalog/species-catalog/api/use-species";
+import { useHeritageDetail } from "@/features/catalog/heritage-catalog/api/use-heritages";
 import { useSubclassDetail } from "@/features/catalog/subclass-catalog/api/use-subclasses";
 import { FeatureDetailDialog } from "@/features/character/character-sheet/ui/sheet/feature-detail-dialog";
 import { Button } from "@/shared/ui/button";
+import { heritageOriginKindLabel } from "@/entities/heritage/origin-label";
 import { PhbProse } from "@/shared/ui/phb-prose";
 
 type OriginPreviewProps = {
   classSlug?: string;
   subclassSlug?: string;
   speciesSlug?: string;
+  heritageSlug?: string;
   backgroundSlug?: string;
   level?: number;
   showPlaceholder?: boolean;
@@ -261,6 +264,28 @@ function SpeciesPreviewSection({ speciesSlug }: { speciesSlug: string }) {
   );
 }
 
+function HeritagePreviewSection({ heritageSlug }: { heritageSlug: string }) {
+  const heritageDetail = useHeritageDetail(heritageSlug, true);
+  const data = heritageDetail.data;
+  if (!data) return null;
+  const teaser = proseTeaser(data.tagline, data.summary);
+
+  return (
+    <OriginBlock
+      title={data.name}
+      subtitle={heritageOriginKindLabel()}
+      teaser={teaser || undefined}
+      detailText={data.description || data.summary}
+    >
+      <p className="font-heading font-semibold">{data.name}</p>
+      <p className="text-xs text-muted-foreground">
+        {data.creatureType} · {data.speedRule}
+      </p>
+      <p className="text-xs text-muted-foreground">{data.sizeRule}</p>
+    </OriginBlock>
+  );
+}
+
 function BackgroundPreviewSection({
   backgroundSlug,
 }: {
@@ -306,6 +331,7 @@ export function OriginPreview({
   classSlug,
   subclassSlug,
   speciesSlug,
+  heritageSlug,
   backgroundSlug,
   level = 1,
   showPlaceholder = false,
@@ -323,7 +349,7 @@ export function OriginPreview({
     );
   }
 
-  if (!classSlug && !speciesSlug && !backgroundSlug && !subclassSlug) {
+  if (!classSlug && !speciesSlug && !heritageSlug && !backgroundSlug && !subclassSlug) {
     return null;
   }
 
@@ -339,7 +365,10 @@ export function OriginPreview({
       {subclassSlug ? (
         <SubclassPreviewSection subclassSlug={subclassSlug} />
       ) : null}
-      {speciesSlug ? (
+      {heritageSlug ? (
+        <HeritagePreviewSection heritageSlug={heritageSlug} />
+      ) : null}
+      {!heritageSlug && speciesSlug ? (
         <SpeciesPreviewSection speciesSlug={speciesSlug} />
       ) : null}
       {backgroundSlug ? (

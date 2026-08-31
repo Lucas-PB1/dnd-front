@@ -27,6 +27,14 @@ import {
 } from "@/features/catalog/background-catalog/api/use-backgrounds";
 import { useSpeciesTraitChoices } from "@/features/catalog/species-catalog/api/use-species";
 import {
+  useHeritageDetail,
+  useHeritageTraditionalBuild,
+  useHeritageTraitChoices,
+} from "@/features/catalog/heritage-catalog/api/use-heritages";
+import {
+  buildTraditionalHeritageChoices,
+} from "@/entities/heritage";
+import {
   useFeatLabels,
   useFeats,
 } from "@/features/catalog/reference-catalog/api/use-reference";
@@ -45,20 +53,37 @@ export function useStepSpeciesChoices(
   control: Control<CreateCharacterInput>,
   setValue: UseFormSetValue<CreateCharacterInput>,
   fallbackSpeciesSlug?: string,
+  fallbackHeritageSlug?: string,
 ) {
   const speciesSlugRaw = useWatch({
     control,
     name: "speciesSlug",
   });
+  const heritageSlugRaw = useWatch({
+    control,
+    name: "heritageSlug",
+  });
   const speciesSlug = speciesSlugRaw || fallbackSpeciesSlug || "";
+  const heritageSlug = heritageSlugRaw || fallbackHeritageSlug || "";
+  const originSlug = heritageSlug || speciesSlug;
+  const isHeritageOrigin = Boolean(heritageSlug);
   const speciesChoicesWatch = useWatch({
     control,
     name: "speciesChoices",
+  });
+  const heritageChoicesWatch = useWatch({
+    control,
+    name: "heritageChoices",
   });
   const speciesChoices = useMemo(
     () => speciesChoicesWatch ?? [],
     [speciesChoicesWatch],
   );
+  const heritageChoices = useMemo(
+    () => heritageChoicesWatch ?? [],
+    [heritageChoicesWatch],
+  );
+  const originChoices = isHeritageOrigin ? heritageChoices : speciesChoices;
   const backgroundSlug =
     useWatch({
       control,
@@ -106,7 +131,25 @@ export function useStepSpeciesChoices(
       name: "backgroundOriginFeatSlug",
     }) ?? "";
 
-  const traitChoices = useSpeciesTraitChoices(speciesSlug, !!speciesSlug);
+  const speciesTraitChoices = useSpeciesTraitChoices(
+    speciesSlug,
+    !isHeritageOrigin && !!speciesSlug,
+  );
+  const heritageTraitChoices = useHeritageTraitChoices(
+    heritageSlug,
+    isHeritageOrigin && !!heritageSlug,
+  );
+  const heritageDetail = useHeritageDetail(
+    heritageSlug,
+    isHeritageOrigin && !!heritageSlug,
+  );
+  const heritageTraditional = useHeritageTraditionalBuild(
+    heritageSlug,
+    isHeritageOrigin && !!heritageSlug,
+  );
+  const traitChoices = isHeritageOrigin
+    ? heritageTraitChoices
+    : speciesTraitChoices;
   const backgroundDetail = useBackgroundDetail(
     backgroundSlug,
     !!backgroundSlug,
@@ -176,53 +219,78 @@ export function useStepSpeciesChoices(
     const geppettinConstruction = speciesChoices.find(
       (c) => c.choiceKind === "geppettin_construction",
     )?.choiceSlug;
-    const ghSpeedTrade = speciesChoices.find(
-      (c) => c.choiceKind === "gh_heritage_speed_trade",
+    const ghSpeedTrade = originChoices.find(
+      (c) =>
+        c.choiceKind === "heritage_speed_trade" ||
+        c.choiceKind === "gh_heritage_speed_trade",
     )?.choiceSlug;
 
-    for (const row of traitChoices.data?.data ?? []) {
-      if (row.choiceKind === "high_elf_cantrip" && elfLineage !== "high-elf") {
+    for (const row of isHeritageOrigin
+      ? (heritageTraitChoices.data ?? [])
+      : (speciesTraitChoices.data?.data ?? [])) {
+      if (isHeritageOrigin) {
+        const heritageRow = row as import("@/entities/heritage/types").HeritageTraitChoice;
+        const choiceKind = heritageRow.choiceKind;
+        if (choiceKind === "heritage_trait_9" && ghSpeedTrade !== "yes") {
+          continue;
+        }
+        const traitName = heritageRow.traitName ?? heritageRow.label ?? choiceKind;
+        const group = map.get(choiceKind) ?? { traitName, options: [] };
+        group.options.push({
+          choiceSlug: heritageRow.traitSlug,
+          choiceName: heritageRow.label ?? traitName,
+          level1Benefit: heritageRow.benefitBase ?? null,
+        });
+        map.set(choiceKind, group);
+        continue;
+      }
+
+      const speciesRow = row as {
+        choiceKind: string;
+        traitName: string;
+        choiceSlug: string;
+        choiceName: string;
+        level1Benefit: string | null;
+      };
+      if (speciesRow.choiceKind === "high_elf_cantrip" && elfLineage !== "high-elf") {
         continue;
       }
       if (
-        row.choiceKind === "andari_druid_cantrip" &&
+        speciesRow.choiceKind === "andari_druid_cantrip" &&
         bearfolkLineage !== "andari"
       ) {
         continue;
       }
       if (
-        row.choiceKind === "geppettin_size" &&
-        row.choiceSlug === "medium" &&
+        speciesRow.choiceKind === "geppettin_size" &&
+        speciesRow.choiceSlug === "medium" &&
         geppettinConstruction !== "marionette"
       ) {
         continue;
       }
-      if (row.choiceKind === "gh_heritage_trait_9" && ghSpeedTrade !== "yes") {
-        continue;
-      }
-      const group = map.get(row.choiceKind) ?? {
-        traitName: row.traitName,
+      const group = map.get(speciesRow.choiceKind) ?? {
+        traitName: speciesRow.traitName,
         options: [],
       };
       group.options.push({
-        choiceSlug: row.choiceSlug,
-        choiceName: row.choiceName,
-        level1Benefit: row.level1Benefit,
+        choiceSlug: speciesRow.choiceSlug,
+        choiceName: speciesRow.choiceName,
+        level1Benefit: speciesRow.level1Benefit,
       });
-      map.set(row.choiceKind, group);
+      map.set(speciesRow.choiceKind, group);
     }
 
     return [...map.entries()]
       .sort(([left], [right]) => {
-        const ghLeft = left.match(/^gh_heritage_trait_(\d+)$/);
-        const ghRight = right.match(/^gh_heritage_trait_(\d+)$/);
-        if (ghLeft && ghRight) {
-          return Number(ghLeft[1]) - Number(ghRight[1]);
+        const slotLeft = left.match(/^(?:heritage|gh_heritage)_trait_(\d+)$/);
+        const slotRight = right.match(/^(?:heritage|gh_heritage)_trait_(\d+)$/);
+        if (slotLeft && slotRight) {
+          return Number(slotLeft[1]) - Number(slotRight[1]);
         }
-        if (left === "gh_heritage_speed_trade") return -1;
-        if (right === "gh_heritage_speed_trade") return 1;
-        if (left === "gh_heritage_size") return 1;
-        if (right === "gh_heritage_size") return -1;
+        if (left.endsWith("_speed_trade")) return -1;
+        if (right.endsWith("_speed_trade")) return 1;
+        if (left.endsWith("_size")) return 1;
+        if (right.endsWith("_size")) return -1;
         return left.localeCompare(right, "pt");
       })
       .map(([kind, group]) => ({
@@ -235,7 +303,14 @@ export function useStepSpeciesChoices(
             )
           : group.options,
     }));
-  }, [featSlugsFromOtherSources, speciesChoices, traitChoices.data?.data]);
+  }, [
+    featSlugsFromOtherSources,
+    isHeritageOrigin,
+    originChoices,
+    speciesChoices,
+    heritageTraitChoices.data,
+    speciesTraitChoices.data?.data,
+  ]);
 
   const featNameBySlug = useMemo(() => {
     const map = Object.fromEntries(
@@ -285,29 +360,41 @@ export function useStepSpeciesChoices(
   }, [previewFeats, speciesChoices]);
 
   function setChoice(kind: string, slug: string) {
-    let next: SpeciesChoice[] = speciesChoices.filter(
-      (c) => c.choiceKind !== kind,
-    );
+    const current = isHeritageOrigin ? heritageChoices : speciesChoices;
+    let next: SpeciesChoice[] = current.filter((c) => c.choiceKind !== kind);
     if (slug) {
       next.push({ choiceKind: kind, choiceSlug: slug });
     }
-    if (kind === "elf_lineage" && slug !== "high-elf") {
-      next = next.filter((c) => c.choiceKind !== "high_elf_cantrip");
+    if (!isHeritageOrigin) {
+      if (kind === "elf_lineage" && slug !== "high-elf") {
+        next = next.filter((c) => c.choiceKind !== "high_elf_cantrip");
+      }
+      if (kind === "bearfolk_lineage" && slug !== "andari") {
+        next = next.filter((c) => c.choiceKind !== "andari_druid_cantrip");
+      }
     }
-    if (kind === "bearfolk_lineage" && slug !== "andari") {
-      next = next.filter((c) => c.choiceKind !== "andari_druid_cantrip");
+    if (
+      (kind === "heritage_speed_trade" || kind === "gh_heritage_speed_trade") &&
+      slug !== "yes"
+    ) {
+      next = next.filter(
+        (c) =>
+          c.choiceKind !== "heritage_trait_9" &&
+          c.choiceKind !== "gh_heritage_trait_9",
+      );
     }
-    if (kind === "gh_heritage_speed_trade" && slug !== "yes") {
-      next = next.filter((c) => c.choiceKind !== "gh_heritage_trait_9");
+    if (isHeritageOrigin) {
+      setValue("heritageChoices", next);
+    } else {
+      setValue("speciesChoices", next);
     }
-    setValue("speciesChoices", next);
 
     const nextPreview = resolveCreateCharacterFeats(
       backgroundDetail.data?.originFeatSlug?.trim() ||
         backgroundOriginFeatSlug?.trim() ||
         null,
       asiFeatSlotsToCharacterFeats(asiFeatSlotSlugs),
-      next,
+      isHeritageOrigin ? speciesChoices : next,
     );
     const validKeys = new Set(
       nextPreview.map((f) => featInstanceKey(f.featSlug, f.instanceIndex)),
@@ -324,10 +411,24 @@ export function useStepSpeciesChoices(
     setValue("featOptions", next);
   }
 
+  function applyTraditionalBuild() {
+    const traditional = heritageTraditional.data ?? [];
+    const detail = heritageDetail.data;
+    if (!traditional.length || !detail) return;
+    const picks = buildTraditionalHeritageChoices(traditional, {
+      allowsSpeedTrade: detail.allowsSpeedTrade,
+      allowsSizeChoice: detail.allowsSizeChoice,
+      speedTrade: "no",
+    });
+    setValue("heritageChoices", picks);
+  }
+
   return {
-    speciesSlug,
-    isGhHeritage: isGrimHollowHeritageSlug(speciesSlug),
-    speciesChoices,
+    speciesSlug: originSlug,
+    heritageSlug,
+    isHeritageOrigin,
+    isGhHeritage: isHeritageOrigin || isGrimHollowHeritageSlug(originSlug),
+    speciesChoices: originChoices,
     level,
     classSlug,
     featOptions,
@@ -339,6 +440,9 @@ export function useStepSpeciesChoices(
     humanOriginFeatKeys,
     skillKinds,
     traitChoices,
+    applyTraditionalBuild,
+    canApplyTraditionalBuild:
+      isHeritageOrigin && (heritageTraditional.data?.length ?? 0) >= 8,
     setChoice,
     setFeatOptions,
   };

@@ -70,7 +70,8 @@ export const createCharacterBaseSchema = z.object({
   name: z.string().min(1, "Informe o nome").max(100),
   level: z.number().int().min(1, "Mínimo nível 1").max(20, "Máximo nível 20"),
   classSlug: z.string().min(1, "Escolha uma classe"),
-  speciesSlug: z.string().min(1, "Escolha uma espécie"),
+  speciesSlug: z.string().optional(),
+  heritageSlug: z.string().optional(),
   backgroundSlug: z.string().min(1, "Escolha um antecedente"),
   characterThreadSlug: z.string().optional(),
   characterThreadGoalIndex: z.number().int().min(1).max(6).optional(),
@@ -85,6 +86,7 @@ export const createCharacterBaseSchema = z.object({
   classSkillSlugs: z.array(z.string()),
   abilityRawValues: z.array(z.number().int()).length(6).optional(),
   speciesChoices: z.array(speciesChoiceSchema),
+  heritageChoices: z.array(speciesChoiceSchema).optional(),
   subclassOptions: z.array(subclassOptionSchema),
   classOptions: z.array(classOptionSchema),
   featOptions: z.array(featOptionSchema),
@@ -226,6 +228,28 @@ function refineBackgroundBoosts(
   }
 }
 
+function refineOrigin(
+  data: Pick<CreateCharacterInput, "speciesSlug" | "heritageSlug">,
+  ctx: z.RefinementCtx,
+): void {
+  const species = data.speciesSlug?.trim();
+  const heritage = data.heritageSlug?.trim();
+  if (!species && !heritage) {
+    ctx.addIssue({
+      code: "custom",
+      message: "Escolha uma espécie ou variante",
+      path: ["speciesSlug"],
+    });
+  }
+  if (species && heritage) {
+    ctx.addIssue({
+      code: "custom",
+      message: "Escolha apenas espécie ou variante, não ambos",
+      path: ["heritageSlug"],
+    });
+  }
+}
+
 export type CreateCharacterInput = z.infer<typeof createCharacterBaseSchema>;
 
 export const identityStepSchema = createCharacterBaseSchema
@@ -234,10 +258,12 @@ export const identityStepSchema = createCharacterBaseSchema
     level: true,
     classSlug: true,
     speciesSlug: true,
+    heritageSlug: true,
     backgroundSlug: true,
     subclassSlug: true,
   })
-  .superRefine(refineSubclassRequired);
+  .superRefine(refineSubclassRequired)
+  .superRefine(refineOrigin);
 
 export const abilitiesStepSchema = createCharacterBaseSchema
   .pick({

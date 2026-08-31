@@ -69,7 +69,10 @@ export function previewCreateCharacter(
     name: values.name,
     level: values.level,
     classSlug: values.classSlug,
-    speciesSlug: values.speciesSlug,
+    speciesSlug: values.heritageSlug?.trim()
+      ? null
+      : values.speciesSlug?.trim() || null,
+    heritageSlug: values.heritageSlug?.trim() || null,
     backgroundSlug: values.backgroundSlug,
     subclassSlug: values.subclassSlug?.trim() ? values.subclassSlug : null,
     alignmentSlug: values.alignmentSlug?.trim()

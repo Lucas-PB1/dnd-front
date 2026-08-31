@@ -12,13 +12,18 @@ export function toCreateCharacterPayload(
     name: values.name,
     level: values.level,
     classSlug: values.classSlug,
-    speciesSlug: values.speciesSlug,
     backgroundSlug: values.backgroundSlug,
     abilityScores: values.abilityScores,
     abilityGenerationMethodSlug: values.abilityGenerationMethodSlug,
     classSkillSlugs: values.classSkillSlugs,
     backgroundAbilityBoostMode: values.backgroundAbilityBoostMode ?? "plus2plus1",
   };
+
+  if (values.heritageSlug?.trim()) {
+    payload.heritageSlug = values.heritageSlug.trim();
+  } else if (values.speciesSlug?.trim()) {
+    payload.speciesSlug = values.speciesSlug.trim();
+  }
 
   if ((values.backgroundAbilityBoostMode ?? "plus2plus1") === "plus1x3") {
     payload.backgroundAbilityBoostPlus1Slugs =
@@ -39,6 +44,9 @@ export function toCreateCharacterPayload(
   }
   if (values.speciesChoices.length > 0) {
     payload.speciesChoices = values.speciesChoices;
+  }
+  if ((values.heritageChoices ?? []).length > 0) {
+    payload.heritageChoices = values.heritageChoices;
   }
   if (values.subclassOptions.length > 0) {
     payload.subclassOptions = values.subclassOptions;

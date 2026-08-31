@@ -19,6 +19,8 @@ export type ClassEconomyAction = {
   speciesSlug?: string | null;
   featSlug?: string | null;
   itemSlug?: string | null;
+  heritageTraitSlug?: string | null;
+  minTraitTakes?: number;
   minLevel: number;
   /** Se definido, só aparece com essa subclasse. */
   subclassSlug?: string;
@@ -49,6 +51,8 @@ export type ResolveClassEconomyInput = {
   speciesSlug?: string | null;
   /** Escolhas de espécie (choiceKind / choiceSlug). */
   speciesChoices?: readonly { choiceKind: string; choiceSlug: string }[];
+  /** Escolhas de herança GH (choiceKind / choiceSlug). */
+  heritageChoices?: readonly { choiceKind: string; choiceSlug: string }[];
   /** Slugs de talentos na ficha (inclui estilos de luta como feat). */
   featSlugs?: readonly string[];
   /** Itens ativos (equipado + sintonizado) e charms anexados. */
@@ -98,6 +102,8 @@ export function mapEconomyActionRecord(
     speciesSlug: record.speciesSlug,
     featSlug: record.featSlug,
     itemSlug: record.itemSlug,
+    heritageTraitSlug: record.heritageTraitSlug,
+    minTraitTakes: record.minTraitTakes,
     minLevel: record.minLevel,
     subclassSlug: record.subclassSlug,
     requiresOptionKey: record.requiresOptionKey,
@@ -136,6 +142,30 @@ function matchesSpeciesOption(
   );
 }
 
+function heritageTraitTakeCounts(
+  heritageChoices: readonly { choiceKind: string; choiceSlug: string }[],
+): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const choice of heritageChoices) {
+    if (!choice.choiceKind.startsWith("heritage_trait_")) continue;
+    const slug = choice.choiceSlug?.trim();
+    if (!slug) continue;
+    counts.set(slug, (counts.get(slug) ?? 0) + 1);
+  }
+  return counts;
+}
+
+function matchesHeritageTraitAction(
+  action: ClassEconomyActionRecord,
+  heritageChoices: readonly { choiceKind: string; choiceSlug: string }[],
+): boolean {
+  if (!action.heritageTraitSlug) return false;
+  const takes = heritageTraitTakeCounts(heritageChoices);
+  const have = takes.get(action.heritageTraitSlug) ?? 0;
+  const need = action.minTraitTakes ?? 1;
+  return have >= need;
+}
+
 export function resolveClassEconomyActions(
   catalog: readonly ClassEconomyActionRecord[],
   input: ResolveClassEconomyInput,
@@ -143,6 +173,7 @@ export function resolveClassEconomyActions(
   const subclass = input.subclassSlug ?? null;
   const species = input.speciesSlug ?? null;
   const choices = input.speciesChoices ?? [];
+  const heritageChoices = input.heritageChoices ?? [];
   const featSlugs = new Set(input.featSlugs ?? []);
   const activeItemSlugs = new Set(input.activeItemSlugs ?? []);
 
@@ -156,6 +187,10 @@ export function resolveClassEconomyActions(
 
       if (action.featSlug) {
         return featSlugs.has(action.featSlug);
+      }
+
+      if (action.heritageTraitSlug) {
+        return matchesHeritageTraitAction(action, heritageChoices);
       }
 
       const isSpeciesRow = Boolean(action.speciesSlug);

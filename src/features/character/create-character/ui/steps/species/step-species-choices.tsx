@@ -8,12 +8,15 @@ import { OriginPreview } from "@/features/character/create-character/ui/origin-p
 import { SpeciesFeatOptionsSection } from "@/features/character/create-character/ui/steps/species/species-feat-options-section";
 import { SpeciesTraitChoicesSection } from "@/features/character/create-character/ui/steps/species/species-trait-choices-section";
 
+import { Button } from "@/shared/ui/button";
+
 type StepSpeciesChoicesProps = {
   control: Control<CreateCharacterInput>;
   setValue: UseFormSetValue<CreateCharacterInput>;
   error?: string;
   /** Slug da ficha — fallback se o watch ainda não hidratou. */
   lockedSpeciesSlug?: string;
+  lockedHeritageSlug?: string;
 };
 
 export function StepSpeciesChoices({
@@ -21,19 +24,21 @@ export function StepSpeciesChoices({
   setValue,
   error,
   lockedSpeciesSlug,
+  lockedHeritageSlug,
 }: StepSpeciesChoicesProps) {
   const data = useStepSpeciesChoices(
     control,
     setValue,
     lockedSpeciesSlug,
+    lockedHeritageSlug,
   );
 
   if (!data.speciesSlug) {
     return (
       <p className="text-sm text-muted-foreground">
-        {lockedSpeciesSlug
-          ? "Não foi possível carregar a espécie desta ficha."
-          : "Volte à identidade e escolha uma espécie."}
+        {lockedSpeciesSlug || lockedHeritageSlug
+          ? "Não foi possível carregar a origem desta ficha."
+          : "Volte à identidade e escolha uma espécie ou variante."}
       </p>
     );
   }
@@ -44,20 +49,37 @@ export function StepSpeciesChoices({
 
   return (
     <div className="space-y-3">
-      <OriginPreview speciesSlug={data.speciesSlug} level={data.level} />
+      <OriginPreview
+        speciesSlug={data.isHeritageOrigin ? undefined : data.speciesSlug}
+        heritageSlug={data.heritageSlug || undefined}
+        level={data.level}
+      />
 
       {data.groups.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          Esta espécie não exige escolhas de traço.
+          {data.isHeritageOrigin
+            ? "Esta variante não exige escolhas de traço."
+            : "Esta espécie não exige escolhas de traço."}
         </p>
       ) : (
         <>
           {data.isGhHeritage ? (
-            <p className="text-sm text-muted-foreground">
-              Escolha 8 traços modulares do pool Grim Hollow. Traços podem ser
-              repetidos para a versão aprimorada. Algumas heranças permitem
-              trocar 1,5 m de deslocamento por um 9º traço.
-            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <p className="text-sm text-muted-foreground">
+                Escolha 8 traços modulares do pool Grim Hollow. Repetir um traço
+                aplica o benefício aprimorado quando disponível.
+              </p>
+              {data.canApplyTraditionalBuild ? (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={data.applyTraditionalBuild}
+                >
+                  Usar build tradicional
+                </Button>
+              ) : null}
+            </div>
           ) : null}
           <SpeciesTraitChoicesSection
             groups={data.groups}

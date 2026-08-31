@@ -27,16 +27,22 @@ export function EditClassSkillsForm(props: EditFormProps) {
 }
 
 export function EditSpeciesChoicesForm(props: EditFormProps) {
+  const isHeritage = Boolean(props.character.heritageSlug);
   return (
     <SheetStepForm
       {...props}
-      toPayload={(v) => ({ speciesChoices: v.speciesChoices })}
+      toPayload={(v) =>
+        isHeritage
+          ? { heritageChoices: v.heritageChoices }
+          : { speciesChoices: v.speciesChoices }
+      }
     >
       {(form) => (
         <StepSpeciesChoices
           control={form.control}
           setValue={form.setValue}
-          lockedSpeciesSlug={props.character.speciesSlug}
+          lockedSpeciesSlug={props.character.speciesSlug ?? undefined}
+          lockedHeritageSlug={props.character.heritageSlug ?? undefined}
         />
       )}
     </SheetStepForm>

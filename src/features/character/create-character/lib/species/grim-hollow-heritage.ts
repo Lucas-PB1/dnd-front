@@ -1,19 +1,30 @@
+import {
+  resolveHeritageDisplaySpeed,
+  sortHeritageTraitOptions as sortGhHeritageTraitOptionsExport,
+} from "@/entities/heritage";
+
+export {
+  aggregateTraitTakes,
+  buildTraditionalHeritageChoices,
+  ghHeritageTraitSlotNumber,
+  HERITAGE_SIZE_KIND,
+  HERITAGE_SPEED_TRADE_KIND,
+  HERITAGE_TRAIT_SLOT_9,
+  HERITAGE_TRAIT_SLOTS,
+  isGhHeritageTraitSlot,
+  isGrimHollowHeritageSlug,
+  isHeritageTraitSlot,
+  resolveHeritageDisplaySpeed,
+} from "@/entities/heritage";
+
+/** @deprecated heranças GH não usam mais phb_species */
 export const GH_HERITAGE_TRAIT_INDEX_SLUG = "gh-heritage-traits";
 
-const GH_HERITAGE_TRAIT_SLOT_PREFIX = "gh_heritage_trait_";
+export const sortGhHeritageTraitOptions = sortGhHeritageTraitOptionsExport;
 
-export function isGrimHollowHeritageSlug(
-  speciesSlug: string | null | undefined,
-): boolean {
-  const slug = speciesSlug?.trim() ?? "";
-  return slug.startsWith("gh-") && slug !== GH_HERITAGE_TRAIT_INDEX_SLUG;
-}
-
-export function isGhHeritageTraitSlot(choiceKind: string): boolean {
-  return choiceKind.startsWith(GH_HERITAGE_TRAIT_SLOT_PREFIX);
-}
-
-export function ghHeritageTraitSlotNumber(choiceKind: string): number | null {
-  const match = choiceKind.match(/^gh_heritage_trait_(\d+)$/);
-  return match ? Number.parseInt(match[1], 10) : null;
+export function resolveGhHeritageDisplaySpeed(
+  baseSpeed: string | null | undefined,
+  choices: readonly { choiceKind: string; choiceSlug: string }[],
+): string | null {
+  return resolveHeritageDisplaySpeed(baseSpeed, choices);
 }

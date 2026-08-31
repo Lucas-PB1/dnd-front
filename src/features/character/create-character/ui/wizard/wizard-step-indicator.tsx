@@ -1,21 +1,24 @@
 import { cn } from "@/shared/lib/utils";
 import {
   skippedWizardSteps,
-  visibleWizardSteps,
+  visibleWizardStepsWithLabels,
   type WizardNavOptions,
   type WizardStepId,
+  type WizardStepLabelContext,
 } from "@/features/character/create-character/model/wizard-steps";
 
 type WizardStepIndicatorProps = {
   currentStep: WizardStepId;
   navOptions?: WizardNavOptions;
+  stepLabelContext?: WizardStepLabelContext;
 };
 
 export function WizardStepIndicator({
   currentStep,
   navOptions,
+  stepLabelContext,
 }: WizardStepIndicatorProps) {
-  const steps = visibleWizardSteps(navOptions);
+  const steps = visibleWizardStepsWithLabels(navOptions, stepLabelContext);
   const skipped = skippedWizardSteps(navOptions);
   const currentIndex = steps.findIndex((step) => step.id === currentStep);
   const current = steps[currentIndex];

@@ -104,7 +104,8 @@ function characterToFormValues(
     name: character.name,
     level: character.level,
     classSlug: character.classSlug,
-    speciesSlug: character.speciesSlug,
+    speciesSlug: character.speciesSlug ?? undefined,
+    heritageSlug: character.heritageSlug ?? undefined,
     backgroundSlug: character.backgroundSlug,
     subclassSlug: character.subclassSlug ?? "",
     abilityGenerationMethodSlug:
@@ -124,6 +125,7 @@ function characterToFormValues(
     alignmentSlug: character.alignmentSlug ?? "",
     languageSlugs: character.languageSlugs,
     speciesChoices: character.speciesChoices,
+    heritageChoices: character.heritageChoices ?? [],
     subclassOptions: character.subclassOptions,
     classOptions: character.classOptions ?? [],
     featOptions: character.featOptions,

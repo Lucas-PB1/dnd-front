@@ -66,7 +66,12 @@ export function WizardStepContent({
       className="animate-in fade-in-0 slide-in-from-right-3 duration-300 fill-mode-both"
     >
       {step === "identity" ? (
-        <StepIdentity register={register} control={control} errors={errors} />
+        <StepIdentity
+          register={register}
+          control={control}
+          errors={errors}
+          setValue={setValue}
+        />
       ) : null}
 
       {step === "abilities" ? (

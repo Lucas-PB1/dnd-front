@@ -48,6 +48,7 @@ export type SkillBonusSources = {
   classSkillSlugs?: readonly string[];
   backgroundSkillSlugs?: readonly string[];
   speciesChoices?: readonly SpeciesChoiceLike[];
+  heritageChoices?: readonly SpeciesChoiceLike[];
   featOptions?: readonly FeatOptionLike[];
   classOptions?: readonly ClassOptionLike[];
   classSlug?: string | null;
@@ -104,6 +105,7 @@ function collectPriorProficientSkillSlugs(input: SkillBonusSources): string[] {
       ...(input.classSkillSlugs ?? []),
       ...(input.backgroundSkillSlugs ?? []),
       ...collectSpeciesSkillSlugs(input.speciesChoices),
+      ...collectSpeciesSkillSlugs(input.heritageChoices),
       ...collectFeatSkillOptionSlugs(featOptions),
       ...collectClassExtraSkillSlugs(input.classOptions),
     ]),

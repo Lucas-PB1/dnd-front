@@ -15,6 +15,8 @@ import {
   useSkills,
 } from "@/features/catalog/reference-catalog/api/use-reference";
 import { useSpellLabels } from "@/features/catalog/spell-catalog/api/use-spells";
+import { formatHeritageVariantLabel } from "@/entities/heritage/origin-label";
+import { useHeritageDetail } from "@/features/catalog/heritage-catalog/api/use-heritages";
 import { useSpeciesDetail } from "@/features/catalog/species-catalog/api/use-species";
 
 export type CharacterIdentityLabels = {
@@ -76,7 +78,14 @@ export function useCharacterCatalogLabels(
   const loadAlignments = options.loadAlignments ?? true;
 
   const classDetail = useClassDetail(character?.classSlug ?? "", enabled);
-  const speciesDetail = useSpeciesDetail(character?.speciesSlug ?? "", enabled);
+  const speciesDetail = useSpeciesDetail(
+    character?.heritageSlug ? "" : (character?.speciesSlug ?? ""),
+    enabled && !character?.heritageSlug,
+  );
+  const heritageDetail = useHeritageDetail(
+    character?.heritageSlug ?? "",
+    enabled && !!character?.heritageSlug,
+  );
   const backgroundDetail = useBackgroundDetail(
     character?.backgroundSlug ?? "",
     enabled,
@@ -121,7 +130,11 @@ export function useCharacterCatalogLabels(
 
   const identity: CharacterIdentityLabels = {
     className: classDetail.data?.name ?? character?.classSlug ?? null,
-    speciesName: speciesDetail.data?.name ?? character?.speciesSlug ?? null,
+    speciesName: character?.heritageSlug
+      ? heritageDetail.data?.name
+        ? formatHeritageVariantLabel(heritageDetail.data.name)
+        : (character.heritageSlug ?? null)
+      : (speciesDetail.data?.name ?? character?.speciesSlug ?? null),
     backgroundName:
       backgroundDetail.data?.name ?? character?.backgroundSlug ?? null,
     subclassName,
@@ -130,7 +143,8 @@ export function useCharacterCatalogLabels(
 
   const isLoading =
     (enabled && classDetail.isPending) ||
-    (enabled && speciesDetail.isPending) ||
+    (enabled && !character?.heritageSlug && speciesDetail.isPending) ||
+    (enabled && !!character?.heritageSlug && heritageDetail.isPending) ||
     (enabled && backgroundDetail.isPending) ||
     (enabled && subclasses.isPending) ||
     skills.isPending ||
