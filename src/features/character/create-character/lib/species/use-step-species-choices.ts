@@ -236,11 +236,17 @@ export function useStepSpeciesChoices(
         }
         const traitName = heritageRow.traitName ?? heritageRow.label ?? choiceKind;
         const group = map.get(choiceKind) ?? { traitName, options: [] };
-        group.options.push({
-          choiceSlug: heritageRow.traitSlug,
-          choiceName: heritageRow.label ?? traitName,
-          level1Benefit: heritageRow.benefitBase ?? null,
-        });
+        if (
+          !group.options.some(
+            (option) => option.choiceSlug === heritageRow.traitSlug,
+          )
+        ) {
+          group.options.push({
+            choiceSlug: heritageRow.traitSlug,
+            choiceName: heritageRow.label ?? traitName,
+            level1Benefit: heritageRow.benefitBase ?? null,
+          });
+        }
         map.set(choiceKind, group);
         continue;
       }
