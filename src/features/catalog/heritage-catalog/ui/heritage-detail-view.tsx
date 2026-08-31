@@ -179,19 +179,23 @@ function TraitPoolSection({ entries }: { entries: TraitPoolEntry[] }) {
   if (entries.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
-        Pool de traços indisponível.
+        Esta variante não tem build tradicional sugerido.
       </p>
     );
   }
 
+  const showSearch = entries.length > TRAITS_PER_PAGE;
+
   return (
     <div className="space-y-4">
-      <CatalogSearch
-        value={query}
-        onChange={setQuery}
-        placeholder="Buscar traço por nome, categoria ou benefício…"
-        resultCount={query.trim() ? total : undefined}
-      />
+      {showSearch ? (
+        <CatalogSearch
+          value={query}
+          onChange={setQuery}
+          placeholder="Buscar traço por nome, categoria ou benefício…"
+          resultCount={query.trim() ? total : undefined}
+        />
+      ) : null}
 
       {total === 0 ? (
         <p className="text-sm text-muted-foreground">
@@ -199,50 +203,44 @@ function TraitPoolSection({ entries }: { entries: TraitPoolEntry[] }) {
         </p>
       ) : (
         <>
-      {grouped.map(([category, traits]) => (
-        <div key={category} className="space-y-2">
-          <p className="text-xs font-semibold tracking-wide text-primary uppercase">
-            {category}
-          </p>
-          <div className="space-y-2">
-            {traits.map((trait) => (
-              <CollapsibleCard
-                key={trait.traitSlug}
-                title={trait.traitName}
-                subtitle={
-                  trait.isTraditional ? "Sugerido no build tradicional" : undefined
-                }
-              >
-                <div className="space-y-3">
-                  {trait.benefitBase ? (
-                    <PhbProse text={trait.benefitBase} className="text-sm" />
-                  ) : null}
-                  {trait.benefitImproved ? (
-                    <div className="space-y-1 border-t border-border/60 pt-3">
-                      <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                        Benefício aprimorado (2×)
-                      </p>
-                      <PhbProse
-                        text={trait.benefitImproved}
-                        className="text-sm text-muted-foreground"
-                      />
+          {grouped.map(([category, traits]) => (
+            <div key={category} className="space-y-2">
+              <p className="text-xs font-semibold tracking-wide text-primary uppercase">
+                {category}
+              </p>
+              <div className="space-y-2">
+                {traits.map((trait) => (
+                  <CollapsibleCard key={trait.traitSlug} title={trait.traitName}>
+                    <div className="space-y-3">
+                      {trait.benefitBase ? (
+                        <PhbProse text={trait.benefitBase} className="text-sm" />
+                      ) : null}
+                      {trait.benefitImproved ? (
+                        <div className="space-y-1 border-t border-border/60 pt-3">
+                          <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                            Benefício aprimorado (2×)
+                          </p>
+                          <PhbProse
+                            text={trait.benefitImproved}
+                            className="text-sm text-muted-foreground"
+                          />
+                        </div>
+                      ) : null}
                     </div>
-                  ) : null}
-                </div>
-              </CollapsibleCard>
-            ))}
-          </div>
-        </div>
-      ))}
+                  </CollapsibleCard>
+                ))}
+              </div>
+            </div>
+          ))}
 
-      <CatalogPagination
-        page={page}
-        totalPages={totalPages}
-        total={total}
-        from={from}
-        to={to}
-        onPageChange={setPage}
-      />
+          <CatalogPagination
+            page={page}
+            totalPages={totalPages}
+            total={total}
+            from={from}
+            to={to}
+            onPageChange={setPage}
+          />
         </>
       )}
     </div>
@@ -321,7 +319,7 @@ function HeritageDetailBody({ slug }: HeritageDetailViewProps) {
         </section>
       ) : null}
 
-      {(heritage.allowsSpeedTrade || heritage.allowsSizeChoice) && (
+      {heritage.allowsSizeChoice ? (
         <section aria-labelledby="heritage-custom" className="space-y-4">
           <div className="space-y-1">
             <h2
@@ -331,29 +329,17 @@ function HeritageDetailBody({ slug }: HeritageDetailViewProps) {
               Customização
             </h2>
             <p className="text-sm text-muted-foreground">
-              Opções extras ao montar os 8 traços modulares.
+              Única escolha extra na criação desta variante.
             </p>
           </div>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            {heritage.allowsSizeChoice ? (
-              <li>
-                <span className="font-medium text-foreground">
-                  Tamanho:{" "}
-                </span>
-                Pequeno ou Médio (escolha na criação).
-              </li>
-            ) : null}
-            {heritage.allowsSpeedTrade ? (
-              <li>
-                <span className="font-medium text-foreground">
-                  Troca de deslocamento:{" "}
-                </span>
-                −1,5 m para ganhar um 9º traço modular.
-              </li>
-            ) : null}
+            <li>
+              <span className="font-medium text-foreground">Tamanho: </span>
+              Pequeno ou Médio (escolha na criação).
+            </li>
           </ul>
         </section>
-      )}
+      ) : null}
 
       <section aria-labelledby="heritage-traditional" className="space-y-4">
         <div className="space-y-1">
@@ -361,43 +347,26 @@ function HeritageDetailBody({ slug }: HeritageDetailViewProps) {
             id="heritage-traditional"
             className="font-heading text-2xl font-semibold tracking-tight"
           >
-            Build tradicional
+            Traços tradicionais
           </h2>
           <p className="text-sm text-muted-foreground">
-            Oito traços sugeridos pelo livro (3 Combate + 3 Exploração + 2
-            Interpretação). Você pode trocar livremente por qualquer traço do
-            pool global.
+            Conjunto fixo do livro (em geral 3 Combate + 3 Exploração + 2
+            Interpretação). Na criação, esta variante usa exatamente esses
+            traços — sem montar um pool customizado.
           </p>
         </div>
-        {traditionalQuery.isPending ? (
-          <p className="text-sm text-muted-foreground">Carregando preset…</p>
-        ) : (
-          <TraditionalBuildList traits={traditional} />
-        )}
-      </section>
-
-      <section aria-labelledby="heritage-pool" className="space-y-4">
-        <div className="space-y-1">
-          <h2
-            id="heritage-pool"
-            className="font-heading text-2xl font-semibold tracking-tight"
-          >
-            Pool de traços modulares
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            Referência do pool global (~107 traços). Na criação, escolha
-            exatamente 8 — repetir um traço aplica o benefício aprimorado quando
-            disponível.
-          </p>
-        </div>
-        {modularTraitsQuery.isPending ? (
+        {traditionalQuery.isPending || modularTraitsQuery.isPending ? (
           <p className="text-sm text-muted-foreground">Carregando traços…</p>
-        ) : modularTraitsQuery.isError ? (
-          <p className="text-sm text-muted-foreground">
-            Não foi possível carregar o pool de traços desta variante.
-          </p>
+        ) : traditional.length === 0 ? (
+          <TraditionalBuildList traits={traditional} />
         ) : (
-          <TraitPoolSection entries={traitPool} />
+          <TraitPoolSection
+            entries={traditional
+              .map((row) =>
+                traitPool.find((entry) => entry.traitSlug === row.traitSlug),
+              )
+              .filter((entry): entry is TraitPoolEntry => Boolean(entry))}
+          />
         )}
       </section>
     </div>

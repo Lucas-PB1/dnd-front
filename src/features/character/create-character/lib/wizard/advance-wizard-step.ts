@@ -251,18 +251,19 @@ export async function advanceWizardStep(deps: WizardAdvanceDeps): Promise<void> 
       (c) => c.choiceKind === "bearfolk_lineage",
     )?.choiceSlug;
     const ghSpeedTrade = originChoices.find(
-      (c) =>
-        c.choiceKind === "heritage_speed_trade" ||
-        c.choiceKind === "gh_heritage_speed_trade",
+      (c) => c.choiceKind === "heritage_speed_trade",
     )?.choiceSlug;
     const requiredKinds = [
       ...new Set((speciesTraitChoices ?? []).map((r) => r.choiceKind)),
     ].filter((kind) => {
       if (kind === "high_elf_cantrip") return elfLineage === "high-elf";
       if (kind === "andari_druid_cantrip") return bearfolkLineage === "andari";
-      if (kind === "heritage_trait_9" || kind === "gh_heritage_trait_9") {
+      if (kind === "heritage_trait_9") {
         return ghSpeedTrade === "yes";
       }
+      // Criador usa só build tradicional — não exige kinds do pool custom.
+      if (kind.startsWith("heritage_trait_")) return false;
+      if (kind === "heritage_speed_trade") return false;
       return true;
     });
     if (requiredKinds.length > 0) {

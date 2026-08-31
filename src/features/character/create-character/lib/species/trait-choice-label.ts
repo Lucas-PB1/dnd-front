@@ -38,12 +38,12 @@ export function traitChoiceLabel(kind: string, traitName: string): string {
     case "feathren_feline_ancestry":
       return "Ancestria felina";
     default: {
-      const heritageSlot = kind.match(/^(?:heritage|gh_heritage)_trait_(\d+)$/);
+      const heritageSlot = kind.match(/^heritage_trait_(\d+)$/);
       if (heritageSlot) return `Traço modular ${heritageSlot[1]}`;
-      if (kind === "heritage_speed_trade" || kind === "gh_heritage_speed_trade") {
+      if (kind === "heritage_speed_trade") {
         return "Trocar deslocamento (+1 traço)";
       }
-      if (kind === "heritage_size" || kind === "gh_heritage_size") {
+      if (kind === "heritage_size") {
         return "Tamanho";
       }
       return traitName;

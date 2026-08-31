@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import type { Control, UseFormSetValue } from "react-hook-form";
 import { useWatch } from "react-hook-form";
 
@@ -12,10 +12,6 @@ import type {
 import { asiFeatSlotsToCharacterFeats } from "@/features/character/create-character/lib/feats/asi-feat-slots-to-feats";
 import { skillChoiceKinds } from "@/features/character/create-character/lib/class-skills/granted-proficiencies";
 import { featSlugsGrantedOutsideSpecies } from "@/features/character/create-character/lib/feats/origin-feat-options";
-import {
-  isGhHeritageTraitSlot,
-  isGrimHollowHeritageSlug,
-} from "@/features/character/create-character/lib/species/grim-hollow-heritage";
 import {
   HUMAN_ORIGIN_FEAT_KIND,
   resolveCreateCharacterFeats,
@@ -32,8 +28,17 @@ import {
   useHeritageTraitChoices,
 } from "@/features/catalog/heritage-catalog/api/use-heritages";
 import {
+  applyTraditionalTraitDouble,
   buildTraditionalHeritageChoices,
+  clearTraditionalTraitDouble,
+  HERITAGE_SIZE_KIND,
+  isHeritageTraitSlot,
+  isTraditionalHeritagePickSet,
 } from "@/entities/heritage";
+import {
+  toTraditionalTraitDisplay,
+  type TraditionalTraitDisplay,
+} from "@/features/character/create-character/ui/steps/species/heritage-traditional-traits-panel";
 import {
   useFeatLabels,
   useFeats,
@@ -219,11 +224,6 @@ export function useStepSpeciesChoices(
     const geppettinConstruction = speciesChoices.find(
       (c) => c.choiceKind === "geppettin_construction",
     )?.choiceSlug;
-    const ghSpeedTrade = originChoices.find(
-      (c) =>
-        c.choiceKind === "heritage_speed_trade" ||
-        c.choiceKind === "gh_heritage_speed_trade",
-    )?.choiceSlug;
 
     for (const row of isHeritageOrigin
       ? (heritageTraitChoices.data ?? [])
@@ -231,7 +231,10 @@ export function useStepSpeciesChoices(
       if (isHeritageOrigin) {
         const heritageRow = row as import("@/entities/heritage/types").HeritageTraitChoice;
         const choiceKind = heritageRow.choiceKind;
-        if (choiceKind === "heritage_trait_9" && ghSpeedTrade !== "yes") {
+        // Traços modulares vêm do build tradicional (lista fixa), não do pool.
+        if (isHeritageTraitSlot(choiceKind)) continue;
+        // Troca de deslocamento (+9º traço) fica fora — sempre build tradicional.
+        if (choiceKind === "heritage_speed_trade") {
           continue;
         }
         const traitName = heritageRow.traitName ?? heritageRow.label ?? choiceKind;
@@ -288,15 +291,15 @@ export function useStepSpeciesChoices(
 
     return [...map.entries()]
       .sort(([left], [right]) => {
-        const slotLeft = left.match(/^(?:heritage|gh_heritage)_trait_(\d+)$/);
-        const slotRight = right.match(/^(?:heritage|gh_heritage)_trait_(\d+)$/);
+        const slotLeft = left.match(/^heritage_trait_(\d+)$/);
+        const slotRight = right.match(/^heritage_trait_(\d+)$/);
         if (slotLeft && slotRight) {
           return Number(slotLeft[1]) - Number(slotRight[1]);
         }
-        if (left.endsWith("_speed_trade")) return -1;
-        if (right.endsWith("_speed_trade")) return 1;
-        if (left.endsWith("_size")) return 1;
-        if (right.endsWith("_size")) return -1;
+        if (left === "heritage_speed_trade") return -1;
+        if (right === "heritage_speed_trade") return 1;
+        if (left === "heritage_size") return 1;
+        if (right === "heritage_size") return -1;
         return left.localeCompare(right, "pt");
       })
       .map(([kind, group]) => ({
@@ -312,10 +315,32 @@ export function useStepSpeciesChoices(
   }, [
     featSlugsFromOtherSources,
     isHeritageOrigin,
-    originChoices,
     speciesChoices,
     heritageTraitChoices.data,
     speciesTraitChoices.data?.data,
+  ]);
+
+  const traditionalTraits = useMemo((): TraditionalTraitDisplay[] => {
+    if (!isHeritageOrigin) return [];
+    const traditional = heritageTraditional.data ?? [];
+    const benefitsBySlug = new Map(
+      (heritageTraitChoices.data ?? [])
+        .filter((row) => row.isTraditional && isHeritageTraitSlot(row.choiceKind))
+        .map((row) => [
+          row.traitSlug,
+          {
+            benefitBase: row.benefitBase,
+            benefitImproved: row.benefitImproved,
+          },
+        ]),
+    );
+    return traditional.map((trait) =>
+      toTraditionalTraitDisplay(trait, benefitsBySlug.get(trait.traitSlug)),
+    );
+  }, [
+    heritageTraditional.data,
+    heritageTraitChoices.data,
+    isHeritageOrigin,
   ]);
 
   const featNameBySlug = useMemo(() => {
@@ -380,14 +405,10 @@ export function useStepSpeciesChoices(
       }
     }
     if (
-      (kind === "heritage_speed_trade" || kind === "gh_heritage_speed_trade") &&
+      kind === "heritage_speed_trade" &&
       slug !== "yes"
     ) {
-      next = next.filter(
-        (c) =>
-          c.choiceKind !== "heritage_trait_9" &&
-          c.choiceKind !== "gh_heritage_trait_9",
-      );
+      next = next.filter((c) => c.choiceKind !== "heritage_trait_9");
     }
     if (isHeritageOrigin) {
       setValue("heritageChoices", next);
@@ -421,19 +442,103 @@ export function useStepSpeciesChoices(
     const traditional = heritageTraditional.data ?? [];
     const detail = heritageDetail.data;
     if (!traditional.length || !detail) return;
+    const sizePick = heritageChoices.find(
+      (choice) => choice.choiceKind === HERITAGE_SIZE_KIND,
+    )?.choiceSlug;
     const picks = buildTraditionalHeritageChoices(traditional, {
-      allowsSpeedTrade: detail.allowsSpeedTrade,
+      allowsSpeedTrade: false,
       allowsSizeChoice: detail.allowsSizeChoice,
       speedTrade: "no",
+      sizeChoice:
+        sizePick === "small" || sizePick === "medium" ? sizePick : "medium",
     });
     setValue("heritageChoices", picks);
   }
+
+  function setTraditionalTraitDouble(doubleSlug: string, replaceSlug: string) {
+    setValue(
+      "heritageChoices",
+      applyTraditionalTraitDouble(heritageChoices, doubleSlug, replaceSlug),
+    );
+  }
+
+  function clearTraditionalTraitDoubleChoice(
+    doubleSlug: string,
+    restoreSlug: string,
+  ) {
+    setValue(
+      "heritageChoices",
+      clearTraditionalTraitDouble(heritageChoices, doubleSlug, restoreSlug),
+    );
+  }
+
+  function changeTraditionalTraitReplace(
+    doubleSlug: string,
+    fromSlug: string,
+    toSlug: string,
+  ) {
+    if (!fromSlug || !toSlug || fromSlug === toSlug) return;
+    const restored = clearTraditionalTraitDouble(
+      heritageChoices,
+      doubleSlug,
+      fromSlug,
+    );
+    setValue(
+      "heritageChoices",
+      applyTraditionalTraitDouble(restored, doubleSlug, toSlug),
+    );
+  }
+
+  useEffect(() => {
+    if (!isHeritageOrigin) return;
+    const traditional = heritageTraditional.data ?? [];
+    const detail = heritageDetail.data;
+    if (!detail || traditional.length < 8) return;
+
+    const traditionalSlugs = new Set(
+      traditional.map((trait) => trait.traitSlug),
+    );
+    // Mantém 2× no mesmo naipe; só reseta se sair do conjunto tradicional.
+    if (isTraditionalHeritagePickSet(traditionalSlugs, heritageChoices)) {
+      const needsSize =
+        detail.allowsSizeChoice &&
+        !heritageChoices.some(
+          (choice) => choice.choiceKind === HERITAGE_SIZE_KIND,
+        );
+      if (!needsSize) return;
+      setValue("heritageChoices", [
+        ...heritageChoices,
+        { choiceKind: HERITAGE_SIZE_KIND, choiceSlug: "medium" },
+      ]);
+      return;
+    }
+
+    const sizePick = heritageChoices.find(
+      (choice) => choice.choiceKind === HERITAGE_SIZE_KIND,
+    )?.choiceSlug;
+    setValue(
+      "heritageChoices",
+      buildTraditionalHeritageChoices(traditional, {
+        allowsSpeedTrade: false,
+        allowsSizeChoice: detail.allowsSizeChoice,
+        speedTrade: "no",
+        sizeChoice:
+          sizePick === "small" || sizePick === "medium" ? sizePick : "medium",
+      }),
+    );
+  }, [
+    heritageChoices,
+    heritageDetail.data,
+    heritageTraditional.data,
+    isHeritageOrigin,
+    setValue,
+  ]);
 
   return {
     speciesSlug: originSlug,
     heritageSlug,
     isHeritageOrigin,
-    isGhHeritage: isHeritageOrigin || isGrimHollowHeritageSlug(originSlug),
+    isGhHeritage: isHeritageOrigin,
     speciesChoices: originChoices,
     level,
     classSlug,
@@ -441,14 +546,20 @@ export function useStepSpeciesChoices(
     grantedSkillSlugs,
     grantedToolSlugs,
     groups,
+    traditionalTraits,
+    heritageTraitSlugs: heritageChoices
+      .filter((choice) => isHeritageTraitSlot(choice.choiceKind))
+      .map((choice) => choice.choiceSlug),
     featNameBySlug,
     previewFeats,
     humanOriginFeatKeys,
     skillKinds,
     traitChoices,
     applyTraditionalBuild,
-    canApplyTraditionalBuild:
-      isHeritageOrigin && (heritageTraditional.data?.length ?? 0) >= 8,
+    canApplyTraditionalBuild: false,
+    setTraditionalTraitDouble,
+    clearTraditionalTraitDoubleChoice,
+    changeTraditionalTraitReplace,
     setChoice,
     setFeatOptions,
   };

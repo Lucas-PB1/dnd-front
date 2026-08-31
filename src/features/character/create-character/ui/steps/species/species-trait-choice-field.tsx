@@ -2,17 +2,12 @@
 
 import { filterOptionsExcludingTaken } from "@/features/character/create-character/lib/class-skills/granted-proficiencies";
 import { traitChoiceLabel } from "@/features/character/create-character/lib/species/trait-choice-label";
-import {
-  isGhHeritageTraitSlot,
-  sortGhHeritageTraitOptions,
-} from "@/features/character/create-character/lib/species/grim-hollow-heritage";
 import type { SpeciesTraitChoiceGroup } from "@/features/character/create-character/lib/species/use-step-species-choices";
 import { CatalogSelect } from "@/features/character/create-character/ui/catalog-select";
 import {
   ChoicePreviewPanel,
   truncateChoiceHint,
 } from "@/features/character/create-character/ui/choice-preview-panel";
-import { PaginatedTraitChoiceList } from "@/features/character/create-character/ui/steps/species/paginated-trait-choice-list";
 import { cn } from "@/shared/lib/utils";
 
 const COMPACT_LIST_THRESHOLD = 8;
@@ -49,12 +44,8 @@ export function SpeciesTraitChoiceField({
           level1Benefit: source?.level1Benefit ?? null,
         };
       })
-    : isGhHeritageTraitSlot(kind)
-      ? sortGhHeritageTraitOptions(options)
-      : options;
-  const isGhTraitSlot = isGhHeritageTraitSlot(kind);
-  const useSelect =
-    !isGhTraitSlot && visibleOptions.length > COMPACT_LIST_THRESHOLD;
+    : options;
+  const useSelect = visibleOptions.length > COMPACT_LIST_THRESHOLD;
   const selectedOption = options.find((opt) => opt.choiceSlug === selected);
 
   return (
@@ -67,14 +58,7 @@ export function SpeciesTraitChoiceField({
           Perícias já concedidas foram removidas — escolha outra.
         </p>
       ) : null}
-      {isGhTraitSlot ? (
-        <PaginatedTraitChoiceList
-          options={visibleOptions}
-          selected={selected}
-          name={`species-${kind}`}
-          onSelect={(slug) => onSelect(kind, slug)}
-        />
-      ) : useSelect ? (
+      {useSelect ? (
         <CatalogSelect
           id={`species-choice-${kind}`}
           label=""

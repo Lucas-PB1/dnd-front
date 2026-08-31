@@ -6,7 +6,3 @@ export function formatHeritageVariantLabel(name: string): string {
 export function heritageOriginKindLabel(): string {
   return "Variante";
 }
-
-export function isGrimHollowHeritageSlug(slug: string | null | undefined): boolean {
-  return Boolean(slug?.startsWith("gh-"));
-}

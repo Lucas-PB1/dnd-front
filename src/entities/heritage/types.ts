@@ -184,27 +184,53 @@ export function buildTraditionalHeritageChoices(
   return picks;
 }
 
-/** @deprecated use heritageSlug */
-export function isGrimHollowHeritageSlug(
-  slug: string | null | undefined,
+/** Todos os picks de traço estão no conjunto tradicional e há 8 slots. */
+export function isTraditionalHeritagePickSet(
+  traditionalSlugs: ReadonlySet<string>,
+  picks: readonly HeritageTraitPick[],
 ): boolean {
-  return Boolean(slug?.trim().startsWith("gh-"));
+  const traitPicks = picks.filter((pick) => isHeritageTraitSlot(pick.choiceKind));
+  if (traitPicks.length !== 8) return false;
+  return traitPicks.every((pick) => traditionalSlugs.has(pick.choiceSlug.trim()));
 }
 
-export function isGhHeritageTraitSlot(choiceKind: string): boolean {
-  return (
-    isHeritageTraitSlot(choiceKind) ||
-    choiceKind.startsWith("gh_heritage_trait_")
+/**
+ * Repete um traço tradicional (2×) no lugar de outro do mesmo conjunto.
+ * `replaceSlug` some; `doubleSlug` passa a ocupar dois slots.
+ */
+export function applyTraditionalTraitDouble(
+  picks: readonly HeritageTraitPick[],
+  doubleSlug: string,
+  replaceSlug: string,
+): HeritageTraitPick[] {
+  if (!doubleSlug || !replaceSlug || doubleSlug === replaceSlug) return [...picks];
+
+  const next = picks.map((pick) => ({ ...pick }));
+  const replaceSlot = next.find(
+    (pick) =>
+      isHeritageTraitSlot(pick.choiceKind) && pick.choiceSlug === replaceSlug,
   );
+  if (!replaceSlot) return next;
+  replaceSlot.choiceSlug = doubleSlug;
+  return next;
 }
 
-export function ghHeritageTraitSlotNumber(choiceKind: string): number | null {
-  return (
-    heritageTraitSlotIndex(choiceKind) ??
-    (choiceKind.match(/^gh_heritage_trait_(\d+)$/)
-      ? Number.parseInt(choiceKind.match(/^gh_heritage_trait_(\d+)$/)![1], 10)
-      : null)
+/** Desfaz um 2×: recoloca `restoreSlug` no segundo slot de `doubleSlug`. */
+export function clearTraditionalTraitDouble(
+  picks: readonly HeritageTraitPick[],
+  doubleSlug: string,
+  restoreSlug: string,
+): HeritageTraitPick[] {
+  if (!doubleSlug || !restoreSlug) return [...picks];
+
+  const next = picks.map((pick) => ({ ...pick }));
+  const doubleSlots = next.filter(
+    (pick) =>
+      isHeritageTraitSlot(pick.choiceKind) && pick.choiceSlug === doubleSlug,
   );
+  if (doubleSlots.length < 2) return next;
+  doubleSlots[1].choiceSlug = restoreSlug;
+  return next;
 }
 
 const GH_TRAIT_CATEGORY_ORDER: Record<string, number> = {

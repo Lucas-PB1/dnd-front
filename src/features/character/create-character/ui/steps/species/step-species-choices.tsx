@@ -5,10 +5,9 @@ import type { Control, UseFormSetValue } from "react-hook-form";
 import { useStepSpeciesChoices } from "@/features/character/create-character/lib/species/use-step-species-choices";
 import type { CreateCharacterInput } from "@/features/character/create-character/model/create-character.schema";
 import { OriginPreview } from "@/features/character/create-character/ui/origin-preview";
+import { HeritageTraditionalTraitsPanel } from "@/features/character/create-character/ui/steps/species/heritage-traditional-traits-panel";
 import { SpeciesFeatOptionsSection } from "@/features/character/create-character/ui/steps/species/species-feat-options-section";
 import { SpeciesTraitChoicesSection } from "@/features/character/create-character/ui/steps/species/species-trait-choices-section";
-
-import { Button } from "@/shared/ui/button";
 
 type StepSpeciesChoicesProps = {
   control: Control<CreateCharacterInput>;
@@ -47,6 +46,10 @@ export function StepSpeciesChoices({
     return <p className="text-sm text-muted-foreground">Carregando traços…</p>;
   }
 
+  const heritageHasCustomChoices = data.groups.length > 0;
+  const heritageReady =
+    !data.isHeritageOrigin || data.traditionalTraits.length > 0;
+
   return (
     <div className="space-y-3">
       <OriginPreview
@@ -55,54 +58,57 @@ export function StepSpeciesChoices({
         level={data.level}
       />
 
-      {data.groups.length === 0 ? (
+      {data.isHeritageOrigin ? (
+        <>
+          <HeritageTraditionalTraitsPanel
+            traits={data.traditionalTraits}
+            selectedTraitSlugs={data.heritageTraitSlugs}
+            onDoubleChange={data.setTraditionalTraitDouble}
+            onClearDouble={data.clearTraditionalTraitDoubleChoice}
+            onReplaceChange={data.changeTraditionalTraitReplace}
+          />
+          {heritageHasCustomChoices ? (
+            <SpeciesTraitChoicesSection
+              groups={data.groups}
+              speciesChoices={data.speciesChoices}
+              skillKinds={data.skillKinds}
+              grantedSkillSlugs={data.grantedSkillSlugs}
+              error={error}
+              onSelect={data.setChoice}
+            />
+          ) : null}
+          {!heritageReady ? (
+            <p className="text-sm text-muted-foreground">
+              Esta variante não tem build tradicional cadastrado.
+            </p>
+          ) : null}
+        </>
+      ) : data.groups.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          {data.isHeritageOrigin
-            ? "Esta variante não exige escolhas de traço."
-            : "Esta espécie não exige escolhas de traço."}
+          Esta espécie não exige escolhas de traço.
         </p>
       ) : (
-        <>
-          {data.isGhHeritage ? (
-            <div className="flex flex-wrap items-center gap-3">
-              <p className="text-sm text-muted-foreground">
-                Escolha 8 traços modulares do pool Grim Hollow. Repetir um traço
-                aplica o benefício aprimorado quando disponível.
-              </p>
-              {data.canApplyTraditionalBuild ? (
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  onClick={data.applyTraditionalBuild}
-                >
-                  Usar build tradicional
-                </Button>
-              ) : null}
-            </div>
-          ) : null}
-          <SpeciesTraitChoicesSection
-            groups={data.groups}
-            speciesChoices={data.speciesChoices}
-            skillKinds={data.skillKinds}
-            grantedSkillSlugs={data.grantedSkillSlugs}
-            error={error}
-            onSelect={data.setChoice}
-          />
-
-          <SpeciesFeatOptionsSection
-            previewFeats={data.previewFeats}
-            humanOriginFeatKeys={data.humanOriginFeatKeys}
-            featNameBySlug={data.featNameBySlug}
-            featOptions={data.featOptions}
-            level={data.level}
-            classSlug={data.classSlug}
-            grantedSkillSlugs={data.grantedSkillSlugs}
-            grantedToolSlugs={data.grantedToolSlugs}
-            onChange={data.setFeatOptions}
-          />
-        </>
+        <SpeciesTraitChoicesSection
+          groups={data.groups}
+          speciesChoices={data.speciesChoices}
+          skillKinds={data.skillKinds}
+          grantedSkillSlugs={data.grantedSkillSlugs}
+          error={error}
+          onSelect={data.setChoice}
+        />
       )}
+
+      <SpeciesFeatOptionsSection
+        previewFeats={data.previewFeats}
+        humanOriginFeatKeys={data.humanOriginFeatKeys}
+        featNameBySlug={data.featNameBySlug}
+        featOptions={data.featOptions}
+        level={data.level}
+        classSlug={data.classSlug}
+        grantedSkillSlugs={data.grantedSkillSlugs}
+        grantedToolSlugs={data.grantedToolSlugs}
+        onChange={data.setFeatOptions}
+      />
     </div>
   );
 }
