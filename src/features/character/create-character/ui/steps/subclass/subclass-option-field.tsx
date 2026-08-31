@@ -24,6 +24,7 @@ type SubclassOptionFieldProps = {
   loreSpells: readonly ClassSpellOption[];
   wizardSpells: readonly ClassSpellOption[];
   clericCantrips?: readonly ClassSpellOption[];
+  sangromancySpells?: readonly ClassSpellOption[];
   /** Descrição da feature de escolha (quando value.benefit ainda é null). */
   featureFallbackText?: string | null;
   isLoading?: boolean;
@@ -62,6 +63,7 @@ export function SubclassOptionField({
   loreSpells,
   wizardSpells,
   clericCantrips = [],
+  sangromancySpells = [],
   featureFallbackText,
   isLoading = false,
   onChange,
@@ -120,6 +122,7 @@ export function SubclassOptionField({
       loreSpells,
       wizardSpells,
       clericCantrips,
+      sangromancySpells,
       subclassOptions,
       selected,
     });

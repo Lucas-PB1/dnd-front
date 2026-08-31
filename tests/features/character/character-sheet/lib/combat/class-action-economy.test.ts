@@ -248,4 +248,88 @@ describe("resolveClassEconomyActions", () => {
     });
     expect(withRing.some((a) => a.id === "item-ring-of-barrels")).toBe(true);
   });
+
+  it("filters heritage actions by minTraitTakes", () => {
+    const catalog: ClassEconomyActionRecord[] = [
+      ...FIXTURE_CATALOG,
+      {
+        id: "heritage-potent-breath",
+        name: "Sopro Potente",
+        economy: "action",
+        heritageTraitSlug: "potent-breath",
+        minTraitTakes: 1,
+        minLevel: 1,
+        resourceSlug: "potentBreath",
+        tableAction: "spend-resource",
+      },
+      {
+        id: "heritage-potent-breath-action-x2",
+        name: "Sopro Potente (2×)",
+        economy: "action",
+        heritageTraitSlug: "potent-breath",
+        minTraitTakes: 2,
+        minLevel: 1,
+        resourceSlug: "gh-potent-breath-x2",
+        tableAction: "spend-resource",
+      },
+      {
+        id: "heritage-damage-immunity-reaction-x2",
+        name: "Imunidade a Dano (2×)",
+        economy: "reaction",
+        heritageTraitSlug: "damage-immunity",
+        minTraitTakes: 2,
+        minLevel: 1,
+        resourceSlug: "gh-damage-immunity-x2",
+        tableAction: "spend-resource",
+      },
+    ];
+
+    const oneTake = resolveClassEconomyActions(catalog, {
+      classSlug: "fighter",
+      level: 5,
+      heritageChoices: [
+        { choiceKind: "heritage_trait_1", choiceSlug: "potent-breath" },
+      ],
+    });
+    expect(oneTake.some((a) => a.id === "heritage-potent-breath")).toBe(true);
+    expect(
+      oneTake.some((a) => a.id === "heritage-potent-breath-action-x2"),
+    ).toBe(false);
+
+    const twoTakes = resolveClassEconomyActions(catalog, {
+      classSlug: "fighter",
+      level: 5,
+      heritageChoices: [
+        { choiceKind: "heritage_trait_1", choiceSlug: "potent-breath" },
+        { choiceKind: "heritage_trait_2", choiceSlug: "potent-breath" },
+      ],
+    });
+    expect(twoTakes.some((a) => a.id === "heritage-potent-breath")).toBe(true);
+    expect(
+      twoTakes.some((a) => a.id === "heritage-potent-breath-action-x2"),
+    ).toBe(true);
+
+    const immunityOne = resolveClassEconomyActions(catalog, {
+      classSlug: "fighter",
+      level: 5,
+      heritageChoices: [
+        { choiceKind: "heritage_trait_1", choiceSlug: "damage-immunity" },
+      ],
+    });
+    expect(
+      immunityOne.some((a) => a.id === "heritage-damage-immunity-reaction-x2"),
+    ).toBe(false);
+
+    const immunityTwo = resolveClassEconomyActions(catalog, {
+      classSlug: "fighter",
+      level: 5,
+      heritageChoices: [
+        { choiceKind: "heritage_trait_1", choiceSlug: "damage-immunity" },
+        { choiceKind: "heritage_trait_2", choiceSlug: "damage-immunity" },
+      ],
+    });
+    expect(
+      immunityTwo.some((a) => a.id === "heritage-damage-immunity-reaction-x2"),
+    ).toBe(true);
+  });
 });

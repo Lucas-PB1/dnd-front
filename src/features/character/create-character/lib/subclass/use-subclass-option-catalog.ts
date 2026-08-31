@@ -9,10 +9,12 @@ import {
   LORE_MAGICAL_DISCOVERY_KEYS,
   loreMagicalDiscoveryMaxLevel,
 } from "@/features/character/create-character/lib/subclass/subclass-option-keys";
+import { isSangromancySavantOptionKey } from "@/entities/spell/lib/sangromancy";
 import {
   useClassSkills,
   useClassSpells,
 } from "@/features/catalog/class-catalog/api/use-classes";
+import { useSangromancySpells } from "@/features/catalog/spell-catalog/api/use-spells";
 import { useSkills } from "@/features/catalog/reference-catalog/api/use-reference";
 
 export function useSubclassOptionCatalog(
@@ -30,7 +32,11 @@ export function useSubclassOptionCatalog(
     (group) =>
       group.valueType === "spell" &&
       !LORE_MAGICAL_DISCOVERY_KEYS.has(group.optionKey) &&
-      !BLADE_HOLY_CANTRIP_KEYS.has(group.optionKey),
+      !BLADE_HOLY_CANTRIP_KEYS.has(group.optionKey) &&
+      !isSangromancySavantOptionKey(group.optionKey),
+  );
+  const needsSangromancySpells = groups.some((group) =>
+    isSangromancySavantOptionKey(group.optionKey),
   );
   const needsFighterSkills = groups.some(
     (group) => group.optionKey === "warScholarSkill",
@@ -55,6 +61,7 @@ export function useSubclassOptionCatalog(
     2,
     needsWizardVersatility,
   );
+  const sangromancySpells = useSangromancySpells(9, needsSangromancySpells);
   const fighterSkills = useClassSkills(
     classSlug,
     needsFighterSkills && classSlug === "fighter",
@@ -92,5 +99,8 @@ export function useSubclassOptionCatalog(
     wizardSpells: wizardVersatilitySpells.data?.data ?? [],
     wizardSpellsLoading:
       needsWizardVersatility && wizardVersatilitySpells.isPending,
+    sangromancySpells: sangromancySpells.data?.data ?? [],
+    sangromancySpellsLoading:
+      needsSangromancySpells && sangromancySpells.isPending,
   };
 }

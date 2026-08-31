@@ -17,6 +17,7 @@ import {
   filterAllowedFightingStyleValues,
   isFightingStyleSubclassOptionKey,
 } from "@/features/catalog/feat-catalog/lib/fighting-style-feat-options";
+import { isSangromancySavantOptionKey } from "@/entities/spell/lib/sangromancy";
 import { useFeats } from "@/features/catalog/reference-catalog/api/use-reference";
 import { useBackgroundSkills } from "@/features/catalog/background-catalog/api/use-backgrounds";
 import { skillChoiceKinds } from "@/features/character/create-character/lib/class-skills/granted-proficiencies";
@@ -225,6 +226,7 @@ export function StepSubclassOptions({
                 loreSpells={catalog.loreSpells}
                 wizardSpells={catalog.wizardSpells}
                 clericCantrips={catalog.clericCantrips}
+                sangromancySpells={catalog.sangromancySpells}
                 featureFallbackText={featureTextByOptionKey.get(group.optionKey)}
                 onChange={(valueId) => setOption(group.optionKey, valueId)}
               />
@@ -240,7 +242,9 @@ export function StepSubclassOptions({
                 ? catalog.loreSpellsLoading
                 : group.optionKey.startsWith("holyRevelationCantrip")
                   ? catalog.clericCantripsLoading
-                  : catalog.wizardSpellsLoading));
+                  : isSangromancySavantOptionKey(group.optionKey)
+                    ? catalog.sangromancySpellsLoading
+                    : catalog.wizardSpellsLoading));
 
           return (
             <SubclassOptionField
@@ -255,6 +259,7 @@ export function StepSubclassOptions({
               loreSpells={catalog.loreSpells}
               wizardSpells={catalog.wizardSpells}
               clericCantrips={catalog.clericCantrips}
+              sangromancySpells={catalog.sangromancySpells}
               featureFallbackText={featureTextByOptionKey.get(group.optionKey)}
               isLoading={isLoading}
               onChange={(valueId) => setOption(group.optionKey, valueId)}

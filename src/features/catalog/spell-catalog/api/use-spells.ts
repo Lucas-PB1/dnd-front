@@ -2,8 +2,10 @@
 
 import { useQuery } from "@tanstack/react-query";
 
+import type { ClassSpellOption } from "@/entities/class/types";
 import {
   fetchAllSpellsSummary,
+  fetchSangromancySpells,
   fetchSpellBySlug,
   fetchSpellLabels,
   fetchSpells,
@@ -59,5 +61,28 @@ export function useSpellDetail(slug: string) {
     slug,
     queryKey: spellKeys.detail(slug),
     queryFn: () => fetchSpellBySlug(slug),
+  });
+}
+
+export function useSangromancySpells(maxLevel?: number, enabled = true) {
+  return useQuery({
+    queryKey: [...spellKeys.all, "sangromancy", maxLevel ?? "all"],
+    queryFn: async () => {
+      const response = await fetchSangromancySpells(maxLevel);
+      return {
+        ...response,
+        data: response.data.map(
+          (spell): ClassSpellOption => ({
+            slug: spell.slug,
+            name: spell.name,
+            level: spell.level,
+            schoolSlug: spell.schoolSlug,
+            schoolName: spell.schoolName,
+          }),
+        ),
+      };
+    },
+    staleTime: CATALOG_DETAIL_STALE_MS,
+    enabled,
   });
 }

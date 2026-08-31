@@ -4,6 +4,7 @@ import { useMemo } from "react";
 
 import { extraCantripsFromClassOrder } from "@/entities/character/lib/class-order-effects";
 import { magicalSecretsListSlugs } from "@/entities/character/lib/magical-secrets";
+import { usesWizardPlusSangromancyList } from "@/entities/spell/lib/sangromancy";
 import { isSubclassRequired } from "@/entities/character/lib/subclass";
 import { resolveSpellcastingUiProfile } from "@/features/character/create-character/lib/spells/class-spellcasting-ui";
 import { resolveLevelProgression } from "@/features/character/create-character/lib/progression/resolve-level-progression";
@@ -24,6 +25,7 @@ import {
   useSubclassSpellSlots,
   useSubclassSpells,
 } from "@/features/catalog/class-catalog/api/use-classes";
+import { useSangromancySpells } from "@/features/catalog/spell-catalog/api/use-spells";
 
 type SpellStepCatalogInput = {
   level: number;
@@ -94,6 +96,14 @@ export function useSpellStepCatalog({
     maxLevel,
     secretsLists.includes("wizard"),
   );
+  const needsSangromancyList = usesWizardPlusSangromancyList(
+    classSlug,
+    subclassSlug,
+  );
+  const sangromancySpells = useSangromancySpells(
+    undefined,
+    needsSangromancyList && slotsReady,
+  );
 
   const availableClass = useMemo(() => {
     const bySlug = new Map(
@@ -108,12 +118,19 @@ export function useSpellStepCatalog({
         if (!bySlug.has(spell.slug)) bySlug.set(spell.slug, spell);
       }
     }
+    for (const spell of sangromancySpells.data?.data ?? []) {
+      if (spell.level === 0 || spell.level <= maxLevel) {
+        if (!bySlug.has(spell.slug)) bySlug.set(spell.slug, spell);
+      }
+    }
     return [...bySlug.values()];
   }, [
     classSpells.data?.data,
     secretsCleric.data?.data,
     secretsDruid.data?.data,
     secretsWizard.data?.data,
+    sangromancySpells.data?.data,
+    maxLevel,
   ]);
   const availableSubclass = useMemo(
     () =>
@@ -173,7 +190,8 @@ export function useSpellStepCatalog({
     classSpellSlotsQuery.isLoading ||
     subclassSpellSlotsQuery.isLoading ||
     progressionQuery.isLoading ||
-    subclassSpells.isLoading;
+    subclassSpells.isLoading ||
+    (needsSangromancyList && sangromancySpells.isLoading);
 
   return {
     className: classDetail.data?.name ?? "Classe",

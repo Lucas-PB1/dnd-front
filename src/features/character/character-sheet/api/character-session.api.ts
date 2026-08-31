@@ -130,12 +130,19 @@ export type BarbarianTableActionSlug =
   | "burning-hands-slap"
   | "magic-missile-throws"
   | "shield-block"
-  | "i-cast-fist";
+  | "i-cast-fist"
+  | "primal-companion"
+  | "primal-companion-summon"
+  | "primal-companion-restore";
 
 export async function executeBarbarianTableAction(
   accessToken: string,
   characterId: string,
-  payload: { actionSlug: BarbarianTableActionSlug; diceCount?: number },
+  payload: {
+    actionSlug: BarbarianTableActionSlug;
+    diceCount?: number;
+    companionCommand?: CompanionCommandSlug;
+  },
 ) {
   return gameFetch<TableActionResult>(
     `/characters/${characterId}/barbarian/table-action`,
@@ -352,15 +359,28 @@ export type RangerTableActionSlug =
   | "fey-reinforcements"
   | "misty-wanderer"
   | "primal-companion"
+  | "primal-companion-summon"
+  | "primal-companion-restore"
   | "hunter-defense"
   | "gloom-stalker-dodge"
   | "set-bestial-aspect"
   | "feral-howl";
 
+export type CompanionCommandSlug =
+  | "strike"
+  | "help"
+  | "dash"
+  | "disengage"
+  | "dodge";
+
 export async function executeRangerTableAction(
   accessToken: string,
   characterId: string,
-  payload: { actionSlug: RangerTableActionSlug; level?: number },
+  payload: {
+    actionSlug: RangerTableActionSlug;
+    level?: number;
+    companionCommand?: CompanionCommandSlug;
+  },
 ) {
   return gameFetch<FighterTableActionResult>(
     `/characters/${characterId}/ranger/table-action`,

@@ -8,6 +8,7 @@ import {
   LORE_MAGICAL_DISCOVERY_KEYS,
   loreMagicalDiscoveryMaxLevel,
 } from "@/features/character/create-character/lib/subclass/subclass-option-keys";
+import { isSangromancySavantOptionKey } from "@/entities/spell/lib/sangromancy";
 
 type SelectOption = { value: string; label: string };
 
@@ -93,6 +94,7 @@ export function resolveSubclassSpellSelectOptions(params: {
   loreSpells: readonly ClassSpellOption[];
   wizardSpells: readonly ClassSpellOption[];
   clericCantrips?: readonly ClassSpellOption[];
+  sangromancySpells?: readonly ClassSpellOption[];
   subclassOptions: readonly SubclassOption[];
   selected: string;
 }): SelectOption[] {
@@ -102,6 +104,7 @@ export function resolveSubclassSpellSelectOptions(params: {
     loreSpells,
     wizardSpells,
     clericCantrips = [],
+    sangromancySpells = [],
     subclassOptions,
     selected,
   } = params;
@@ -133,6 +136,26 @@ export function resolveSubclassSpellSelectOptions(params: {
     return filterOptionsExcludingTaken(
       spells.map((spell) => ({ value: spell.slug, label: spell.name })),
       siblingTaken,
+      selected,
+    );
+  }
+
+  if (isSangromancySavantOptionKey(group.optionKey)) {
+    const maxLevel = group.spellMaxLevel ?? 2;
+    const spells = sangromancySpells.filter(
+      (spell) => spell.level >= 1 && spell.level <= maxLevel,
+    );
+    const taken = subclassOptions
+      .filter(
+        (option) =>
+          isSangromancySavantOptionKey(option.optionKey) &&
+          option.optionKey !== group.optionKey &&
+          option.valueId,
+      )
+      .map((option) => option.valueId);
+    return filterOptionsExcludingTaken(
+      spells.map((spell) => ({ value: spell.slug, label: spell.name })),
+      taken,
       selected,
     );
   }

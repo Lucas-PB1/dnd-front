@@ -115,6 +115,15 @@ const CLASS_COPY: Partial<
       "Escolha magias de círculos para os quais você tem espaços de Spellslinger.",
     listAccessNote: "Lista completa do mago + Finger Guns",
   },
+  "sanguine-thief": {
+    archetypeTitle: "Magia de sangue (preparada)",
+    guide:
+      "Conjurador de um terço: truques e magias preparadas da lista de mago e de Sangromancia (Cap. 7). Dados de Sangromancia alimentam magias de sangue e poderes da subclasse.",
+    leveledSectionTitle: "Magias preparadas",
+    leveledSectionHint:
+      "Escolha magias de círculos para os quais você tem espaços; troca uma ao subir de nível de ladino.",
+    listAccessNote: "Lista de mago + magias [Sangromancia]",
+  },
 };
 
 function slotPatternNote(

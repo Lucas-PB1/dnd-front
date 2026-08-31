@@ -35,6 +35,7 @@ export function ClassCombatPanel({
     characterId,
     classSlug: character.classSlug,
     subclassSlug: character.subclassSlug,
+    subclassOptions: character.subclassOptions,
     level: character.level,
     combatNotes: character.classCombatNotes,
     state,

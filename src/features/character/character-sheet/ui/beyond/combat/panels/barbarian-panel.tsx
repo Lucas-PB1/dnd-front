@@ -3,14 +3,17 @@
 import { useMemo } from "react";
 
 import type { CharacterState } from "@/entities/character/session-types";
+import type { SubclassOptionPick } from "@/entities/companion/lib/companion-profiles";
 import type { ClassPanelActionRecord } from "@/entities/combat-mechanical/types";
 import {
   executeBarbarianTableAction,
   type BarbarianTableActionSlug,
+  type CompanionCommandSlug,
 } from "@/features/character/character-sheet/api/character-session.api";
 import { useTableActionMutation } from "@/features/character/character-sheet/api/use-table-action-mutation";
 import { useCombatMechanicalCatalog } from "@/features/catalog/reference-catalog/api/use-reference";
 import { resolvePanelActions } from "@/features/character/character-sheet/lib/combat/resolve-panel-actions";
+import { CompanionTrackerPanel } from "@/features/companion/ui/companion-tracker-panel";
 import { CombatClassPanelShell } from "../shared/class-panel-shell";
 import { CombatPanelActionButtons } from "../shared/panel-action-buttons";
 import { TableActionFeedback } from "../shared/table-action-feedback";
@@ -21,6 +24,7 @@ type CombatBarbarianPanelProps = {
   characterId: string;
   classSlug: string;
   subclassSlug?: string | null;
+  subclassOptions?: readonly SubclassOptionPick[];
   level: number;
   combatNotes?: string[];
   state: CharacterState | undefined;
@@ -37,6 +41,7 @@ export function CombatBarbarianPanel({
   characterId,
   classSlug,
   subclassSlug,
+  subclassOptions = [],
   level,
   combatNotes,
   state,
@@ -67,9 +72,15 @@ export function CombatBarbarianPanel({
         level,
         subclassSlug,
         section: "subclass",
-      }),
+      }).filter(
+        (entry) =>
+          !entry.slug.startsWith("primal-companion"),
+      ),
     [panelCatalog, level, subclassSlug],
   );
+
+  const isPrimalSpirit =
+    subclassSlug === "pathofthe-primal-spirit" && level >= 3;
 
   if (!enabled) return null;
 
@@ -117,17 +128,40 @@ export function CombatBarbarianPanel({
     </div>
   );
 
+  function runSubclass(
+    slug: string,
+    companionCommand?: CompanionCommandSlug,
+    diceCount?: number,
+  ) {
+    action.mutate({
+      actionSlug: slug as BarbarianTableActionSlug,
+      ...(companionCommand ? { companionCommand } : {}),
+      ...(diceCount != null ? { diceCount } : {}),
+    });
+  }
+
+  const primalSpiritContent = isPrimalSpirit ? (
+    <CompanionTrackerPanel
+      characterId={characterId}
+      subclassSlug={subclassSlug}
+      subclassOptions={subclassOptions}
+      level={level}
+      isTableActionPending={action.isPending}
+      lastNote={action.lastResult?.note}
+      onCommand={(command) => runSubclass("primal-companion", command)}
+    />
+  ) : null;
+
   const powersContent =
-    subclassActions.length > 0 ? (
+    subclassActions.length > 0 || primalSpiritContent ? (
       <div className="space-y-2">
+        {primalSpiritContent}
         <CombatPanelActionButtons
           actions={subclassActions}
           getRemaining={getRemaining}
           isPending={action.isPending}
           disabled={!state}
-          onAction={(slug) =>
-            action.mutate({ actionSlug: slug as BarbarianTableActionSlug })
-          }
+          onAction={(slug) => runSubclass(slug)}
         />
         <TableActionFeedback
           lastResultNote={action.lastResult?.note}

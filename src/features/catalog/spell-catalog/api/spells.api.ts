@@ -27,6 +27,7 @@ export async function fetchSpellsPage(params?: {
   q?: string;
   level?: number | string;
   school?: string;
+  sangromancy?: boolean;
   editionSlugs?: string;
   fields?: "summary";
 }): Promise<SpellListResponse | SpellCatalogLabelListResponse> {
@@ -38,6 +39,7 @@ export async function fetchSpellsPage(params?: {
     filters: {
       level: params?.level,
       school: params?.school,
+      sangromancy: params?.sangromancy ? "true" : undefined,
       editionSlugs: params?.editionSlugs,
       fields: params?.fields,
     },
@@ -95,4 +97,23 @@ export async function fetchSpellLabels(
 
 export async function fetchSpellBySlug(slug: string) {
   return catalogFetch<SpellSummary>(`/spells/${slug}`, CATALOG_FETCH_INIT);
+}
+
+export async function fetchSangromancySpells(maxLevel?: number) {
+  const response = await fetchAllCatalogPages<SpellSummary>(
+    (page) =>
+      fetchSpellsPage({
+        ...page,
+        sangromancy: true,
+        fields: "summary",
+      }) as Promise<SpellListResponse>,
+    FETCH_PAGE_SIZE,
+  );
+  if (maxLevel == null) return response;
+  return {
+    ...response,
+    data: response.data.filter(
+      (spell) => spell.level >= 1 && spell.level <= maxLevel,
+    ),
+  };
 }
