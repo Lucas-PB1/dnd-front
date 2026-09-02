@@ -20,6 +20,7 @@ export type ClassEconomyAction = {
   featSlug?: string | null;
   itemSlug?: string | null;
   heritageTraitSlug?: string | null;
+  threadSlug?: string | null;
   minTraitTakes?: number;
   minLevel: number;
   /** Se definido, só aparece com essa subclasse. */
@@ -53,6 +54,14 @@ export type ResolveClassEconomyInput = {
   speciesChoices?: readonly { choiceKind: string; choiceSlug: string }[];
   /** Escolhas de herança GH (choiceKind / choiceSlug). */
   heritageChoices?: readonly { choiceKind: string; choiceSlug: string }[];
+  /**
+   * Thread ativo na ficha (Northlands).
+   * `benefitKeys` = milestones alcançados (`benefitKey`).
+   */
+  activeThread?: {
+    threadSlug: string;
+    benefitKeys: readonly string[];
+  } | null;
   /** Slugs de talentos na ficha (inclui estilos de luta como feat). */
   featSlugs?: readonly string[];
   /** Itens ativos (equipado + sintonizado) e charms anexados. */
@@ -103,6 +112,7 @@ export function mapEconomyActionRecord(
     featSlug: record.featSlug,
     itemSlug: record.itemSlug,
     heritageTraitSlug: record.heritageTraitSlug,
+    threadSlug: record.threadSlug,
     minTraitTakes: record.minTraitTakes,
     minLevel: record.minLevel,
     subclassSlug: record.subclassSlug,
@@ -166,6 +176,40 @@ function matchesHeritageTraitAction(
   return have >= need;
 }
 
+/** Pool compartilhado do Grande Sacrifício (Cursemarked) — SSOT alinhado à API. */
+const CURSEMARKED_GREATER_SACRIFICE = "cursemarked-greater-sacrifice";
+const CURSEMARKED_BRACKET_BENEFITS = new Set([
+  "tides-of-fate",
+  "burdens-shield",
+  "threads-entwined",
+  "two-edged-gift",
+]);
+
+function matchesThreadAction(
+  action: ClassEconomyActionRecord,
+  activeThread: {
+    threadSlug: string;
+    benefitKeys: readonly string[];
+  } | null,
+): boolean {
+  if (!action.threadSlug) return false;
+  if (!activeThread) return false;
+  if (action.threadSlug !== activeThread.threadSlug) return false;
+
+  const resourceSlug = action.resourceSlug?.trim();
+  if (!resourceSlug) return false;
+
+  const reached = new Set(activeThread.benefitKeys);
+  if (reached.has(resourceSlug)) return true;
+
+  if (resourceSlug === CURSEMARKED_GREATER_SACRIFICE) {
+    for (const key of CURSEMARKED_BRACKET_BENEFITS) {
+      if (reached.has(key)) return true;
+    }
+  }
+  return false;
+}
+
 export function resolveClassEconomyActions(
   catalog: readonly ClassEconomyActionRecord[],
   input: ResolveClassEconomyInput,
@@ -174,6 +218,7 @@ export function resolveClassEconomyActions(
   const species = input.speciesSlug ?? null;
   const choices = input.speciesChoices ?? [];
   const heritageChoices = input.heritageChoices ?? [];
+  const activeThread = input.activeThread ?? null;
   const featSlugs = new Set(input.featSlugs ?? []);
   const activeItemSlugs = new Set(input.activeItemSlugs ?? []);
 
@@ -191,6 +236,10 @@ export function resolveClassEconomyActions(
 
       if (action.heritageTraitSlug) {
         return matchesHeritageTraitAction(action, heritageChoices);
+      }
+
+      if (action.threadSlug) {
+        return matchesThreadAction(action, activeThread);
       }
 
       const isSpeciesRow = Boolean(action.speciesSlug);

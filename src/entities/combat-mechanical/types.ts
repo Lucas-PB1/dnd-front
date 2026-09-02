@@ -75,6 +75,8 @@ export type ClassEconomyActionRecord = {
   featSlug?: string | null;
   itemSlug?: string | null;
   heritageTraitSlug?: string | null;
+  /** Character Thread (Northlands). */
+  threadSlug?: string | null;
   minTraitTakes?: number;
   requiresOptionKey?: string;
   requiresOptionValue?: string;

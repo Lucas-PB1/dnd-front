@@ -332,4 +332,67 @@ describe("resolveClassEconomyActions", () => {
       immunityTwo.some((a) => a.id === "heritage-damage-immunity-reaction-x2"),
     ).toBe(true);
   });
+
+  it("includes thread economy only for active thread + reached benefit", () => {
+    const catalog: ClassEconomyActionRecord[] = [
+      ...FIXTURE_CATALOG,
+      {
+        id: "thread-jarls-authority",
+        name: "Autoridade do Jarl",
+        economy: "free",
+        threadSlug: "sworn-huskarl",
+        minLevel: 1,
+        resourceSlug: "jarls-authority",
+        tableAction: "spend-resource",
+      },
+      {
+        id: "thread-cursemarked-greater-sacrifice",
+        name: "Grande Sacrifício",
+        economy: "free",
+        threadSlug: "cursemarked",
+        minLevel: 1,
+        resourceSlug: "cursemarked-greater-sacrifice",
+        tableAction: "spend-resource",
+      },
+      {
+        id: "thread-wrath",
+        name: "Ira",
+        economy: "action",
+        threadSlug: "bloodsworn",
+        minLevel: 1,
+        resourceSlug: "wrath",
+        tableAction: "spend-resource",
+      },
+    ];
+
+    const none = resolveClassEconomyActions(catalog, {
+      classSlug: "fighter",
+      level: 5,
+      activeThread: null,
+    });
+    expect(none.some((a) => a.id.startsWith("thread-"))).toBe(false);
+
+    const huskarl = resolveClassEconomyActions(catalog, {
+      classSlug: "fighter",
+      level: 5,
+      activeThread: {
+        threadSlug: "sworn-huskarl",
+        benefitKeys: ["jarls-authority"],
+      },
+    });
+    expect(huskarl.some((a) => a.id === "thread-jarls-authority")).toBe(true);
+    expect(huskarl.some((a) => a.id === "thread-wrath")).toBe(false);
+
+    const cursemarked = resolveClassEconomyActions(catalog, {
+      classSlug: "rogue",
+      level: 3,
+      activeThread: {
+        threadSlug: "cursemarked",
+        benefitKeys: ["tides-of-fate"],
+      },
+    });
+    expect(
+      cursemarked.some((a) => a.id === "thread-cursemarked-greater-sacrifice"),
+    ).toBe(true);
+  });
 });

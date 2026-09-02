@@ -129,6 +129,14 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
           speciesSlug: character.speciesSlug ?? undefined,
           speciesChoices: character.speciesChoices,
           heritageChoices: character.heritageChoices,
+          activeThread: character.thread?.active
+            ? {
+                threadSlug: character.thread.active.threadSlug,
+                benefitKeys: character.thread.active.milestones.map(
+                  (milestone) => milestone.benefitKey,
+                ),
+              }
+            : null,
           featSlugs: [
             ...(character.characterFeats?.map((feat) => feat.featSlug) ?? []),
             ...(character.subclassOptions ?? [])
@@ -195,6 +203,8 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
       character.subclassSlug,
       character.speciesSlug,
       character.speciesChoices,
+      character.heritageChoices,
+      character.thread,
       character.characterFeats,
       character.subclassOptions,
       activeItemSlugs,
