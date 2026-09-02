@@ -49,6 +49,7 @@ import {
   ARTIFACT_REGEN_TABLE_ACTION,
 } from "@/features/character/character-sheet/lib/combat/artifact-instance-actions";
 import { inventoryKeys } from "@/features/character/character-sheet/api/character-inventory.api";
+import { charactersKeys } from "@/features/character/characters/api/characters.api";
 import { gameFetch } from "@/shared/api/dnd-api/api-client";
 
 export type EconomyTableActionResultNote = {
@@ -233,6 +234,9 @@ export function useEconomyTableAction(characterId: string) {
             amount: spendAmount,
           });
           queryClient.setQueryData(sessionKeys.state(characterId), result.state);
+          void queryClient.invalidateQueries({
+            queryKey: charactersKeys.detail(characterId),
+          });
           return {
             note: (
               result.note?.trim() ||

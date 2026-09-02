@@ -118,6 +118,7 @@ export function useSpendClassResource(characterId: string) {
     `/characters/${characterId}`,
   );
   const setState = useInvalidateState(characterId);
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (payload: UseClassResourcePayload) => {
@@ -130,6 +131,9 @@ export function useSpendClassResource(characterId: string) {
     onSuccess: (result) => {
       if (!result) return;
       setState(result.state);
+      void queryClient.invalidateQueries({
+        queryKey: charactersKeys.detail(characterId),
+      });
     },
   });
 }
