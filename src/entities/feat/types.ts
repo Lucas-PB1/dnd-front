@@ -6,6 +6,11 @@ export type FeatBenefit = {
   description?: string;
 };
 
+export type FeatOriginBackground = {
+  slug: string;
+  name: string;
+};
+
 /** Resposta de `GET /feats?fields=summary`. */
 export type FeatCatalogLabel = {
   slug: string;
@@ -51,6 +56,8 @@ export type FeatSummary = {
   sourceChapterTitle: string | null;
   editionSlug: string | null;
   benefits: FeatBenefit[];
+  /** Antecedentes que concedem este talento de origem (Cap. 3). */
+  originBackgrounds?: FeatOriginBackground[];
 };
 
 export type FeatListResponse = PaginatedResponse<FeatSummary>;

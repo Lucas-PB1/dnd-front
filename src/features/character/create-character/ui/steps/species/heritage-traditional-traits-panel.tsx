@@ -98,6 +98,10 @@ export function HeritageTraditionalTraitsPanel({
     );
     return new Map(aggregated.map((entry) => [entry.traitSlug, entry.takeCount]));
   }, [selectedTraitSlugs]);
+  const hasActiveSelections = useMemo(
+    () => selectedTraitSlugs.some((slug) => slug.trim()),
+    [selectedTraitSlugs],
+  );
 
   if (traits.length === 0) {
     return (
@@ -130,9 +134,10 @@ export function HeritageTraditionalTraitsPanel({
               </p>
               <div className="space-y-2">
                 {list
-                  .filter(
-                    (trait) =>
-                      (takeCountBySlug.get(trait.traitSlug) ?? 0) > 0,
+                  .filter((trait) =>
+                    hasActiveSelections
+                      ? (takeCountBySlug.get(trait.traitSlug) ?? 0) > 0
+                      : true,
                   )
                   .map((trait) => {
                   const takes = takeCountBySlug.get(trait.traitSlug) ?? 0;

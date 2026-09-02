@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useMemo } from "react";
+import Link from "next/link";
 
 import type {
   BackgroundEquipmentOption,
@@ -159,6 +160,25 @@ function BackgroundDetailBody({ slug }: BackgroundDetailViewProps) {
         skillNames={skillNames}
         backHref={backHref}
       />
+
+      {background.originFeatSlug ? (
+        <section aria-labelledby="background-origin-feat" className="space-y-2">
+          <h2
+            id="background-origin-feat"
+            className="font-heading text-lg font-semibold tracking-tight"
+          >
+            Talento de origem
+          </h2>
+          <p className="text-sm text-foreground/90">
+            <Link
+              href={`/feats/${background.originFeatSlug}`}
+              className="text-primary underline-offset-4 hover:underline"
+            >
+              {background.originFeatName ?? background.originFeatSlug}
+            </Link>
+          </p>
+        </section>
+      ) : null}
 
       {optionalRule ? (
         <aside

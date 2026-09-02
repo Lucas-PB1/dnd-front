@@ -1,8 +1,10 @@
 import type { AbilityScores } from "@/entities/character/types";
 import type { FeatSummary } from "@/entities/feat/types";
+import { generalFeatMinLevelForFightingStyle } from "@/entities/feat/fighting-style-general-feat";
 
 type FeatRequirements = Pick<
   FeatSummary,
+  | "slug"
   | "minimumLevel"
   | "abilityPrerequisites"
   | "requiresSpellcasting"
@@ -85,7 +87,10 @@ export function meetsFeatRequirements(
   }
 
   if (feat.requiresFightingStyle && !context.hasFightingStyleFeature) {
-    return false;
+    const generalMin = generalFeatMinLevelForFightingStyle(feat.slug);
+    if (generalMin == null || context.level < generalMin) {
+      return false;
+    }
   }
 
   if (feat.requiresWeaponMastery && !context.hasWeaponMasteryFeature) {

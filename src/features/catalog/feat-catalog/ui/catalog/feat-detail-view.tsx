@@ -11,6 +11,9 @@ import {
 } from "@/shared/ui/catalog-detail-hero";
 import { CollapsibleCard } from "@/shared/ui/collapsible-card";
 import { PhbProse } from "@/shared/ui/phb-prose";
+import { FeatPrerequisitesBlock } from "@/features/catalog/feat-catalog/ui/catalog/feat-prerequisites-block";
+import { featHasPrerequisiteContent } from "@/features/catalog/feat-catalog/ui/catalog/feat-prerequisites-block";
+import { isGhTransformationOptionalPrerequisite } from "@/features/catalog/feat-catalog/lib/gh-transformation-prerequisite";
 
 type FeatDetailViewProps = {
   slug: string;
@@ -26,7 +29,10 @@ function FeatHero({ feat, backHref }: { feat: FeatSummary; backHref: string }) {
   if (feat.repeatable) {
     stats.push({ label: "Repetível", value: "Sim" });
   }
-  if (feat.prerequisite) {
+  if (
+    feat.prerequisite &&
+    !isGhTransformationOptionalPrerequisite(feat.categorySlug, feat.prerequisite)
+  ) {
     stats.push({ label: "Pré-requisito", value: feat.prerequisite });
   }
   if (feat.benefits.length) {
@@ -83,6 +89,20 @@ function FeatDetailBody({ slug }: FeatDetailViewProps) {
             o mestre antes de adotar na campanha.
           </p>
         </aside>
+      ) : null}
+
+      {featHasPrerequisiteContent(data, data.originBackgrounds) &&
+      !isGhTransformationOptionalPrerequisite(
+        data.categorySlug,
+        data.prerequisite,
+      ) ? (
+        <section aria-labelledby="feat-prerequisites" className="space-y-4">
+          <FeatPrerequisitesBlock
+            feat={data}
+            originBackgrounds={data.originBackgrounds}
+            className="rounded-lg border border-border/60 bg-muted/20 px-4 py-4"
+          />
+        </section>
       ) : null}
 
       <section aria-labelledby="feat-benefits" className="space-y-4">

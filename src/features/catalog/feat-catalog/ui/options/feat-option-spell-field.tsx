@@ -5,6 +5,10 @@ import type { CharacterFeat, FeatOption } from "@/entities/character/sheet-types
 import type { FeatOptionDefinition } from "@/entities/feat/types";
 import type { SpellCatalogLabel } from "@/entities/spell/types";
 import { applyFeatOptionChange } from "@/features/catalog/feat-catalog/lib/apply-feat-option-change";
+import {
+  resolveFeatOptionSpellLoading,
+  resolveFeatOptionSpellRows,
+} from "@/features/catalog/feat-catalog/lib/resolve-feat-option-spell-rows";
 import { CatalogSelect } from "@/features/character/create-character/ui/catalog-select";
 import {
   Field,
@@ -26,58 +30,6 @@ type FeatOptionSpellFieldProps = {
   classSpellsLevel1Pending: boolean;
   allSpellsPending: boolean;
 };
-
-function resolveSpellRows({
-  def,
-  allSpells,
-  classSpellsLevel0,
-  classSpellsLevel1,
-}: Pick<
-  FeatOptionSpellFieldProps,
-  "def" | "allSpells" | "classSpellsLevel0" | "classSpellsLevel1"
->): ClassSpellOption[] | SpellCatalogLabel[] {
-  if (def.spellRitualOnly) {
-    return allSpells.filter(
-      (spell) =>
-        spell.level === (def.spellMaxLevel ?? 1) && spell.ritual,
-    );
-  }
-  if (def.spellSchoolSlugs?.length) {
-    return allSpells.filter(
-      (spell) =>
-        spell.level === (def.spellMaxLevel ?? 1) &&
-        def.spellSchoolSlugs?.includes(spell.schoolSlug),
-    );
-  }
-  const exactLevel = def.spellMaxLevel ?? 1;
-  // `GET /classes/:slug/spells?maxLevel=` filtra com `<=`; aqui precisamos do círculo exato
-  // (ex.: Magia de 1º círculo do Iniciado em Magia não pode listar truques).
-  if (exactLevel === 0) {
-    return classSpellsLevel0.filter((spell) => spell.level === 0);
-  }
-  return classSpellsLevel1.filter((spell) => spell.level === exactLevel);
-}
-
-function resolveSpellLoading({
-  def,
-  allSpellsPending,
-  classSpellsLevel0Pending,
-  classSpellsLevel1Pending,
-}: Pick<
-  FeatOptionSpellFieldProps,
-  | "def"
-  | "allSpellsPending"
-  | "classSpellsLevel0Pending"
-  | "classSpellsLevel1Pending"
->): boolean {
-  if (def.spellRitualOnly || def.spellSchoolSlugs?.length) {
-    return allSpellsPending;
-  }
-  if (def.spellMaxLevel === 0) {
-    return classSpellsLevel0Pending;
-  }
-  return classSpellsLevel1Pending;
-}
 
 export function FeatOptionSpellField({
   feat,
@@ -111,7 +63,7 @@ export function FeatOptionSpellField({
     );
   }
 
-  const spellRows = resolveSpellRows({
+  const spellRows = resolveFeatOptionSpellRows({
     def,
     allSpells,
     classSpellsLevel0,
@@ -126,7 +78,7 @@ export function FeatOptionSpellField({
         value: spell.slug,
         label: spell.name,
       }))}
-      isLoading={resolveSpellLoading({
+      isLoading={resolveFeatOptionSpellLoading({
         def,
         allSpellsPending,
         classSpellsLevel0Pending,

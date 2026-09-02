@@ -184,13 +184,13 @@ export function buildTraditionalHeritageChoices(
   return picks;
 }
 
-/** Todos os picks de traço estão no conjunto tradicional e há 8 slots. */
+/** Todos os picks de traço estão no conjunto tradicional (7 ou 8 slots). */
 export function isTraditionalHeritagePickSet(
   traditionalSlugs: ReadonlySet<string>,
   picks: readonly HeritageTraitPick[],
 ): boolean {
   const traitPicks = picks.filter((pick) => isHeritageTraitSlot(pick.choiceKind));
-  if (traitPicks.length !== 8) return false;
+  if (traitPicks.length !== traditionalSlugs.size) return false;
   return traitPicks.every((pick) => traditionalSlugs.has(pick.choiceSlug.trim()));
 }
 

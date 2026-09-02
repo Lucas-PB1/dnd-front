@@ -54,8 +54,8 @@ export async function fetchFeatsPage(params?: {
   );
 }
 
-/** Compêndio — todas as façanhas (summary) com filtros opcionais. */
-export async function fetchAllFeatsSummary(params?: {
+/** Compêndio — listagem completa para cards (benefícios, pré-requisitos, etc.). */
+export async function fetchAllFeats(params?: {
   q?: string;
   category?: string;
   editionSlugs?: string;
@@ -65,10 +65,18 @@ export async function fetchAllFeatsSummary(params?: {
       fetchFeatsPage({
         ...page,
         ...params,
-        fields: "summary",
       }) as Promise<FeatListResponse>,
     FETCH_PAGE_SIZE,
   );
+}
+
+/** Alias legado — preferir `fetchAllFeats` no compêndio. */
+export async function fetchAllFeatsSummary(params?: {
+  q?: string;
+  category?: string;
+  editionSlugs?: string;
+}): Promise<FeatListResponse> {
+  return fetchAllFeats(params);
 }
 
 /** Só labels (`fields=summary`) — ficha / review / epic-boon set. */

@@ -1,4 +1,5 @@
 import type { FeatSummary } from "@/entities/feat/types";
+import { formatFeatPrerequisiteTeaser } from "@/features/catalog/feat-catalog/lib/format-feat-prerequisites";
 import { withCatalogReturn } from "@/shared/lib/catalog-return";
 import { CatalogEditionChip } from "@/shared/ui/catalog-edition-chip";
 import { CatalogListCard } from "@/shared/ui/catalog-list-card";
@@ -11,11 +12,12 @@ type FeatCardProps = {
 
 export function FeatCard({ feat, listPath, className }: FeatCardProps) {
   const teaser =
-    feat.benefits
+    (feat.benefits ?? [])
       .map((b) => b.name ?? b.description)
       .filter(Boolean)
       .slice(0, 2)
       .join(" · ") || null;
+  const prerequisiteTeaser = formatFeatPrerequisiteTeaser(feat);
 
   return (
     <CatalogListCard
@@ -32,9 +34,9 @@ export function FeatCard({ feat, listPath, className }: FeatCardProps) {
       eyebrow={feat.categoryTypeLabel || feat.categoryName}
       teaser={teaser}
       aside={
-        feat.prerequisite ? (
+        prerequisiteTeaser ? (
           <p className="shrink-0 text-xs text-muted-foreground sm:max-w-56 sm:text-right">
-            Pré-req.: {feat.prerequisite}
+            Pré-req.: {prerequisiteTeaser}
           </p>
         ) : null
       }

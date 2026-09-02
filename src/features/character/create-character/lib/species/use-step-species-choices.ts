@@ -493,7 +493,7 @@ export function useStepSpeciesChoices(
     if (!isHeritageOrigin) return;
     const traditional = heritageTraditional.data ?? [];
     const detail = heritageDetail.data;
-    if (!detail || traditional.length < 8) return;
+    if (!detail || traditional.length === 0) return;
 
     const traditionalSlugs = new Set(
       traditional.map((trait) => trait.traitSlug),
