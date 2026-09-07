@@ -118,6 +118,18 @@ export function SheetSessionBadges({ characterId }: SheetSessionBadgesProps) {
         </Button>
       ) : null}
 
+      {state?.highElfCantripSwapAvailable ? (
+        <span
+          className={cn(
+            "h-8 inline-flex items-center rounded-full border px-2 text-[0.65rem] font-semibold",
+            "border-chart-2/50 bg-chart-2/15 text-chart-2",
+          )}
+          title="Após o Descanso Longo: pode trocar o truque de Alto Elfo na edição da ficha"
+        >
+          Troca de truque disponível
+        </span>
+      ) : null}
+
       {MESA_CIRCUMSTANCES.map(({ tag, label }) => {
         const on = circumstances.includes(tag);
         return (

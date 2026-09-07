@@ -47,11 +47,16 @@ import {
 } from "@/features/character/character-sheet/lib/combat/plan-economy-table-use";
 import { ClassCombatPanel } from "@/features/character/character-sheet/ui/beyond/combat/class-combat-panel";
 import { BoardedVehiclePanel } from "@/features/character/character-sheet/ui/beyond/combat/boarded-vehicle-panel";
+import { AberrantMutationDialog } from "@/features/character/character-sheet/ui/beyond/combat/aberrant-mutation-dialog";
 import { ArtisanCraftDialog } from "@/features/character/character-sheet/ui/beyond/combat/artisan-craft-dialog";
 import {
   craftItemsForArtisanTools,
   isArtisanCraftAction,
 } from "@/features/character/character-sheet/lib/combat/artisan-quick-craft";
+import {
+  ABERRANT_MUTATION_ACTION,
+  isAberrantMutationAction,
+} from "@/features/character/character-sheet/lib/transformation/aberrant-mutation";
 import { WeaponAttackCard } from "@/features/character/character-sheet/ui/beyond/inventory/weapon-attack-card";
 import { FeatureDetailTrigger } from "@/features/character/character-sheet/ui/sheet/feature-detail-dialog";
 import {
@@ -113,6 +118,7 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
   const [tableNote, setTableNote] = useState<string | null>(null);
   const [repeatWithPsi, setRepeatWithPsi] = useState(false);
   const [craftOpen, setCraftOpen] = useState(false);
+  const [mutationOpen, setMutationOpen] = useState(false);
   const mechanicalCatalog = useCombatMechanicalCatalog({ classSlug: character.classSlug, subclassSlug: character.subclassSlug });
 
   const artisanToolSlugs = useMemo(
@@ -472,6 +478,10 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
               preferSpendPool={repeatWithPsi}
               missileShieldArmed={stateQuery.data?.missileShieldArmed ?? false}
               gigaMissileArmed={stateQuery.data?.gigaMissileArmed ?? false}
+              mesaCircumstances={stateQuery.data?.mesaCircumstances ?? []}
+              aberrantMutationActive={
+                stateQuery.data?.aberrantMutationActive ?? null
+              }
               onSpend={(resourceSlug) =>
                 spendResource.mutate({ resourceSlug, amount: 1 })
               }
@@ -487,6 +497,10 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
                   setCraftOpen(true);
                   return;
                 }
+                if (isAberrantMutationAction(action.tableAction)) {
+                  setMutationOpen(true);
+                  return;
+                }
                 tableAction.mutate(
                   {
                     tableAction: action.tableAction,
@@ -499,6 +513,7 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
                     itemSlug: action.itemSlug,
                     note: action.description ?? action.summary,
                     armed: plan.armed,
+                    enabled: plan.enabled,
                   },
                   {
                     onSuccess: (result) => {
@@ -525,6 +540,42 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
                 {
                   onSuccess: (result) => {
                     setCraftOpen(false);
+                    if (result?.note) setTableNote(result.note);
+                  },
+                },
+              );
+            }}
+          />
+          <AberrantMutationDialog
+            open={mutationOpen}
+            onOpenChange={setMutationOpen}
+            activeSlug={stateQuery.data?.aberrantMutationActive}
+            busy={tableAction.isPending}
+            onActivate={(mutationSlug) => {
+              tableAction.mutate(
+                {
+                  tableAction: ABERRANT_MUTATION_ACTION,
+                  mutationSlug,
+                  note: "Mutação Aberrante",
+                },
+                {
+                  onSuccess: (result) => {
+                    setMutationOpen(false);
+                    if (result?.note) setTableNote(result.note);
+                  },
+                },
+              );
+            }}
+            onEnd={() => {
+              tableAction.mutate(
+                {
+                  tableAction: ABERRANT_MUTATION_ACTION,
+                  mutationSlug: null,
+                  note: "Encerrar Mutação Aberrante",
+                },
+                {
+                  onSuccess: (result) => {
+                    setMutationOpen(false);
                     if (result?.note) setTableNote(result.note);
                   },
                 },
@@ -560,6 +611,8 @@ function EconomyBucketSection({
   preferSpendPool,
   missileShieldArmed,
   gigaMissileArmed,
+  mesaCircumstances,
+  aberrantMutationActive,
   onSpend,
   onRecover,
   onUse,
@@ -574,6 +627,8 @@ function EconomyBucketSection({
   preferSpendPool: boolean;
   missileShieldArmed: boolean;
   gigaMissileArmed: boolean;
+  mesaCircumstances: readonly string[];
+  aberrantMutationActive: string | null;
   onSpend: (resourceSlug: string) => void;
   onRecover: (resourceSlug: string) => void;
   onUse: (
@@ -607,6 +662,8 @@ function EconomyBucketSection({
             preferSpendPool,
             missileShieldArmed,
             gigaMissileArmed,
+            mesaCircumstances,
+            aberrantMutationActive,
           });
           const counter =
             plan.counterSlug != null

@@ -50,6 +50,10 @@ export type CharacterState = {
   boardedActorId?: string | null;
   /** Circunstâncias de mesa: snow_ice | in_water | extreme_cold */
   mesaCircumstances?: string[];
+  /** Mutação Aberrante ativa (Horror Aberrante Cap. 6) */
+  aberrantMutationActive?: string | null;
+  /** Alto Elfo: troca de truque L1 disponível após Descanso Longo */
+  highElfCantripSwapAvailable?: boolean;
 };
 
 export type ResourceDieRoll = {

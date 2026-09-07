@@ -108,6 +108,7 @@ export function useEconomyTableAction(characterId: string) {
       armed,
       itemSlug,
       enabled,
+      mutationSlug,
     }: {
       tableAction: EconomyTableAction;
       /** `economyActions[].classSlug` — obrigatório para slugs de classe. */
@@ -126,6 +127,8 @@ export function useEconomyTableAction(characterId: string) {
       itemSlug?: string | null;
       /** Toggle de circunstância (snow/água/frio). */
       enabled?: boolean;
+      /** Mutação Aberrante — omitir/null encerra. */
+      mutationSlug?: string | null;
     }): Promise<EconomyTableActionResultNote> => {
       const token = requireToken();
       try {
@@ -288,7 +291,10 @@ export function useEconomyTableAction(characterId: string) {
           const result = await executeTransformationTableAction(
             token,
             characterId,
-            tableAction,
+            {
+              actionSlug: tableAction,
+              ...(mutationSlug !== undefined ? { mutationSlug } : {}),
+            },
           );
           queryClient.setQueryData(sessionKeys.state(characterId), result.state);
           return noteFromResult(result, note);

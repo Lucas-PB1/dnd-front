@@ -636,17 +636,32 @@ export async function executeMonsterHunterTableAction(
   );
 }
 
+export type TransformationTableActionPayload = {
+  actionSlug: string;
+  /** Mutação Aberrante: slug ativa; omitir/null encerra sem gastar uso. */
+  mutationSlug?: string | null;
+};
+
 export async function executeTransformationTableAction(
   accessToken: string,
   characterId: string,
-  actionSlug: string,
+  payload: TransformationTableActionPayload | string,
 ) {
+  const body =
+    typeof payload === "string"
+      ? { actionSlug: payload }
+      : {
+          actionSlug: payload.actionSlug,
+          ...(payload.mutationSlug !== undefined
+            ? { mutationSlug: payload.mutationSlug }
+            : {}),
+        };
   return gameFetch<TableActionResult>(
     `/characters/${characterId}/transformation/table-action`,
     accessToken,
     {
       method: "POST",
-      body: JSON.stringify({ actionSlug }),
+      body: JSON.stringify(body),
     },
   );
 }

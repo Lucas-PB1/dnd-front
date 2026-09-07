@@ -169,4 +169,59 @@ describe("planEconomyTableUse", () => {
     expect(plan.canUse).toBe(false);
     expect(plan.counterSlug).toBe("favoredEnemy");
   });
+
+  it("toggles mesa circumstances with Ligar/Desligar", () => {
+    const off = planEconomyTableUse({
+      action: action({
+        id: "snow",
+        name: "Neve",
+        featSlug: "snowrunner",
+        classSlug: null,
+        tableAction: "snowrunner-toggle-snow-ice",
+      }),
+      remainingBySlug: new Map(),
+      preferSpendPool: false,
+      mesaCircumstances: [],
+    });
+    expect(off.buttonLabel).toBe("Ligar");
+    expect(off.enabled).toBe(true);
+    expect(off.canUse).toBe(true);
+
+    const on = planEconomyTableUse({
+      action: action({
+        id: "snow",
+        name: "Neve",
+        featSlug: "snowrunner",
+        classSlug: null,
+        tableAction: "snowrunner-toggle-snow-ice",
+      }),
+      remainingBySlug: new Map(),
+      preferSpendPool: false,
+      mesaCircumstances: ["snow_ice"],
+    });
+    expect(on.buttonLabel).toBe("Desligar");
+    expect(on.enabled).toBe(false);
+  });
+
+  it("manages aberrant mutation when already active without pool", () => {
+    const remaining = new Map([
+      ["aberrant-mutation", { remaining: 0, max: 1 }],
+    ]);
+    const plan = planEconomyTableUse({
+      action: action({
+        id: "mutation",
+        name: "Mutação Aberrante",
+        classSlug: null,
+        tableAction:
+          "gh-transformation-aberrant-horror/aberrant-mutation",
+        resourceSlug: "aberrant-mutation",
+      }),
+      remainingBySlug: remaining,
+      preferSpendPool: false,
+      aberrantMutationActive: "chitinous-shell",
+    });
+    expect(plan.canUse).toBe(true);
+    expect(plan.buttonLabel).toBe("Gerenciar");
+    expect(plan.hint).toBe("Ativa: Casca Quitinosa");
+  });
 });

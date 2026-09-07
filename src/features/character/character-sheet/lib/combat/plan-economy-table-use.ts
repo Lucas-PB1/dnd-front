@@ -1,5 +1,11 @@
 import type { ClassEconomyAction } from "@/features/character/character-sheet/lib/combat/class-action-economy";
 import { isPsiTableAction } from "@/features/character/character-sheet/lib/combat/economy-table-actions";
+import { mesaCircumstanceTagForAction } from "@/features/character/character-sheet/lib/combat/mesa-circumstances";
+import {
+  aberrantMutationLabel,
+  isAberrantMutationAction,
+  isAberrantMutationSlug,
+} from "@/features/character/character-sheet/lib/transformation/aberrant-mutation";
 
 export type ResourceCounter = { remaining: number; max: number };
 
@@ -14,6 +20,8 @@ export type EconomyTableUsePlan = {
   hint?: string;
   /** Flag de sessão já armada (Escudo/Giga). */
   armed?: boolean;
+  /** Toggle de circunstância: próximo estado desejado. */
+  enabled?: boolean;
 };
 
 /**
@@ -27,6 +35,10 @@ export function planEconomyTableUse(input: {
   preferSpendPool: boolean;
   missileShieldArmed?: boolean;
   gigaMissileArmed?: boolean;
+  /** Circunstâncias ativas na sessão (neve/água/frio). */
+  mesaCircumstances?: readonly string[];
+  /** Mutação Aberrante ativa (Horror Cap. 6). */
+  aberrantMutationActive?: string | null;
 }): EconomyTableUsePlan {
   const {
     action,
@@ -34,6 +46,8 @@ export function planEconomyTableUse(input: {
     preferSpendPool,
     missileShieldArmed = false,
     gigaMissileArmed = false,
+    mesaCircumstances = [],
+    aberrantMutationActive = null,
   } = input;
   const poolSlug = action.resourceSlug ?? null;
   const freeSlug = action.freeResourceSlug ?? null;
@@ -49,6 +63,34 @@ export function planEconomyTableUse(input: {
       buttonLabel: "Usar",
       /** Ainda mostra ± se a linha tiver resource_slug (controle de recurso). */
       counterSlug: poolSlug,
+    };
+  }
+
+  const circumstanceTag = mesaCircumstanceTagForAction(action.tableAction);
+  if (circumstanceTag) {
+    const isOn = mesaCircumstances.includes(circumstanceTag);
+    return {
+      canUse: true,
+      usePsiDie: false,
+      buttonLabel: isOn ? "Desligar" : "Ligar",
+      counterSlug: poolSlug,
+      enabled: !isOn,
+      hint: isOn ? "Ativo na mesa" : undefined,
+    };
+  }
+
+  if (isAberrantMutationAction(action.tableAction)) {
+    const needsPool = poolSlug != null;
+    const active = Boolean(aberrantMutationActive);
+    const activeLabel = isAberrantMutationSlug(aberrantMutationActive)
+      ? aberrantMutationLabel(aberrantMutationActive)
+      : aberrantMutationActive;
+    return {
+      canUse: active || !needsPool || poolLeft > 0,
+      usePsiDie: false,
+      buttonLabel: active ? "Gerenciar" : "Usar",
+      counterSlug: poolSlug,
+      hint: active && activeLabel ? `Ativa: ${activeLabel}` : undefined,
     };
   }
 
