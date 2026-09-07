@@ -2,6 +2,7 @@ import type {
   CharacterEquipment,
   CharacterSpell,
   CharacterSheetInput,
+  CharacterTransformation,
   SpeciesChoice,
   SubclassOption,
   ClassOption,
@@ -14,6 +15,7 @@ export type {
   CharacterEquipment,
   CharacterSpell,
   CharacterSheetInput,
+  CharacterTransformation,
   SpeciesChoice,
   SubclassOption,
   ClassOption,
@@ -65,6 +67,7 @@ export type CharacterDetail = {
   backgroundSkillSlugs: string[];
   speciesChoices: SpeciesChoice[];
   heritageChoices?: SpeciesChoice[];
+  transformation?: CharacterTransformation | null;
   aggregatedHeritageTraits?: Array<{
     traitSlug: string;
     traitName: string;
@@ -89,6 +92,22 @@ export type CharacterDetail = {
   passivePerception: number;
   armorClass: number;
   armorClassNote: string;
+  /**
+   * Soma tipada de `ac_bonus` de talentos (sticky na UI — aplicar quando toggle ligado).
+   */
+  featAcBonus?: number;
+  /** Flags de efeitos de talento para UI de roll/cast (wire incremental). */
+  featEffectFlags?: {
+    inspirationRefundOnFail: boolean;
+    damageDieFloor: boolean;
+    damageDieFlip: boolean;
+    damageDieExplode: boolean;
+    improveCritical: boolean;
+    slotElevate: boolean;
+    slotReduce: boolean;
+    wieldTwoHandedOneHand: boolean;
+    versatileOneHandFullDamage: boolean;
+  };
   weaponAttacks: WeaponAttackSummary[];
   equipmentWarnings?: EquipmentWarning[];
   cannotCastSpellsInArmor?: boolean;

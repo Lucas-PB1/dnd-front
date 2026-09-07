@@ -165,6 +165,8 @@ export function BeyondSpellsTab({
       slotLevel?: number;
       freeCastResourceSlug?: string;
       useFreeCast?: boolean;
+      flexElevateExtraSlots?: number;
+      flexReduce?: boolean;
     },
   ) {
     const result = await castSpell.mutateAsync({
@@ -172,11 +174,22 @@ export function BeyondSpellsTab({
       slotLevel: options?.slotLevel,
       freeCastResourceSlug: options?.freeCastResourceSlug,
       useFreeCast: options?.useFreeCast,
+      flexElevateExtraSlots: options?.flexElevateExtraSlots,
+      flexReduce: options?.flexReduce,
     });
     if (result?.note?.trim()) {
       setCastNote(result.note.trim());
     }
   }
+
+  const flexCaster =
+    character.featEffectFlags?.slotElevate ||
+    character.featEffectFlags?.slotReduce
+      ? {
+          elevate: Boolean(character.featEffectFlags.slotElevate),
+          reduce: Boolean(character.featEffectFlags.slotReduce),
+        }
+      : undefined;
 
   if (character.characterSpells.length === 0) {
     return (
@@ -330,6 +343,7 @@ export function BeyondSpellsTab({
                   freeMissileUses={freeMissileUses}
                   masterySlugs={masterySlugs}
                   onCast={handleCast}
+                  flexCaster={flexCaster}
                 />
               ))}
             </section>
@@ -350,6 +364,7 @@ export function BeyondSpellsTab({
               freeMissileUses={freeMissileUses}
               masterySlugs={masterySlugs}
               onCast={handleCast}
+              flexCaster={flexCaster}
             />
           ))}
         </div>
@@ -378,6 +393,7 @@ function SpellLevelGroup({
   freeMissileUses = 0,
   masterySlugs,
   onCast,
+  flexCaster,
 }: {
   level: number;
   rows: SpellRowModel[];
@@ -395,8 +411,11 @@ function SpellLevelGroup({
       slotLevel?: number;
       freeCastResourceSlug?: string;
       useFreeCast?: boolean;
+      flexElevateExtraSlots?: number;
+      flexReduce?: boolean;
     },
   ) => Promise<void>;
+  flexCaster?: { elevate: boolean; reduce: boolean };
 }) {
   return (
     <section className="space-y-1.5">
@@ -420,6 +439,7 @@ function SpellLevelGroup({
             freeMissileUses={freeMissileUses}
             isSpellMastery={masterySlugs.has(row.spell.spellSlug)}
             onCast={onCast}
+            flexCaster={flexCaster}
           />
         ))}
       </ul>

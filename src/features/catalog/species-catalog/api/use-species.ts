@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   fetchAllSpecies,
   fetchSpeciesBySlug,
+  fetchSpeciesEffects,
   fetchSpeciesTraitChoices,
   fetchSpeciesTraits,
   speciesKeys,
@@ -57,6 +58,15 @@ export function useSpeciesTraitChoices(slug: string, enabled = true) {
     slug,
     queryKey: speciesKeys.traitChoices(slug, editionSlugsParam),
     queryFn: () => fetchSpeciesTraitChoices(slug, editionSlugsParam),
+    enabled,
+  });
+}
+
+export function useSpeciesEffects(slug: string, enabled = true) {
+  return useCatalogDetailQuery({
+    slug,
+    queryKey: speciesKeys.effects(slug),
+    queryFn: () => fetchSpeciesEffects(slug),
     enabled,
   });
 }

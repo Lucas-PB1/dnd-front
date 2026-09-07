@@ -5,8 +5,9 @@ export type AdvantageMode = "normal" | "advantage" | "disadvantage";
 
 export type EncounterCombatant = {
   id: string;
-  kind: "pc" | "creature";
+  kind: "pc" | "actor";
   characterId: string | null;
+  actorId?: string | null;
   displayName: string;
   initiativeTotal: number | null;
   initiativeModifier: number | null;
@@ -38,10 +39,12 @@ export type CampaignEncounter = {
 };
 
 export type AddCreaturePayload = {
-  name: string;
-  hpMax: number;
+  templateSlug?: string;
+  count?: number;
+  name?: string;
+  hpMax?: number;
   hpCurrent?: number;
-  armorClass: number;
+  armorClass?: number;
   initiativeModifier?: number;
 };
 

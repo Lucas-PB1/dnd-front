@@ -4,6 +4,7 @@ import {
   BookmarkIcon,
   GlobeAltIcon,
   PencilSquareIcon,
+  ArrowPathIcon,
   ShieldCheckIcon,
   SparklesIcon,
   Squares2X2Icon,
@@ -28,6 +29,7 @@ import {
   SpeciesChoicesSection,
   SubclassMechanicsSection,
   SubclassOptionsSection,
+  TransformationSection,
 } from "@/features/character/character-sheet/ui/sections";
 import { SheetEditAction } from "@/features/character/character-sheet/ui/sheet/sheet-ui";
 import { cn } from "@/shared/lib/utils";
@@ -37,6 +39,7 @@ type TraitsSectionId =
   | "species"
   | "subclass"
   | "feats"
+  | "transformation"
   | "background"
   | "thread";
 
@@ -102,6 +105,13 @@ export function BeyondTraitsTab({
       icon: SparklesIcon,
       edit: "feats",
       content: <FeatsSection {...sectionProps} />,
+    },
+    {
+      id: "transformation",
+      label: "Transformação",
+      icon: ArrowPathIcon,
+      edit: "transformation",
+      content: <TransformationSection {...sectionProps} />,
     },
     {
       id: "background",

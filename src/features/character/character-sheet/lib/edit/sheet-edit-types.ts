@@ -8,5 +8,6 @@ export type SheetEditId =
   | "spells"
   | "equipment"
   | "feats"
+  | "transformation"
   | "languages"
   | null;

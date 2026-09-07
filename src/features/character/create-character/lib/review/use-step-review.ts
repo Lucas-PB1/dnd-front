@@ -140,9 +140,10 @@ export function useStepReview(control: Control<CreateCharacterInput>) {
   const classLangGrant = classLanguageGrant(values.classSlug, values.level);
   const langQuota = languageQuota({
     grantedSlugs: (backgroundLanguages.data?.data ?? []).map((row) => row.slug),
-    languageChoiceCount: backgroundDetail.data?.languageChoiceCount ?? 2,
+    languageChoiceCount: backgroundDetail.data?.languageChoiceCount ?? 0,
     extraGrantedSlugs: classLangGrant.grantedSlugs,
     extraChoiceCount: classLangGrant.choiceCount,
+    speciesSlug: values.speciesSlug || null,
   });
 
   const classPackages = useMemo(

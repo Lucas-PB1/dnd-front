@@ -78,6 +78,7 @@ export type FeatOptionDefinition = {
   spellMaxLevel: number | null;
   spellSchoolSlugs: string[] | null;
   spellRitualOnly: boolean;
+  unlockLevel?: number | null;
   values: FeatOptionValue[];
 };
 

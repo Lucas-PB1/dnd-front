@@ -7,8 +7,10 @@
  * - `cast:…` — conjuração especial (ex.: mísseis gratuitos)
  * - `arm:…` — armar/desarmar flag de sessão (Mago MM)
  * - `psi:…` — ação psi (hoje Guerreiro; usePsiDie no payload)
+ * - `gh-transformation-…/…` — boons Cap. 6 → POST …/transformation/table-action
  *
- * Demais slugs: roteiam por `economyActions[].classSlug` → POST …/<class>/table-action.
+ * Demais slugs: roteiam por `economyActions[].classSlug` → POST …/<class>/table-action
+ * ou por `featSlug` → POST …/feat/table-action.
  */
 
 /** Identificador de ação de mesa (string livre do catálogo). */
@@ -54,4 +56,11 @@ export function wizardSlugFromArmTableAction(
   armed: boolean,
 ): string {
   return action.replace(/^arm:/, armed ? "disarm-" : "arm-");
+}
+
+/** `{transformationSlug}/{boonId}` — Grim Hollow Cap. 6. */
+export function isTransformationTableAction(action: string): boolean {
+  return (
+    action.startsWith("gh-transformation-") && action.includes("/")
+  );
 }

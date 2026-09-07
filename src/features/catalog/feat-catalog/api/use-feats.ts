@@ -4,6 +4,7 @@ import {
   featKeys,
   fetchAllFeats,
   fetchFeatBySlug,
+  fetchFeatEffects,
 } from "@/features/catalog/feat-catalog/api/feats.api";
 import { useCatalogCompendium } from "@/shared/lib/use-catalog-compendium";
 import { useCatalogDetailQuery } from "@/shared/lib/use-catalog-query";
@@ -29,6 +30,16 @@ export function useFeatDetail(slug: string, enabled = true) {
     slug,
     queryKey: featKeys.detail(slug),
     queryFn: () => fetchFeatBySlug(slug),
+    enabled,
+    staleTime: FEAT_DETAIL_STALE_MS,
+  });
+}
+
+export function useFeatEffects(slug: string, enabled = true) {
+  return useCatalogDetailQuery({
+    slug,
+    queryKey: featKeys.effects(slug),
+    queryFn: () => fetchFeatEffects(slug),
     enabled,
     staleTime: FEAT_DETAIL_STALE_MS,
   });

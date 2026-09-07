@@ -2,6 +2,8 @@ import { gameFetch } from "@/shared/api/dnd-api/api-client";
 
 export type AdvantageMode = "normal" | "advantage" | "disadvantage";
 
+export type AttackCoverLevel = "none" | "half" | "three_quarters" | "full";
+
 export type CharacterRollResult = {
   kind: "attack" | "damage" | "skill" | "saving_throw" | "initiative";
   label: string;
@@ -13,6 +15,10 @@ export type CharacterRollResult = {
   rolls: number[];
   kept?: number[];
   note?: string;
+  targetAcBonus?: number;
+  effectiveTargetAc?: number;
+  hit?: boolean;
+  blocked?: boolean;
 };
 
 export type RollAttackPayload = {
@@ -26,6 +32,12 @@ export type RollAttackPayload = {
   strokeOfLuck?: boolean;
   assassinate?: boolean;
   preciseHunter?: boolean;
+  targetCover?: AttackCoverLevel;
+  longRange?: boolean;
+  meleeWithRanged?: boolean;
+  targetAc?: number;
+  brutalStrike?: boolean;
+  spentInspiration?: boolean;
 };
 
 export type RollDamagePayload = {
@@ -53,12 +65,17 @@ export type RollDamagePayload = {
   dreadfulStrikes?: boolean;
   dreadAmbusher?: boolean;
   divineStrike?: boolean;
+  damageDieFloor?: boolean;
+  damageDieFlip?: boolean;
+  damageDieExplode?: boolean;
 };
 
 export type RollSkillPayload = {
   skillSlug: string;
   advantage?: AdvantageMode;
   strokeOfLuck?: boolean;
+  spentInspiration?: boolean;
+  dc?: number;
 };
 
 export type RollSavingThrowPayload = {
@@ -66,11 +83,15 @@ export type RollSavingThrowPayload = {
   advantage?: AdvantageMode;
   indomitable?: boolean;
   strokeOfLuck?: boolean;
+  spentInspiration?: boolean;
+  dc?: number;
 };
 
 export type RollInitiativePayload = {
   advantage?: AdvantageMode;
   strokeOfLuck?: boolean;
+  stonePulse?: boolean;
+  kasInitiativeBoost?: boolean;
 };
 
 export async function rollCharacterAttack(

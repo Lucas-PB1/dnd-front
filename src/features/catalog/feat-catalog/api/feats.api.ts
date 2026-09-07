@@ -5,6 +5,7 @@ import type {
   FeatOptionListResponse,
   FeatSummary,
 } from "@/entities/feat/types";
+import type { CatalogEffectSummary } from "@/entities/effect/types";
 import {
   buildCatalogSearchParams,
   CATALOG_FETCH_INIT,
@@ -21,6 +22,7 @@ export const featKeys = {
   options: (slug: string) => [...featKeys.all, "options", slug] as const,
   optionsBySlugs: (slugs: string[]) =>
     [...featKeys.all, "options-batch", [...slugs].sort().join(",")] as const,
+  effects: (slug: string) => [...featKeys.all, "effects", slug] as const,
 };
 
 const MAX_FEAT_BATCH_SLUGS = 40;
@@ -139,6 +141,13 @@ export async function fetchFeatOptionsBySlugs(
   search.set("slugs", unique.join(","));
   return catalogFetch<FeatOptionsBySlug[]>(
     `/feats/options?${search}`,
+    CATALOG_FETCH_INIT,
+  );
+}
+
+export async function fetchFeatEffects(slug: string) {
+  return catalogFetch<CatalogEffectSummary[]>(
+    `/feats/${encodeURIComponent(slug)}/effects`,
     CATALOG_FETCH_INIT,
   );
 }

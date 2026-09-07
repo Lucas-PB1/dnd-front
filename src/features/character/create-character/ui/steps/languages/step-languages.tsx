@@ -8,6 +8,7 @@ import { classLanguageGrant } from "@/entities/character/lib/class-language-gran
 import {
   filterPickableLanguages,
   languageQuota,
+  languageQuotaSummary,
   syncLanguagesForBackground,
   toggleLanguageSelection,
 } from "@/features/character/create-character/lib/languages/language-selection";
@@ -42,6 +43,11 @@ export function StepLanguages({ control, setValue }: StepLanguagesProps) {
     name: "backgroundSlug",
     defaultValue: "",
   });
+  const speciesSlug = useWatch({
+    control,
+    name: "speciesSlug",
+    defaultValue: "",
+  });
   const selected = useWatch({
     control,
     name: "languageSlugs",
@@ -62,15 +68,17 @@ export function StepLanguages({ control, setValue }: StepLanguagesProps) {
   const grant = useMemo(
     () => ({
       grantedSlugs: (fixedLanguages.data?.data ?? []).map((row) => row.slug),
-      languageChoiceCount: background.data?.languageChoiceCount ?? 2,
+      languageChoiceCount: background.data?.languageChoiceCount ?? 0,
       extraGrantedSlugs: classGrant.grantedSlugs,
       extraChoiceCount: classGrant.choiceCount,
+      speciesSlug: speciesSlug || null,
     }),
     [
       fixedLanguages.data?.data,
       background.data?.languageChoiceCount,
       classGrant.grantedSlugs,
       classGrant.choiceCount,
+      speciesSlug,
     ],
   );
 
@@ -96,11 +104,12 @@ export function StepLanguages({ control, setValue }: StepLanguagesProps) {
     if (!same) {
       setValue("languageSlugs", next, { shouldDirty: true });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- sync por antecedente/classe/catálogo
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- sync por antecedente/espécie/classe/catálogo
   }, [
     grantReady,
     grant.grantedSlugs.join(","),
     grant.languageChoiceCount,
+    grant.speciesSlug,
     classGrant.grantedSlugs.join(","),
     classGrant.choiceCount,
     catalog.map((row) => row.slug).join(","),
@@ -126,9 +135,9 @@ export function StepLanguages({ control, setValue }: StepLanguagesProps) {
             <p className="text-[11px] text-muted-foreground">
               {!backgroundSlug
                 ? "Selecione um antecedente para ver a cota de idiomas."
-                : quota.choiceCount === 0
-                  ? "Seus idiomas vêm do antecedente e da classe — sem escolha extra."
-                  : `Concedidos ${quota.granted.length} idioma(s) + ${quota.choiceCount} à escolha (idiomas padrão).`}
+                : !speciesSlug
+                  ? "Selecione uma espécie para incluir os idiomas da linhagem."
+                  : languageQuotaSummary(quota)}
             </p>
           </div>
           <p className="tabular-nums text-sm font-semibold">

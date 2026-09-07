@@ -635,3 +635,61 @@ export async function executeMonsterHunterTableAction(
     },
   );
 }
+
+export async function executeTransformationTableAction(
+  accessToken: string,
+  characterId: string,
+  actionSlug: string,
+) {
+  return gameFetch<TableActionResult>(
+    `/characters/${characterId}/transformation/table-action`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify({ actionSlug }),
+    },
+  );
+}
+
+export type FeatTableActionPayload = {
+  featSlug: string;
+  actionSlug: string;
+  itemSlug?: string;
+  enabled?: boolean;
+};
+
+export async function executeFeatTableAction(
+  accessToken: string,
+  characterId: string,
+  payload: FeatTableActionPayload,
+) {
+  return gameFetch<TableActionResult>(
+    `/characters/${characterId}/feat/table-action`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
+export type TransferInspirationResult = {
+  sourceState: CharacterState;
+  targetState: CharacterState;
+  note: string;
+};
+
+export async function transferInspiration(
+  accessToken: string,
+  characterId: string,
+  targetCharacterId: string,
+) {
+  return gameFetch<TransferInspirationResult>(
+    `/characters/${characterId}/state/transfer-inspiration`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify({ targetCharacterId }),
+    },
+  );
+}

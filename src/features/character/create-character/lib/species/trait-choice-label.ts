@@ -31,6 +31,10 @@ export function traitChoiceLabel(kind: string, traitName: string): string {
       return "Dádiva da Natureza — truque de Druida";
     case "bearfolk_lineage":
       return "Linhagem do Povo-urso";
+    case "beastkin_adaptation":
+      return "Adaptação Natural";
+    case "beastkin_size":
+      return "Tamanho";
     case "dwarf_culture":
       return "Variante cultural";
     case "feathren_avian_ancestry":

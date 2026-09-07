@@ -395,4 +395,95 @@ describe("resolveClassEconomyActions", () => {
       cursemarked.some((a) => a.id === "thread-cursemarked-greater-sacrifice"),
     ).toBe(true);
   });
+
+  it("includes transformation boons by slug, stage and choices", () => {
+    const catalog: ClassEconomyActionRecord[] = [
+      ...FIXTURE_CATALOG,
+      {
+        id: "transformation-infernal-smite",
+        name: "Punição Infernal",
+        economy: "bonus",
+        featSlug: "gh-transformation-fiend",
+        minLevel: 1,
+        resourceSlug: "infernal-smite-uses",
+        alwaysSpendsResource: true,
+        tableAction: "gh-transformation-fiend/infernal-smite",
+      },
+      {
+        id: "transformation-daemonic-brand",
+        name: "Marca Demoníaca",
+        economy: "bonus",
+        featSlug: "gh-transformation-fiend",
+        minLevel: 2,
+        resourceSlug: "daemonic-brand-uses",
+        alwaysSpendsResource: true,
+        requiresOptionKey: "stage2Boon",
+        requiresOptionValue: "daemonic-brand",
+        tableAction: "gh-transformation-fiend/daemonic-brand",
+      },
+    ];
+
+    const without = resolveClassEconomyActions(catalog, {
+      classSlug: "wizard",
+      level: 20,
+      featSlugs: [],
+      transformation: null,
+    });
+    expect(without.some((a) => a.id === "transformation-infernal-smite")).toBe(
+      false,
+    );
+
+    const stage1 = resolveClassEconomyActions(catalog, {
+      classSlug: "wizard",
+      level: 20,
+      featSlugs: ["gh-transformation-fiend"],
+      transformation: {
+        slug: "gh-transformation-fiend",
+        stage: 1,
+        choices: [
+          { choiceKind: "stage1Boon", choiceSlug: "infernal-smite" },
+        ],
+      },
+    });
+    expect(stage1.some((a) => a.id === "transformation-infernal-smite")).toBe(
+      true,
+    );
+    expect(stage1.some((a) => a.id === "transformation-daemonic-brand")).toBe(
+      false,
+    );
+
+    const stage2WrongBoon = resolveClassEconomyActions(catalog, {
+      classSlug: "wizard",
+      level: 20,
+      featSlugs: ["gh-transformation-fiend"],
+      transformation: {
+        slug: "gh-transformation-fiend",
+        stage: 2,
+        choices: [
+          { choiceKind: "stage1Boon", choiceSlug: "infernal-smite" },
+          { choiceKind: "stage2Boon", choiceSlug: "other-boon" },
+        ],
+      },
+    });
+    expect(
+      stage2WrongBoon.some((a) => a.id === "transformation-daemonic-brand"),
+    ).toBe(false);
+
+    const stage2Brand = resolveClassEconomyActions(catalog, {
+      classSlug: "wizard",
+      level: 20,
+      featSlugs: ["gh-transformation-fiend"],
+      transformation: {
+        slug: "gh-transformation-fiend",
+        stage: 2,
+        choices: [
+          { choiceKind: "stage1Boon", choiceSlug: "infernal-smite" },
+          { choiceKind: "stage2Boon", choiceSlug: "daemonic-brand" },
+        ],
+      },
+    });
+    expect(
+      stage2Brand.some((a) => a.id === "transformation-daemonic-brand"),
+    ).toBe(true);
+  });
 });

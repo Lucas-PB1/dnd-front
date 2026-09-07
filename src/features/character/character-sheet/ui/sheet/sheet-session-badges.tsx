@@ -5,12 +5,14 @@ import {
   SparklesIcon,
 } from "@heroicons/react/24/outline";
 import { SparklesIcon as SparklesSolid } from "@heroicons/react/24/solid";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import {
   useCharacterState,
   usePatchCharacterState,
 } from "@/features/character/character-sheet/api/use-character-state";
+import { useTransferInspiration } from "@/features/character/character-sheet/api/use-transfer-inspiration";
+import { useCharacters } from "@/features/character/characters/api/use-characters";
 import { DeathSaveTrack } from "@/features/character/character-sheet/ui/beyond/combat/status/death-save-track";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
@@ -18,26 +20,53 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/shared/ui/dialog";
+
+const MESA_CIRCUMSTANCES = [
+  { tag: "snow_ice", label: "Neve/gelo" },
+  { tag: "in_water", label: "Na água" },
+  { tag: "extreme_cold", label: "Frio extremo" },
+] as const;
 
 type SheetSessionBadgesProps = {
   characterId: string;
 };
 
-/** Inspiração (ícone) + testes de morte (modal) no topo da ficha. */
+/** Inspiração (ícone) + testes de morte (modal) + circunstâncias de mesa. */
 export function SheetSessionBadges({ characterId }: SheetSessionBadgesProps) {
   const stateQuery = useCharacterState(characterId);
   const patchState = usePatchCharacterState(characterId);
+  const transferInspiration = useTransferInspiration(characterId);
+  const charactersQuery = useCharacters();
   const [deathOpen, setDeathOpen] = useState(false);
+  const [transferOpen, setTransferOpen] = useState(false);
+  const [transferNote, setTransferNote] = useState<string | null>(null);
 
   const state = stateQuery.data;
   const inspired = state?.inspiration ?? false;
   const successes = state?.deathSaveSuccesses ?? 0;
   const failures = state?.deathSaveFailures ?? 0;
-  const busy = !state || patchState.isPending;
+  const circumstances = state?.mesaCircumstances ?? [];
+  const busy = !state || patchState.isPending || transferInspiration.isPending;
   const hasDeathMarks = successes > 0 || failures > 0;
+
+  const allies = useMemo(
+    () =>
+      (charactersQuery.data ?? []).filter(
+        (row) => row.id !== characterId,
+      ),
+    [charactersQuery.data, characterId],
+  );
+
+  function toggleCircumstance(tag: string) {
+    const set = new Set(circumstances);
+    if (set.has(tag)) set.delete(tag);
+    else set.add(tag);
+    patchState.mutate({ mesaCircumstances: [...set] });
+  }
 
   return (
     <div className="flex flex-wrap items-center gap-1.5">
@@ -46,7 +75,11 @@ export function SheetSessionBadges({ characterId }: SheetSessionBadgesProps) {
         disabled={busy}
         aria-pressed={inspired}
         aria-label={inspired ? "Remover inspiração" : "Marcar inspiração"}
-        title={inspired ? "Inspiração ativa — clique para remover" : "Marcar inspiração"}
+        title={
+          inspired
+            ? "Inspiração ativa — clique para remover"
+            : "Marcar inspiração"
+        }
         onClick={() => patchState.mutate({ inspiration: !inspired })}
         className={cn(
           "inline-flex size-8 items-center justify-center rounded-full border transition-colors",
@@ -63,6 +96,51 @@ export function SheetSessionBadges({ characterId }: SheetSessionBadgesProps) {
           <SparklesIcon className="size-3.5" aria-hidden />
         )}
       </button>
+
+      {inspired ? (
+        <Button
+          type="button"
+          size="sm"
+          variant="ghost"
+          className="h-8 px-2 text-xs"
+          disabled={busy || allies.length === 0}
+          title={
+            allies.length === 0
+              ? "Sem outros personagens para transferir"
+              : "Transferir inspiração para aliado"
+          }
+          onClick={() => {
+            setTransferNote(null);
+            setTransferOpen(true);
+          }}
+        >
+          Transferir
+        </Button>
+      ) : null}
+
+      {MESA_CIRCUMSTANCES.map(({ tag, label }) => {
+        const on = circumstances.includes(tag);
+        return (
+          <button
+            key={tag}
+            type="button"
+            disabled={busy}
+            aria-pressed={on}
+            title={label}
+            onClick={() => toggleCircumstance(tag)}
+            className={cn(
+              "h-8 rounded-full border px-2 text-[0.65rem] font-semibold transition-colors",
+              "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
+              "disabled:opacity-50",
+              on
+                ? "border-chart-3/50 bg-chart-3/20 text-chart-3"
+                : "border-border/70 bg-card/60 text-muted-foreground hover:border-chart-3/40",
+            )}
+          >
+            {label}
+          </button>
+        );
+      })}
 
       <Button
         type="button"
@@ -126,9 +204,60 @@ export function SheetSessionBadges({ characterId }: SheetSessionBadgesProps) {
                 })
               }
             >
-              Zerar testes
+              Limpar
             </Button>
           ) : null}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={transferOpen} onOpenChange={setTransferOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Transferir inspiração</DialogTitle>
+            <DialogDescription>
+              Passa a Inspiração Heroica para outro personagem seu (ou da
+              campanha, se a API permitir write).
+            </DialogDescription>
+          </DialogHeader>
+          <ul className="grid max-h-64 gap-1.5 overflow-y-auto">
+            {allies.map((ally) => (
+              <li key={ally.id}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-auto w-full justify-start px-3 py-2"
+                  disabled={busy}
+                  onClick={() =>
+                    transferInspiration.mutate(ally.id, {
+                      onSuccess: (result) => {
+                        setTransferNote(result.note);
+                        setTransferOpen(false);
+                      },
+                    })
+                  }
+                >
+                  {ally.name}
+                  <span className="ml-auto text-xs text-muted-foreground">
+                    Nv. {ally.level}
+                  </span>
+                </Button>
+              </li>
+            ))}
+          </ul>
+          {transferNote ? (
+            <p className="text-sm text-secondary" role="status">
+              {transferNote}
+            </p>
+          ) : null}
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setTransferOpen(false)}
+            >
+              Fechar
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

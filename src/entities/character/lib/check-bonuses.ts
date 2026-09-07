@@ -224,13 +224,13 @@ export function hasAlertFeat(
   );
 }
 
-export function initiativeBonus(
-  dexterityModifier: number,
-  proficiencyBonus: number,
-  characterFeats: readonly CharacterFeatLike[] | undefined,
-): number {
-  return (
-    dexterityModifier +
-    (hasAlertFeat(characterFeats) ? proficiencyBonus : 0)
-  );
-}
+export {
+  focusedInitiativeTakeCount,
+  hasAutomaticInitiativeAdvantage,
+  hasGiantkinStoneAncestry,
+  hasInitiativeProficiency,
+  initiativeBonus,
+  resolveInitiativeBonus,
+  type InitiativeBonusBreakdown,
+  type InitiativeRollContext,
+} from "@/entities/character/lib/resolve-initiative-roll";

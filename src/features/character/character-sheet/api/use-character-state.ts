@@ -20,6 +20,9 @@ import {
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
 import { CHARACTER_STATE_STALE_MS } from "@/features/character/characters/api/character-query";
 import { charactersKeys } from "@/features/character/characters/api/characters.api";
+import { inventoryKeys } from "@/features/character/character-sheet/api/character-inventory.api";
+
+export { useTransferInspiration } from "@/features/character/character-sheet/api/use-transfer-inspiration";
 
 export function useCharacterState(characterId: string) {
   const { accessToken, handleUnauthorized } = useGameAuth(
@@ -109,6 +112,11 @@ export function useTakeRest(characterId: string) {
       queryClient.invalidateQueries({
         queryKey: charactersKeys.detail(characterId),
       });
+      if (result.type === "long") {
+        void queryClient.invalidateQueries({
+          queryKey: inventoryKeys.list(characterId),
+        });
+      }
     },
   });
 }

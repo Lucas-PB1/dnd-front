@@ -1,5 +1,5 @@
 /**
- * Idiomas iniciais PHB 2024 — concedidos pelo antecedente (API).
+ * Idiomas iniciais PHB 2024 — antecedente + espécie (E007) + classe.
  */
 
 import {
@@ -11,6 +11,9 @@ export const CLASS_EXCLUSIVE_LANGUAGE_SLUGS = [
   DRUIDIC_LANGUAGE_SLUG,
   THIEVES_CANT_LANGUAGE_SLUG,
 ] as const;
+
+/** Espelha dnd-api `SPECIES_LANGUAGE_CHOICE_COUNT` (grant_language ×2). */
+export const SPECIES_LANGUAGE_CHOICE_COUNT = 2;
 
 const CLASS_EXCLUSIVE_SET = new Set<string>(CLASS_EXCLUSIVE_LANGUAGE_SLUGS);
 
@@ -45,41 +48,59 @@ export type BackgroundLanguageGrant = {
   choiceCount: number;
 };
 
-const FALLBACK: BackgroundLanguageGrant = {
-  grantedSlugs: ["common"],
-  choiceCount: 2,
-};
+const DEFAULT_GRANTED = ["common"];
 
+/**
+ * Concessões do antecedente. `languageChoiceCount` ausente → 0
+ * (não inventar 2; a cota da espécie entra em `languageQuota`).
+ */
 export function backgroundLanguageGrant(input?: {
   grantedSlugs?: string[];
   languageChoiceCount?: number;
 } | null): BackgroundLanguageGrant {
-  if (!input) return FALLBACK;
+  if (!input) {
+    return { grantedSlugs: DEFAULT_GRANTED, choiceCount: 0 };
+  }
   const grantedSlugs =
-    input.grantedSlugs?.length ? [...input.grantedSlugs] : FALLBACK.grantedSlugs;
-  const choiceCount =
-    input.languageChoiceCount ?? FALLBACK.choiceCount;
+    input.grantedSlugs?.length ? [...input.grantedSlugs] : DEFAULT_GRANTED;
+  const choiceCount = input.languageChoiceCount ?? 0;
   return { grantedSlugs, choiceCount };
 }
 
-export function languageQuota(input?: {
+export type LanguageQuotaInput = {
   grantedSlugs?: string[];
   languageChoiceCount?: number;
   extraGrantedSlugs?: string[];
   extraChoiceCount?: number;
-} | null): {
+  /** Quando presente, soma `SPECIES_LANGUAGE_CHOICE_COUNT` às escolhas. */
+  speciesSlug?: string | null;
+};
+
+export function languageQuota(input?: LanguageQuotaInput | null): {
   granted: string[];
   choiceCount: number;
   maxTotal: number;
+  backgroundChoiceCount: number;
+  speciesChoiceCount: number;
+  classChoiceCount: number;
 } {
-  const { grantedSlugs, choiceCount } = backgroundLanguageGrant(input);
+  const { grantedSlugs, choiceCount: backgroundChoiceCount } =
+    backgroundLanguageGrant(input);
   const extraGranted = [...new Set(input?.extraGrantedSlugs ?? [])];
   const granted = [...new Set([...grantedSlugs, ...extraGranted])];
-  const totalChoice = choiceCount + (input?.extraChoiceCount ?? 0);
+  const speciesChoiceCount = input?.speciesSlug?.trim()
+    ? SPECIES_LANGUAGE_CHOICE_COUNT
+    : 0;
+  const classChoiceCount = input?.extraChoiceCount ?? 0;
+  const totalChoice =
+    backgroundChoiceCount + speciesChoiceCount + classChoiceCount;
   return {
     granted,
     choiceCount: totalChoice,
     maxTotal: granted.length + totalChoice,
+    backgroundChoiceCount,
+    speciesChoiceCount,
+    classChoiceCount,
   };
 }
 
@@ -102,12 +123,7 @@ export function ensureGrantedLanguages(
 
 export function syncLanguagesForBackground(
   selected: string[],
-  grant?: {
-    grantedSlugs?: string[];
-    languageChoiceCount?: number;
-    extraGrantedSlugs?: string[];
-    extraChoiceCount?: number;
-  } | null,
+  grant?: LanguageQuotaInput | null,
   catalog?: LanguageCatalogEntry[],
 ): string[] {
   const { granted, choiceCount } = languageQuota(grant);
@@ -123,12 +139,7 @@ export function syncLanguagesForBackground(
 export function toggleLanguageSelection(
   selected: string[],
   slug: string,
-  grant?: {
-    grantedSlugs?: string[];
-    languageChoiceCount?: number;
-    extraGrantedSlugs?: string[];
-    extraChoiceCount?: number;
-  } | null,
+  grant?: LanguageQuotaInput | null,
   catalog?: LanguageCatalogEntry[],
 ): { ok: true; next: string[] } | { ok: false; reason: string } {
   const { granted, choiceCount, maxTotal } = languageQuota(grant);
@@ -165,7 +176,7 @@ export function toggleLanguageSelection(
       ok: false,
       reason:
         choiceCount === 0
-          ? "Seu antecedente não concede idiomas extras para escolher."
+          ? "Não há idiomas extras para escolher."
           : `Limite de idiomas extras: ${choiceCount}.`,
     };
   }
@@ -181,4 +192,22 @@ export function toggleLanguageSelection(
     ok: true,
     next: ensureGrantedLanguages([...selected, slug], granted),
   };
+}
+
+/** Texto curto da cota (espécie + antecedente + classe). */
+export function languageQuotaSummary(quota: ReturnType<typeof languageQuota>): string {
+  if (quota.choiceCount === 0) {
+    return "Seus idiomas vêm das concessões fixas — sem escolha extra.";
+  }
+  const parts: string[] = [];
+  if (quota.speciesChoiceCount > 0) {
+    parts.push(`${quota.speciesChoiceCount} da espécie`);
+  }
+  if (quota.backgroundChoiceCount > 0) {
+    parts.push(`${quota.backgroundChoiceCount} do antecedente`);
+  }
+  if (quota.classChoiceCount > 0) {
+    parts.push(`${quota.classChoiceCount} da classe`);
+  }
+  return `Concedidos ${quota.granted.length} + ${quota.choiceCount} à escolha (${parts.join(", ")}).`;
 }

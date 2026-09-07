@@ -86,6 +86,11 @@ function RollResultBanner({
           <p className="mt-0.5 text-xs text-muted-foreground">
             {result.expression}
             {result.critical ? " · crítico" : ""}
+            {result.hit != null && result.effectiveTargetAc != null
+              ? result.hit
+                ? ` · acertou CA ${result.effectiveTargetAc}`
+                : ` · errou CA ${result.effectiveTargetAc}`
+              : ""}
           </p>
           {result.note ? (
             <p className="mt-0.5 text-[0.7rem] text-secondary">{result.note}</p>

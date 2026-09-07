@@ -43,7 +43,7 @@ export function ClassCombatPanel({
 
   switch (character.classSlug) {
     case "barbarian":
-      return <CombatBarbarianPanel {...shared} />;
+      return <CombatBarbarianPanel {...shared} onTableNote={onTableNote} />;
     case "fighter":
       return (
         <CombatFighterPanel

@@ -14,9 +14,12 @@ import { useTableActionMutation } from "@/features/character/character-sheet/api
 import { useCombatMechanicalCatalog } from "@/features/catalog/reference-catalog/api/use-reference";
 import { resolvePanelActions } from "@/features/character/character-sheet/lib/combat/resolve-panel-actions";
 import { CompanionTrackerPanel } from "@/features/companion/ui/companion-tracker-panel";
+import { BarbarianCombatToggles } from "./barbarian-combat-toggles";
 import { CombatClassPanelShell } from "../shared/class-panel-shell";
 import { CombatPanelActionButtons } from "../shared/panel-action-buttons";
 import { TableActionFeedback } from "../shared/table-action-feedback";
+
+const RAGE_TOGGLE_SLUGS = new Set(["toggle-rage", "toggle-reckless"]);
 
 const EMPTY_PANEL_ACTIONS: ClassPanelActionRecord[] = [];
 
@@ -28,6 +31,7 @@ type CombatBarbarianPanelProps = {
   level: number;
   combatNotes?: string[];
   state: CharacterState | undefined;
+  onTableNote?: (note: string) => void;
 };
 
 function isRageSlug(slug: string): boolean {
@@ -45,6 +49,7 @@ export function CombatBarbarianPanel({
   level,
   combatNotes,
   state,
+  onTableNote,
 }: CombatBarbarianPanelProps) {
   const enabled = classSlug === "barbarian";
   const action = useTableActionMutation(characterId, executeBarbarianTableAction);
@@ -62,7 +67,7 @@ export function CombatBarbarianPanel({
         level,
         subclassSlug,
         section: "base",
-      }),
+      }).filter((entry) => !RAGE_TOGGLE_SLUGS.has(entry.slug)),
     [panelCatalog, level, subclassSlug],
   );
   const subclassActions = useMemo(
@@ -85,8 +90,6 @@ export function CombatBarbarianPanel({
   if (!enabled) return null;
 
   const resources = state?.classResources ?? [];
-  const rageActive = state?.rageActive ?? false;
-  const recklessActive = state?.recklessActive ?? false;
 
   function getRemaining(slug: string): number | null {
     if (isRageSlug(slug)) {
@@ -95,23 +98,14 @@ export function CombatBarbarianPanel({
     return resources.find((entry) => entry.slug === slug)?.remaining ?? null;
   }
 
-  const statusLine = (
-    <p className="text-sm text-muted-foreground">
-      Fúria:{" "}
-      <span className="font-medium text-foreground">
-        {rageActive ? "ativa" : "inativa"}
-      </span>
-      {" · "}
-      Imprudente:{" "}
-      <span className="font-medium text-foreground">
-        {recklessActive ? "ativo" : "inativo"}
-      </span>
-    </p>
-  );
-
   const actionsContent = (
     <div className="space-y-2">
-      {statusLine}
+      <BarbarianCombatToggles
+        characterId={characterId}
+        level={level}
+        state={state}
+        onNote={onTableNote}
+      />
       <CombatPanelActionButtons
         actions={baseActions}
         getRemaining={getRemaining}

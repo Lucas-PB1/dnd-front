@@ -5,3 +5,4 @@ export { FeatsSection } from "./feats-section";
 export { SpeciesChoicesSection } from "./species-choices-section";
 export { SubclassMechanicsSection } from "./subclass-mechanics-section";
 export { SubclassOptionsSection } from "./subclass-options-section";
+export { TransformationSection } from "./transformation-section";

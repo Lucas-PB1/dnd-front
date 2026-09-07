@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import {
   AcademicCapIcon,
   PencilSquareIcon,
@@ -17,6 +18,8 @@ import {
 import { classOrderSkillCheckBonus } from "@/entities/character/lib/class-order-effects";
 import type { SkillSummary } from "@/entities/skill/types";
 import { useAbilityLabels } from "@/features/catalog/reference-catalog/api/use-ability-labels";
+import { useCharacterState } from "@/features/character/character-sheet/api/use-character-state";
+import { sessionKeys } from "@/features/character/character-sheet/api/character-session.api";
 import { BeyondPanel } from "@/features/character/character-sheet/ui/beyond/layout/beyond-panel";
 import { useSheetRolls } from "@/features/character/character-sheet/ui/beyond/layout/sheet-rolls";
 import { SheetEditAction } from "@/features/character/character-sheet/ui/sheet/sheet-ui";
@@ -43,7 +46,13 @@ export function BeyondSkillsColumn({
   onEdit,
 }: BeyondSkillsColumnProps) {
   const rolls = useSheetRolls();
+  const queryClient = useQueryClient();
+  const stateQuery = useCharacterState(character.id);
   const [useStrokeOfLuck, setUseStrokeOfLuck] = useState(false);
+  const [spendInspiration, setSpendInspiration] = useState(false);
+  const canSpendIh =
+    Boolean(character.featEffectFlags?.inspirationRefundOnFail) &&
+    Boolean(stateQuery.data?.inspiration);
   const scores = sheetAbilityScores(character);
   const skillSources = {
     classSkillSlugs: character.classSkillSlugs,
@@ -90,11 +99,25 @@ export function BeyondSkillsColumn({
     .sort((a, b) => a.skill.name.localeCompare(b.skill.name, "pt"));
 
   function rollSkill(row: SkillRowData) {
-    rolls.skill.mutate({
-      skillSlug: row.skill.slug,
-      strokeOfLuck: useStrokeOfLuck || undefined,
-    });
+    const spent = spendInspiration && canSpendIh;
+    rolls.skill.mutate(
+      {
+        skillSlug: row.skill.slug,
+        strokeOfLuck: useStrokeOfLuck || undefined,
+        spentInspiration: spent || undefined,
+      },
+      {
+        onSuccess: () => {
+          if (spent) {
+            void queryClient.invalidateQueries({
+              queryKey: sessionKeys.state(character.id),
+            });
+          }
+        },
+      },
+    );
     setUseStrokeOfLuck(false);
+    setSpendInspiration(false);
   }
 
   return (
@@ -120,6 +143,17 @@ export function BeyondSkillsColumn({
             onChange={(event) => setUseStrokeOfLuck(event.target.checked)}
           />
           Golpe de Sorte: transformar falha em 20
+        </label>
+      ) : null}
+      {canSpendIh ? (
+        <label className="mb-1.5 block text-[0.68rem] text-muted-foreground">
+          <input
+            className="mr-1 align-middle"
+            type="checkbox"
+            checked={spendInspiration}
+            onChange={(event) => setSpendInspiration(event.target.checked)}
+          />
+          Gastar inspiração (IH)
         </label>
       ) : null}
 

@@ -51,6 +51,11 @@ export function ReviewSpellsSection({ data }: { data: ReviewData }) {
 
 export function ReviewLanguagesSection({ data }: { data: ReviewData }) {
   const { values, labels, langQuota } = data;
+  const classGranted = new Set<string>(
+    langQuota.granted.filter(
+      (slug) => slug === "thieves-cant" || slug === "druidic",
+    ),
+  );
 
   return (
     <WizardFormSection title="Idiomas" compact>
@@ -58,11 +63,20 @@ export function ReviewLanguagesSection({ data }: { data: ReviewData }) {
         items={values.languageSlugs.map((slug) => ({
           key: slug,
           label: labels.resolveLanguage(slug),
-          hint: langQuota.granted.includes(slug) ? "Antecedente" : undefined,
+          hint: classGranted.has(slug)
+            ? "Classe"
+            : langQuota.granted.includes(slug)
+              ? "Antecedente"
+              : langQuota.speciesChoiceCount > 0
+                ? "Escolha"
+                : undefined,
         }))}
       />
       <p className="text-xs text-muted-foreground">
         {values.languageSlugs.length} / {langQuota.maxTotal}
+        {langQuota.speciesChoiceCount > 0
+          ? ` · ${langQuota.speciesChoiceCount} da espécie`
+          : ""}
       </p>
     </WizardFormSection>
   );

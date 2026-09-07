@@ -64,9 +64,21 @@ export type ResolveClassEconomyInput = {
   } | null;
   /** Slugs de talentos na ficha (inclui estilos de luta como feat). */
   featSlugs?: readonly string[];
+  /** Transformação GH Cap. 6 (estágio + choices para gates de boon). */
+  transformation?: {
+    slug: string;
+    stage: number;
+    choices: readonly { choiceKind: string; choiceSlug: string }[];
+  } | null;
   /** Itens ativos (equipado + sintonizado) e charms anexados. */
   activeItemSlugs?: readonly string[];
 };
+
+function isTransformationFeatSlug(
+  slug: string | null | undefined,
+): slug is string {
+  return Boolean(slug?.startsWith("gh-transformation-"));
+}
 
 /** option_key do catálogo → choiceKind na ficha. */
 const OPTION_KEY_TO_CHOICE_KIND: Record<string, string> = {
@@ -152,6 +164,18 @@ function matchesSpeciesOption(
   );
 }
 
+/** Cap. 6: option_key do catálogo = choiceKind na ficha (`stage1Boon`, …). */
+function matchesTransformationOption(
+  action: ClassEconomyActionRecord,
+  choices: readonly { choiceKind: string; choiceSlug: string }[],
+): boolean {
+  if (!action.requiresOptionKey || !action.requiresOptionValue) return true;
+  const picked = choices.find(
+    (choice) => choice.choiceKind === action.requiresOptionKey,
+  )?.choiceSlug;
+  return picked === action.requiresOptionValue;
+}
+
 function heritageTraitTakeCounts(
   heritageChoices: readonly { choiceKind: string; choiceSlug: string }[],
 ): Map<string, number> {
@@ -222,8 +246,22 @@ export function resolveClassEconomyActions(
   const featSlugs = new Set(input.featSlugs ?? []);
   const activeItemSlugs = new Set(input.activeItemSlugs ?? []);
 
+  const transformation = input.transformation ?? null;
+
   return catalog
     .filter((action) => {
+      if (isTransformationFeatSlug(action.featSlug)) {
+        if (
+          !transformation ||
+          transformation.slug !== action.featSlug ||
+          !featSlugs.has(action.featSlug)
+        ) {
+          return false;
+        }
+        if (transformation.stage < action.minLevel) return false;
+        return matchesTransformationOption(action, transformation.choices);
+      }
+
       if (input.level < action.minLevel) return false;
 
       if (action.itemSlug) {

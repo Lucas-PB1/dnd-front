@@ -18,6 +18,9 @@ export function EditLanguagesForm({
   const { patch, formError, submit } = useSectionPatch(character, onSuccess);
   const selection = useSheetLanguageSelection({
     backgroundSlug: character.backgroundSlug,
+    speciesSlug: character.speciesSlug,
+    classSlug: character.classSlug,
+    level: character.level,
     initialSlugs: character.languageSlugs,
   });
 

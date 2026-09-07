@@ -79,8 +79,12 @@ type BeyondSpellRowProps = {
       slotLevel?: number;
       freeCastResourceSlug?: string;
       useFreeCast?: boolean;
+      flexElevateExtraSlots?: number;
+      flexReduce?: boolean;
     },
   ) => Promise<void>;
+  /** Flex Caster flags from character.featEffectFlags. */
+  flexCaster?: { elevate: boolean; reduce: boolean };
 };
 
 export function BeyondSpellRow({
@@ -94,10 +98,13 @@ export function BeyondSpellRow({
   freeMissileUses = 0,
   isSpellMastery = false,
   onCast,
+  flexCaster,
 }: BeyondSpellRowProps) {
   const { shortOf } = useAbilityLabels();
   const [open, setOpen] = useState(false);
   const [slotLevel, setSlotLevel] = useState<number | null>(null);
+  const [flexElevate, setFlexElevate] = useState(false);
+  const [flexReduce, setFlexReduce] = useState(false);
 
   const isCantrip = row.level === 0;
   const isUnknownLevel = row.level < 0;
@@ -126,13 +133,17 @@ export function BeyondSpellRow({
     grantedCast?.castEconomy === "once_per_long_rest"
       ? (grantedCast.freeCastsRemaining ?? 0)
       : 0;
+  const atWillCast =
+    isSpellMastery ||
+    grantedCast?.castEconomy === "at_will" ||
+    row.spell.castEconomy === "at_will";
   const canOncePerFreeCast =
-    !cannotCastSpellsInArmor && !isSpellMastery && oncePerFreeRemaining > 0;
+    !cannotCastSpellsInArmor && !atWillCast && oncePerFreeRemaining > 0;
 
   const canCast =
     !cannotCastSpellsInArmor &&
     (isCantrip ||
-      isSpellMastery ||
+      atWillCast ||
       canOncePerFreeCast ||
       (selectedSlot != null &&
         (state?.spellSlotsRemaining[String(selectedSlot)] ?? 0) > 0));
@@ -164,7 +175,7 @@ export function BeyondSpellRow({
       : null;
 
   async function cast() {
-    if (isCantrip || isSpellMastery) {
+    if (isCantrip || atWillCast) {
       await onCast(row.spell.spellSlug);
       return;
     }
@@ -173,7 +184,17 @@ export function BeyondSpellRow({
       return;
     }
     if (selectedSlot == null) return;
-    await onCast(row.spell.spellSlug, { slotLevel: selectedSlot });
+    await onCast(row.spell.spellSlug, {
+      slotLevel: selectedSlot,
+      ...(flexCaster?.elevate && flexElevate && !flexReduce
+        ? { flexElevateExtraSlots: 1 }
+        : {}),
+      ...(flexCaster?.reduce && flexReduce && selectedSlot === baseLevel
+        ? { flexReduce: true }
+        : {}),
+    });
+    setFlexElevate(false);
+    setFlexReduce(false);
   }
 
   async function castFreeMissile() {
@@ -223,7 +244,7 @@ export function BeyondSpellRow({
                   R
                 </Badge>
               ) : null}
-              {isSpellMastery ? (
+              {atWillCast ? (
                 <Badge
                   variant="secondary"
                   size="sm"
@@ -233,14 +254,23 @@ export function BeyondSpellRow({
                   À vontade
                 </Badge>
               ) : null}
-              {canOncePerFreeCast ? (
+              {canOncePerFreeCast ||
+              (grantedCast?.castEconomy === "once_per_long_rest" &&
+                !atWillCast) ? (
                 <Badge
                   variant="secondary"
                   size="sm"
                   className="tracking-wide uppercase"
-                  title="1 uso gratuito por Descanso Longo"
+                  title={
+                    canOncePerFreeCast
+                      ? "1 uso gratuito por Descanso Longo"
+                      : "1× por Descanso Longo (sem usos restantes)"
+                  }
                 >
                   1×/DL
+                  {grantedCast?.freeCastsRemaining != null
+                    ? ` · ${grantedCast.freeCastsRemaining}`
+                    : ""}
                 </Badge>
               ) : null}
               {saveBadge ? (
@@ -265,7 +295,7 @@ export function BeyondSpellRow({
         <div className="flex flex-wrap items-center gap-2">
           {!isCantrip &&
           !isUnknownLevel &&
-          !isSpellMastery &&
+          !atWillCast &&
           availableUpcastLevels.length > 1 ? (
             <>
               <label
@@ -302,6 +332,42 @@ export function BeyondSpellRow({
             </Button>
           ) : null}
 
+          {flexCaster?.elevate &&
+          !isCantrip &&
+          !atWillCast &&
+          !canOncePerFreeCast ? (
+            <label className="flex items-center gap-1 text-[0.7rem] text-muted-foreground">
+              <input
+                type="checkbox"
+                checked={flexElevate}
+                disabled={casting || flexReduce}
+                onChange={(event) => {
+                  setFlexElevate(event.target.checked);
+                  if (event.target.checked) setFlexReduce(false);
+                }}
+              />
+              Elevação
+            </label>
+          ) : null}
+          {flexCaster?.reduce &&
+          !isCantrip &&
+          !atWillCast &&
+          !canOncePerFreeCast &&
+          selectedSlot === baseLevel ? (
+            <label className="flex items-center gap-1 text-[0.7rem] text-muted-foreground">
+              <input
+                type="checkbox"
+                checked={flexReduce}
+                disabled={casting || flexElevate}
+                onChange={(event) => {
+                  setFlexReduce(event.target.checked);
+                  if (event.target.checked) setFlexElevate(false);
+                }}
+              />
+              Redução
+            </label>
+          ) : null}
+
           <Button
             type="button"
             size="sm"
@@ -313,7 +379,7 @@ export function BeyondSpellRow({
                 ? "Não pode conjurar com armadura/escudo sem treino"
                 : isUnknownLevel
                   ? "Aguardando catálogo"
-                  : isSpellMastery
+                  : atWillCast
                     ? "Sem espaço"
                     : canOncePerFreeCast
                       ? "Uso gratuito (1×/DL)"

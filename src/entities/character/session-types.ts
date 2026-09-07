@@ -48,6 +48,8 @@ export type CharacterState = {
   stellarConstellation?: string | null;
   /** game_actor (veículo/montaria) em que o PC está a bordo */
   boardedActorId?: string | null;
+  /** Circunstâncias de mesa: snow_ice | in_water | extreme_cold */
+  mesaCircumstances?: string[];
 };
 
 export type ResourceDieRoll = {
@@ -92,6 +94,7 @@ export type PatchCharacterStatePayload = {
   deathSaveSuccesses?: number;
   deathSaveFailures?: number;
   inspiration?: boolean;
+  mesaCircumstances?: string[];
 };
 
 export type UseClassResourcePayload = {
@@ -119,6 +122,10 @@ export type CastSpellPayload = {
       | "majorDetrimental";
     index: number;
   };
+  /** Flex Caster: espaços extras do mesmo círculo. */
+  flexElevateExtraSlots?: number;
+  /** Flex Caster: conjurar no base e recuperar 1º. */
+  flexReduce?: boolean;
 };
 
 export type CastSpellResult = {
@@ -141,6 +148,7 @@ export type RestResult = {
   hitDiceSpent?: number;
   hitDiceRolls?: number[];
   hitPointsHealed?: number;
+  notes?: string[];
 };
 
 /** Espelha InventoryItemResponseDto */

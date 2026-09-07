@@ -9,6 +9,7 @@ import type {
   AdvantageMode,
   EncounterCombatant,
 } from "@/features/campaign/campaigns/api/encounters.api";
+import { isEncounterActor } from "@/features/campaign/campaigns/lib/encounter-combatant-kind";
 
 type Props = {
   combatant: EncounterCombatant;
@@ -80,7 +81,7 @@ export function EncounterCombatantRow({
         "relative flex flex-col gap-3 border-b border-border/70 px-3 py-3 last:border-b-0 sm:flex-row sm:items-center sm:gap-4 sm:px-4",
         combatant.isCurrentTurn && "bg-secondary/12",
         !combatant.isActive && "opacity-50",
-        combatant.kind === "creature" && !combatant.isCurrentTurn && "bg-muted/15",
+        isEncounterActor(combatant) && !combatant.isCurrentTurn && "bg-muted/15",
       )}
     >
       {combatant.isCurrentTurn ? (
@@ -171,7 +172,7 @@ export function EncounterCombatantRow({
               ? `${combatant.hpCurrent}/${combatant.hpMax}`
               : combatant.hpPercent != null
                 ? `${combatant.hpPercent}%`
-                : combatant.kind === "creature"
+                : isEncounterActor(combatant)
                   ? "oculto"
                   : "—"}
           </span>
@@ -212,7 +213,7 @@ export function EncounterCombatantRow({
           </Button>
         ) : null}
         {canManage &&
-        combatant.kind === "creature" &&
+        isEncounterActor(combatant) &&
         combatant.hpCurrent != null &&
         onHpSet ? (
           <>

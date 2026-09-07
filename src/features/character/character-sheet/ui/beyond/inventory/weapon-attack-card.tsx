@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CubeIcon } from "@heroicons/react/24/outline";
 
-import type { WeaponAttackSummary } from "@/entities/character/types";
+import type {
+  CharacterDetail,
+  WeaponAttackSummary,
+} from "@/entities/character/types";
 import { formatSkillBonus } from "@/entities/character";
 import type { AdvantageMode } from "@/features/character/character-sheet/api/character-rolls.api";
 import { availableCunningStrikes as resolveCunningStrikes } from "@/features/character/character-sheet/lib/combat/available-cunning-strikes";
@@ -17,6 +20,11 @@ import {
 import { PaladinSmiteControls } from "@/features/character/character-sheet/ui/beyond/inventory/weapon-attack/paladin-smite-controls";
 import { RangerAttackOptions } from "@/features/character/character-sheet/ui/beyond/inventory/weapon-attack/ranger-attack-options";
 import { RogueAttackOptions } from "@/features/character/character-sheet/ui/beyond/inventory/weapon-attack/rogue-attack-options";
+import {
+  AttackSituationalOptions,
+  type AttackCoverLevel,
+} from "@/features/character/character-sheet/ui/beyond/inventory/weapon-attack/attack-situational-options";
+import { CombatToggleChip } from "@/features/character/character-sheet/ui/beyond/combat/shared/combat-toggle-chip";
 import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
 
@@ -50,6 +58,10 @@ type WeaponAttackCardProps = {
   cleric?: {
     level: number;
   };
+  /** Fúria ativa — habilita Fúria Divina no dano. */
+  rageActive?: boolean;
+  featEffectFlags?: CharacterDetail["featEffectFlags"];
+  inspiration?: boolean;
 };
 
 const ADVANTAGE_OPTIONS: { id: AdvantageMode; label: string }[] = [
@@ -76,6 +88,9 @@ export function WeaponAttackCard({
   ranger,
   onDreadAmbusherResolved,
   cleric,
+  rageActive = false,
+  featEffectFlags,
+  inspiration = false,
 }: WeaponAttackCardProps) {
   const rolls = useSheetRolls();
   const mechanicalCatalog = useCombatMechanicalCatalog({
@@ -99,6 +114,9 @@ export function WeaponAttackCard({
   const [assassinPoisonFailedSave, setAssassinPoisonFailedSave] =
     useState(false);
   const [strokeOfLuck, setStrokeOfLuck] = useState(false);
+  const [damageDieFlip, setDamageDieFlip] = useState(false);
+  const [damageDieExplode, setDamageDieExplode] = useState(false);
+  const [spendInspiration, setSpendInspiration] = useState(false);
   const [cunningStrikeEffects, setCunningStrikeEffects] = useState<string[]>(
     [],
   );
@@ -115,6 +133,16 @@ export function WeaponAttackCard({
   const [colossusSlayer, setColossusSlayer] = useState(false);
   const [dreadfulStrikes, setDreadfulStrikes] = useState(false);
   const [divineStrike, setDivineStrike] = useState(false);
+  const [brutalStrike, setBrutalStrike] = useState(false);
+  const [divineFury, setDivineFury] = useState(false);
+
+  useEffect(() => {
+    if (!rageActive) setDivineFury(false);
+  }, [rageActive]);
+  const [targetCover, setTargetCover] = useState<AttackCoverLevel>("none");
+  const [longRange, setLongRange] = useState(false);
+  const [meleeWithRanged, setMeleeWithRanged] = useState(false);
+  const [targetAc, setTargetAc] = useState("");
   const canPreciseHunter = Boolean(ranger && ranger.level >= 17);
   const canColossusSlayer = Boolean(
     ranger?.subclassSlug === "hunter" && ranger.level >= 3,
@@ -359,7 +387,64 @@ export function WeaponAttackCard({
               Golpe Divino
             </button>
           ) : null}
+          {attack.brutalStrikeDice ? (
+            <CombatToggleChip
+              label={`Golpe Brutal (+${attack.brutalStrikeDice})`}
+              active={brutalStrike}
+              title="Golpe Brutal: dano extra; abre mão da vantagem do Imprudente neste ataque"
+              onToggle={() => setBrutalStrike((value) => !value)}
+            />
+          ) : null}
+          {attack.divineFuryDice ? (
+            <CombatToggleChip
+              label={`Fúria Divina (+${attack.divineFuryDice})`}
+              active={divineFury}
+              disabled={!rageActive}
+              title={
+                rageActive
+                  ? "1º acerto/turno com Fúria: Necrótico ou Radiante à escolha"
+                  : "Ative a Fúria para usar Fúria Divina"
+              }
+              onToggle={() => setDivineFury((value) => !value)}
+            />
+          ) : null}
+          {featEffectFlags?.damageDieFlip ? (
+            <CombatToggleChip
+              label="Virar dado"
+              active={damageDieFlip}
+              title="Marksman's Luck: virar o menor dado (lados > 4)"
+              onToggle={() => setDamageDieFlip((value) => !value)}
+            />
+          ) : null}
+          {featEffectFlags?.damageDieExplode ? (
+            <CombatToggleChip
+              label="Explodir"
+              active={damageDieExplode}
+              title="Pyromaniac: face máxima gera um dado extra"
+              onToggle={() => setDamageDieExplode((value) => !value)}
+            />
+          ) : null}
+          {featEffectFlags?.inspirationRefundOnFail && inspiration ? (
+            <CombatToggleChip
+              label="Gastar IH"
+              active={spendInspiration}
+              title="Gasta inspiração neste ataque; reembolsa se errar (com CA do alvo)"
+              onToggle={() => setSpendInspiration((value) => !value)}
+            />
+          ) : null}
         </div>
+
+        <AttackSituationalOptions
+          mode={attack.mode}
+          targetCover={targetCover}
+          onTargetCoverChange={setTargetCover}
+          longRange={longRange}
+          onLongRangeChange={setLongRange}
+          meleeWithRanged={meleeWithRanged}
+          onMeleeWithRangedChange={setMeleeWithRanged}
+          targetAc={targetAc}
+          onTargetAcChange={setTargetAc}
+        />
 
         {ranger ? (
           <RangerAttackOptions
@@ -415,8 +500,17 @@ export function WeaponAttackCard({
                 strokeOfLuck: strokeOfLuck || undefined,
                 assassinate: assassinate || undefined,
                 preciseHunter: preciseHunter || undefined,
+                targetCover: targetCover === "none" ? undefined : targetCover,
+                longRange: longRange || undefined,
+                meleeWithRanged: meleeWithRanged || undefined,
+                targetAc: targetAc.trim()
+                  ? Number.parseInt(targetAc, 10)
+                  : undefined,
+                brutalStrike: brutalStrike || undefined,
+                spentInspiration: spendInspiration || undefined,
               });
               setStrokeOfLuck(false);
+              setSpendInspiration(false);
             }}
           >
             Atacar
@@ -443,6 +537,11 @@ export function WeaponAttackCard({
                   colossusSlayer,
                   dreadfulStrikes,
                   divineStrike,
+                  brutalStrike,
+                  divineFury,
+                  damageDieFloor: featEffectFlags?.damageDieFloor,
+                  damageDieFlip,
+                  damageDieExplode,
                 }),
               )
             }
@@ -470,6 +569,11 @@ export function WeaponAttackCard({
                   colossusSlayer,
                   dreadfulStrikes,
                   divineStrike,
+                  brutalStrike,
+                  divineFury,
+                  damageDieFloor: featEffectFlags?.damageDieFloor,
+                  damageDieFlip,
+                  damageDieExplode,
                 }),
               )
             }
@@ -518,42 +622,6 @@ export function WeaponAttackCard({
               }
             >
               Golpe Terrível
-            </Button>
-          ) : null}
-          {attack.brutalStrikeDice ? (
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              disabled={busy}
-              title={`Golpe Brutal: +${attack.brutalStrikeDice} de dano (abre mão da vantagem do Imprudente)`}
-              onClick={() =>
-                rolls.damage.mutate({
-                  itemSlug: attack.itemSlug,
-                  mode: attack.mode,
-                  brutalStrike: true,
-                })
-              }
-            >
-              Golpe Brutal (+{attack.brutalStrikeDice})
-            </Button>
-          ) : null}
-          {attack.divineFuryDice ? (
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              disabled={busy}
-              title={`Fúria Divina: +${attack.divineFuryDice} Necrótico ou Radiante (1º acerto/turno com Fúria ativa)`}
-              onClick={() =>
-                rolls.damage.mutate({
-                  itemSlug: attack.itemSlug,
-                  mode: attack.mode,
-                  divineFury: true,
-                })
-              }
-            >
-              Fúria Divina (+{attack.divineFuryDice})
             </Button>
           ) : null}
           {canPsiStrike ? (

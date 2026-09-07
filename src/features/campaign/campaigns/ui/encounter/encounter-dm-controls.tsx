@@ -1,21 +1,18 @@
 "use client";
 
-import { FormEvent, useState } from "react";
-
 import type {
   AdvantageMode,
   CampaignEncounter,
 } from "@/features/campaign/campaigns/api/encounters.api";
 import {
-  useAddEncounterCreature,
   useCloseEncounter,
   useNextEncounterTurn,
   usePatchEncounter,
   useRollAllInitiative,
 } from "@/features/campaign/campaigns/api/use-encounters";
+import { EncounterAddCreaturePanel } from "@/features/campaign/campaigns/ui/encounter/encounter-add-creature-panel";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
-import { Input } from "@/shared/ui/input";
 import { SearchableSelect } from "@/shared/ui/searchable-select";
 
 type Props = {
@@ -35,40 +32,12 @@ export function EncounterDmControls({
   const rollAll = useRollAllInitiative(campaignId);
   const nextTurn = useNextEncounterTurn(campaignId);
   const close = useCloseEncounter(campaignId);
-  const addCreature = useAddEncounterCreature(campaignId);
-
-  const [creatureName, setCreatureName] = useState("");
-  const [hpMax, setHpMax] = useState("10");
-  const [armorClass, setArmorClass] = useState("13");
-  const [initMod, setInitMod] = useState("0");
-
-  function onAddCreature(event: FormEvent) {
-    event.preventDefault();
-    const max = Number(hpMax);
-    const ac = Number(armorClass);
-    const mod = Number(initMod);
-    if (!creatureName.trim() || !Number.isFinite(max) || max < 1) return;
-    if (!Number.isFinite(ac) || ac < 1) return;
-    addCreature.mutate(
-      {
-        encounterId: encounter.id,
-        payload: {
-          name: creatureName.trim(),
-          hpMax: max,
-          armorClass: ac,
-          initiativeModifier: Number.isFinite(mod) ? mod : 0,
-        },
-      },
-      { onSuccess: () => setCreatureName("") },
-    );
-  }
 
   const busy =
     patch.isPending ||
     rollAll.isPending ||
     nextTurn.isPending ||
-    close.isPending ||
-    addCreature.isPending;
+    close.isPending;
 
   return (
     <div
@@ -183,56 +152,11 @@ export function EncounterDmControls({
         </div>
       </div>
 
-      <form
-        onSubmit={onAddCreature}
-        className="space-y-2 border-t border-border/60 pt-3"
-      >
-        <p className="font-heading text-[0.7rem] font-semibold tracking-[0.08em] text-secondary uppercase">
-          Adicionar criatura
-        </p>
-        <div className="grid gap-2 sm:grid-cols-[1fr_5rem_5rem_5rem_auto]">
-          <Input
-            placeholder="Nome"
-            value={creatureName}
-            onChange={(e) => setCreatureName(e.target.value)}
-            maxLength={120}
-            required
-            aria-label="Nome da criatura"
-          />
-          <Input
-            type="number"
-            min={1}
-            placeholder="PV máx"
-            value={hpMax}
-            onChange={(e) => setHpMax(e.target.value)}
-            required
-            aria-label="PV máximo"
-          />
-          <Input
-            type="number"
-            min={1}
-            placeholder="CA"
-            value={armorClass}
-            onChange={(e) => setArmorClass(e.target.value)}
-            required
-            aria-label="Classe de armadura"
-          />
-          <Input
-            type="number"
-            placeholder="Init"
-            value={initMod}
-            onChange={(e) => setInitMod(e.target.value)}
-            aria-label="Modificador de iniciativa"
-          />
-          <Button
-            type="submit"
-            size="sm"
-            disabled={busy || !creatureName.trim()}
-          >
-            Adicionar
-          </Button>
-        </div>
-      </form>
+      <EncounterAddCreaturePanel
+        campaignId={campaignId}
+        encounterId={encounter.id}
+        busy={busy}
+      />
     </div>
   );
 }

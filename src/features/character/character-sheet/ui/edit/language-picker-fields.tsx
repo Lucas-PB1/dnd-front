@@ -2,8 +2,10 @@
 
 import { useMemo, useState } from "react";
 
+import { classLanguageGrant } from "@/entities/character/lib/class-language-grant";
 import {
   languageQuota,
+  languageQuotaSummary,
   syncLanguagesForBackground,
   toggleLanguageSelection,
 } from "@/features/character/create-character/lib/languages/language-selection";
@@ -16,12 +18,18 @@ import { cn } from "@/shared/lib/utils";
 
 type UseSheetLanguageSelectionArgs = {
   backgroundSlug: string;
+  speciesSlug?: string | null;
+  classSlug?: string | null;
+  level?: number;
   initialSlugs: string[];
 };
 
-/** Cota do antecedente + seleção local (mesma regra do wizard). */
+/** Cota antecedente + espécie + classe (mesma regra do wizard). */
 export function useSheetLanguageSelection({
   backgroundSlug,
+  speciesSlug,
+  classSlug,
+  level = 1,
   initialSlugs,
 }: UseSheetLanguageSelectionArgs) {
   const languages = useLanguages();
@@ -31,16 +39,36 @@ export function useSheetLanguageSelection({
     !!backgroundSlug,
   );
 
+  const classGrant = useMemo(
+    () => classLanguageGrant(classSlug, level),
+    [classSlug, level],
+  );
+
   const grant = useMemo(
     () => ({
       grantedSlugs: (fixedLanguages.data?.data ?? []).map((row) => row.slug),
-      languageChoiceCount: background.data?.languageChoiceCount ?? 2,
+      languageChoiceCount: background.data?.languageChoiceCount ?? 0,
+      extraGrantedSlugs: classGrant.grantedSlugs,
+      extraChoiceCount: classGrant.choiceCount,
+      speciesSlug: speciesSlug ?? null,
     }),
-    [fixedLanguages.data?.data, background.data?.languageChoiceCount],
+    [
+      fixedLanguages.data?.data,
+      background.data?.languageChoiceCount,
+      classGrant.grantedSlugs,
+      classGrant.choiceCount,
+      speciesSlug,
+    ],
   );
 
   const quota = useMemo(() => languageQuota(grant), [grant]);
-  const grantKey = `${grant.grantedSlugs.join(",")}:${grant.languageChoiceCount}`;
+  const grantKey = [
+    grant.grantedSlugs.join(","),
+    grant.languageChoiceCount,
+    grant.extraGrantedSlugs?.join(",") ?? "",
+    grant.extraChoiceCount ?? 0,
+    grant.speciesSlug ?? "",
+  ].join(":");
   const grantReady =
     !!backgroundSlug &&
     !background.isPending &&
@@ -110,6 +138,8 @@ type LanguagePickerFieldsProps = {
    * a grade só aparece se ainda houver vaga de extra.
    */
   variant?: "wizard" | "settings";
+  /** Slugs fixos da classe (ex. gíria) — hint “Classe”. */
+  classGrantedSlugs?: readonly string[];
 };
 
 export function LanguagePickerFields({
@@ -122,7 +152,12 @@ export function LanguagePickerFields({
   onToggle,
   languageRows,
   variant = "wizard",
+  classGrantedSlugs = [],
 }: LanguagePickerFieldsProps) {
+  const classGranted = useMemo(
+    () => new Set(classGrantedSlugs),
+    [classGrantedSlugs],
+  );
   const nameBySlug = useMemo(() => {
     const map = new Map<string, string>();
     for (const row of languageRows) map.set(row.slug, row.name);
@@ -155,9 +190,7 @@ export function LanguagePickerFields({
       ) : (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border px-3 py-2">
           <p className="text-[11px] text-muted-foreground">
-            {quota.choiceCount === 0
-              ? "Antecedente define os idiomas — sem escolha extra."
-              : `Antecedente: ${quota.granted.length} fixo(s) + ${quota.choiceCount} à escolha.`}
+            {languageQuotaSummary(quota)}
           </p>
           <p className="tabular-nums text-sm font-semibold">
             {selected.length}
@@ -218,6 +251,11 @@ export function LanguagePickerFields({
             const checked = selected.includes(lang.slug);
             const atLimit =
               !checked && !granted && chosenCount >= quota.choiceCount;
+            const grantHint = classGranted.has(lang.slug)
+              ? "Classe"
+              : granted
+                ? "Antecedente"
+                : null;
             return (
               <li key={lang.slug}>
                 <label
@@ -237,9 +275,9 @@ export function LanguagePickerFields({
                   />
                   <span className="min-w-0">
                     <span className="font-medium">{lang.name}</span>
-                    {granted ? (
+                    {grantHint ? (
                       <span className="mt-0.5 block text-[10px] tracking-wide text-muted-foreground uppercase">
-                        Antecedente
+                        {grantHint}
                       </span>
                     ) : null}
                   </span>

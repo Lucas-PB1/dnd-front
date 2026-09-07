@@ -1,0 +1,239 @@
+{
+  "gh-transformation-aberrant-horror": {
+    "stages": {
+      "1": { "mode": "auto_all", "autoBoons": ["aberrant-form", "aberrant-mutation"], "pickKeys": [] },
+      "2": { "mode": "pick1", "autoBoons": [], "pickKeys": ["stage2Boon"] },
+      "3": { "mode": "pick1", "autoBoons": [], "pickKeys": ["stage3Boon"] },
+      "4": { "mode": "pick1", "autoBoons": [], "pickKeys": ["stage4Boon"] }
+    },
+    "subOptions": [],
+    "requireMatch": []
+  },
+  "gh-transformation-fey": {
+    "stages": {
+      "1": {
+        "mode": "fixed_plus_pick1",
+        "autoBoons": ["fey-form"],
+        "pickKeys": ["stage1Boon"]
+      },
+      "2": { "mode": "pick1", "autoBoons": [], "pickKeys": ["stage2Boon"] },
+      "3": { "mode": "pick1", "autoBoons": [], "pickKeys": ["stage3Boon"] },
+      "4": { "mode": "pick1", "autoBoons": [], "pickKeys": ["stage4Boon"] }
+    },
+    "subOptions": [],
+    "requireMatch": []
+  },
+  "gh-transformation-fiend": {
+    "stages": {
+      "1": {
+        "mode": "fixed_plus_pick1",
+        "autoBoons": ["fiendish-soul"],
+        "pickKeys": ["stage1Boon"]
+      },
+      "2": { "mode": "pick1", "autoBoons": [], "pickKeys": ["stage2Boon"] },
+      "3": { "mode": "pick1", "autoBoons": [], "pickKeys": ["stage3Boon"] },
+      "4": { "mode": "pick1", "autoBoons": [], "pickKeys": ["stage4Boon"] }
+    },
+    "subOptions": [
+      {
+        "key": "fiendDamageType",
+        "fromStage": 1,
+        "values": [
+          { "id": "acid", "label": "Ácido" },
+          { "id": "cold", "label": "Frio" },
+          { "id": "fire", "label": "Fogo" }
+        ]
+      }
+    ],
+    "requireMatch": []
+  },
+  "gh-transformation-hag": {
+    "stages": {
+      "1": {
+        "mode": "fixed_plus_pick1",
+        "autoBoons": ["hag-form"],
+        "pickKeys": ["stage1Boon"]
+      },
+      "2": { "mode": "pick1", "autoBoons": [], "pickKeys": ["stage2Boon"] },
+      "3": { "mode": "pick1", "autoBoons": [], "pickKeys": ["stage3Boon"] },
+      "4": { "mode": "pick1", "autoBoons": [], "pickKeys": ["stage4Boon"] }
+    },
+    "subOptions": [],
+    "requireMatch": [
+      {
+        "laterKey": "stage2Boon",
+        "earlierKey": "stage1Boon",
+        "pairs": {
+          "the-green-sisterhood": "adept-of-the-green-sisterhood",
+          "the-red-sisterhood": "adept-of-the-red-sisterhood",
+          "the-sea-sisterhood": "adept-of-the-sea-sisterhood"
+        }
+      },
+      {
+        "laterKey": "stage3Boon",
+        "earlierKey": "stage1Boon",
+        "pairs": {
+          "the-green-sisterhood": "master-of-the-green-sisterhood",
+          "the-red-sisterhood": "master-of-the-red-sisterhood",
+          "the-sea-sisterhood": "master-of-the-sea-sisterhood"
+        }
+      }
+    ]
+  },
+  "gh-transformation-lich": {
+    "stages": {
+      "1": {
+        "mode": "fixed_plus_pick1",
+        "autoBoons": ["undead-form"],
+        "pickKeys": ["stage1Boon"]
+      },
+      "2": { "mode": "pick1", "autoBoons": [], "pickKeys": ["stage2Boon"] },
+      "3": { "mode": "pick1", "autoBoons": [], "pickKeys": ["stage3Boon"] },
+      "4": { "mode": "pick1", "autoBoons": [], "pickKeys": ["stage4Boon"] }
+    },
+    "subOptions": [],
+    "requireMatch": []
+  },
+  "gh-transformation-lycanthrope": {
+    "stages": {
+      "1": { "mode": "pick1", "autoBoons": [], "pickKeys": ["stage1Boon"] },
+      "2": { "mode": "pick1", "autoBoons": [], "pickKeys": ["stage2Boon"] },
+      "3": { "mode": "pick1", "autoBoons": [], "pickKeys": ["stage3Boon"] },
+      "4": { "mode": "pick1", "autoBoons": [], "pickKeys": ["stage4Boon"] }
+    },
+    "subOptions": [],
+    "requireMatch": []
+  },
+  "gh-transformation-ooze": {
+    "stages": {
+      "1": {
+        "mode": "fixed_plus_pick1",
+        "autoBoons": ["ooze-form"],
+        "pickKeys": ["stage1Boon"]
+      },
+      "2": { "mode": "pick1", "autoBoons": [], "pickKeys": ["stage2Boon"] },
+      "3": { "mode": "pick1", "autoBoons": [], "pickKeys": ["stage3Boon"] },
+      "4": { "mode": "pick1", "autoBoons": [], "pickKeys": ["stage4Boon"] }
+    },
+    "subOptions": [],
+    "requireMatch": []
+  },
+  "gh-transformation-primordial": {
+    "stages": {
+      "1": {
+        "mode": "auto_all",
+        "autoBoons": ["primordial-form", "elemental-affinity"],
+        "pickKeys": []
+      },
+      "2": { "mode": "pick1", "autoBoons": [], "pickKeys": ["stage2Boon"] },
+      "3": { "mode": "pick1", "autoBoons": [], "pickKeys": ["stage3Boon"] },
+      "4": { "mode": "pick1", "autoBoons": [], "pickKeys": ["stage4Boon"] }
+    },
+    "subOptions": [
+      {
+        "key": "elementalAffinity",
+        "fromStage": 1,
+        "values": [
+          { "id": "air", "label": "Ar" },
+          { "id": "earth", "label": "Terra" },
+          { "id": "fire", "label": "Fogo" },
+          { "id": "water", "label": "Água" }
+        ]
+      },
+      {
+        "key": "primordialDamageType",
+        "fromStage": 3,
+        "whenChoice": { "key": "stage3Boon", "value": "primeval-body" },
+        "values": [
+          { "id": "bludgeoning", "label": "Contundente" },
+          { "id": "cold", "label": "Frio" },
+          { "id": "fire", "label": "Fogo" },
+          { "id": "lightning", "label": "Elétrico" }
+        ]
+      }
+    ],
+    "requireMatch": []
+  },
+  "gh-transformation-seraph": {
+    "stages": {
+      "1": {
+        "mode": "fixed_plus_pick1",
+        "autoBoons": ["celestial-form"],
+        "pickKeys": ["stage1Boon"]
+      },
+      "2": { "mode": "pick1", "autoBoons": [], "pickKeys": ["stage2Boon"] },
+      "3": { "mode": "pick1", "autoBoons": [], "pickKeys": ["stage3Boon"] },
+      "4": { "mode": "pick1", "autoBoons": [], "pickKeys": ["stage4Boon"] }
+    },
+    "subOptions": [],
+    "requireMatch": []
+  },
+  "gh-transformation-shadowsteel-ghoul": {
+    "stages": {
+      "1": { "mode": "pick1", "autoBoons": [], "pickKeys": ["stage1Boon"] },
+      "2": {
+        "mode": "pick2",
+        "autoBoons": [],
+        "pickKeys": ["stage2Boon", "stage2Boon2"]
+      },
+      "3": {
+        "mode": "auto_single",
+        "autoBoons": ["cursed-claw"],
+        "pickKeys": []
+      },
+      "4": { "mode": "pick1", "autoBoons": [], "pickKeys": ["stage4Boon"] }
+    },
+    "subOptions": [],
+    "requireMatch": []
+  },
+  "gh-transformation-specter": {
+    "stages": {
+      "1": {
+        "mode": "fixed_plus_pick1",
+        "autoBoons": ["spectral-form"],
+        "pickKeys": ["stage1Boon"]
+      },
+      "2": { "mode": "pick1", "autoBoons": [], "pickKeys": ["stage2Boon"] },
+      "3": { "mode": "pick1", "autoBoons": [], "pickKeys": ["stage3Boon"] },
+      "4": { "mode": "pick1", "autoBoons": [], "pickKeys": ["stage4Boon"] }
+    },
+    "subOptions": [],
+    "requireMatch": []
+  },
+  "gh-transformation-vampire": {
+    "stages": {
+      "1": {
+        "mode": "fixed_plus_pick1",
+        "autoBoons": ["fanged-bite"],
+        "pickKeys": ["stage1Boon"]
+      },
+      "2": {
+        "mode": "pick2",
+        "autoBoons": [],
+        "pickKeys": ["stage2Boon", "stage2Boon2"]
+      },
+      "3": {
+        "mode": "pick2",
+        "autoBoons": [],
+        "pickKeys": ["stage3Boon", "stage3Boon2"]
+      },
+      "4": {
+        "mode": "fixed_plus_pick1",
+        "autoBoons": ["regeneration"],
+        "pickKeys": ["stage4Boon"]
+      }
+    },
+    "subOptions": [],
+    "requireMatch": [
+      {
+        "laterKey": "stage4Boon",
+        "earlierKey": "stage1Boon",
+        "pairs": {
+          "soman-bloodline": "final-soman-bloodline",
+          "fzeg-bloodline": "final-fzeg-bloodline",
+          "strigoi-bloodline": "final-strigoi-bloodline"
+        }
+      }
+    ]
+  }
+}

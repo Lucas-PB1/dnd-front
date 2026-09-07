@@ -21,6 +21,7 @@ import {
 } from "@/features/campaign/campaigns/api/use-encounters";
 import { EncounterCombatantRow } from "@/features/campaign/campaigns/ui/encounter/encounter-combatant-row";
 import { EncounterDmControls } from "@/features/campaign/campaigns/ui/encounter/encounter-dm-controls";
+import { isEncounterActor } from "@/features/campaign/campaigns/lib/encounter-combatant-kind";
 import { ApiError } from "@/shared/api/dnd-api/api-error";
 import { motion } from "@/shared/lib/motion";
 import { cn } from "@/shared/lib/utils";
@@ -270,7 +271,7 @@ export function EncounterView({ campaignId }: { campaignId: string }) {
                       })
                     }
                     onHpSet={
-                      canManage && combatant.kind === "creature"
+                      canManage && isEncounterActor(combatant)
                         ? (hpCurrent) =>
                             patchCombatant.mutate({
                               encounterId: encounter.id,

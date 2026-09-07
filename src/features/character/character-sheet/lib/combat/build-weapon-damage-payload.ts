@@ -25,6 +25,9 @@ export type WeaponDamageOptions = {
   monsterSlayer?: boolean;
   grazeMiss?: boolean;
   divineStrike?: boolean;
+  damageDieFloor?: boolean;
+  damageDieFlip?: boolean;
+  damageDieExplode?: boolean;
 };
 
 /** Builds the shared damage/crit payload for weapon attack rolls. */
@@ -67,5 +70,8 @@ export function buildWeaponDamagePayload(
     ...(options.monsterSlayer ? { monsterSlayer: true } : {}),
     ...(options.grazeMiss ? { grazeMiss: true } : {}),
     ...(options.divineStrike ? { divineStrike: true } : {}),
+    ...(options.damageDieFloor ? { damageDieFloor: true } : {}),
+    ...(options.damageDieFlip ? { damageDieFlip: true } : {}),
+    ...(options.damageDieExplode ? { damageDieExplode: true } : {}),
   };
 }

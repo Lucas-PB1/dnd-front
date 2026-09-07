@@ -31,6 +31,8 @@ export type CharacterSpell = {
   spellSlug: string;
   listType: "known" | "prepared" | "always_prepared";
   source?: "class" | "subclass" | "feat" | "species";
+  /** Economia de cast (API — magias concedidas / enriquecidas). */
+  castEconomy?: "at_will" | "once_per_long_rest" | "slot_only";
 };
 
 export type CharacterEquipment = {
@@ -41,10 +43,18 @@ export type CharacterEquipment = {
   sortOrder?: number;
 };
 
+/** Transformação GH Cap. 6 — espelha CharacterTransformationDto. */
+export type CharacterTransformation = {
+  slug: string;
+  stage: number;
+  choices: SpeciesChoice[];
+};
+
 export type CharacterSheetInput = {
   classSkillSlugs?: string[];
   speciesChoices?: SpeciesChoice[];
   heritageChoices?: SpeciesChoice[];
+  transformation?: CharacterTransformation | null;
   subclassOptions?: SubclassOption[];
   classOptions?: ClassOption[];
   characterFeats?: CharacterFeat[];

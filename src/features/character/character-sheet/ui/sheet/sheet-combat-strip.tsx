@@ -12,13 +12,16 @@ import type { CharacterDetail } from "@/entities/character/types";
 import {
   abilityModifierValue,
   formatSkillBonus,
-  initiativeBonus,
+  hasAutomaticInitiativeAdvantage,
+  hasGiantkinStoneAncestry,
+  resolveInitiativeBonus,
   sheetAbilityScores,
 } from "@/entities/character";
 import {
   useCharacterState,
   usePatchCharacterState,
 } from "@/features/character/character-sheet/api/use-character-state";
+import { BarbarianCombatToggles } from "@/features/character/character-sheet/ui/beyond/combat/panels/barbarian-combat-toggles";
 import { CombatStatusEditor } from "@/features/character/character-sheet/ui/beyond/combat/status/status-editor";
 import { useSheetRolls } from "@/features/character/character-sheet/ui/beyond/layout/sheet-rolls";
 import { SheetChip } from "@/features/character/character-sheet/ui/sheet/sheet-ui";
@@ -135,13 +138,49 @@ export function SheetCombatStrip({
   const [editing, setEditing] = useState(false);
   const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
   const [tempHpDraft, setTempHpDraft] = useState("");
+  const [stonePulse, setStonePulse] = useState(false);
+  const [featAcSticky, setFeatAcSticky] = useState(false);
 
   const state = stateQuery.data;
-  const initiative = initiativeBonus(
-    abilityModifierValue(sheetAbilityScores(character).destreza),
-    character.proficiencyBonus,
-    character.characterFeats,
-  );
+  const scores = sheetAbilityScores(character);
+  const featAcBonus = character.featAcBonus ?? 0;
+  const displayedArmorClass =
+    character.armorClass + (featAcSticky && featAcBonus > 0 ? featAcBonus : 0);
+  const armorClassHint =
+    featAcBonus > 0
+      ? [
+          character.armorClassNote,
+          featAcSticky
+            ? `Inclui +${featAcBonus} de talento`
+            : `Talentos: até +${featAcBonus} CA (ative o toggle)`,
+        ]
+          .filter(Boolean)
+          .join(" · ")
+      : character.armorClassNote;
+  const initiativeBreakdown = resolveInitiativeBonus({
+    dexterityModifier: abilityModifierValue(scores.destreza),
+    wisdomModifier: abilityModifierValue(scores.sabedoria),
+    intelligenceModifier: abilityModifierValue(scores.inteligencia),
+    proficiencyBonus: character.proficiencyBonus,
+    classSlug: character.classSlug,
+    subclassSlug: character.subclassSlug ?? null,
+    level: character.level,
+    characterFeats: character.characterFeats,
+    heritageChoices: character.heritageChoices,
+    speciesChoices: character.speciesChoices,
+  });
+  const initiativeAdvantage = hasAutomaticInitiativeAdvantage({
+    classSlug: character.classSlug,
+    subclassSlug: character.subclassSlug ?? null,
+    level: character.level,
+  });
+  const canStonePulse = hasGiantkinStoneAncestry(character.speciesChoices);
+  const initiativeHint = [
+    initiativeBreakdown.notes.join(" · ") || undefined,
+    initiativeAdvantage ? "Vantagem automática na rolagem" : undefined,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   const conditionNameBySlug = useMemo(() => {
     const names = new Map<string, string>();
@@ -193,15 +232,60 @@ export function SheetCombatStrip({
       <div className="grid grid-cols-2 items-stretch gap-1.5 sm:grid-cols-4">
         <HeaderMetric
           label="Inic."
-          value={formatSkillBonus(initiative)}
+          value={formatSkillBonus(initiativeBreakdown.total)}
+          hint={initiativeHint || undefined}
           icon={BoltIcon}
-          onClick={() => rolls.initiative.mutate({})}
+          onClick={() =>
+            rolls.initiative.mutate({
+              stonePulse: stonePulse || undefined,
+            })
+          }
           disabled={rolls.initiative.isPending}
         />
+        {canStonePulse ? (
+          <button
+            type="button"
+            className={cn(
+              metricShellClass,
+              "col-span-2 cursor-pointer border-border/65 bg-background/40 text-left sm:col-span-4",
+              stonePulse && "border-primary/50 bg-primary/10",
+            )}
+            aria-pressed={stonePulse}
+            onClick={() => setStonePulse((value) => !value)}
+          >
+            <span className="text-[0.55rem] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+              Pulso de Pedra
+            </span>
+            <span className="mt-0.5 text-[0.7rem] text-muted-foreground">
+              Vantagem na Iniciativa (solo sólido)
+            </span>
+          </button>
+        ) : null}
+        {featAcBonus > 0 ? (
+          <button
+            type="button"
+            className={cn(
+              metricShellClass,
+              "col-span-2 cursor-pointer border-border/65 bg-background/40 text-left sm:col-span-4",
+              featAcSticky && "border-primary/50 bg-primary/10",
+            )}
+            aria-pressed={featAcSticky}
+            onClick={() => setFeatAcSticky((value) => !value)}
+          >
+            <span className="text-[0.55rem] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+              Bônus de talento (CA)
+            </span>
+            <span className="mt-0.5 text-[0.7rem] text-muted-foreground">
+              {featAcSticky
+                ? `+${featAcBonus} CA aplicado`
+                : `Até +${featAcBonus} CA (ligar quando o bônus estiver ativo)`}
+            </span>
+          </button>
+        ) : null}
         <HeaderMetric
           label="CA"
-          value={character.armorClass}
-          hint={character.armorClassNote}
+          value={displayedArmorClass}
+          hint={armorClassHint}
           icon={ShieldCheckIcon}
           emphasize
         />
@@ -249,6 +333,16 @@ export function SheetCombatStrip({
           </div>
         </div>
       </div>
+
+      {character.classSlug === "barbarian" ? (
+        <div className="mt-2 flex flex-wrap gap-2">
+          <BarbarianCombatToggles
+            characterId={characterId}
+            level={character.level}
+            state={state}
+          />
+        </div>
+      ) : null}
 
       <Dialog open={editing} onOpenChange={setEditing}>
         <DialogContent className="sm:max-w-md">

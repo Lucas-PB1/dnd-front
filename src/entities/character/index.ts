@@ -23,12 +23,20 @@ export {
 export {
   collectSaveProficiencyAbilities,
   computePassiveSkill,
+  focusedInitiativeTakeCount,
+  hasAutomaticInitiativeAdvantage,
+  hasGiantkinStoneAncestry,
   initiativeBonus,
+  resolveInitiativeBonus,
   savingThrowDisplayBonus,
   skillCheckBonus,
   skillProficiencyRank,
 } from "@/entities/character/lib/check-bonuses";
-export type { SkillProficiencyRank } from "@/entities/character/lib/check-bonuses";
+export type {
+  InitiativeBonusBreakdown,
+  InitiativeRollContext,
+  SkillProficiencyRank,
+} from "@/entities/character/lib/check-bonuses";
 export {
   isSubclassRequired,
   SUBCLASS_UNLOCK_LEVEL_DEFAULT,

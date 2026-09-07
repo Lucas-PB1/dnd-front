@@ -8,6 +8,7 @@ import {
   EditEquipmentForm,
   EditFeatsForm,
   EditLanguagesForm,
+  EditTransformationForm,
   EditSpeciesChoicesForm,
   EditSpellsForm,
   EditSubclassOptionsForm,
@@ -74,6 +75,13 @@ export function buildSheetEditDialogs(
       description: "Adicione, remova e configure as opções dos talentos.",
       width: "lg",
       content: <EditFeatsForm {...editForms} />,
+    },
+    transformation: {
+      title: "Transformação",
+      description:
+        "Escolha a transformação Grim Hollow Cap. 6, o estágio e as bênçãos.",
+      width: "md",
+      content: <EditTransformationForm {...editForms} />,
     },
     languages: {
       title: "Idiomas",

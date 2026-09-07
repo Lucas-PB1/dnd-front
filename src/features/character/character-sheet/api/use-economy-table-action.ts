@@ -18,6 +18,8 @@ import {
   executeWarlockTableAction,
   executeWizardTableAction,
   executeMonsterHunterTableAction,
+  executeTransformationTableAction,
+  executeFeatTableAction,
   sessionKeys,
   spendClassResource,
   type BarbarianTableActionSlug,
@@ -41,6 +43,7 @@ import {
   isArmTableAction,
   isPsiTableAction,
   SPEND_RESOURCE_TABLE_ACTION,
+  isTransformationTableAction,
   wizardSlugFromArmTableAction,
   type EconomyTableAction,
 } from "@/features/character/character-sheet/lib/combat/economy-table-actions";
@@ -96,6 +99,7 @@ export function useEconomyTableAction(characterId: string) {
     mutationFn: async ({
       tableAction,
       classSlug,
+      featSlug,
       usePsiDie = false,
       resourceSlug,
       spendAmount = 1,
@@ -103,10 +107,13 @@ export function useEconomyTableAction(characterId: string) {
       note,
       armed,
       itemSlug,
+      enabled,
     }: {
       tableAction: EconomyTableAction;
       /** `economyActions[].classSlug` — obrigatório para slugs de classe. */
       classSlug?: string | null;
+      /** `economyActions[].featSlug` — talentos / origem. */
+      featSlug?: string | null;
       usePsiDie?: boolean;
       resourceSlug?: string;
       spendAmount?: number;
@@ -115,8 +122,10 @@ export function useEconomyTableAction(characterId: string) {
       note?: string;
       /** Para arm:* — se true, desarma em vez de armar. */
       armed?: boolean;
-      /** Cast gratuito de item (cast-item-free). */
+      /** Cast gratuito de item (cast-item-free) ou artisan-craft. */
       itemSlug?: string | null;
+      /** Toggle de circunstância (snow/água/frio). */
+      enabled?: boolean;
     }): Promise<EconomyTableActionResultNote> => {
       const token = requireToken();
       try {
@@ -275,10 +284,37 @@ export function useEconomyTableAction(characterId: string) {
           return { note: result.note };
         }
 
+        if (isTransformationTableAction(tableAction)) {
+          const result = await executeTransformationTableAction(
+            token,
+            characterId,
+            tableAction,
+          );
+          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
+          return noteFromResult(result, note);
+        }
+
+        const routeFeat = featSlug?.trim() || null;
+        if (routeFeat && !(classSlug?.trim())) {
+          const result = await executeFeatTableAction(token, characterId, {
+            featSlug: routeFeat,
+            actionSlug: tableAction,
+            itemSlug: itemSlug?.trim() || undefined,
+            enabled,
+          });
+          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
+          if (tableAction === "artisan-craft") {
+            void queryClient.invalidateQueries({
+              queryKey: inventoryKeys.list(characterId),
+            });
+          }
+          return noteFromResult(result, note);
+        }
+
         const routeClass = classSlug?.trim() || null;
         if (!routeClass) {
           throw new Error(
-            `Ação de mesa sem classSlug no catálogo: ${tableAction}`,
+            `Ação de mesa sem classSlug/featSlug no catálogo: ${tableAction}`,
           );
         }
 

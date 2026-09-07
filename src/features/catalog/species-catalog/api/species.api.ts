@@ -5,6 +5,7 @@ import type {
   SpeciesTrait,
   SpeciesTraitChoice,
 } from "@/entities/species/types";
+import type { CatalogEffectSummary } from "@/entities/effect/types";
 import type { PaginatedResponse } from "@/shared/api/dnd-api/types";
 import {
   buildCatalogSearchParams,
@@ -22,6 +23,7 @@ export const speciesKeys = {
   traits: (slug: string) => [...speciesKeys.all, "traits", slug] as const,
   traitChoices: (slug: string, editionSlugs?: string) =>
     [...speciesKeys.all, "trait-choices", slug, editionSlugs ?? "all"] as const,
+  effects: (slug: string) => [...speciesKeys.all, "effects", slug] as const,
 };
 
 export async function fetchSpeciesPage(params?: {
@@ -101,6 +103,13 @@ export async function fetchSpeciesTraitChoices(
   });
   return catalogFetch<PaginatedResponse<SpeciesTraitChoice>>(
     `/species/${slug}/trait-choices?${search}`,
+    CATALOG_FETCH_INIT,
+  );
+}
+
+export async function fetchSpeciesEffects(slug: string) {
+  return catalogFetch<CatalogEffectSummary[]>(
+    `/species/${encodeURIComponent(slug)}/effects`,
     CATALOG_FETCH_INIT,
   );
 }

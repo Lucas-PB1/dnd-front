@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import {
   EyeIcon,
   LanguageIcon,
@@ -18,6 +19,8 @@ import {
 } from "@/entities/character";
 import { useClassDetail } from "@/features/catalog/class-catalog/api/use-classes";
 import { useAbilityLabels } from "@/features/catalog/reference-catalog/api/use-ability-labels";
+import { useCharacterState } from "@/features/character/character-sheet/api/use-character-state";
+import { sessionKeys } from "@/features/character/character-sheet/api/character-session.api";
 import { BeyondPanel } from "@/features/character/character-sheet/ui/beyond/layout/beyond-panel";
 import { CombatPassivesTrigger } from "@/features/character/character-sheet/ui/beyond/combat/status/passives-trigger";
 import { useSheetRolls } from "@/features/character/character-sheet/ui/beyond/layout/sheet-rolls";
@@ -57,10 +60,16 @@ export function BeyondLeftColumn({
   const { labelOf, shortOf, orderedKeys } = useAbilityLabels();
   const classDetail = useClassDetail(character.classSlug, true);
   const rolls = useSheetRolls();
+  const queryClient = useQueryClient();
+  const stateQuery = useCharacterState(characterId);
   const [useIndomitable, setUseIndomitable] = useState(false);
   const [useStrokeOfLuck, setUseStrokeOfLuck] = useState(false);
+  const [spendInspiration, setSpendInspiration] = useState(false);
   const hasIndomitable =
     character.classSlug === "fighter" && character.level >= 9;
+  const canSpendIh =
+    Boolean(character.featEffectFlags?.inspirationRefundOnFail) &&
+    Boolean(stateQuery.data?.inspiration);
   const proficient = new Set(
     collectSaveProficiencyAbilities(
       classDetail.data?.savingThrowSlugs ?? [],
@@ -113,6 +122,17 @@ export function BeyondLeftColumn({
             Golpe de Sorte: transformar falha em 20
           </label>
         ) : null}
+        {canSpendIh ? (
+          <label className="mb-1.5 block text-[0.68rem] text-muted-foreground">
+            <input
+              className="mr-1 align-middle"
+              type="checkbox"
+              checked={spendInspiration}
+              onChange={(event) => setSpendInspiration(event.target.checked)}
+            />
+            Gastar inspiração (IH)
+          </label>
+        ) : null}
         {classDetail.isPending ? (
           <p className="text-sm text-muted-foreground">Carregando…</p>
         ) : (
@@ -132,13 +152,27 @@ export function BeyondLeftColumn({
                     type="button"
                     disabled={rolls.savingThrow.isPending}
                     onClick={() => {
-                      rolls.savingThrow.mutate({
-                        abilitySlug: slug,
-                        indomitable: useIndomitable || undefined,
-                        strokeOfLuck: useStrokeOfLuck || undefined,
-                      });
+                      const spent = spendInspiration && canSpendIh;
+                      rolls.savingThrow.mutate(
+                        {
+                          abilitySlug: slug,
+                          indomitable: useIndomitable || undefined,
+                          strokeOfLuck: useStrokeOfLuck || undefined,
+                          spentInspiration: spent || undefined,
+                        },
+                        {
+                          onSuccess: () => {
+                            if (spent) {
+                              void queryClient.invalidateQueries({
+                                queryKey: sessionKeys.state(characterId),
+                              });
+                            }
+                          },
+                        },
+                      );
                       setUseIndomitable(false);
                       setUseStrokeOfLuck(false);
+                      setSpendInspiration(false);
                     }}
                     className={cn(
                       "flex w-full items-center gap-2 rounded-md px-2 py-1 text-left text-sm",

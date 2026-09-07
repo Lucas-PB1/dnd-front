@@ -10,6 +10,7 @@ import type {
 } from "@/entities/species/types";
 import {
   useSpeciesDetail,
+  useSpeciesEffects,
   useSpeciesTraitChoices,
   useSpeciesTraits,
 } from "@/features/catalog/species-catalog/api/use-species";
@@ -20,6 +21,7 @@ import {
 } from "@/shared/ui/catalog-detail-hero";
 import { CollapsibleCard } from "@/shared/ui/collapsible-card";
 import { PhbProse } from "@/shared/ui/phb-prose";
+import { CatalogEffectsPanel } from "@/features/catalog/shared/ui/catalog-effects-panel";
 
 type SpeciesDetailViewProps = {
   slug: string;
@@ -117,6 +119,7 @@ function SpeciesDetailBody({ slug }: SpeciesDetailViewProps) {
   const speciesQuery = useSpeciesDetail(slug);
   const traitsQuery = useSpeciesTraits(slug, !!slug);
   const choicesQuery = useSpeciesTraitChoices(slug, !!slug);
+  const effectsQuery = useSpeciesEffects(slug, !!slug);
   const backHref = useCatalogBackHref("/species");
 
   const choicesByTrait = useMemo(
@@ -192,7 +195,8 @@ function SpeciesDetailBody({ slug }: SpeciesDetailViewProps) {
           <p className="text-sm text-muted-foreground">
             Traços fixos e escolhas (linhagem, herança dracônica, variantes
             culturais, etc.) — abra cada card para ver o texto completo e as
-            opções.
+            opções. Passivas mecânicas (sentidos, resistências, magias
+            concedidas) aparecem na ficha após criar o personagem.
           </p>
         </div>
 
@@ -234,6 +238,29 @@ function SpeciesDetailBody({ slug }: SpeciesDetailViewProps) {
             })}
           </div>
         )}
+      </section>
+
+      <section aria-labelledby="species-effects" className="space-y-4">
+        <div className="space-y-1">
+          <p className="text-xs font-medium tracking-wider text-primary uppercase">
+            Efeitos
+          </p>
+          <h2
+            id="species-effects"
+            className="font-heading text-2xl font-semibold tracking-tight"
+          >
+            Efeitos tipados
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Passivas mecânicas do catálogo que alimentam a ficha (sentidos,
+            resistências, magias, etc.).
+          </p>
+        </div>
+        <CatalogEffectsPanel
+          effects={effectsQuery.data}
+          isPending={effectsQuery.isPending}
+          isError={effectsQuery.isError}
+        />
       </section>
     </div>
   );

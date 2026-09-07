@@ -47,6 +47,11 @@ import {
 } from "@/features/character/character-sheet/lib/combat/plan-economy-table-use";
 import { ClassCombatPanel } from "@/features/character/character-sheet/ui/beyond/combat/class-combat-panel";
 import { BoardedVehiclePanel } from "@/features/character/character-sheet/ui/beyond/combat/boarded-vehicle-panel";
+import { ArtisanCraftDialog } from "@/features/character/character-sheet/ui/beyond/combat/artisan-craft-dialog";
+import {
+  craftItemsForArtisanTools,
+  isArtisanCraftAction,
+} from "@/features/character/character-sheet/lib/combat/artisan-quick-craft";
 import { WeaponAttackCard } from "@/features/character/character-sheet/ui/beyond/inventory/weapon-attack-card";
 import { FeatureDetailTrigger } from "@/features/character/character-sheet/ui/sheet/feature-detail-dialog";
 import {
@@ -107,7 +112,26 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
   const chambers = stateQuery.data?.firearmChambers ?? {};
   const [tableNote, setTableNote] = useState<string | null>(null);
   const [repeatWithPsi, setRepeatWithPsi] = useState(false);
+  const [craftOpen, setCraftOpen] = useState(false);
   const mechanicalCatalog = useCombatMechanicalCatalog({ classSlug: character.classSlug, subclassSlug: character.subclassSlug });
+
+  const artisanToolSlugs = useMemo(
+    () =>
+      (character.featOptions ?? [])
+        .filter(
+          (option) =>
+            option.featSlug === "artisan" &&
+            (option.optionKey === "artisanTool1" ||
+              option.optionKey === "artisanTool2" ||
+              option.optionKey === "artisanTool3"),
+        )
+        .map((option) => option.valueId),
+    [character.featOptions],
+  );
+  const artisanCraftOptions = useMemo(
+    () => craftItemsForArtisanTools(artisanToolSlugs),
+    [artisanToolSlugs],
+  );
 
   const activeItemSlugs = useMemo(
     () =>
@@ -138,6 +162,9 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
               }
             : null,
           featSlugs: [
+            ...(character.transformation?.slug
+              ? [character.transformation.slug]
+              : []),
             ...(character.characterFeats?.map((feat) => feat.featSlug) ?? []),
             ...(character.subclassOptions ?? [])
               .filter(
@@ -148,6 +175,7 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
               )
               .map((option) => option.valueId),
           ],
+          transformation: character.transformation ?? null,
           activeItemSlugs,
         },
       );
@@ -206,6 +234,7 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
       character.heritageChoices,
       character.thread,
       character.characterFeats,
+      character.transformation,
       character.subclassOptions,
       activeItemSlugs,
       inventoryQuery.data?.items,
@@ -394,6 +423,9 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
                     ? { level: character.level }
                     : undefined
                 }
+                rageActive={stateQuery.data?.rageActive ?? false}
+                featEffectFlags={character.featEffectFlags}
+                inspiration={stateQuery.data?.inspiration ?? false}
               />
             ))}
           </ul>
@@ -449,10 +481,17 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
               onUse={(action, plan) => {
                 if (!action.tableAction) return;
                 if (!plan.canUse) return;
+                if (
+                  isArtisanCraftAction(action.featSlug, action.tableAction)
+                ) {
+                  setCraftOpen(true);
+                  return;
+                }
                 tableAction.mutate(
                   {
                     tableAction: action.tableAction,
                     classSlug: action.classSlug,
+                    featSlug: action.featSlug,
                     usePsiDie: plan.usePsiDie,
                     resourceSlug: action.resourceSlug,
                     spendAmount: action.spendAmount ?? 1,
@@ -470,6 +509,28 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
               }}
             />
           ))}
+          <ArtisanCraftDialog
+            open={craftOpen}
+            onOpenChange={setCraftOpen}
+            options={artisanCraftOptions}
+            busy={tableAction.isPending}
+            onPick={(itemSlug) => {
+              tableAction.mutate(
+                {
+                  tableAction: "artisan-craft",
+                  featSlug: "artisan",
+                  itemSlug,
+                  note: "Fabricação Rápida",
+                },
+                {
+                  onSuccess: (result) => {
+                    setCraftOpen(false);
+                    if (result?.note) setTableNote(result.note);
+                  },
+                },
+              );
+            }}
+          />
           {tableNote ? (
             <p className="text-sm text-secondary" role="status">
               {tableNote}

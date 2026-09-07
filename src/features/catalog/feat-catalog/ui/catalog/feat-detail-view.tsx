@@ -2,7 +2,7 @@
 
 import { Suspense } from "react";
 
-import { useFeatDetail } from "@/features/catalog/feat-catalog/api/use-feats";
+import { useFeatDetail, useFeatEffects } from "@/features/catalog/feat-catalog/api/use-feats";
 import type { FeatSummary } from "@/entities/feat/types";
 import { useCatalogBackHref } from "@/shared/lib/use-catalog-back-href";
 import {
@@ -14,6 +14,7 @@ import { PhbProse } from "@/shared/ui/phb-prose";
 import { FeatPrerequisitesBlock } from "@/features/catalog/feat-catalog/ui/catalog/feat-prerequisites-block";
 import { featHasPrerequisiteContent } from "@/features/catalog/feat-catalog/ui/catalog/feat-prerequisites-block";
 import { isGhTransformationOptionalPrerequisite } from "@/features/catalog/feat-catalog/lib/gh-transformation-prerequisite";
+import { CatalogEffectsPanel } from "@/features/catalog/shared/ui/catalog-effects-panel";
 
 type FeatDetailViewProps = {
   slug: string;
@@ -55,6 +56,7 @@ function FeatHero({ feat, backHref }: { feat: FeatSummary; backHref: string }) {
 
 function FeatDetailBody({ slug }: FeatDetailViewProps) {
   const { data, isPending, isError, error } = useFeatDetail(slug);
+  const effectsQuery = useFeatEffects(slug, !!slug);
   const backHref = useCatalogBackHref("/feats");
 
   if (isPending) {
@@ -144,6 +146,29 @@ function FeatDetailBody({ slug }: FeatDetailViewProps) {
             ))}
           </div>
         )}
+      </section>
+
+      <section aria-labelledby="feat-effects" className="space-y-4">
+        <div className="space-y-1">
+          <p className="text-xs font-medium tracking-wider text-primary uppercase">
+            Efeitos
+          </p>
+          <h2
+            id="feat-effects"
+            className="font-heading text-2xl font-semibold tracking-tight"
+          >
+            Efeitos tipados
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Verbos mecânicos do catálogo (`phb_effect`) usados na ficha e na
+            mesa.
+          </p>
+        </div>
+        <CatalogEffectsPanel
+          effects={effectsQuery.data}
+          isPending={effectsQuery.isPending}
+          isError={effectsQuery.isError}
+        />
       </section>
     </div>
   );
