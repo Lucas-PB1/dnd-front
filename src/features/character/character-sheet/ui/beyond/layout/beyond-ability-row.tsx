@@ -207,24 +207,47 @@ export function BeyondRestActions({ characterId }: { characterId: string }) {
   const stateQuery = useCharacterState(characterId);
   const takeRest = useTakeRest(characterId);
   const [hitDiceSpent, setHitDiceSpent] = useState(1);
-  const [lastHeal, setLastHeal] = useState<string | null>(null);
+  const [lastRestFeedback, setLastRestFeedback] = useState<string | null>(null);
 
   const hitDiceCurrent = stateQuery.data?.hitDiceCurrent ?? 0;
   const hitDie = stateQuery.data?.hitDie ?? "DV";
   const maxSpend = Math.max(0, hitDiceCurrent);
   const spend = Math.min(Math.max(0, hitDiceSpent), maxSpend);
 
+  function formatRestNotes(notes: string[] | undefined): string | null {
+    if (!notes?.length) return null;
+    return notes.join(" · ");
+  }
+
   async function shortRest() {
     const result = await takeRest.mutateAsync({
       type: "short",
       hitDiceSpent: spend,
     });
+    const parts: string[] = [];
     if (result?.hitPointsHealed != null && result.hitPointsHealed > 0) {
       const rolls = result.hitDiceRolls?.join(", ") ?? "";
-      setLastHeal(`+${result.hitPointsHealed} PV${rolls ? ` (${rolls})` : ""}`);
-    } else {
-      setLastHeal(spend > 0 ? "Sem cura efetiva" : null);
+      parts.push(
+        `+${result.hitPointsHealed} PV${rolls ? ` (${rolls})` : ""}`,
+      );
+    } else if (spend > 0) {
+      parts.push("Sem cura efetiva");
     }
+    const notes = formatRestNotes(result?.notes);
+    if (notes) parts.push(notes);
+    setLastRestFeedback(parts.length > 0 ? parts.join(" · ") : null);
+  }
+
+  function longRest() {
+    takeRest.mutate(
+      { type: "long" },
+      {
+        onSuccess: (result) => {
+          const notes = formatRestNotes(result?.notes);
+          setLastRestFeedback(notes ?? "Descanso longo concluído");
+        },
+      },
+    );
   }
 
   return (
@@ -270,16 +293,16 @@ export function BeyondRestActions({ characterId }: { characterId: string }) {
         disabled={takeRest.isPending}
         title="Inclui recuperação de cargas de itens mágicos (MVP ≈ próximo amanhecer)"
         onClick={() => {
-          setLastHeal(null);
-          takeRest.mutate({ type: "long" });
+          setLastRestFeedback(null);
+          longRest();
         }}
       >
         <MoonIcon className="size-3.5" aria-hidden />
         Descanso longo
       </Button>
-      {lastHeal ? (
-        <span className="text-xs text-muted-foreground" role="status">
-          {lastHeal}
+      {lastRestFeedback ? (
+        <span className="max-w-md text-xs text-muted-foreground" role="status">
+          {lastRestFeedback}
         </span>
       ) : null}
     </div>

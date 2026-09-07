@@ -37,25 +37,27 @@ export function usePatchCharacter(characterId: string) {
       queryClient.setQueryData(charactersKeys.detail(characterId), data);
       queryClient.invalidateQueries({ queryKey: charactersKeys.all });
 
-      if (!payloadTouchesHitPoints(variables)) return;
+      if (payloadTouchesHitPoints(variables)) {
+        queryClient.setQueryData<CharacterState>(
+          sessionKeys.state(characterId),
+          (prev) => {
+            if (!prev) return prev;
+            return {
+              ...prev,
+              hitPointsCurrent:
+                variables.hitPointsCurrent !== undefined
+                  ? (data.hitPointsCurrent ?? variables.hitPointsCurrent)
+                  : prev.hitPointsCurrent,
+              hitPointsMax:
+                variables.hitPointsMax !== undefined
+                  ? (data.hitPointsMax ?? variables.hitPointsMax)
+                  : prev.hitPointsMax,
+            };
+          },
+        );
+      }
 
-      queryClient.setQueryData<CharacterState>(
-        sessionKeys.state(characterId),
-        (prev) => {
-          if (!prev) return prev;
-          return {
-            ...prev,
-            hitPointsCurrent:
-              variables.hitPointsCurrent !== undefined
-                ? (data.hitPointsCurrent ?? variables.hitPointsCurrent)
-                : prev.hitPointsCurrent,
-            hitPointsMax:
-              variables.hitPointsMax !== undefined
-                ? (data.hitPointsMax ?? variables.hitPointsMax)
-                : prev.hitPointsMax,
-          };
-        },
-      );
+      // Session flags (ex.: highElfCantripSwapAvailable) podem mudar no PATCH sheet.
       void queryClient.invalidateQueries({
         queryKey: sessionKeys.state(characterId),
       });
