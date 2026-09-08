@@ -34,17 +34,18 @@ export function EncounterAddCreaturePanel({
   const [armorClass, setArmorClass] = useState("13");
   const [initMod, setInitMod] = useState("0");
 
+  const templates = catalog.data?.data ?? [];
   const templateOptions = useMemo(
     () =>
-      (catalog.data ?? []).map((row) => ({
+      templates.map((row) => ({
         value: row.slug,
         label: `${row.name}${row.challengeRating ? ` · ND ${row.challengeRating}` : ""}`,
         keywords: [row.slug, row.creatureType],
       })),
-    [catalog.data],
+    [catalog.data?.data],
   );
 
-  const selectedTemplate = (catalog.data ?? []).find(
+  const selectedTemplate = templates.find(
     (row) => row.slug === templateSlug,
   );
 

@@ -11,7 +11,7 @@ export function useSyncCharacterCompanion(characterId: string, loginNext: string
   const { accessToken } = useGameAuth(loginNext);
 
   return useMutation({
-    mutationFn: async (restoreHp = false) => {
+    mutationFn: async (restoreHp: boolean) => {
       if (!accessToken) throw new Error("Não autenticado");
       return syncCharacterCompanion(accessToken, characterId, { restoreHp });
     },

@@ -33,7 +33,9 @@ export type FeatPrerequisiteInput = Pick<
   | "requiredSpeciesSlugs"
   | "requiredWeaponProficiencySlugs"
   | "requiredFeatOptions"
->;
+> & {
+  prerequisite?: string | null;
+};
 
 function resolveLabel(
   labels: Record<string, string> | undefined,
@@ -149,7 +151,7 @@ export function hasStructuredFeatPrerequisites(feat: FeatPrerequisiteInput): boo
 
 /** Uma linha para cards de listagem. */
 export function formatFeatPrerequisiteTeaser(
-  feat: Pick<FeatPrerequisiteInput, "prerequisite"> & FeatPrerequisiteInput,
+  feat: FeatPrerequisiteInput,
   labels?: FeatPrerequisiteLabels,
 ): string | null {
   const structured = formatFeatStructuredPrerequisites(feat, labels);

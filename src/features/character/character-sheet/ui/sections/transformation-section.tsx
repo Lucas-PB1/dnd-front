@@ -18,7 +18,7 @@ export function TransformationSection({ character }: SheetReadSectionProps) {
   const items = useMemo((): DetailTileItem[] => {
     if (!transformation) return [];
 
-    const title = detail.data?.featName ?? transformation.slug;
+    const title = detail.data?.name ?? transformation.slug;
     const choiceBody =
       transformation.choices.length === 0 ? (
         <p className="text-sm text-muted-foreground">
@@ -48,7 +48,7 @@ export function TransformationSection({ character }: SheetReadSectionProps) {
         ),
       },
     ];
-  }, [detail.data?.featName, transformation]);
+  }, [detail.data?.name, transformation]);
 
   if (!transformation) {
     return (
