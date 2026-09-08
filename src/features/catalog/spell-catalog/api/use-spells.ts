@@ -41,6 +41,12 @@ export function useSpellsCatalog(params: {
   q?: string;
   level?: string;
   school?: string;
+  ritual?: string;
+  concentration?: string;
+  roll?: string;
+  castingTime?: string;
+  saveAbility?: string;
+  rangeKind?: string;
 }) {
   return useCatalogCompendium({
     queryKey: spellKeys.all,
@@ -49,10 +55,25 @@ export function useSpellsCatalog(params: {
         q: filters.q,
         level: filters.level,
         school: filters.school,
+        ritual: filters.ritual,
+        concentration: filters.concentration,
+        roll: filters.roll,
+        castingTime: filters.castingTime,
+        saveAbility: filters.saveAbility,
+        rangeKind: filters.rangeKind,
         editionSlugs: filters.editionSlugs,
       }),
     q: params.q,
-    filters: { level: params.level, school: params.school },
+    filters: {
+      level: params.level,
+      school: params.school,
+      ritual: params.ritual,
+      concentration: params.concentration,
+      roll: params.roll,
+      castingTime: params.castingTime,
+      saveAbility: params.saveAbility,
+      rangeKind: params.rangeKind,
+    },
   });
 }
 

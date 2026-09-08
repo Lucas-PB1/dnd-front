@@ -28,7 +28,16 @@ export function LoginForm() {
     formState: { errors, isSubmitting },
   } = useForm<LoginCredentials>({
     resolver: zodResolver(loginCredentialsSchema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: {
+      email:
+        process.env.NODE_ENV === "development"
+          ? (process.env.NEXT_PUBLIC_DEV_LOGIN_EMAIL ?? "")
+          : "",
+      password:
+        process.env.NODE_ENV === "development"
+          ? (process.env.NEXT_PUBLIC_DEV_LOGIN_PASSWORD ?? "")
+          : "",
+    },
   });
 
   if (!isConfigured) {

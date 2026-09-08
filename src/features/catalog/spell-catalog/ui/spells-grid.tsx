@@ -6,7 +6,13 @@ import type { SpellSummary } from "@/entities/spell/types";
 import { useSpellsCatalog } from "@/features/catalog/spell-catalog/api/use-spells";
 import { SpellCard } from "@/features/catalog/spell-catalog/ui/spell-card";
 import {
+  SPELL_CASTING_TIME_FILTER,
+  SPELL_CONCENTRATION_FILTER,
   SPELL_LEVEL_FILTER,
+  SPELL_RANGE_KIND_FILTER,
+  SPELL_RITUAL_FILTER,
+  SPELL_ROLL_FILTER,
+  SPELL_SAVE_ABILITY_FILTER,
   SPELL_SCHOOL_FILTER,
 } from "@/shared/lib/catalog-filter-options";
 import { useCatalogListState } from "@/shared/lib/use-catalog-list-state";
@@ -17,6 +23,17 @@ import { CatalogSearch } from "@/shared/ui/catalog-search";
 import { CatalogEmptyMessage } from "@/shared/ui/catalog-empty-message";
 import { motion } from "@/shared/lib/motion";
 import { cn } from "@/shared/lib/utils";
+
+const SPELL_FILTER_KEYS = [
+  "level",
+  "school",
+  "ritual",
+  "concentration",
+  "roll",
+  "castingTime",
+  "saveAbility",
+  "rangeKind",
+] as const;
 
 function sortByName(a: SpellSummary, b: SpellSummary) {
   return a.name.localeCompare(b.name, "pt");
@@ -34,18 +51,32 @@ export function SpellsGrid() {
     listPath,
   } = useCatalogListState({
     syncUrl: true,
-    filterKeys: ["level", "school"],
+    filterKeys: [...SPELL_FILTER_KEYS],
   });
 
   const level = filters.level ?? "";
   const school = filters.school ?? "";
-  const isFiltered =
-    debouncedQuery.trim().length > 0 || Boolean(level) || Boolean(school);
+  const ritual = filters.ritual ?? "";
+  const concentration = filters.concentration ?? "";
+  const roll = filters.roll ?? "";
+  const castingTime = filters.castingTime ?? "";
+  const saveAbility = filters.saveAbility ?? "";
+  const rangeKind = filters.rangeKind ?? "";
+
+  const hasStructuredFilter = SPELL_FILTER_KEYS.some(
+    (key) => (filters[key] ?? "").trim().length > 0,
+  );
 
   const { data, isPending, isError, error, isFetching } = useSpellsCatalog({
     q: debouncedQuery,
     level,
     school,
+    ritual,
+    concentration,
+    roll,
+    castingTime,
+    saveAbility,
+    rangeKind,
   });
 
   const spells = useMemo(() => {
@@ -54,7 +85,7 @@ export function SpellsGrid() {
   }, [data?.data]);
 
   const { pageItems, total, totalPages, safePage, from, to } =
-    paginateCatalogItems(spells, page, isFiltered);
+    paginateCatalogItems(spells, page, true);
 
   if (isPending && !data) {
     return <p className="text-sm text-muted-foreground">Carregando magias…</p>;
@@ -78,7 +109,16 @@ export function SpellsGrid() {
           resultCount={total}
         />
         <CatalogFilters
-          fields={[SPELL_LEVEL_FILTER, SPELL_SCHOOL_FILTER]}
+          fields={[
+            SPELL_LEVEL_FILTER,
+            SPELL_SCHOOL_FILTER,
+            SPELL_CASTING_TIME_FILTER,
+            SPELL_RANGE_KIND_FILTER,
+            SPELL_SAVE_ABILITY_FILTER,
+            SPELL_ROLL_FILTER,
+            SPELL_RITUAL_FILTER,
+            SPELL_CONCENTRATION_FILTER,
+          ]}
           values={filters}
           onChange={setFilter}
         />
@@ -86,28 +126,29 @@ export function SpellsGrid() {
       {pageItems.length === 0 ? (
         <CatalogEmptyMessage
           message={
-            debouncedQuery || level || school
+            debouncedQuery || hasStructuredFilter
               ? "Nenhuma magia corresponde aos filtros."
               : "Nenhuma magia encontrada."
           }
         />
       ) : (
         <>
-          <div className={cn(isFetching && "opacity-70 transition-opacity")}>
-            <ul
-              className={cn(
-                "divide-y-0 border-t border-border",
-                motion.stagger,
-              )}
-            >
-              {pageItems.map((spell) => (
-                <li key={spell.slug}>
-                  <SpellCard spell={spell} listPath={listPath} />
-                </li>
-              ))}
-            </ul>
+          <div
+            className={cn(
+              "grid auto-rows-fr gap-2.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 [&>*]:h-full",
+              motion.stagger,
+              isFetching && "opacity-70 transition-opacity",
+            )}
+          >
+            {pageItems.map((spell) => (
+              <SpellCard
+                key={spell.slug}
+                spell={spell}
+                listPath={listPath}
+              />
+            ))}
           </div>
-          {isFiltered && totalPages > 1 ? (
+          {totalPages > 1 ? (
             <CatalogPagination
               page={safePage}
               totalPages={totalPages}

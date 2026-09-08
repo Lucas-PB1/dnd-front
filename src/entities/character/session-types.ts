@@ -284,6 +284,20 @@ export type LevelUpSpellOption = {
   spellLevel: number;
 };
 
+export type LevelUpSubclassOptionSlot = {
+  optionKey: string;
+  label: string;
+  unlockLevel: number;
+};
+
+export type LevelUpFeatureUnlock = {
+  name: string;
+  description: string;
+  level: number;
+  source: "class" | "subclass";
+  optionKey?: string | null;
+};
+
 export type LevelUpPreview = {
   currentLevel: number;
   nextLevel: number;
@@ -294,7 +308,13 @@ export type LevelUpPreview = {
   subclassRequired: boolean;
   subclassUnlockLevel?: number;
   isAsiOrFeatLevel: boolean;
+  /** Características de classe/subclasse neste nível. */
+  newFeatures?: LevelUpFeatureUnlock[];
   newSpellOptions: LevelUpSpellOption[];
+  /** Always-prepared da subclasse neste nível — não é escolha na aba Magias. */
+  newAlwaysPreparedSpells?: LevelUpSpellOption[];
+  /** Opções de subclasse desbloqueadas neste nível (ex.: Revelações Santas). */
+  newSubclassOptionSlots?: LevelUpSubclassOptionSlot[];
   newClassExpertiseSlots: LevelUpClassExpertiseSlot[];
   newWeaponMasterySlots: LevelUpWeaponMasterySlot[];
 };

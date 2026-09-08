@@ -12,10 +12,10 @@ import {
   itemCatalogStats,
   itemCatalogTypeLabel,
 } from "@/features/catalog/item-catalog/lib/item-catalog-meta";
+import { CatalogMediaImage } from "@/shared/design-system/patterns/catalog-media-image";
 import { PhbProse } from "@/shared/ui/phb-prose";
 import { cn } from "@/shared/lib/utils";
 import { toMetricProse } from "@/shared/lib/metric";
-import { resolveCatalogImageUrl } from "@/shared/lib/resolve-catalog-image-url";
 
 type ItemCatalogDetailContentProps = {
   item: ItemSummary;
@@ -25,6 +25,11 @@ type ItemCatalogDetailContentProps = {
   isLoading?: boolean;
   /** Preview de 2 linhas na listagem da loja. */
   compact?: boolean;
+  /**
+   * Modal com título/subtítulo próprios (ficha/loja): não repete o tipo
+   * no corpo e usa imagem com object-contain.
+   */
+  embedded?: boolean;
   className?: string;
 };
 
@@ -45,6 +50,7 @@ export function ItemCatalogDetailContent({
   equipmentPending = false,
   isLoading = false,
   compact = false,
+  embedded = false,
   className,
 }: ItemCatalogDetailContentProps) {
   const props = item.properties;
@@ -87,39 +93,58 @@ export function ItemCatalogDetailContent({
   const eyebrow = [
     props?.magic === true ? "Item mágico" : null,
     rarityLabel,
-    itemCatalogTypeLabel(item),
+    embedded ? null : itemCatalogTypeLabel(item),
   ]
     .filter(Boolean)
     .join(" · ");
-  const resolvedImageUrl = resolveCatalogImageUrl(item.imageUrl);
+  const imageUrl = item.imageUrl?.trim() || null;
+
+  const statsBlock =
+    stats.length > 0 ? (
+      <dl className="grid h-full grid-cols-[auto_1fr] content-center gap-x-3 gap-y-1.5 rounded-md border border-border bg-muted/30 px-3 py-2.5 text-xs">
+        {stats.map((stat) => (
+          <div key={stat.label} className="contents">
+            <dt className="font-medium text-muted-foreground">{stat.label}</dt>
+            <dd className="text-foreground">{stat.value}</dd>
+          </div>
+        ))}
+      </dl>
+    ) : null;
 
   return (
     <div className={cn("space-y-4", className)}>
-      {resolvedImageUrl ? (
-        <img
-          src={resolvedImageUrl}
-          alt=""
-          className="mx-auto max-h-48 w-full max-w-xs rounded-lg border border-border/60 bg-muted/30 object-cover object-top"
-        />
-      ) : null}
-      {eyebrow ? (
-        <p className="text-xs font-medium text-muted-foreground">{eyebrow}</p>
-      ) : null}
+      <div
+        className={cn(
+          "grid gap-3",
+          imageUrl &&
+            "grid-cols-1 sm:grid-cols-[5.5rem_minmax(0,1fr)] sm:items-stretch",
+        )}
+      >
+        {imageUrl ? (
+          <div className="mx-auto flex h-28 w-20 items-center justify-center overflow-hidden rounded-lg border border-border/60 bg-muted/30 p-1.5 sm:mx-0 sm:h-full sm:w-full">
+            <CatalogMediaImage
+              src={imageUrl}
+              alt={item.name}
+              expandable
+              className="max-h-[90%] max-w-[90%] object-contain object-center"
+            />
+          </div>
+        ) : null}
 
-      {header && header !== rarityLabel ? (
-        <p className="text-sm font-medium text-foreground">{header}</p>
-      ) : null}
+        <div className="flex min-w-0 flex-col">
+          {eyebrow ? (
+            <p className="mb-2 text-xs font-medium text-muted-foreground">
+              {eyebrow}
+            </p>
+          ) : null}
 
-      {stats.length > 0 ? (
-        <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 rounded-md border border-border bg-muted/30 px-3 py-2.5 text-xs">
-          {stats.map((stat) => (
-            <div key={stat.label} className="contents">
-              <dt className="font-medium text-muted-foreground">{stat.label}</dt>
-              <dd className="text-foreground">{stat.value}</dd>
-            </div>
-          ))}
-        </dl>
-      ) : null}
+          {header && header !== rarityLabel ? (
+            <p className="mb-2 text-sm font-medium text-foreground">{header}</p>
+          ) : null}
+
+          <div className="min-h-0 flex-1">{statsBlock}</div>
+        </div>
+      </div>
 
       {traitLines.length > 0 ? (
         <div className="space-y-2">

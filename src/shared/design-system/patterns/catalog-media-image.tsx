@@ -32,6 +32,9 @@ export function CatalogMediaImage({
   if (hidden || !resolvedSrc) return null;
 
   const image = (
+    // Catalog images are served by Nest (`NEXT_PUBLIC_API_URL`), not the Next
+    // optimizer origin — plain <img> avoids remotePatterns / rewrite coupling.
+    // eslint-disable-next-line @next/next/no-img-element -- API catalog asset
     <img
       src={resolvedSrc}
       alt={alt}
@@ -72,6 +75,7 @@ export function CatalogMediaImage({
           <DialogTitle className="sr-only">
             {alt ? `Imagem: ${alt}` : "Imagem ampliada"}
           </DialogTitle>
+          {/* eslint-disable-next-line @next/next/no-img-element -- API catalog asset */}
           <img
             src={resolvedSrc}
             alt={alt}

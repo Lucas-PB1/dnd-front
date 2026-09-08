@@ -25,7 +25,7 @@ import { BarbarianCombatToggles } from "@/features/character/character-sheet/ui/
 import { CombatStatusEditor } from "@/features/character/character-sheet/ui/beyond/combat/status/status-editor";
 import { useSheetRolls } from "@/features/character/character-sheet/ui/beyond/layout/sheet-rolls";
 import { SheetChip } from "@/features/character/character-sheet/ui/sheet/sheet-ui";
-import { useConditions } from "@/features/catalog/reference-catalog/api/use-reference";
+import { useConditions, useFeats } from "@/features/catalog/reference-catalog/api/use-reference";
 import { resolveHeritageDisplaySpeed } from "@/entities/heritage/types";
 import { useHeritageDetail } from "@/features/catalog/heritage-catalog/api/use-heritages";
 import { useSpeciesDetail } from "@/features/catalog/species-catalog/api/use-species";
@@ -47,11 +47,15 @@ type SheetCombatStripProps = {
 type MetricProps = {
   label: string;
   value: string | number;
+  /** Uma linha curta (legado) ou várias linhas (ex.: vários talentos de CA). */
   hint?: string;
+  hintLines?: string[];
   emphasize?: boolean;
   icon?: typeof BoltIcon;
   onClick?: () => void;
   disabled?: boolean;
+  /** Toggle sticky (ex.: bônus de CA de talento). */
+  pressed?: boolean;
 };
 
 const metricShellClass = cn(
@@ -62,16 +66,26 @@ function HeaderMetric({
   label,
   value,
   hint,
+  hintLines,
   emphasize,
   icon: Icon,
   onClick,
   disabled,
+  pressed,
 }: MetricProps) {
+  const lines = (hintLines?.filter(Boolean) ?? []).length
+    ? (hintLines ?? []).filter(Boolean)
+    : hint
+      ? [hint]
+      : [];
+  const titleText = lines.join(" · ");
+
   const className = cn(
     metricShellClass,
-    emphasize
+    emphasize || pressed
       ? "border-secondary/50 bg-secondary/12"
       : "border-border/65 bg-background/40",
+    pressed && "border-primary/50 bg-primary/10",
     onClick &&
       "cursor-pointer transition-colors hover:border-secondary/55 disabled:pointer-events-none disabled:opacity-60",
   );
@@ -85,12 +99,16 @@ function HeaderMetric({
       <span className="font-heading mt-0.5 text-lg font-semibold leading-none tabular-nums">
         {value}
       </span>
-      {hint ? (
+      {lines.length > 0 ? (
         <span
-          className="mt-0.5 line-clamp-2 w-full text-[0.6rem] leading-snug text-muted-foreground"
-          title={hint}
+          className="mt-0.5 flex w-full flex-col gap-0.5 text-[0.6rem] leading-snug text-muted-foreground"
+          title={titleText}
         >
-          {hint}
+          {lines.map((line) => (
+            <span key={line} className="line-clamp-2">
+              {line}
+            </span>
+          ))}
         </span>
       ) : null}
     </>
@@ -103,7 +121,8 @@ function HeaderMetric({
         className={className}
         onClick={onClick}
         disabled={disabled}
-        title={hint ? `${label}: ${hint}` : `Rolar ${label.toLowerCase()}`}
+        aria-pressed={pressed}
+        title={titleText || `Rolar ${label.toLowerCase()}`}
       >
         {body}
       </button>
@@ -111,7 +130,7 @@ function HeaderMetric({
   }
 
   return (
-    <div className={className} title={hint || undefined}>
+    <div className={className} title={titleText || undefined}>
       {body}
     </div>
   );
@@ -127,6 +146,7 @@ export function SheetCombatStrip({
   const stateQuery = useCharacterState(characterId);
   const patchState = usePatchCharacterState(characterId);
   const conditionsCatalog = useConditions();
+  const featsCatalog = useFeats();
   const isHeritage = Boolean(character.heritageSlug);
   const speciesDetail = useSpeciesDetail(character.speciesSlug ?? "", !isHeritage);
   const heritageDetail = useHeritageDetail(
@@ -144,19 +164,43 @@ export function SheetCombatStrip({
   const state = stateQuery.data;
   const scores = sheetAbilityScores(character);
   const featAcBonus = character.featAcBonus ?? 0;
+  const featAcBonusSources = character.featAcBonusSources ?? [];
   const displayedArmorClass =
     character.armorClass + (featAcSticky && featAcBonus > 0 ? featAcBonus : 0);
-  const armorClassHint =
+  const baseArmorNote = (character.armorClassNote ?? "")
+    .replace(/;?\s*talentos:.*$/i, "")
+    .trim();
+  const featNameBySlug = useMemo(
+    () =>
+      Object.fromEntries(
+        (featsCatalog.data?.data ?? []).map((feat) => [feat.slug, feat.name]),
+      ),
+    [featsCatalog.data?.data],
+  );
+  const featAcSourceLines = useMemo(() => {
+    if (featAcBonusSources.length === 0) {
+      return featAcBonus > 0 ? [`+${featAcBonus} talento`] : [];
+    }
+    return featAcBonusSources.map((source) => {
+      const name = featNameBySlug[source.featSlug] ?? source.featSlug;
+      return `+${source.bonus} ${name}`;
+    });
+  }, [featAcBonus, featAcBonusSources, featNameBySlug]);
+  const armorClassHintLines = [
+    baseArmorNote || undefined,
     featAcBonus > 0
-      ? [
-          character.armorClassNote,
-          featAcSticky
-            ? `Inclui +${featAcBonus} de talento`
-            : `Talentos: até +${featAcBonus} CA (ative o toggle)`,
-        ]
-          .filter(Boolean)
-          .join(" · ")
-      : character.armorClassNote;
+      ? featAcSticky
+        ? featAcSourceLines.length > 1
+          ? `+${featAcBonus} ativo`
+          : `${featAcSourceLines[0]} ativo`
+        : featAcSourceLines.length > 1
+          ? `Toque: +${featAcBonus} (${featAcSourceLines.length} talentos)`
+          : `Toque: ${featAcSourceLines[0]}`
+      : undefined,
+    ...(featAcBonus > 0 && featAcSourceLines.length > 1
+      ? featAcSourceLines
+      : []),
+  ].filter((line): line is string => Boolean(line));
   const initiativeBreakdown = resolveInitiativeBonus({
     dexterityModifier: abilityModifierValue(scores.destreza),
     wisdomModifier: abilityModifierValue(scores.sabedoria),
@@ -247,7 +291,7 @@ export function SheetCombatStrip({
             type="button"
             className={cn(
               metricShellClass,
-              "col-span-2 cursor-pointer border-border/65 bg-background/40 text-left sm:col-span-4",
+              "col-span-2 cursor-pointer border-border/65 bg-background/40 text-left sm:col-span-1",
               stonePulse && "border-primary/50 bg-primary/10",
             )}
             aria-pressed={stonePulse}
@@ -256,38 +300,23 @@ export function SheetCombatStrip({
             <span className="text-[0.55rem] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
               Pulso de Pedra
             </span>
-            <span className="mt-0.5 text-[0.7rem] text-muted-foreground">
-              Vantagem na Iniciativa (solo sólido)
-            </span>
-          </button>
-        ) : null}
-        {featAcBonus > 0 ? (
-          <button
-            type="button"
-            className={cn(
-              metricShellClass,
-              "col-span-2 cursor-pointer border-border/65 bg-background/40 text-left sm:col-span-4",
-              featAcSticky && "border-primary/50 bg-primary/10",
-            )}
-            aria-pressed={featAcSticky}
-            onClick={() => setFeatAcSticky((value) => !value)}
-          >
-            <span className="text-[0.55rem] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
-              Bônus de talento (CA)
-            </span>
-            <span className="mt-0.5 text-[0.7rem] text-muted-foreground">
-              {featAcSticky
-                ? `+${featAcBonus} CA aplicado`
-                : `Até +${featAcBonus} CA (ligar quando o bônus estiver ativo)`}
+            <span className="mt-0.5 text-[0.7rem] leading-snug text-muted-foreground">
+              Vantagem na Inic.
             </span>
           </button>
         ) : null}
         <HeaderMetric
           label="CA"
           value={displayedArmorClass}
-          hint={armorClassHint}
+          hintLines={armorClassHintLines}
           icon={ShieldCheckIcon}
           emphasize
+          pressed={featAcSticky}
+          onClick={
+            featAcBonus > 0
+              ? () => setFeatAcSticky((value) => !value)
+              : undefined
+          }
         />
         <HeaderMetric
           label="Desloc."
@@ -299,6 +328,7 @@ export function SheetCombatStrip({
           className={cn(
             metricShellClass,
             "items-stretch justify-start border-border/65 bg-background/40 text-left",
+            canStonePulse && "col-span-2 sm:col-span-1",
           )}
         >
           <div className="flex items-center justify-between gap-1">

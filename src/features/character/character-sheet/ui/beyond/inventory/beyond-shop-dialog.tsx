@@ -29,7 +29,6 @@ import {
   isPlainShopLine,
   shopCartLineKey,
 } from "@/features/character/character-sheet/lib/inventory/beyond-shop-cart-line";
-import { resolveCatalogImageUrl } from "@/shared/lib/resolve-catalog-image-url";
 import { resolveCoverageShopCostText } from "@/features/character/character-sheet/lib/inventory/coverage-tier-cost";
 import {
   BeyondShopFilters,
@@ -48,6 +47,7 @@ import { BeyondShopListItemInfo } from "@/features/character/character-sheet/ui/
 import { filterShopCatalogItems } from "@/features/character/character-sheet/lib/inventory/shop-item-filters";
 import { shopProficiencyHint } from "@/features/character/character-sheet/lib/inventory/shop-proficiency-hint";
 import { useSheetWeaponProficiency } from "@/features/character/character-sheet/lib/inventory/weapon-proficiency-context";
+import { CatalogMediaImage } from "@/shared/design-system/patterns/catalog-media-image";
 import { recordItemView } from "@/features/catalog/item-catalog/api/items.api";
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
 import { CatalogEditionChip } from "@/shared/ui/catalog-edition-chip";
@@ -401,10 +401,10 @@ export function BeyondShopDialog({
                       <li key={item.slug}>
                         <div className="flex items-start gap-2 px-3 py-2">
                           {item.imageUrl ? (
-                            <img
-                              src={resolveCatalogImageUrl(item.imageUrl) ?? ""}
+                            <CatalogMediaImage
+                              src={item.imageUrl}
                               alt=""
-                              className="mt-0.5 size-12 shrink-0 rounded-md border border-border/60 bg-muted/30 object-cover object-top"
+                              className="mt-0.5 size-12 shrink-0 rounded-md border border-border/60 bg-muted/30 object-contain object-center p-0.5"
                             />
                           ) : null}
                           <div className="min-w-0 flex-1">

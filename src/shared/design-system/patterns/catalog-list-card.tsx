@@ -76,6 +76,8 @@ type CatalogTileCardProps = {
   meta?: ReactNode;
   imageUrl?: string | null;
   footer?: ReactNode;
+  /** Padding e teaser mais curtos — grades densas (ex.: magias). */
+  dense?: boolean;
   className?: string;
 };
 
@@ -89,6 +91,7 @@ export function CatalogTileCard({
   meta,
   imageUrl,
   footer,
+  dense = false,
   className,
 }: CatalogTileCardProps) {
   return (
@@ -101,19 +104,30 @@ export function CatalogTileCard({
     >
       <Link
         href={href}
-        className="flex min-h-0 flex-1 flex-col gap-3 p-4 hover:bg-muted/30"
+        className={cn(
+          "flex min-h-0 flex-1 flex-col hover:bg-muted/30",
+          dense ? "gap-2 p-3" : "gap-3 p-4",
+        )}
       >
         {imageUrl ? (
-          <div className="-mx-4 -mt-4 overflow-hidden border-b border-border/60">
+          <div className={cn("-mx-4 -mt-4 overflow-hidden border-b border-border/60", dense && "-mx-3 -mt-3")}>
             <CatalogMediaImage
               src={imageUrl}
-              className="h-32 w-full bg-muted/30 object-cover object-top"
+              className={cn(
+                "w-full bg-muted/30 object-cover object-top",
+                dense ? "h-24" : "h-32",
+              )}
             />
           </div>
         ) : null}
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 space-y-0.5">
-            <h2 className="font-heading text-lg font-semibold tracking-tight transition-colors duration-150 group-hover:text-primary">
+            <h2
+              className={cn(
+                "font-heading font-semibold tracking-tight transition-colors duration-150 group-hover:text-primary",
+                dense ? "text-base" : "text-lg",
+              )}
+            >
               {title}
             </h2>
             <div className="min-h-[1.25rem]">
@@ -127,16 +141,28 @@ export function CatalogTileCard({
           {titleExtra}
         </div>
 
-        <div className="min-h-[4.5rem] flex-1">
+        <div className={cn("flex-1", dense ? "min-h-0" : "min-h-[4.5rem]")}>
           {teaser ? (
-            <p className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">
+            <p
+              className={cn(
+                "leading-relaxed text-muted-foreground",
+                dense
+                  ? "line-clamp-2 text-xs"
+                  : "line-clamp-3 text-sm",
+              )}
+            >
               {teaser}
             </p>
           ) : null}
         </div>
 
         {meta ? (
-          <div className="mt-auto flex flex-wrap gap-x-3 gap-y-1 border-t border-border/60 pt-3 text-xs text-muted-foreground">
+          <div
+            className={cn(
+              "mt-auto flex flex-wrap gap-x-3 gap-y-1 border-t border-border/60 text-xs text-muted-foreground",
+              dense ? "pt-2" : "pt-3",
+            )}
+          >
             {meta}
           </div>
         ) : null}

@@ -96,6 +96,8 @@ export type CharacterDetail = {
    * Soma tipada de `ac_bonus` de talentos (sticky na UI — aplicar quando toggle ligado).
    */
   featAcBonus?: number;
+  /** Fontes do bônus sticky de CA (nomear o talento no toggle). */
+  featAcBonusSources?: { featSlug: string; bonus: number }[];
   /** Flags de efeitos de talento para UI de roll/cast (wire incremental). */
   featEffectFlags?: {
     inspirationRefundOnFail: boolean;

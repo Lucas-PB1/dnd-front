@@ -54,6 +54,70 @@ export const SPELL_SCHOOL_FILTER: CatalogFilterField = {
   ],
 };
 
+export const SPELL_RITUAL_FILTER: CatalogFilterField = {
+  key: "ritual",
+  label: "Ritual",
+  options: [
+    { value: "true", label: "Sim" },
+    { value: "false", label: "Não" },
+  ],
+};
+
+export const SPELL_CONCENTRATION_FILTER: CatalogFilterField = {
+  key: "concentration",
+  label: "Concentração",
+  options: [
+    { value: "true", label: "Sim" },
+    { value: "false", label: "Não" },
+  ],
+};
+
+export const SPELL_ROLL_FILTER: CatalogFilterField = {
+  key: "roll",
+  label: "Jogada",
+  options: [
+    { value: "attack", label: "Ataque" },
+    { value: "save", label: "Salvaguarda" },
+  ],
+};
+
+export const SPELL_CASTING_TIME_FILTER: CatalogFilterField = {
+  key: "castingTime",
+  label: "Conjuração",
+  options: [
+    { value: "action", label: "Ação" },
+    { value: "bonus", label: "Ação bônus" },
+    { value: "reaction", label: "Reação" },
+    { value: "minute", label: "Minutos" },
+    { value: "hour", label: "Horas" },
+  ],
+};
+
+export const SPELL_SAVE_ABILITY_FILTER: CatalogFilterField = {
+  key: "saveAbility",
+  label: "Teste",
+  options: [
+    { value: "forca", label: "Força" },
+    { value: "destreza", label: "Destreza" },
+    { value: "constituicao", label: "Constituição" },
+    { value: "inteligencia", label: "Inteligência" },
+    { value: "sabedoria", label: "Sabedoria" },
+    { value: "carisma", label: "Carisma" },
+  ],
+};
+
+export const SPELL_RANGE_KIND_FILTER: CatalogFilterField = {
+  key: "rangeKind",
+  label: "Alcance",
+  options: [
+    { value: "self", label: "Pessoal" },
+    { value: "touch", label: "Toque" },
+    { value: "short", label: "Curto (≤ 9 m)" },
+    { value: "medium", label: "Médio (≈ 18–36 m)" },
+    { value: "long", label: "Longo" },
+  ],
+};
+
 export const FEAT_CATEGORY_FILTER: CatalogFilterField = {
   key: "category",
   label: "Categoria",

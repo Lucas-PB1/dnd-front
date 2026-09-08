@@ -148,6 +148,14 @@ export function BeyondSpellRow({
       (selectedSlot != null &&
         (state?.spellSlotsRemaining[String(selectedSlot)] ?? 0) > 0));
 
+  const castBlockedReason = cannotCastSpellsInArmor
+    ? "Não pode conjurar com esta armadura/escudo"
+    : isUnknownLevel
+      ? "Aguardando catálogo da magia"
+      : !canCast
+        ? "Sem espaços de magia disponíveis"
+        : null;
+
   const listLabel = wizardLayout
     ? WIZARD_LIST_TYPE_LABELS[row.spell.listType]
     : LIST_TYPE_LABELS[row.spell.listType];
@@ -375,23 +383,23 @@ export function BeyondSpellRow({
             className="gap-1"
             disabled={casting || !canCast || isUnknownLevel}
             title={
-              cannotCastSpellsInArmor
-                ? "Não pode conjurar com armadura/escudo sem treino"
-                : isUnknownLevel
-                  ? "Aguardando catálogo"
-                  : atWillCast
-                    ? "Sem espaço"
-                    : canOncePerFreeCast
-                      ? "Uso gratuito (1×/DL)"
-                      : !canCast
-                      ? "Sem espaços disponíveis"
-                      : undefined
+              castBlockedReason ??
+              (atWillCast
+                ? "Sem espaço"
+                : canOncePerFreeCast
+                  ? "Uso gratuito (1×/DL)"
+                  : undefined)
             }
             onClick={cast}
           >
             <SparklesIcon className="size-3.5" aria-hidden />
             Conjurar
           </Button>
+          {castBlockedReason ? (
+            <p className="basis-full text-right text-[0.65rem] text-destructive sm:basis-auto">
+              {castBlockedReason}
+            </p>
+          ) : null}
         </div>
       </div>
 

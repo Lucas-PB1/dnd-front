@@ -19,7 +19,7 @@ import {
   isClassWeaponMasteryOptionKey,
   parseWeaponMasteryEligibility,
 } from "@/entities/character/lib/class-weapon-mastery-slots";
-import { isWeaponProficient } from "@/entities/character/lib/weapon-proficiency";
+import { buildWeaponMasteryCandidates } from "@/entities/character/lib/build-weapon-mastery-candidates";
 import {
   collectTakenFightingStyleSlugs,
   isFightingStyleSubclassOptionKey,
@@ -216,39 +216,21 @@ export function useStepClassSkills(
   ]);
 
   const masteryCandidates = useMemo(() => {
-    const items = weapons.data?.data ?? [];
-    return items
-      .filter((weapon) => weapon.mastery)
-      .filter((weapon) => {
-        const props = weapon.propertyDetails.map((p) => p.slug);
-        if (masteryEligibility === "melee") {
-          return !(props.includes("ammunition") && !props.includes("thrown"));
-        }
-        if (masteryEligibility === "ranged") {
-          return props.includes("ammunition");
-        }
-        return true;
-      })
-      .filter((weapon) =>
-        isWeaponProficient(
-          {
-            itemSlug: weapon.slug,
-            category: weapon.category,
-            propertySlugs: weapon.propertyDetails.map((p) => p.slug),
-          },
-          weaponProficiencySlugs,
-          weaponProficiencyContext,
-        ),
-      )
-      .map((weapon) => ({
-        value: weapon.slug,
-        label: `${weapon.name}${weapon.mastery ? ` · ${weapon.mastery.name}` : ""}`,
-        hint: truncateChoiceHint(weapon.mastery?.description),
-        masteryName: weapon.mastery?.name ?? null,
-        masteryDescription: weapon.mastery?.description ?? null,
-      }))
-      .sort((a, b) => a.label.localeCompare(b.label, "pt"));
-  }, [weapons.data?.data, masteryEligibility, weaponProficiencySlugs, weaponProficiencyContext]);
+    if (!classDetail.isSuccess) return [];
+    return buildWeaponMasteryCandidates({
+      weapons: weapons.data?.data ?? [],
+      weaponProficiencySlugs,
+      proficiencyContext: weaponProficiencyContext,
+      eligibility: masteryEligibility,
+      truncateHint: truncateChoiceHint,
+    });
+  }, [
+    classDetail.isSuccess,
+    weapons.data?.data,
+    masteryEligibility,
+    weaponProficiencySlugs,
+    weaponProficiencyContext,
+  ]);
 
   function toggleSkill(slug: string) {
     if (backgroundSkillSlugs.has(slug)) return;

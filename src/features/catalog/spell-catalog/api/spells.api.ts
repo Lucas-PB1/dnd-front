@@ -27,6 +27,12 @@ export async function fetchSpellsPage(params?: {
   q?: string;
   level?: number | string;
   school?: string;
+  ritual?: boolean | string;
+  concentration?: boolean | string;
+  roll?: string;
+  castingTime?: string;
+  saveAbility?: string;
+  rangeKind?: string;
   sangromancy?: boolean;
   editionSlugs?: string;
   fields?: "summary";
@@ -39,6 +45,18 @@ export async function fetchSpellsPage(params?: {
     filters: {
       level: params?.level,
       school: params?.school,
+      ritual:
+        params?.ritual === undefined || params?.ritual === ""
+          ? undefined
+          : String(params.ritual),
+      concentration:
+        params?.concentration === undefined || params?.concentration === ""
+          ? undefined
+          : String(params.concentration),
+      roll: params?.roll || undefined,
+      castingTime: params?.castingTime || undefined,
+      saveAbility: params?.saveAbility || undefined,
+      rangeKind: params?.rangeKind || undefined,
       sangromancy: params?.sangromancy ? "true" : undefined,
       editionSlugs: params?.editionSlugs,
       fields: params?.fields,
@@ -56,6 +74,12 @@ export async function fetchAllSpellsSummary(params?: {
   q?: string;
   level?: number | string;
   school?: string;
+  ritual?: string;
+  concentration?: string;
+  roll?: string;
+  castingTime?: string;
+  saveAbility?: string;
+  rangeKind?: string;
   editionSlugs?: string;
 }): Promise<SpellListResponse> {
   return fetchAllCatalogPages(

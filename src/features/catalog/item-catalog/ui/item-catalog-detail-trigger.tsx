@@ -117,6 +117,7 @@ export function ItemCatalogDetailTrigger({
               armor={equipment.armor}
               equipmentPending={equipment.isPending}
               isLoading={detail.isPending && !detail.data}
+              embedded
             />
           </div>
         </DialogContent>

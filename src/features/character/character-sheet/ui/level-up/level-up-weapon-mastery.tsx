@@ -5,12 +5,12 @@ import { useQuery } from "@tanstack/react-query";
 
 import type { CharacterDetail } from "@/entities/character/types";
 import type { ClassOption } from "@/entities/character/sheet-types";
+import { buildWeaponMasteryCandidates } from "@/entities/character/lib/build-weapon-mastery-candidates";
 import {
   isClassWeaponMasteryOptionKey,
   parseWeaponMasteryEligibility,
   type ClassWeaponMasterySlot,
 } from "@/entities/character/lib/class-weapon-mastery-slots";
-import { isWeaponProficient } from "@/entities/character/lib/weapon-proficiency";
 import { isFightingStyleSubclassOptionKey } from "@/features/catalog/feat-catalog/lib/fighting-style-feat-options";
 import { useClassDetail } from "@/features/catalog/class-catalog/api/use-classes";
 import { CatalogSelect } from "@/features/character/create-character/ui/catalog-select";
@@ -60,36 +60,20 @@ export function LevelUpWeaponMastery({
   }, [character.characterFeats, character.subclassOptions]);
 
   const candidates = useMemo(() => {
-    const items = weapons.data?.data ?? [];
-    return items
-      .filter((weapon) => weapon.mastery)
-      .filter((weapon) => {
-        const props = weapon.propertyDetails.map((p) => p.slug);
-        if (eligibility === "melee") {
-          return !(props.includes("ammunition") && !props.includes("thrown"));
-        }
-        if (eligibility === "ranged") {
-          return props.includes("ammunition");
-        }
-        return true;
-      })
-      .filter((weapon) =>
-        isWeaponProficient(
-          {
-            itemSlug: weapon.slug,
-            category: weapon.category,
-            propertySlugs: weapon.propertyDetails.map((p) => p.slug),
-          },
-          weaponProficiencySlugs,
-          weaponProficiencyContext,
-        ),
-      )
-      .map((weapon) => ({
-        value: weapon.slug,
-        label: `${weapon.name}${weapon.mastery ? ` · ${weapon.mastery.name}` : ""}`,
-      }))
-      .sort((a, b) => a.label.localeCompare(b.label, "pt"));
-  }, [weapons.data?.data, eligibility, weaponProficiencySlugs, weaponProficiencyContext]);
+    if (!classDetail.isSuccess) return [];
+    return buildWeaponMasteryCandidates({
+      weapons: weapons.data?.data ?? [],
+      weaponProficiencySlugs,
+      proficiencyContext: weaponProficiencyContext,
+      eligibility,
+    });
+  }, [
+    classDetail.isSuccess,
+    weapons.data?.data,
+    eligibility,
+    weaponProficiencySlugs,
+    weaponProficiencyContext,
+  ]);
 
   function setMastery(optionKey: string, valueId: string) {
     const without = value.filter((option) => option.optionKey !== optionKey);
@@ -140,6 +124,7 @@ export function LevelUpWeaponMastery({
               label={`Maestria (nv. ${slot.unlockLevel})`}
               options={selectOptions}
               value={selected}
+              isLoading={classDetail.isPending || weapons.isPending}
               onChange={(event) =>
                 setMastery(slot.optionKey, event.target.value)
               }

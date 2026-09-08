@@ -7,6 +7,7 @@ import type {
   CharacterFeat,
   ClassOption,
   FeatOption,
+  SubclassOption,
 } from "@/entities/character/sheet-types";
 import type {
   LevelUpAsiDistributionMode,
@@ -15,6 +16,7 @@ import type {
 } from "@/entities/character/session-types";
 import { isLevelUpAsiComplete } from "@/features/character/character-sheet/ui/level-up/level-up-asi-picker";
 import { findIncompleteCreateFeatOptions } from "@/features/character/create-character/lib/feats/validate-create-feat-options";
+import { subclassOptionsComplete } from "@/features/character/character-sheet/ui/level-up/subclass-options-editor";
 
 type FeatCatalogItem = {
   slug: string;
@@ -32,6 +34,7 @@ type SubmitLevelUpInput = {
   selectedFeatSlug: string;
   levelUpFeatOptions: FeatOption[];
   levelUpClassOptions: ClassOption[];
+  levelUpSubclassOptions: SubclassOption[];
   newFeatInstance: CharacterFeat | null;
   hasFeatOptions: boolean;
   featNameBySlug: Record<string, string>;
@@ -55,6 +58,7 @@ export async function submitLevelUp({
   selectedFeatSlug,
   levelUpFeatOptions,
   levelUpClassOptions,
+  levelUpSubclassOptions,
   newFeatInstance,
   hasFeatOptions,
   featNameBySlug,
@@ -79,6 +83,19 @@ export async function submitLevelUp({
 
   const newExpertiseSlots = data.newClassExpertiseSlots ?? [];
   const newMasterySlots = data.newWeaponMasterySlots ?? [];
+  const newSubclassSlots = data.newSubclassOptionSlots ?? [];
+  if (
+    newSubclassSlots.length > 0 &&
+    !subclassOptionsComplete(
+      newSubclassSlots.map((slot) => slot.optionKey),
+      levelUpSubclassOptions,
+    )
+  ) {
+    return {
+      ok: false,
+      error: "Complete as escolhas de subclasse deste nível.",
+    };
+  }
 
   const payload: LevelUpPayload = {};
   if (data.subclassRequired && subclassSlug) {
@@ -129,6 +146,9 @@ export async function submitLevelUp({
     // (featOptions fica a cargo do ramo ASI/talento ou do snapshot na API).
     payload.classSkillSlugs = character.classSkillSlugs;
     payload.speciesChoices = character.speciesChoices;
+  }
+  if (newSubclassSlots.length > 0) {
+    payload.subclassOptions = levelUpSubclassOptions;
   }
 
   const updated = await mutateAsync(payload);

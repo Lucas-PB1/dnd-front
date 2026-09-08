@@ -6,6 +6,7 @@ import { appendCharacterFeat } from "@/entities/character/lib/character-feat";
 import type { CharacterDetail } from "@/entities/character/types";
 import type { ClassOption } from "@/entities/character/sheet-types";
 import type { FeatOption } from "@/entities/character/sheet-types";
+import type { SubclassOption } from "@/entities/character/sheet-types";
 import type { LevelUpAsiDistributionMode } from "@/entities/character/session-types";
 import {
   useLevelUp,
@@ -19,9 +20,19 @@ import {
 } from "@/features/character/character-sheet/ui/level-up/level-up-class-expertise";
 import { LevelUpPreviewSummary } from "@/features/character/character-sheet/ui/level-up/level-up-preview-summary";
 import { LevelUpSubmitFooter } from "@/features/character/character-sheet/ui/level-up/level-up-submit-footer";
+import { LevelUpUnlocksPanel } from "@/features/character/character-sheet/ui/level-up/level-up-unlocks-panel";
 import {
   levelUpWeaponMasteryComplete,
 } from "@/features/character/character-sheet/ui/level-up/level-up-weapon-mastery";
+import { subclassOptionsComplete } from "@/features/character/character-sheet/ui/level-up/subclass-options-editor";
+import {
+  IncompleteFeatOptionsFixPanel,
+  useHasIncompleteFeatOptions,
+} from "@/features/character/character-sheet/ui/edit/incomplete-feat-options-fix-panel";
+import {
+  IncompleteSubclassOptionsFixPanel,
+  useHasIncompleteSubclassOptions,
+} from "@/features/character/character-sheet/ui/edit/incomplete-subclass-options-fix-panel";
 import { useFeatOptions } from "@/features/catalog/feat-catalog/api/use-feat-options";
 import { useFeats } from "@/features/catalog/reference-catalog/api/use-reference";
 
@@ -49,6 +60,9 @@ export function LevelUpSection({
   const [levelUpClassOptions, setLevelUpClassOptions] = useState<ClassOption[]>(
     () => character.classOptions ?? [],
   );
+  const [levelUpSubclassOptions, setLevelUpSubclassOptions] = useState<
+    SubclassOption[]
+  >(() => character.subclassOptions ?? []);
   const [asiMode, setAsiMode] = useState<LevelUpAsiDistributionMode | "">("");
   const [asiPrimary, setAsiPrimary] = useState("");
   const [asiSecondary, setAsiSecondary] = useState("");
@@ -76,12 +90,19 @@ export function LevelUpSection({
       ),
     [feats.data?.data],
   );
+  const hasIncompleteFeatOptions = useHasIncompleteFeatOptions(character);
+  const hasIncompleteSubclassOptions =
+    useHasIncompleteSubclassOptions(character);
 
   if (!canLevelUp) {
     return (
-      <p className="text-sm text-muted-foreground">
-        Personagem no nível máximo (20).
-      </p>
+      <div className="space-y-4">
+        <IncompleteFeatOptionsFixPanel character={character} />
+        <IncompleteSubclassOptionsFixPanel character={character} />
+        <p className="text-sm text-muted-foreground">
+          Personagem no nível máximo (20).
+        </p>
+      </div>
     );
   }
 
@@ -101,6 +122,10 @@ export function LevelUpSection({
   const levelUpPreview = data;
   const newExpertiseSlots = levelUpPreview.newClassExpertiseSlots ?? [];
   const newMasterySlots = levelUpPreview.newWeaponMasterySlots ?? [];
+  const newAlwaysPreparedSpells =
+    levelUpPreview.newAlwaysPreparedSpells ?? [];
+  const newSubclassOptionSlots = levelUpPreview.newSubclassOptionSlots ?? [];
+  const newFeatures = levelUpPreview.newFeatures ?? [];
   const expertiseComplete = levelUpExpertiseComplete(
     newExpertiseSlots,
     levelUpClassOptions,
@@ -108,6 +133,10 @@ export function LevelUpSection({
   const masteryComplete = levelUpWeaponMasteryComplete(
     newMasterySlots,
     levelUpClassOptions,
+  );
+  const subclassOptionsReady = subclassOptionsComplete(
+    newSubclassOptionSlots.map((slot) => slot.optionKey),
+    levelUpSubclassOptions,
   );
 
   async function handleLevelUp() {
@@ -123,6 +152,7 @@ export function LevelUpSection({
       selectedFeatSlug,
       levelUpFeatOptions,
       levelUpClassOptions,
+      levelUpSubclassOptions,
       newFeatInstance,
       hasFeatOptions,
       featNameBySlug,
@@ -142,12 +172,34 @@ export function LevelUpSection({
     setAsiSecondary("");
     if (result.updated) {
       setLevelUpClassOptions(result.updated.classOptions ?? []);
+      setLevelUpSubclassOptions(result.updated.subclassOptions ?? []);
     }
   }
 
   return (
     <div className="space-y-4">
+      <IncompleteFeatOptionsFixPanel
+        character={character}
+        blockProgression
+      />
+      <IncompleteSubclassOptionsFixPanel
+        character={character}
+        blockProgression
+      />
+
       <LevelUpPreviewSummary {...levelUpPreview} />
+
+      <LevelUpUnlocksPanel
+        nextLevel={levelUpPreview.nextLevel}
+        isAsiOrFeatLevel={levelUpPreview.isAsiOrFeatLevel}
+        subclassRequired={levelUpPreview.subclassRequired}
+        newFeatures={newFeatures}
+        newAlwaysPreparedSpells={newAlwaysPreparedSpells}
+        newSpellOptionsCount={levelUpPreview.newSpellOptions.length}
+        newSubclassOptionSlots={newSubclassOptionSlots}
+        newExpertiseSlots={newExpertiseSlots}
+        newMasterySlots={newMasterySlots}
+      />
 
       {levelUpPreview.isAsiOrFeatLevel ? (
         <LevelUpAsiFeatPanel
@@ -174,22 +226,28 @@ export function LevelUpSection({
         character={character}
         subclassRequired={levelUpPreview.subclassRequired}
         subclassUnlockLevel={levelUpPreview.subclassUnlockLevel}
-        newSpellOptionsCount={levelUpPreview.newSpellOptions.length}
+        newSubclassOptionSlots={newSubclassOptionSlots}
         newExpertiseSlots={newExpertiseSlots}
         newMasterySlots={newMasterySlots}
         subclassSlug={subclassSlug}
         onSubclassChange={setSubclassSlug}
         classOptions={levelUpClassOptions}
         onClassOptionsChange={setLevelUpClassOptions}
+        subclassOptions={levelUpSubclassOptions}
+        onSubclassOptionsChange={setLevelUpSubclassOptions}
+        nextLevel={levelUpPreview.nextLevel}
       />
 
       <LevelUpSubmitFooter
         nextLevel={data.nextLevel}
         levelUpError={levelUpError}
         disabled={
+          hasIncompleteFeatOptions ||
+          hasIncompleteSubclassOptions ||
           (data.subclassRequired && !subclassSlug) ||
           (newExpertiseSlots.length > 0 && !expertiseComplete) ||
-          (newMasterySlots.length > 0 && !masteryComplete)
+          (newMasterySlots.length > 0 && !masteryComplete) ||
+          (newSubclassOptionSlots.length > 0 && !subclassOptionsReady)
         }
         levelUp={levelUp}
         onSubmit={handleLevelUp}

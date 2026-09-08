@@ -64,6 +64,7 @@ export function ItemCatalogDescriptionBlock({
       weapon={equipment.weapon}
       armor={equipment.armor}
       equipmentPending={equipment.isPending}
+      embedded
     />
   );
 }

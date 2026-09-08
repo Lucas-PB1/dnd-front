@@ -62,10 +62,7 @@ export function SheetSettingsDialog({
             title="Subir de nível"
             icon={ArrowUpCircleIcon}
           >
-            <LevelUpSection
-              characterId={characterId}
-              character={character}
-            />
+            <LevelUpSection characterId={characterId} character={character} />
           </CharacterSheetTabSection>
           <CharacterSheetTabSection title="Idiomas" icon={LanguageIcon}>
             <EditLanguagesInlineForm

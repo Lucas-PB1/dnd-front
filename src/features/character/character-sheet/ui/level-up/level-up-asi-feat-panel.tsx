@@ -16,30 +16,12 @@ import { useFeatOptions } from "@/features/catalog/feat-catalog/api/use-feat-opt
 import { meetsFeatRequirements } from "@/features/catalog/feat-catalog/lib/feat-eligibility";
 import { isGeneralFeatFightingStylePick } from "@/entities/feat/fighting-style-general-feat";
 import { FeatOptionsEditor } from "@/features/catalog/feat-catalog/ui/options/feat-options-editor";
-
-type FeatCatalogItem = Pick<
-  FeatSummary,
-  | "slug"
-  | "name"
-  | "repeatable"
-  | "categorySlug"
-  | "minimumLevel"
-  | "abilityPrerequisites"
-  | "requiresSpellcasting"
-  | "requiredArmorTrainingSlug"
-  | "requiresFightingStyle"
-  | "requiresWeaponMastery"
-  | "requiredFeatSlugs"
-  | "requiredSkillSlugs"
-  | "requiredSpeciesSlugs"
-  | "requiredWeaponProficiencySlugs"
-  | "requiredFeatOptions"
->;
+import { FeatChoicePreview } from "@/features/character/create-character/ui/steps/feats/feat-choice-preview";
 
 type LevelUpAsiFeatPanelProps = {
   character: CharacterDetail;
   featsPending: boolean;
-  feats: FeatCatalogItem[];
+  feats: FeatSummary[];
   featNameBySlug: Record<string, string>;
   newFeatInstance: CharacterFeat | null;
   asiMode: LevelUpAsiDistributionMode | "";
@@ -79,6 +61,7 @@ export function LevelUpAsiFeatPanel({
     !!selectedFeatSlug,
   );
   const hasFeatOptions = (selectedFeatOptionDefs.data?.data.length ?? 0) > 0;
+  const selectedFeat = feats.find((feat) => feat.slug === selectedFeatSlug);
   const nextLevel = character.level + 1;
   const skillKinds = skillChoiceKinds();
   const skillSlugs = [
@@ -174,6 +157,13 @@ export function LevelUpAsiFeatPanel({
             }}
           />
         )}
+        {selectedFeatSlug ? (
+          <FeatChoicePreview
+            feat={selectedFeat}
+            loading={featsPending}
+            subtitle="Talento"
+          />
+        ) : null}
         {hasFeatOptions && newFeatInstance ? (
           <FeatOptionsEditor
             characterFeats={[newFeatInstance]}

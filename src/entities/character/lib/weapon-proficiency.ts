@@ -1,5 +1,5 @@
 /**
- * Espelha dnd-api `game/sheet/domain/weapon-attack.ts` → `isProficient`
+ * Espelha dnd-api `weapon-attack-predicates.ts` → `isProficient`
  * (categorias + grupos; feats/estilos martial-weapon-training e advanced-weapon-proficiency).
  */
 
@@ -8,8 +8,11 @@ const MARTIAL_PROFICIENCY = "armas-marciais";
 const ADVANCED_PROFICIENCY = "armas-avancadas";
 const MARTIAL_LIGHT_PROFICIENCY = "armas-marciais-leves";
 const MARTIAL_RANGED_PROFICIENCY = "armas-marciais-a-distancia";
+/** PHB 2024 Ladino: marciais com Acuidade ou Leve. */
+const MARTIAL_FINESSE_OR_LIGHT_PROFICIENCY =
+  "armas-marciais-acuidade-ou-leves";
 
-/** Proficiências específicas (seeds S027/S031) → item slug. */
+/** Proficiências específicas (seeds) → item slug. */
 const SPECIFIC_WEAPON_PROFICIENCY: Record<string, string> = {
   adagas: "dagger",
   dardos: "dart",
@@ -20,6 +23,7 @@ const SPECIFIC_WEAPON_PROFICIENCY: Record<string, string> = {
   "espada-longa": "longsword",
   rapieira: "rapier",
   "espada-curta": "shortsword",
+  machadinhas: "handaxe",
 };
 
 export type WeaponProficiencyPiece = {
@@ -52,6 +56,12 @@ function expandProficiencySlugs(
   return proficiencySlugs;
 }
 
+function hasFinesseOrLight(propertySlugs: readonly string[]): boolean {
+  return (
+    propertySlugs.includes("finesse") || propertySlugs.includes("light")
+  );
+}
+
 export function isWeaponProficient(
   piece: WeaponProficiencyPiece,
   weaponProficiencySlugs: readonly string[],
@@ -73,22 +83,29 @@ export function isWeaponProficient(
     ) {
       return true;
     }
+    if (
+      slug === MARTIAL_FINESSE_OR_LIGHT_PROFICIENCY &&
+      piece.category === "martial" &&
+      hasFinesseOrLight(piece.propertySlugs)
+    ) {
+      return true;
+    }
   }
 
   if (piece.category === "simple") {
-    return weaponProficiencySlugs.includes(SIMPLE_PROFICIENCY);
+    return proficiencySlugs.includes(SIMPLE_PROFICIENCY);
   }
   if (piece.category === "martial") {
-    if (weaponProficiencySlugs.includes(MARTIAL_PROFICIENCY)) return true;
+    if (proficiencySlugs.includes(MARTIAL_PROFICIENCY)) return true;
     if (
-      weaponProficiencySlugs.includes(MARTIAL_RANGED_PROFICIENCY) &&
+      proficiencySlugs.includes(MARTIAL_RANGED_PROFICIENCY) &&
       piece.propertySlugs.includes("ammunition")
     ) {
       return true;
     }
   }
   if (piece.category === "advanced") {
-    return weaponProficiencySlugs.includes(ADVANCED_PROFICIENCY);
+    return proficiencySlugs.includes(ADVANCED_PROFICIENCY);
   }
   return false;
 }

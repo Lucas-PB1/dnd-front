@@ -34,7 +34,10 @@ export function CatalogFilters({
 
   return (
     <div
-      className={cn("flex flex-wrap items-end gap-3", className)}
+      className={cn(
+        "grid grid-cols-2 items-end gap-3 sm:grid-cols-3 md:grid-cols-4",
+        className,
+      )}
       role="group"
       aria-label="Filtros do catálogo"
     >
@@ -42,14 +45,14 @@ export function CatalogFilters({
         const id = `catalog-filter-${field.key}`;
         const value = values[field.key] ?? "";
         return (
-          <label key={field.key} className="flex min-w-36 flex-col gap-1">
+          <label key={field.key} className="flex min-w-0 flex-col gap-1">
             <span className="text-[0.65rem] font-medium tracking-wider text-muted-foreground uppercase">
               {field.label}
             </span>
             <SearchableSelect
               id={id}
               value={value}
-              className="h-10"
+              className="h-10 w-full"
               options={[
                 { value: "", label: field.allLabel ?? "Todos" },
                 ...field.options,
