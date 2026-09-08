@@ -1,8 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeftIcon, PhotoIcon } from "@heroicons/react/24/outline";
-import { useRef } from "react";
+import {
+  ArrowLeftIcon,
+  LinkIcon,
+  PhotoIcon,
+} from "@heroicons/react/24/outline";
+import { useRef, useState } from "react";
 
 import { useAuth } from "@/features/auth/model";
 import { AVATAR_ACCEPT } from "@/features/auth/model/profile.schema";
@@ -181,6 +185,7 @@ export function DuelDetailView({ duelId }: { duelId: string }) {
   const conditionMutation = useDuelCondition(duelId);
   const forfeitMutation = useForfeitDuel(duelId);
   const portraitMutation = useUploadDuelPortrait(duelId);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   if (isPending) {
     return (
@@ -199,11 +204,27 @@ export function DuelDetailView({ duelId }: { duelId: string }) {
     );
   }
 
+  const isSpectator = data.viewerRole === "spectator";
+  const isParticipant = !isSpectator;
   const mine = data.combatants.find((c) => c.userId === user?.id);
   const waitingOpponent = data.members.length < 2;
   const lobbyOpen = data.status === "open" || data.status === "ready";
   const inCombat = data.status === "active";
   const finished = data.status === "finished" || data.status === "cancelled";
+
+  async function copySpectatorLink() {
+    const url =
+      typeof window !== "undefined"
+        ? `${window.location.origin}/duels/${duelId}`
+        : `/duels/${duelId}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setLinkCopied(true);
+      window.setTimeout(() => setLinkCopied(false), 2000);
+    } catch {
+      setLinkCopied(false);
+    }
+  }
 
   return (
     <div className="space-y-8" data-cy="duel-detail">
@@ -219,6 +240,14 @@ export function DuelDetailView({ duelId }: { duelId: string }) {
           Duelos
         </Link>
         <StatusChip status={data.status} />
+        {isSpectator ? (
+          <span
+            className="inline-flex rounded-md border border-border/80 bg-muted/30 px-2 py-0.5 text-xs font-medium text-muted-foreground"
+            data-cy="duel-spectator-badge"
+          >
+            Espectador
+          </span>
+        ) : null}
         {inCombat ? (
           <span className="text-sm text-muted-foreground">
             Rodada {data.round}
@@ -230,7 +259,13 @@ export function DuelDetailView({ duelId }: { duelId: string }) {
         <h1 className="font-heading text-2xl font-semibold tracking-tight">
           {inCombat || finished ? "Arena" : "Lobby do duelo"}
         </h1>
-        {lobbyOpen ? (
+        {isSpectator ? (
+          <p className="text-sm text-muted-foreground" role="status">
+            Você está assistindo — sem ações de combate. A página atualiza
+            sozinha.
+          </p>
+        ) : null}
+        {lobbyOpen && isParticipant ? (
           <p className="text-sm text-muted-foreground">
             Código{" "}
             <span
@@ -240,10 +275,25 @@ export function DuelDetailView({ duelId }: { duelId: string }) {
               {data.inviteCode}
             </span>
             {waitingOpponent
-              ? " — compartilhe com a outra conta."
+              ? " — compartilhe com a outra conta para jogar."
               : " — ambos no lobby; marquem prontos para iniciar."}
           </p>
         ) : null}
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            data-cy="duel-copy-spectator-link"
+            onClick={() => void copySpectatorLink()}
+          >
+            <LinkIcon className="size-3.5" aria-hidden />
+            {linkCopied ? "Link copiado" : "Copiar link de espectador"}
+          </Button>
+          <p className="text-xs text-muted-foreground">
+            Outras contas logadas abrem o link só para assistir.
+          </p>
+        </div>
         <p className="text-sm text-muted-foreground">
           Sem mapa: distância, cobertura e voo não entram neste x1.
         </p>
@@ -253,7 +303,7 @@ export function DuelDetailView({ duelId }: { duelId: string }) {
             role="status"
           >
             Arena em escuridão mágica
-            {data.seesInMagicalDarkness
+            {isParticipant && data.seesInMagicalDarkness
               ? " — você enxerga (Visão do Diabo)."
               : " — Visão no Escuro não atravessa."}
           </p>
@@ -265,8 +315,12 @@ export function DuelDetailView({ duelId }: { duelId: string }) {
               : data.endReason === "forfeit"
                 ? "Vitória por desistência."
                 : "Duelo encerrado."}
-            {data.winnerUserId === user?.id ? " Você venceu." : null}
-            {data.winnerUserId && data.winnerUserId !== user?.id
+            {isParticipant && data.winnerUserId === user?.id
+              ? " Você venceu."
+              : null}
+            {isParticipant &&
+            data.winnerUserId &&
+            data.winnerUserId !== user?.id
               ? " O oponente venceu."
               : null}
           </p>
@@ -289,7 +343,9 @@ export function DuelDetailView({ duelId }: { duelId: string }) {
             portraitUrl={c.portraitUrl}
             isTurn={inCombat && data.turnCharacterId === c.characterId}
             isWinner={finished && data.winnerUserId === c.userId}
-            canUploadPortrait={c.userId === user?.id && !finished}
+            canUploadPortrait={
+              isParticipant && c.userId === user?.id && !finished
+            }
             uploadPending={portraitMutation.isPending}
             onPickPortrait={(file) =>
               portraitMutation.mutate({ characterId: c.characterId, file })
@@ -310,7 +366,7 @@ export function DuelDetailView({ duelId }: { duelId: string }) {
         </p>
       ) : null}
 
-      {lobbyOpen && mine ? (
+      {lobbyOpen && isParticipant && mine ? (
         <div className="flex flex-wrap gap-3">
           <Button
             data-cy="duel-ready"
@@ -340,7 +396,7 @@ export function DuelDetailView({ duelId }: { duelId: string }) {
         </div>
       ) : null}
 
-      {inCombat ? (
+      {inCombat && isParticipant ? (
         <section className="space-y-6">
           <div className="space-y-3">
             <h2 className="font-heading text-lg font-semibold">Armas</h2>
@@ -484,6 +540,12 @@ export function DuelDetailView({ duelId }: { duelId: string }) {
             Desistir
           </Button>
         </section>
+      ) : null}
+
+      {inCombat && isSpectator ? (
+        <p className="text-sm text-muted-foreground">
+          Combate em andamento — acompanhe o log abaixo.
+        </p>
       ) : null}
 
       {data.combatLog.length > 0 ? (

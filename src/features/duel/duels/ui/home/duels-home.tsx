@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ArrowRightIcon,
+  EyeIcon,
   KeyIcon,
   PlusCircleIcon,
 } from "@heroicons/react/24/outline";
@@ -113,6 +115,7 @@ function DuelsListSkeleton() {
 }
 
 export function DuelsHome() {
+  const router = useRouter();
   const { data, isPending, isError, error } = useDuels();
   const characters = useCharacters();
   const create = useCreateDuel();
@@ -120,6 +123,8 @@ export function DuelsHome() {
   const [createCharacterId, setCreateCharacterId] = useState("");
   const [joinCharacterId, setJoinCharacterId] = useState("");
   const [inviteCode, setInviteCode] = useState("");
+  const [watchInput, setWatchInput] = useState("");
+  const [watchError, setWatchError] = useState<string | null>(null);
 
   const characterOptions = useMemo(
     () =>
@@ -145,6 +150,24 @@ export function DuelsHome() {
     });
   }
 
+  function onWatch(event: FormEvent) {
+    event.preventDefault();
+    setWatchError(null);
+    const raw = watchInput.trim();
+    if (!raw) return;
+    const fromUrl = raw.match(
+      /\/duels\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i,
+    );
+    const id = (fromUrl?.[1] ?? raw).toLowerCase();
+    const uuidRe =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+    if (!uuidRe.test(id)) {
+      setWatchError("Cole o link do duelo ou o id (UUID).");
+      return;
+    }
+    router.push(`/duels/${id}`);
+  }
+
   return (
     <div className="space-y-10">
       <div className="grid gap-8 lg:grid-cols-2 lg:gap-0">
@@ -159,7 +182,7 @@ export function DuelsHome() {
           </h2>
           <p className="text-sm text-muted-foreground">
             Escolha seu personagem e compartilhe o código com o oponente (outra
-            conta).
+            conta). Use o link da arena para espectadores.
           </p>
           <label className="flex flex-col gap-1 text-sm">
             <span className="text-muted-foreground">Seu personagem</span>
@@ -252,6 +275,38 @@ export function DuelsHome() {
           ) : null}
         </form>
       </div>
+
+      <form
+        data-cy="duel-watch-form"
+        onSubmit={onWatch}
+        className="space-y-3 rounded-xl border border-border/80 p-4"
+      >
+        <h2 className="inline-flex items-center gap-2 font-heading text-lg font-semibold">
+          <EyeIcon className="size-5 text-muted-foreground" aria-hidden />
+          Assistir com link
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          Cole o link de espectador (ou o id do duelo). Conta logada necessária;
+          só leitura.
+        </p>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Input
+            data-cy="duel-watch-input"
+            value={watchInput}
+            onChange={(e) => setWatchInput(e.target.value)}
+            placeholder="https://…/duels/uuid ou uuid"
+            className="sm:flex-1"
+          />
+          <Button type="submit" variant="outline" disabled={!watchInput.trim()}>
+            Assistir
+          </Button>
+        </div>
+        {watchError ? (
+          <p className="text-sm text-destructive" role="alert">
+            {watchError}
+          </p>
+        ) : null}
+      </form>
 
       <section className="space-y-3">
         <h2 className="font-heading text-lg font-semibold">Seus duelos</h2>

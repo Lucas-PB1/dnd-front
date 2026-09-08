@@ -76,6 +76,7 @@ export type DuelSummary = {
 };
 
 export type DuelDetail = DuelSummary & {
+  viewerRole: "participant" | "spectator";
   members: DuelMember[];
   combatants: DuelCombatant[];
   turnCharacterId: string | null;
