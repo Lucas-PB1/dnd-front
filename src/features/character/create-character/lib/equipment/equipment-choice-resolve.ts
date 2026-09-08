@@ -43,6 +43,11 @@ const FIXED_CHOICE_MAP: Record<
     quantity: 2,
     label: "2× Roupas, Fantasia",
   },
+  Costume: {
+    itemSlug: "roupas-fantasia",
+    quantity: 1,
+    label: "Roupas, Fantasia",
+  },
   "2 Algibeiras": {
     itemSlug: "algibeira",
     quantity: 2,

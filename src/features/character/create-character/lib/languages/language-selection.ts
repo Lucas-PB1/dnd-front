@@ -53,6 +53,7 @@ const DEFAULT_GRANTED = ["common"];
 /**
  * Concessões do antecedente. `languageChoiceCount` ausente → 0
  * (não inventar 2; a cota da espécie entra em `languageQuota`).
+ * Lista vazia da API = 0 fixos (não inventar Comum).
  */
 export function backgroundLanguageGrant(input?: {
   grantedSlugs?: string[];
@@ -61,8 +62,9 @@ export function backgroundLanguageGrant(input?: {
   if (!input) {
     return { grantedSlugs: DEFAULT_GRANTED, choiceCount: 0 };
   }
-  const grantedSlugs =
-    input.grantedSlugs?.length ? [...input.grantedSlugs] : DEFAULT_GRANTED;
+  const grantedSlugs = Array.isArray(input.grantedSlugs)
+    ? [...input.grantedSlugs]
+    : DEFAULT_GRANTED;
   const choiceCount = input.languageChoiceCount ?? 0;
   return { grantedSlugs, choiceCount };
 }

@@ -70,6 +70,23 @@ describe("language-selection", () => {
     });
   });
 
+  it("does not invent Common when API returns empty granted list", () => {
+    expect(
+      languageQuota({
+        grantedSlugs: [],
+        languageChoiceCount: 0,
+        speciesSlug: "human",
+      }),
+    ).toEqual({
+      granted: [],
+      choiceCount: SPECIES_LANGUAGE_CHOICE_COUNT,
+      maxTotal: SPECIES_LANGUAGE_CHOICE_COUNT,
+      backgroundChoiceCount: 0,
+      speciesChoiceCount: SPECIES_LANGUAGE_CHOICE_COUNT,
+      classChoiceCount: 0,
+    });
+  });
+
   it("lets the player pick species extras when BG choice is 0", () => {
     const first = toggleLanguageSelection(
       ["common"],
