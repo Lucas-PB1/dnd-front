@@ -105,6 +105,7 @@ export function BeyondShopDialog({
   const [cart, setCart] = useState<BeyondShopCartLine[]>([]);
   const [skipPayment, setSkipPayment] = useState(false);
   const viewed = useRef(new Set<string>());
+  const checkoutLock = useRef(false);
   const { accessToken } = useGameAuth("/characters");
   const debouncedSearch = useDebouncedValue(search, 300);
 
@@ -285,12 +286,19 @@ export function BeyondShopDialog({
   }
 
   async function handleCheckout() {
-    if (cart.length === 0 || insufficient) return;
-    await onCheckout({
-      lines: cart,
-      pay: chargeApplies ? !skipPayment : false,
-    });
-    handleOpenChange(false);
+    if (cart.length === 0 || insufficient || pending || checkoutLock.current) {
+      return;
+    }
+    checkoutLock.current = true;
+    try {
+      await onCheckout({
+        lines: cart,
+        pay: chargeApplies ? !skipPayment : false,
+      });
+      handleOpenChange(false);
+    } finally {
+      checkoutLock.current = false;
+    }
   }
 
   const title = chargeApplies ? "Comprar" : "Adicionar à mochila";
