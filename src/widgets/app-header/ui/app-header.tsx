@@ -2,6 +2,7 @@
 
 import {
   Bars3Icon,
+  BoltIcon,
   BookOpenIcon,
   MapIcon,
   UserGroupIcon,
@@ -29,6 +30,7 @@ const NAV_LINKS: ReadonlyArray<{
   { href: "/compendium", label: "Compêndio", icon: BookOpenIcon },
   { href: "/characters", label: "Fichas", icon: UserGroupIcon },
   { href: "/campaigns", label: "Campanhas", icon: MapIcon },
+  { href: "/duels", label: "Duelos", icon: BoltIcon },
 ];
 
 function NavLink({

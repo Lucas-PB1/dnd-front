@@ -86,6 +86,7 @@ export function SpeciesTraitChoiceField({
               <input
                 type="radio"
                 name={`species-${kind}`}
+                data-cy={`species-choice-${kind}-${opt.choiceSlug}`}
                 checked={selected === opt.choiceSlug}
                 onChange={() => onSelect(kind, opt.choiceSlug)}
                 className="size-4"

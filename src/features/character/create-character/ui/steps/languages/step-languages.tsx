@@ -197,6 +197,7 @@ export function StepLanguages({ control, setValue }: StepLanguagesProps) {
                   >
                     <input
                       type="checkbox"
+                      data-cy={`language-${lang.slug}`}
                       checked={checked}
                       disabled={atLimit}
                       onChange={() => toggle(lang.slug)}

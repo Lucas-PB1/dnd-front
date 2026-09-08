@@ -271,6 +271,7 @@ export function EldritchInvocationPicker({
                 Adicionar invocação
               </label>
               <SearchableSelect
+                id="eldritch-invocation-draft"
                 value={draft}
                 onValueChange={setDraft}
                 options={options}
@@ -281,6 +282,7 @@ export function EldritchInvocationPicker({
             <Button
               type="button"
               size="sm"
+              data-cy="eldritch-invocation-add"
               disabled={disabled || !draft}
               onClick={add}
             >

@@ -30,7 +30,10 @@ export function WizardStepIndicator({
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="font-heading text-lg font-semibold tracking-tight">
+        <p
+          className="font-heading text-lg font-semibold tracking-tight"
+          data-cy="wizard-step-title"
+        >
           {current?.label ?? "—"}
           <span className="ml-2 text-sm font-normal text-muted-foreground">
             {currentIndex + 1}/{steps.length}

@@ -70,9 +70,10 @@ export function CampaignMembersSection({
   removeMember,
 }: CampaignMembersSectionProps) {
   return (
-    <section className="space-y-3">
+    <section className="space-y-3" data-cy="campaign-members">
       <h2 className="font-heading text-lg font-semibold">Membros</h2>
       <ul
+        data-cy="campaign-members-list"
         className={cn(
           "divide-y divide-border overflow-hidden rounded-xl border border-border/80 bg-card/45",
           motion.stagger,

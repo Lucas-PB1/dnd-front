@@ -20,6 +20,11 @@ type SubclassOptionsEditorProps = {
   optionsLevel: number;
   /** Se definido, só mostra estes optionKeys. */
   optionKeys?: readonly string[];
+  /**
+   * Slug em draft no level-up (ainda não salvo na ficha).
+   * Sem isso, opções do unlock (ex.: Coração Selvagem nv. 3) não aparecem.
+   */
+  subclassSlugOverride?: string;
   value: SubclassOption[];
   onChange: (next: SubclassOption[]) => void;
 };
@@ -29,10 +34,12 @@ export function SubclassOptionsEditor({
   character,
   optionsLevel,
   optionKeys,
+  subclassSlugOverride,
   value,
   onChange,
 }: SubclassOptionsEditorProps) {
-  const subclassSlug = character.subclassSlug ?? "";
+  const subclassSlug =
+    subclassSlugOverride?.trim() || character.subclassSlug || "";
   const enabled = !!subclassSlug;
   const optionsQuery = useSubclassOptions(subclassSlug, optionsLevel, enabled);
   const mechanicsQuery = useSubclassMechanics(subclassSlug, enabled);

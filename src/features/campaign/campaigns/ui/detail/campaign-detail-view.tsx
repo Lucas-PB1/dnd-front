@@ -127,7 +127,10 @@ export function CampaignDetailView({ campaignId }: { campaignId: string }) {
   }
 
   return (
-    <div className={cn("space-y-8", motion.enter)}>
+    <div
+      className={cn("space-y-8", motion.enter)}
+      data-cy="campaign-detail"
+    >
       <header className="relative overflow-hidden rounded-xl border border-border bg-card/50 shadow-sm backdrop-blur-sm">
         <div
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,color-mix(in_oklch,var(--muted)_75%,transparent),transparent_55%),radial-gradient(ellipse_at_bottom_right,color-mix(in_oklch,var(--secondary)_16%,transparent),transparent_50%)]"
@@ -149,6 +152,7 @@ export function CampaignDetailView({ campaignId }: { campaignId: string }) {
                   type="button"
                   size="sm"
                   variant="outline"
+                  data-cy="campaign-edit"
                   onClick={startEdit}
                 >
                   Editar
@@ -158,14 +162,20 @@ export function CampaignDetailView({ campaignId }: { campaignId: string }) {
           </div>
 
           {editing ? (
-            <form onSubmit={onSaveMeta} className="space-y-2">
+            <form
+              data-cy="campaign-edit-form"
+              onSubmit={onSaveMeta}
+              className="space-y-2"
+            >
               <Input
+                data-cy="campaign-edit-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 maxLength={120}
                 required
               />
               <textarea
+                data-cy="campaign-edit-description"
                 className="min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -173,7 +183,12 @@ export function CampaignDetailView({ campaignId }: { campaignId: string }) {
                 placeholder="Descrição (opcional)"
               />
               <div className="flex gap-2">
-                <Button type="submit" size="sm" disabled={update.isPending}>
+                <Button
+                  type="submit"
+                  size="sm"
+                  data-cy="campaign-edit-save"
+                  disabled={update.isPending}
+                >
                   Salvar
                 </Button>
                 <Button
@@ -190,17 +205,26 @@ export function CampaignDetailView({ campaignId }: { campaignId: string }) {
             <div className="flex min-w-0 flex-wrap items-start gap-3">
               <SealMark className="size-10 shrink-0 text-secondary sm:size-11" />
               <div className="min-w-0 space-y-1.5">
-                <h1 className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
+                <h1
+                  data-cy="campaign-title"
+                  className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl"
+                >
                   {data.name}
                 </h1>
                 <InkFlourish className="h-3 w-36 text-secondary/60 sm:w-44" />
                 <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-                  <span className="inline-flex rounded-md border border-secondary/50 bg-secondary/10 px-2 py-0.5 text-xs font-medium">
+                  <span
+                    data-cy="campaign-role"
+                    className="inline-flex rounded-md border border-secondary/50 bg-secondary/10 px-2 py-0.5 text-xs font-medium"
+                  >
                     {campaignRoleLabel(data.myRole)}
                   </span>
                 </div>
                 {data.description ? (
-                  <p className="max-w-2xl pt-1 text-sm text-muted-foreground">
+                  <p
+                    data-cy="campaign-description"
+                    className="max-w-2xl pt-1 text-sm text-muted-foreground"
+                  >
                     {data.description}
                   </p>
                 ) : null}
@@ -218,7 +242,10 @@ export function CampaignDetailView({ campaignId }: { campaignId: string }) {
       </header>
 
       {canOpenEncounter ? (
-        <section className="relative overflow-hidden rounded-xl border border-secondary/40 bg-secondary/8 px-4 py-4 sm:px-5 sm:py-5">
+        <section
+          data-cy="campaign-encounter-section"
+          className="relative overflow-hidden rounded-xl border border-secondary/40 bg-secondary/8 px-4 py-4 sm:px-5 sm:py-5"
+        >
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="space-y-1">
               <h2 className="inline-flex items-center gap-2 font-heading text-lg font-semibold">
@@ -231,6 +258,7 @@ export function CampaignDetailView({ campaignId }: { campaignId: string }) {
             </div>
             <Link
               href={`/campaigns/${campaignId}/encounter`}
+              data-cy="campaign-open-encounter"
               className={cn(
                 buttonVariants({ size: "default" }),
                 "inline-flex shrink-0 items-center gap-1.5",
@@ -244,12 +272,13 @@ export function CampaignDetailView({ campaignId }: { campaignId: string }) {
       ) : null}
 
       {isDm ? (
-        <section className="space-y-3">
+        <section className="space-y-3" data-cy="campaign-inventory-settings">
           <h2 className="font-heading text-lg font-semibold">Inventário</h2>
           <div className="rounded-xl border border-border/80 bg-card/45 px-4 py-3">
             <label className="flex items-start gap-2 text-sm">
               <input
                 type="checkbox"
+                data-cy="campaign-skip-payment"
                 className="mt-0.5 size-4 accent-secondary"
                 checked={data.allowPlayerSkipPayment}
                 disabled={update.isPending}

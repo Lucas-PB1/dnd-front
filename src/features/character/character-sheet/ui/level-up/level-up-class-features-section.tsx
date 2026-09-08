@@ -24,6 +24,8 @@ type LevelUpClassFeaturesSectionProps = {
   subclassRequired: boolean;
   subclassUnlockLevel?: number;
   newSubclassOptionSlots: LevelUpSubclassOptionSlot[];
+  /** Draft da trilha no unlock — catálogo de opções ainda carregando. */
+  subclassOptionsLoading?: boolean;
   newExpertiseSlots: LevelUpClassExpertiseSlot[];
   newMasterySlots: LevelUpWeaponMasterySlot[];
   subclassSlug: string;
@@ -41,6 +43,7 @@ export function LevelUpClassFeaturesSection({
   subclassRequired,
   subclassUnlockLevel,
   newSubclassOptionSlots,
+  subclassOptionsLoading = false,
   newExpertiseSlots,
   newMasterySlots,
   subclassSlug,
@@ -77,6 +80,15 @@ export function LevelUpClassFeaturesSection({
         />
       ) : null}
 
+      {subclassOptionsLoading ? (
+        <p
+          className="text-sm text-muted-foreground"
+          data-cy="level-up-subclass-options-loading"
+        >
+          Carregando opções de subclasse…
+        </p>
+      ) : null}
+
       {newSubclassOptionSlots.length > 0 ? (
         <div className="space-y-3 rounded-md border border-border bg-muted/30 px-3 py-3 text-sm">
           <div className="space-y-0.5">
@@ -87,6 +99,9 @@ export function LevelUpClassFeaturesSection({
           </div>
           <SubclassOptionsEditor
             character={character}
+            subclassSlugOverride={
+              subclassRequired ? subclassSlug : undefined
+            }
             optionsLevel={nextLevel}
             optionKeys={subclassOptionKeys}
             value={subclassOptions}

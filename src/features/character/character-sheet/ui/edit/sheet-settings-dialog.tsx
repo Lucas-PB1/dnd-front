@@ -41,7 +41,10 @@ export function SheetSettingsDialog({
         if (!next) onClose();
       }}
     >
-      <DialogContent className="flex max-h-[min(92vh,52rem)] min-h-0 flex-col gap-0 overflow-hidden sm:max-w-3xl">
+      <DialogContent
+        data-cy="sheet-settings-dialog"
+        className="flex max-h-[min(92vh,52rem)] min-h-0 flex-col gap-0 overflow-hidden sm:max-w-3xl"
+      >
         <DialogHeader className="shrink-0">
           <DialogTitle>Ajustes</DialogTitle>
           <DialogDescription>

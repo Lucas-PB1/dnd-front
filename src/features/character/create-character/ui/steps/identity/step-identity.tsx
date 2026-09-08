@@ -151,6 +151,7 @@ export function StepIdentity({
             <FieldLabel htmlFor="name">Nome</FieldLabel>
             <Input
               id="name"
+              data-cy="character-name"
               autoComplete="off"
               placeholder="Ex.: Lyra Nocturna"
               aria-invalid={!!errors.name}

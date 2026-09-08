@@ -12,8 +12,14 @@
     "format:check": "prettier --check .",
     "test": "vitest",
     "test:run": "vitest run",
-    "test:e2e": "start-server-and-test dev http://127.0.0.1:3001 \"cypress run\"",
-    "test:e2e:open": "start-server-and-test dev http://127.0.0.1:3001 \"cypress open\"",
+    "test:e2e": "start-server-and-test dev http://localhost:3001 \"cypress run\"",
+    "test:e2e:open": "start-server-and-test dev http://localhost:3001 \"cypress open\"",
+    "test:e2e:character-lv1": "cypress run --spec cypress/e2e/character-create-level1.cy.ts",
+    "test:e2e:character-levelup": "cypress run --spec cypress/e2e/character-level-up-1-to-2.cy.ts",
+    "test:e2e:character-levelup-20": "cypress run --spec cypress/e2e/character-level-up-1-to-20.cy.ts",
+    "test:e2e:character-barbarian-subclass": "cypress run --spec cypress/e2e/character-barbarian-subclass-unlock.cy.ts",
+    "test:e2e:login": "cypress run --spec cypress/e2e/login.cy.ts",
+    "test:e2e:campaigns": "cypress run --spec cypress/e2e/campaigns.cy.ts",
     "prepare": "husky"
   },
   "dependencies": {

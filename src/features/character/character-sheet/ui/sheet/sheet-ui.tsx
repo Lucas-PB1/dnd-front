@@ -1,4 +1,9 @@
-import type { ComponentType, ReactNode, SVGProps } from "react";
+import type {
+  ComponentPropsWithoutRef,
+  ComponentType,
+  ReactNode,
+  SVGProps,
+} from "react";
 
 import { Badge } from "@/shared/design-system/primitives/badge";
 import { cn } from "@/shared/lib/utils";
@@ -120,12 +125,13 @@ export function SheetChip({
   hint,
   active = false,
   className,
+  ...props
 }: {
   children: ReactNode;
   hint?: ReactNode;
   active?: boolean;
   className?: string;
-}) {
+} & ComponentPropsWithoutRef<"span">) {
   return (
     <Badge
       variant={active ? "secondary" : "muted"}
@@ -135,6 +141,7 @@ export function SheetChip({
         active && "font-medium text-foreground",
         className,
       )}
+      {...props}
     >
       <span>{children}</span>
       {hint ? (

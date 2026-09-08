@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -21,6 +21,11 @@ export function LoginForm() {
   const nextPath = searchParams.get("next") ?? "/";
   const { signInWithPassword, isConfigured } = useAuth();
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
 
   const {
     register,
@@ -51,6 +56,9 @@ export function LoginForm() {
 
   return (
     <form
+      method="post"
+      data-cy="login-form"
+      data-hydrated={hydrated ? "true" : "false"}
       className="flex w-full flex-col gap-5"
       onSubmit={handleSubmit(async (values) => {
         setSubmitError(null);
@@ -72,6 +80,7 @@ export function LoginForm() {
           <FieldLabel htmlFor="email">E-mail</FieldLabel>
           <Input
             id="email"
+            data-cy="login-email"
             type="email"
             autoComplete="email"
             aria-invalid={!!errors.email}
@@ -84,6 +93,7 @@ export function LoginForm() {
           <FieldLabel htmlFor="password">Senha</FieldLabel>
           <Input
             id="password"
+            data-cy="login-password"
             type="password"
             autoComplete="current-password"
             aria-invalid={!!errors.password}
@@ -99,7 +109,12 @@ export function LoginForm() {
         </p>
       ) : null}
 
-      <Button type="submit" size="lg" disabled={isSubmitting}>
+      <Button
+        type="submit"
+        size="lg"
+        disabled={isSubmitting}
+        data-cy="login-submit"
+      >
         {isSubmitting ? "Entrando…" : "Entrar"}
       </Button>
 

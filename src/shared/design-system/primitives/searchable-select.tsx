@@ -79,6 +79,7 @@ export function SearchableSelect({
       ) : null}
       <Combobox.Trigger
         id={id}
+        data-cy={id}
         aria-invalid={ariaInvalid || undefined}
         aria-label={ariaLabel}
         onBlur={onBlur}

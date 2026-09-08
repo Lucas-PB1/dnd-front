@@ -9,10 +9,15 @@ import type { FeatOption } from "@/entities/character/sheet-types";
 import type { SubclassOption } from "@/entities/character/sheet-types";
 import type { LevelUpAsiDistributionMode } from "@/entities/character/session-types";
 import {
+  useClassSubclasses,
+  useSubclassOptions,
+} from "@/features/catalog/class-catalog/api/use-classes";
+import {
   useLevelUp,
   useLevelUpPreview,
 } from "@/features/character/character-sheet/api/use-character-progression";
 import { submitLevelUp } from "@/features/character/character-sheet/lib/level-up/submit-level-up";
+import { resolveLevelUpSubclassOptionSlots } from "@/features/character/character-sheet/lib/level-up/unlock-subclass-option-slots";
 import { LevelUpAsiFeatPanel } from "@/features/character/character-sheet/ui/level-up/level-up-asi-feat-panel";
 import { LevelUpClassFeaturesSection } from "@/features/character/character-sheet/ui/level-up/level-up-class-features-section";
 import {
@@ -67,6 +72,16 @@ export function LevelUpSection({
   const [asiPrimary, setAsiPrimary] = useState("");
   const [asiSecondary, setAsiSecondary] = useState("");
   const [levelUpError, setLevelUpError] = useState<string | undefined>();
+
+  const previewNextLevel = preview.data?.nextLevel ?? character.level + 1;
+  const subclassRequired = preview.data?.subclassRequired ?? false;
+  const draftSubclassOptions = useSubclassOptions(
+    subclassSlug,
+    previewNextLevel,
+    canLevelUp && subclassRequired && !!subclassSlug,
+  );
+  // Prefetch da lista enquanto o preview carrega (select no unlock).
+  useClassSubclasses(character.classSlug, canLevelUp && subclassRequired);
 
   const newFeatInstance = useMemo(() => {
     if (!selectedFeatSlug) return null;
@@ -124,7 +139,13 @@ export function LevelUpSection({
   const newMasterySlots = levelUpPreview.newWeaponMasterySlots ?? [];
   const newAlwaysPreparedSpells =
     levelUpPreview.newAlwaysPreparedSpells ?? [];
-  const newSubclassOptionSlots = levelUpPreview.newSubclassOptionSlots ?? [];
+  const newSubclassOptionSlots = resolveLevelUpSubclassOptionSlots({
+    previewSlots: levelUpPreview.newSubclassOptionSlots,
+    subclassRequired: levelUpPreview.subclassRequired,
+    draftSubclassSlug: subclassSlug,
+    draftOptionGroups: draftSubclassOptions.data?.data,
+    nextLevel: levelUpPreview.nextLevel,
+  });
   const newFeatures = levelUpPreview.newFeatures ?? [];
   const expertiseComplete = levelUpExpertiseComplete(
     newExpertiseSlots,
@@ -138,6 +159,10 @@ export function LevelUpSection({
     newSubclassOptionSlots.map((slot) => slot.optionKey),
     levelUpSubclassOptions,
   );
+  const subclassOptionsPending =
+    levelUpPreview.subclassRequired &&
+    !!subclassSlug &&
+    draftSubclassOptions.isPending;
 
   async function handleLevelUp() {
     setLevelUpError(undefined);
@@ -153,6 +178,7 @@ export function LevelUpSection({
       levelUpFeatOptions,
       levelUpClassOptions,
       levelUpSubclassOptions,
+      subclassOptionSlots: newSubclassOptionSlots,
       newFeatInstance,
       hasFeatOptions,
       featNameBySlug,
@@ -174,6 +200,12 @@ export function LevelUpSection({
       setLevelUpClassOptions(result.updated.classOptions ?? []);
       setLevelUpSubclassOptions(result.updated.subclassOptions ?? []);
     }
+  }
+
+  function handleSubclassChange(slug: string) {
+    setSubclassSlug(slug);
+    setLevelUpSubclassOptions([]);
+    setLevelUpError(undefined);
   }
 
   return (
@@ -227,10 +259,11 @@ export function LevelUpSection({
         subclassRequired={levelUpPreview.subclassRequired}
         subclassUnlockLevel={levelUpPreview.subclassUnlockLevel}
         newSubclassOptionSlots={newSubclassOptionSlots}
+        subclassOptionsLoading={subclassOptionsPending}
         newExpertiseSlots={newExpertiseSlots}
         newMasterySlots={newMasterySlots}
         subclassSlug={subclassSlug}
-        onSubclassChange={setSubclassSlug}
+        onSubclassChange={handleSubclassChange}
         classOptions={levelUpClassOptions}
         onClassOptionsChange={setLevelUpClassOptions}
         subclassOptions={levelUpSubclassOptions}
@@ -245,6 +278,7 @@ export function LevelUpSection({
           hasIncompleteFeatOptions ||
           hasIncompleteSubclassOptions ||
           (data.subclassRequired && !subclassSlug) ||
+          subclassOptionsPending ||
           (newExpertiseSlots.length > 0 && !expertiseComplete) ||
           (newMasterySlots.length > 0 && !masteryComplete) ||
           (newSubclassOptionSlots.length > 0 && !subclassOptionsReady)

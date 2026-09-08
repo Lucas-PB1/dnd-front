@@ -70,6 +70,7 @@ export function LevelUpSubmitFooter({
 
       <Button
         type="button"
+        data-cy="level-up-submit"
         disabled={disabled || levelUp.isPending}
         onClick={onSubmit}
       >
@@ -87,7 +88,10 @@ export function LevelUpSubmitFooter({
       ) : null}
 
       {levelUp.isSuccess ? (
-        <p className="text-sm text-green-700 dark:text-green-400">
+        <p
+          data-cy="level-up-success"
+          className="text-sm text-green-700 dark:text-green-400"
+        >
           Nível atualizado com sucesso.
         </p>
       ) : null}

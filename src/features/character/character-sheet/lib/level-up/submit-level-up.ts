@@ -35,6 +35,8 @@ type SubmitLevelUpInput = {
   levelUpFeatOptions: FeatOption[];
   levelUpClassOptions: ClassOption[];
   levelUpSubclassOptions: SubclassOption[];
+  /** Slots efetivos (preview ou draft no unlock da subclasse). */
+  subclassOptionSlots: { optionKey: string }[];
   newFeatInstance: CharacterFeat | null;
   hasFeatOptions: boolean;
   featNameBySlug: Record<string, string>;
@@ -59,6 +61,7 @@ export async function submitLevelUp({
   levelUpFeatOptions,
   levelUpClassOptions,
   levelUpSubclassOptions,
+  subclassOptionSlots,
   newFeatInstance,
   hasFeatOptions,
   featNameBySlug,
@@ -83,11 +86,10 @@ export async function submitLevelUp({
 
   const newExpertiseSlots = data.newClassExpertiseSlots ?? [];
   const newMasterySlots = data.newWeaponMasterySlots ?? [];
-  const newSubclassSlots = data.newSubclassOptionSlots ?? [];
   if (
-    newSubclassSlots.length > 0 &&
+    subclassOptionSlots.length > 0 &&
     !subclassOptionsComplete(
-      newSubclassSlots.map((slot) => slot.optionKey),
+      subclassOptionSlots.map((slot) => slot.optionKey),
       levelUpSubclassOptions,
     )
   ) {
@@ -147,7 +149,7 @@ export async function submitLevelUp({
     payload.classSkillSlugs = character.classSkillSlugs;
     payload.speciesChoices = character.speciesChoices;
   }
-  if (newSubclassSlots.length > 0) {
+  if (subclassOptionSlots.length > 0) {
     payload.subclassOptions = levelUpSubclassOptions;
   }
 

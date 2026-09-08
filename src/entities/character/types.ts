@@ -62,6 +62,7 @@ export type CharacterDetail = {
   effectiveAbilityScores?: AbilityScores;
   hitPointsMax: number | null;
   hitPointsCurrent: number | null;
+  portraitUrl?: string | null;
   proficiencyBonus: number;
   classSkillSlugs: string[];
   backgroundSkillSlugs: string[];
@@ -182,6 +183,7 @@ export type CharacterSummary = Pick<
   | "speciesSlug"
   | "backgroundSlug"
   | "subclassSlug"
+  | "portraitUrl"
   | "campaigns"
   | "createdAt"
   | "updatedAt"
@@ -209,6 +211,7 @@ export type CreateCharacterPayload = {
   backgroundToolItemSlug?: string;
   hitPointsMax?: number;
   hitPointsCurrent?: number;
+  portraitUrl?: string | null;
 } & CharacterSheetInput;
 
 /** Payload para PATCH /characters/:id — espelha UpdateCharacterDto */

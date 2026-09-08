@@ -57,6 +57,7 @@ export function ClassSkillsPickerSection({
               >
                 <input
                   type="checkbox"
+                  data-cy={`class-skill-${skill.slug}`}
                   checked={checked || fromBackground}
                   disabled={disabled}
                   onChange={() => onToggleSkill(skill.slug)}

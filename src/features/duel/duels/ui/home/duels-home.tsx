@@ -2,22 +2,23 @@
 
 import Link from "next/link";
 import {
+  ArrowRightIcon,
   KeyIcon,
   PlusCircleIcon,
-  ArrowRightIcon,
 } from "@heroicons/react/24/outline";
-import { FormEvent, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 
+import { useCharacters } from "@/features/character/characters/api/use-characters";
 import {
-  campaignRoleLabel,
-  type CampaignRole,
-  type CampaignSummary,
-} from "@/features/campaign/campaigns/api/campaigns.api";
+  duelStatusLabel,
+  type DuelStatus,
+  type DuelSummary,
+} from "@/features/duel/duels/api/duels.api";
 import {
-  useCampaigns,
-  useCreateCampaign,
-  useJoinCampaign,
-} from "@/features/campaign/campaigns/api/use-campaigns";
+  useCreateDuel,
+  useDuels,
+  useJoinDuel,
+} from "@/features/duel/duels/api/use-duels";
 import { motion } from "@/shared/lib/motion";
 import { cn } from "@/shared/lib/utils";
 import { EmptyMapMark } from "@/shared/ui/brand-marks";
@@ -26,28 +27,35 @@ import { EmptyState } from "@/shared/ui/empty-state";
 import { Input } from "@/shared/ui/input";
 import { SearchableSelect } from "@/shared/ui/searchable-select";
 
-function RoleChip({ role }: { role: CampaignRole }) {
+function StatusChip({ status }: { status: DuelStatus }) {
   return (
     <span
       className={cn(
         "inline-flex rounded-md border px-2 py-0.5 text-xs font-medium",
-        role === "dm"
+        status === "open"
           ? "border-secondary/50 bg-secondary/10 text-secondary"
-          : role === "assistant"
+          : status === "active" || status === "ready"
             ? "border-accent/40 bg-accent/10 text-accent"
             : "border-border/80 bg-muted/30 text-muted-foreground",
       )}
     >
-      {campaignRoleLabel(role)}
+      {duelStatusLabel(status)}
     </span>
   );
 }
 
-function CampaignRow({ campaign }: { campaign: CampaignSummary }) {
+function DuelRow({ duel }: { duel: DuelSummary }) {
+  const title =
+    duel.myCharacter && duel.opponentCharacter
+      ? `${duel.myCharacter.name} vs ${duel.opponentCharacter.name}`
+      : duel.myCharacter
+        ? `${duel.myCharacter.name} — aguardando oponente`
+        : "Duelo";
+
   return (
     <li
-      data-cy="campaign-row"
-      data-campaign-id={campaign.id}
+      data-cy="duel-row"
+      data-duel-id={duel.id}
       className={cn(
         "flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between",
         motion.hoverRow,
@@ -55,19 +63,19 @@ function CampaignRow({ campaign }: { campaign: CampaignSummary }) {
     >
       <div className="min-w-0 space-y-1.5">
         <div className="flex flex-wrap items-center gap-2">
-          <p className="font-heading font-medium" data-cy="campaign-row-name">
-            {campaign.name}
+          <p className="font-heading font-medium" data-cy="duel-row-name">
+            {title}
           </p>
-          <RoleChip role={campaign.myRole} />
+          <StatusChip status={duel.status} />
         </div>
         <p className="text-sm text-muted-foreground">
           Código{" "}
-          <span className="font-mono tracking-wide">{campaign.inviteCode}</span>
+          <span className="font-mono tracking-wide">{duel.inviteCode}</span>
         </p>
       </div>
       <Link
-        href={`/campaigns/${campaign.id}`}
-        data-cy="campaign-open"
+        href={`/duels/${duel.id}`}
+        data-cy="duel-open"
         className={cn(
           buttonVariants({ size: "sm", variant: "outline" }),
           "inline-flex items-center gap-1",
@@ -80,16 +88,19 @@ function CampaignRow({ campaign }: { campaign: CampaignSummary }) {
   );
 }
 
-function CampaignsListSkeleton() {
+function DuelsListSkeleton() {
   return (
     <ul
       className="divide-y divide-border overflow-hidden rounded-xl border border-border/80"
       role="status"
       aria-busy="true"
-      aria-label="Carregando campanhas"
+      aria-label="Carregando duelos"
     >
       {Array.from({ length: 3 }, (_, index) => (
-        <li key={index} className="flex items-center justify-between gap-3 px-4 py-3">
+        <li
+          key={index}
+          className="flex items-center justify-between gap-3 px-4 py-3"
+        >
           <div className="space-y-2">
             <div className="h-4 w-40 animate-pulse rounded bg-muted/40" />
             <div className="h-3 w-28 animate-pulse rounded bg-muted/30" />
@@ -101,53 +112,77 @@ function CampaignsListSkeleton() {
   );
 }
 
-export function CampaignsHome() {
-  const { data, isPending, isError, error } = useCampaigns();
-  const create = useCreateCampaign();
-  const join = useJoinCampaign();
-  const [name, setName] = useState("");
+export function DuelsHome() {
+  const { data, isPending, isError, error } = useDuels();
+  const characters = useCharacters();
+  const create = useCreateDuel();
+  const join = useJoinDuel();
+  const [createCharacterId, setCreateCharacterId] = useState("");
+  const [joinCharacterId, setJoinCharacterId] = useState("");
   const [inviteCode, setInviteCode] = useState("");
-  const [joinRole, setJoinRole] = useState<"player" | "assistant">("player");
+
+  const characterOptions = useMemo(
+    () =>
+      (characters.data ?? []).map((c) => ({
+        value: c.id,
+        label: `${c.name} · N${c.level} ${c.className}`,
+      })),
+    [characters.data],
+  );
 
   function onCreate(event: FormEvent) {
     event.preventDefault();
-    if (!name.trim()) return;
-    create.mutate({ name: name.trim() });
+    if (!createCharacterId) return;
+    create.mutate({ characterId: createCharacterId });
   }
 
   function onJoin(event: FormEvent) {
     event.preventDefault();
-    if (!inviteCode.trim()) return;
-    join.mutate({ inviteCode: inviteCode.trim(), role: joinRole });
+    if (!inviteCode.trim() || !joinCharacterId) return;
+    join.mutate({
+      inviteCode: inviteCode.trim(),
+      characterId: joinCharacterId,
+    });
   }
 
   return (
     <div className="space-y-10">
       <div className="grid gap-8 lg:grid-cols-2 lg:gap-0">
         <form
-          data-cy="campaign-create-form"
+          data-cy="duel-create-form"
           onSubmit={onCreate}
           className="space-y-3 lg:pr-10"
         >
           <h2 className="inline-flex items-center gap-2 font-heading text-lg font-semibold">
             <PlusCircleIcon className="size-5 text-secondary" aria-hidden />
-            Nova campanha
+            Novo duelo
           </h2>
           <p className="text-sm text-muted-foreground">
-            Você entra como mestre e recebe um código de convite.
+            Escolha seu personagem e compartilhe o código com o oponente (outra
+            conta).
           </p>
-          <Input
-            data-cy="campaign-create-name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Nome da campanha"
-            maxLength={120}
-            required
-          />
+          <label className="flex flex-col gap-1 text-sm">
+            <span className="text-muted-foreground">Seu personagem</span>
+            <SearchableSelect
+              id="duel-create-character"
+              aria-label="Personagem para criar duelo"
+              className="h-9"
+              value={createCharacterId}
+              options={characterOptions}
+              placeholder={
+                characters.isPending
+                  ? "Carregando fichas…"
+                  : "Selecione uma ficha"
+              }
+              onValueChange={setCreateCharacterId}
+            />
+          </label>
           <Button
             type="submit"
-            data-cy="campaign-create-submit"
-            disabled={create.isPending || !name.trim()}
+            data-cy="duel-create-submit"
+            disabled={
+              create.isPending || !createCharacterId || characters.isPending
+            }
           >
             {create.isPending ? "Criando…" : "Criar"}
           </Button>
@@ -161,7 +196,7 @@ export function CampaignsHome() {
         </form>
 
         <form
-          data-cy="campaign-join-form"
+          data-cy="duel-join-form"
           onSubmit={onJoin}
           className="space-y-3 border-t border-border pt-8 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-10"
         >
@@ -170,10 +205,10 @@ export function CampaignsHome() {
             Entrar com código
           </h2>
           <p className="text-sm text-muted-foreground">
-            Use o código que o mestre compartilhou com a mesa.
+            Use o código do oponente e escolha o personagem que vai lutar.
           </p>
           <Input
-            data-cy="campaign-join-code"
+            data-cy="duel-join-code"
             value={inviteCode}
             onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
             placeholder="Código do convite"
@@ -181,25 +216,30 @@ export function CampaignsHome() {
             required
           />
           <label className="flex flex-col gap-1 text-sm">
-            <span className="text-muted-foreground">Papel</span>
+            <span className="text-muted-foreground">Seu personagem</span>
             <SearchableSelect
-              id="campaign-join-role"
+              id="duel-join-character"
+              aria-label="Personagem para entrar no duelo"
               className="h-9"
-              value={joinRole}
-              options={[
-                { value: "player", label: "Jogador" },
-                { value: "assistant", label: "Auxiliar" },
-              ]}
-              onValueChange={(next) =>
-                setJoinRole(next as "player" | "assistant")
+              value={joinCharacterId}
+              options={characterOptions}
+              placeholder={
+                characters.isPending
+                  ? "Carregando fichas…"
+                  : "Selecione uma ficha"
               }
+              onValueChange={setJoinCharacterId}
             />
           </label>
           <Button
             type="submit"
-            variant="outline"
-            data-cy="campaign-join-submit"
-            disabled={join.isPending || !inviteCode.trim()}
+            data-cy="duel-join-submit"
+            disabled={
+              join.isPending ||
+              !inviteCode.trim() ||
+              !joinCharacterId ||
+              characters.isPending
+            }
           >
             {join.isPending ? "Entrando…" : "Entrar"}
           </Button>
@@ -213,31 +253,25 @@ export function CampaignsHome() {
         </form>
       </div>
 
-      <section className="space-y-3" data-cy="campaigns-list-section">
-        <h2 className="font-heading text-lg font-semibold">Minhas campanhas</h2>
-        {isPending ? <CampaignsListSkeleton /> : null}
+      <section className="space-y-3">
+        <h2 className="font-heading text-lg font-semibold">Seus duelos</h2>
+        {isPending ? <DuelsListSkeleton /> : null}
         {isError ? (
-          <p className="text-sm text-destructive">
+          <p className="text-sm text-destructive" role="alert">
             {error instanceof Error ? error.message : "Erro ao carregar"}
           </p>
         ) : null}
-        {!isPending && !isError && !data?.length ? (
+        {!isPending && !isError && (data?.length ?? 0) === 0 ? (
           <EmptyState
-            icon={<EmptyMapMark className="size-16" />}
-            title="Nenhuma campanha ainda"
-            description="Crie uma mesa como mestre ou entre com o código de convite de outra pessoa."
+            icon={<EmptyMapMark className="size-10" />}
+            title="Nenhum duelo ainda"
+            description="Crie um desafio ou entre com o código de outra conta."
           />
         ) : null}
-        {data?.length ? (
-          <ul
-            data-cy="campaigns-list"
-            className={cn(
-              "divide-y divide-border overflow-hidden rounded-xl border border-border/80 bg-card/45",
-              motion.stagger,
-            )}
-          >
-            {data.map((campaign) => (
-              <CampaignRow key={campaign.id} campaign={campaign} />
+        {!isPending && (data?.length ?? 0) > 0 ? (
+          <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border/80">
+            {data!.map((duel) => (
+              <DuelRow key={duel.id} duel={duel} />
             ))}
           </ul>
         ) : null}

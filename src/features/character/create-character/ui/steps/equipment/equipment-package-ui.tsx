@@ -89,6 +89,7 @@ export function PackageCard({
 }) {
   return (
     <label
+      data-cy={`${name}-card`}
       className={cn(
         "relative flex cursor-pointer flex-col gap-2.5 rounded-xl border p-3 text-sm transition-colors",
         selected

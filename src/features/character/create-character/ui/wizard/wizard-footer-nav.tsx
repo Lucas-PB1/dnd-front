@@ -18,24 +18,34 @@ export function WizardFooterNav({
   onCancel,
 }: WizardFooterNavProps) {
   return (
-    <div className="flex flex-wrap gap-2 pt-1">
+    <div className="flex flex-wrap gap-2 pt-1" data-cy="wizard-footer">
       {showBack ? (
-        <Button type="button" variant="outline" onClick={onBack}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onBack}
+          data-cy="wizard-back"
+        >
           Voltar
         </Button>
       ) : null}
 
       {!isLastStep ? (
-        <Button type="button" onClick={onNext}>
+        <Button type="button" onClick={onNext} data-cy="wizard-continue">
           Continuar
         </Button>
       ) : (
-        <Button type="submit" disabled={isSubmitting}>
+        <Button type="submit" disabled={isSubmitting} data-cy="wizard-submit">
           {isSubmitting ? "Criando ficha…" : "Criar ficha"}
         </Button>
       )}
 
-      <Button type="button" variant="ghost" onClick={onCancel}>
+      <Button
+        type="button"
+        variant="ghost"
+        onClick={onCancel}
+        data-cy="wizard-cancel"
+      >
         Cancelar
       </Button>
     </div>

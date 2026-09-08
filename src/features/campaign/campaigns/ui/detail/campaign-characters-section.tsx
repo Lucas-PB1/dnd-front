@@ -45,7 +45,7 @@ export function CampaignCharactersSection({
   const [selectedCharacterId, setSelectedCharacterId] = useState("");
 
   return (
-    <section className="space-y-3">
+    <section className="space-y-3" data-cy="campaign-characters">
       <div className="space-y-1">
         <h2 className="font-heading text-lg font-semibold">Personagens</h2>
         <p className="text-sm text-muted-foreground">
@@ -66,6 +66,7 @@ export function CampaignCharactersSection({
         />
       ) : (
         <ul
+          data-cy="campaign-characters-list"
           className={cn(
             "divide-y divide-border overflow-hidden rounded-xl border border-border/80 bg-card/45",
             motion.stagger,
@@ -74,13 +75,16 @@ export function CampaignCharactersSection({
           {characters.map((character) => (
             <li
               key={character.characterId}
+              data-cy="campaign-character-row"
               className={cn(
                 "flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between",
                 motion.hoverRow,
               )}
             >
               <div className="min-w-0">
-                <p className="font-medium">{character.name}</p>
+                <p className="font-medium" data-cy="campaign-character-name">
+                  {character.name}
+                </p>
                 <p className="text-sm text-muted-foreground">
                   Nv. {character.level} · {character.speciesSlug} ·{" "}
                   {character.classSlug}
@@ -99,6 +103,7 @@ export function CampaignCharactersSection({
                   type="button"
                   size="sm"
                   variant="ghost"
+                  data-cy="campaign-character-unlink"
                   disabled={unlink.isPending}
                   onClick={() => unlink.mutate(character.characterId)}
                 >
@@ -111,10 +116,14 @@ export function CampaignCharactersSection({
       )}
 
       {available.length > 0 ? (
-        <div className="flex flex-col gap-2 rounded-xl border border-border/70 bg-muted/15 p-3 sm:flex-row sm:items-end">
+        <div
+          data-cy="campaign-link-character-form"
+          className="flex flex-col gap-2 rounded-xl border border-border/70 bg-muted/15 p-3 sm:flex-row sm:items-end"
+        >
           <label className="flex flex-1 flex-col gap-1 text-sm">
             <span className="text-muted-foreground">Vincular minha ficha</span>
             <SearchableSelect
+              id="campaign-link-character"
               className="h-9"
               value={selectedCharacterId}
               placeholder="Escolher…"
@@ -130,6 +139,7 @@ export function CampaignCharactersSection({
           </label>
           <Button
             type="button"
+            data-cy="campaign-link-submit"
             disabled={!selectedCharacterId || link.isPending}
             onClick={() => {
               if (!selectedCharacterId) return;

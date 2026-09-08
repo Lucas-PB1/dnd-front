@@ -59,11 +59,16 @@ export function AuthNav() {
       <div className="flex flex-wrap items-center gap-2">
         <Link
           href="/login"
+          data-cy="auth-login-link"
           className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
         >
           Entrar
         </Link>
-        <Link href="/signup" className={cn(buttonVariants({ size: "sm" }))}>
+        <Link
+          href="/signup"
+          data-cy="auth-signup-link"
+          className={cn(buttonVariants({ size: "sm" }))}
+        >
           Criar conta
         </Link>
       </div>
@@ -93,6 +98,7 @@ export function AuthNav() {
           variant="ghost"
           size="sm"
           className="gap-1.5 px-1.5 sm:px-2"
+          data-cy="auth-menu"
           aria-expanded={open}
           aria-haspopup="menu"
           aria-controls={menuId}
@@ -196,6 +202,7 @@ export function AuthNav() {
                 <button
                   type="button"
                   role="menuitem"
+                  data-cy="auth-sign-out"
                   disabled={isSigningOut}
                   className="flex w-full items-center gap-2 rounded-sm px-2 py-2 text-sm text-destructive transition-colors hover:bg-destructive/10 disabled:opacity-60"
                   onClick={() => {

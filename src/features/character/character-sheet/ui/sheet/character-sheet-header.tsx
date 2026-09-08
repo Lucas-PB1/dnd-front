@@ -48,6 +48,7 @@ export function CharacterSheetHeader({
             <SourceEditionBadge live />
             <button
               type="button"
+              data-cy="sheet-settings"
               onClick={onOpenSettings}
               className={cn(
                 buttonVariants({ variant: "outline", size: "sm" }),
@@ -78,7 +79,9 @@ export function CharacterSheetHeader({
             aria-label="Identidade do personagem"
             className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5 sm:justify-end"
           >
-            <SheetChip active>Nv. {character.level}</SheetChip>
+            <SheetChip active data-cy="sheet-level">
+              Nv. {character.level}
+            </SheetChip>
             {labels.identity.speciesName ? (
               <SheetChip>{labels.identity.speciesName}</SheetChip>
             ) : null}
@@ -86,7 +89,9 @@ export function CharacterSheetHeader({
               <SheetChip>{labels.identity.className}</SheetChip>
             ) : null}
             {labels.identity.subclassName ? (
-              <SheetChip>{labels.identity.subclassName}</SheetChip>
+              <SheetChip data-cy="sheet-subclass">
+                {labels.identity.subclassName}
+              </SheetChip>
             ) : null}
             {labels.identity.backgroundName ? (
               <SheetChip>{labels.identity.backgroundName}</SheetChip>
