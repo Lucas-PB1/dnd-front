@@ -50,6 +50,7 @@ export type DuelWeaponOption = {
   itemName: string;
   mode: "melee" | "ranged";
   attackBonus: number;
+  masterySlug?: string | null;
 };
 
 export type DuelSpellOption = {
@@ -75,6 +76,36 @@ export type DuelSummary = {
   updatedAt: string;
 };
 
+export type DuelBloodStrikeOption = {
+  slug: string;
+  label: string;
+  costDice: string;
+};
+
+export type DuelBloodStrikePanel = {
+  available: boolean;
+  remaining: number;
+  max: number;
+  saveDc: number;
+  options: DuelBloodStrikeOption[];
+  canTakeLowerCost: boolean;
+  canArmament: boolean;
+  canExplosion: boolean;
+};
+
+export type DuelFighterPanel = {
+  available: boolean;
+  attacksPerAction: number;
+  turnAttacksRemaining: number | null;
+  tacticalMaster: boolean;
+  secondWindRemaining: number;
+  secondWindMax: number;
+  actionSurgeRemaining: number;
+  actionSurgeMax: number;
+  indomitableRemaining: number;
+  indomitableMax: number;
+};
+
 export type DuelDetail = DuelSummary & {
   viewerRole: "participant" | "spectator";
   members: DuelMember[];
@@ -84,6 +115,9 @@ export type DuelDetail = DuelSummary & {
   myTurn: boolean;
   myWeapons: DuelWeaponOption[];
   mySpells: DuelSpellOption[];
+  bloodStrike: DuelBloodStrikePanel | null;
+  fighter: DuelFighterPanel | null;
+  turnAttacksRemaining: number | null;
   arenaEffects: string[];
   arenaEffectSourceCharacterId: string | null;
   seesInMagicalDarkness: boolean;
@@ -154,7 +188,15 @@ export async function setDuelReady(
 export async function attackInDuel(
   accessToken: string,
   duelId: string,
-  payload: { itemSlug: string; mode: "melee" | "ranged" },
+  payload: {
+    itemSlug: string;
+    mode: "melee" | "ranged";
+    bloodStrike?: { optionSlug: string; takeLowerBloodCost?: boolean };
+    damageTypeOverride?: "acid" | "necrotic" | "poison";
+    bloodExplosionOnMiss?: boolean;
+    masteryOverrideSlug?: "push" | "sap" | "slow";
+    graze?: boolean;
+  },
 ) {
   return gameFetch<DuelDetail>(`/duels/${duelId}/attack`, accessToken, {
     method: "POST",
@@ -190,6 +232,18 @@ export async function changeDuelCondition(
 
 export async function forfeitDuel(accessToken: string, duelId: string) {
   return gameFetch<DuelDetail>(`/duels/${duelId}/forfeit`, accessToken, {
+    method: "POST",
+  });
+}
+
+export async function secondWindInDuel(accessToken: string, duelId: string) {
+  return gameFetch<DuelDetail>(`/duels/${duelId}/second-wind`, accessToken, {
+    method: "POST",
+  });
+}
+
+export async function actionSurgeInDuel(accessToken: string, duelId: string) {
+  return gameFetch<DuelDetail>(`/duels/${duelId}/action-surge`, accessToken, {
     method: "POST",
   });
 }

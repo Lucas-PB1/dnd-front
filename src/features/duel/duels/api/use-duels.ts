@@ -18,6 +18,8 @@ import {
   forfeitDuel,
   joinDuel,
   setDuelReady,
+  actionSurgeInDuel,
+  secondWindInDuel,
 } from "@/features/duel/duels/api/duels.api";
 
 function useDuelAuth(nextPath: string) {
@@ -145,9 +147,40 @@ export function useDuelAttack(duelId: string) {
     mutationFn: async (payload: {
       itemSlug: string;
       mode: "melee" | "ranged";
+      bloodStrike?: { optionSlug: string; takeLowerBloodCost?: boolean };
+      damageTypeOverride?: "acid" | "necrotic" | "poison";
+      bloodExplosionOnMiss?: boolean;
+      masteryOverrideSlug?: "push" | "sap" | "slow";
+      graze?: boolean;
     }) => {
       if (!accessToken) throw new Error("Sessão expirada");
       return attackInDuel(accessToken, duelId, payload);
+    },
+    onSuccess: () => invalidateDuel(queryClient, duelId),
+  });
+}
+
+export function useDuelSecondWindAction(duelId: string) {
+  const queryClient = useQueryClient();
+  const { accessToken } = useDuelAuth(`/duels/${duelId}`);
+
+  return useMutation({
+    mutationFn: async () => {
+      if (!accessToken) throw new Error("Sessão expirada");
+      return secondWindInDuel(accessToken, duelId);
+    },
+    onSuccess: () => invalidateDuel(queryClient, duelId),
+  });
+}
+
+export function useDuelActionSurgeAction(duelId: string) {
+  const queryClient = useQueryClient();
+  const { accessToken } = useDuelAuth(`/duels/${duelId}`);
+
+  return useMutation({
+    mutationFn: async () => {
+      if (!accessToken) throw new Error("Sessão expirada");
+      return actionSurgeInDuel(accessToken, duelId);
     },
     onSuccess: () => invalidateDuel(queryClient, duelId),
   });

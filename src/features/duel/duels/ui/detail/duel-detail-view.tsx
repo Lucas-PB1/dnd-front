@@ -17,8 +17,10 @@ import {
 import {
   useDuel,
   useDuelAttack,
+  useDuelActionSurgeAction,
   useDuelCast,
   useDuelCondition,
+  useDuelSecondWindAction,
   useForfeitDuel,
   useSetDuelReady,
   useUploadDuelPortrait,
@@ -181,11 +183,22 @@ export function DuelDetailView({ duelId }: { duelId: string }) {
   const { data, isPending, isError, error } = useDuel(duelId);
   const readyMutation = useSetDuelReady(duelId);
   const attackMutation = useDuelAttack(duelId);
+  const secondWindMutation = useDuelSecondWindAction(duelId);
+  const actionSurgeMutation = useDuelActionSurgeAction(duelId);
   const castMutation = useDuelCast(duelId);
   const conditionMutation = useDuelCondition(duelId);
   const forfeitMutation = useForfeitDuel(duelId);
   const portraitMutation = useUploadDuelPortrait(duelId);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [bloodOption, setBloodOption] = useState("");
+  const [takeLowerCost, setTakeLowerCost] = useState(false);
+  const [armamentType, setArmamentType] = useState<
+    "" | "acid" | "necrotic" | "poison"
+  >("");
+  const [explosionOnMiss, setExplosionOnMiss] = useState(false);
+  const [masteryOverride, setMasteryOverride] = useState<
+    "" | "push" | "sap" | "slow"
+  >("");
 
   if (isPending) {
     return (
@@ -251,6 +264,9 @@ export function DuelDetailView({ duelId }: { duelId: string }) {
         {inCombat ? (
           <span className="text-sm text-muted-foreground">
             Rodada {data.round}
+            {data.turnAttacksRemaining != null
+              ? ` · Ataques restantes: ${data.turnAttacksRemaining}`
+              : null}
           </span>
         ) : null}
       </div>
@@ -400,6 +416,158 @@ export function DuelDetailView({ duelId }: { duelId: string }) {
         <section className="space-y-6">
           <div className="space-y-3">
             <h2 className="font-heading text-lg font-semibold">Armas</h2>
+            {data.fighter && data.myTurn ? (
+              <div
+                className="space-y-2 rounded-lg border border-border/80 p-3"
+                data-cy="duel-fighter-panel"
+              >
+                <p className="text-sm font-medium">
+                  Guerreiro{" "}
+                  <span className="text-muted-foreground">
+                    ({data.turnAttacksRemaining ?? data.fighter.attacksPerAction}{" "}
+                    ataque(s) restantes)
+                  </span>
+                </p>
+                {data.fighter.tacticalMaster ? (
+                  <label className="flex flex-col gap-1 text-sm">
+                    <span className="text-muted-foreground">
+                      Mestre Tático (maestria)
+                    </span>
+                    <select
+                      className="h-8 rounded-lg border border-input bg-background px-2 text-sm"
+                      value={masteryOverride}
+                      data-cy="duel-mastery-override"
+                      onChange={(e) =>
+                        setMasteryOverride(
+                          e.target.value as "" | "push" | "sap" | "slow",
+                        )
+                      }
+                    >
+                      <option value="">Maestria da arma</option>
+                      <option value="push">Empurrar</option>
+                      <option value="sap">Drenar</option>
+                      <option value="slow">Lento</option>
+                    </select>
+                  </label>
+                ) : null}
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={
+                      secondWindMutation.isPending ||
+                      data.fighter.secondWindRemaining <= 0
+                    }
+                    data-cy="duel-second-wind"
+                    onClick={() => secondWindMutation.mutate()}
+                  >
+                    Recuperar Fôlego ({data.fighter.secondWindRemaining}/
+                    {data.fighter.secondWindMax})
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={
+                      actionSurgeMutation.isPending ||
+                      data.fighter.actionSurgeRemaining <= 0
+                    }
+                    data-cy="duel-action-surge"
+                    onClick={() => actionSurgeMutation.mutate()}
+                  >
+                    Surto de Ação ({data.fighter.actionSurgeRemaining}/
+                    {data.fighter.actionSurgeMax})
+                  </Button>
+                </div>
+                {secondWindMutation.isError ? (
+                  <p className="text-sm text-destructive" role="alert">
+                    {secondWindMutation.error instanceof Error
+                      ? secondWindMutation.error.message
+                      : "Erro no Recuperar Fôlego"}
+                  </p>
+                ) : null}
+                {actionSurgeMutation.isError ? (
+                  <p className="text-sm text-destructive" role="alert">
+                    {actionSurgeMutation.error instanceof Error
+                      ? actionSurgeMutation.error.message
+                      : "Erro no Surto de Ação"}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
+            {data.bloodStrike && data.myTurn ? (
+              <div
+                className="space-y-2 rounded-lg border border-border/80 p-3"
+                data-cy="duel-blood-strike-panel"
+              >
+                <p className="text-sm font-medium">
+                  Golpe de Sangue{" "}
+                  <span className="text-muted-foreground">
+                    ({data.bloodStrike.remaining}/{data.bloodStrike.max} · CD{" "}
+                    {data.bloodStrike.saveDc})
+                  </span>
+                </p>
+                <label className="flex flex-col gap-1 text-sm">
+                  <span className="text-muted-foreground">Opção</span>
+                  <select
+                    className="h-8 rounded-lg border border-input bg-background px-2 text-sm"
+                    value={bloodOption}
+                    data-cy="duel-blood-strike-option"
+                    onChange={(e) => setBloodOption(e.target.value)}
+                  >
+                    <option value="">Sem golpe</option>
+                    {data.bloodStrike.options.map((opt) => (
+                      <option key={opt.slug} value={opt.slug}>
+                        {opt.label} ({opt.costDice})
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                {data.bloodStrike.canTakeLowerCost ? (
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={takeLowerCost}
+                      onChange={(e) => setTakeLowerCost(e.target.checked)}
+                      data-cy="duel-blood-lower-cost"
+                    />
+                    Menor custo (Sangue da Criação)
+                  </label>
+                ) : null}
+                {data.bloodStrike.canArmament ? (
+                  <label className="flex flex-col gap-1 text-sm">
+                    <span className="text-muted-foreground">
+                      Armamento de Sangue
+                    </span>
+                    <select
+                      className="h-8 rounded-lg border border-input bg-background px-2 text-sm"
+                      value={armamentType}
+                      data-cy="duel-blood-armament"
+                      onChange={(e) =>
+                        setArmamentType(
+                          e.target.value as "" | "acid" | "necrotic" | "poison",
+                        )
+                      }
+                    >
+                      <option value="">Tipo normal da arma</option>
+                      <option value="acid">Ácido</option>
+                      <option value="necrotic">Necrótico</option>
+                      <option value="poison">Veneno</option>
+                    </select>
+                  </label>
+                ) : null}
+                {data.bloodStrike.canExplosion ? (
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={explosionOnMiss}
+                      onChange={(e) => setExplosionOnMiss(e.target.checked)}
+                      data-cy="duel-blood-explosion"
+                    />
+                    Explosão se errar
+                  </label>
+                ) : null}
+              </div>
+            ) : null}
             {data.myTurn ? (
               data.myWeapons.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
@@ -417,6 +585,23 @@ export function DuelDetailView({ duelId }: { duelId: string }) {
                           attackMutation.mutate({
                             itemSlug: weapon.itemSlug,
                             mode: weapon.mode,
+                            ...(bloodOption
+                              ? {
+                                  bloodStrike: {
+                                    optionSlug: bloodOption,
+                                    takeLowerBloodCost: takeLowerCost || undefined,
+                                  },
+                                }
+                              : {}),
+                            ...(armamentType
+                              ? { damageTypeOverride: armamentType }
+                              : {}),
+                            ...(explosionOnMiss
+                              ? { bloodExplosionOnMiss: true }
+                              : {}),
+                            ...(masteryOverride
+                              ? { masteryOverrideSlug: masteryOverride }
+                              : {}),
                           })
                         }
                       >
