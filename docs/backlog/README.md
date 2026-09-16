@@ -51,7 +51,7 @@ Blocked não vira Ready só espelhando TS. Adiado só com pedido explícito.
 | [18](./plans/18-forma-selvagem-ui.md) | Feito | Seletor Forma Selvagem |
 | [19](./plans/19-companheiros-ui.md) | Feito | Tracker de companheiros na ficha |
 | [20](./plans/20-veiculos-sheet-actions-ui.md) | Feito | Leme / carga / tripulação |
-| [21](./plans/21-montarias-ui.md) | Ready | Montaria: board + sheet-actions |
+| [21](./plans/21-montarias-ui.md) | Feito | Montaria: board + sheet-actions |
 
 ### Compêndio / wizard
 

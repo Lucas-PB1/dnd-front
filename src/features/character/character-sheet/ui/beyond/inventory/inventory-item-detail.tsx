@@ -20,6 +20,7 @@ import {
   useCharacterActors,
   useLinkVehicle,
 } from "@/features/actor/api/use-actors";
+import { useBoardMount, useLinkMount } from "@/features/actor/api/use-mounts";
 import { ActorSheetDialog } from "@/features/actor/ui/actor-sheet-dialog";
 import { useSpellLabels } from "@/features/catalog/spell-catalog/api/use-spells";
 import {
@@ -70,7 +71,6 @@ type InventoryItemDetailProps = {
     spellSlug?: string,
   ) => void;
   onDetachCoverage?: (baseItemSlug: string) => void;
-  /** Em campanha (player): remover vende por ½ do catálogo. */
   sellCreditApplies?: boolean;
   proficiencyHint?: string | null;
 };
@@ -315,7 +315,6 @@ function InstancePropertiesSummary({
   );
 }
 
-/** Controles e avisos do item (usado no modal do tile). */
 export function InventoryItemDetail({
   item,
   characterId,
@@ -347,8 +346,13 @@ export function InventoryItemDetail({
   );
   const spellLabels = useSpellLabels();
   const isTransport = isBoardableTransportKind(item.propertiesKind);
+  const isMountItem = item.propertiesKind === "mount";
   const linkVehicle = useLinkVehicle(characterId ?? "");
   const boardVehicle = useBoardVehicle(characterId ?? "");
+  const linkMount = useLinkMount(characterId ?? "");
+  const boardMount = useBoardMount(characterId ?? "");
+  const linkTransport = isMountItem ? linkMount : linkVehicle;
+  const boardTransport = isMountItem ? boardMount : boardVehicle;
   const linkedActors = useCharacterActors(characterId ?? "");
   const [transportSheetOpen, setTransportSheetOpen] = useState(false);
   const linkedTransport = (linkedActors.data ?? []).find(
@@ -778,12 +782,12 @@ export function InventoryItemDetail({
               className="min-h-11 gap-1 touch-manipulation sm:min-h-8"
               disabled={
                 isPending ||
-                linkVehicle.isPending ||
-                boardVehicle.isPending ||
+                linkTransport.isPending ||
+                boardTransport.isPending ||
                 Boolean(linkedTransport)
               }
               onClick={() =>
-                linkVehicle.mutate({ itemSlug: item.itemSlug })
+                linkTransport.mutate({ itemSlug: item.itemSlug })
               }
             >
               {linkedTransport ? "Já vinculado" : "Vincular"}
@@ -795,8 +799,8 @@ export function InventoryItemDetail({
                   variant="secondary"
                   size="sm"
                   className="min-h-11 touch-manipulation sm:min-h-8"
-                  disabled={isPending || boardVehicle.isPending}
-                  onClick={() => boardVehicle.mutate(linkedTransport.id)}
+                  disabled={isPending || boardTransport.isPending}
+                  onClick={() => boardTransport.mutate(linkedTransport.id)}
                 >
                   Entrar
                 </Button>
@@ -816,9 +820,9 @@ export function InventoryItemDetail({
                 />
               </>
             ) : null}
-            {linkVehicle.isError ? (
+            {linkTransport.isError ? (
               <p className="basis-full text-xs text-destructive">
-                {(linkVehicle.error as Error)?.message ??
+                {(linkTransport.error as Error)?.message ??
                   "Falha ao vincular transporte"}
               </p>
             ) : null}
@@ -919,7 +923,6 @@ export function inventoryItemTileMeta(
   item: InventoryItem,
   options?: {
     catalogKindLabel?: string | null;
-    /** @deprecated use catalogKindLabel */
     catalogEyebrow?: string | null;
   },
 ): {

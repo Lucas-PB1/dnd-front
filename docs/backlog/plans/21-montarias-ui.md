@@ -1,6 +1,6 @@
 # Plano 21 — UI montaria
 
-**ID:** FR-37 · **Dificuldade:** média · **Status:** Ready · **Depende:** 11
+**ID:** FR-37 · **Dificuldade:** média · **Status:** Feito · **Depende:** 11
 
 ## Gap
 

@@ -13,7 +13,9 @@ import {
   useBoardVehicle,
   usePatchActorState,
 } from "@/features/actor/api/use-actors";
+import { useBoardMount } from "@/features/actor/api/use-mounts";
 import { ActorSheetDialog } from "@/features/actor/ui/actor-sheet-dialog";
+import { MountSheetControls } from "@/features/actor/ui/mount-sheet-controls";
 import { VehicleSheetControls } from "@/features/actor/ui/vehicle-sheet-controls";
 import { VitalStepper } from "@/features/actor/ui/vital-stepper";
 import {
@@ -50,14 +52,27 @@ export function BoardedVehiclePanel({
 }: BoardedVehiclePanelProps) {
   const actorQuery = useActorDetail(actorId);
   const liveQuery = useActorState(actorId);
-  const board = useBoardVehicle(characterId);
+  const boardVehicle = useBoardVehicle(characterId);
+  const boardMount = useBoardMount(characterId);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const isMount = actorQuery.data?.actorKind === "mount";
+  const leavePending = isMount
+    ? boardMount.isPending
+    : boardVehicle.isPending;
+
+  function leave() {
+    if (isMount) {
+      boardMount.mutate(null);
+      return;
+    }
+    boardVehicle.mutate(null);
+  }
 
   if (actorQuery.isPending) {
     return (
       <section className="space-y-2">
         <SheetSectionHeader title="A bordo" />
-        <p className="text-sm text-muted-foreground">Carregando veículo…</p>
+        <p className="text-sm text-muted-foreground">Carregando…</p>
       </section>
     );
   }
@@ -67,15 +82,15 @@ export function BoardedVehiclePanel({
       <section className="space-y-2">
         <SheetSectionHeader title="A bordo" />
         <p className="text-sm text-destructive">
-          Não foi possível carregar o veículo vinculado.
+          Não foi possível carregar o ator vinculado.
         </p>
         <Button
           type="button"
           variant="outline"
           size="sm"
           className="min-h-11 touch-manipulation sm:min-h-8"
-          disabled={board.isPending}
-          onClick={() => board.mutate(null)}
+          disabled={leavePending}
+          onClick={leave}
         >
           Sair
         </Button>
@@ -106,8 +121,8 @@ export function BoardedVehiclePanel({
             variant="outline"
             size="sm"
             className="min-h-11 flex-1 touch-manipulation sm:min-h-8 sm:flex-none"
-            disabled={board.isPending}
-            onClick={() => board.mutate(null)}
+            disabled={leavePending}
+            onClick={leave}
           >
             Sair
           </Button>
@@ -122,6 +137,16 @@ export function BoardedVehiclePanel({
           crewCapacity={actor.crewCapacity}
           passengerCapacity={actor.passengerCapacity}
           cargoCapacityLb={actor.cargoCapacityLb}
+        />
+      ) : null}
+      {isMount ? (
+        <MountSheetControls
+          characterId={characterId}
+          actorId={actor.id}
+          templateSlug={actor.templateSlug}
+          boarded
+          live={liveQuery.data}
+          showDismount={false}
         />
       ) : null}
       <button

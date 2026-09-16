@@ -95,7 +95,7 @@ export function useMountSheetAction(characterId: string) {
         queryClient,
         characterId,
         result.boardedActorId,
-        payload.actorId,
+        payload.actorId ?? result.boardedActorId,
       );
     },
   });

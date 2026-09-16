@@ -10,14 +10,18 @@ import {
   actorKeys,
   useSpawnActorFromTemplate,
 } from "@/features/actor/api/use-actors";
-import { useCharacters } from "@/features/character/characters/api/use-characters";
-import { charactersKeys } from "@/features/character/characters/api/characters.api";
-import { sessionKeys } from "@/features/character/character-sheet/api/character-session.api";
+import {
+  boardCharacterMount,
+  linkCharacterMount,
+} from "@/features/actor/api/mounts.api";
+import { useAuth } from "@/features/auth/model";
 import {
   boardCharacterVehicle,
   linkCharacterVehicle,
 } from "@/features/catalog/creature-template-catalog/api/creature-templates.api";
-import { useAuth } from "@/features/auth/model";
+import { sessionKeys } from "@/features/character/character-sheet/api/character-session.api";
+import { charactersKeys } from "@/features/character/characters/api/characters.api";
+import { useCharacters } from "@/features/character/characters/api/use-characters";
 import { Button, buttonVariants } from "@/shared/ui/button";
 import { NativeSelect } from "@/shared/ui/native-select";
 import { cn } from "@/shared/lib/utils";
@@ -47,20 +51,30 @@ export function LinkTemplateToCharacter({
   const [characterId, setCharacterId] = useState("");
   const [boardAfterLink, setBoardAfterLink] = useState(true);
 
-  const vehicleLink = useMutation({
+  const transportLink = useMutation({
     mutationFn: async (selectedCharacterId: string) => {
       if (!accessToken) throw new Error("Não autenticado");
-      const actor = await linkCharacterVehicle(
-        accessToken,
-        selectedCharacterId,
-        { templateSlug },
-      );
-      if (boardAfterLink && isBoardableKind(actorKind)) {
-        await boardCharacterVehicle(accessToken, selectedCharacterId, {
-          actorId: actor.id,
-        });
+      const actor =
+        actorKind === "mount"
+          ? await linkCharacterMount(accessToken, selectedCharacterId, {
+              templateSlug,
+            })
+          : await linkCharacterVehicle(accessToken, selectedCharacterId, {
+              templateSlug,
+            });
+      const shouldBoard = boardAfterLink && isBoardableKind(actorKind);
+      if (shouldBoard) {
+        if (actorKind === "mount") {
+          await boardCharacterMount(accessToken, selectedCharacterId, {
+            actorId: actor.id,
+          });
+        } else {
+          await boardCharacterVehicle(accessToken, selectedCharacterId, {
+            actorId: actor.id,
+          });
+        }
       }
-      return { actor, boarded: boardAfterLink && isBoardableKind(actorKind) };
+      return { actor, boarded: shouldBoard };
     },
     onSuccess: ({ actor, boarded }, selectedCharacterId) => {
       void queryClient.invalidateQueries({
@@ -89,14 +103,14 @@ export function LinkTemplateToCharacter({
     );
   }
 
-  const busy = spawn.isPending || vehicleLink.isPending;
-  const error = spawn.error ?? vehicleLink.error;
+  const busy = spawn.isPending || transportLink.isPending;
+  const error = spawn.error ?? transportLink.error;
 
   async function handleLink() {
     if (!characterId) return;
 
-    if (actorKind === "vehicle") {
-      const { actor, boarded } = await vehicleLink.mutateAsync(characterId);
+    if (actorKind === "vehicle" || actorKind === "mount") {
+      const { actor, boarded } = await transportLink.mutateAsync(characterId);
       router.push(
         boarded ? `/characters/${characterId}` : `/actors/${actor.id}`,
       );

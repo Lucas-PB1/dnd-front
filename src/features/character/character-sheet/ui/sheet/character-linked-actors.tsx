@@ -12,6 +12,7 @@ import {
   useBoardVehicle,
   useCharacterActors,
 } from "@/features/actor/api/use-actors";
+import { useBoardMount } from "@/features/actor/api/use-mounts";
 import { ActorSheetDialog } from "@/features/actor/ui/actor-sheet-dialog";
 import { useCharacterState } from "@/features/character/character-sheet/api/use-character-state";
 import { BeyondPanel } from "@/features/character/character-sheet/ui/beyond/layout/beyond-panel";
@@ -129,9 +130,11 @@ function ActorRow({
 export function CharacterLinkedActors({ characterId }: CharacterLinkedActorsProps) {
   const actors = useCharacterActors(characterId);
   const state = useCharacterState(characterId);
-  const board = useBoardVehicle(characterId);
+  const boardVehicle = useBoardVehicle(characterId);
+  const boardMount = useBoardMount(characterId);
   const boardedActorId = state.data?.boardedActorId ?? null;
   const [sheetActorId, setSheetActorId] = useState<string | null>(null);
+  const boardPending = boardVehicle.isPending || boardMount.isPending;
 
   if (actors.isPending) {
     return (
@@ -154,6 +157,25 @@ export function CharacterLinkedActors({ characterId }: CharacterLinkedActorsProp
     if (aBoard !== bBoard) return aBoard - bBoard;
     return a.name.localeCompare(b.name, "pt");
   });
+  const boardedActor =
+    sorted.find((actor) => actor.id === boardedActorId) ?? null;
+
+  function boardActor(actorId: string) {
+    const actor = sorted.find((row) => row.id === actorId);
+    if (actor?.actorKind === "mount") {
+      boardMount.mutate(actorId);
+      return;
+    }
+    boardVehicle.mutate(actorId);
+  }
+
+  function leaveBoarded() {
+    if (boardedActor?.actorKind === "mount") {
+      boardMount.mutate(null);
+      return;
+    }
+    boardVehicle.mutate(null);
+  }
 
   return (
     <>
@@ -164,15 +186,15 @@ export function CharacterLinkedActors({ characterId }: CharacterLinkedActorsProp
               key={actor.id}
               actor={actor}
               boardedActorId={boardedActorId}
-              isPending={board.isPending}
-              onBoard={(id) => board.mutate(id)}
-              onLeave={() => board.mutate(null)}
+              isPending={boardPending}
+              onBoard={boardActor}
+              onLeave={leaveBoarded}
               onOpenSheet={setSheetActorId}
             />
           ))}
         </ul>
         <p className="mt-2 text-xs text-muted-foreground">
-          Adicione criaturas ou veículos pelo{" "}
+          Adicione criaturas, montarias ou veículos pelo{" "}
           <Link href="/compendium" className="text-primary underline-offset-2 hover:underline">
             compêndio
           </Link>

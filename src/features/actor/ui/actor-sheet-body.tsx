@@ -14,6 +14,7 @@ import {
   useRollActorAttack,
 } from "@/features/actor/api/use-actors";
 import { VitalStepper } from "@/features/actor/ui/vital-stepper";
+import { MountSheetControls } from "@/features/actor/ui/mount-sheet-controls";
 import { VehicleSheetControls } from "@/features/actor/ui/vehicle-sheet-controls";
 import { useCharacterState } from "@/features/character/character-sheet/api/use-character-state";
 import { StatBlockCard } from "@/features/catalog/template-stat-block/ui/stat-block-card";
@@ -37,7 +38,9 @@ export function ActorSheetBody({
     useState<ActorAttackRollResult | null>(null);
   const vitals = resolveActorVitals(actor, liveQuery.data);
   const isVehicle = actor.actorKind === "vehicle";
-  const sheetCharacterId = isVehicle ? actor.parentCharacterId : null;
+  const isMount = actor.actorKind === "mount";
+  const sheetCharacterId =
+    isVehicle || isMount ? actor.parentCharacterId : null;
   const sessionQuery = useCharacterState(sheetCharacterId ?? "");
   const boarded =
     Boolean(sheetCharacterId) &&
@@ -126,6 +129,16 @@ export function ActorSheetBody({
           crewCapacity={actor.crewCapacity}
           passengerCapacity={actor.passengerCapacity}
           cargoCapacityLb={actor.cargoCapacityLb}
+        />
+      ) : null}
+
+      {isMount && sheetCharacterId ? (
+        <MountSheetControls
+          characterId={sheetCharacterId}
+          actorId={actor.id}
+          templateSlug={actor.templateSlug}
+          boarded={boarded}
+          live={liveQuery.data}
         />
       ) : null}
 
