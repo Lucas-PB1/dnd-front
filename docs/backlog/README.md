@@ -41,7 +41,7 @@ Blocked não vira Ready só espelhando TS. Adiado só com pedido explícito.
 | [13](./plans/13-actors-create.md) | Feito | `POST /actors` |
 | [14](./plans/14-actors-delete.md) | Feito | `DELETE /actors/:id` |
 | [15](./plans/15-actors-get-state.md) | Feito | `GET /actors/:id/state` |
-| [16](./plans/16-actors-roll-attack.md) | Ready | `POST /actors/:id/rolls/attack` |
+| [16](./plans/16-actors-roll-attack.md) | Feito | `POST /actors/:id/rolls/attack` |
 
 ### UI sobre contrato
 

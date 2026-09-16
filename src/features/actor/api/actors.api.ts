@@ -1,5 +1,7 @@
 import { gameFetch } from "@/shared/api/dnd-api/api-client";
 import type {
+  ActorAttackRollPayload,
+  ActorAttackRollResult,
   ActorDetail,
   ActorLiveState,
   ActorSummary,
@@ -28,4 +30,19 @@ export async function deleteActor(accessToken: string, id: string) {
 
 export async function fetchActorState(accessToken: string, id: string) {
   return gameFetch<ActorLiveState>(`/actors/${id}/state`, accessToken);
+}
+
+export async function rollActorAttack(
+  accessToken: string,
+  actorId: string,
+  payload: ActorAttackRollPayload,
+) {
+  return gameFetch<ActorAttackRollResult>(
+    `/actors/${actorId}/rolls/attack`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+  );
 }

@@ -9,6 +9,7 @@ import {
 import { useRouter } from "next/navigation";
 
 import type {
+  ActorAttackRollPayload,
   ActorDetail,
   ActorLiveState,
   CreateActorPayload,
@@ -19,6 +20,7 @@ import {
   deleteActor,
   fetchActorState,
   fetchActors,
+  rollActorAttack,
 } from "@/features/actor/api/actors.api";
 import {
   boardCharacterVehicle,
@@ -117,6 +119,26 @@ export function useActorState(actorId: string) {
     },
     enabled: !!accessToken && !!actorId,
     staleTime: CHARACTER_STATE_STALE_MS,
+  });
+}
+
+export function useRollActorAttack(actorId: string) {
+  const { requireToken, handleUnauthorized } = useGameAuth(
+    `/actors/${actorId}`,
+  );
+
+  return useMutation({
+    mutationFn: async (payload: ActorAttackRollPayload) => {
+      try {
+        return await rollActorAttack(
+          requireToken("Faça login para rolar ataque"),
+          actorId,
+          payload,
+        );
+      } catch (error) {
+        return handleUnauthorized(error);
+      }
+    },
   });
 }
 

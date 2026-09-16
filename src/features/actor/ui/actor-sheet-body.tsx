@@ -1,18 +1,23 @@
 "use client";
 
+import { useState } from "react";
+
 import {
   ACTOR_KIND_LABELS,
+  type ActorAttackRollResult,
   type ActorDetail,
 } from "@/entities/actor/types";
 import { resolveActorVitals } from "@/entities/actor/lib/resolve-actor-vitals";
 import {
   useActorState,
   usePatchActorState,
+  useRollActorAttack,
 } from "@/features/actor/api/use-actors";
 import { VitalStepper } from "@/features/actor/ui/vital-stepper";
 import { StatBlockCard } from "@/features/catalog/template-stat-block/ui/stat-block-card";
 import { TemplateSpellsList } from "@/features/catalog/template-stat-block/ui/template-stat-block-sections";
 import { formatKgFromPounds } from "@/shared/lib/metric";
+import { Button } from "@/shared/ui/button";
 
 type ActorSheetBodyProps = {
   actor: ActorDetail;
@@ -25,6 +30,9 @@ export function ActorSheetBody({
 }: ActorSheetBodyProps) {
   const liveQuery = useActorState(actor.id);
   const patchState = usePatchActorState(actor.id);
+  const attackRoll = useRollActorAttack(actor.id);
+  const [latestAttack, setLatestAttack] =
+    useState<ActorAttackRollResult | null>(null);
   const vitals = resolveActorVitals(actor, liveQuery.data);
   const isVehicle = actor.actorKind === "vehicle";
 
@@ -95,6 +103,11 @@ export function ActorSheetBody({
             {(patchState.error as Error)?.message ?? "Falha ao atualizar"}
           </p>
         ) : null}
+        {attackRoll.isError ? (
+          <p className="text-xs text-destructive" role="alert">
+            {(attackRoll.error as Error)?.message ?? "Falha ao rolar ataque"}
+          </p>
+        ) : null}
       </header>
 
       <StatBlockCard
@@ -119,6 +132,13 @@ export function ActorSheetBody({
         }
         proficiencyBonus={actor.proficiencyBonus}
         enableRolls
+        onAttackAction={(action, advantage) => {
+          if (typeof action.id !== "string" || action.id.length === 0) return;
+          attackRoll.mutate(
+            { actionId: action.id, advantage },
+            { onSuccess: (result) => setLatestAttack(result) },
+          );
+        }}
         actions={actor.actions.map((action, index) => ({
           id: action.id,
           name: action.name,
@@ -144,6 +164,39 @@ export function ActorSheetBody({
           rechargeDice: spell.rechargeDice ?? null,
         }))}
       />
+
+      {latestAttack ? (
+        <div
+          className="rounded-xl border border-primary/40 bg-card p-3 shadow-sm"
+          role="status"
+          aria-live="polite"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                {latestAttack.actionName}
+              </p>
+              <p className="mt-1 font-mono text-2xl font-semibold tabular-nums text-primary">
+                {latestAttack.total}
+              </p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                {latestAttack.expression}
+                {latestAttack.damageExpression
+                  ? ` · dano ${latestAttack.damageExpression}`
+                  : ""}
+              </p>
+            </div>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={() => setLatestAttack(null)}
+            >
+              Fechar
+            </Button>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

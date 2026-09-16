@@ -26,7 +26,7 @@ Cada linha é **um** plano. Detalhe só no arquivo do plano.
 | ~~`POST /actors`~~ | [13](./plans/13-actors-create.md) Feito |
 | ~~`DELETE /actors/:id`~~ | [14](./plans/14-actors-delete.md) Feito |
 | ~~`GET /actors/:id/state`~~ | [15](./plans/15-actors-get-state.md) Feito |
-| `POST /actors/:id/rolls/attack` | [16](./plans/16-actors-roll-attack.md) |
+| ~~`POST /actors/:id/rolls/attack`~~ | [16](./plans/16-actors-roll-attack.md) Feito |
 
 ## UI
 

@@ -63,8 +63,11 @@ export type StatBlockCardProps = {
   proficiencyBonus?: number | null;
   traits?: StatBlockTrait[];
   actions?: StatBlockAction[];
-  /** Quando false, a ficha fica só leitura (sem chips de rolagem). */
   enableRolls?: boolean;
+  onAttackAction?: (
+    action: StatBlockAction,
+    advantage: AdvantageMode,
+  ) => void;
 };
 
 const ABILITY_ORDER = [
@@ -244,11 +247,16 @@ function ActionRollChips({
   advantage,
   critical,
   onResult,
+  onAttackAction,
 }: {
   action: StatBlockAction;
   advantage: AdvantageMode;
   critical: boolean;
   onResult: (result: LocalRollResult) => void;
+  onAttackAction?: (
+    action: StatBlockAction,
+    advantage: AdvantageMode,
+  ) => void;
 }) {
   const targets = collectActionRollTargets(action);
   const hasRecharge = RECHARGE_PATTERN.test(action.name);
@@ -263,11 +271,19 @@ function ActionRollChips({
             <RollChip
               key={`attack-${action.name}-${target.modifier}`}
               title={target.label}
-              onClick={() =>
+              onClick={() => {
+                if (
+                  onAttackAction &&
+                  typeof action.id === "string" &&
+                  action.id.length > 0
+                ) {
+                  onAttackAction(action, advantage);
+                  return;
+                }
                 onResult(
                   rollD20Check(target.modifier!, target.label, advantage),
-                )
-              }
+                );
+              }}
             >
               Ataque {formatModifier(target.modifier)}
             </RollChip>
@@ -379,6 +395,7 @@ export function StatBlockCard({
   traits = [],
   actions = [],
   enableRolls = true,
+  onAttackAction,
 }: StatBlockCardProps) {
   const [latestRoll, setLatestRoll] = useState<LocalRollResult | null>(null);
   const [advantage, setAdvantage] = useState<AdvantageMode>("normal");
@@ -594,6 +611,7 @@ export function StatBlockCard({
                             advantage={advantage}
                             critical={critical}
                             onResult={setLatestRoll}
+                            onAttackAction={onAttackAction}
                           />
                         ) : null}
                       </li>

@@ -92,6 +92,19 @@ export type CreateActorPayload = {
   spells?: ActorDetail["spells"];
 };
 
+export type ActorAttackRollPayload = {
+  actionId: string;
+  advantage?: "normal" | "advantage" | "disadvantage";
+};
+
+export type ActorAttackRollResult = {
+  expression: string;
+  total: number;
+  modifier: number;
+  actionName: string;
+  damageExpression?: string | null;
+};
+
 export type SpawnActorFromTemplatePayload = {
   templateSlug: string;
   actorKind: ActorKind;
