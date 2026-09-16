@@ -1,6 +1,6 @@
 # Plano 10 — HTTP `vehicles/sheet-actions`
 
-**ID:** FR-18 · **Dificuldade:** fácil · **Status:** Ready
+**ID:** FR-18 · **Dificuldade:** fácil · **Status:** Feito
 
 ## Gap
 
@@ -13,3 +13,7 @@
 ## Pronto quando
 
 A ação de ficha do veículo pode ser disparada pelo client.
+
+## Feito
+
+`postVehicleSheetAction` + `useVehicleSheetAction`. Tipos em `entities/actor/vehicle-sheet.ts` (`board` | `dismount` | `set-metrics` | `helm`). UI no plano 20.

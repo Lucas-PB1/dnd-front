@@ -13,7 +13,7 @@ Um ID → um plano. Status: Ready · Blocked · Adiado · Feito.
 | FR-31 | [07](./plans/07-feat-effect-flags.md) | Feito | Flags de feat na UI |
 | FR-15 | [08](./plans/08-wild-shape-eligible-http.md) | Feito | HTTP wild-shape eligible |
 | FR-16 | [09](./plans/09-companions-http.md) | Feito | HTTP companions GET/dismiss |
-| FR-18 | [10](./plans/10-vehicles-sheet-actions-http.md) | Ready | HTTP vehicles sheet-actions |
+| FR-18 | [10](./plans/10-vehicles-sheet-actions-http.md) | Feito | HTTP vehicles sheet-actions |
 | FR-17 | [11](./plans/11-mounts-http.md) | Ready | HTTP mounts |
 | FR-19 | [12](./plans/12-actors-list.md) | Ready | `GET /actors` |
 | FR-38 | [13](./plans/13-actors-create.md) | Ready | `POST /actors` |
