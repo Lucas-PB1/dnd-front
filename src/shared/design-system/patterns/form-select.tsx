@@ -31,10 +31,6 @@ export type FormSelectProps = {
   size?: "default" | "compact";
 };
 
-/**
- * Select com busca + Field (label, descrição, erro).
- * Padrão para wizard, ficha e filtros de catálogo.
- */
 export function FormSelect({
   id,
   label,
@@ -73,7 +69,6 @@ export function FormSelect({
       {showLabel ? <FieldLabel htmlFor={id}>{label}</FieldLabel> : null}
       {description ? <FieldDescription>{description}</FieldDescription> : null}
       <SearchableSelect
-        key={`${id}-${isLoading ? "loading" : "ready"}`}
         id={id}
         name={name}
         options={selectOptions}

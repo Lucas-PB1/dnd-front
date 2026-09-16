@@ -16,6 +16,7 @@ import {
 } from "react";
 
 import type { CharacterDetail } from "@/entities/character/types";
+import { useClassSpellSlots } from "@/features/catalog/class-catalog/api/use-classes";
 import type { CharacterSheetPageSectionId } from "@/features/character/character-sheet/ui/sheet/character-sheet-tab-panels";
 import { cn } from "@/shared/lib/utils";
 
@@ -53,8 +54,12 @@ const PAGE_SECTIONS: {
   },
 ];
 
-export function characterHasSpellcasting(character: CharacterDetail): boolean {
+export function characterHasSpellcasting(
+  character: CharacterDetail,
+  classHasSpellSlots = false,
+): boolean {
   return (
+    classHasSpellSlots ||
     character.characterSpells.length > 0 ||
     character.spellSaveDc != null ||
     character.spellAttackBonus != null ||
@@ -76,13 +81,23 @@ export function CharacterSheetPageSections({
   onActiveSectionChange,
 }: CharacterSheetPageSectionsProps) {
   const baseId = useId();
+  const spellSlots = useClassSpellSlots(character.classSlug, true);
+  const classHasSpellSlots = useMemo(() => {
+    const rows = spellSlots.data?.data ?? [];
+    return rows.some(
+      (row) =>
+        row.classLevel <= character.level &&
+        Object.values(row.spellSlots).some((count) => count > 0),
+    );
+  }, [character.level, spellSlots.data]);
   const sections = useMemo(
     () =>
       PAGE_SECTIONS.filter(
         (item) =>
-          item.id !== "spells" || characterHasSpellcasting(character),
+          item.id !== "spells" ||
+          characterHasSpellcasting(character, classHasSpellSlots),
       ),
-    [character],
+    [character, classHasSpellSlots],
   );
   const [uncontrolledSection, setUncontrolledSection] =
     useState<CharacterSheetPageSectionId>("actions");

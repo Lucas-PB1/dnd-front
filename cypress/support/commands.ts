@@ -31,11 +31,14 @@ declare global {
       fillLanguageQuota(): Chainable<void>;
       fillSpeciesChoicesIfPresent(): Chainable<void>;
       fillClassFeatureOptionsIfPresent(): Chainable<void>;
+      fillSpellsIfPresent(): Chainable<void>;
+      fillMetamagicsIfPresent(): Chainable<void>;
       advanceWizardUntilReview(depth?: number): Chainable<void>;
       createLevel1Character(className: string): Chainable<void>;
       openCharacterSheetById(characterId: string): Chainable<void>;
       openSheetSettings(): Chainable<void>;
       fillLevelUpExpertiseIfPresent(): Chainable<void>;
+      fillLevelUpMasteryIfPresent(): Chainable<void>;
       fillLevelUpSubclassIfPresent(
         subclassLabel: string | RegExp,
       ): Chainable<void>;
@@ -96,7 +99,6 @@ Cypress.Commands.add("loginAsDevUser", () => {
 
       cy.visit("/login", {
         onBeforeLoad(win) {
-          // Injeta tokens antes do app montar o cliente Supabase SSR.
           win.localStorage.setItem(
             "cypress.supabase.session",
             JSON.stringify({ access_token, refresh_token }),
@@ -122,7 +124,6 @@ Cypress.Commands.add("loginAsDevUser", () => {
   });
 });
 
-/** Login pelo formulário da UI (teste do fluxo real, sem token inject). */
 Cypress.Commands.add(
   "loginViaUi",
   (options?: { email?: string; password?: string; nextPath?: string }) => {
@@ -163,16 +164,16 @@ Cypress.Commands.add(
         expect($el.text()).to.not.include("Carregando");
       });
 
-    cy.get(trigger).click({ force: true });
+    openSearchablePopup(trigger);
 
     if (typeof optionLabel === "string") {
-      cy.get('input[placeholder="Buscar…"]')
+      cy.get("[data-cy=searchable-select-search]")
         .filter(":visible")
         .last()
         .type(`{selectAll}{backspace}${optionLabel}`, { delay: 0 });
     }
 
-    cy.contains('[role="option"]', optionLabel, {
+    cy.contains("[data-cy=searchable-select-option]", optionLabel, {
       matchCase: false,
       timeout: 15000,
     }).click({ force: true });
@@ -203,7 +204,6 @@ Cypress.Commands.add(
   (className: string, characterName: string) => {
     cy.get("[data-cy=character-name]").clear().type(characterName);
     cy.selectSearchable("classSlug", className);
-    // Preferir Anão PHB (label exato) — evita variantes com "Anão" no nome.
     cy.selectSearchable("originSlug", /^Anão$/);
     cy.selectSearchable("backgroundSlug", "Fazendeiro");
   },
@@ -256,6 +256,16 @@ Cypress.Commands.add("fillExpertiseIfPresent", () => {
   fillOptionSelectsByPrefix("expertise");
 });
 
+function openSearchablePopup(trigger: string | JQuery<HTMLElement>) {
+  const chain =
+    typeof trigger === "string" ? cy.get(trigger) : cy.wrap(trigger);
+  chain.click({ force: true }).type("{downarrow}", { force: true });
+  cy.get("[data-cy=searchable-select-search]", { timeout: 20000 })
+    .filter(":visible")
+    .last()
+    .should("be.visible");
+}
+
 function isSelectPlaceholderText(text: string) {
   const trimmed = text.replace(/\s+/g, " ").trim();
   return (
@@ -267,7 +277,6 @@ function isSelectPlaceholderText(text: string) {
   );
 }
 
-/** Preenche SearchableSelects cujo data-cy começa com o prefixo. */
 function fillOptionSelectsByPrefix(prefix: string) {
   const usedLabels = new Set<string>();
 
@@ -286,14 +295,21 @@ function fillOptionSelectsByPrefix(prefix: string) {
       cy.get(`[data-cy="${id}"]`)
         .scrollIntoView()
         .should("not.be.disabled")
+        .and(($el) => {
+          expect($el.text()).to.not.include("Carregando");
+        })
         .then(($trigger) => {
           if (!isSelectPlaceholderText($trigger.text())) {
             usedLabels.add($trigger.text().replace(/\s+/g, " ").trim());
             return;
           }
 
-          cy.wrap($trigger).click({ force: true });
-          cy.get('[role="option"]', { timeout: 15000 })
+          openSearchablePopup($trigger);
+          cy.get("[data-cy=searchable-select-search]", { timeout: 20000 })
+            .filter(":visible")
+            .last()
+            .click({ force: true });
+          cy.get("[data-cy=searchable-select-option]", { timeout: 20000 })
             .filter(":visible")
             .should(($options) => {
               const real = [...$options].filter(
@@ -330,8 +346,8 @@ function fillOptionSelectsByPrefix(prefix: string) {
 Cypress.Commands.add("fillFightingStyleIfPresent", () => {
   cy.get("body").then(($body) => {
     if ($body.find("[data-cy=fighting-style-feat]").length === 0) return;
-    cy.get("[data-cy=fighting-style-feat]").click();
-    cy.get('[role="option"]')
+    cy.get('[data-cy="fighting-style-feat"]').click();
+    cy.get("[data-cy=searchable-select-option]")
       .filter(":visible")
       .not(':contains("Escolha")')
       .first()
@@ -367,7 +383,7 @@ Cypress.Commands.add("fillEquipmentPackages", () => {
       .find("[data-cy]")
       .each(($select) => {
         cy.wrap($select).click({ force: true });
-        cy.get('[role="option"]')
+        cy.get("[data-cy=searchable-select-option]")
           .filter(":visible")
           .not(':contains("Selecionar")')
           .first()
@@ -378,10 +394,12 @@ Cypress.Commands.add("fillEquipmentPackages", () => {
 
 Cypress.Commands.add("fillWarlockInvocationIfPresent", () => {
   cy.contains(/Carregando catálogo/).should("not.exist");
-  cy.get("[data-cy=eldritch-invocation-draft]", { timeout: 15000 })
-    .should("be.visible")
-    .click({ force: true });
-  cy.contains('[role="option"]', /Pacto/i, { timeout: 15000 })
+    cy.get("[data-cy=eldritch-invocation-draft]", { timeout: 15000 })
+      .should("be.visible")
+      .click({ force: true });
+    cy.contains("[data-cy=searchable-select-option]", /Pacto/i, {
+      timeout: 15000,
+    })
     .first()
     .click({ force: true });
   cy.get("[data-cy=eldritch-invocation-add]")
@@ -398,13 +416,16 @@ Cypress.Commands.add("fillClassFeatureOptionsIfPresent", () => {
       .filter((id): id is string => Boolean(id));
 
     cy.wrap(ids).each((id: string) => {
-      cy.get(`[data-cy="${id}"]`)
-        .should("not.be.disabled")
+      cy.get(`[data-cy="${id}"]`).should("not.be.disabled");
+      openSearchablePopup(`[data-cy="${id}"]`);
+      cy.get("[data-cy=searchable-select-search]", { timeout: 20000 })
+        .filter(":visible")
+        .last()
         .click({ force: true });
-      cy.get('[role="option"]', { timeout: 15000 })
+      cy.get("[data-cy=searchable-select-option]", { timeout: 15000 })
         .filter(":visible")
         .should("have.length.at.least", 2);
-      cy.get('[role="option"]')
+      cy.get("[data-cy=searchable-select-option]")
         .filter(":visible")
         .then(($options) => {
           const pick = [...$options].find((el) => {
@@ -447,7 +468,6 @@ Cypress.Commands.add("fillLanguageQuota", () => {
 
     const match = text.match(/Extras escolhidos:\s*(\d+)\s*\/\s*(\d+)/);
     if (!match) {
-      // Ainda carregando cota — tenta de novo após checkboxes existirem.
       if ($body.find('[data-cy^="language-"]').length === 0) return;
     }
 
@@ -476,6 +496,35 @@ Cypress.Commands.add("fillLanguageQuota", () => {
   });
 });
 
+function fillEnabledUncheckedBoxes(remaining = 24) {
+  if (remaining <= 0) return;
+  cy.get("body").then(($body) => {
+    const next = [...$body.find('input[type="checkbox"]:enabled')].find(
+      (el) => !(el as HTMLInputElement).checked,
+    );
+    if (!next) return;
+    cy.wrap(next).check({ force: true });
+    fillEnabledUncheckedBoxes(remaining - 1);
+  });
+}
+
+Cypress.Commands.add("fillSpellsIfPresent", () => {
+  cy.contains("Carregando magias…").should("not.exist");
+  cy.get("body").then(($body) => {
+    if ($body.text().includes("não tem escolha de magias")) return;
+    cy.get('input[type="checkbox"]', { timeout: 20000 }).should(
+      "have.length.at.least",
+      1,
+    );
+    fillEnabledUncheckedBoxes();
+  });
+});
+
+Cypress.Commands.add("fillMetamagicsIfPresent", () => {
+  cy.contains("Carregando catálogo…").should("not.exist");
+  fillEnabledUncheckedBoxes(8);
+});
+
 Cypress.Commands.add("advanceWizardUntilReview", (depth = 0) => {
   expect(depth, "wizard steps").to.be.lessThan(20);
 
@@ -498,6 +547,10 @@ Cypress.Commands.add("advanceWizardUntilReview", (depth = 0) => {
       cy.fillEquipmentPackages();
     } else if (/Invocações/.test(title)) {
       cy.fillWarlockInvocationIfPresent();
+    } else if (/^Magias$/.test(title.trim())) {
+      cy.fillSpellsIfPresent();
+    } else if (/Metamagia/.test(title)) {
+      cy.fillMetamagicsIfPresent();
     } else if (/Idiomas/.test(title)) {
       cy.fillLanguageQuota();
     }
@@ -582,6 +635,10 @@ Cypress.Commands.add("fillLevelUpExpertiseIfPresent", () => {
   fillOptionSelectsByPrefix("level-up-expertise");
 });
 
+Cypress.Commands.add("fillLevelUpMasteryIfPresent", () => {
+  fillOptionSelectsByPrefix("level-up-masteryWeapon");
+});
+
 Cypress.Commands.add(
   "fillLevelUpSubclassIfPresent",
   (subclassLabel: string | RegExp) => {
@@ -592,7 +649,6 @@ Cypress.Commands.add(
     cy.selectSearchable("level-up-subclass", subclassLabel);
 
     cy.get("[data-cy=level-up-subclass-options-loading]").should("not.exist");
-    // Ou há opções a preencher, ou o submit já libera (trilha sem escolhas).
     cy.get("[data-cy=level-up-submit]", { timeout: 25000 }).should(($btn) => {
       const hasOpts = Cypress.$('[data-cy^="subclass-opt"]').length > 0;
       if (hasOpts) return;
@@ -633,7 +689,6 @@ Cypress.Commands.add(
   "levelUpCharacterTo",
   (nextLevel: number, options?: { subclassLabel?: string | RegExp }) => {
     cy.openSheetSettings();
-    // Preview e editores (expertise/maestria/subclasse) só após o GET.
     cy.contains("Carregando preview…").should("not.exist");
     cy.get("[data-cy=level-up-submit]", { timeout: 20000 })
       .scrollIntoView()

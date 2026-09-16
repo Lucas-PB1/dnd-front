@@ -4,6 +4,13 @@ export function openSheetFeaturesTab() {
     .click({ force: true });
 }
 
+export function openSheetFeatsTraits() {
+  openSheetFeaturesTab();
+  cy.get("[data-cy=sheet-traits-tab-feats]")
+    .scrollIntoView()
+    .click({ force: true });
+}
+
 export function pickLevelUpFeat(
   featLabel: string,
   optionTriggerCy?: string,
@@ -26,23 +33,21 @@ export function levelUpChoosingFeat(
   cy.openSheetSettings();
   cy.contains("Carregando preview…").should("not.exist");
   cy.get("[data-cy=level-up-submit]", { timeout: 20000 }).should("exist");
+  cy.get("[data-cy=level-up-feat]", { timeout: 20000 }).should(
+    "not.be.disabled",
+  );
   cy.fillLevelUpExpertiseIfPresent();
   cy.get("body").then(($body) => {
-    const mastery = $body.find('[data-cy^="level-up-masteryWeapon"]');
-    if (mastery.length === 0) return;
-    cy.wrap(mastery).each(($el) => {
-      const trigger = $el.attr("data-cy");
-      if (!trigger) return;
-      cy.get(`[data-cy=${trigger}]`)
-        .scrollIntoView()
-        .click({ force: true });
-      cy.get('[role="option"]')
-        .filter(":visible")
-        .not('[aria-disabled="true"]')
-        .first()
-        .click({ force: true });
-    });
+    if ($body.find('[data-cy^="level-up-masteryWeapon"]').length === 0) {
+      return;
+    }
+    cy.get('[data-cy^="level-up-masteryWeapon"]')
+      .should("not.be.disabled")
+      .and(($el) => {
+        expect($el.text()).to.not.include("Carregando");
+      });
   });
+  cy.fillLevelUpMasteryIfPresent();
   pickLevelUpFeat(featLabel, optionTriggerCy, optionLabel);
   cy.submitLevelUp(nextLevel);
   cy.get("body").type("{esc}");

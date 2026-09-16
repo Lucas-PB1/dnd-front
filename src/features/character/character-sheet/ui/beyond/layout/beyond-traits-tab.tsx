@@ -189,6 +189,7 @@ export function BeyondTraitsTab({
                 aria-selected={isActive}
                 aria-controls={panelId}
                 tabIndex={isActive ? 0 : -1}
+                data-cy={`sheet-traits-tab-${tab.id}`}
                 onClick={() => setActive(tab.id)}
                 onKeyDown={(event) => onTabKeyDown(event, index)}
                 className={cn(

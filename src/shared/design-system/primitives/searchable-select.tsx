@@ -8,7 +8,6 @@ import { cn } from "@/shared/lib/utils";
 export type SearchableSelectOption = {
   value: string;
   label: string;
-  /** Segunda linha (stats, CA, dano…). */
   hint?: string;
 };
 
@@ -21,7 +20,6 @@ export type SearchableSelectProps = {
   placeholder?: string;
   searchPlaceholder?: string;
   emptyMessage?: string;
-  /** Densidade tipográfica — `compact` para painéis estreitos (loja). */
   size?: "default" | "compact";
   className?: string;
   "aria-invalid"?: boolean;
@@ -143,7 +141,7 @@ export function SearchableSelect({
 
       <Combobox.Portal>
         <Combobox.Positioner
-          className="z-50 outline-none"
+          className="isolate z-[300] outline-none"
           align="start"
           sideOffset={4}
         >
@@ -158,6 +156,7 @@ export function SearchableSelect({
           >
             <div className="border-b border-border p-1.5">
               <Combobox.Input
+                data-cy="searchable-select-search"
                 placeholder={searchPlaceholder}
                 className={cn(
                   "h-8 w-full rounded-md border border-input bg-background px-2.5 text-foreground outline-none",
@@ -168,47 +167,48 @@ export function SearchableSelect({
                 )}
               />
             </div>
-            <Combobox.Empty
-              className={cn(
-                "px-3 py-3 text-muted-foreground",
-                compact ? "text-xs" : "text-sm",
-              )}
-            >
-              {emptyMessage}
-            </Combobox.Empty>
-            <Combobox.List className="max-h-60 overflow-y-auto overscroll-contain p-1 empty:p-0">
-              {(option: SearchableSelectOption) => (
-                <Combobox.Item
-                  key={option.value === "" ? "__empty__" : option.value}
-                  value={option}
-                  className={cn(
-                    "grid cursor-default grid-cols-[1rem_1fr] items-center gap-2 rounded-md px-2 outline-none select-none",
-                    "data-highlighted:bg-accent data-highlighted:text-accent-foreground",
-                    compact ? "py-1 text-xs" : "py-1.5 text-sm",
-                  )}
-                >
-                  <Combobox.ItemIndicator className="col-start-1 flex items-center justify-center">
-                    <CheckIcon aria-hidden className="size-3.5" />
-                  </Combobox.ItemIndicator>
-                  <span className="col-start-2 min-w-0">
-                    <span className="block truncate font-medium">
-                      {option.label}
-                    </span>
-                    {option.hint ? (
-                      <span
-                        className={cn(
-                          "block truncate leading-snug text-muted-foreground",
-                          compact ? "text-[10px]" : "text-[11px]",
-                        )}
-                      >
-                        {option.hint}
-                      </span>
-                    ) : null}
+          <Combobox.Empty
+            className={cn(
+              "px-3 py-3 text-muted-foreground",
+              compact ? "text-xs" : "text-sm",
+            )}
+          >
+            {emptyMessage}
+          </Combobox.Empty>
+          <Combobox.List className="max-h-60 overflow-y-auto overscroll-contain p-1 empty:p-0">
+            {(option: SearchableSelectOption) => (
+              <Combobox.Item
+                key={option.value === "" ? "__empty__" : option.value}
+                value={option}
+                data-cy="searchable-select-option"
+                className={cn(
+                  "grid cursor-default grid-cols-[1rem_1fr] items-center gap-2 rounded-md px-2 outline-none select-none",
+                  "data-highlighted:bg-accent data-highlighted:text-accent-foreground",
+                  compact ? "py-1 text-xs" : "py-1.5 text-sm",
+                )}
+              >
+                <Combobox.ItemIndicator className="col-start-1 flex items-center justify-center">
+                  <CheckIcon aria-hidden className="size-3.5" />
+                </Combobox.ItemIndicator>
+                <span className="col-start-2 min-w-0">
+                  <span className="block truncate font-medium">
+                    {option.label}
                   </span>
-                </Combobox.Item>
-              )}
-            </Combobox.List>
-          </Combobox.Popup>
+                  {option.hint ? (
+                    <span
+                      className={cn(
+                        "block truncate leading-snug text-muted-foreground",
+                        compact ? "text-[10px]" : "text-[11px]",
+                      )}
+                    >
+                      {option.hint}
+                    </span>
+                  ) : null}
+                </span>
+              </Combobox.Item>
+            )}
+          </Combobox.List>
+        </Combobox.Popup>
         </Combobox.Positioner>
       </Combobox.Portal>
     </Combobox.Root>

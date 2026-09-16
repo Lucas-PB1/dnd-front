@@ -4,7 +4,7 @@ import {
 } from "../../../support/api-level-up";
 import {
   levelUpChoosingFeat,
-  openSheetFeaturesTab,
+  openSheetFeatsTraits,
 } from "../../../support/sheet-progression";
 
 describe("ficha — talento nos níveis de ASI", () => {
@@ -18,7 +18,7 @@ describe("ficha — talento nos níveis de ASI", () => {
     });
 
     levelUpChoosingFeat(4, "Chef", "chef-0-abilityIncrease", "Constituição");
-    openSheetFeaturesTab();
+    openSheetFeatsTraits();
     cy.contains("Chef").should("exist");
 
     cy.get<string>("@characterId").then((characterId) => {
@@ -33,7 +33,7 @@ describe("ficha — talento nos níveis de ASI", () => {
       "durable-0-abilityIncrease",
       "Constituição",
     );
-    openSheetFeaturesTab();
+    openSheetFeatsTraits();
     cy.contains("Chef").should("exist");
     cy.contains("Resistente").should("exist");
   });

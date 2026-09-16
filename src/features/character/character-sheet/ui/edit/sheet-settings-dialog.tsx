@@ -25,10 +25,6 @@ type SheetSettingsDialogProps = {
   onClose: () => void;
 };
 
-/**
- * Hub de Ajustes: metadados leves + progressão + idiomas.
- * Aberto por botão no header (não é aba do painel Beyond).
- */
 export function SheetSettingsDialog({
   characterId,
   character,
@@ -37,13 +33,14 @@ export function SheetSettingsDialog({
   return (
     <Dialog
       open
+      modal={false}
       onOpenChange={(next) => {
         if (!next) onClose();
       }}
     >
       <DialogContent
         data-cy="sheet-settings-dialog"
-        className="flex max-h-[min(92vh,52rem)] min-h-0 flex-col gap-0 overflow-hidden sm:max-w-3xl"
+        className="flex max-h-[min(92vh,52rem)] min-h-0 flex-col gap-0 overflow-visible sm:max-w-3xl"
       >
         <DialogHeader className="shrink-0">
           <DialogTitle>Ajustes</DialogTitle>
@@ -56,9 +53,7 @@ export function SheetSettingsDialog({
             <EditProfileForm
               key={`profile-${character.name}-${character.alignmentSlug ?? ""}`}
               character={character}
-              onSuccess={() => {
-                /* invalidação via mutation; permanece no hub */
-              }}
+              onSuccess={() => undefined}
             />
           </CharacterSheetTabSection>
           <CharacterSheetTabSection
@@ -71,9 +66,7 @@ export function SheetSettingsDialog({
             <EditLanguagesInlineForm
               key={`langs-${character.languageSlugs.join(",")}`}
               character={character}
-              onSuccess={() => {
-                /* invalidação via mutation; permanece no hub */
-              }}
+              onSuccess={() => undefined}
             />
           </CharacterSheetTabSection>
         </div>
