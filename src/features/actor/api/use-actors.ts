@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
 import type { SpawnActorFromTemplatePayload } from "@/entities/actor/types";
+import { fetchActors } from "@/features/actor/api/actors.api";
 import {
   boardCharacterVehicle,
   fetchActorById,
@@ -21,10 +22,24 @@ import { charactersKeys } from "@/features/character/characters/api/characters.a
 
 export const actorKeys = {
   all: ["actors"] as const,
+  list: () => [...actorKeys.all, "list"] as const,
   detail: (id: string) => [...actorKeys.all, "detail", id] as const,
   byCharacter: (characterId: string) =>
     [...actorKeys.all, "character", characterId] as const,
 };
+
+export function useActors() {
+  const { accessToken, isLoading: authLoading } = useAuth();
+
+  return useQuery({
+    queryKey: actorKeys.list(),
+    queryFn: () => {
+      if (!accessToken) throw new Error("Não autenticado");
+      return fetchActors(accessToken);
+    },
+    enabled: !authLoading && !!accessToken,
+  });
+}
 
 export function useCharacterActors(characterId: string) {
   const { accessToken, isLoading: authLoading } = useAuth();

@@ -1,6 +1,6 @@
 # Plano 12 — `GET /actors`
 
-**ID:** FR-19 · **Dificuldade:** fácil · **Status:** Ready
+**ID:** FR-19 · **Dificuldade:** fácil · **Status:** Feito
 
 ## Gap
 
@@ -13,3 +13,7 @@ Client + hook. Útil para hub de actors fora da ficha.
 ## Pronto quando
 
 Dá para listar actors da conta sem `characterId`.
+
+## Feito
+
+`fetchActors` + `actorKeys.list` + `useActors`. Resposta: `ActorSummary[]`. Sem UI de hub neste plano.

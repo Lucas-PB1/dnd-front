@@ -15,7 +15,7 @@ Um ID → um plano. Status: Ready · Blocked · Adiado · Feito.
 | FR-16 | [09](./plans/09-companions-http.md) | Feito | HTTP companions GET/dismiss |
 | FR-18 | [10](./plans/10-vehicles-sheet-actions-http.md) | Feito | HTTP vehicles sheet-actions |
 | FR-17 | [11](./plans/11-mounts-http.md) | Feito | HTTP mounts |
-| FR-19 | [12](./plans/12-actors-list.md) | Ready | `GET /actors` |
+| FR-19 | [12](./plans/12-actors-list.md) | Feito | `GET /actors` |
 | FR-38 | [13](./plans/13-actors-create.md) | Ready | `POST /actors` |
 | FR-39 | [14](./plans/14-actors-delete.md) | Ready | `DELETE /actors/:id` |
 | FR-40 | [15](./plans/15-actors-get-state.md) | Ready | `GET /actors/:id/state` |
