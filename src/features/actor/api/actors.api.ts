@@ -1,6 +1,7 @@
 import { gameFetch } from "@/shared/api/dnd-api/api-client";
 import type {
   ActorDetail,
+  ActorLiveState,
   ActorSummary,
   CreateActorPayload,
 } from "@/entities/actor/types";
@@ -23,4 +24,8 @@ export async function deleteActor(accessToken: string, id: string) {
   return gameFetch<void>(`/actors/${id}`, accessToken, {
     method: "DELETE",
   });
+}
+
+export async function fetchActorState(accessToken: string, id: string) {
+  return gameFetch<ActorLiveState>(`/actors/${id}/state`, accessToken);
 }

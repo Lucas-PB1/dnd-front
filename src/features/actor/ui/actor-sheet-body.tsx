@@ -4,7 +4,11 @@ import {
   ACTOR_KIND_LABELS,
   type ActorDetail,
 } from "@/entities/actor/types";
-import { usePatchActorState } from "@/features/actor/api/use-actors";
+import { resolveActorVitals } from "@/entities/actor/lib/resolve-actor-vitals";
+import {
+  useActorState,
+  usePatchActorState,
+} from "@/features/actor/api/use-actors";
 import { VitalStepper } from "@/features/actor/ui/vital-stepper";
 import { StatBlockCard } from "@/features/catalog/template-stat-block/ui/stat-block-card";
 import { TemplateSpellsList } from "@/features/catalog/template-stat-block/ui/template-stat-block-sections";
@@ -12,31 +16,31 @@ import { formatKgFromPounds } from "@/shared/lib/metric";
 
 type ActorSheetBodyProps = {
   actor: ActorDetail;
-  /** Esconde link “ver personagem” (útil no modal sobre a ficha). */
   hideParentLink?: boolean;
 };
 
-/** Conteúdo da ficha de actor (veículo/montaria/criatura) com controles de mesa. */
 export function ActorSheetBody({
   actor,
   hideParentLink = false,
 }: ActorSheetBodyProps) {
+  const liveQuery = useActorState(actor.id);
   const patchState = usePatchActorState(actor.id);
+  const vitals = resolveActorVitals(actor, liveQuery.data);
   const isVehicle = actor.actorKind === "vehicle";
-  const hpCurrent = actor.hitPointsCurrent ?? actor.hitPointsMax ?? 0;
-  const hpMax = actor.hitPointsMax;
-  const tempHp = actor.state?.tempHp ?? 0;
-  const conditions = actor.state?.conditions ?? [];
 
   function setHp(next: number) {
+    const max = vitals.hitPointsMax;
     const clamped =
-      hpMax != null ? Math.max(0, Math.min(hpMax, next)) : Math.max(0, next);
+      max != null ? Math.max(0, Math.min(max, next)) : Math.max(0, next);
     patchState.mutate({ hitPointsCurrent: clamped });
   }
 
   function setTempHp(next: number) {
     patchState.mutate({ tempHp: Math.max(0, next) });
   }
+
+  const cargoCapacityLb =
+    liveQuery.data?.cargoCapacityLb ?? actor.cargoCapacityLb;
 
   return (
     <div className="space-y-4">
@@ -54,30 +58,36 @@ export function ActorSheetBody({
           <VitalStepper
             id={`actor-hp-${actor.id}`}
             label="PV"
-            value={hpCurrent}
-            max={hpMax}
+            value={vitals.hitPointsCurrent}
+            max={vitals.hitPointsMax}
             disabled={patchState.isPending}
             onChange={setHp}
           />
           <VitalStepper
             id={`actor-temp-hp-${actor.id}`}
             label="PV temp."
-            value={tempHp}
+            value={vitals.tempHp}
             disabled={patchState.isPending}
             onChange={setTempHp}
           />
-          {actor.armorClass != null ? (
+          {vitals.armorClass != null ? (
             <span className="text-xs text-muted-foreground">
               CA{" "}
               <span className="font-semibold text-foreground">
-                {actor.armorClass}
+                {vitals.armorClass}
               </span>
             </span>
           ) : null}
         </div>
-        {conditions.length > 0 ? (
+        {vitals.conditions.length > 0 ? (
           <p className="text-xs text-muted-foreground">
-            Condições: {conditions.join(", ")}
+            Condições: {vitals.conditions.join(", ")}
+          </p>
+        ) : null}
+        {liveQuery.isError ? (
+          <p className="text-xs text-destructive">
+            {(liveQuery.error as Error)?.message ??
+              "Falha ao carregar o estado"}
           </p>
         ) : null}
         {patchState.isError ? (
@@ -91,19 +101,21 @@ export function ActorSheetBody({
         variant={isVehicle ? "vehicle" : "creature"}
         name={actor.name}
         imageUrl={actor.imageUrl}
-        armorClass={actor.armorClass}
+        armorClass={vitals.armorClass}
         initiativeModifier={actor.initiativeModifier}
-        hitPoints={actor.hitPointsMax}
-        hitPointsCurrent={actor.hitPointsCurrent}
-        damageThreshold={actor.damageThreshold}
+        hitPoints={vitals.hitPointsMax}
+        hitPointsCurrent={vitals.hitPointsCurrent}
+        damageThreshold={
+          liveQuery.data?.damageThreshold ?? actor.damageThreshold
+        }
         speeds={actor.speeds}
         abilityScores={actor.abilityScores}
-        crewCapacity={actor.crewCapacity}
-        passengerCapacity={actor.passengerCapacity}
+        crewCapacity={liveQuery.data?.crewCapacity ?? actor.crewCapacity}
+        passengerCapacity={
+          liveQuery.data?.passengerCapacity ?? actor.passengerCapacity
+        }
         cargoCapacityLabel={
-          actor.cargoCapacityLb != null
-            ? formatKgFromPounds(actor.cargoCapacityLb)
-            : null
+          cargoCapacityLb != null ? formatKgFromPounds(cargoCapacityLb) : null
         }
         proficiencyBonus={actor.proficiencyBonus}
         enableRolls

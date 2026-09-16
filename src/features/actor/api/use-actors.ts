@@ -10,10 +10,16 @@ import { useRouter } from "next/navigation";
 
 import type {
   ActorDetail,
+  ActorLiveState,
   CreateActorPayload,
   SpawnActorFromTemplatePayload,
 } from "@/entities/actor/types";
-import { createActor, deleteActor, fetchActors } from "@/features/actor/api/actors.api";
+import {
+  createActor,
+  deleteActor,
+  fetchActorState,
+  fetchActors,
+} from "@/features/actor/api/actors.api";
 import {
   boardCharacterVehicle,
   fetchActorById,
@@ -27,6 +33,7 @@ import {
 import { sessionKeys } from "@/features/character/character-sheet/api/character-session.api";
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
 import { useAuth } from "@/features/auth/model";
+import { CHARACTER_STATE_STALE_MS } from "@/features/character/characters/api/character-query";
 import { charactersKeys } from "@/features/character/characters/api/characters.api";
 
 export const actorKeys = {
@@ -35,6 +42,7 @@ export const actorKeys = {
   detail: (id: string) => [...actorKeys.all, "detail", id] as const,
   byCharacter: (characterId: string) =>
     [...actorKeys.all, "character", characterId] as const,
+  state: (id: string) => [...actorKeys.all, "state", id] as const,
 };
 
 function invalidateActorCaches(
@@ -87,6 +95,28 @@ export function useActorDetail(id: string) {
       return fetchActorById(accessToken, id);
     },
     enabled: !authLoading && !!accessToken && !!id,
+  });
+}
+
+export function useActorState(actorId: string) {
+  const { accessToken, handleUnauthorized } = useGameAuth(
+    `/actors/${actorId}`,
+  );
+
+  return useQuery({
+    queryKey: actorKeys.state(actorId),
+    queryFn: async () => {
+      if (!accessToken) {
+        throw new Error("Faça login para ver o estado do actor");
+      }
+      try {
+        return await fetchActorState(accessToken, actorId);
+      } catch (error) {
+        return handleUnauthorized(error);
+      }
+    },
+    enabled: !!accessToken && !!actorId,
+    staleTime: CHARACTER_STATE_STALE_MS,
   });
 }
 
@@ -148,6 +178,7 @@ export function useDeleteActor(actorId: string) {
         actorKeys.detail(actorId),
       );
       queryClient.removeQueries({ queryKey: actorKeys.detail(actorId) });
+      queryClient.removeQueries({ queryKey: actorKeys.state(actorId) });
       invalidateActorCaches(queryClient, {
         parentCharacterId: detail?.parentCharacterId ?? null,
       });
@@ -192,8 +223,13 @@ export function usePatchActorState(actorId: string) {
     },
     onSuccess: (state) => {
       queryClient.setQueryData(
+        actorKeys.state(state.actorId),
+        (prev: ActorLiveState | undefined) =>
+          prev ? { ...prev, ...state } : (state as ActorLiveState),
+      );
+      queryClient.setQueryData(
         actorKeys.detail(state.actorId),
-        (prev: import("@/entities/actor/types").ActorDetail | undefined) => {
+        (prev: ActorDetail | undefined) => {
           if (!prev) return prev;
           return {
             ...prev,
@@ -217,9 +253,9 @@ export function usePatchActorState(actorId: string) {
           };
         },
       );
-      const detail = queryClient.getQueryData<
-        import("@/entities/actor/types").ActorDetail
-      >(actorKeys.detail(state.actorId));
+      const detail = queryClient.getQueryData<ActorDetail>(
+        actorKeys.detail(state.actorId),
+      );
       if (detail?.parentCharacterId) {
         void queryClient.invalidateQueries({
           queryKey: actorKeys.byCharacter(detail.parentCharacterId),

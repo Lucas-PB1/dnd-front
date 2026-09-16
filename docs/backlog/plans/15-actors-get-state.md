@@ -1,6 +1,6 @@
 # Plano 15 — `GET /actors/:id/state`
 
-**ID:** FR-40 · **Dificuldade:** fácil · **Status:** Ready
+**ID:** FR-40 · **Dificuldade:** fácil · **Status:** Feito
 
 ## Gap
 
@@ -13,3 +13,7 @@ State ao vivo do actor. Front só faz `PATCH /actors/:id/state`.
 ## Pronto quando
 
 A UI de actor lê state pelo GET dedicado (ou documenta por que o bundle basta e o tipo PATCH não substitui leitura).
+
+## Feito
+
+`fetchActorState` + `actorKeys.state` + `useActorState`. Ficha e PV a bordo usam o GET; o bundle só cobre o intervalo até a query chegar. PATCH grava na mesma key.

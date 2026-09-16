@@ -6,8 +6,10 @@ import {
   ACTOR_KIND_LABELS,
   type ActorDetail,
 } from "@/entities/actor/types";
+import { resolveActorVitals } from "@/entities/actor/lib/resolve-actor-vitals";
 import {
   useActorDetail,
+  useActorState,
   useBoardVehicle,
   usePatchActorState,
 } from "@/features/actor/api/use-actors";
@@ -25,16 +27,16 @@ type BoardedVehiclePanelProps = {
 };
 
 function BoardedVehicleHp({ actor }: { actor: ActorDetail }) {
+  const liveQuery = useActorState(actor.id);
   const patch = usePatchActorState(actor.id);
-  const current = actor.hitPointsCurrent ?? actor.hitPointsMax ?? 0;
-  const max = actor.hitPointsMax;
+  const vitals = resolveActorVitals(actor, liveQuery.data);
 
   return (
     <VitalStepper
       id={`boarded-hp-${actor.id}`}
       label="PV"
-      value={current}
-      max={max}
+      value={vitals.hitPointsCurrent}
+      max={vitals.hitPointsMax}
       disabled={patch.isPending}
       onChange={(next) => patch.mutate({ hitPointsCurrent: next })}
     />

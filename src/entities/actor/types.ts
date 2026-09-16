@@ -55,6 +55,25 @@ export type ActorDetail = ActorSummary & {
   } | null;
 };
 
+export type ActorLiveState = {
+  actorId: string;
+  hitPointsCurrent: number | null;
+  hitPointsMax: number | null;
+  armorClass: number | null;
+  abilityModifiers: Record<string, number>;
+  conditions: string[];
+  tempHp: number;
+  concentratingOn: string | null;
+  innateSpellUses: Record<string, number>;
+  damageThreshold: number | null;
+  crewCapacity: number | null;
+  passengerCapacity: number | null;
+  cargoCapacityLb: number | null;
+  crewCurrent: number;
+  passengerCurrent: number;
+  cargoCurrentLb: number;
+};
+
 export type CreateActorPayload = {
   actorKind: ActorKind;
   name: string;
