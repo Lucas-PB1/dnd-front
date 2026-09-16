@@ -63,7 +63,6 @@ export type ActionEconomyBucket =
   | "reaction"
   | "free";
 
-/** Registro da API — features com economia de ação (aba Ações). */
 export type ClassEconomyActionRecord = {
   id: string;
   name: string;
@@ -75,7 +74,6 @@ export type ClassEconomyActionRecord = {
   featSlug?: string | null;
   itemSlug?: string | null;
   heritageTraitSlug?: string | null;
-  /** Character Thread (Northlands). */
   threadSlug?: string | null;
   minTraitTakes?: number;
   requiresOptionKey?: string;
@@ -87,7 +85,6 @@ export type ClassEconomyActionRecord = {
   description?: string;
   tableAction?: string;
   spendAmount?: number;
-  /** Magia vinculada (cast de item). */
   spellSlug?: string;
 };
 
@@ -97,16 +94,13 @@ export type PanelActionSection =
   | "metamagic"
   | "channel";
 
-/** Registro da API — botões dos painéis de combate por classe. */
 export type ClassPanelActionRecord = {
   panelKey: string;
   classSlug: string;
   subclassSlug?: string;
   slug: string;
   name: string;
-  /** Resumo curto (C010). */
   title?: string;
-  /** Texto jogável completo (C009 quando há match por table_action). */
   description?: string;
   minLevel: number;
   resourceSlug?: string;

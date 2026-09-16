@@ -33,6 +33,7 @@ Todas em `.cursor/skills/<nome>/SKILL.md`.
 - `02-clean-code` — legibilidade
 - `03-solid` — SOLID no FSD
 - `04-dry` — schemas e keys únicos
+- `05-no-code-comments` — sem comentários no código
 
 Rules por contexto (globs): `10`–`50` em `.cursor/rules/`.
 

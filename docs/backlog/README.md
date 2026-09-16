@@ -21,8 +21,8 @@ Blocked não vira Ready só espelhando TS. Adiado só com pedido explícito.
 
 | # | Status | Plano |
 | --- | --- | --- |
-| [01](./plans/01-doc-api-integration.md) | Ready | Corrigir `API-INTEGRATION.md` |
-| [02](./plans/02-min-trait-takes.md) | Ready | Alinhar `minTraitTakes` |
+| [01](./plans/01-doc-api-integration.md) | Feito | Corrigir `API-INTEGRATION.md` |
+| [02](./plans/02-min-trait-takes.md) | Feito | Alinhar `minTraitTakes` |
 | [03](./plans/03-xp-threshold.md) | Ready | `xpThreshold` na ficha ou fora do tipo |
 | [04](./plans/04-character-state-tipos.md) | Ready | Tipar wild shape + companions no state |
 | [05](./plans/05-strike-options-tipo.md) | Ready | Tipar `strikeOptions` |

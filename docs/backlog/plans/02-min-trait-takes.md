@@ -1,17 +1,11 @@
 # Plano 02 — `minTraitTakes`
 
-**ID:** FR-33 · **Dificuldade:** fácil · **Status:** Ready
+**ID:** FR-33 · **Dificuldade:** fácil · **Status:** Feito (2026-09-16)
 
 ## Gap
 
-Front `ClassEconomyActionRecord.minTraitTakes` existe. DTO Nest `ClassEconomyActionDto` **não** lista o campo.
+Front já tipava `minTraitTakes`. O JSON do `GET /combat-mechanical-catalog` já manda (`mapEconomyActions`). O Swagger `ClassEconomyActionDto` omitia o campo.
 
-## Fazer
+## Feito
 
-Ver o mapper do `GET /combat-mechanical-catalog`. Se o JSON não traz: **remover** do tipo front. Se traz e o Swagger omite: tipar igual ao JSON (e opcionalmente abrir PR na API no Swagger).
-
-Não inventar filtro de traço no front sem o campo.
-
-## Pronto quando
-
-Tipo = resposta real. Sem campo fantasma.
+Campo no DTO Nest (Swagger = JSON). Comentário no tipo do front. Filtro na aba Ações permanece (`matchesHeritageTraitAction`).

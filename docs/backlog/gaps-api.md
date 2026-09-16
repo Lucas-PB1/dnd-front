@@ -6,8 +6,8 @@ Cada linha é **um** plano. Detalhe só no arquivo do plano.
 
 | Gap | Plano |
 | --- | --- |
-| Doc diz que o wizard não lê métodos de atributo | [01](./plans/01-doc-api-integration.md) |
-| Front tem `minTraitTakes`; DTO Nest não | [02](./plans/02-min-trait-takes.md) |
+| ~~Doc diz que o wizard não lê métodos de atributo~~ | [01](./plans/01-doc-api-integration.md) Feito |
+| ~~Front tem `minTraitTakes`; DTO Nest não~~ | [02](./plans/02-min-trait-takes.md) Feito |
 | `xpThreshold` no GET levels, UI não usa | [03](./plans/03-xp-threshold.md) |
 | State: wild shape + companions sem tipo | [04](./plans/04-character-state-tipos.md) |
 | Catálogo: `strikeOptions` sem tipo | [05](./plans/05-strike-options-tipo.md) |

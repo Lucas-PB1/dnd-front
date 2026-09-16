@@ -4,8 +4,8 @@ Um ID → um plano. Status: Ready · Blocked · Adiado · Feito.
 
 | ID | Plano | Status | Item |
 | --- | --- | --- | --- |
-| FR-14 | [01](./plans/01-doc-api-integration.md) | Ready | Doc `API-INTEGRATION.md` |
-| FR-33 | [02](./plans/02-min-trait-takes.md) | Ready | `minTraitTakes` |
+| FR-14 | [01](./plans/01-doc-api-integration.md) | Feito | Doc `API-INTEGRATION.md` |
+| FR-33 | [02](./plans/02-min-trait-takes.md) | Feito | `minTraitTakes` |
 | FR-32 | [03](./plans/03-xp-threshold.md) | Ready | `xpThreshold` |
 | FR-12 | [04](./plans/04-character-state-tipos.md) | Ready | Tipos `CharacterState` |
 | FR-13 | [05](./plans/05-strike-options-tipo.md) | Ready | Tipo `strikeOptions` |

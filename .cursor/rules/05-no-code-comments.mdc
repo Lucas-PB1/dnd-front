@@ -1,0 +1,20 @@
+---
+description: Sem comentários no código; limpar ao editar o arquivo
+alwaysApply: true
+---
+
+# Sem comentários no código
+
+Em `src/`, `tests/` e `.ts`/`.tsx`/`.js`/`.css`: **zero comentários** (`//`, `/* */`, JSDoc, `{/* */}`).
+
+Contrato e intenção ficam em `docs/`. Nomes e tipos explicam o código.
+
+## Ao alterar um arquivo
+
+Se o arquivo de código foi editado (por você ou pelo usuário neste turno):
+
+1. Conferir se ainda há comentário
+2. Remover **todos** os comentários daquele arquivo (não só os que você inseriu)
+3. Não reintroduzir comentário na mesma edição
+
+O hook `afterFileEdit` / `afterTabFileEdit` também tenta apagar comentários sozinho. Se sobrar algum, limpe na hora.

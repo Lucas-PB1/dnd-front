@@ -1,15 +1,11 @@
 # Plano 01 — Doc de integração
 
-**ID:** FR-14 · **Dificuldade:** fácil · **Status:** Ready
+**ID:** FR-14 · **Dificuldade:** fácil · **Status:** Feito (2026-09-16)
 
 ## Gap
 
-`docs/API-INTEGRATION.md` diz que o wizard **não** consome `GET /ability-generation-methods`. O passo de atributos já chama `useAbilityGenerationMethods()`.
+`docs/API-INTEGRATION.md` dizia que o wizard **não** consome `GET /ability-generation-methods`. O passo de atributos já chamava `useAbilityGenerationMethods()`.
 
-## Fazer
+## Feito
 
-Corrigir o parágrafo. Fallback local só enquanto a query está pending.
-
-## Pronto quando
-
-O doc descreve o código atual.
+Parágrafo alinhado ao código: catálogo no select + review; fallback só pending/vazio; schema Zod e custos de point-buy apontam ao plano 29.

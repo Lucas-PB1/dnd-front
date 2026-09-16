@@ -28,6 +28,6 @@ Regras de jogo (PV, PB, validação de subclasse, feats) ficam na **dnd-api**.
 
 Talentos: payload/resposta usam **`characterFeats`** + **`featOptions`**.
 
-Métodos de atributo no wizard: enum local (`standard-array` / `roll` / `point-buy`); a API ainda expõe `GET /ability-generation-methods`, mas o front **não** consome esse catálogo.
+Métodos de atributo: `GET /ability-generation-methods` (`slug` + `name` + `description`). O wizard (`ability-generation-fields.tsx`) e o review (`useStepReview`) **consomem** esse catálogo para labels do select. Enquanto a query está pending ou vazia, o select usa fallback `standard-array` / `roll` / `point-buy`. O schema Zod do create ainda valida esses três slugs; custos de point-buy continuam locais ([plano 29](./backlog/plans/29-point-buy-ssot.md)).
 
 Armas: `range` + `propertyDetails` + `mastery` (não `properties` bruto).
