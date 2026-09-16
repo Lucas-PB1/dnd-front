@@ -7,7 +7,10 @@ import type { ClassPanelActionRecord } from "@/entities/combat-mechanical/types"
 import { executePaladinTableAction } from "@/features/character/character-sheet/api/character-session.api";
 import { useTableActionMutation } from "@/features/character/character-sheet/api/use-table-action-mutation";
 import { useCombatMechanicalCatalog } from "@/features/catalog/reference-catalog/api/use-reference";
+import { economyActionDetailText } from "@/features/character/character-sheet/lib/combat/class-action-economy";
+import { paladinProtectiveSmiteReminder } from "@/features/character/character-sheet/lib/combat/paladin-protective-smite";
 import { resolvePanelActions } from "@/features/character/character-sheet/lib/combat/resolve-panel-actions";
+import { FeatureDetailTrigger } from "@/features/character/character-sheet/ui/sheet/feature-detail-dialog";
 import { CombatClassPanelShell } from "../shared/class-panel-shell";
 import { CombatPanelActionButtons } from "../shared/panel-action-buttons";
 import { TableActionFeedback } from "../shared/table-action-feedback";
@@ -40,6 +43,10 @@ export function CombatPaladinPanel({
   });
   const panelCatalog =
     mechanicalCatalog.data?.panelActions ?? EMPTY_PANEL_ACTIONS;
+  const protectiveSmite = paladinProtectiveSmiteReminder(
+    mechanicalCatalog.data?.economyActions ?? [],
+    { level, subclassSlug },
+  );
 
   const channelActions = useMemo(
     () =>
@@ -151,6 +158,32 @@ export function CombatPaladinPanel({
         onAction={(slug) => action.mutate({ actionSlug: slug })}
         listTitle="Juramento"
       />
+
+      {protectiveSmite ? (
+        <div className="rounded-md border border-border/60 bg-muted/20 px-2.5 py-2">
+          {economyActionDetailText(protectiveSmite) ? (
+            <FeatureDetailTrigger
+              variant="text"
+              title={protectiveSmite.name}
+              subtitle={protectiveSmite.summary}
+              description={economyActionDetailText(protectiveSmite)}
+            >
+              <span className="text-sm font-medium text-foreground underline-offset-2 hover:underline">
+                {protectiveSmite.name}
+              </span>
+              {protectiveSmite.summary ? (
+                <span className="mt-0.5 block text-xs text-muted-foreground">
+                  {protectiveSmite.summary}
+                </span>
+              ) : null}
+            </FeatureDetailTrigger>
+          ) : (
+            <p className="text-sm font-medium text-foreground">
+              {protectiveSmite.name}
+            </p>
+          )}
+        </div>
+      ) : null}
 
       <TableActionFeedback
         lastResultNote={action.lastResult?.note}

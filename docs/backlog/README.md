@@ -80,11 +80,16 @@ Blocked não vira Ready só espelhando TS. Adiado só com pedido explícito.
 | [32](./plans/32-subclass-unlock-create.md) | Feito | Unlock de subclasse no create |
 | [33](./plans/33-max-attuned.md) | Feito | Limite de sintonias |
 
+### Mesa (pedido explícito)
+
+| # | Status | Plano |
+| --- | --- | --- |
+| [34](./plans/34-paladino-cobertura-lembrete.md) | Feito | Lembrete Destruição Protetora |
+
 ### Adiado (pedido explícito)
 
 | # | Status | Plano |
 | --- | --- | --- |
-| [34](./plans/34-paladino-cobertura-lembrete.md) | Adiado | Lembrete Destruição Protetora |
 | [35](./plans/35-misseis-modal-boost.md) | Adiado | Modal Escudo/Giga no cast |
 | [36](./plans/36-gh-cap1-tracos.md) | Adiado | GH Cap. 1 sub-escolhas |
 | [37](./plans/37-pistoleiro-polish.md) | Adiado | Pistoleiro polish |
