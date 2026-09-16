@@ -4,7 +4,7 @@
 
 ## Gap
 
-`SPELL_SCHOOL_FILTER` é array PT. Escolas estão em `phb_spell_school`. Sem `GET /spell-schools`. Query `?school=` no `GET /spells` **já** é consumida.
+`buildSpellSchoolFilter` em `entities/spell` ainda usa `SPELL_SCHOOL_OPTIONS` local. Escolas estão em `phb_spell_school`. Sem `GET /spell-schools`. Query `?school=` no `GET /spells` **já** é consumida.
 
 ## Fazer
 

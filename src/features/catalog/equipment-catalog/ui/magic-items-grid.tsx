@@ -6,9 +6,9 @@ import type { ItemSummary } from "@/entities/item/types";
 import { useMagicItemsCatalog } from "@/features/catalog/equipment-catalog/api/use-equipment";
 import { GearItemCard } from "@/features/catalog/equipment-catalog/ui/gear-item-card";
 import {
-  MAGIC_ITEM_RARITY_FILTER,
-  MAGIC_ITEM_TYPE_FILTER,
-} from "@/shared/lib/catalog-filter-options";
+  buildMagicItemRarityFilter,
+  buildMagicItemTypeFilter,
+} from "@/entities/item/lib/item-catalog-filters";
 import { useCatalogListState } from "@/shared/lib/use-catalog-list-state";
 import { paginateCatalogItems } from "@/shared/lib/catalog-pagination";
 import { CatalogFilters } from "@/shared/ui/catalog-filters";
@@ -21,6 +21,11 @@ import { cn } from "@/shared/lib/utils";
 function sortByName(a: ItemSummary, b: ItemSummary) {
   return a.name.localeCompare(b.name, "pt");
 }
+
+const MAGIC_ITEM_FILTERS = [
+  buildMagicItemTypeFilter(),
+  buildMagicItemRarityFilter(),
+];
 
 export function MagicItemsGrid() {
   const {
@@ -82,7 +87,7 @@ export function MagicItemsGrid() {
           resultCount={total}
         />
         <CatalogFilters
-          fields={[MAGIC_ITEM_TYPE_FILTER, MAGIC_ITEM_RARITY_FILTER]}
+          fields={MAGIC_ITEM_FILTERS}
           values={filters}
           onChange={setFilter}
         />

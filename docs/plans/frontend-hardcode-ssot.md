@@ -56,7 +56,7 @@ Já consome API (contraste bom):
 
 | O quê | Onde | Nota |
 |-------|------|------|
-| Escolas de magia (filtro) | `shared/lib/catalog-filter-options.ts` | seed escolas; só embutido em spells |
+| Escolas de magia (filtro) | `entities/spell/lib/spell-catalog-filters.ts` (`buildSpellSchoolFilter`) | seed escolas; `GET /spell-schools` = plano 23 |
 | Categorias feat / arma / armadura / item | idem + `ITEM_TYPE_LABELS_PT` / `WEAPON_CATEGORY_LABELS_PT` | seeds `S006`–`S011` |
 | Pools de ferramentas (instrumento, jogo, artesão) | `create-character/lib/equipment/equipment-choice-resolve.ts` | items/tools no DB |
 
@@ -115,7 +115,7 @@ Nota: **B−**
 | Catálogo + HTTP + FSD documentado | Forte (A−) |
 | `character-sheet` (combate / inventário / magias) | Fraco — god slice, arquivos 500–850 linhas, regras espelhadas |
 | Tipagem de resposta API | Só compile-time (`gameFetch<T>`); sem Zod no boundary |
-| Boundaries FSD | `shared` → `entities` em filtros/chips; barrels públicos = `index.ts` na pasta (sem aggregators nomeados) |
+| Boundaries FSD | `shared` não importa `entities`; filtros do catálogo em entity builders |
 | Testes | ~26 Vitest vs ~450 src; ficha quase sem cobertura; Cypress smoke |
 
 ### Melhorias alinhadas a este plano
@@ -123,7 +123,7 @@ Nota: **B−**
 1. Contrair regras de mesa no front (fases 1–2 e 5) — maior ganho de qualidade.
 2. Fatiar `character-sheet` / `character-session.api.ts` quando o catálogo deixar de viver no cliente.
 3. Validação runtime nos DTOs críticos após o contrato do GET mecânico estabilizar.
-4. Corrigir imports `shared` → `entities` ao mexer em `catalog-filter-options` (fase 4).
+4. Filtros do catálogo: builders nas entities; `shared/lib/build-catalog-filter-field.ts` sem domínio. Labels via API = planos 23–24.
 5. Testes no hotspot: libs de economia + 2–3 e2e de ficha logada.
 
 Detalhe de arquitetura: [`../ARCHITECTURE.md`](../ARCHITECTURE.md).

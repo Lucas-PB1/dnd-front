@@ -25,7 +25,7 @@ Um ID → um plano. Status: Ready · Blocked · Adiado · Feito.
 | FR-21 | [19](./plans/19-companheiros-ui.md) | Feito | UI companheiros |
 | FR-22 | [20](./plans/20-veiculos-sheet-actions-ui.md) | Feito | UI veículo sheet-actions |
 | FR-37 | [21](./plans/21-montarias-ui.md) | Feito | UI montaria |
-| FR-10 | [22](./plans/22-fsd-catalog-filters.md) | Ready | FSD filtros |
+| FR-10 | [22](./plans/22-fsd-catalog-filters.md) | Feito | FSD filtros |
 | FR-1 | [23](./plans/23-filtros-escolas.md) | Blocked | Escolas de magia |
 | FR-34 | [24](./plans/24-filtros-categorias.md) | Blocked | Categorias de catálogo |
 | FR-2 | [25](./plans/25-pools-ferramentas.md) | Blocked | Pools de tools |

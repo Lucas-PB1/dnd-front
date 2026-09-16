@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import type { ArmorSummary } from "@/entities/armor/types";
 import { useArmorCatalog } from "@/features/catalog/equipment-catalog/api/use-equipment";
 import { ArmorCard } from "@/features/catalog/equipment-catalog/ui/armor-card";
-import { ARMOR_CATEGORY_FILTER } from "@/shared/lib/catalog-filter-options";
+import { buildArmorCategoryFilter } from "@/entities/armor/lib/armor-catalog-filters";
 import { useCatalogListState } from "@/shared/lib/use-catalog-list-state";
 import { paginateCatalogItems } from "@/shared/lib/catalog-pagination";
 import { CatalogFilters } from "@/shared/ui/catalog-filters";
@@ -18,6 +18,8 @@ import { cn } from "@/shared/lib/utils";
 function sortByName(a: ArmorSummary, b: ArmorSummary) {
   return a.name.localeCompare(b.name, "pt");
 }
+
+const ARMOR_CATEGORY_FILTER = buildArmorCategoryFilter();
 
 export function ArmorGrid() {
   const {

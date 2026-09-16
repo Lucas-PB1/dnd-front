@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import type { WeaponSummary } from "@/entities/weapon/types";
 import { useWeaponsCatalog } from "@/features/catalog/equipment-catalog/api/use-equipment";
 import { WeaponCard } from "@/features/catalog/equipment-catalog/ui/weapon-card";
-import { WEAPON_CATEGORY_FILTER } from "@/shared/lib/catalog-filter-options";
+import { buildWeaponCategoryFilter } from "@/entities/weapon/lib/weapon-catalog-filters";
 import { useCatalogListState } from "@/shared/lib/use-catalog-list-state";
 import { paginateCatalogItems } from "@/shared/lib/catalog-pagination";
 import { CatalogFilters } from "@/shared/ui/catalog-filters";
@@ -18,6 +18,8 @@ import { cn } from "@/shared/lib/utils";
 function sortByName(a: WeaponSummary, b: WeaponSummary) {
   return a.name.localeCompare(b.name, "pt");
 }
+
+const WEAPON_CATEGORY_FILTER = buildWeaponCategoryFilter();
 
 export function WeaponsGrid() {
   const {

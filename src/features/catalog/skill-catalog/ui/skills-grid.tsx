@@ -8,7 +8,7 @@ import { SkillCard } from "@/features/catalog/skill-catalog/ui/skill-card";
 import { useAbilities } from "@/features/catalog/reference-catalog/api/use-reference";
 import { useCatalogListState } from "@/shared/lib/use-catalog-list-state";
 import { paginateCatalogItems } from "@/shared/lib/catalog-pagination";
-import { buildAbilityFilter } from "@/shared/lib/catalog-filter-options";
+import { buildAbilityFilter } from "@/entities/ability/lib/build-ability-filter";
 import { CatalogFilters } from "@/shared/ui/catalog-filters";
 import { CatalogPagination } from "@/shared/ui/catalog-pagination";
 import { CatalogSearch } from "@/shared/ui/catalog-search";

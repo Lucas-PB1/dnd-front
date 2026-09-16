@@ -10,9 +10,9 @@ import { useGearCatalog } from "@/features/catalog/equipment-catalog/api/use-equ
 import { filterGearCatalogItems } from "@/features/catalog/equipment-catalog/lib/gear-catalog-filters";
 import { GearItemCard } from "@/features/catalog/equipment-catalog/ui/gear-item-card";
 import {
-  GEAR_CATALOG_KIND_FILTER,
-  ITEM_TYPE_FILTER,
-} from "@/shared/lib/catalog-filter-options";
+  buildGearCatalogKindFilter,
+  buildItemTypeFilter,
+} from "@/entities/item/lib/item-catalog-filters";
 import { useCatalogListState } from "@/shared/lib/use-catalog-list-state";
 import { paginateCatalogItems } from "@/shared/lib/catalog-pagination";
 import { CATALOG_DETAIL_STALE_MS } from "@/shared/lib/catalog-query";
@@ -27,6 +27,11 @@ import { cn } from "@/shared/lib/utils";
 function sortByName(a: ItemSummary, b: ItemSummary) {
   return a.name.localeCompare(b.name, "pt");
 }
+
+const GEAR_CATALOG_FILTERS = [
+  buildItemTypeFilter(),
+  buildGearCatalogKindFilter(),
+];
 
 export function GearItemsGrid() {
   const {
@@ -104,7 +109,7 @@ export function GearItemsGrid() {
             resultCount={total}
           />
           <CatalogFilters
-            fields={[ITEM_TYPE_FILTER, GEAR_CATALOG_KIND_FILTER]}
+            fields={GEAR_CATALOG_FILTERS}
             values={filters}
             onChange={setFilter}
           />

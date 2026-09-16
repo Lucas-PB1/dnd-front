@@ -14,11 +14,11 @@ import {
   SHOP_CATALOG_KIND_FILTER,
   SHOP_SORT_FILTER,
   SHOP_WEAPON_CATEGORY_FILTER,
+  MAGIC_ITEM_RARITY_FILTER,
   shopAdvancedFilterLabels,
   clearShopAdvancedFilterKey,
   type ShopAdvancedFilters,
 } from "@/features/character/character-sheet/ui/beyond/inventory/beyond-shop-filter-options";
-import { MAGIC_ITEM_RARITY_FILTER } from "@/shared/lib/catalog-filter-options";
 import { CATALOG_DETAIL_STALE_MS } from "@/shared/lib/catalog-query";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";

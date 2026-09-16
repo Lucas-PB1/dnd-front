@@ -7,7 +7,7 @@ import { useLanguagesCatalog } from "@/features/catalog/language-catalog/api/use
 import { LanguageCard } from "@/features/catalog/language-catalog/ui/language-card";
 import { useCatalogListState } from "@/shared/lib/use-catalog-list-state";
 import { paginateCatalogItems } from "@/shared/lib/catalog-pagination";
-import { RARE_FILTER } from "@/shared/lib/catalog-filter-options";
+import { buildRareFilter } from "@/entities/language/lib/language-catalog-filters";
 import { CatalogFilters } from "@/shared/ui/catalog-filters";
 import { CatalogPagination } from "@/shared/ui/catalog-pagination";
 import { CatalogSearch } from "@/shared/ui/catalog-search";
@@ -18,6 +18,8 @@ import { cn } from "@/shared/lib/utils";
 function sortByName(a: LanguageSummary, b: LanguageSummary) {
   return a.name.localeCompare(b.name, "pt");
 }
+
+const RARE_FILTER = buildRareFilter();
 
 export function LanguagesGrid() {
   const {

@@ -57,7 +57,7 @@ Blocked não vira Ready só espelhando TS. Adiado só com pedido explícito.
 
 | # | Status | Plano |
 | --- | --- | --- |
-| [22](./plans/22-fsd-catalog-filters.md) | Ready | FSD em `catalog-filter-options` |
+| [22](./plans/22-fsd-catalog-filters.md) | Feito | FSD em `catalog-filter-options` |
 | [23](./plans/23-filtros-escolas.md) | Blocked | Escolas de magia via API |
 | [24](./plans/24-filtros-categorias.md) | Blocked | Categorias feat/arma/armadura/item |
 | [25](./plans/25-pools-ferramentas.md) | Blocked | Pools instrumento/jogo/artesão |

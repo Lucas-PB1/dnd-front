@@ -3,18 +3,9 @@
 import { useMemo } from "react";
 
 import type { SpellSummary } from "@/entities/spell/types";
+import { spellCatalogFilterFields } from "@/entities/spell/lib/spell-catalog-filters";
 import { useSpellsCatalog } from "@/features/catalog/spell-catalog/api/use-spells";
 import { SpellCard } from "@/features/catalog/spell-catalog/ui/spell-card";
-import {
-  SPELL_CASTING_TIME_FILTER,
-  SPELL_CONCENTRATION_FILTER,
-  SPELL_LEVEL_FILTER,
-  SPELL_RANGE_KIND_FILTER,
-  SPELL_RITUAL_FILTER,
-  SPELL_ROLL_FILTER,
-  SPELL_SAVE_ABILITY_FILTER,
-  SPELL_SCHOOL_FILTER,
-} from "@/shared/lib/catalog-filter-options";
 import { useCatalogListState } from "@/shared/lib/use-catalog-list-state";
 import { paginateCatalogItems } from "@/shared/lib/catalog-pagination";
 import { CatalogFilters } from "@/shared/ui/catalog-filters";
@@ -34,6 +25,8 @@ const SPELL_FILTER_KEYS = [
   "saveAbility",
   "rangeKind",
 ] as const;
+
+const SPELL_FILTER_FIELDS = spellCatalogFilterFields();
 
 function sortByName(a: SpellSummary, b: SpellSummary) {
   return a.name.localeCompare(b.name, "pt");
@@ -109,16 +102,7 @@ export function SpellsGrid() {
           resultCount={total}
         />
         <CatalogFilters
-          fields={[
-            SPELL_LEVEL_FILTER,
-            SPELL_SCHOOL_FILTER,
-            SPELL_CASTING_TIME_FILTER,
-            SPELL_RANGE_KIND_FILTER,
-            SPELL_SAVE_ABILITY_FILTER,
-            SPELL_ROLL_FILTER,
-            SPELL_RITUAL_FILTER,
-            SPELL_CONCENTRATION_FILTER,
-          ]}
+          fields={SPELL_FILTER_FIELDS}
           values={filters}
           onChange={setFilter}
         />

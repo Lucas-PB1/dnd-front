@@ -3,9 +3,9 @@
 import { useMemo } from "react";
 
 import type { FeatSummary } from "@/entities/feat/types";
+import { buildFeatCategoryFilter } from "@/entities/feat/lib/feat-catalog-filters";
 import { useFeatsCatalog } from "@/features/catalog/feat-catalog/api/use-feats";
 import { FeatCard } from "@/features/catalog/feat-catalog/ui/catalog/feat-card";
-import { FEAT_CATEGORY_FILTER } from "@/shared/lib/catalog-filter-options";
 import { useCatalogListState } from "@/shared/lib/use-catalog-list-state";
 import { paginateCatalogItems } from "@/shared/lib/catalog-pagination";
 import { CatalogFilters } from "@/shared/ui/catalog-filters";
@@ -18,6 +18,8 @@ import { cn } from "@/shared/lib/utils";
 function sortByName(a: FeatSummary, b: FeatSummary) {
   return a.name.localeCompare(b.name, "pt");
 }
+
+const FEAT_CATEGORY_FILTER = buildFeatCategoryFilter();
 
 export function FeatsGrid() {
   const {

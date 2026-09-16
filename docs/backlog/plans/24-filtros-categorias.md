@@ -4,7 +4,7 @@
 
 ## Gap
 
-`FEAT_CATEGORY_FILTER`, `WEAPON_CATEGORY_FILTER`, `ARMOR_CATEGORY_FILTER`, `ITEM_TYPE_LABELS_PT` hardcoded. Seeds na API; listagens filtram por query, **não** expõem o enum/catálogo de labels.
+`buildFeatCategoryFilter`, `buildWeaponCategoryFilter`, `buildArmorCategoryFilter` e `buildItemTypeFilter` ainda usam opções locais. `ITEM_TYPE_LABELS_PT` hardcoded. Seeds na API; listagens filtram por query, **não** expõem o enum/catálogo de labels.
 
 ## Fazer
 

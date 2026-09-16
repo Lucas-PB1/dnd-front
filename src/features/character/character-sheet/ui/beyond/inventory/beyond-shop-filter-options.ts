@@ -1,8 +1,6 @@
 import type { CatalogFilterField } from "@/shared/ui/catalog-filters";
-import {
-  MAGIC_ITEM_RARITY_FILTER,
-  WEAPON_CATEGORY_FILTER,
-} from "@/shared/lib/catalog-filter-options";
+import { buildMagicItemRarityFilter } from "@/entities/item/lib/item-catalog-filters";
+import { buildWeaponCategoryFilter } from "@/entities/weapon/lib/weapon-catalog-filters";
 
 export type ShopSortValue =
   | ""
@@ -42,8 +40,10 @@ export const SHOP_SORT_FILTER: CatalogFilterField = {
   ],
 };
 
+export const MAGIC_ITEM_RARITY_FILTER = buildMagicItemRarityFilter();
+
 export const SHOP_WEAPON_CATEGORY_FILTER: CatalogFilterField = {
-  ...WEAPON_CATEGORY_FILTER,
+  ...buildWeaponCategoryFilter(),
   key: "weaponCategory",
 };
 

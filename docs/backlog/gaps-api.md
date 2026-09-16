@@ -42,7 +42,7 @@ Cada linha é **um** plano. Detalhe só no arquivo do plano.
 
 | Gap | Plano |
 | --- | --- |
-| Import FSD nos filtros | [22](./plans/22-fsd-catalog-filters.md) |
+| ~~Import FSD nos filtros~~ | [22](./plans/22-fsd-catalog-filters.md) Feito |
 | Escolas hardcoded | [23](./plans/23-filtros-escolas.md) |
 | Categorias hardcoded | [24](./plans/24-filtros-categorias.md) |
 | Pools de tools hardcoded | [25](./plans/25-pools-ferramentas.md) |
