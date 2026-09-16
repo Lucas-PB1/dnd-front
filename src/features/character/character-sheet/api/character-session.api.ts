@@ -217,7 +217,15 @@ export type FighterTableActionSlug =
   | "psi:psychic-leap"
   | "psi:mental-guard"
   | "psi:energy-bulwark"
-  | "psi:telekinetic-master";
+  | "psi:telekinetic-master"
+  | "blood-strike"
+  | "blood-explosion"
+  | "marauders-reprisal"
+  | "unstoppable-assault"
+  | "peaceful-ward"
+  | "benevolent-presence"
+  | "merciless-strike"
+  | "paragon";
 
 export type FighterTableActionInput = {
   actionSlug: FighterTableActionSlug;
@@ -227,6 +235,8 @@ export type FighterTableActionInput = {
   usePsiDie?: boolean;
   checkTotal?: number;
   dc?: number;
+  optionSlug?: string;
+  takeLowerBloodCost?: boolean;
 };
 
 export type RogueTableActionSlug =
@@ -489,7 +499,6 @@ export type SorcererTableActionSlug =
 export type SorcererTableActionInput = {
   actionSlug: SorcererTableActionSlug;
   metamagicSlug?: string;
-  /** Bastião da Lei: 1–5 Pontos de Feitiçaria. */
   pointsSpent?: number;
 };
 
@@ -638,7 +647,6 @@ export async function executeMonsterHunterTableAction(
 
 export type TransformationTableActionPayload = {
   actionSlug: string;
-  /** Mutação Aberrante: slug ativa; omitir/null encerra sem gastar uso. */
   mutationSlug?: string | null;
 };
 

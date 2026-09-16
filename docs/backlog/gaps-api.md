@@ -32,7 +32,7 @@ Cada linha é **um** plano. Detalhe só no arquivo do plano.
 
 | Gap | Plano |
 | --- | --- |
-| `strikeOptions` tipado mas painel não usa | [17](./plans/17-strike-options-ui.md) |
+| ~~`strikeOptions` tipado mas painel não usa~~ | [17](./plans/17-strike-options-ui.md) Feito |
 | Forma Selvagem “polish futuro” | [18](./plans/18-forma-selvagem-ui.md) |
 | Tracker companions | [19](./plans/19-companheiros-ui.md) |
 | Veículo sem sheet-actions na UI | [20](./plans/20-veiculos-sheet-actions-ui.md) |

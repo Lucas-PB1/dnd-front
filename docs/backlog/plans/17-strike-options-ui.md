@@ -1,6 +1,6 @@
 # Plano 17 — UI `strikeOptions`
 
-**ID:** FR-35 · **Dificuldade:** média · **Status:** Ready · **Depende:** 05
+**ID:** FR-35 · **Dificuldade:** média · **Status:** Feito · **Depende:** 05
 
 ## Gap
 
@@ -13,3 +13,7 @@ Painel da subclasse dona (patrulheiro/blood-hound): listar opções da API, gast
 ## Pronto quando
 
 Jogador vê e usa golpes do catálogo, não de array TS.
+
+## Feito
+
+Painel do Guerreiro lista `strikeOptions` do catálogo (Cão de Sangue). **Usar** chama `POST .../fighter/table-action` com `optionSlug` quando o personagem conhece o golpe (`bloodStrikeN`). Sem lista hardcoded.

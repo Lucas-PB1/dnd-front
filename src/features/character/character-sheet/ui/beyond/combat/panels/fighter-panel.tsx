@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import type { CharacterState } from "@/entities/character/session-types";
+import type { SubclassOption } from "@/entities/character/sheet-types";
 import type { ClassPanelActionRecord } from "@/entities/combat-mechanical/types";
 import {
   executeFighterTableAction,
@@ -15,10 +16,15 @@ import {
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
 import { useTableActionMutation } from "@/features/character/character-sheet/api/use-table-action-mutation";
 import { useCombatMechanicalCatalog } from "@/features/catalog/reference-catalog/api/use-reference";
+import {
+  availableStrikeOptions,
+  knownStrikeOptionSlugs,
+} from "@/features/character/character-sheet/lib/combat/available-strike-options";
 import { resolvePanelActions } from "@/features/character/character-sheet/lib/combat/resolve-panel-actions";
 import { FighterSubclassActions } from "./fighter-subclass-actions";
 import { CombatClassPanelShell } from "../shared/class-panel-shell";
 import { CombatPanelActionButtons } from "../shared/panel-action-buttons";
+import { StrikeOptionsPanel } from "../shared/strike-options-panel";
 import { TableActionFeedback } from "../shared/table-action-feedback";
 
 const EMPTY_PANEL_ACTIONS: ClassPanelActionRecord[] = [];
@@ -27,20 +33,18 @@ type CombatFighterPanelProps = {
   characterId: string;
   classSlug: string;
   subclassSlug?: string | null;
+  subclassOptions?: readonly SubclassOption[];
   level: number;
   combatNotes?: string[];
   state: CharacterState | undefined;
   onTableNote?: (note: string) => void;
 };
 
-/**
- * Guerreiro: base/psi pelo catálogo C010/C019; BM/Dungeoneer com seletor na UI.
- * Indomável → salvaguardas. Ataques → coluna de perícias.
- */
 export function CombatFighterPanel({
   characterId,
   classSlug,
   subclassSlug,
+  subclassOptions = [],
   level,
   combatNotes,
   state,
@@ -80,6 +84,26 @@ export function CombatFighterPanel({
         section: "subclass",
       }),
     [panelCatalog, level, subclassSlug],
+  );
+
+  const strikeOptions = useMemo(
+    () =>
+      availableStrikeOptions(mechanicalCatalog.data?.strikeOptions ?? [], {
+        subclassSlug,
+      }),
+    [mechanicalCatalog.data?.strikeOptions, subclassSlug],
+  );
+  const knownSlugs = useMemo(
+    () => knownStrikeOptionSlugs(subclassOptions),
+    [subclassOptions],
+  );
+  const subclassActionsWithoutStrikes = useMemo(
+    () =>
+      subclassCatalogActions.filter(
+        (entry) =>
+          !strikeOptions.some((option) => option.tableAction === entry.slug),
+      ),
+    [subclassCatalogActions, strikeOptions],
   );
 
   const showBmOrDungeon =
@@ -133,15 +157,35 @@ export function CombatFighterPanel({
   );
 
   const powersContent =
-    subclassCatalogActions.length > 0 || showBmOrDungeon ? (
+    subclassActionsWithoutStrikes.length > 0 ||
+    showBmOrDungeon ||
+    strikeOptions.length > 0 ? (
       <div className="space-y-2">
         <CombatPanelActionButtons
-          actions={subclassCatalogActions}
+          actions={subclassActionsWithoutStrikes}
           getRemaining={getRemaining}
           isPending={action.isPending}
           onAction={(slug) =>
             run({ actionSlug: slug as FighterTableActionSlug })
           }
+        />
+        <StrikeOptionsPanel
+          options={strikeOptions}
+          knownSlugs={knownSlugs}
+          level={level}
+          isPending={action.isPending}
+          remaining={getRemaining(
+            strikeOptions[0]?.resourceSlug ?? "blood-strike",
+          )}
+          canTakeLowerCost={level >= 10}
+          onUse={(option, takeLowerCost) => {
+            if (!option.tableAction) return;
+            run({
+              actionSlug: option.tableAction as FighterTableActionSlug,
+              optionSlug: option.slug,
+              ...(takeLowerCost ? { takeLowerBloodCost: true } : {}),
+            });
+          }}
         />
         {showBmOrDungeon && subclassSlug != null ? (
           <FighterSubclassActions
