@@ -9,6 +9,11 @@ import type {
 } from "react-hook-form";
 import { Controller, useWatch } from "react-hook-form";
 
+import {
+  formatXpThreshold,
+  xpThresholdForLevel,
+} from "@/entities/character-level/xp-threshold-for-level";
+import { formatHeritageVariantLabel } from "@/entities/heritage/origin-label";
 import { useBackgrounds } from "@/features/catalog/background-catalog/api/use-backgrounds";
 import {
   useClasses,
@@ -23,10 +28,12 @@ import {
 import { CatalogSelect } from "@/features/character/create-character/ui/catalog-select";
 import { OriginPreview } from "@/features/character/create-character/ui/origin-preview";
 import { WizardFormSection } from "@/features/character/create-character/ui/wizard/wizard-form-section";
-import { useAlignments } from "@/features/catalog/reference-catalog/api/use-reference";
+import {
+  useAlignments,
+  useCharacterLevels,
+} from "@/features/catalog/reference-catalog/api/use-reference";
 import { useHeritages } from "@/features/catalog/heritage-catalog/api/use-heritages";
 import { useSpecies } from "@/features/catalog/species-catalog/api/use-species";
-import { formatHeritageVariantLabel } from "@/entities/heritage/origin-label";
 import { Field, FieldError, FieldLabel } from "@/shared/ui/field";
 import { Input } from "@/shared/ui/input";
 
@@ -56,6 +63,7 @@ export function StepIdentity({
   const heritages = useHeritages();
   const backgrounds = useBackgrounds();
   const alignments = useAlignments();
+  const characterLevels = useCharacterLevels();
 
   const level = useWatch({ control, name: "level", defaultValue: 1 });
   const classSlug = useWatch({ control, name: "classSlug", defaultValue: "" });
@@ -83,6 +91,10 @@ export function StepIdentity({
   });
 
   const needsSubclass = level >= SUBCLASS_REQUIRED_FROM_LEVEL;
+  const selectedXpThreshold = xpThresholdForLevel(
+    level,
+    characterLevels.data?.data ?? [],
+  );
   const subclasses = useClassSubclasses(
     classSlug,
     needsSubclass && !!classSlug,
@@ -171,19 +183,29 @@ export function StepIdentity({
               control={control}
               name="level"
               render={({ field }) => (
-                <CatalogSelect
-                  id="level"
-                  label="Nível"
-                  name={field.name}
-                  options={LEVEL_OPTIONS.map((lv) => ({
-                    value: String(lv),
-                    label: String(lv),
-                  }))}
-                  value={String(field.value ?? "")}
-                  onBlur={field.onBlur}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
-                  error={errors.level}
-                />
+                <div>
+                  <CatalogSelect
+                    id="level"
+                    label="Nível"
+                    name={field.name}
+                    options={LEVEL_OPTIONS.map((lv) => ({
+                      value: String(lv),
+                      label: String(lv),
+                    }))}
+                    value={String(field.value ?? "")}
+                    onBlur={field.onBlur}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    error={errors.level}
+                  />
+                  {selectedXpThreshold != null ? (
+                    <p
+                      className="mt-1.5 text-xs text-muted-foreground"
+                      data-cy="wizard-level-xp"
+                    >
+                      Limiar neste nível: {formatXpThreshold(selectedXpThreshold)}
+                    </p>
+                  ) : null}
+                </div>
               )}
             />
 

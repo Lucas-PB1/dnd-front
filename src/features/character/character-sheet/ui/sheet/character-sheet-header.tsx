@@ -4,6 +4,11 @@ import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 
 import type { CharacterDetail } from "@/entities/character/types";
+import {
+  formatXpThreshold,
+  xpThresholdForLevel,
+} from "@/entities/character-level/xp-threshold-for-level";
+import { useCharacterLevels } from "@/features/catalog/reference-catalog/api/use-reference";
 import type { useCharacterCatalogLabels } from "@/features/character/character-sheet/api/use-character-catalog-labels";
 import { BeyondRestActions } from "@/features/character/character-sheet/ui/beyond/layout/beyond-ability-row";
 import { DeleteCharacterButton } from "@/features/character/character-sheet/ui/sheet/delete-character-button";
@@ -29,6 +34,12 @@ export function CharacterSheetHeader({
   labels,
   onOpenSettings,
 }: CharacterSheetHeaderProps) {
+  const levels = useCharacterLevels();
+  const xpThreshold = xpThresholdForLevel(
+    character.level,
+    levels.data?.data ?? [],
+  );
+
   return (
     <header className="relative overflow-hidden rounded-xl border border-border bg-card/50 shadow-sm backdrop-blur-sm">
       <div
@@ -79,7 +90,13 @@ export function CharacterSheetHeader({
             aria-label="Identidade do personagem"
             className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5 sm:justify-end"
           >
-            <SheetChip active data-cy="sheet-level">
+            <SheetChip
+              active
+              data-cy="sheet-level"
+              hint={
+                xpThreshold != null ? formatXpThreshold(xpThreshold) : undefined
+              }
+            >
               Nv. {character.level}
             </SheetChip>
             {labels.identity.speciesName ? (

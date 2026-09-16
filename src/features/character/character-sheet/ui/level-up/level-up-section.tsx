@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 
 import { appendCharacterFeat } from "@/entities/character/lib/character-feat";
 import type { CharacterDetail } from "@/entities/character/types";
+import { xpThresholdForLevel } from "@/entities/character-level/xp-threshold-for-level";
 import type { ClassOption } from "@/entities/character/sheet-types";
 import type { FeatOption } from "@/entities/character/sheet-types";
 import type { SubclassOption } from "@/entities/character/sheet-types";
@@ -39,7 +40,10 @@ import {
   useHasIncompleteSubclassOptions,
 } from "@/features/character/character-sheet/ui/edit/incomplete-subclass-options-fix-panel";
 import { useFeatOptions } from "@/features/catalog/feat-catalog/api/use-feat-options";
-import { useFeats } from "@/features/catalog/reference-catalog/api/use-reference";
+import {
+  useCharacterLevels,
+  useFeats,
+} from "@/features/catalog/reference-catalog/api/use-reference";
 
 type LevelUpSectionProps = {
   characterId: string;
@@ -54,6 +58,8 @@ export function LevelUpSection({
   const preview = useLevelUpPreview(characterId, canLevelUp);
   const levelUp = useLevelUp(characterId);
   const feats = useFeats();
+  const characterLevels = useCharacterLevels();
+  const levelCatalog = characterLevels.data?.data ?? [];
 
   const [subclassSlug, setSubclassSlug] = useState(
     character.subclassSlug ?? "",
@@ -80,7 +86,6 @@ export function LevelUpSection({
     previewNextLevel,
     canLevelUp && subclassRequired && !!subclassSlug,
   );
-  // Prefetch da lista enquanto o preview carrega (select no unlock).
   useClassSubclasses(character.classSlug, canLevelUp && subclassRequired);
 
   const newFeatInstance = useMemo(() => {
@@ -219,7 +224,13 @@ export function LevelUpSection({
         blockProgression
       />
 
-      <LevelUpPreviewSummary {...levelUpPreview} />
+      <LevelUpPreviewSummary
+        {...levelUpPreview}
+        nextXpThreshold={xpThresholdForLevel(
+          levelUpPreview.nextLevel,
+          levelCatalog,
+        )}
+      />
 
       <LevelUpUnlocksPanel
         nextLevel={levelUpPreview.nextLevel}

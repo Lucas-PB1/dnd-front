@@ -6,7 +6,7 @@ Um ID → um plano. Status: Ready · Blocked · Adiado · Feito.
 | --- | --- | --- | --- |
 | FR-14 | [01](./plans/01-doc-api-integration.md) | Feito | Doc `API-INTEGRATION.md` |
 | FR-33 | [02](./plans/02-min-trait-takes.md) | Feito | `minTraitTakes` |
-| FR-32 | [03](./plans/03-xp-threshold.md) | Ready | `xpThreshold` |
+| FR-32 | [03](./plans/03-xp-threshold.md) | Feito | `xpThreshold` |
 | FR-12 | [04](./plans/04-character-state-tipos.md) | Ready | Tipos `CharacterState` |
 | FR-13 | [05](./plans/05-strike-options-tipo.md) | Ready | Tipo `strikeOptions` |
 | FR-30 | [06](./plans/06-patch-conditions-delta.md) | Ready | PATCH conditions delta |

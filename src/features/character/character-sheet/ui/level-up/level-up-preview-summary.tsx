@@ -1,6 +1,7 @@
 "use client";
 
 import type { LevelUpPreview } from "@/entities/character/session-types";
+import { formatXpThreshold } from "@/entities/character-level/xp-threshold-for-level";
 
 type LevelUpPreviewSummaryProps = Pick<
   LevelUpPreview,
@@ -11,7 +12,9 @@ type LevelUpPreviewSummaryProps = Pick<
   | "estimatedHpGain"
   | "estimatedHitPointsMax"
   | "isAsiOrFeatLevel"
->;
+> & {
+  nextXpThreshold: number | null;
+};
 
 export function LevelUpPreviewSummary({
   currentLevel,
@@ -21,6 +24,7 @@ export function LevelUpPreviewSummary({
   estimatedHpGain,
   estimatedHitPointsMax,
   isAsiOrFeatLevel,
+  nextXpThreshold,
 }: LevelUpPreviewSummaryProps) {
   return (
     <dl className="grid gap-3 text-sm sm:grid-cols-2">
@@ -30,6 +34,12 @@ export function LevelUpPreviewSummary({
           {currentLevel} → {nextLevel}
         </dd>
       </div>
+      {nextXpThreshold != null ? (
+        <div>
+          <dt className="text-muted-foreground">Limiar de XP do próximo nível</dt>
+          <dd className="font-medium">{formatXpThreshold(nextXpThreshold)}</dd>
+        </div>
+      ) : null}
       <div>
         <dt className="text-muted-foreground">Bônus de proficiência</dt>
         <dd className="font-medium">
