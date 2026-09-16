@@ -67,7 +67,7 @@ Blocked não vira Ready só espelhando TS. Adiado só com pedido explícito.
 | # | Status | Plano |
 | --- | --- | --- |
 | [26](./plans/26-zod-dtos.md) | Feito | Zod nos DTOs críticos |
-| [27](./plans/27-testes-hotspot.md) | Ready | Vitest economia + e2e ficha |
+| [27](./plans/27-testes-hotspot.md) | Feito | Vitest economia + e2e ficha |
 | [28](./plans/28-fatiar-character-sheet.md) | Ready | Remodelar slice da ficha |
 
 ### SSOT regras (level-up já usa preview)

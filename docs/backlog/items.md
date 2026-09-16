@@ -30,7 +30,7 @@ Um ID → um plano. Status: Ready · Blocked · Adiado · Feito.
 | FR-34 | [24](./plans/24-filtros-categorias.md) | Feito | Categorias de catálogo |
 | FR-2 | [25](./plans/25-pools-ferramentas.md) | Feito | Pools de tools |
 | FR-8 | [26](./plans/26-zod-dtos.md) | Feito | Zod DTOs |
-| FR-11 | [27](./plans/27-testes-hotspot.md) | Ready | Testes hotspot |
+| FR-11 | [27](./plans/27-testes-hotspot.md) | Feito | Testes hotspot |
 | FR-9 | [28](./plans/28-fatiar-character-sheet.md) | Ready | Fatiar `character-sheet` |
 | FR-3 | [29](./plans/29-point-buy-ssot.md) | Blocked | Point-buy |
 | FR-4 | [30](./plans/30-asi-wizard.md) | Blocked | ASI no wizard |

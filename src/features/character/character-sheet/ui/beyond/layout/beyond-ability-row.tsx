@@ -66,7 +66,6 @@ function StatCell({
   );
 }
 
-/** Faixa superior: atributos + PB + PV (cura/dano). */
 export function BeyondCharacterStatsBar({
   characterId,
   character,
@@ -279,6 +278,7 @@ export function BeyondRestActions({ characterId }: { characterId: string }) {
         size="sm"
         variant="outline"
         className="h-8 gap-1.5"
+        data-cy="sheet-short-rest"
         disabled={takeRest.isPending}
         onClick={() => void shortRest()}
       >
@@ -290,6 +290,7 @@ export function BeyondRestActions({ characterId }: { characterId: string }) {
         size="sm"
         variant="outline"
         className="h-8 gap-1.5"
+        data-cy="sheet-long-rest"
         disabled={takeRest.isPending}
         title="Inclui recuperação de cargas de itens mágicos (MVP ≈ próximo amanhecer)"
         onClick={() => {
@@ -301,7 +302,11 @@ export function BeyondRestActions({ characterId }: { characterId: string }) {
         Descanso longo
       </Button>
       {lastRestFeedback ? (
-        <span className="max-w-md text-xs text-muted-foreground" role="status">
+        <span
+          className="max-w-md text-xs text-muted-foreground"
+          role="status"
+          data-cy="sheet-rest-feedback"
+        >
           {lastRestFeedback}
         </span>
       ) : null}

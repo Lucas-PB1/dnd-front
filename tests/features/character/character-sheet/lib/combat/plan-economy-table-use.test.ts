@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import type { ClassEconomyAction } from "@/features/character/character-sheet/lib/combat/class-action-economy";
-import { planEconomyTableUse } from "@/features/character/character-sheet/lib/combat/plan-economy-table-use";
+import {
+  hasAvailableFreeEconomyUse,
+  planEconomyTableUse,
+} from "@/features/character/character-sheet/lib/combat/plan-economy-table-use";
 import { itemTableActionSlug } from "@/features/character/character-sheet/lib/combat/economy-table-actions";
 
 function action(
@@ -256,5 +259,59 @@ describe("planEconomyTableUse", () => {
         tableAction: "spend-resource",
       }),
     ).toBe("spend-resource");
+  });
+
+  it("detects leftover free economy uses", () => {
+    const remaining = new Map([
+      ["telekinetic-movement", { remaining: 1, max: 1 }],
+      ["psi-energy-dice", { remaining: 4, max: 8 }],
+    ]);
+    expect(
+      hasAvailableFreeEconomyUse(
+        [
+          action({
+            id: "move",
+            name: "Movimento",
+            freeResourceSlug: "telekinetic-movement",
+            resourceSlug: "psi-energy-dice",
+          }),
+        ],
+        remaining,
+      ),
+    ).toBe(true);
+    expect(
+      hasAvailableFreeEconomyUse(
+        [
+          action({
+            id: "field",
+            name: "Campo",
+            freeResourceSlug: "telekinetic-movement",
+            alwaysSpendsResource: true,
+          }),
+        ],
+        remaining,
+      ),
+    ).toBe(false);
+  });
+
+  it("prefers the pool when preferSpendPool is on and free remains", () => {
+    const remaining = new Map([
+      ["telekinetic-movement", { remaining: 1, max: 1 }],
+      ["psi-energy-dice", { remaining: 4, max: 8 }],
+    ]);
+    const plan = planEconomyTableUse({
+      action: action({
+        id: "move",
+        name: "Movimento",
+        tableAction: "psi:telekinetic-movement",
+        resourceSlug: "psi-energy-dice",
+        freeResourceSlug: "telekinetic-movement",
+      }),
+      remainingBySlug: remaining,
+      preferSpendPool: true,
+    });
+    expect(plan.canUse).toBe(true);
+    expect(plan.usePsiDie).toBe(true);
+    expect(plan.buttonLabel).toBe("Usar (1 dado)");
   });
 });

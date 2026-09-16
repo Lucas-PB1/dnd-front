@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { ClassEconomyActionRecord } from "@/entities/combat-mechanical/types";
 import {
   groupClassEconomyActions,
+  mapEconomyActionRecord,
   resolveClassEconomyActions,
 } from "@/features/character/character-sheet/lib/combat/class-action-economy";
 
@@ -485,5 +486,16 @@ describe("resolveClassEconomyActions", () => {
     expect(
       stage2Brand.some((a) => a.id === "transformation-daemonic-brand"),
     ).toBe(true);
+  });
+
+  it("maps unknown economy buckets to free", () => {
+    const mapped = mapEconomyActionRecord({
+      id: "odd-movement",
+      name: "Movimento",
+      economy: "movement",
+      classSlug: "fighter",
+      minLevel: 1,
+    });
+    expect(mapped.economy).toBe("free");
   });
 });

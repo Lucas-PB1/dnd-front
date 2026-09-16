@@ -53,7 +53,6 @@ const PAGE_SECTIONS: {
   },
 ];
 
-/** Personagem com conjuração / magias na ficha. */
 export function characterHasSpellcasting(character: CharacterDetail): boolean {
   return (
     character.characterSpells.length > 0 ||
@@ -116,6 +115,7 @@ export function CharacterSheetPageSections({
             <button
               key={item.id}
               type="button"
+              data-cy={`sheet-tab-${item.id}`}
               aria-expanded={isOpen}
               aria-controls={`${baseId}-${item.id}`}
               onClick={() => setOpenSection(item.id)}

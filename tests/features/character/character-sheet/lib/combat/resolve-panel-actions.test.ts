@@ -78,4 +78,17 @@ describe("resolvePanelActions", () => {
     });
     expect(elements).toHaveLength(0);
   });
+
+  it("includes every section when section is omitted", () => {
+    const actions = resolvePanelActions(FIXTURE, {
+      classSlug: "monk",
+      level: 5,
+      subclassSlug: "open-hand",
+    });
+    expect(actions.map((a) => a.slug)).toEqual([
+      "patient-defense",
+      "flurry-of-blows",
+      "open-hand-technique",
+    ]);
+  });
 });

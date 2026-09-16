@@ -739,6 +739,7 @@ function EconomyBucketSection({
                     size="xs"
                     variant="outline"
                     className="h-7 px-2"
+                    data-cy={`sheet-economy-use-${action.id}`}
                     disabled={busy || !plan.canUse}
                     title={plan.buttonLabel}
                     onClick={() => onUse(action, plan)}
