@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { ClassEconomyAction } from "@/features/character/character-sheet/lib/combat/class-action-economy";
 import { planEconomyTableUse } from "@/features/character/character-sheet/lib/combat/plan-economy-table-use";
+import { itemTableActionSlug } from "@/features/character/character-sheet/lib/combat/economy-table-actions";
 
 function action(
   partial: Partial<ClassEconomyAction> & Pick<ClassEconomyAction, "id" | "name">,
@@ -135,6 +136,22 @@ describe("planEconomyTableUse", () => {
     expect(disarm.armed).toBe(true);
   });
 
+  it("enables Usar on item rows even when tableAction is missing", () => {
+    const plan = planEconomyTableUse({
+      action: action({
+        id: "item-pocao-de-cura-usar",
+        name: "Beber · Poção de Cura",
+        classSlug: null,
+        itemSlug: "pocao-de-cura",
+        tableAction: undefined,
+      }),
+      remainingBySlug: new Map(),
+      preferSpendPool: false,
+    });
+    expect(plan.canUse).toBe(true);
+    expect(plan.buttonLabel).toBe("Usar");
+  });
+
   it("reminder rows without tableAction have no counter when there is no resource", () => {
     const plan = planEconomyTableUse({
       action: action({
@@ -223,5 +240,21 @@ describe("planEconomyTableUse", () => {
     expect(plan.canUse).toBe(true);
     expect(plan.buttonLabel).toBe("Gerenciar");
     expect(plan.hint).toBe("Ativa: Casca Quitinosa");
+  });
+
+  it("uses economy id as item table-action when catalog tableAction is empty", () => {
+    expect(
+      itemTableActionSlug({
+        id: "item-pocao-de-cura-usar",
+        itemSlug: "pocao-de-cura",
+      }),
+    ).toBe("item-pocao-de-cura-usar");
+    expect(
+      itemTableActionSlug({
+        id: "item-anel-de-evasao-usar",
+        itemSlug: "anel-de-evasao",
+        tableAction: "spend-resource",
+      }),
+    ).toBe("spend-resource");
   });
 });

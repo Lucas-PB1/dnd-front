@@ -57,6 +57,14 @@ export function planEconomyTableUse(input: {
   const freeLeft = free?.remaining ?? 0;
 
   if (action.tableAction == null) {
+    if (action.itemSlug) {
+      return {
+        canUse: true,
+        usePsiDie: false,
+        buttonLabel: "Usar",
+        counterSlug: poolSlug,
+      };
+    }
     return {
       canUse: false,
       usePsiDie: false,

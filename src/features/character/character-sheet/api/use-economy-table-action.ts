@@ -20,6 +20,7 @@ import {
   executeMonsterHunterTableAction,
   executeTransformationTableAction,
   executeFeatTableAction,
+  executeItemTableAction,
   sessionKeys,
   spendClassResource,
   type BarbarianTableActionSlug,
@@ -107,6 +108,7 @@ export function useEconomyTableAction(characterId: string) {
       note,
       armed,
       itemSlug,
+      actionId,
       enabled,
       mutationSlug,
     }: {
@@ -123,8 +125,10 @@ export function useEconomyTableAction(characterId: string) {
       note?: string;
       /** Para arm:* — se true, desarma em vez de armar. */
       armed?: boolean;
-      /** Cast gratuito de item (cast-item-free) ou artisan-craft. */
+      /** Cast gratuito de item (cast-item-free), artisan-craft ou item/table-action. */
       itemSlug?: string | null;
+      /** `economyActions[].id` — charges/poções (não usar `spend-resource` genérico). */
+      actionId?: string;
       /** Toggle de circunstância (snow/água/frio). */
       enabled?: boolean;
       /** Mutação Aberrante — omitir/null encerra. */
@@ -220,6 +224,45 @@ export function useEconomyTableAction(characterId: string) {
           return {
             note: (note?.trim() || "Lembrete de item").trim(),
           };
+        }
+
+        const routeItem = itemSlug?.trim() || null;
+        if (
+          routeItem &&
+          !(classSlug?.trim()) &&
+          !(featSlug?.trim())
+        ) {
+          if (tableAction === SPEND_RESOURCE_TABLE_ACTION && spellSlug) {
+            if (!resourceSlug) {
+              throw new Error("Recurso não definido para esta ação");
+            }
+            const result = await castCharacterSpell(token, characterId, {
+              spellSlug,
+              itemCastResourceSlug: resourceSlug,
+              itemCastSpendAmount: spendAmount,
+            });
+            queryClient.setQueryData(sessionKeys.state(characterId), result.state);
+            return {
+              note: (
+                result.note?.trim() ||
+                note?.trim() ||
+                `Conjurou ${spellSlug}`
+              ).trim(),
+            };
+          }
+          const itemActionSlug = actionId?.trim() || tableAction;
+          const result = await executeItemTableAction(token, characterId, {
+            itemSlug: routeItem,
+            actionSlug: itemActionSlug,
+          });
+          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
+          void queryClient.invalidateQueries({
+            queryKey: inventoryKeys.list(characterId),
+          });
+          void queryClient.invalidateQueries({
+            queryKey: charactersKeys.detail(characterId),
+          });
+          return noteFromResult(result, note);
         }
 
         if (tableAction === SPEND_RESOURCE_TABLE_ACTION) {

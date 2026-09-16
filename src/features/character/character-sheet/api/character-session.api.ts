@@ -688,6 +688,26 @@ export async function executeFeatTableAction(
   );
 }
 
+export type ItemTableActionPayload = {
+  itemSlug: string;
+  actionSlug: string;
+};
+
+export async function executeItemTableAction(
+  accessToken: string,
+  characterId: string,
+  payload: ItemTableActionPayload,
+) {
+  return gameFetch<TableActionResult>(
+    `/characters/${characterId}/item/table-action`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
 export type TransferInspirationResult = {
   sourceState: CharacterState;
   targetState: CharacterState;

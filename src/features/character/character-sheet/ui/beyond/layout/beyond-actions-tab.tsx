@@ -489,7 +489,7 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
                 recoverResource.mutate({ resourceSlug, amount: 1 })
               }
               onUse={(action, plan) => {
-                if (!action.tableAction) return;
+                if (!action.tableAction && !action.itemSlug) return;
                 if (!plan.canUse) return;
                 if (
                   isArtisanCraftAction(action.featSlug, action.tableAction)
@@ -497,13 +497,17 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
                   setCraftOpen(true);
                   return;
                 }
-                if (isAberrantMutationAction(action.tableAction)) {
+                if (
+                  action.tableAction &&
+                  isAberrantMutationAction(action.tableAction)
+                ) {
                   setMutationOpen(true);
                   return;
                 }
                 tableAction.mutate(
                   {
-                    tableAction: action.tableAction,
+                    tableAction: action.tableAction ?? action.id,
+                    actionId: action.id,
                     classSlug: action.classSlug,
                     featSlug: action.featSlug,
                     usePsiDie: plan.usePsiDie,
@@ -728,7 +732,7 @@ function EconomyBucketSection({
                 )}
               </div>
               <div className="flex shrink-0 flex-col items-end gap-1 sm:flex-row sm:items-center">
-                {action.tableAction ? (
+                {action.tableAction || action.itemSlug ? (
                   <Button
                     type="button"
                     size="xs"

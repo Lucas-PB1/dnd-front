@@ -10,8 +10,19 @@
  * - `gh-transformation-…/…` — boons Cap. 6 → POST …/transformation/table-action
  *
  * Demais slugs: roteiam por `economyActions[].classSlug` → POST …/<class>/table-action
- * ou por `featSlug` → POST …/feat/table-action.
+ * ou por `featSlug` → POST …/feat/table-action
+ * ou por `itemSlug` → POST …/item/table-action (charges / poções de ficha).
  */
+
+/** Linha de item: `tableAction` do catálogo ou o `id` da economy (poções com table_action NULL). */
+export function itemTableActionSlug(action: {
+  id: string;
+  itemSlug?: string | null;
+  tableAction?: string | null;
+}): string | null {
+  if (!action.itemSlug) return null;
+  return action.tableAction ?? action.id;
+}
 
 /** Identificador de ação de mesa (string livre do catálogo). */
 export type EconomyTableAction = string;
