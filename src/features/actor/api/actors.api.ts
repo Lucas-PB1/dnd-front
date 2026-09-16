@@ -18,3 +18,9 @@ export async function createActor(
     body: JSON.stringify(payload),
   });
 }
+
+export async function deleteActor(accessToken: string, id: string) {
+  return gameFetch<void>(`/actors/${id}`, accessToken, {
+    method: "DELETE",
+  });
+}

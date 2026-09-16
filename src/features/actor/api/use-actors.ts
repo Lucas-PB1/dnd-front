@@ -13,7 +13,7 @@ import type {
   CreateActorPayload,
   SpawnActorFromTemplatePayload,
 } from "@/entities/actor/types";
-import { createActor, fetchActors } from "@/features/actor/api/actors.api";
+import { createActor, deleteActor, fetchActors } from "@/features/actor/api/actors.api";
 import {
   boardCharacterVehicle,
   fetchActorById,
@@ -121,6 +121,41 @@ export function useCreateActor() {
     onSuccess: (actor) => {
       queryClient.setQueryData(actorKeys.detail(actor.id), actor);
       invalidateActorCaches(queryClient, actor);
+    },
+  });
+}
+
+export function useDeleteActor(actorId: string) {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+  const { requireToken, handleUnauthorized } = useGameAuth(
+    `/actors/${actorId}`,
+  );
+
+  return useMutation({
+    mutationFn: async () => {
+      try {
+        await deleteActor(
+          requireToken("Faça login para excluir o actor"),
+          actorId,
+        );
+      } catch (error) {
+        return handleUnauthorized(error);
+      }
+    },
+    onSuccess: () => {
+      const detail = queryClient.getQueryData<ActorDetail>(
+        actorKeys.detail(actorId),
+      );
+      queryClient.removeQueries({ queryKey: actorKeys.detail(actorId) });
+      invalidateActorCaches(queryClient, {
+        parentCharacterId: detail?.parentCharacterId ?? null,
+      });
+      if (detail?.parentCharacterId) {
+        router.push(`/characters/${detail.parentCharacterId}`);
+        return;
+      }
+      router.push("/characters");
     },
   });
 }

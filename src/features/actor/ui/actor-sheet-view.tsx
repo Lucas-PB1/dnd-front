@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { useActorDetail } from "@/features/actor/api/use-actors";
 import { ActorSheetBody } from "@/features/actor/ui/actor-sheet-body";
+import { DeleteActorButton } from "@/features/actor/ui/delete-actor-button";
 import { AppPageShell } from "@/shared/ui/app-page-shell";
 import { buttonVariants } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
@@ -40,6 +41,10 @@ export function ActorSheetView({ id }: ActorSheetViewProps) {
             </Link>
           ) : null}
           <ActorSheetBody actor={query.data} hideParentLink />
+          <DeleteActorButton
+            actorId={query.data.id}
+            actorName={query.data.name}
+          />
         </div>
       )}
     </AppPageShell>
