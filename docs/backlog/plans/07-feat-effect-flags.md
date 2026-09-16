@@ -1,6 +1,6 @@
 # Plano 07 — Flags de feat na UI
 
-**ID:** FR-31 · **Dificuldade:** fácil · **Status:** Ready
+**ID:** FR-31 · **Dificuldade:** fácil · **Status:** Feito
 
 ## Gap
 
@@ -13,3 +13,7 @@ No card de ataque (e dano se couber): crít. melhorado, empunhadura duas mãos, 
 ## Pronto quando
 
 Personagem com esses talentos vê o efeito na UI de ataque.
+
+## Feito
+
+Chips no card de ataque (`AttackBadges`) quando os três flags vêm `true`. Sem payload extra nem cálculo de dado/crítico no front.

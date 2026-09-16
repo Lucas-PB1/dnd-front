@@ -1,6 +1,9 @@
 "use client";
 
-import type { WeaponAttackSummary } from "@/entities/character/types";
+import type {
+  CharacterDetail,
+  WeaponAttackSummary,
+} from "@/entities/character/types";
 import { useAbilityLabels } from "@/features/catalog/reference-catalog/api/use-ability-labels";
 import { SheetChip } from "@/features/character/character-sheet/ui/sheet/sheet-ui";
 
@@ -18,18 +21,17 @@ export function modeLabel(attack: WeaponAttackSummary): string {
 export function AttackBadges({
   attack,
   carnificinaBonus = 0,
+  featEffectFlags,
 }: {
   attack: WeaponAttackSummary;
-  /** Bônus flat de Carnificina (Aspecto Bestial ≥ 1). */
   carnificinaBonus?: number;
+  featEffectFlags?: CharacterDetail["featEffectFlags"];
 }) {
   const { shortOf } = useAbilityLabels();
 
   return (
     <div className="mt-1.5 flex flex-wrap gap-1">
-      <SheetChip active>
-        {shortOf(attack.abilitySlug)}
-      </SheetChip>
+      <SheetChip active>{shortOf(attack.abilitySlug)}</SheetChip>
       {!attack.proficient ? <SheetChip>sem prof.</SheetChip> : null}
       {attack.isFirearm ? <SheetChip active>arma de fogo</SheetChip> : null}
       {attack.hasRecoil ? <SheetChip>recuo</SheetChip> : null}
@@ -38,6 +40,27 @@ export function AttackBadges({
       ) : null}
       {attack.critThreshold != null && attack.critThreshold < 20 ? (
         <SheetChip active>crít. {attack.critThreshold}–20</SheetChip>
+      ) : null}
+      {featEffectFlags?.improveCritical ? (
+        <SheetChip active title="Talento: crítico melhorado (API)">
+          crít. melhorado
+        </SheetChip>
+      ) : null}
+      {featEffectFlags?.wieldTwoHandedOneHand ? (
+        <SheetChip
+          active
+          title="Talento: empunhar arma de duas mãos com uma mão (API)"
+        >
+          2 mãos numa mão
+        </SheetChip>
+      ) : null}
+      {featEffectFlags?.versatileOneHandFullDamage ? (
+        <SheetChip
+          active
+          title="Talento: versátil em uma mão usa o dado cheio (API)"
+        >
+          versátil dado cheio
+        </SheetChip>
       ) : null}
       {attack.greatWeaponFighting ? <SheetChip active>GWF</SheetChip> : null}
       {attack.omitsAbilityDamage ? (

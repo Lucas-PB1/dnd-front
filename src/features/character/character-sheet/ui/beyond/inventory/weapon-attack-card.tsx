@@ -51,14 +51,12 @@ type WeaponAttackCardProps = {
   ranger?: {
     level: number;
     subclassSlug?: string | null;
-    /** Aspecto Bestial na mesa (Beastborne); Carnificina no dano se ≥ 1. */
     bestialAspectLevel?: number;
   };
   onDreadAmbusherResolved?: () => void | Promise<void>;
   cleric?: {
     level: number;
   };
-  /** Fúria ativa — habilita Fúria Divina no dano. */
   rageActive?: boolean;
   featEffectFlags?: CharacterDetail["featEffectFlags"];
   inspiration?: boolean;
@@ -203,7 +201,11 @@ export function WeaponAttackCard({
                 {modeLabel(attack)}
               </span>
             </p>
-            <AttackBadges attack={attack} carnificinaBonus={carnificinaBonus} />
+            <AttackBadges
+              attack={attack}
+              carnificinaBonus={carnificinaBonus}
+              featEffectFlags={featEffectFlags}
+            />
             {hasChamber ? (
               <p className="mt-1 text-[0.7rem] text-muted-foreground">
                 Câmara: {shotsLeft ?? "—"}/{attack.reloadCapacity}

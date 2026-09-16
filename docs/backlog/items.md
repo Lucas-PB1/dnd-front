@@ -10,7 +10,7 @@ Um ID → um plano. Status: Ready · Blocked · Adiado · Feito.
 | FR-12 | [04](./plans/04-character-state-tipos.md) | Feito | Tipos `CharacterState` |
 | FR-13 | [05](./plans/05-strike-options-tipo.md) | Feito | Tipo `strikeOptions` |
 | FR-30 | [06](./plans/06-patch-conditions-delta.md) | Feito | PATCH conditions delta |
-| FR-31 | [07](./plans/07-feat-effect-flags.md) | Ready | Flags de feat na UI |
+| FR-31 | [07](./plans/07-feat-effect-flags.md) | Feito | Flags de feat na UI |
 | FR-15 | [08](./plans/08-wild-shape-eligible-http.md) | Ready | HTTP wild-shape eligible |
 | FR-16 | [09](./plans/09-companions-http.md) | Ready | HTTP companions GET/dismiss |
 | FR-18 | [10](./plans/10-vehicles-sheet-actions-http.md) | Ready | HTTP vehicles sheet-actions |

@@ -27,7 +27,7 @@ Blocked não vira Ready só espelhando TS. Adiado só com pedido explícito.
 | [04](./plans/04-character-state-tipos.md) | Feito | Tipar wild shape + companions no state |
 | [05](./plans/05-strike-options-tipo.md) | Feito | Tipar `strikeOptions` |
 | [06](./plans/06-patch-conditions-delta.md) | Feito | PATCH `addConditions` / `removeConditions` |
-| [07](./plans/07-feat-effect-flags.md) | Ready | Ligar flags de feat mortos na UI |
+| [07](./plans/07-feat-effect-flags.md) | Feito | Ligar flags de feat mortos na UI |
 
 ### Cliente HTTP (rota existe, fetch não)
 

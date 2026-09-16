@@ -12,7 +12,7 @@ Cada linha é **um** plano. Detalhe só no arquivo do plano.
 | ~~State: wild shape + companions sem tipo~~ | [04](./plans/04-character-state-tipos.md) Feito |
 | ~~Catálogo: `strikeOptions` sem tipo~~ | [05](./plans/05-strike-options-tipo.md) Feito |
 | ~~PATCH state sem add/remove conditions~~ | [06](./plans/06-patch-conditions-delta.md) Feito |
-| `featEffectFlags` crítico / duas mãos / versátil | [07](./plans/07-feat-effect-flags.md) |
+| ~~`featEffectFlags` crítico / duas mãos / versátil~~ | [07](./plans/07-feat-effect-flags.md) Feito |
 
 ## Rota sem cliente
 
