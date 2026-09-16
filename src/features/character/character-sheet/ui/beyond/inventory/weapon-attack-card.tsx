@@ -11,6 +11,11 @@ import { formatSkillBonus } from "@/entities/character";
 import type { AdvantageMode } from "@/features/character/character-sheet/api/character-rolls.api";
 import { availableCunningStrikes as resolveCunningStrikes } from "@/features/character/character-sheet/lib/combat/available-cunning-strikes";
 import { buildWeaponDamagePayload } from "@/features/character/character-sheet/lib/combat/build-weapon-damage-payload";
+import {
+  canReloadFirearmChamber,
+  canSpendFirearmChamber,
+  firearmAttackShots,
+} from "@/features/character/character-sheet/lib/combat/firearm-chamber";
 import { useCombatMechanicalCatalog } from "@/features/catalog/reference-catalog/api/use-reference";
 import { useSheetRolls } from "@/features/character/character-sheet/ui/beyond/layout/sheet-rolls";
 import {
@@ -162,6 +167,15 @@ export function WeaponAttackCard({
   const hasChamber = attack.reloadCapacity != null;
   const shotsLeft =
     chamberRemaining ?? (hasChamber ? attack.reloadCapacity : null);
+  const chamberShots = firearmAttackShots(automatic);
+  const canFireChamber = canSpendFirearmChamber({
+    remaining: shotsLeft,
+    shots: chamberShots,
+  });
+  const canReloadChamber = canReloadFirearmChamber({
+    remaining: shotsLeft,
+    capacity: attack.reloadCapacity,
+  });
   const canSneakAttack = Boolean(rogue && attack.sneakAttackEligible);
   const maxCunningEffects = (rogue?.level ?? 0) >= 11 ? 2 : 1;
   const availableCunningStrikes =
@@ -209,6 +223,12 @@ export function WeaponAttackCard({
             {hasChamber ? (
               <p className="mt-1 text-[0.7rem] text-muted-foreground">
                 Câmara: {shotsLeft ?? "—"}/{attack.reloadCapacity}
+                {shotsLeft === 0 ? " · vazia — recarregue" : null}
+                {shotsLeft != null &&
+                shotsLeft > 0 &&
+                shotsLeft < chamberShots
+                  ? ` · precisa de ${chamberShots} tiros`
+                  : null}
               </p>
             ) : null}
           </div>
@@ -486,10 +506,10 @@ export function WeaponAttackCard({
             type="button"
             size="sm"
             variant="secondary"
-            disabled={busy}
+            disabled={busy || (hasChamber && !canFireChamber)}
             onClick={() => {
-              if (hasChamber && onFire) {
-                onFire(attack.itemSlug, automatic ? 2 : 1);
+              if (hasChamber && onFire && canFireChamber) {
+                onFire(attack.itemSlug, chamberShots);
               }
               rolls.attack.mutate({
                 itemSlug: attack.itemSlug,
@@ -707,7 +727,7 @@ export function WeaponAttackCard({
               type="button"
               size="sm"
               variant="outline"
-              disabled={busy}
+              disabled={busy || !canReloadChamber}
               onClick={() => onReload(attack.itemSlug)}
             >
               Recarregar

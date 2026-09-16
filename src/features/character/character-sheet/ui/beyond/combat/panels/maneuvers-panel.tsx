@@ -1,9 +1,10 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
-import type { UseManeuverResult } from "@/entities/character/session-types";
+import type { CharacterState, UseManeuverResult } from "@/entities/character/session-types";
+import type { ClassPanelActionRecord } from "@/entities/combat-mechanical/types";
 import {
   executeGunslingerTableAction,
   listManeuvers,
@@ -11,19 +12,24 @@ import {
 } from "@/features/character/character-sheet/api/character-session.api";
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
 import { useCombatMechanicalCatalog } from "@/features/catalog/reference-catalog/api/use-reference";
+import { economyActionDetailText } from "@/features/character/character-sheet/lib/combat/class-action-economy";
+import { gunslingerPanelReminders } from "@/features/character/character-sheet/lib/combat/gunslinger-panel-reminders";
 import { resolvePanelActions } from "@/features/character/character-sheet/lib/combat/resolve-panel-actions";
+import { FeatureDetailTrigger } from "@/features/character/character-sheet/ui/sheet/feature-detail-dialog";
 import { CombatClassPanelShell } from "../shared/class-panel-shell";
 import {
   CombatPanelActionList,
   CombatPanelActionRow,
 } from "../shared/panel-action-row";
 
-const EMPTY_PANEL_ACTIONS: never[] = [];
+const EMPTY_PANEL_ACTIONS: ClassPanelActionRecord[] = [];
 
 type CombatManeuversPanelProps = {
   characterId: string;
   classSlug: string;
+  subclassSlug?: string | null;
   level: number;
+  state: CharacterState | undefined;
 };
 
 function isManeuverResult(
@@ -35,7 +41,9 @@ function isManeuverResult(
 export function CombatManeuversPanel({
   characterId,
   classSlug,
+  subclassSlug,
   level,
+  state,
 }: CombatManeuversPanelProps) {
   const enabled = classSlug === "gunslinger" && level >= 2;
   const { requireToken, handleUnauthorized } = useGameAuth(
@@ -46,12 +54,23 @@ export function CombatManeuversPanel({
   const [tableNote, setTableNote] = useState<string | null>(null);
   const mechanicalCatalog = useCombatMechanicalCatalog({
     classSlug: "gunslinger",
+    subclassSlug,
   });
   const panelActions =
     resolvePanelActions(mechanicalCatalog.data?.panelActions ?? EMPTY_PANEL_ACTIONS, {
       classSlug: "gunslinger",
       level,
+      subclassSlug,
     }) ?? EMPTY_PANEL_ACTIONS;
+  const reminders = useMemo(
+    () =>
+      gunslingerPanelReminders(mechanicalCatalog.data?.economyActions ?? [], {
+        level,
+        subclassSlug,
+      }),
+    [mechanicalCatalog.data?.economyActions, level, subclassSlug],
+  );
+  const risk = state?.classResources?.find((item) => item.slug === "risk");
 
   const maneuversQuery = useQuery({
     queryKey: [...sessionKeys.state(characterId), "maneuvers"],
@@ -92,16 +111,35 @@ export function CombatManeuversPanel({
     },
   });
 
-  if (!enabled) return null;
+  if (classSlug !== "gunslinger") return null;
 
   const maneuvers = maneuversQuery.data ?? [];
-  if (maneuvers.length === 0 && !maneuversQuery.isPending && panelActions.length === 0) {
+  if (!enabled && reminders.length === 0 && !risk) {
+    return null;
+  }
+  if (
+    enabled &&
+    maneuvers.length === 0 &&
+    !maneuversQuery.isPending &&
+    panelActions.length === 0 &&
+    reminders.length === 0 &&
+    !risk
+  ) {
     return null;
   }
 
   const busy = tableAction.isPending;
   const actionsContent = (
     <div className="space-y-2">
+      {risk ? (
+        <p className="text-sm text-muted-foreground">
+          Dados de Risco:{" "}
+          <span className="font-semibold text-foreground">
+            {risk.remaining}/{risk.max}
+          </span>
+        </p>
+      ) : null}
+      {enabled ? (
       <CombatPanelActionList
         title="Manobras"
         count={maneuvers.length + panelActions.length}
@@ -137,6 +175,40 @@ export function CombatManeuversPanel({
           />
         ))}
       </CombatPanelActionList>
+      ) : null}
+
+      {reminders.length > 0 ? (
+        <ul className="space-y-2">
+          {reminders.map((reminder) => (
+            <li
+              key={reminder.id}
+              className="rounded-md border border-border/60 bg-muted/20 px-2.5 py-2"
+            >
+              {economyActionDetailText(reminder) ? (
+                <FeatureDetailTrigger
+                  variant="text"
+                  title={reminder.name}
+                  subtitle={reminder.summary}
+                  description={economyActionDetailText(reminder)}
+                >
+                  <span className="text-sm font-medium text-foreground underline-offset-2 hover:underline">
+                    {reminder.name}
+                  </span>
+                  {reminder.summary ? (
+                    <span className="mt-0.5 block text-xs text-muted-foreground">
+                      {reminder.summary}
+                    </span>
+                  ) : null}
+                </FeatureDetailTrigger>
+              ) : (
+                <p className="text-sm font-medium text-foreground">
+                  {reminder.name}
+                </p>
+              )}
+            </li>
+          ))}
+        </ul>
+      ) : null}
 
       {lastResult ? (
         <div className="space-y-1 text-sm" role="status">
@@ -178,7 +250,7 @@ export function CombatManeuversPanel({
 
   return (
     <CombatClassPanelShell
-      title="Manobras de Risco"
+      title="Pistoleiro"
       actionsContent={actionsContent}
     />
   );

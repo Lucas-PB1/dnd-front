@@ -24,7 +24,6 @@ type ClassCombatPanelProps = {
   onTableNote?: (note: string) => void;
 };
 
-/** Renderiza só o painel de combate da classe do personagem. */
 export function ClassCombatPanel({
   characterId,
   character,
@@ -93,7 +92,9 @@ export function ClassCombatPanel({
         <CombatManeuversPanel
           characterId={characterId}
           classSlug={character.classSlug}
+          subclassSlug={character.subclassSlug}
           level={character.level}
+          state={state}
         />
       );
     default:

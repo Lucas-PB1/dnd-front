@@ -1,6 +1,6 @@
 # Plano 37 — Pistoleiro polish
 
-**ID:** FR-25 · **Dificuldade:** média · **Status:** Adiado
+**ID:** FR-25 · **Dificuldade:** média · **Status:** Feito
 
 Só com pedido explícito. Fora de dano no alvo.
 
@@ -15,3 +15,7 @@ Painel gunslinger: poderes que já tiverem table-action/catálogo. Sem combate r
 ## Pronto quando
 
 Esses poderes têm botão/estado na ficha alinhado ao catálogo.
+
+## Feito
+
+Painel Pistoleiro lista lembretes de `GET /combat-mechanical-catalog` (`gunslinger-white-hat-*`, `gunslinger-risk-taker`, `gunslinger-bang-youre-dead`, Tiro Arcano / Negócio Arriscado / Duplo ou Nada), manobras + Gambito Terrível, e pool de Risco. Câmara: Atacar/Recarregar respeitam tiros restantes (Automática gasta 2). Sem dano em alvo.
