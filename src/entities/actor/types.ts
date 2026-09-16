@@ -55,6 +55,24 @@ export type ActorDetail = ActorSummary & {
   } | null;
 };
 
+export type CreateActorPayload = {
+  actorKind: ActorKind;
+  name: string;
+  campaignId?: string;
+  parentCharacterId?: string;
+  templateSlug?: string;
+  hitPointsMax?: number;
+  hitPointsCurrent?: number;
+  armorClass?: number;
+  initiativeModifier?: number;
+  proficiencyBonus?: number;
+  sizeSlug?: string;
+  notes?: string;
+  speeds?: ActorDetail["speeds"];
+  actions?: Array<Omit<ActorDetail["actions"][number], "id">>;
+  spells?: ActorDetail["spells"];
+};
+
 export type SpawnActorFromTemplatePayload = {
   templateSlug: string;
   actorKind: ActorKind;

@@ -1,6 +1,6 @@
 # Plano 13 — `POST /actors`
 
-**ID:** FR-38 · **Dificuldade:** fácil · **Status:** Ready
+**ID:** FR-38 · **Dificuldade:** fácil · **Status:** Feito
 
 ## Gap
 
@@ -13,3 +13,7 @@ Client autenticado. UI mínima pode ficar na página de actor se já houver “c
 ## Pronto quando
 
 POST cria actor sem template.
+
+## Feito
+
+`createActor` + `useCreateActor` + tipo `CreateActorPayload` (`actorKind` + `name` obrigatórios). Sem UI: não havia “criar” na ficha de actor.

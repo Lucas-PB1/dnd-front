@@ -38,7 +38,7 @@ Blocked não vira Ready só espelhando TS. Adiado só com pedido explícito.
 | [10](./plans/10-vehicles-sheet-actions-http.md) | Feito | `POST .../vehicles/sheet-actions` |
 | [11](./plans/11-mounts-http.md) | Feito | `POST .../mounts/*` |
 | [12](./plans/12-actors-list.md) | Feito | `GET /actors` |
-| [13](./plans/13-actors-create.md) | Ready | `POST /actors` |
+| [13](./plans/13-actors-create.md) | Feito | `POST /actors` |
 | [14](./plans/14-actors-delete.md) | Ready | `DELETE /actors/:id` |
 | [15](./plans/15-actors-get-state.md) | Ready | `GET /actors/:id/state` |
 | [16](./plans/16-actors-roll-attack.md) | Ready | `POST /actors/:id/rolls/attack` |

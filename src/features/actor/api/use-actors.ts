@@ -1,10 +1,19 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  type QueryClient,
+} from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
-import type { SpawnActorFromTemplatePayload } from "@/entities/actor/types";
-import { fetchActors } from "@/features/actor/api/actors.api";
+import type {
+  ActorDetail,
+  CreateActorPayload,
+  SpawnActorFromTemplatePayload,
+} from "@/entities/actor/types";
+import { createActor, fetchActors } from "@/features/actor/api/actors.api";
 import {
   boardCharacterVehicle,
   fetchActorById,
@@ -27,6 +36,20 @@ export const actorKeys = {
   byCharacter: (characterId: string) =>
     [...actorKeys.all, "character", characterId] as const,
 };
+
+function invalidateActorCaches(
+  queryClient: QueryClient,
+  actor: Pick<ActorDetail, "parentCharacterId">,
+) {
+  void queryClient.invalidateQueries({ queryKey: actorKeys.list() });
+  if (!actor.parentCharacterId) return;
+  void queryClient.invalidateQueries({
+    queryKey: actorKeys.byCharacter(actor.parentCharacterId),
+  });
+  void queryClient.invalidateQueries({
+    queryKey: charactersKeys.detail(actor.parentCharacterId),
+  });
+}
 
 export function useActors() {
   const { accessToken, isLoading: authLoading } = useAuth();
@@ -81,14 +104,23 @@ export function useSpawnActorFromTemplate(loginNext: string) {
       return spawnActorFromTemplate(accessToken, payload);
     },
     onSuccess: (actor) => {
-      if (actor.parentCharacterId) {
-        void queryClient.invalidateQueries({
-          queryKey: actorKeys.byCharacter(actor.parentCharacterId),
-        });
-        void queryClient.invalidateQueries({
-          queryKey: charactersKeys.detail(actor.parentCharacterId),
-        });
-      }
+      invalidateActorCaches(queryClient, actor);
+    },
+  });
+}
+
+export function useCreateActor() {
+  const queryClient = useQueryClient();
+  const { accessToken } = useAuth();
+
+  return useMutation({
+    mutationFn: async (payload: CreateActorPayload) => {
+      if (!accessToken) throw new Error("Não autenticado");
+      return createActor(accessToken, payload);
+    },
+    onSuccess: (actor) => {
+      queryClient.setQueryData(actorKeys.detail(actor.id), actor);
+      invalidateActorCaches(queryClient, actor);
     },
   });
 }
@@ -109,11 +141,7 @@ export function useUpdateActor(actorId: string) {
     },
     onSuccess: (actor) => {
       queryClient.setQueryData(actorKeys.detail(actor.id), actor);
-      if (actor.parentCharacterId) {
-        void queryClient.invalidateQueries({
-          queryKey: actorKeys.byCharacter(actor.parentCharacterId),
-        });
-      }
+      invalidateActorCaches(queryClient, actor);
     },
   });
 }
