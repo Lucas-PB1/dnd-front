@@ -1,7 +1,10 @@
 import { gameFetch } from "@/shared/api/dnd-api/api-client";
+import {
+  parseCharacterInventory,
+  parseInventoryItem,
+} from "@/entities/character/lib/character-inventory.schema";
 import type {
   AddInventoryItemPayload,
-  CharacterInventory,
   InventoryItem,
   PatchInventoryItemPayload,
 } from "@/entities/character/session-types";
@@ -16,9 +19,11 @@ export async function fetchCharacterInventory(
   accessToken: string,
   characterId: string,
 ) {
-  return gameFetch<CharacterInventory>(
-    `/characters/${characterId}/inventory`,
-    accessToken,
+  return parseCharacterInventory(
+    await gameFetch<unknown>(
+      `/characters/${characterId}/inventory`,
+      accessToken,
+    ),
   );
 }
 
@@ -27,13 +32,15 @@ export async function addInventoryItem(
   characterId: string,
   payload: AddInventoryItemPayload,
 ) {
-  return gameFetch<InventoryItem>(
-    `/characters/${characterId}/inventory`,
-    accessToken,
-    {
-      method: "POST",
-      body: JSON.stringify(payload),
-    },
+  return parseInventoryItem(
+    await gameFetch<unknown>(
+      `/characters/${characterId}/inventory`,
+      accessToken,
+      {
+        method: "POST",
+        body: JSON.stringify(payload),
+      },
+    ),
   );
 }
 
@@ -43,13 +50,15 @@ export async function patchInventoryItem(
   itemSlug: string,
   payload: PatchInventoryItemPayload,
 ) {
-  return gameFetch<InventoryItem>(
-    `/characters/${characterId}/inventory/${itemSlug}`,
-    accessToken,
-    {
-      method: "PATCH",
-      body: JSON.stringify(payload),
-    },
+  return parseInventoryItem(
+    await gameFetch<unknown>(
+      `/characters/${characterId}/inventory/${itemSlug}`,
+      accessToken,
+      {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      },
+    ),
   );
 }
 
@@ -88,13 +97,15 @@ export async function purchaseInventory(
     pay?: boolean;
   },
 ) {
-  return gameFetch<CharacterInventory>(
-    `/characters/${characterId}/inventory/purchase`,
-    accessToken,
-    {
-      method: "POST",
-      body: JSON.stringify(payload),
-    },
+  return parseCharacterInventory(
+    await gameFetch<unknown>(
+      `/characters/${characterId}/inventory/purchase`,
+      accessToken,
+      {
+        method: "POST",
+        body: JSON.stringify(payload),
+      },
+    ),
   );
 }
 
@@ -156,10 +167,12 @@ export async function attachWeaponCharm(
   characterId: string,
   payload: AttachWeaponCharmPayload,
 ) {
-  return runInventoryAction<InventoryItem>(accessToken, characterId, {
-    actionSlug: "attach-weapon-charm",
-    ...payload,
-  });
+  return parseInventoryItem(
+    await runInventoryAction<unknown>(accessToken, characterId, {
+      actionSlug: "attach-weapon-charm",
+      ...payload,
+    }),
+  );
 }
 
 export async function detachWeaponCharm(
@@ -167,10 +180,12 @@ export async function detachWeaponCharm(
   characterId: string,
   payload: DetachWeaponCharmPayload,
 ) {
-  return runInventoryAction<InventoryItem>(accessToken, characterId, {
-    actionSlug: "detach-weapon-charm",
-    ...payload,
-  });
+  return parseInventoryItem(
+    await runInventoryAction<unknown>(accessToken, characterId, {
+      actionSlug: "detach-weapon-charm",
+      ...payload,
+    }),
+  );
 }
 
 export type AttachCoveragePayload = {
@@ -189,10 +204,12 @@ export async function attachCoverage(
   characterId: string,
   payload: AttachCoveragePayload,
 ) {
-  return runInventoryAction<InventoryItem>(accessToken, characterId, {
-    actionSlug: "attach-coverage",
-    ...payload,
-  });
+  return parseInventoryItem(
+    await runInventoryAction<unknown>(accessToken, characterId, {
+      actionSlug: "attach-coverage",
+      ...payload,
+    }),
+  );
 }
 
 export async function detachCoverage(
@@ -200,10 +217,12 @@ export async function detachCoverage(
   characterId: string,
   payload: DetachCoveragePayload,
 ) {
-  return runInventoryAction<InventoryItem>(accessToken, characterId, {
-    actionSlug: "detach-coverage",
-    ...payload,
-  });
+  return parseInventoryItem(
+    await runInventoryAction<unknown>(accessToken, characterId, {
+      actionSlug: "detach-coverage",
+      ...payload,
+    }),
+  );
 }
 
 export type SentientConflictResult = {
@@ -230,8 +249,10 @@ export async function rerollArtifactProperties(
   characterId: string,
   itemSlug: string,
 ) {
-  return runInventoryAction<InventoryItem>(accessToken, characterId, {
-    actionSlug: "artifact-reroll",
-    itemSlug,
-  });
+  return parseInventoryItem(
+    await runInventoryAction<unknown>(accessToken, characterId, {
+      actionSlug: "artifact-reroll",
+      itemSlug,
+    }),
+  );
 }

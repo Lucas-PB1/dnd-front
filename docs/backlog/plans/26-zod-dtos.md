@@ -1,6 +1,6 @@
 # Plano 26 — Zod nos DTOs críticos
 
-**ID:** FR-8 · **Dificuldade:** média · **Status:** Ready · **Depende:** 04, 05 (tipos estáveis)
+**ID:** FR-8 · **Dificuldade:** média · **Status:** Feito · **Depende:** 04, 05 (tipos estáveis)
 
 ## Gap
 

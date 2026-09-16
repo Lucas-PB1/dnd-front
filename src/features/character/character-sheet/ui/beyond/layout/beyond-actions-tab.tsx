@@ -105,7 +105,6 @@ const ECONOMY_SECTIONS: {
   },
 ];
 
-/** Ataques, economia com Usar, ferramentas de classe e passivas. */
 export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
   const attacks = character.weaponAttacks ?? [];
   const stateQuery = useCharacterState(character.id);
@@ -335,6 +334,8 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
   );
 
   const resourceError =
+    (stateQuery.isError && stateQuery.error) ||
+    (mechanicalCatalog.isError && mechanicalCatalog.error) ||
     (spendResource.isError && spendResource.error) ||
     (recoverResource.isError && recoverResource.error) ||
     (tableAction.isError && tableAction.error) ||

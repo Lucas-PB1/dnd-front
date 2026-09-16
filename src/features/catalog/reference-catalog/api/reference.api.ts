@@ -3,7 +3,7 @@ import type { AbilitySummary } from "@/entities/ability/types";
 import type { AbilityGenerationMethod } from "@/entities/ability-generation-method/types";
 import type { AlignmentListResponse } from "@/entities/alignment/types";
 import type { CharacterLevel } from "@/entities/character-level/types";
-import type { CombatMechanicalCatalog } from "@/entities/combat-mechanical/types";
+import { parseCombatMechanicalCatalog } from "@/entities/combat-mechanical/lib/combat-mechanical-catalog.schema";
 import type { ConditionSummary } from "@/entities/condition/types";
 import type { FeatListResponse } from "@/entities/feat/types";
 import type { LanguageListResponse } from "@/entities/language/types";
@@ -113,13 +113,12 @@ export async function fetchCombatMechanicalCatalog(filters?: {
       subclassSlug: filters?.subclassSlug,
     },
   });
-  // Endpoint não é paginado; remove page/limit do query string.
   search.delete("page");
   search.delete("limit");
   const qs = search.toString();
-  // Catálogo de mesa muda com reseed — não usar Next Data Cache de 1h.
-  return catalogFetch<CombatMechanicalCatalog>(
+  const data = await catalogFetch<unknown>(
     qs ? `/combat-mechanical-catalog?${qs}` : `/combat-mechanical-catalog`,
     { cache: "no-store" },
   );
+  return parseCombatMechanicalCatalog(data);
 }

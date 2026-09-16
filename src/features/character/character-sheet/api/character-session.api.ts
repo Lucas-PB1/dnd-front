@@ -1,4 +1,10 @@
 import { gameFetch } from "@/shared/api/dnd-api/api-client";
+import type { ApiFetchOptions } from "@/shared/api/dnd-api/api-client";
+import {
+  parseCharacterState,
+  parseCharacterStateEnvelope,
+  parseTransferInspirationResult,
+} from "@/entities/character/lib/character-state.schema";
 import type {
   CastSpellPayload,
   CastSpellResult,
@@ -12,6 +18,32 @@ import type {
   UseManeuverResult,
 } from "@/entities/character/session-types";
 
+async function sessionJson(
+  path: string,
+  accessToken: string,
+  init?: Omit<ApiFetchOptions, "token">,
+) {
+  return gameFetch<unknown>(path, accessToken, init);
+}
+
+async function sessionState(
+  path: string,
+  accessToken: string,
+  init?: Omit<ApiFetchOptions, "token">,
+) {
+  return parseCharacterState(await sessionJson(path, accessToken, init));
+}
+
+async function sessionWithState<T extends { state: CharacterState }>(
+  path: string,
+  accessToken: string,
+  init?: Omit<ApiFetchOptions, "token">,
+) {
+  return parseCharacterStateEnvelope<T>(
+    await sessionJson(path, accessToken, init),
+  );
+}
+
 export const sessionKeys = {
   all: ["character-session"] as const,
   state: (characterId: string) =>
@@ -22,7 +54,7 @@ export async function fetchCharacterState(
   accessToken: string,
   characterId: string,
 ) {
-  return gameFetch<CharacterState>(
+  return sessionState(
     `/characters/${characterId}/state`,
     accessToken,
   );
@@ -33,7 +65,7 @@ export async function patchCharacterState(
   characterId: string,
   payload: PatchCharacterStatePayload,
 ) {
-  return gameFetch<CharacterState>(
+  return sessionState(
     `/characters/${characterId}/state`,
     accessToken,
     {
@@ -48,7 +80,7 @@ export async function castCharacterSpell(
   characterId: string,
   payload: CastSpellPayload,
 ) {
-  return gameFetch<CastSpellResult>(
+  return sessionWithState<CastSpellResult>(
     `/characters/${characterId}/spells/cast`,
     accessToken,
     {
@@ -63,7 +95,7 @@ export async function takeCharacterRest(
   characterId: string,
   payload: RestPayload,
 ) {
-  return gameFetch<RestResult>(`/characters/${characterId}/rest`, accessToken, {
+  return sessionWithState<RestResult>(`/characters/${characterId}/rest`, accessToken, {
     method: "POST",
     body: JSON.stringify(payload),
   });
@@ -74,7 +106,7 @@ export async function spendClassResource(
   characterId: string,
   payload: UseClassResourcePayload,
 ) {
-  return gameFetch<UseClassResourceResult>(
+  return sessionWithState<UseClassResourceResult>(
     `/characters/${characterId}/resources/use`,
     accessToken,
     {
@@ -89,7 +121,7 @@ export async function recoverClassResource(
   characterId: string,
   payload: UseClassResourcePayload,
 ) {
-  return gameFetch<CharacterState>(
+  return sessionState(
     `/characters/${characterId}/resources/recover`,
     accessToken,
     {
@@ -144,7 +176,7 @@ export async function executeBarbarianTableAction(
     companionCommand?: CompanionCommandSlug;
   },
 ) {
-  return gameFetch<TableActionResult>(
+  return sessionWithState<TableActionResult>(
     `/characters/${characterId}/barbarian/table-action`,
     accessToken,
     {
@@ -196,7 +228,7 @@ export async function executeGunslingerTableAction(
     shots?: number;
   },
 ) {
-  return gameFetch<GunslingerTableActionResult>(
+  return sessionWithState<GunslingerTableActionResult>(
     `/characters/${characterId}/gunslinger/table-action`,
     accessToken,
     {
@@ -267,7 +299,7 @@ export async function executeFighterTableAction(
   characterId: string,
   input: FighterTableActionInput,
 ) {
-  return gameFetch<FighterTableActionResult>(
+  return sessionWithState<FighterTableActionResult>(
     `/characters/${characterId}/fighter/table-action`,
     accessToken,
     {
@@ -287,7 +319,7 @@ export async function executeRogueTableAction(
     usePsiDie?: boolean;
   },
 ) {
-  return gameFetch<FighterTableActionResult>(
+  return sessionWithState<FighterTableActionResult>(
     `/characters/${characterId}/rogue/table-action`,
     accessToken,
     {
@@ -328,7 +360,7 @@ export async function executeMonkTableAction(
   characterId: string,
   actionSlug: MonkTableActionSlug,
 ) {
-  return gameFetch<FighterTableActionResult>(
+  return sessionWithState<FighterTableActionResult>(
     `/characters/${characterId}/monk/table-action`,
     accessToken,
     {
@@ -352,7 +384,7 @@ export async function executePaladinTableAction(
   characterId: string,
   payload: { actionSlug: PaladinTableActionSlug; amount?: number },
 ) {
-  return gameFetch<FighterTableActionResult>(
+  return sessionWithState<FighterTableActionResult>(
     `/characters/${characterId}/paladin/table-action`,
     accessToken,
     {
@@ -392,7 +424,7 @@ export async function executeRangerTableAction(
     companionCommand?: CompanionCommandSlug;
   },
 ) {
-  return gameFetch<FighterTableActionResult>(
+  return sessionWithState<FighterTableActionResult>(
     `/characters/${characterId}/ranger/table-action`,
     accessToken,
     {
@@ -428,7 +460,7 @@ export async function executeClericTableAction(
   characterId: string,
   actionSlug: ClericTableActionSlug,
 ) {
-  return gameFetch<TableActionResult>(
+  return sessionWithState<TableActionResult>(
     `/characters/${characterId}/cleric/table-action`,
     accessToken,
     {
@@ -463,7 +495,7 @@ export async function executeBardTableAction(
   characterId: string,
   payload: { actionSlug: BardTableActionSlug; masks?: string[] },
 ) {
-  return gameFetch<TableActionResult>(
+  return sessionWithState<TableActionResult>(
     `/characters/${characterId}/bard/table-action`,
     accessToken,
     {
@@ -507,7 +539,7 @@ export async function executeSorcererTableAction(
   characterId: string,
   input: SorcererTableActionInput,
 ) {
-  return gameFetch<TableActionResult>(
+  return sessionWithState<TableActionResult>(
     `/characters/${characterId}/sorcerer/table-action`,
     accessToken,
     {
@@ -539,7 +571,7 @@ export async function executeWarlockTableAction(
     diceCount?: number;
   },
 ) {
-  return gameFetch<TableActionResult>(
+  return sessionWithState<TableActionResult>(
     `/characters/${characterId}/warlock/table-action`,
     accessToken,
     {
@@ -596,7 +628,7 @@ export async function executeDruidTableAction(
   characterId: string,
   input: DruidTableActionInput,
 ) {
-  return gameFetch<TableActionResult>(
+  return sessionWithState<TableActionResult>(
     `/characters/${characterId}/druid/table-action`,
     accessToken,
     {
@@ -635,7 +667,7 @@ export async function executeWizardTableAction(
   characterId: string,
   actionSlug: WizardTableActionSlug,
 ) {
-  return gameFetch<TableActionResult>(
+  return sessionWithState<TableActionResult>(
     `/characters/${characterId}/wizard/table-action`,
     accessToken,
     {
@@ -650,7 +682,7 @@ export async function executeMonsterHunterTableAction(
   characterId: string,
   actionSlug: string,
 ) {
-  return gameFetch<TableActionResult>(
+  return sessionWithState<TableActionResult>(
     `/characters/${characterId}/monster-hunter/table-action`,
     accessToken,
     {
@@ -679,7 +711,7 @@ export async function executeTransformationTableAction(
             ? { mutationSlug: payload.mutationSlug }
             : {}),
         };
-  return gameFetch<TableActionResult>(
+  return sessionWithState<TableActionResult>(
     `/characters/${characterId}/transformation/table-action`,
     accessToken,
     {
@@ -701,7 +733,7 @@ export async function executeFeatTableAction(
   characterId: string,
   payload: FeatTableActionPayload,
 ) {
-  return gameFetch<TableActionResult>(
+  return sessionWithState<TableActionResult>(
     `/characters/${characterId}/feat/table-action`,
     accessToken,
     {
@@ -721,7 +753,7 @@ export async function executeItemTableAction(
   characterId: string,
   payload: ItemTableActionPayload,
 ) {
-  return gameFetch<TableActionResult>(
+  return sessionWithState<TableActionResult>(
     `/characters/${characterId}/item/table-action`,
     accessToken,
     {
@@ -742,12 +774,14 @@ export async function transferInspiration(
   characterId: string,
   targetCharacterId: string,
 ) {
-  return gameFetch<TransferInspirationResult>(
-    `/characters/${characterId}/state/transfer-inspiration`,
-    accessToken,
-    {
-      method: "POST",
-      body: JSON.stringify({ targetCharacterId }),
-    },
+  return parseTransferInspirationResult(
+    await sessionJson(
+      `/characters/${characterId}/state/transfer-inspiration`,
+      accessToken,
+      {
+        method: "POST",
+        body: JSON.stringify({ targetCharacterId }),
+      },
+    ),
   );
 }

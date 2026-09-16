@@ -280,6 +280,13 @@ export function SheetCombatStrip({
 
   return (
     <>
+      {stateQuery.isError ? (
+        <p className="text-sm text-destructive" role="alert">
+          {stateQuery.error instanceof Error
+            ? stateQuery.error.message
+            : "Não foi possível carregar o estado de combate"}
+        </p>
+      ) : null}
       <div className="grid grid-cols-2 items-stretch gap-1.5 sm:grid-cols-4">
         <HeaderMetric
           label="Inic."
