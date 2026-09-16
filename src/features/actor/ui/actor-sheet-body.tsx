@@ -14,6 +14,8 @@ import {
   useRollActorAttack,
 } from "@/features/actor/api/use-actors";
 import { VitalStepper } from "@/features/actor/ui/vital-stepper";
+import { VehicleSheetControls } from "@/features/actor/ui/vehicle-sheet-controls";
+import { useCharacterState } from "@/features/character/character-sheet/api/use-character-state";
 import { StatBlockCard } from "@/features/catalog/template-stat-block/ui/stat-block-card";
 import { TemplateSpellsList } from "@/features/catalog/template-stat-block/ui/template-stat-block-sections";
 import { formatKgFromPounds } from "@/shared/lib/metric";
@@ -35,6 +37,11 @@ export function ActorSheetBody({
     useState<ActorAttackRollResult | null>(null);
   const vitals = resolveActorVitals(actor, liveQuery.data);
   const isVehicle = actor.actorKind === "vehicle";
+  const sheetCharacterId = isVehicle ? actor.parentCharacterId : null;
+  const sessionQuery = useCharacterState(sheetCharacterId ?? "");
+  const boarded =
+    Boolean(sheetCharacterId) &&
+    sessionQuery.data?.boardedActorId === actor.id;
 
   function setHp(next: number) {
     const max = vitals.hitPointsMax;
@@ -109,6 +116,18 @@ export function ActorSheetBody({
           </p>
         ) : null}
       </header>
+
+      {isVehicle && sheetCharacterId ? (
+        <VehicleSheetControls
+          characterId={sheetCharacterId}
+          actorId={actor.id}
+          boarded={boarded}
+          live={liveQuery.data}
+          crewCapacity={actor.crewCapacity}
+          passengerCapacity={actor.passengerCapacity}
+          cargoCapacityLb={actor.cargoCapacityLb}
+        />
+      ) : null}
 
       <StatBlockCard
         variant={isVehicle ? "vehicle" : "creature"}

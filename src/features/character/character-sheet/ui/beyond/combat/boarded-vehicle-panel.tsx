@@ -14,6 +14,7 @@ import {
   usePatchActorState,
 } from "@/features/actor/api/use-actors";
 import { ActorSheetDialog } from "@/features/actor/ui/actor-sheet-dialog";
+import { VehicleSheetControls } from "@/features/actor/ui/vehicle-sheet-controls";
 import { VitalStepper } from "@/features/actor/ui/vital-stepper";
 import {
   SheetSectionHeader,
@@ -48,6 +49,7 @@ export function BoardedVehiclePanel({
   actorId,
 }: BoardedVehiclePanelProps) {
   const actorQuery = useActorDetail(actorId);
+  const liveQuery = useActorState(actorId);
   const board = useBoardVehicle(characterId);
   const [sheetOpen, setSheetOpen] = useState(false);
 
@@ -82,6 +84,7 @@ export function BoardedVehiclePanel({
   }
 
   const actor = actorQuery.data;
+  const isVehicle = actor.actorKind === "vehicle";
 
   return (
     <section className="space-y-3">
@@ -110,6 +113,17 @@ export function BoardedVehiclePanel({
           </Button>
         </div>
       </div>
+      {isVehicle ? (
+        <VehicleSheetControls
+          characterId={characterId}
+          actorId={actor.id}
+          boarded
+          live={liveQuery.data}
+          crewCapacity={actor.crewCapacity}
+          passengerCapacity={actor.passengerCapacity}
+          cargoCapacityLb={actor.cargoCapacityLb}
+        />
+      ) : null}
       <button
         type="button"
         className="block w-full rounded-md border border-border/60 bg-muted/20 px-3 py-3 text-left touch-manipulation active:bg-muted/40"

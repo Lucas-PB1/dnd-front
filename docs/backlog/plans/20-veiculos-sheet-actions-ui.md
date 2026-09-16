@@ -1,6 +1,6 @@
 # Plano 20 — UI sheet-actions de veículo
 
-**ID:** FR-22 · **Dificuldade:** média · **Status:** Ready · **Depende:** 10
+**ID:** FR-22 · **Dificuldade:** média · **Status:** Feito · **Depende:** 10
 
 ## Gap
 

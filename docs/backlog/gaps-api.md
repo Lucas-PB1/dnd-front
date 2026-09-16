@@ -35,7 +35,7 @@ Cada linha é **um** plano. Detalhe só no arquivo do plano.
 | ~~`strikeOptions` tipado mas painel não usa~~ | [17](./plans/17-strike-options-ui.md) Feito |
 | ~~Forma Selvagem “polish futuro”~~ | [18](./plans/18-forma-selvagem-ui.md) Feito |
 | ~~Tracker companions~~ | [19](./plans/19-companheiros-ui.md) Feito |
-| Veículo sem sheet-actions na UI | [20](./plans/20-veiculos-sheet-actions-ui.md) |
+| ~~Veículo sem sheet-actions na UI~~ | [20](./plans/20-veiculos-sheet-actions-ui.md) Feito |
 | Montaria sem cliente/UI | [21](./plans/21-montarias-ui.md) |
 
 ## Compêndio (falta endpoint de lista)

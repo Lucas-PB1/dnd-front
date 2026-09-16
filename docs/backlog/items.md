@@ -23,7 +23,7 @@ Um ID → um plano. Status: Ready · Blocked · Adiado · Feito.
 | FR-35 | [17](./plans/17-strike-options-ui.md) | Feito | UI `strikeOptions` |
 | FR-20 | [18](./plans/18-forma-selvagem-ui.md) | Feito | UI Forma Selvagem |
 | FR-21 | [19](./plans/19-companheiros-ui.md) | Feito | UI companheiros |
-| FR-22 | [20](./plans/20-veiculos-sheet-actions-ui.md) | Ready | UI veículo sheet-actions |
+| FR-22 | [20](./plans/20-veiculos-sheet-actions-ui.md) | Feito | UI veículo sheet-actions |
 | FR-37 | [21](./plans/21-montarias-ui.md) | Ready | UI montaria |
 | FR-10 | [22](./plans/22-fsd-catalog-filters.md) | Ready | FSD filtros |
 | FR-1 | [23](./plans/23-filtros-escolas.md) | Blocked | Escolas de magia |

@@ -32,5 +32,8 @@ export function syncCharacterTransportCaches(
     void queryClient.invalidateQueries({
       queryKey: actorKeys.detail(actorId),
     });
+    void queryClient.invalidateQueries({
+      queryKey: actorKeys.state(actorId),
+    });
   }
 }
