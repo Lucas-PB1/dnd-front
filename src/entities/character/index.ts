@@ -13,6 +13,7 @@ export type {
   UpdateCharacterPayload,
 } from "@/entities/character/types";
 export { abilityModifier } from "@/entities/character/types";
+export { conditionListDelta } from "@/entities/character/lib/condition-list-delta";
 export {
   abilityModifierValue,
   formatAbilityModifier,

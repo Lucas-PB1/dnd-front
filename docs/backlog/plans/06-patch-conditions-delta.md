@@ -1,6 +1,6 @@
 # Plano 06 — PATCH condições em delta
 
-**ID:** FR-30 · **Dificuldade:** fácil · **Status:** Ready
+**ID:** FR-30 · **Dificuldade:** fácil · **Status:** Feito
 
 ## Gap
 
@@ -13,3 +13,7 @@ Estender `PatchCharacterStatePayload`. A UI de condições (combate/status) pass
 ## Pronto quando
 
 Um fluxo da ficha usa add/remove; tipos alinhados ao Nest.
+
+## Feito
+
+Payload com `addConditions` / `removeConditions`. Editor da faixa de combate envia só o delta; `conditions` inteiro permanece no tipo se alguém precisar substituir a lista.

@@ -95,6 +95,8 @@ export type UseManeuverResult = {
 
 export type PatchCharacterStatePayload = {
   conditions?: string[];
+  addConditions?: string[];
+  removeConditions?: string[];
   tempHp?: number;
   concentratingOn?: string | null;
   deathSaveSuccesses?: number;

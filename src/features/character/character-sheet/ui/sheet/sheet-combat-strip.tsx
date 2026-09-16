@@ -11,6 +11,7 @@ import { useMemo, useState } from "react";
 import type { CharacterDetail } from "@/entities/character/types";
 import {
   abilityModifierValue,
+  conditionListDelta,
   formatSkillBonus,
   hasAutomaticInitiativeAdvantage,
   hasGiantkinStoneAncestry,
@@ -25,7 +26,10 @@ import { BarbarianCombatToggles } from "@/features/character/character-sheet/ui/
 import { CombatStatusEditor } from "@/features/character/character-sheet/ui/beyond/combat/status/status-editor";
 import { useSheetRolls } from "@/features/character/character-sheet/ui/beyond/layout/sheet-rolls";
 import { SheetChip } from "@/features/character/character-sheet/ui/sheet/sheet-ui";
-import { useConditions, useFeats } from "@/features/catalog/reference-catalog/api/use-reference";
+import {
+  useConditions,
+  useFeats,
+} from "@/features/catalog/reference-catalog/api/use-reference";
 import { resolveHeritageDisplaySpeed } from "@/entities/heritage/types";
 import { useHeritageDetail } from "@/features/catalog/heritage-catalog/api/use-heritages";
 import { useSpeciesDetail } from "@/features/catalog/species-catalog/api/use-species";
@@ -47,14 +51,12 @@ type SheetCombatStripProps = {
 type MetricProps = {
   label: string;
   value: string | number;
-  /** Uma linha curta (legado) ou várias linhas (ex.: vários talentos de CA). */
   hint?: string;
   hintLines?: string[];
   emphasize?: boolean;
   icon?: typeof BoltIcon;
   onClick?: () => void;
   disabled?: boolean;
-  /** Toggle sticky (ex.: bônus de CA de talento). */
   pressed?: boolean;
 };
 
@@ -136,9 +138,6 @@ function HeaderMetric({
   );
 }
 
-/**
- * Faixa compacta no header: Iniciativa, CA, Deslocamento e Condições.
- */
 export function SheetCombatStrip({
   characterId,
   character,
@@ -148,7 +147,10 @@ export function SheetCombatStrip({
   const conditionsCatalog = useConditions();
   const featsCatalog = useFeats();
   const isHeritage = Boolean(character.heritageSlug);
-  const speciesDetail = useSpeciesDetail(character.speciesSlug ?? "", !isHeritage);
+  const speciesDetail = useSpeciesDetail(
+    character.speciesSlug ?? "",
+    !isHeritage,
+  );
   const heritageDetail = useHeritageDetail(
     character.heritageSlug ?? "",
     isHeritage,
@@ -164,7 +166,6 @@ export function SheetCombatStrip({
   const state = stateQuery.data;
   const scores = sheetAbilityScores(character);
   const featAcBonus = character.featAcBonus ?? 0;
-  const featAcBonusSources = character.featAcBonusSources ?? [];
   const displayedArmorClass =
     character.armorClass + (featAcSticky && featAcBonus > 0 ? featAcBonus : 0);
   const baseArmorNote = (character.armorClassNote ?? "")
@@ -178,14 +179,15 @@ export function SheetCombatStrip({
     [featsCatalog.data?.data],
   );
   const featAcSourceLines = useMemo(() => {
-    if (featAcBonusSources.length === 0) {
+    const sources = character.featAcBonusSources ?? [];
+    if (sources.length === 0) {
       return featAcBonus > 0 ? [`+${featAcBonus} talento`] : [];
     }
-    return featAcBonusSources.map((source) => {
+    return sources.map((source) => {
       const name = featNameBySlug[source.featSlug] ?? source.featSlug;
       return `+${source.bonus} ${name}`;
     });
-  }, [featAcBonus, featAcBonusSources, featNameBySlug]);
+  }, [character.featAcBonusSources, featAcBonus, featNameBySlug]);
   const armorClassHintLines = [
     baseArmorNote || undefined,
     featAcBonus > 0
@@ -264,8 +266,13 @@ export function SheetCombatStrip({
   }
 
   async function saveStatus() {
+    const { addConditions, removeConditions } = conditionListDelta(
+      conditions,
+      selectedConditions,
+    );
     await patchState.mutateAsync({
-      conditions: selectedConditions,
+      ...(addConditions.length > 0 ? { addConditions } : {}),
+      ...(removeConditions.length > 0 ? { removeConditions } : {}),
       tempHp: Number(tempHpDraft) || 0,
     });
     setEditing(false);
@@ -318,11 +325,7 @@ export function SheetCombatStrip({
               : undefined
           }
         />
-        <HeaderMetric
-          label="Desloc."
-          value={speedLabel}
-          hint={speedHint}
-        />
+        <HeaderMetric label="Desloc." value={speedLabel} hint={speedHint} />
 
         <div
           className={cn(
