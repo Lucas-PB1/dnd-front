@@ -11,7 +11,6 @@ import {
   listBattleMasterManeuvers,
   sessionKeys,
   type FighterTableActionInput,
-  type FighterTableActionSlug,
 } from "@/features/character/character-sheet/api/character-session.api";
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
 import { useTableActionMutation } from "@/features/character/character-sheet/api/use-table-action-mutation";
@@ -146,7 +145,7 @@ export function CombatFighterPanel({
         isPending={action.isPending}
         size="xs"
         onAction={(slug) =>
-          run({ actionSlug: slug as FighterTableActionSlug })
+          run({ actionSlug: slug })
         }
       />
       <TableActionFeedback
@@ -166,7 +165,7 @@ export function CombatFighterPanel({
           getRemaining={getRemaining}
           isPending={action.isPending}
           onAction={(slug) =>
-            run({ actionSlug: slug as FighterTableActionSlug })
+            run({ actionSlug: slug })
           }
         />
         <StrikeOptionsPanel
@@ -181,7 +180,7 @@ export function CombatFighterPanel({
           onUse={(option, takeLowerCost) => {
             if (!option.tableAction) return;
             run({
-              actionSlug: option.tableAction as FighterTableActionSlug,
+              actionSlug: option.tableAction,
               optionSlug: option.slug,
               ...(takeLowerCost ? { takeLowerBloodCost: true } : {}),
             });

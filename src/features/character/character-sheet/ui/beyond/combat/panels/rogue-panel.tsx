@@ -4,10 +4,7 @@ import { useMemo, useState } from "react";
 
 import type { CharacterState } from "@/entities/character/session-types";
 import type { ClassPanelActionRecord } from "@/entities/combat-mechanical/types";
-import {
-  executeRogueTableAction,
-  type RogueTableActionSlug,
-} from "@/features/character/character-sheet/api/character-session.api";
+import { executeRogueTableAction } from "@/features/character/character-sheet/api/character-session.api";
 import { useTableActionMutation } from "@/features/character/character-sheet/api/use-table-action-mutation";
 import { useCombatMechanicalCatalog } from "@/features/catalog/reference-catalog/api/use-reference";
 import { resolvePanelActions } from "@/features/character/character-sheet/lib/combat/resolve-panel-actions";
@@ -48,7 +45,7 @@ export function CombatRoguePanel({
 
   const action = useTableActionMutation(
     characterId,
-    (token: string, id: string, actionSlug: RogueTableActionSlug) => {
+    (token: string, id: string, actionSlug: string) => {
       const needsPayload = SOULKNIFE_PAYLOAD_SLUGS.has(actionSlug);
       return executeRogueTableAction(token, id, {
         actionSlug,
@@ -101,7 +98,7 @@ export function CombatRoguePanel({
   }
 
   function run(slug: string) {
-    action.mutate(slug as RogueTableActionSlug);
+    action.mutate(slug);
   }
 
   const actionsContent = (

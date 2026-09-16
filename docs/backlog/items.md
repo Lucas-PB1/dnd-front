@@ -31,7 +31,7 @@ Um ID → um plano. Status: Ready · Blocked · Adiado · Feito.
 | FR-2 | [25](./plans/25-pools-ferramentas.md) | Feito | Pools de tools |
 | FR-8 | [26](./plans/26-zod-dtos.md) | Feito | Zod DTOs |
 | FR-11 | [27](./plans/27-testes-hotspot.md) | Feito | Testes hotspot |
-| FR-9 | [28](./plans/28-fatiar-character-sheet.md) | Ready | Fatiar `character-sheet` |
+| FR-9 | [28](./plans/28-fatiar-character-sheet.md) | Feito | Fatiar `character-sheet` |
 | FR-3 | [29](./plans/29-point-buy-ssot.md) | Blocked | Point-buy |
 | FR-4 | [30](./plans/30-asi-wizard.md) | Blocked | ASI no wizard |
 | FR-5 | [31](./plans/31-expertise-create.md) | Blocked | Expertise create + JoaT |

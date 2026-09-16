@@ -4,10 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import type { CharacterState } from "@/entities/character/session-types";
 import type { ClassPanelActionRecord } from "@/entities/combat-mechanical/types";
-import {
-  executeBardTableAction,
-  type BardTableActionSlug,
-} from "@/features/character/character-sheet/api/character-session.api";
+import { executeBardTableAction } from "@/features/character/character-sheet/api/character-session.api";
 import { useTableActionMutation } from "@/features/character/character-sheet/api/use-table-action-mutation";
 import { useCombatMechanicalCatalog } from "@/features/catalog/reference-catalog/api/use-reference";
 import { resolvePanelActions } from "@/features/character/character-sheet/lib/combat/resolve-panel-actions";
@@ -35,9 +32,6 @@ function maxEquippedMasks(level: number): number {
   return level >= 14 ? 2 : 1;
 }
 
-/**
- * Bardo: base/colégio pelo catálogo C010; Inspiração ± só na Economia; máscaras no painel.
- */
 export function CombatBardPanel({
   characterId,
   classSlug,
@@ -175,7 +169,7 @@ export function CombatBardPanel({
         isPending={action.isPending}
         disabled={!state}
         onAction={(slug) =>
-          action.mutate({ actionSlug: slug as BardTableActionSlug })
+          action.mutate({ actionSlug: slug })
         }
       />
       <TableActionFeedback
@@ -195,7 +189,7 @@ export function CombatBardPanel({
           isPending={action.isPending}
           disabled={!state}
           onAction={(slug) =>
-            action.mutate({ actionSlug: slug as BardTableActionSlug })
+            action.mutate({ actionSlug: slug })
           }
         />
         <TableActionFeedback

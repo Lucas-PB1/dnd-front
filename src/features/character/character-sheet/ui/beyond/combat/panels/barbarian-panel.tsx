@@ -5,11 +5,8 @@ import { useMemo } from "react";
 import type { CharacterState } from "@/entities/character/session-types";
 import type { SubclassOptionPick } from "@/entities/companion/lib/companion-profiles";
 import type { ClassPanelActionRecord } from "@/entities/combat-mechanical/types";
-import {
-  executeBarbarianTableAction,
-  type BarbarianTableActionSlug,
-  type CompanionCommandSlug,
-} from "@/features/character/character-sheet/api/character-session.api";
+import { executeBarbarianTableAction } from "@/features/character/character-sheet/api/character-session.api";
+import type { CompanionCommandSlug } from "@/entities/companion/lib/companion-commands";
 import { useTableActionMutation } from "@/features/character/character-sheet/api/use-table-action-mutation";
 import { useCombatMechanicalCatalog } from "@/features/catalog/reference-catalog/api/use-reference";
 import { resolvePanelActions } from "@/features/character/character-sheet/lib/combat/resolve-panel-actions";
@@ -38,9 +35,6 @@ function isRageSlug(slug: string): boolean {
   return slug === "rage";
 }
 
-/**
- * Bárbaro: Fúria/Imprudente e poderes de trilha via C010; pool de Fúria ± na Economia.
- */
 export function CombatBarbarianPanel({
   characterId,
   classSlug,
@@ -112,7 +106,7 @@ export function CombatBarbarianPanel({
         isPending={action.isPending}
         disabled={!state}
         onAction={(slug) =>
-          action.mutate({ actionSlug: slug as BarbarianTableActionSlug })
+          action.mutate({ actionSlug: slug })
         }
       />
       <TableActionFeedback
@@ -128,7 +122,7 @@ export function CombatBarbarianPanel({
     diceCount?: number,
   ) {
     action.mutate({
-      actionSlug: slug as BarbarianTableActionSlug,
+      actionSlug: slug,
       ...(companionCommand ? { companionCommand } : {}),
       ...(diceCount != null ? { diceCount } : {}),
     });

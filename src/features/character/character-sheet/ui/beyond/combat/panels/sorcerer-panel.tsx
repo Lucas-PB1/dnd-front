@@ -123,7 +123,7 @@ export function CombatSorcererPanel({
           getRemaining={getRemaining}
           isPending={action.isPending}
           size="xs"
-          onAction={(slug) => run({ actionSlug: slug as never })}
+          onAction={(slug) => run({ actionSlug: slug })}
         />
       ) : null}
 
@@ -243,7 +243,7 @@ export function CombatSorcererPanel({
           actions={subclassActions}
           getRemaining={getRemaining}
           isPending={action.isPending}
-          onAction={(slug) => run({ actionSlug: slug as never })}
+          onAction={(slug) => run({ actionSlug: slug })}
         />
 
         {showBastion ? (

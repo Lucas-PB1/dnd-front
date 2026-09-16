@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 
 import type { SubclassOptionPick } from "@/entities/companion/lib/companion-profiles";
 import { COMPANION_COMMANDS } from "@/entities/companion/lib/companion-commands";
-import type { CompanionCommandSlug } from "@/features/character/character-sheet/api/character-session.api";
+import type { CompanionCommandSlug } from "@/entities/companion/lib/companion-commands";
 import {
   findCompanionProfile,
   resolveCompanionConfig,

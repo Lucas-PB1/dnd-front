@@ -9,7 +9,6 @@ import { actorKeys } from "@/features/actor/api/use-actors";
 import {
   executeDruidTableAction,
   type DruidTableActionInput,
-  type DruidTableActionSlug,
 } from "@/features/character/character-sheet/api/character-session.api";
 import { useTableActionMutation } from "@/features/character/character-sheet/api/use-table-action-mutation";
 import { wildShapeKeys } from "@/features/character/character-sheet/api/wild-shape.api";
@@ -141,7 +140,7 @@ export function CombatDruidPanel({
         getRemaining={getRemaining}
         isPending={action.isPending}
         disabled={!state}
-        onAction={(slug) => run({ actionSlug: slug as DruidTableActionSlug })}
+        onAction={(slug) => run({ actionSlug: slug })}
       />
       <TableActionFeedback
         lastResultNote={action.lastResult?.note}
@@ -159,7 +158,7 @@ export function CombatDruidPanel({
           getRemaining={getRemaining}
           isPending={action.isPending}
           disabled={!state}
-          onAction={(slug) => run({ actionSlug: slug as DruidTableActionSlug })}
+          onAction={(slug) => run({ actionSlug: slug })}
         />
         <TableActionFeedback
           lastResultNote={action.lastResult?.note}

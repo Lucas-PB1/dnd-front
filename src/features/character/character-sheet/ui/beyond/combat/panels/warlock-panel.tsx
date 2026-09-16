@@ -6,10 +6,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ClassOption } from "@/entities/character/sheet-types";
 import type { CharacterState } from "@/entities/character/session-types";
 import type { ClassPanelActionRecord } from "@/entities/combat-mechanical/types";
-import {
-  executeWarlockTableAction,
-  type WarlockTableActionSlug,
-} from "@/features/character/character-sheet/api/character-session.api";
+import { executeWarlockTableAction } from "@/features/character/character-sheet/api/character-session.api";
 import { inventoryKeys } from "@/features/character/character-sheet/api/character-inventory.api";
 import { useCastSpell } from "@/features/character/character-sheet/api/use-character-state";
 import { useCharacterInventory } from "@/features/character/character-sheet/api/use-character-inventory";
@@ -162,7 +159,7 @@ export function CombatWarlockPanel({
   }
 
   function runTableAction(
-    slug: WarlockTableActionSlug,
+    slug: string,
     zone: "tools" | "powers",
     itemSlug?: string,
   ) {
@@ -234,7 +231,7 @@ export function CombatWarlockPanel({
         getRemaining={getRemaining}
         isPending={busy}
         onAction={(slug) =>
-          runTableAction(slug as WarlockTableActionSlug, "tools")
+          runTableAction(slug, "tools")
         }
       />
 
@@ -264,7 +261,7 @@ export function CombatWarlockPanel({
             isPending={busy}
             variant="secondary"
             onAction={(slug) =>
-              runTableAction(slug as WarlockTableActionSlug, "powers")
+              runTableAction(slug, "powers")
             }
           />
         </div>

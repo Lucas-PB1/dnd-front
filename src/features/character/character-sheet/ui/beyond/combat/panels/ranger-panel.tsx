@@ -5,11 +5,8 @@ import { useMemo, useState } from "react";
 import type { CharacterState } from "@/entities/character/session-types";
 import type { SubclassOptionPick } from "@/entities/companion/lib/companion-profiles";
 import type { ClassPanelActionRecord } from "@/entities/combat-mechanical/types";
-import {
-  executeRangerTableAction,
-  type CompanionCommandSlug,
-  type RangerTableActionSlug,
-} from "@/features/character/character-sheet/api/character-session.api";
+import { executeRangerTableAction } from "@/features/character/character-sheet/api/character-session.api";
+import type { CompanionCommandSlug } from "@/entities/companion/lib/companion-commands";
 import { useTableActionMutation } from "@/features/character/character-sheet/api/use-table-action-mutation";
 import { useCombatMechanicalCatalog } from "@/features/catalog/reference-catalog/api/use-reference";
 import { resolvePanelActions } from "@/features/character/character-sheet/lib/combat/resolve-panel-actions";
@@ -152,7 +149,7 @@ export function CombatRangerPanel({
 
   function run(slug: string, companionCommand?: CompanionCommandSlug) {
     action.mutate({
-      actionSlug: slug as RangerTableActionSlug,
+      actionSlug: slug,
       ...(companionCommand ? { companionCommand } : {}),
     });
   }

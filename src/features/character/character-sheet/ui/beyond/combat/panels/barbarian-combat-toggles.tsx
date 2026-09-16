@@ -1,10 +1,7 @@
 "use client";
 
 import type { CharacterState } from "@/entities/character/session-types";
-import {
-  executeBarbarianTableAction,
-  type BarbarianTableActionSlug,
-} from "@/features/character/character-sheet/api/character-session.api";
+import { executeBarbarianTableAction } from "@/features/character/character-sheet/api/character-session.api";
 import { useTableActionMutation } from "@/features/character/character-sheet/api/use-table-action-mutation";
 import { CombatToggleChip } from "@/features/character/character-sheet/ui/beyond/combat/shared/combat-toggle-chip";
 
@@ -19,7 +16,6 @@ function rageRemaining(state: CharacterState | undefined): number {
   return state?.classResources?.find((item) => item.slug === "rage")?.remaining ?? 0;
 }
 
-/** Fúria e Ataque Imprudente — alterna estado na ficha via table-action. */
 export function BarbarianCombatToggles({
   characterId,
   level,
@@ -32,7 +28,7 @@ export function BarbarianCombatToggles({
   const remaining = rageRemaining(state);
   const canEnterRage = rageActive || remaining > 0;
 
-  function run(slug: BarbarianTableActionSlug) {
+  function run(slug: string) {
     action.mutate(
       { actionSlug: slug },
       {

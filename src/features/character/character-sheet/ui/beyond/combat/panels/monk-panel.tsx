@@ -4,10 +4,7 @@ import { useMemo } from "react";
 
 import type { CharacterState } from "@/entities/character/session-types";
 import type { ClassPanelActionRecord } from "@/entities/combat-mechanical/types";
-import {
-  executeMonkTableAction,
-  type MonkTableActionSlug,
-} from "@/features/character/character-sheet/api/character-session.api";
+import { executeMonkTableAction } from "@/features/character/character-sheet/api/character-session.api";
 import { useTableActionMutation } from "@/features/character/character-sheet/api/use-table-action-mutation";
 import { useCombatMechanicalCatalog } from "@/features/catalog/reference-catalog/api/use-reference";
 import { resolvePanelActions } from "@/features/character/character-sheet/lib/combat/resolve-panel-actions";
@@ -26,9 +23,6 @@ type CombatMonkPanelProps = {
   state: CharacterState | undefined;
 };
 
-/**
- * Monge: base/subclasse pelo catálogo C010; Foco ± só na Economia.
- */
 export function CombatMonkPanel({
   characterId,
   classSlug,
@@ -81,7 +75,7 @@ export function CombatMonkPanel({
         actions={baseActions}
         getRemaining={getRemaining}
         isPending={action.isPending}
-        onAction={(slug) => action.mutate(slug as MonkTableActionSlug)}
+        onAction={(slug) => action.mutate(slug)}
       />
       <TableActionFeedback
         lastResultNote={action.lastResult?.note}
@@ -97,7 +91,7 @@ export function CombatMonkPanel({
           actions={subclassActions}
           getRemaining={getRemaining}
           isPending={action.isPending}
-          onAction={(slug) => action.mutate(slug as MonkTableActionSlug)}
+          onAction={(slug) => action.mutate(slug)}
         />
         <TableActionFeedback
           lastResultNote={action.lastResult?.note}

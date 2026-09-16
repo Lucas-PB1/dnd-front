@@ -14,6 +14,7 @@ import type {
   RestResult,
   UseClassResourcePayload,
   UseClassResourceResult,
+  UseManeuverResult,
 } from "@/entities/character/session-types";
 
 export async function sessionJson(
@@ -149,6 +150,54 @@ export async function transferInspiration(
   );
 }
 
+export type TableActionResult = {
+  state: CharacterState;
+  actionName: string;
+  expression?: string;
+  roll?: number;
+  total?: number;
+  saveDc?: number;
+  resourceSpent: boolean;
+  note: string;
+};
+
+export type FighterTableActionResult = TableActionResult;
+
+export type GunslingerTableActionResult =
+  | UseManeuverResult
+  | TableActionResult;
+
+export type ClassTableActionPayload = {
+  actionSlug: string;
+  amount?: number;
+  diceCount?: number;
+  companionCommand?: string;
+  maneuverSlug?: string;
+  itemSlug?: string;
+  shots?: number;
+  useRelentless?: boolean;
+  spellSlug?: string;
+  usePsiDie?: boolean;
+  checkTotal?: number;
+  dc?: number;
+  optionSlug?: string;
+  takeLowerBloodCost?: boolean;
+  level?: number;
+  masks?: string[];
+  metamagicSlug?: string;
+  pointsSpent?: number;
+  slotLevel?: number;
+  templateSlug?: string;
+  templateSlugs?: string[];
+  replaceSlug?: string;
+};
+
+export type ClassTableActionInput = string | ClassTableActionPayload;
+
+export type FighterTableActionInput = ClassTableActionPayload;
+export type DruidTableActionInput = ClassTableActionPayload;
+export type SorcererTableActionInput = ClassTableActionPayload;
+
 export async function postClassTableAction<T extends { state: CharacterState }>(
   accessToken: string,
   characterId: string,
@@ -164,3 +213,48 @@ export async function postClassTableAction<T extends { state: CharacterState }>(
     },
   );
 }
+
+function payloadFromInput(input: ClassTableActionInput): ClassTableActionPayload {
+  return typeof input === "string" ? { actionSlug: input } : input;
+}
+
+export async function executeClassTableAction(
+  accessToken: string,
+  characterId: string,
+  owner: string,
+  input: ClassTableActionInput,
+) {
+  return postClassTableAction<TableActionResult>(
+    accessToken,
+    characterId,
+    owner,
+    payloadFromInput(input),
+  );
+}
+
+function bindClassOwner(owner: string) {
+  return async function executeBoundTableAction(
+    accessToken: string,
+    characterId: string,
+    input: ClassTableActionInput,
+  ) {
+    return executeClassTableAction(accessToken, characterId, owner, input);
+  };
+}
+
+export const executeBarbarianTableAction = bindClassOwner("barbarian");
+export const executeFighterTableAction = bindClassOwner("fighter");
+export const executeRogueTableAction = bindClassOwner("rogue");
+export const executeMonkTableAction = bindClassOwner("monk");
+export const executePaladinTableAction = bindClassOwner("paladin");
+export const executeRangerTableAction = bindClassOwner("ranger");
+export const executeClericTableAction = bindClassOwner("cleric");
+export const executeBardTableAction = bindClassOwner("bard");
+export const executeSorcererTableAction = bindClassOwner("sorcerer");
+export const executeWarlockTableAction = bindClassOwner("warlock");
+export const executeDruidTableAction = bindClassOwner("druid");
+export const executeWizardTableAction = bindClassOwner("wizard");
+export const executeGunslingerTableAction = bindClassOwner("gunslinger");
+export const executeMonsterHunterTableAction = bindClassOwner(
+  "monster-hunter",
+);

@@ -139,7 +139,7 @@ export function CombatPaladinPanel({
         getRemaining={getRemaining}
         isPending={action.isPending}
         variant="outline"
-        onAction={(slug) => action.mutate({ actionSlug: slug as never })}
+        onAction={(slug) => action.mutate({ actionSlug: slug })}
         listTitle="Canalizar"
       />
 
@@ -148,7 +148,7 @@ export function CombatPaladinPanel({
         getRemaining={getRemaining}
         isPending={action.isPending}
         variant="outline"
-        onAction={(slug) => action.mutate({ actionSlug: slug as never })}
+        onAction={(slug) => action.mutate({ actionSlug: slug })}
         listTitle="Juramento"
       />
 

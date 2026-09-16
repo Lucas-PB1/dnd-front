@@ -1,6 +1,6 @@
 # Plano 28 — Fatiar `character-sheet`
 
-**ID:** FR-9 · **Dificuldade:** difícil · **Status:** Ready · **Depende:** 27 (rede de segurança)
+**ID:** FR-9 · **Dificuldade:** difícil · **Status:** Feito · **Depende:** 27 (rede de segurança)
 
 ## Gap
 
@@ -13,3 +13,7 @@ Ondas: fetch por dono (como a API); pastas por fluxo (combate, inventário, leve
 ## Pronto quando
 
 Arquivos novos não passam de ~400 linhas sem motivo. Testes do 27 passam.
+
+## Feito
+
+Fetch de sessão: um POST genérico (`executeClassTableAction`) cujo `actionSlug` vem do catálogo; sem unions PHB no front. GETs de manobras isolados. UI já estava em combate / inventário / level-up / edição. Vitest combate 40/40.

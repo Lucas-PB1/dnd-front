@@ -3,10 +3,7 @@
 import { useMemo } from "react";
 
 import type { CharacterState } from "@/entities/character/session-types";
-import {
-  executeWizardTableAction,
-  type WizardTableActionSlug,
-} from "@/features/character/character-sheet/api/character-session.api";
+import { executeWizardTableAction } from "@/features/character/character-sheet/api/character-session.api";
 import { useTableActionMutation } from "@/features/character/character-sheet/api/use-table-action-mutation";
 import { useCombatMechanicalCatalog } from "@/features/catalog/reference-catalog/api/use-reference";
 import { resolvePanelActions } from "@/features/character/character-sheet/lib/combat/resolve-panel-actions";
@@ -70,7 +67,7 @@ export function CombatWizardPanel({
             const max = slotsMax[String(slotLvl)] ?? 0;
             if (max <= 0 || slotLvl > maxSlotLevelsToRecover) return null;
             const slug =
-              `arcane-recovery-${slotLvl}` as WizardTableActionSlug;
+              `arcane-recovery-${slotLvl}`;
             return (
               <Button
                 key={slug}
@@ -102,7 +99,7 @@ export function CombatWizardPanel({
           getRemaining={getRemaining}
           isPending={action.isPending}
           variant="secondary"
-          onAction={(slug) => action.mutate(slug as WizardTableActionSlug)}
+          onAction={(slug) => action.mutate(slug)}
         />
 
         <TableActionFeedback

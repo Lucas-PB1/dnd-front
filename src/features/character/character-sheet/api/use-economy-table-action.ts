@@ -4,38 +4,12 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import {
   castCharacterSpell,
-  executeBarbarianTableAction,
-  executeBardTableAction,
-  executeClericTableAction,
-  executeDruidTableAction,
-  executeFighterTableAction,
-  executeGunslingerTableAction,
-  executeMonkTableAction,
-  executePaladinTableAction,
-  executeRangerTableAction,
-  executeRogueTableAction,
-  executeSorcererTableAction,
-  executeWarlockTableAction,
-  executeWizardTableAction,
-  executeMonsterHunterTableAction,
-  executeTransformationTableAction,
+  executeClassTableAction,
   executeFeatTableAction,
   executeItemTableAction,
+  executeTransformationTableAction,
   sessionKeys,
   spendClassResource,
-  type BarbarianTableActionSlug,
-  type BardTableActionSlug,
-  type ClericTableActionSlug,
-  type DruidTableActionSlug,
-  type FighterTableActionSlug,
-  type GunslingerTableActionSlug,
-  type MonkTableActionSlug,
-  type PaladinTableActionSlug,
-  type RangerTableActionSlug,
-  type RogueTableActionSlug,
-  type SorcererTableActionSlug,
-  type WarlockTableActionSlug,
-  type WizardTableActionSlug,
 } from "@/features/character/character-sheet/api/character-session.api";
 import { useGameAuth } from "@/features/character/character-sheet/api/use-game-auth";
 import {
@@ -86,10 +60,22 @@ function noteFromResult(
   return { note: fallbackNote?.trim() ?? "" };
 }
 
-/**
- * Executa a ação de mesa ligada a uma linha de economia (Usar).
- * Roteia por `classSlug` do catálogo (+ protocolos cast/arm/spend-resource).
- */
+function classTableSpendFields(tableAction: string, spendAmount: number) {
+  if (tableAction === "champion-of-the-gods" || tableAction === "healing-light") {
+    return { diceCount: spendAmount };
+  }
+  if (tableAction === "restore-lunar-step") {
+    return { slotLevel: spendAmount };
+  }
+  if (tableAction === "lay-on-hands") {
+    return { amount: spendAmount };
+  }
+  if (tableAction === "bastion-of-law") {
+    return { pointsSpent: spendAmount };
+  }
+  return {};
+}
+
 export function useEconomyTableAction(characterId: string) {
   const { requireToken, handleUnauthorized } = useGameAuth(
     `/characters/${characterId}`,
@@ -113,25 +99,17 @@ export function useEconomyTableAction(characterId: string) {
       mutationSlug,
     }: {
       tableAction: EconomyTableAction;
-      /** `economyActions[].classSlug` — obrigatório para slugs de classe. */
       classSlug?: string | null;
-      /** `economyActions[].featSlug` — talentos / origem. */
       featSlug?: string | null;
       usePsiDie?: boolean;
       resourceSlug?: string;
       spendAmount?: number;
-      /** Cast de item (fase 6) quando tableAction = spend-resource. */
       spellSlug?: string;
       note?: string;
-      /** Para arm:* — se true, desarma em vez de armar. */
       armed?: boolean;
-      /** Cast gratuito de item (cast-item-free), artisan-craft ou item/table-action. */
       itemSlug?: string | null;
-      /** `economyActions[].id` — charges/poções (não usar `spend-resource` genérico). */
       actionId?: string;
-      /** Toggle de circunstância (snow/água/frio). */
       enabled?: boolean;
-      /** Mutação Aberrante — omitir/null encerra. */
       mutationSlug?: string | null;
     }): Promise<EconomyTableActionResultNote> => {
       const token = requireToken();
@@ -317,14 +295,11 @@ export function useEconomyTableAction(characterId: string) {
         }
 
         if (isArmTableAction(tableAction)) {
-          const slug = wizardSlugFromArmTableAction(
-            tableAction,
-            Boolean(armed),
-          ) as WizardTableActionSlug;
-          const result = await executeWizardTableAction(
+          const result = await executeClassTableAction(
             token,
             characterId,
-            slug,
+            "wizard",
+            wizardSlugFromArmTableAction(tableAction, Boolean(armed)),
           );
           queryClient.setQueryData(sessionKeys.state(characterId), result.state);
           return { note: result.note };
@@ -367,141 +342,16 @@ export function useEconomyTableAction(characterId: string) {
           );
         }
 
-        if (routeClass === "fighter") {
-          const result = await executeFighterTableAction(token, characterId, {
-            actionSlug: tableAction as FighterTableActionSlug,
-            usePsiDie: isPsiTableAction(tableAction) ? usePsiDie : undefined,
-          });
-          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
-          return { note: result.note };
-        }
-
-        if (routeClass === "gunslinger") {
-          const result = await executeGunslingerTableAction(token, characterId, {
-            actionSlug: tableAction as GunslingerTableActionSlug,
-          });
-          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
-          return noteFromResult(result, note);
-        }
-
-        if (routeClass === "ranger") {
-          const result = await executeRangerTableAction(token, characterId, {
-            actionSlug: tableAction as RangerTableActionSlug,
-          });
-          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
-          return noteFromResult(result, note);
-        }
-
-        if (routeClass === "monk") {
-          const result = await executeMonkTableAction(
-            token,
-            characterId,
-            tableAction as MonkTableActionSlug,
-          );
-          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
-          return noteFromResult(result, note);
-        }
-
-        if (routeClass === "cleric") {
-          const result = await executeClericTableAction(
-            token,
-            characterId,
-            tableAction as ClericTableActionSlug,
-          );
-          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
-          return noteFromResult(result, note);
-        }
-
-        if (routeClass === "bard") {
-          const result = await executeBardTableAction(token, characterId, {
-            actionSlug: tableAction as BardTableActionSlug,
-          });
-          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
-          return noteFromResult(result, note);
-        }
-
-        if (routeClass === "barbarian") {
-          const result = await executeBarbarianTableAction(token, characterId, {
-            actionSlug: tableAction as BarbarianTableActionSlug,
-            diceCount:
-              tableAction === "champion-of-the-gods" ? spendAmount : undefined,
-          });
-          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
-          return noteFromResult(result, note);
-        }
-
-        if (routeClass === "druid") {
-          const result = await executeDruidTableAction(token, characterId, {
-            actionSlug: tableAction as DruidTableActionSlug,
-            slotLevel:
-              tableAction === "restore-lunar-step" ? spendAmount : undefined,
-          });
-          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
-          return noteFromResult(result, note);
-        }
-
-        if (routeClass === "paladin") {
-          const result = await executePaladinTableAction(token, characterId, {
-            actionSlug: tableAction as PaladinTableActionSlug,
-            amount:
-              tableAction === "lay-on-hands" ? spendAmount : undefined,
-          });
-          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
-          return noteFromResult(result, note);
-        }
-
-        if (routeClass === "rogue") {
-          const result = await executeRogueTableAction(token, characterId, {
-            actionSlug: tableAction as RogueTableActionSlug,
-            usePsiDie,
-          });
-          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
-          return noteFromResult(result, note);
-        }
-
-        if (routeClass === "sorcerer") {
-          const result = await executeSorcererTableAction(token, characterId, {
-            actionSlug: tableAction as SorcererTableActionSlug,
-            pointsSpent:
-              tableAction === "bastion-of-law" ? spendAmount : undefined,
-          });
-          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
-          return noteFromResult(result, note);
-        }
-
-        if (routeClass === "warlock") {
-          const result = await executeWarlockTableAction(token, characterId, {
-            actionSlug: tableAction as WarlockTableActionSlug,
-            diceCount:
-              tableAction === "healing-light" ? spendAmount : undefined,
-          });
-          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
-          return noteFromResult(result, note);
-        }
-
-        if (routeClass === "wizard") {
-          const result = await executeWizardTableAction(
-            token,
-            characterId,
-            tableAction as WizardTableActionSlug,
-          );
-          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
-          return noteFromResult(result, note);
-        }
-
-        if (routeClass === "monster-hunter") {
-          const result = await executeMonsterHunterTableAction(
-            token,
-            characterId,
-            tableAction,
-          );
-          queryClient.setQueryData(sessionKeys.state(characterId), result.state);
-          return noteFromResult(result, note);
-        }
-
-        throw new Error(
-          `Classe sem routing de economia Usar: ${routeClass} (${tableAction})`,
-        );
+        const result = await executeClassTableAction(token, characterId, routeClass, {
+          actionSlug: tableAction,
+          usePsiDie:
+            routeClass === "rogue" || isPsiTableAction(tableAction)
+              ? usePsiDie
+              : undefined,
+          ...classTableSpendFields(tableAction, spendAmount),
+        });
+        queryClient.setQueryData(sessionKeys.state(characterId), result.state);
+        return noteFromResult(result, note);
       } catch (error) {
         return handleUnauthorized(error);
       }
