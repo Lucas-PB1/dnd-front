@@ -34,7 +34,7 @@ Blocked não vira Ready só espelhando TS. Adiado só com pedido explícito.
 | # | Status | Plano |
 | --- | --- | --- |
 | [08](./plans/08-wild-shape-eligible-http.md) | Feito | `GET .../wild-shape/eligible` |
-| [09](./plans/09-companions-http.md) | Ready | `GET` + `POST dismiss` companions |
+| [09](./plans/09-companions-http.md) | Feito | `GET` + `POST dismiss` companions |
 | [10](./plans/10-vehicles-sheet-actions-http.md) | Ready | `POST .../vehicles/sheet-actions` |
 | [11](./plans/11-mounts-http.md) | Ready | `POST .../mounts/*` |
 | [12](./plans/12-actors-list.md) | Ready | `GET /actors` |
