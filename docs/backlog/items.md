@@ -33,10 +33,10 @@ Um ID → um plano. Status: Ready · Blocked · Adiado · Feito.
 | FR-11 | [27](./plans/27-testes-hotspot.md) | Feito | Testes hotspot |
 | FR-9 | [28](./plans/28-fatiar-character-sheet.md) | Feito | Fatiar `character-sheet` |
 | FR-3 | [29](./plans/29-point-buy-ssot.md) | Feito | Point-buy |
-| FR-4 | [30](./plans/30-asi-wizard.md) | Blocked | ASI no wizard |
-| FR-5 | [31](./plans/31-expertise-create.md) | Blocked | Expertise create + JoaT |
-| FR-6 | [32](./plans/32-subclass-unlock-create.md) | Blocked | Unlock subclasse no create |
-| FR-7 | [33](./plans/33-max-attuned.md) | Blocked | Max sintonias |
+| FR-4 | [30](./plans/30-asi-wizard.md) | Feito | ASI no wizard |
+| FR-5 | [31](./plans/31-expertise-create.md) | Feito | Expertise create + JoaT |
+| FR-6 | [32](./plans/32-subclass-unlock-create.md) | Feito | Unlock subclasse no create |
+| FR-7 | [33](./plans/33-max-attuned.md) | Feito | Max sintonias |
 | FR-24 | [34](./plans/34-paladino-cobertura-lembrete.md) | Adiado | Paladino cobertura |
 | FR-23 | [35](./plans/35-misseis-modal-boost.md) | Adiado | Modal Mísseis |
 | FR-26 | [36](./plans/36-gh-cap1-tracos.md) | Adiado | GH Cap. 1 |

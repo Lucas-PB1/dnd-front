@@ -31,7 +31,6 @@ import {
   type BeyondShopCartLine,
 } from "@/features/character/character-sheet/ui/beyond/inventory/beyond-shop-dialog";
 import { BeyondSellDialog } from "@/features/character/character-sheet/ui/beyond/inventory/beyond-sell-dialog";
-import { MAX_ATTUNED_ITEMS } from "@/features/character/character-sheet/ui/beyond/inventory/inventory-item-meta";
 import { InventoryLocationSection } from "@/features/character/character-sheet/ui/beyond/inventory/inventory-location-section";
 import { useInventoryCatalogIndex } from "@/features/character/character-sheet/api/use-inventory-catalog-index";
 import { resolveInventoryCatalogTileMeta } from "@/features/character/character-sheet/lib/inventory/inventory-catalog-tile-meta";
@@ -107,7 +106,9 @@ export function BeyondInventoryTab({
   const attunedCount =
     items.filter((item) => item.attuned).length +
     items.filter((item) => item.attachedCoverageAttuned).length;
-  const attunementSlotsFull = attunedCount >= MAX_ATTUNED_ITEMS;
+  const attunementLimit = inventory.data?.attunementLimit ?? 0;
+  const attunementSlotsFull =
+    attunementLimit > 0 && attunedCount >= attunementLimit;
   const isPending =
     patchItem.isPending ||
     patchWealth.isPending ||
@@ -253,6 +254,7 @@ export function BeyondInventoryTab({
     characterId,
     isPending,
     attunementSlotsFull,
+    attunementLimit,
     equipmentWarnings,
     resolveCatalogTileMeta,
     resolveProficiencyHint,
@@ -307,7 +309,7 @@ export function BeyondInventoryTab({
             )}
             title="Itens mágicos sintonizados"
           >
-            Sintonia {attunedCount}/{MAX_ATTUNED_ITEMS}
+            Sintonia {attunedCount}/{attunementLimit}
           </span>
           <span className="font-mono text-xs tabular-nums text-muted-foreground">
             {items.length} {items.length === 1 ? "item" : "itens"}

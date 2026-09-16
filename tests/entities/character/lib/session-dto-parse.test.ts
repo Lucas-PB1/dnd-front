@@ -63,6 +63,7 @@ const validInventory = {
     allowPlayerSkipPayment: false,
     chargeApplies: false,
   },
+  attunementLimit: 3,
 };
 
 const validCombatCatalog = {

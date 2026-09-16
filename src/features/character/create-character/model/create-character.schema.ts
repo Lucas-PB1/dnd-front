@@ -1,10 +1,8 @@
 import { z } from "zod";
 
 import { ABILITY_SCORE_KEYS } from "@/entities/character/lib/ability-score-keys";
-import { SUBCLASS_UNLOCK_LEVEL_DEFAULT } from "@/entities/character/lib/subclass";
+import { isSubclassRequired } from "@/entities/character/lib/subclass";
 import { isAbilityPoolAssigned } from "@/features/character/create-character/lib/abilities/ability-pool";
-
-const SUBCLASS_UNLOCK_LEVEL = SUBCLASS_UNLOCK_LEVEL_DEFAULT;
 
 const abilityScoresSchema = z.object({
   forca: z.number().int().min(0).max(30),
@@ -72,6 +70,7 @@ export const createCharacterBaseSchema = z.object({
   characterThreadSlug: z.string().optional(),
   characterThreadGoalIndex: z.number().int().min(1).max(6).optional(),
   subclassSlug: z.string().optional(),
+  subclassUnlockLevel: z.number().int().min(1).nullable().optional(),
   abilityGenerationMethodSlug: abilityGenerationMethodSchema,
   abilityScores: abilityScoresSchema,
   backgroundAbilityBoostMode: backgroundAbilityBoostModeSchema,
@@ -96,13 +95,20 @@ export const createCharacterBaseSchema = z.object({
 });
 
 function refineSubclassRequired(
-  data: { level: number; subclassSlug?: string },
+  data: {
+    level: number;
+    subclassSlug?: string;
+    subclassUnlockLevel?: number | null;
+  },
   ctx: z.RefinementCtx,
 ) {
-  if (data.level >= SUBCLASS_UNLOCK_LEVEL && !data.subclassSlug?.trim()) {
+  if (
+    isSubclassRequired(data.level, data.subclassUnlockLevel) &&
+    !data.subclassSlug?.trim()
+  ) {
     ctx.addIssue({
       code: "custom",
-      message: `Subclasse obrigatória a partir do nível ${SUBCLASS_UNLOCK_LEVEL}`,
+      message: `Subclasse obrigatória a partir do nível ${data.subclassUnlockLevel}`,
       path: ["subclassSlug"],
     });
   }
@@ -254,6 +260,7 @@ export const identityStepSchema = createCharacterBaseSchema
     heritageSlug: true,
     backgroundSlug: true,
     subclassSlug: true,
+    subclassUnlockLevel: true,
   })
   .superRefine(refineSubclassRequired)
   .superRefine(refineOrigin);
@@ -271,8 +278,6 @@ export const abilitiesStepSchema = createCharacterBaseSchema
   .superRefine(refinePointBuyAssigned)
   .superRefine(refineAbilityPool)
   .superRefine(refineBackgroundBoosts);
-
-export const SUBCLASS_REQUIRED_FROM_LEVEL = SUBCLASS_UNLOCK_LEVEL;
 
 export const LEVEL_OPTIONS = Array.from({ length: 20 }, (_, i) => i + 1);
 

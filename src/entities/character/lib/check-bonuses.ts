@@ -1,8 +1,3 @@
-/**
- * Espelha dnd-api `game/sheet/domain/character-check-bonuses.ts`.
- */
-
-import { hasJackOfAllTrades } from "@/entities/character/lib/class-expertise-slots";
 import { collectClassExtraSkillSlugs } from "@/entities/character/lib/class-extra-skill-slots";
 
 export const SKILL_SPECIES_CHOICE_KINDS = new Set([
@@ -53,6 +48,7 @@ export type SkillBonusSources = {
   classOptions?: readonly ClassOptionLike[];
   classSlug?: string | null;
   level?: number;
+  jackOfAllTrades?: boolean;
 };
 
 function isFeatSkillProficiencyOptionKey(optionKey: string): boolean {
@@ -160,7 +156,7 @@ export function skillProficiencyRank(
   if (expertise.has(skillSlug)) return "expertise";
   const proficient = new Set(collectProficientSkillSlugs(input));
   if (proficient.has(skillSlug)) return "proficient";
-  if (hasJackOfAllTrades(input.classSlug, input.level ?? 0)) return "jack";
+  if (input.jackOfAllTrades) return "jack";
   return "none";
 }
 
@@ -177,7 +173,6 @@ export function skillCheckBonus(
   return abilityModifier;
 }
 
-/** Passiva = 10 + bônus de perícia (inclui Jack of All Trades / expertise). */
 export function computePassiveSkill(
   skillSlug: string,
   abilityScore: number,
@@ -206,7 +201,6 @@ export function collectSaveProficiencyAbilities(
   return [...set];
 }
 
-/** Bônus de salvaguarda na ficha: atributo + PB + aura (valor já resolvido pela API). */
 export function savingThrowDisplayBonus(
   abilityModifier: number,
   proficient: boolean,

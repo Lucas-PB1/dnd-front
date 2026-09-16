@@ -4,8 +4,13 @@ import { isSubclassRequired } from "@/entities/character/lib/subclass";
 import { useSubclassOptions } from "@/features/catalog/class-catalog/api/use-classes";
 import { shouldShowWizardSubclassStep } from "@/features/character/create-character/lib/subclass/wizard-subclass-step";
 
-export function useWizardHasSubclassStep(level: number, subclassSlug: string) {
-  const needsQuery = isSubclassRequired(level) && !!subclassSlug.trim();
+export function useWizardHasSubclassStep(
+  level: number,
+  subclassSlug: string,
+  unlockLevel: number | null | undefined,
+) {
+  const needsQuery =
+    isSubclassRequired(level, unlockLevel) && !!subclassSlug.trim();
 
   const optionsQuery = useSubclassOptions(subclassSlug, level, needsQuery);
 
@@ -18,6 +23,7 @@ export function useWizardHasSubclassStep(level: number, subclassSlug: string) {
     subclassSlug,
     optionCount,
     optionsLoaded,
+    unlockLevel,
   );
 
   return {

@@ -11,6 +11,7 @@ export const CREATE_CHARACTER_DEFAULT_VALUES: CreateCharacterInput = {
   characterThreadSlug: "",
   characterThreadGoalIndex: undefined,
   subclassSlug: "",
+  subclassUnlockLevel: null,
   abilityGenerationMethodSlug: "standard-array",
   abilityScores: { ...UNASSIGNED_ABILITY_SCORES },
   backgroundAbilityBoostMode: "plus2plus1",

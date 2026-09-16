@@ -8,11 +8,10 @@ import { countAsiFeatSlots } from "@/features/character/create-character/lib/fea
 import { ritualSpellSlotIndex } from "@/features/character/create-character/lib/feats/feat-option-requirements";
 import { resolveCreateCharacterFeats } from "@/features/character/create-character/lib/feats/preview-create-character-feats";
 import { proficiencyBonusForLevel } from "@/features/character/create-character/lib/progression/proficiency-bonus-for-level";
-import {
-  SUBCLASS_REQUIRED_FROM_LEVEL,
-  type CreateCharacterInput,
-} from "@/features/character/create-character/model/create-character.schema";
+import { isSubclassRequired } from "@/entities/character/lib/subclass";
+import type { CreateCharacterInput } from "@/features/character/create-character/model/create-character.schema";
 import { useCharacterLevels } from "@/features/catalog/reference-catalog/api/use-reference";
+import type { ClassProgressionRow } from "@/entities/class/types";
 
 type UseWizardFormFieldSyncParams = {
   level: number;
@@ -21,6 +20,8 @@ type UseWizardFormFieldSyncParams = {
   subclassSlug: string;
   backgroundSlug: string;
   originFeatSlug: string;
+  subclassUnlockLevel: number | null | undefined;
+  classProgression: readonly Pick<ClassProgressionRow, "level" | "asiOrFeat">[];
   setValue: UseFormSetValue<CreateCharacterInput>;
   getValues: UseFormGetValues<CreateCharacterInput>;
 };
@@ -32,6 +33,8 @@ export function useWizardFormFieldSync({
   subclassSlug,
   backgroundSlug,
   originFeatSlug,
+  subclassUnlockLevel,
+  classProgression,
   setValue,
   getValues,
 }: UseWizardFormFieldSyncParams) {
@@ -43,11 +46,12 @@ export function useWizardFormFieldSync({
   const prevBackgroundSlugRef = useRef(backgroundSlug);
 
   useEffect(() => {
-    if (level < SUBCLASS_REQUIRED_FROM_LEVEL) {
+    setValue("subclassUnlockLevel", subclassUnlockLevel ?? null);
+    if (!isSubclassRequired(level, subclassUnlockLevel)) {
       setValue("subclassSlug", "");
       setValue("subclassOptions", []);
     }
-  }, [level, setValue]);
+  }, [level, subclassUnlockLevel, setValue]);
 
   useEffect(() => {
     if (prevBackgroundSlugRef.current !== backgroundSlug) {
@@ -96,7 +100,7 @@ export function useWizardFormFieldSync({
   }, [subclassSlug, setValue]);
 
   useEffect(() => {
-    const count = countAsiFeatSlots(classSlug, level);
+    const count = countAsiFeatSlots(classProgression, level);
     const slots = getValues("asiFeatSlotSlugs") ?? [];
     if (slots.length > count) {
       setValue("asiFeatSlotSlugs", slots.slice(0, count));
@@ -126,5 +130,12 @@ export function useWizardFormFieldSync({
         }),
       );
     }
-  }, [level, classSlug, setValue, getValues, originFeatSlug, levelCatalog]);
+  }, [
+    level,
+    classProgression,
+    setValue,
+    getValues,
+    originFeatSlug,
+    levelCatalog,
+  ]);
 }

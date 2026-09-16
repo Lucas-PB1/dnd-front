@@ -6,8 +6,9 @@ import { useWatch } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
 
 import {
-  allowedExpertiseSkillSlugsForClass,
   classExpertiseSlotsAtLevel,
+  expertiseSlotsFromClassOptions,
+  expertiseWhitelistFromClassOptions,
   isClassExpertiseOptionKey,
 } from "@/entities/character/lib/class-expertise-slots";
 import {
@@ -30,6 +31,7 @@ import { truncateChoiceHint } from "@/features/character/create-character/ui/cho
 import { useBackgroundSkills } from "@/features/catalog/background-catalog/api/use-backgrounds";
 import {
   useClassDetail,
+  useClassFeatureOptions,
   useClassProgression,
   useClassSkills,
 } from "@/features/catalog/class-catalog/api/use-classes";
@@ -88,6 +90,11 @@ export function useStepClassSkills(
 
   const classDetail = useClassDetail(classSlug, !!classSlug);
   const classSkills = useClassSkills(classSlug, !!classSlug);
+  const classFeatureOptions = useClassFeatureOptions(
+    classSlug,
+    level,
+    !!classSlug,
+  );
   const progression = useClassProgression(classSlug, !!classSlug);
   const weapons = useQuery({
     queryKey: weaponKeys.allMastery(),
@@ -130,8 +137,12 @@ export function useStepClassSkills(
     [classSlug, level],
   );
   const expertiseSlots = useMemo(
-    () => classExpertiseSlotsAtLevel(classSlug, level),
-    [classSlug, level],
+    () =>
+      classExpertiseSlotsAtLevel(
+        expertiseSlotsFromClassOptions(classFeatureOptions.data?.data ?? []),
+        level,
+      ),
+    [classFeatureOptions.data?.data, level],
   );
   const masterySlots = useMemo(
     () =>
@@ -146,8 +157,9 @@ export function useStepClassSkills(
     [classDetail.data?.weaponMasteryEligibility],
   );
   const whitelist = useMemo(
-    () => allowedExpertiseSkillSlugsForClass(classSlug),
-    [classSlug],
+    () =>
+      expertiseWhitelistFromClassOptions(classFeatureOptions.data?.data ?? []),
+    [classFeatureOptions.data?.data],
   );
 
   const skillNameBySlug = useMemo(() => {

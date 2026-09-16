@@ -5,8 +5,11 @@ export function shouldShowWizardSubclassStep(
   subclassSlug: string,
   optionCount: number,
   optionsLoaded: boolean,
+  unlockLevel: number | null | undefined,
 ): boolean {
-  if (!isSubclassRequired(level) || !subclassSlug.trim()) return false;
+  if (!isSubclassRequired(level, unlockLevel) || !subclassSlug.trim()) {
+    return false;
+  }
   if (!optionsLoaded) return true;
   return optionCount > 0;
 }

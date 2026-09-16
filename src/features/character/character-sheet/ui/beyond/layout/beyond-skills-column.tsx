@@ -62,6 +62,7 @@ export function BeyondSkillsColumn({
     classOptions: character.classOptions,
     classSlug: character.classSlug,
     level: character.level,
+    jackOfAllTrades: character.jackOfAllTrades,
   };
 
   const withBonus: SkillRowData[] = skills.map((skill) => {

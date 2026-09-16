@@ -198,6 +198,7 @@ export type CharacterInventory = {
   encumbrance: InventoryEncumbrance;
   wealth: CoinPurse;
   paymentContext: InventoryPaymentContext;
+  attunementLimit: number;
 };
 
 export type InventoryPaymentContext = {

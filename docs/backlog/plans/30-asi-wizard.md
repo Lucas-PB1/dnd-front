@@ -1,6 +1,6 @@
 # Plano 30 — ASI no wizard de criação
 
-**ID:** FR-4 · **Dificuldade:** difícil · **Status:** Blocked
+**ID:** FR-4 · **Dificuldade:** difícil · **Status:** Feito
 
 ## Gap
 
@@ -13,3 +13,7 @@ Endpoint de preview de criação **ou** incluir níveis ASI no catálogo de clas
 ## Pronto quando
 
 Create não importa `BASE_ASI_FEAT_LEVELS`.
+
+## Feito
+
+`GET /classes/:slug/progression` inclui `asiOrFeat`. O wizard conta slots a partir dessas linhas.

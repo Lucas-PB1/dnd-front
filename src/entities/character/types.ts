@@ -46,7 +46,6 @@ export type CharacterCampaignRef = {
   myRole: "dm" | "player" | "assistant" | null;
 };
 
-/** Espelha CharacterResponseDto da dnd-api */
 export type CharacterDetail = {
   id: string;
   name: string;
@@ -58,7 +57,6 @@ export type CharacterDetail = {
   subclassSlug: string | null;
   alignmentSlug: string | null;
   abilityScores: AbilityScores;
-  /** Atributos após aumentos permanentes de classe (nível 20). Use na ficha. */
   effectiveAbilityScores?: AbilityScores;
   hitPointsMax: number | null;
   hitPointsCurrent: number | null;
@@ -83,6 +81,7 @@ export type CharacterDetail = {
   characterSpells: CharacterSpell[];
   equipment: CharacterEquipment[];
   languageSlugs: string[];
+  jackOfAllTrades?: boolean;
   abilityGenerationMethodSlug: string | null;
   backgroundAbilityBoostMode: "plus2plus1" | "plus1x3";
   backgroundAbilityBoostPlus2Slug: string | null;
@@ -93,13 +92,8 @@ export type CharacterDetail = {
   passivePerception: number;
   armorClass: number;
   armorClassNote: string;
-  /**
-   * Soma tipada de `ac_bonus` de talentos (sticky na UI — aplicar quando toggle ligado).
-   */
   featAcBonus?: number;
-  /** Fontes do bônus sticky de CA (nomear o talento no toggle). */
   featAcBonusSources?: { featSlug: string; bonus: number }[];
-  /** Flags de efeitos de talento para UI de roll/cast (wire incremental). */
   featEffectFlags?: {
     inspirationRefundOnFail: boolean;
     damageDieFloor: boolean;
@@ -118,15 +112,12 @@ export type CharacterDetail = {
   itemSpeedBonusMeters?: number;
   classCombatNotes?: string[];
   attacksPerAction?: number;
-  /** Bônus de salvaguarda de auras (API). Front não recalcula. */
   savingThrowAuraBonus?: number;
   spellcastingAbilitySlug?: string | null;
   spellSaveDc?: number | null;
   spellAttackBonus?: number | null;
   campaigns: CharacterCampaignRef[];
-  /** Saldo das 5 moedas (PC/PP/PE/PO/PL). */
   coins: CoinPurse;
-  /** Character Thread Northlands (ativo + histórico). */
   thread?: CharacterThreadBundle | null;
   createdAt: string;
   updatedAt: string;
@@ -173,7 +164,6 @@ export type EquipmentWarning = {
   itemSlug?: string;
 };
 
-/** Lista resumida (mesmos campos base do detail + nomes do catálogo) */
 export type CharacterSummary = Pick<
   CharacterDetail,
   | "id"
@@ -193,7 +183,6 @@ export type CharacterSummary = Pick<
   subclassName: string | null;
 };
 
-/** Payload para POST /characters — espelha CreateCharacterDto */
 export type CreateCharacterPayload = {
   name: string;
   classSlug: string;
@@ -214,7 +203,6 @@ export type CreateCharacterPayload = {
   portraitUrl?: string | null;
 } & CharacterSheetInput;
 
-/** Payload para PATCH /characters/:id — espelha UpdateCharacterDto */
 export type UpdateCharacterPayload = Partial<CreateCharacterPayload>;
 
 export { abilityModifier } from "@/entities/character/lib/ability";

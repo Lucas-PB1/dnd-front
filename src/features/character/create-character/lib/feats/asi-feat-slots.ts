@@ -1,35 +1,27 @@
-/**
- * Espelha dnd-api `game/progression/domain/asi-feat-levels.ts`.
- * Níveis em que a maioria das classes ganha ASI / talento (PHB 2024).
- */
-export const BASE_ASI_FEAT_LEVELS = [4, 8, 12, 16, 19] as const;
+import type { ClassProgressionRow } from "@/entities/class/types";
 
-/** ASI extras: Guerreiro 6/14, Ladino 10. */
-export const EXTRA_ASI_FEAT_LEVELS_BY_CLASS: Readonly<
-  Record<string, readonly number[]>
-> = {
-  fighter: [6, 14],
-  rogue: [10],
-};
-
-export function asiFeatLevelsForClass(
-  classSlug: string | null | undefined,
+export function asiFeatLevelsFromProgression(
+  rows: readonly Pick<ClassProgressionRow, "level" | "asiOrFeat">[],
 ): number[] {
-  const extras = EXTRA_ASI_FEAT_LEVELS_BY_CLASS[classSlug ?? ""] ?? [];
-  return [...BASE_ASI_FEAT_LEVELS, ...extras].sort((a, b) => a - b);
+  return rows
+    .filter((row) => row.asiOrFeat)
+    .map((row) => row.level)
+    .sort((left, right) => left - right);
 }
 
 export function countAsiFeatSlots(
-  classSlug: string | null | undefined,
+  rows: readonly Pick<ClassProgressionRow, "level" | "asiOrFeat">[],
   level: number,
 ): number {
-  return asiFeatLevelsForClass(classSlug).filter((asiLevel) => asiLevel <= level)
+  return asiFeatLevelsFromProgression(rows).filter((asiLevel) => asiLevel <= level)
     .length;
 }
 
 export function asiFeatLevelsUpTo(
-  classSlug: string | null | undefined,
+  rows: readonly Pick<ClassProgressionRow, "level" | "asiOrFeat">[],
   level: number,
 ): number[] {
-  return asiFeatLevelsForClass(classSlug).filter((asiLevel) => asiLevel <= level);
+  return asiFeatLevelsFromProgression(rows).filter(
+    (asiLevel) => asiLevel <= level,
+  );
 }

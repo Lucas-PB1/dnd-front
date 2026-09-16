@@ -17,8 +17,10 @@ export function useWizardHasSpellStep(
   classSlug: string,
   subclassSlug: string,
   level: number,
+  unlockLevel: number | null | undefined,
 ) {
-  const needsSubclass = isSubclassRequired(level) && !!subclassSlug;
+  const needsSubclass =
+    isSubclassRequired(level, unlockLevel) && !!subclassSlug;
 
   const classSpellSlots = useClassSpellSlots(classSlug, !!classSlug);
   const subclassSpellSlots = useSubclassSpellSlots(

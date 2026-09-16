@@ -32,6 +32,7 @@ type InventoryLocationSectionProps = {
   emptyMessage: string;
   isPending: boolean;
   attunementSlotsFull: boolean;
+  attunementLimit: number;
   equipmentWarnings: EquipmentWarning[];
   resolveCatalogTileMeta?: (item: InventoryItem) => InventoryCatalogTileMeta;
   resolveProficiencyHint?: (item: InventoryItem) => string | null;
@@ -69,6 +70,7 @@ export function InventoryLocationSection({
   emptyMessage,
   isPending,
   attunementSlotsFull,
+  attunementLimit,
   equipmentWarnings,
   resolveCatalogTileMeta,
   resolveProficiencyHint,
@@ -110,6 +112,7 @@ export function InventoryLocationSection({
             characterId={characterId}
             isPending={isPending}
             attunementSlotsFull={attunementSlotsFull}
+            attunementLimit={attunementLimit}
             warnings={warnings}
             weaponOptions={weaponOptions}
             baseOptions={baseOptions}
@@ -131,6 +134,7 @@ export function InventoryLocationSection({
     });
   }, [
     attunementSlotsFull,
+    attunementLimit,
     baseOptions,
     characterId,
     containerOptions,

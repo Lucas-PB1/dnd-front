@@ -1,6 +1,6 @@
 # Plano 32 — Unlock de subclasse no create
 
-**ID:** FR-6 · **Dificuldade:** difícil · **Status:** Blocked
+**ID:** FR-6 · **Dificuldade:** difícil · **Status:** Feito
 
 ## Gap
 
@@ -13,3 +13,7 @@ Ler unlock de `GET /classes/:slug` (se já existir no DTO) ou progression. Wizar
 ## Pronto quando
 
 Classe com unlock ≠ 3 funciona no create sem constante.
+
+## Feito
+
+`GET /classes/:slug` envia `subclassUnlockLevel`. Schema, identidade e payload usam esse valor; sem default 3 no front.

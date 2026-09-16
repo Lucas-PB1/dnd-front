@@ -5,11 +5,12 @@ import { useMemo } from "react";
 import type { CharacterDetail } from "@/entities/character/types";
 import type { ClassOption } from "@/entities/character/sheet-types";
 import {
-  allowedExpertiseSkillSlugsForClass,
+  expertiseWhitelistFromClassOptions,
   type ClassExpertiseSlot,
 } from "@/entities/character/lib/class-expertise-slots";
 import { collectProficientSkillSlugs } from "@/entities/character/lib/check-bonuses";
 import { CatalogSelect } from "@/features/character/create-character/ui/catalog-select";
+import { useClassFeatureOptions } from "@/features/catalog/class-catalog/api/use-classes";
 import { useSkills } from "@/features/catalog/reference-catalog/api/use-reference";
 
 type LevelUpClassExpertiseProps = {
@@ -26,15 +27,22 @@ export function LevelUpClassExpertise({
   onChange,
 }: LevelUpClassExpertiseProps) {
   const allSkills = useSkills();
+  const classFeatureOptions = useClassFeatureOptions(
+    character.classSlug,
+    character.level + 1,
+    !!character.classSlug,
+  );
 
   const whitelist = useMemo(
-    () => allowedExpertiseSkillSlugsForClass(character.classSlug),
-    [character.classSlug],
+    () =>
+      expertiseWhitelistFromClassOptions(
+        classFeatureOptions.data?.data ?? [],
+      ),
+    [classFeatureOptions.data?.data],
   );
 
   const proficientSlugs = useMemo(
     () =>
-      // Sem classOptions: expertise não conta como “já proficiente” (igual à API).
       collectProficientSkillSlugs({
         classSkillSlugs: character.classSkillSlugs,
         backgroundSkillSlugs: character.backgroundSkillSlugs,

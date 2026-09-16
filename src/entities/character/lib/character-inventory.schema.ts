@@ -65,6 +65,7 @@ export const characterInventorySchema = z.looseObject({
     allowPlayerSkipPayment: z.boolean(),
     chargeApplies: z.boolean(),
   }),
+  attunementLimit: z.number().int().positive(),
 });
 
 export function parseInventoryItem(data: unknown): InventoryItem {

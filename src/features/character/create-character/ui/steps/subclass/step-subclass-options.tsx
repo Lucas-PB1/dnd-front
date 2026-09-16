@@ -75,13 +75,15 @@ export function StepSubclassOptions({
     defaultValue: [],
   });
 
-  const enabled = isSubclassRequired(level) && !!subclassSlug;
+  const classDetail = useClassDetail(classSlug, !!classSlug);
+  const enabled =
+    isSubclassRequired(level, classDetail.data?.subclassUnlockLevel) &&
+    !!subclassSlug;
   const optionsQuery = useSubclassOptions(subclassSlug ?? "", level, enabled);
   const mechanicsQuery = useSubclassMechanics(
     subclassSlug ?? "",
     enabled && !!subclassSlug,
   );
-  const classDetail = useClassDetail(classSlug, enabled && !!classSlug);
   const backgroundSkills = useBackgroundSkills(
     backgroundSlug,
     enabled && !!backgroundSlug,

@@ -13,16 +13,17 @@ import {
   formatXpThreshold,
   xpThresholdForLevel,
 } from "@/entities/character-level/xp-threshold-for-level";
+import { isSubclassRequired } from "@/entities/character/lib/subclass";
 import { formatHeritageVariantLabel } from "@/entities/heritage/origin-label";
 import { useBackgrounds } from "@/features/catalog/background-catalog/api/use-backgrounds";
 import {
   useClasses,
+  useClassDetail,
   useClassSubclasses,
 } from "@/features/catalog/class-catalog/api/use-classes";
 import { buildSpeciesSelectOptions } from "@/features/character/create-character/lib/species/build-species-select-options";
 import {
   LEVEL_OPTIONS,
-  SUBCLASS_REQUIRED_FROM_LEVEL,
   type CreateCharacterInput,
 } from "@/features/character/create-character/model/create-character.schema";
 import { CatalogSelect } from "@/features/character/create-character/ui/catalog-select";
@@ -90,7 +91,11 @@ export function StepIdentity({
     defaultValue: "",
   });
 
-  const needsSubclass = level >= SUBCLASS_REQUIRED_FROM_LEVEL;
+  const classDetail = useClassDetail(classSlug, !!classSlug);
+  const needsSubclass = isSubclassRequired(
+    level,
+    classDetail.data?.subclassUnlockLevel,
+  );
   const selectedXpThreshold = xpThresholdForLevel(
     level,
     characterLevels.data?.data ?? [],

@@ -24,7 +24,6 @@ import { useBoardMount, useLinkMount } from "@/features/actor/api/use-mounts";
 import { ActorSheetDialog } from "@/features/actor/ui/actor-sheet-dialog";
 import { useSpellLabels } from "@/features/catalog/spell-catalog/api/use-spells";
 import {
-  MAX_ATTUNED_ITEMS,
   SLOT_LABELS,
   SLOT_OPTIONS,
   effectsStatusLabel,
@@ -48,6 +47,7 @@ type InventoryItemDetailProps = {
   characterId?: string;
   isPending: boolean;
   attunementSlotsFull: boolean;
+  attunementLimit: number;
   warnings: EquipmentWarning[];
   weaponOptions?: { value: string; label: string }[];
   canBindPactWeapon?: boolean;
@@ -320,6 +320,7 @@ export function InventoryItemDetail({
   characterId,
   isPending,
   attunementSlotsFull,
+  attunementLimit,
   warnings,
   weaponOptions = [],
   baseOptions = [],
@@ -739,7 +740,7 @@ export function InventoryItemDetail({
               cursedBlocksUnattune
                 ? "Amaldiçoado — Remover Maldição para dessintonizar"
                 : !canAttune && !item.attuned
-                  ? `Limite de ${MAX_ATTUNED_ITEMS} sintonias atingido`
+                  ? `Limite de ${attunementLimit} sintonias atingido`
                   : item.attuned
                     ? "Dessintonizar"
                     : "Sintonizar"
@@ -875,7 +876,7 @@ export function InventoryItemDetail({
             disabled={isPending || !canAttuneCoverage}
             title={
               !canAttuneCoverage && !item.attachedCoverageAttuned
-                ? `Limite de ${MAX_ATTUNED_ITEMS} sintonias atingido`
+                ? `Limite de ${attunementLimit} sintonias atingido`
                 : item.attachedCoverageAttuned
                   ? "Dessintonizar cobertura"
                   : "Sintonizar cobertura"

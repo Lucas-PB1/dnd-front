@@ -107,17 +107,21 @@ export function CreateCharacterWizard() {
         })),
       }
     : speciesTraitsQuery;
+  const subclassUnlockLevel = classDetail.data?.subclassUnlockLevel ?? null;
   const subclassOpts = useSubclassOptions(
     subclassSlug ?? "",
     level,
-    isSubclassRequired(level) && !!subclassSlug,
+    isSubclassRequired(level, subclassUnlockLevel) && !!subclassSlug,
   );
   const originFeatSlug = backgroundDetail.data?.originFeatSlug ?? "";
   const originFeatChoiceSlugs =
     backgroundDetail.data?.originFeatChoiceSlugs ?? [];
   const hasOriginFeatChoice =
     !originFeatSlug && originFeatChoiceSlugs.length > 0;
-  const asiSlotCount = countAsiFeatSlots(classSlug, level);
+  const asiSlotCount = countAsiFeatSlots(
+    classProgression.data?.data ?? [],
+    level,
+  );
   const hasFightingStylePick =
     classHasFightingStylePick(classSlug, level) &&
     (classDetail.data?.fightingStyleSlugs?.length ?? 0) > 0;
@@ -130,10 +134,12 @@ export function CreateCharacterWizard() {
     classSlug,
     subclassSlug ?? "",
     level,
+    subclassUnlockLevel,
   );
   const { hasSubclassStep } = useWizardHasSubclassStep(
     level,
     subclassSlug ?? "",
+    subclassUnlockLevel,
   );
   const { hasClassFeaturesStep, classFeatureOptions } =
     useWizardHasClassFeaturesStep(classSlug, level);
@@ -155,6 +161,8 @@ export function CreateCharacterWizard() {
     subclassSlug: subclassSlug ?? "",
     backgroundSlug,
     originFeatSlug,
+    subclassUnlockLevel,
+    classProgression: classProgression.data?.data ?? [],
     setValue,
     getValues,
   });

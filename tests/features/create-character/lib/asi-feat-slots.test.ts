@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  BASE_ASI_FEAT_LEVELS,
-  asiFeatLevelsForClass,
+  asiFeatLevelsFromProgression,
   asiFeatLevelsUpTo,
   countAsiFeatSlots,
 } from "@/features/character/create-character/lib/feats/asi-feat-slots";
@@ -10,29 +9,48 @@ import { asiFeatSlotsToCharacterFeats } from "@/features/character/create-charac
 import { featSlugsGrantedOutsideSpecies } from "@/features/character/create-character/lib/feats/origin-feat-options";
 import { resolveCreateCharacterFeats } from "@/features/character/create-character/lib/feats/preview-create-character-feats";
 
+const BASE_ASI = [4, 8, 12, 16, 19].map((level) => ({
+  level,
+  asiOrFeat: true,
+}));
+
+const FIGHTER_ASI = [4, 6, 8, 12, 14, 16, 19].map((level) => ({
+  level,
+  asiOrFeat: true,
+}));
+
+const ROGUE_ASI = [4, 8, 10, 12, 16, 19].map((level) => ({
+  level,
+  asiOrFeat: true,
+}));
+
 describe("asi-feat-slots", () => {
-  it("counts slots up to character level (base classes)", () => {
-    expect(countAsiFeatSlots("wizard", 1)).toBe(0);
-    expect(countAsiFeatSlots("wizard", 4)).toBe(1);
-    expect(countAsiFeatSlots("wizard", 5)).toBe(1);
-    expect(countAsiFeatSlots("wizard", 8)).toBe(2);
-    expect(countAsiFeatSlots("wizard", 20)).toBe(BASE_ASI_FEAT_LEVELS.length);
+  it("counts slots up to character level from progression rows", () => {
+    expect(countAsiFeatSlots(BASE_ASI, 1)).toBe(0);
+    expect(countAsiFeatSlots(BASE_ASI, 4)).toBe(1);
+    expect(countAsiFeatSlots(BASE_ASI, 5)).toBe(1);
+    expect(countAsiFeatSlots(BASE_ASI, 8)).toBe(2);
+    expect(countAsiFeatSlots(BASE_ASI, 20)).toBe(BASE_ASI.length);
   });
 
   it("lists ASI levels reached", () => {
-    expect(asiFeatLevelsUpTo("wizard", 7)).toEqual([4]);
-    expect(asiFeatLevelsUpTo("wizard", 12)).toEqual([4, 8, 12]);
+    expect(asiFeatLevelsUpTo(BASE_ASI, 7)).toEqual([4]);
+    expect(asiFeatLevelsUpTo(BASE_ASI, 12)).toEqual([4, 8, 12]);
   });
 
   it("includes Fighter extra ASI at 6 and 14", () => {
-    expect(asiFeatLevelsForClass("fighter")).toEqual([4, 6, 8, 12, 14, 16, 19]);
-    expect(countAsiFeatSlots("fighter", 6)).toBe(2);
-    expect(asiFeatLevelsUpTo("fighter", 14)).toEqual([4, 6, 8, 12, 14]);
+    expect(asiFeatLevelsFromProgression(FIGHTER_ASI)).toEqual([
+      4, 6, 8, 12, 14, 16, 19,
+    ]);
+    expect(countAsiFeatSlots(FIGHTER_ASI, 6)).toBe(2);
+    expect(asiFeatLevelsUpTo(FIGHTER_ASI, 14)).toEqual([4, 6, 8, 12, 14]);
   });
 
   it("includes Rogue extra ASI at 10", () => {
-    expect(asiFeatLevelsForClass("rogue")).toEqual([4, 8, 10, 12, 16, 19]);
-    expect(countAsiFeatSlots("rogue", 10)).toBe(3);
+    expect(asiFeatLevelsFromProgression(ROGUE_ASI)).toEqual([
+      4, 8, 10, 12, 16, 19,
+    ]);
+    expect(countAsiFeatSlots(ROGUE_ASI, 10)).toBe(3);
   });
 });
 

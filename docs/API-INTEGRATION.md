@@ -30,4 +30,6 @@ Talentos: payload/resposta usam **`characterFeats`** + **`featOptions`**.
 
 Métodos de atributo: `GET /ability-generation-methods` traz `slug` + `name` + `description` e as regras de geração (`pool` no conjunto padrão, `pointBuy` com budget/custos, totais da rolagem). O wizard usa isso no stepper; o POST `/characters` continua validando na API. Enquanto a query está pending ou vazia, o select usa fallback `standard-array` / `roll` / `point-buy`.
 
+Classe: `GET /classes/:slug` inclui `subclassUnlockLevel` e `jackOfAllTradesLevel`; `GET /classes/:slug/progression` marca `asiOrFeat` por nível; `GET /classes/:slug/options` traz grupos `expertiseSkill*`. A ficha traz `jackOfAllTrades`; o inventário traz `attunementLimit`. O front não replica tabelas PHB desses valores.
+
 Armas: `range` + `propertyDetails` + `mastery` (não `properties` bruto).

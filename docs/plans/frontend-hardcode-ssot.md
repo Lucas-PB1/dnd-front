@@ -1,4 +1,4 @@
-Trabalho aberto: [../backlog/README.md](../backlog/README.md) (planos 23–25 e 29–33 = P2/P3 deste doc).
+Trabalho aberto: [../backlog/README.md](../backlog/README.md) (planos 34–40 Adiado).
 
 # Front — SSOT sem hardcode de domínio
 
@@ -60,15 +60,15 @@ Já consome API (contraste bom):
 | Categorias feat / arma / armadura / item | idem + `ITEM_TYPE_LABELS_PT` / `WEAPON_CATEGORY_LABELS_PT` | seeds `S006`–`S011` |
 | Pools de ferramentas (instrumento, jogo, artesão) | `create-character/lib/equipment/equipment-choice-resolve.ts` | items/tools no DB |
 
-### P3 — Ainda TS↔TS nos dois lados (não só front)
+### P3 — Regras de classe/ficha (API é SSOT)
 
 | O quê | Front | Back |
 |-------|-------|------|
 | Point-buy / standard array | `GET /ability-generation-methods` (`pointBuy`, `pool`) | `ability-generation.ts` |
-| ASI / níveis de feat | `asi-feat-slots.ts` | `asi-feat-levels.ts` |
-| Expertise slots | `class-expertise-slots.ts` | `class-expertise-slots.ts` |
-| Subclass unlock default 3 | `entities/character/lib/subclass.ts` | regra implícita |
-| `MAX_ATTUNED_ITEMS = 3` | inventory UI | não modelado como config |
+| ASI / níveis de feat | `asiOrFeat` na progression | `PhbClassProgression` |
+| Expertise slots | `GET /classes/:slug/options` (`expertiseSkill*`) | `phb_option_def` |
+| Subclass unlock | `subclassUnlockLevel` no detalhe da classe | `PhbClassRef` |
+| Limite de sintonias | `attunementLimit` no inventário | `MAX_ATTUNED_ITEMS` na API |
 
 Mover só no front sem SSOT no back **não** fecha o problema — coordenar com plano da API.
 

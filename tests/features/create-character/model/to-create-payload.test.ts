@@ -61,6 +61,7 @@ describe("toCreateCharacterPayload", () => {
     speciesSlug: "dwarf",
     backgroundSlug: "acolyte",
     subclassSlug: "champion",
+    subclassUnlockLevel: 3,
     abilityGenerationMethodSlug: "standard-array",
     abilityScores: {
       forca: 15,
@@ -119,11 +120,12 @@ describe("toCreateCharacterPayload", () => {
     expect(payload.backgroundAbilityBoostPlus1Slug).toBeUndefined();
   });
 
-  it("omits subclass below level 3", () => {
+  it("omits subclass below catalog unlock level", () => {
     const payload = toCreateCharacterPayload({
       ...base,
       level: 1,
-      subclassSlug: "",
+      subclassSlug: "champion",
+      subclassUnlockLevel: 3,
     });
     expect(payload.subclassSlug).toBeUndefined();
   });

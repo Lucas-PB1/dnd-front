@@ -10,6 +10,7 @@ import { useBackgroundDetail } from "@/features/catalog/background-catalog/api/u
 import { useBackgroundSkills } from "@/features/catalog/background-catalog/api/use-backgrounds";
 import {
   useClassDetail,
+  useClassProgression,
   useClassSpellSlots,
 } from "@/features/catalog/class-catalog/api/use-classes";
 import {
@@ -121,6 +122,7 @@ export function useStepFeats(
   const feats = useFeats();
   const featLabels = useFeatLabels();
   const classDetail = useClassDetail(classSlug, !!classSlug);
+  const classProgression = useClassProgression(classSlug, !!classSlug);
   const classSpellSlots = useClassSpellSlots(classSlug, !!classSlug);
   const backgroundDetail = useBackgroundDetail(
     backgroundSlug,
@@ -140,8 +142,14 @@ export function useStepFeats(
     (originFeatChoiceSlugs.includes(originFeatPick) ? originFeatPick : "") ||
     null;
 
-  const asiSlotCount = countAsiFeatSlots(classSlug, level);
-  const asiLevels = asiFeatLevelsUpTo(classSlug, level);
+  const asiSlotCount = countAsiFeatSlots(
+    classProgression.data?.data ?? [],
+    level,
+  );
+  const asiLevels = asiFeatLevelsUpTo(
+    classProgression.data?.data ?? [],
+    level,
+  );
   const epicBoonFeatSlugs = useMemo(
     () =>
       new Set(

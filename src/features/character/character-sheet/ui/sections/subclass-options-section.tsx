@@ -2,7 +2,6 @@
 
 import { useMemo } from "react";
 
-import { isSubclassRequired } from "@/entities/character/lib/subclass";
 import { resolveSubclassOptionValueLabel } from "@/features/character/create-character/lib/subclass/resolve-subclass-option-select";
 import { useSubclassOptions } from "@/features/catalog/class-catalog/api/use-classes";
 import { useCharacterCatalogLabels } from "@/features/character/character-sheet/api/use-character-catalog-labels";
@@ -15,8 +14,7 @@ import type { SheetReadSectionProps } from "@/features/character/character-sheet
 export function SubclassOptionsSection({
   character,
 }: Pick<SheetReadSectionProps, "character">) {
-  const enabled =
-    isSubclassRequired(character.level) && !!character.subclassSlug;
+  const enabled = !!character.subclassSlug;
   const optionsQuery = useSubclassOptions(
     character.subclassSlug ?? "",
     character.level,

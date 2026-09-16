@@ -16,8 +16,10 @@ import {
 } from "@/features/catalog/background-catalog/api/use-backgrounds";
 import { useCharacterCatalogLabels } from "@/features/character/character-sheet/api/use-character-catalog-labels";
 import {
+  useClassDetail,
   useClassEquipment,
   useClassFeatureOptions,
+  useClassProgression,
   useSubclassOptions,
 } from "@/features/catalog/class-catalog/api/use-classes";
 import { asiFeatLevelsUpTo } from "@/features/character/create-character/lib/feats/asi-feat-slots";
@@ -71,10 +73,16 @@ export function useStepReview(control: Control<CreateCharacterInput>) {
     values.heritageSlug?.trim() ? "" : (values.speciesSlug ?? ""),
     !values.heritageSlug?.trim() && !!values.speciesSlug,
   );
+  const classDetail = useClassDetail(values.classSlug, !!values.classSlug);
+  const classProgression = useClassProgression(
+    values.classSlug,
+    !!values.classSlug,
+  );
   const subclassOpts = useSubclassOptions(
     values.subclassSlug ?? "",
     values.level,
-    isSubclassRequired(values.level) && !!values.subclassSlug,
+    isSubclassRequired(values.level, classDetail.data?.subclassUnlockLevel) &&
+      !!values.subclassSlug,
   );
   const classFeatureOpts = useClassFeatureOptions(
     values.classSlug,
@@ -253,7 +261,10 @@ export function useStepReview(control: Control<CreateCharacterInput>) {
 
   const optionsByFeatInstance = groupFeatOptionsByInstance(values.featOptions);
 
-  const asiLevels = asiFeatLevelsUpTo(values.classSlug, values.level);
+  const asiLevels = asiFeatLevelsUpTo(
+    classProgression.data?.data ?? [],
+    values.level,
+  );
   const asiLevelByFeatKey = useMemo(
     () => buildAsiLevelByFeatKey(values.asiFeatSlotSlugs, asiLevels),
     [values.asiFeatSlotSlugs, asiLevels],

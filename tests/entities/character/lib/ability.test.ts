@@ -28,8 +28,10 @@ describe("ability helpers", () => {
 });
 
 describe("subclass helpers", () => {
-  it("requires subclass from level 3", () => {
-    expect(isSubclassRequired(2)).toBe(false);
-    expect(isSubclassRequired(3)).toBe(true);
+  it("requires subclass from catalog unlock level", () => {
+    expect(isSubclassRequired(2, 3)).toBe(false);
+    expect(isSubclassRequired(3, 3)).toBe(true);
+    expect(isSubclassRequired(5, 10)).toBe(false);
+    expect(isSubclassRequired(5, null)).toBe(false);
   });
 });

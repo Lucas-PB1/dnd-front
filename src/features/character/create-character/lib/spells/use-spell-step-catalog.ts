@@ -35,7 +35,6 @@ type SpellStepCatalogInput = {
   classOptions?: CreateCharacterInput["classOptions"];
 };
 
-/** Catálogo, progressão, cotas e perfil de UI do passo de magias. */
 export function useSpellStepCatalog({
   level,
   classSlug,
@@ -47,16 +46,19 @@ export function useSpellStepCatalog({
   const classSpellSlotsQuery = useClassSpellSlots(classSlug, !!classSlug);
   const subclassSpellSlotsQuery = useSubclassSpellSlots(
     subclassSlug ?? "",
-    isSubclassRequired(level) && !!subclassSlug,
+    isSubclassRequired(level, classDetail.data?.subclassUnlockLevel) &&
+    !!subclassSlug,
   );
   const subclassSpellcasting = useSubclassSpellcasting(
     subclassSlug ?? "",
-    isSubclassRequired(level) && !!subclassSlug,
+    isSubclassRequired(level, classDetail.data?.subclassUnlockLevel) &&
+    !!subclassSlug,
   );
   const progressionQuery = useClassProgression(classSlug, !!classSlug);
   const subclassSpells = useSubclassSpells(
     subclassSlug ?? "",
-    isSubclassRequired(level) && !!subclassSlug,
+    isSubclassRequired(level, classDetail.data?.subclassUnlockLevel) &&
+    !!subclassSlug,
   );
 
   const modeOverride = subclassSpellcasting.data?.spellcastingMode ?? null;
@@ -183,8 +185,6 @@ export function useSpellStepCatalog({
     [characterSpells],
   );
 
-  // isLoading (e não isPending) para não travar em "carregando" quando a query
-  // está desabilitada ou já falhou — classe sem magia responde 404.
   const isLoading =
     classSpells.isLoading ||
     classSpellSlotsQuery.isLoading ||

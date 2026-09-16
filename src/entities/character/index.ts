@@ -39,10 +39,7 @@ export type {
   InitiativeRollContext,
   SkillProficiencyRank,
 } from "@/entities/character/lib/check-bonuses";
-export {
-  isSubclassRequired,
-  SUBCLASS_UNLOCK_LEVEL_DEFAULT,
-} from "@/entities/character/lib/subclass";
+export { isSubclassRequired } from "@/entities/character/lib/subclass";
 export type {
   CastSpellPayload,
   CastSpellResult,

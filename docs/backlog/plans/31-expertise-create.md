@@ -1,6 +1,6 @@
 # Plano 31 — Expertise no create + Jack of All Trades
 
-**ID:** FR-5 · **Dificuldade:** difícil · **Status:** Blocked
+**ID:** FR-5 · **Dificuldade:** difícil · **Status:** Feito
 
 ## Gap
 
@@ -13,3 +13,7 @@ Slots no create via API (options/progression). JoaT: flag na ficha/state, não `
 ## Pronto quando
 
 Arquivo `class-expertise-slots.ts` some ou vira só tipo.
+
+## Feito
+
+Create e level-up leem grupos `expertiseSkill*` de `GET /classes/:slug/options`. A ficha aplica Jack of All Trades com `character.jackOfAllTrades`.

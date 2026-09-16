@@ -3,9 +3,13 @@ import type {
   UseFormTrigger,
 } from "react-hook-form";
 
+import { isSubclassRequired } from "@/entities/character/lib/subclass";
 import type { AbilityGenerationMethod } from "@/entities/ability-generation-method/types";
 import type { BackgroundSummary } from "@/entities/background/types";
-import { classExpertiseSlotsAtLevel } from "@/entities/character/lib/class-expertise-slots";
+import {
+  classExpertiseSlotsAtLevel,
+  expertiseSlotsFromClassOptions,
+} from "@/entities/character/lib/class-expertise-slots";
 import { classExtraSkillSlotsAtLevel } from "@/entities/character/lib/class-extra-skill-slots";
 import { mysticArcanumSlotsAtLevel } from "@/entities/character/lib/mystic-arcanum";
 import { signatureSpellKeysAtLevel } from "@/entities/character/lib/signature-spells";
@@ -118,9 +122,19 @@ export async function advanceWizardStep(deps: WizardAdvanceDeps): Promise<void> 
       "speciesSlug",
       "backgroundSlug",
       "subclassSlug",
+      "subclassUnlockLevel",
     ]);
     if (!valid) return;
     if (!identityStepSchema.safeParse(getValues()).success) return;
+    if (
+      isSubclassRequired(
+        getValues().level,
+        classDetail?.subclassUnlockLevel,
+      ) &&
+      !getValues().subclassSlug?.trim()
+    ) {
+      return;
+    }
     setStep("abilities");
     return;
   }
@@ -177,7 +191,7 @@ export async function advanceWizardStep(deps: WizardAdvanceDeps): Promise<void> 
       return;
     }
     const expertiseSlots = classExpertiseSlotsAtLevel(
-      values.classSlug,
+      expertiseSlotsFromClassOptions(classFeatureOptions ?? []),
       values.level,
     );
     const extraSkillSlots = classExtraSkillSlotsAtLevel(

@@ -5,6 +5,7 @@ import type { UseFormSetValue } from "react-hook-form";
 
 import type { CharacterFeat } from "@/entities/character/sheet-types";
 import { isSubclassRequired } from "@/entities/character/lib/subclass";
+import { useClassDetail } from "@/features/catalog/class-catalog/api/use-classes";
 import { usePreviewGrantedSpells } from "@/features/character/create-character/api/use-preview-granted-spells";
 import type { CreateCharacterInput } from "@/features/character/create-character/model/create-character.schema";
 
@@ -21,7 +22,6 @@ type SyncGrantedSpellsInput = {
   setValue: UseFormSetValue<CreateCharacterInput>;
 };
 
-/** Mantém magias always_prepared sincronizadas com o preview da API. */
 export function useSyncGrantedSpells({
   speciesSlug,
   classSlug,
@@ -34,6 +34,7 @@ export function useSyncGrantedSpells({
   playerPickedSpells,
   setValue,
 }: SyncGrantedSpellsInput) {
+  const classDetail = useClassDetail(classSlug, !!classSlug);
   const grantedPreview = usePreviewGrantedSpells(
     speciesSlug
       ? {
@@ -41,7 +42,10 @@ export function useSyncGrantedSpells({
           classSlug: classSlug || undefined,
           level,
           subclassSlug:
-            isSubclassRequired(level) && subclassSlug
+            isSubclassRequired(
+              level,
+              classDetail.data?.subclassUnlockLevel,
+            ) && subclassSlug
               ? subclassSlug
               : undefined,
           speciesChoices,

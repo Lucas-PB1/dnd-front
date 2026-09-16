@@ -2,7 +2,6 @@
 
 import { useMemo } from "react";
 
-import { isSubclassRequired } from "@/entities/character/lib/subclass";
 import { subclassFeatureKindLabel } from "@/entities/subclass/lib/feature-kind-label";
 import type { SubclassMechanic } from "@/entities/subclass/types";
 import { useSubclassMechanics } from "@/features/catalog/class-catalog/api/use-classes";
@@ -54,8 +53,7 @@ function subclassMechanicListKey(
 export function SubclassMechanicsSection({
   character,
 }: Pick<SheetReadSectionProps, "character">) {
-  const enabled =
-    isSubclassRequired(character.level) && !!character.subclassSlug;
+  const enabled = !!character.subclassSlug;
   const mechanicsQuery = useSubclassMechanics(
     character.subclassSlug ?? "",
     enabled,

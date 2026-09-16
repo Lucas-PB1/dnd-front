@@ -10,8 +10,6 @@ import { cn } from "@/shared/lib/utils";
 
 export type HeroIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
-export const MAX_ATTUNED_ITEMS = 3;
-
 export const SLOT_OPTIONS = [
   { value: "armor", label: "Armadura" },
   { value: "shield", label: "Escudo" },

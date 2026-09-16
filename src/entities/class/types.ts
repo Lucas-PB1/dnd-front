@@ -7,7 +7,6 @@ export type {
   SubclassMechanicListResponse,
 } from "@/entities/subclass/types";
 
-/** Espelha ClassResponseDto da dnd-api */
 export type ClassSummary = {
   slug: string;
   name: string;
@@ -33,11 +32,12 @@ export type ClassSummary = {
   weaponProficiencyNames?: string[];
   fightingStyleSlugs?: string[];
   fightingStyleNames?: string[];
+  subclassUnlockLevel?: number | null;
+  jackOfAllTradesLevel?: number | null;
 };
 
 export type ClassListResponse = PaginatedResponse<ClassSummary>;
 
-/** Espelha ClassSkillResponseDto */
 export type ClassSkillOption = {
   slug: string;
   name: string;
@@ -45,7 +45,6 @@ export type ClassSkillOption = {
   skillChoiceFrom: string | null;
 };
 
-/** Espelha ClassEquipmentResponseDto */
 export type ClassEquipmentOption = {
   packageSlug: string;
   packageLabel: string;
@@ -57,7 +56,6 @@ export type ClassEquipmentOption = {
   goldAmount: number | null;
 };
 
-/** Espelha ClassSpellResponseDto */
 export type ClassSpellOption = {
   slug: string;
   name: string;
@@ -66,7 +64,6 @@ export type ClassSpellOption = {
   schoolName: string;
 };
 
-/** Espelha ClassSpellSlotsResponseDto */
 export type ClassSpellSlots = {
   classLevel: number;
   patternSlug: string;
@@ -78,12 +75,10 @@ export type ClassSpellSlots = {
   spellSlots: Record<string, number>;
 };
 
-/** Espelha SubclassSpellSlotsResponseDto */
 export type SubclassSpellSlots = ClassSpellSlots & {
   spellListClassSlug: string;
 };
 
-/** Espelha SubclassSpellcastingResponseDto */
 export type SubclassSpellcasting = {
   subclassSlug: string;
   castingType: string;
@@ -95,7 +90,6 @@ export type SubclassSpellcasting = {
   spellcastingMode: "prepared" | "known" | "wizard";
 };
 
-/** Espelha ClassProgressionResponseDto */
 export type ClassProgressionRow = {
   level: number;
   proficiencyBonus: number;
@@ -103,9 +97,9 @@ export type ClassProgressionRow = {
   preparedSpells: number | null;
   channelDivinity: number | null;
   weaponMastery: number | null;
+  asiOrFeat?: boolean;
 };
 
-/** Espelha ClassFeatureResponseDto */
 export type ClassFeature = {
   classSlug: string;
   featureLevel: number;
@@ -113,7 +107,6 @@ export type ClassFeature = {
   featureDescription: string;
 };
 
-/** Espelha SubclassSpellResponseDto */
 export type SubclassSpellOption = {
   unlockLevel: number;
   slug: string;
@@ -122,7 +115,6 @@ export type SubclassSpellOption = {
   terrainLabel: string | null;
 };
 
-/** Espelha SubclassOptionResponseDto */
 export type SubclassOptionValue = {
   valueId: string;
   label: string;
@@ -140,7 +132,6 @@ export type SubclassOptionGroup = {
   spellSchoolSlugs?: string[] | null;
 };
 
-/** Espelha ClassOptionResponseDto */
 export type ClassFeatureOptionValue = SubclassOptionValue & {
   benefit?: string | null;
 };

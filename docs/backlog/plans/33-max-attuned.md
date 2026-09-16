@@ -1,6 +1,6 @@
 # Plano 33 — Limite de sintonias
 
-**ID:** FR-7 · **Dificuldade:** difícil · **Status:** Blocked
+**ID:** FR-7 · **Dificuldade:** difícil · **Status:** Feito
 
 ## Gap
 
@@ -13,3 +13,7 @@ Campo na ficha/inventory response (`attunementLimit`) na API; front só exibe. S
 ## Pronto quando
 
 UI usa o número da resposta. Sem constante de regra no front.
+
+## Feito
+
+`GET` de inventário inclui `attunementLimit`. A UI conta sintonias contra esse número.

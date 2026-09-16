@@ -1,12 +1,15 @@
 import type { CreateCharacterPayload } from "@/entities/character/types";
+import { isSubclassRequired } from "@/entities/character/lib/subclass";
 import { asiFeatSlotsToCharacterFeats } from "@/features/character/create-character/lib/feats/asi-feat-slots-to-feats";
-import { SUBCLASS_UNLOCK_LEVEL_DEFAULT } from "@/entities/character/lib/subclass";
 import type { CreateCharacterInput } from "@/features/character/create-character/model/create-character.schema";
 
 export function toCreateCharacterPayload(
   values: CreateCharacterInput,
 ): CreateCharacterPayload {
-  const includeSubclass = values.level >= SUBCLASS_UNLOCK_LEVEL_DEFAULT;
+  const includeSubclass = isSubclassRequired(
+    values.level,
+    values.subclassUnlockLevel,
+  );
 
   const payload: CreateCharacterPayload = {
     name: values.name,
