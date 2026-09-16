@@ -26,6 +26,7 @@ import { CombatPassivesTrigger } from "@/features/character/character-sheet/ui/b
 import { useSheetRolls } from "@/features/character/character-sheet/ui/beyond/layout/sheet-rolls";
 import { cn } from "@/shared/lib/utils";
 import { CharacterLinkedActors } from "@/features/character/character-sheet/ui/sheet/character-linked-actors";
+import { CharacterCompanionsPanel } from "@/features/companion/ui/character-companions-panel";
 import { CharacterQuickNotes } from "../../sheet/character-quick-notes";
 
 const PASSIVE_SENSES = [
@@ -82,7 +83,6 @@ export function BeyondLeftColumn({
   }
   const pb = character.proficiencyBonus;
   const scores = sheetAbilityScores(character);
-  /** SSOT na API (`savingThrowAuraBonus`) — não recalcular Aura/classe no front. */
   const auraSaveBonus = character.savingThrowAuraBonus ?? 0;
   const skillSources = {
     classSkillSlugs: character.classSkillSlugs,
@@ -282,6 +282,7 @@ export function BeyondLeftColumn({
       </BeyondPanel>
 
       <CharacterLinkedActors characterId={characterId} />
+      <CharacterCompanionsPanel characterId={characterId} />
 
       <CharacterQuickNotes characterId={character.id} />
     </div>

@@ -145,7 +145,10 @@ export function CharacterLinkedActors({ characterId }: CharacterLinkedActorsProp
     return null;
   }
 
-  const sorted = [...actors.data].sort((a, b) => {
+  const linked = actors.data.filter((actor) => actor.actorKind !== "companion");
+  if (linked.length === 0) return null;
+
+  const sorted = [...linked].sort((a, b) => {
     const aBoard = isBoardableActor(a) ? 0 : 1;
     const bBoard = isBoardableActor(b) ? 0 : 1;
     if (aBoard !== bBoard) return aBoard - bBoard;
