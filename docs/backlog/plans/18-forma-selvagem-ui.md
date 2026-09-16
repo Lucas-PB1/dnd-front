@@ -1,6 +1,6 @@
 # Plano 18 — UI Forma Selvagem
 
-**ID:** FR-20 · **Dificuldade:** média · **Status:** Ready · **Depende:** 04, 08
+**ID:** FR-20 · **Dificuldade:** média · **Status:** Feito · **Depende:** 04, 08
 
 ## Gap
 
@@ -13,3 +13,7 @@ Lista elegível, conhecidas, forma ativa. Disparar table-actions. Link para `wil
 ## Pronto quando
 
 Druida ativa/troca forma só com dados da API.
+
+## Feito
+
+Painel Druida: bestas de `GET .../wild-shape/eligible` (sem CR). Aprender / assumir / encerrar / trocar via table-actions. Link para `/actors/:wildShapeActorId`.

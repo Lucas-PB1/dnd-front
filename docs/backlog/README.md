@@ -48,7 +48,7 @@ Blocked não vira Ready só espelhando TS. Adiado só com pedido explícito.
 | # | Status | Plano |
 | --- | --- | --- |
 | [17](./plans/17-strike-options-ui.md) | Feito | Usar `strikeOptions` no painel |
-| [18](./plans/18-forma-selvagem-ui.md) | Ready | Seletor Forma Selvagem |
+| [18](./plans/18-forma-selvagem-ui.md) | Feito | Seletor Forma Selvagem |
 | [19](./plans/19-companheiros-ui.md) | Ready | Tracker de companheiros na ficha |
 | [20](./plans/20-veiculos-sheet-actions-ui.md) | Ready | Leme / carga / tripulação |
 | [21](./plans/21-montarias-ui.md) | Ready | Montaria: board + sheet-actions |

@@ -551,6 +551,10 @@ export async function executeWarlockTableAction(
 
 export type DruidTableActionSlug =
   | "wild-shape"
+  | "wild-shape-end"
+  | "wild-companion"
+  | "set-wild-shape-known-forms"
+  | "replace-wild-shape-known-form"
   | "wild-resurgence-slot"
   | "wild-resurgence-shape"
   | "starry-form-archer"
@@ -572,21 +576,32 @@ export type DruidTableActionSlug =
   | "natural-recovery-4"
   | "natural-recovery-5"
   | "city-shape"
-  | "wall-warp";
+  | "wall-warp"
+  | "wickerbone-behemoth"
+  | "wolf-mantle"
+  | "defend-the-pack"
+  | "children-of-great-wolf"
+  | "wild-recovery";
+
+export type DruidTableActionInput = {
+  actionSlug: DruidTableActionSlug;
+  slotLevel?: number;
+  templateSlug?: string;
+  templateSlugs?: string[];
+  replaceSlug?: string;
+};
 
 export async function executeDruidTableAction(
   accessToken: string,
   characterId: string,
-  actionSlug: DruidTableActionSlug | { actionSlug: DruidTableActionSlug; slotLevel?: number },
+  input: DruidTableActionInput,
 ) {
-  const payload =
-    typeof actionSlug === "string" ? { actionSlug } : actionSlug;
   return gameFetch<TableActionResult>(
     `/characters/${characterId}/druid/table-action`,
     accessToken,
     {
       method: "POST",
-      body: JSON.stringify(payload),
+      body: JSON.stringify(input),
     },
   );
 }

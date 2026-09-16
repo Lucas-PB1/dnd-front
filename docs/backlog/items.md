@@ -21,7 +21,7 @@ Um ID → um plano. Status: Ready · Blocked · Adiado · Feito.
 | FR-40 | [15](./plans/15-actors-get-state.md) | Feito | `GET /actors/:id/state` |
 | FR-41 | [16](./plans/16-actors-roll-attack.md) | Feito | `POST /actors/:id/rolls/attack` |
 | FR-35 | [17](./plans/17-strike-options-ui.md) | Feito | UI `strikeOptions` |
-| FR-20 | [18](./plans/18-forma-selvagem-ui.md) | Ready | UI Forma Selvagem |
+| FR-20 | [18](./plans/18-forma-selvagem-ui.md) | Feito | UI Forma Selvagem |
 | FR-21 | [19](./plans/19-companheiros-ui.md) | Ready | UI companheiros |
 | FR-22 | [20](./plans/20-veiculos-sheet-actions-ui.md) | Ready | UI veículo sheet-actions |
 | FR-37 | [21](./plans/21-montarias-ui.md) | Ready | UI montaria |

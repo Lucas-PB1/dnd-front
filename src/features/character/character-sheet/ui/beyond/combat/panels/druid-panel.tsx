@@ -1,14 +1,18 @@
 "use client";
 
 import { useMemo } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 import type { CharacterState } from "@/entities/character/session-types";
 import type { ClassPanelActionRecord } from "@/entities/combat-mechanical/types";
+import { actorKeys } from "@/features/actor/api/use-actors";
 import {
   executeDruidTableAction,
+  type DruidTableActionInput,
   type DruidTableActionSlug,
 } from "@/features/character/character-sheet/api/character-session.api";
 import { useTableActionMutation } from "@/features/character/character-sheet/api/use-table-action-mutation";
+import { wildShapeKeys } from "@/features/character/character-sheet/api/wild-shape.api";
 import {
   filterStarryFormPanelActions,
   stellarConstellationDisplayLabel,
@@ -18,8 +22,15 @@ import { useCombatMechanicalCatalog } from "@/features/catalog/reference-catalog
 import { CombatClassPanelShell } from "../shared/class-panel-shell";
 import { CombatPanelActionButtons } from "../shared/panel-action-buttons";
 import { TableActionFeedback } from "../shared/table-action-feedback";
+import { WildShapePanel } from "./wild-shape-panel";
 
 const EMPTY_PANEL_ACTIONS: ClassPanelActionRecord[] = [];
+const WILD_SHAPE_PANEL_SLUGS = new Set([
+  "wild-shape",
+  "wild-shape-end",
+  "set-wild-shape-known-forms",
+  "replace-wild-shape-known-form",
+]);
 
 type CombatDruidPanelProps = {
   characterId: string;
@@ -30,10 +41,6 @@ type CombatDruidPanelProps = {
   state: CharacterState | undefined;
 };
 
-/**
- * Druida: Ressurgimento + poderes de círculo via C010; pool Forma Selvagem ± só na Economia.
- * Forma de besta (seletor/ficha) = polish futuro.
- */
 export function CombatDruidPanel({
   characterId,
   classSlug,
@@ -43,6 +50,7 @@ export function CombatDruidPanel({
   state,
 }: CombatDruidPanelProps) {
   const enabled = classSlug === "druid";
+  const queryClient = useQueryClient();
   const action = useTableActionMutation(characterId, executeDruidTableAction);
   const mechanicalCatalog = useCombatMechanicalCatalog({
     classSlug,
@@ -66,7 +74,7 @@ export function CombatDruidPanel({
         level,
         subclassSlug,
         section: "base",
-      }),
+      }).filter((entry) => !WILD_SHAPE_PANEL_SLUGS.has(entry.slug)),
     [panelCatalog, level, subclassSlug],
   );
   const subclassActions = useMemo(
@@ -79,7 +87,7 @@ export function CombatDruidPanel({
           section: "subclass",
         }),
         starryFormState,
-      ),
+      ).filter((entry) => !WILD_SHAPE_PANEL_SLUGS.has(entry.slug)),
     [panelCatalog, level, subclassSlug, starryFormState],
   );
 
@@ -92,6 +100,19 @@ export function CombatDruidPanel({
 
   function getRemaining(slug: string): number | null {
     return resources.find((entry) => entry.slug === slug)?.remaining ?? null;
+  }
+
+  function run(input: DruidTableActionInput) {
+    action.mutate(input, {
+      onSuccess: () => {
+        void queryClient.invalidateQueries({
+          queryKey: wildShapeKeys.eligible(characterId),
+        });
+        void queryClient.invalidateQueries({
+          queryKey: actorKeys.byCharacter(characterId),
+        });
+      },
+    });
   }
 
   const statusLine =
@@ -108,12 +129,19 @@ export function CombatDruidPanel({
 
   const actionsContent = (
     <div className="space-y-2">
+      <WildShapePanel
+        characterId={characterId}
+        level={level}
+        state={state}
+        isPending={action.isPending}
+        onAction={run}
+      />
       <CombatPanelActionButtons
         actions={baseActions}
         getRemaining={getRemaining}
         isPending={action.isPending}
         disabled={!state}
-        onAction={(slug) => action.mutate(slug as DruidTableActionSlug)}
+        onAction={(slug) => run({ actionSlug: slug as DruidTableActionSlug })}
       />
       <TableActionFeedback
         lastResultNote={action.lastResult?.note}
@@ -131,7 +159,7 @@ export function CombatDruidPanel({
           getRemaining={getRemaining}
           isPending={action.isPending}
           disabled={!state}
-          onAction={(slug) => action.mutate(slug as DruidTableActionSlug)}
+          onAction={(slug) => run({ actionSlug: slug as DruidTableActionSlug })}
         />
         <TableActionFeedback
           lastResultNote={action.lastResult?.note}
