@@ -86,12 +86,12 @@ Blocked não vira Ready só espelhando TS. Adiado só com pedido explícito.
 | --- | --- | --- |
 | [34](./plans/34-paladino-cobertura-lembrete.md) | Feito | Lembrete Destruição Protetora |
 | [35](./plans/35-misseis-modal-boost.md) | Feito | Modal Escudo/Giga no cast |
+| [36](./plans/36-gh-cap1-tracos.md) | Feito | GH Cap. 1 sub-escolhas |
 
 ### Adiado (pedido explícito)
 
 | # | Status | Plano |
 | --- | --- | --- |
-| [36](./plans/36-gh-cap1-tracos.md) | Adiado | GH Cap. 1 sub-escolhas |
 | [37](./plans/37-pistoleiro-polish.md) | Adiado | Pistoleiro polish |
 | [38](./plans/38-dawn-vs-descanso.md) | Adiado | Evento dawn ≠ DL |
 | [39](./plans/39-companheiro-primal.md) | Adiado | Companheiro Primal |

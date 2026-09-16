@@ -14,7 +14,6 @@ export interface HeritageSummary {
   imageUrl?: string | null;
 }
 
-/** Item completo da listagem do compêndio (GET /heritages sem fields=summary). */
 export type HeritageCompendiumItem = HeritageDetail;
 
 export interface HeritageDetail extends HeritageSummary {
@@ -37,6 +36,20 @@ export interface HeritageModularTrait {
   description: string;
   benefitBase: string | null;
   benefitImproved: string | null;
+  options?: HeritageTraitOptionGroup[];
+}
+
+export interface HeritageTraitOptionValue {
+  valueId: string;
+  label: string;
+  sortOrder: number;
+}
+
+export interface HeritageTraitOptionGroup {
+  optionKey: string;
+  label: string;
+  valueType: string;
+  values: HeritageTraitOptionValue[];
 }
 
 export interface HeritageTraitChoice {
@@ -86,9 +99,53 @@ export const HERITAGE_TRAIT_SLOTS = [
 export const HERITAGE_TRAIT_SLOT_9 = "heritage_trait_9";
 export const HERITAGE_SPEED_TRADE_KIND = "heritage_speed_trade";
 export const HERITAGE_SIZE_KIND = "heritage_size";
+export const HERITAGE_OPT_KIND_PREFIX = "heritage_opt_";
 
 export function isHeritageTraitSlot(choiceKind: string): boolean {
   return choiceKind.startsWith(HERITAGE_TRAIT_SLOT_PREFIX);
+}
+
+export function isHeritageOptKind(choiceKind: string): boolean {
+  return choiceKind.startsWith(HERITAGE_OPT_KIND_PREFIX);
+}
+
+export function heritageOptChoiceKind(
+  slotIndex: number,
+  optionKey: string,
+): string {
+  return `${HERITAGE_OPT_KIND_PREFIX}${slotIndex}_${optionKey}`;
+}
+
+export function requiredHeritageOptKinds(
+  picks: readonly HeritageTraitPick[],
+  traitOptions: readonly { traitSlug: string; optionKey: string }[],
+): string[] {
+  const keysByTrait = new Map<string, string[]>();
+  for (const row of traitOptions) {
+    const keys = keysByTrait.get(row.traitSlug) ?? [];
+    if (!keys.includes(row.optionKey)) keys.push(row.optionKey);
+    keysByTrait.set(row.traitSlug, keys);
+  }
+  const kinds: string[] = [];
+  for (const pick of picks) {
+    const slotIndex = heritageTraitSlotIndex(pick.choiceKind);
+    const traitSlug = pick.choiceSlug?.trim();
+    if (slotIndex == null || !traitSlug) continue;
+    for (const optionKey of keysByTrait.get(traitSlug) ?? []) {
+      kinds.push(heritageOptChoiceKind(slotIndex, optionKey));
+    }
+  }
+  return kinds;
+}
+
+export function pruneHeritageOptChoices(
+  picks: readonly HeritageTraitPick[],
+  traitOptions: readonly { traitSlug: string; optionKey: string }[],
+): HeritageTraitPick[] {
+  const allowed = new Set(requiredHeritageOptKinds(picks, traitOptions));
+  return picks.filter(
+    (pick) => !isHeritageOptKind(pick.choiceKind) || allowed.has(pick.choiceKind),
+  );
 }
 
 export function heritageTraitSlotIndex(choiceKind: string): number | null {
@@ -184,7 +241,6 @@ export function buildTraditionalHeritageChoices(
   return picks;
 }
 
-/** Todos os picks de traço estão no conjunto tradicional (7 ou 8 slots). */
 export function isTraditionalHeritagePickSet(
   traditionalSlugs: ReadonlySet<string>,
   picks: readonly HeritageTraitPick[],
@@ -194,10 +250,6 @@ export function isTraditionalHeritagePickSet(
   return traitPicks.every((pick) => traditionalSlugs.has(pick.choiceSlug.trim()));
 }
 
-/**
- * Repete um traço tradicional (2×) no lugar de outro do mesmo conjunto.
- * `replaceSlug` some; `doubleSlug` passa a ocupar dois slots.
- */
 export function applyTraditionalTraitDouble(
   picks: readonly HeritageTraitPick[],
   doubleSlug: string,
@@ -215,7 +267,6 @@ export function applyTraditionalTraitDouble(
   return next;
 }
 
-/** Desfaz um 2×: recoloca `restoreSlug` no segundo slot de `doubleSlug`. */
 export function clearTraditionalTraitDouble(
   picks: readonly HeritageTraitPick[],
   doubleSlug: string,

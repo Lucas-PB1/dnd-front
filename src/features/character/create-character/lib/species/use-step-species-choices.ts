@@ -23,18 +23,22 @@ import {
 } from "@/features/catalog/background-catalog/api/use-backgrounds";
 import { useSpeciesTraitChoices } from "@/features/catalog/species-catalog/api/use-species";
 import {
-  useHeritageDetail,
-  useHeritageTraditionalBuild,
-  useHeritageTraitChoices,
-} from "@/features/catalog/heritage-catalog/api/use-heritages";
-import {
   applyTraditionalTraitDouble,
   buildTraditionalHeritageChoices,
   clearTraditionalTraitDouble,
+  heritageOptChoiceKind,
+  heritageTraitSlotIndex,
   HERITAGE_SIZE_KIND,
   isHeritageTraitSlot,
   isTraditionalHeritagePickSet,
+  pruneHeritageOptChoices,
 } from "@/entities/heritage";
+import {
+  useHeritageDetail,
+  useHeritageModularTraits,
+  useHeritageTraditionalBuild,
+  useHeritageTraitChoices,
+} from "@/features/catalog/heritage-catalog/api/use-heritages";
 import {
   toTraditionalTraitDisplay,
   type TraditionalTraitDisplay,
@@ -152,6 +156,10 @@ export function useStepSpeciesChoices(
     heritageSlug,
     isHeritageOrigin && !!heritageSlug,
   );
+  const heritageModular = useHeritageModularTraits(
+    heritageSlug,
+    isHeritageOrigin && !!heritageSlug,
+  );
   const traitChoices = isHeritageOrigin
     ? heritageTraitChoices
     : speciesTraitChoices;
@@ -166,6 +174,16 @@ export function useStepSpeciesChoices(
   const featsCatalog = useFeats();
   const featLabels = useFeatLabels();
   const skillKinds = useMemo(() => skillChoiceKinds(), []);
+  const heritageTraitOptionCatalog = useMemo(
+    () =>
+      (heritageModular.data ?? []).flatMap((trait) =>
+        (trait.options ?? []).map((option) => ({
+          traitSlug: trait.slug,
+          optionKey: option.optionKey,
+        })),
+      ),
+    [heritageModular.data],
+  );
 
   const grantedSkillSlugs = useMemo(() => {
     const fromBackground = (backgroundSkills.data?.data ?? []).map(
@@ -231,9 +249,7 @@ export function useStepSpeciesChoices(
       if (isHeritageOrigin) {
         const heritageRow = row as import("@/entities/heritage/types").HeritageTraitChoice;
         const choiceKind = heritageRow.choiceKind;
-        // Traços modulares vêm do build tradicional (lista fixa), não do pool.
         if (isHeritageTraitSlot(choiceKind)) continue;
-        // Troca de deslocamento (+9º traço) fica fora — sempre build tradicional.
         if (choiceKind === "heritage_speed_trade") {
           continue;
         }
@@ -289,6 +305,29 @@ export function useStepSpeciesChoices(
       map.set(speciesRow.choiceKind, group);
     }
 
+    if (isHeritageOrigin) {
+      const traitBySlug = new Map(
+        (heritageModular.data ?? []).map((trait) => [trait.slug, trait]),
+      );
+      for (const pick of heritageChoices) {
+        const slotIndex = heritageTraitSlotIndex(pick.choiceKind);
+        if (slotIndex == null) continue;
+        const trait = traitBySlug.get(pick.choiceSlug);
+        if (!trait) continue;
+        for (const option of trait.options ?? []) {
+          const kind = heritageOptChoiceKind(slotIndex, option.optionKey);
+          map.set(kind, {
+            traitName: `${trait.name} — ${option.label}`,
+            options: option.values.map((value) => ({
+              choiceSlug: value.valueId,
+              choiceName: value.label,
+              level1Benefit: null,
+            })),
+          });
+        }
+      }
+    }
+
     return [...map.entries()]
       .sort(([left], [right]) => {
         const slotLeft = left.match(/^heritage_trait_(\d+)$/);
@@ -314,6 +353,8 @@ export function useStepSpeciesChoices(
     }));
   }, [
     featSlugsFromOtherSources,
+    heritageChoices,
+    heritageModular.data,
     isHeritageOrigin,
     speciesChoices,
     heritageTraitChoices.data,
@@ -411,7 +452,10 @@ export function useStepSpeciesChoices(
       next = next.filter((c) => c.choiceKind !== "heritage_trait_9");
     }
     if (isHeritageOrigin) {
-      setValue("heritageChoices", next);
+      setValue(
+        "heritageChoices",
+        pruneHeritageOptChoices(next, heritageTraitOptionCatalog),
+      );
     } else {
       setValue("speciesChoices", next);
     }
@@ -452,13 +496,19 @@ export function useStepSpeciesChoices(
       sizeChoice:
         sizePick === "small" || sizePick === "medium" ? sizePick : "medium",
     });
-    setValue("heritageChoices", picks);
+    setValue(
+      "heritageChoices",
+      pruneHeritageOptChoices(picks, heritageTraitOptionCatalog),
+    );
   }
 
   function setTraditionalTraitDouble(doubleSlug: string, replaceSlug: string) {
     setValue(
       "heritageChoices",
-      applyTraditionalTraitDouble(heritageChoices, doubleSlug, replaceSlug),
+      pruneHeritageOptChoices(
+        applyTraditionalTraitDouble(heritageChoices, doubleSlug, replaceSlug),
+        heritageTraitOptionCatalog,
+      ),
     );
   }
 
@@ -468,7 +518,10 @@ export function useStepSpeciesChoices(
   ) {
     setValue(
       "heritageChoices",
-      clearTraditionalTraitDouble(heritageChoices, doubleSlug, restoreSlug),
+      pruneHeritageOptChoices(
+        clearTraditionalTraitDouble(heritageChoices, doubleSlug, restoreSlug),
+        heritageTraitOptionCatalog,
+      ),
     );
   }
 
@@ -485,7 +538,10 @@ export function useStepSpeciesChoices(
     );
     setValue(
       "heritageChoices",
-      applyTraditionalTraitDouble(restored, doubleSlug, toSlug),
+      pruneHeritageOptChoices(
+        applyTraditionalTraitDouble(restored, doubleSlug, toSlug),
+        heritageTraitOptionCatalog,
+      ),
     );
   }
 
@@ -498,7 +554,6 @@ export function useStepSpeciesChoices(
     const traditionalSlugs = new Set(
       traditional.map((trait) => trait.traitSlug),
     );
-    // Mantém 2× no mesmo naipe; só reseta se sair do conjunto tradicional.
     if (isTraditionalHeritagePickSet(traditionalSlugs, heritageChoices)) {
       const needsSize =
         detail.allowsSizeChoice &&
@@ -506,10 +561,16 @@ export function useStepSpeciesChoices(
           (choice) => choice.choiceKind === HERITAGE_SIZE_KIND,
         );
       if (!needsSize) return;
-      setValue("heritageChoices", [
-        ...heritageChoices,
-        { choiceKind: HERITAGE_SIZE_KIND, choiceSlug: "medium" },
-      ]);
+      setValue(
+        "heritageChoices",
+        pruneHeritageOptChoices(
+          [
+            ...heritageChoices,
+            { choiceKind: HERITAGE_SIZE_KIND, choiceSlug: "medium" },
+          ],
+          heritageTraitOptionCatalog,
+        ),
+      );
       return;
     }
 
@@ -518,18 +579,22 @@ export function useStepSpeciesChoices(
     )?.choiceSlug;
     setValue(
       "heritageChoices",
-      buildTraditionalHeritageChoices(traditional, {
-        allowsSpeedTrade: false,
-        allowsSizeChoice: detail.allowsSizeChoice,
-        speedTrade: "no",
-        sizeChoice:
-          sizePick === "small" || sizePick === "medium" ? sizePick : "medium",
-      }),
+      pruneHeritageOptChoices(
+        buildTraditionalHeritageChoices(traditional, {
+          allowsSpeedTrade: false,
+          allowsSizeChoice: detail.allowsSizeChoice,
+          speedTrade: "no",
+          sizeChoice:
+            sizePick === "small" || sizePick === "medium" ? sizePick : "medium",
+        }),
+        heritageTraitOptionCatalog,
+      ),
     );
   }, [
     heritageChoices,
     heritageDetail.data,
     heritageTraditional.data,
+    heritageTraitOptionCatalog,
     isHeritageOrigin,
     setValue,
   ]);

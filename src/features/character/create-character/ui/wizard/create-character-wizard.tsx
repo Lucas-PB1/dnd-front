@@ -37,7 +37,10 @@ import { WizardStepContent } from "@/features/character/create-character/ui/wiza
 import { WizardStepIndicator } from "@/features/character/create-character/ui/wizard/wizard-step-indicator";
 import { WizardSubmitError } from "@/features/character/create-character/ui/wizard/wizard-submit-error";
 import { useSpeciesTraitChoices } from "@/features/catalog/species-catalog/api/use-species";
-import { useHeritageTraitChoices } from "@/features/catalog/heritage-catalog/api/use-heritages";
+import {
+  useHeritageModularTraits,
+  useHeritageTraitChoices,
+} from "@/features/catalog/heritage-catalog/api/use-heritages";
 import { useBackgroundDetail } from "@/features/catalog/background-catalog/api/use-backgrounds";
 import { useAbilityGenerationMethods } from "@/features/catalog/reference-catalog/api/use-reference";
 
@@ -97,6 +100,10 @@ export function CreateCharacterWizard() {
     !!speciesSlug && !heritageSlug,
   );
   const heritageTraitsQuery = useHeritageTraitChoices(
+    heritageSlug ?? "",
+    !!heritageSlug,
+  );
+  const heritageModularQuery = useHeritageModularTraits(
     heritageSlug ?? "",
     !!heritageSlug,
   );
@@ -187,6 +194,12 @@ export function CreateCharacterWizard() {
       speciesTraitChoices: heritageSlug
         ? (heritageTraitsQuery.data ?? [])
         : speciesTraitsQuery.data?.data,
+      heritageTraitOptions: (heritageModularQuery.data ?? []).flatMap((trait) =>
+        (trait.options ?? []).map((option) => ({
+          traitSlug: trait.slug,
+          optionKey: option.optionKey,
+        })),
+      ),
       subclassOptions: subclassOpts.data?.data,
       classFeatureOptions,
       originFeatSlug,

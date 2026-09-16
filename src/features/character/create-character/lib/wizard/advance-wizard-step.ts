@@ -4,6 +4,7 @@ import type {
 } from "react-hook-form";
 
 import { isSubclassRequired } from "@/entities/character/lib/subclass";
+import { requiredHeritageOptKinds } from "@/entities/heritage";
 import type { AbilityGenerationMethod } from "@/entities/ability-generation-method/types";
 import type { BackgroundSummary } from "@/entities/background/types";
 import {
@@ -66,6 +67,7 @@ export type WizardAdvanceDeps = {
   classProgression: ClassProgressionMasteryRow[] | undefined;
   backgroundDetail: BackgroundSummary | undefined;
   speciesTraitChoices: Array<{ choiceKind: string }> | undefined;
+  heritageTraitOptions?: Array<{ traitSlug: string; optionKey: string }>;
   subclassOptions: SubclassOptionGroup[] | undefined;
   classFeatureOptions: ClassFeatureOptionGroup[] | undefined;
   originFeatSlug: string;
@@ -98,6 +100,7 @@ export async function advanceWizardStep(deps: WizardAdvanceDeps): Promise<void> 
     classProgression,
     backgroundDetail,
     speciesTraitChoices,
+    heritageTraitOptions,
     subclassOptions,
     classFeatureOptions,
     originFeatSlug,
@@ -298,6 +301,14 @@ export async function advanceWizardStep(deps: WizardAdvanceDeps): Promise<void> 
       if (kind === "heritage_speed_trade") return false;
       return true;
     });
+    if (values.heritageSlug?.trim()) {
+      requiredKinds.push(
+        ...requiredHeritageOptKinds(
+          values.heritageChoices ?? [],
+          heritageTraitOptions ?? [],
+        ),
+      );
+    }
     if (requiredKinds.length > 0) {
       const provided = originChoices.map((c) => c.choiceKind);
       const missing = requiredKinds.filter((k) => !provided.includes(k));

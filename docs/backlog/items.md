@@ -39,7 +39,7 @@ Um ID → um plano. Status: Ready · Blocked · Adiado · Feito.
 | FR-7 | [33](./plans/33-max-attuned.md) | Feito | Max sintonias |
 | FR-24 | [34](./plans/34-paladino-cobertura-lembrete.md) | Feito | Paladino cobertura |
 | FR-23 | [35](./plans/35-misseis-modal-boost.md) | Feito | Modal Mísseis |
-| FR-26 | [36](./plans/36-gh-cap1-tracos.md) | Adiado | GH Cap. 1 |
+| FR-26 | [36](./plans/36-gh-cap1-tracos.md) | Feito | GH Cap. 1 |
 | FR-25 | [37](./plans/37-pistoleiro-polish.md) | Adiado | Pistoleiro |
 | FR-28 | [38](./plans/38-dawn-vs-descanso.md) | Adiado | Dawn ≠ DL |
 | FR-27 | [39](./plans/39-companheiro-primal.md) | Adiado | Companheiro Primal |
