@@ -1,5 +1,3 @@
-/** Catálogo mecânico de combate — espelha `GET /combat-mechanical-catalog`. */
-
 export type CunningStrikeEffect = {
   slug: string;
   name: string;
@@ -37,6 +35,30 @@ export type BattleMasterManeuverCatalogEntry = {
   timing: string;
   addsToDamage: boolean;
   addsToAttack: boolean;
+};
+
+export type StrikeOption = {
+  slug: string;
+  name: string;
+  subclassSlug?: string;
+  resourceSlug?: string | null;
+  tableAction?: string | null;
+  costDice?: string | null;
+  extraDice: string;
+  extraDiceL18: string;
+  damageType?: string | null;
+  saveAbility?: string | null;
+  onFailCondition?: string | null;
+  onFailPendingKind?: string | null;
+  onHitPendingKind?: string | null;
+  replacesAttackWithSave: boolean;
+  secondaryDice?: string | null;
+  secondaryDiceL18?: string | null;
+  ignoreTargetArmor: boolean;
+  ignoreDamageResistance: boolean;
+  addsArenaEffect: boolean;
+  arenaEffectSlug?: string | null;
+  noteOnly: boolean;
 };
 
 export type SubclassTableActionCatalogEntry = {
@@ -113,6 +135,7 @@ export type CombatMechanicalCatalog = {
   gunslingerManeuvers: GunslingerManeuverCatalogEntry[];
   battleMasterManeuvers: BattleMasterManeuverCatalogEntry[];
   cunningStrikeEffects: CunningStrikeEffect[];
+  strikeOptions: StrikeOption[];
   tableActions: SubclassTableActionCatalogEntry[];
   personaMasks: PersonaMask[];
   beastborneAspectBenefits: BeastborneAspectBenefit[];

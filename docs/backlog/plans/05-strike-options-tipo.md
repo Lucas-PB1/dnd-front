@@ -1,6 +1,6 @@
 # Plano 05 — Tipo `strikeOptions`
 
-**ID:** FR-13 · **Dificuldade:** fácil · **Status:** Ready · **Depende:** —
+**ID:** FR-13 · **Dificuldade:** fácil · **Status:** Feito
 
 ## Gap
 
@@ -13,3 +13,7 @@ Adicionar o tipo e o campo no catálogo. UI: plano 17.
 ## Pronto quando
 
 O fetch tipado não descarta `strikeOptions`.
+
+## Feito
+
+`StrikeOption` + `strikeOptions` em `CombatMechanicalCatalog`. UI no plano 17.
