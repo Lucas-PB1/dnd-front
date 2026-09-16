@@ -1,6 +1,6 @@
 # Plano 08 — HTTP Forma Selvagem eligible
 
-**ID:** FR-15 · **Dificuldade:** fácil · **Status:** Ready · **Depende:** 04 (tipos de state, se a resposta reusar slugs)
+**ID:** FR-15 · **Dificuldade:** fácil · **Status:** Feito
 
 ## Gap
 
@@ -13,3 +13,7 @@ Função + query key + hook. Sem UI (plano 18). Tipar o DTO `WildShapeEligibleLi
 ## Pronto quando
 
 O front consegue listar bestas elegíveis autenticado.
+
+## Feito
+
+`fetchWildShapeEligible` + `wildShapeKeys` + `useWildShapeEligible`. Tipos em `entities/character/wild-shape-eligible.ts`. UI no plano 18.

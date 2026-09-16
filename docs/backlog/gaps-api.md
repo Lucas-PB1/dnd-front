@@ -18,7 +18,7 @@ Cada linha é **um** plano. Detalhe só no arquivo do plano.
 
 | Gap | Plano |
 | --- | --- |
-| `GET .../druid/wild-shape/eligible` | [08](./plans/08-wild-shape-eligible-http.md) |
+| ~~`GET .../druid/wild-shape/eligible`~~ | [08](./plans/08-wild-shape-eligible-http.md) Feito |
 | `GET` + `POST dismiss` companions | [09](./plans/09-companions-http.md) |
 | `POST .../vehicles/sheet-actions` | [10](./plans/10-vehicles-sheet-actions-http.md) |
 | `POST .../mounts/*` | [11](./plans/11-mounts-http.md) |

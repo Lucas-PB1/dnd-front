@@ -60,3 +60,7 @@ export type {
   AddInventoryItemPayload,
   PatchInventoryItemPayload,
 } from "@/entities/character/session-types";
+export type {
+  WildShapeEligibleBeast,
+  WildShapeEligibleList,
+} from "@/entities/character/wild-shape-eligible";
