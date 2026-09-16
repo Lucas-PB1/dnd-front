@@ -9,7 +9,7 @@ Cada linha é **um** plano. Detalhe só no arquivo do plano.
 | ~~Doc diz que o wizard não lê métodos de atributo~~ | [01](./plans/01-doc-api-integration.md) Feito |
 | ~~Front tem `minTraitTakes`; DTO Nest não~~ | [02](./plans/02-min-trait-takes.md) Feito |
 | ~~`xpThreshold` no GET levels, UI não usa~~ | [03](./plans/03-xp-threshold.md) Feito |
-| State: wild shape + companions sem tipo | [04](./plans/04-character-state-tipos.md) |
+| ~~State: wild shape + companions sem tipo~~ | [04](./plans/04-character-state-tipos.md) Feito |
 | Catálogo: `strikeOptions` sem tipo | [05](./plans/05-strike-options-tipo.md) |
 | PATCH state sem add/remove conditions | [06](./plans/06-patch-conditions-delta.md) |
 | `featEffectFlags` crítico / duas mãos / versátil | [07](./plans/07-feat-effect-flags.md) |

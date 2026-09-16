@@ -24,7 +24,7 @@ Blocked não vira Ready só espelhando TS. Adiado só com pedido explícito.
 | [01](./plans/01-doc-api-integration.md) | Feito | Corrigir `API-INTEGRATION.md` |
 | [02](./plans/02-min-trait-takes.md) | Feito | Alinhar `minTraitTakes` |
 | [03](./plans/03-xp-threshold.md) | Feito | `xpThreshold` na ficha ou fora do tipo |
-| [04](./plans/04-character-state-tipos.md) | Ready | Tipar wild shape + companions no state |
+| [04](./plans/04-character-state-tipos.md) | Feito | Tipar wild shape + companions no state |
 | [05](./plans/05-strike-options-tipo.md) | Ready | Tipar `strikeOptions` |
 | [06](./plans/06-patch-conditions-delta.md) | Ready | PATCH `addConditions` / `removeConditions` |
 | [07](./plans/07-feat-effect-flags.md) | Ready | Ligar flags de feat mortos na UI |

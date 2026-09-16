@@ -46,6 +46,7 @@ export type {
   CastSpellResult,
   CharacterInventory,
   CharacterState,
+  CompanionTracker,
   InventoryItem,
   LevelUpPayload,
   LevelUpPreview,

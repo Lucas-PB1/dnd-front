@@ -1,7 +1,7 @@
-/** Espelha CharacterStateResponseDto da dnd-api */
 import type { CoinPurse } from "@/entities/character/types";
-
+import type { CompanionTracker } from "@/entities/companion/types";
 export type { CoinPurse };
+export type { CompanionTracker };
 
 export type SpellSlotsMap = Record<string, number>;
 
@@ -46,14 +46,16 @@ export type CharacterState = {
   gigaMissileArmed?: boolean;
   starryFormActive?: boolean;
   stellarConstellation?: string | null;
-  /** game_actor (veículo/montaria) em que o PC está a bordo */
   boardedActorId?: string | null;
-  /** Circunstâncias de mesa: snow_ice | in_water | extreme_cold */
   mesaCircumstances?: string[];
-  /** Mutação Aberrante ativa (Horror Aberrante Cap. 6) */
   aberrantMutationActive?: string | null;
-  /** Alto Elfo: troca de truque L1 disponível após Descanso Longo */
   highElfCantripSwapAvailable?: boolean;
+  wildShapeActive: boolean;
+  wildShapeTemplateSlug: string | null;
+  wildShapeKnownSlugs: string[];
+  wildShapeFormSwapAvailable: boolean;
+  wildShapeActorId: string | null;
+  companions: CompanionTracker[];
 };
 
 export type ResourceDieRoll = {
@@ -111,12 +113,9 @@ export type CastSpellPayload = {
   slotLevel?: number;
   useFreeCast?: boolean;
   freeCastResourceSlug?: string;
-  /** Cast via carga de item (fase 6). */
   itemCastResourceSlug?: string;
   itemCastSpendAmount?: number;
-  /** Cast gratuito de item (Magi custo 0). */
   itemCastItemSlug?: string;
-  /** Magia rolada em prop de artefato (1× até DL). */
   artifactRandomCast?: {
     itemSlug: string;
     bucket:
@@ -126,9 +125,7 @@ export type CastSpellPayload = {
       | "majorDetrimental";
     index: number;
   };
-  /** Flex Caster: espaços extras do mesmo círculo. */
   flexElevateExtraSlots?: number;
-  /** Flex Caster: conjurar no base e recuperar 1º. */
   flexReduce?: boolean;
 };
 
@@ -155,7 +152,6 @@ export type RestResult = {
   notes?: string[];
 };
 
-/** Espelha InventoryItemResponseDto */
 export type InventoryItem = {
   itemSlug: string;
   itemName: string;
@@ -166,12 +162,9 @@ export type InventoryItem = {
   attuned: boolean;
   isPactWeapon?: boolean;
   requiresAttunement: boolean;
-  /** Item amaldiçoado (properties.cursed). */
   cursed?: boolean;
-  /** Maldição quebrada (instance_properties.curseBroken). */
   curseBroken?: boolean;
   effectsActive: boolean;
-  /** Poção/óleo/pergaminho — economy ativa com quantity > 0. */
   consumable?: boolean;
   effectsStatus: "active" | "inactive_unequipped" | "inactive_unattuned";
   weightKg: number;
@@ -185,15 +178,10 @@ export type InventoryItem = {
   attachedCoverageSpellSlug?: string | null;
   boundSpellSlug?: string | null;
   isCoverage?: boolean;
-  /** Peça mágica de catálogo — não recebe cobertura. */
   isMagic?: boolean;
-  /** phb_item.properties.kind (ex.: large-vehicle, mount). */
   propertiesKind?: string | null;
-  /** Estado por instância (artefato rolado, senciência, etc.). */
   instanceProperties?: Record<string, unknown> | null;
-  /** Preço de catálogo (compra/venda). */
   costText?: string | null;
-  /** Recipiente (bolsa/saca/…); null = raiz. */
   containedInItemSlug?: string | null;
 };
 
@@ -220,7 +208,6 @@ export type InventoryPaymentContext = {
 export type AddInventoryItemPayload = {
   itemSlug: string;
   quantity?: number;
-  /** Default true quando cobrança se aplica. */
   pay?: boolean;
 };
 
@@ -239,13 +226,9 @@ export type PatchInventoryItemPayload = {
     | "carried";
   quantity?: number;
   attuned?: boolean;
-  /** Sintonizar / dessintonizar cobertura anexada. */
   attachedCoverageAttuned?: boolean;
-  /** Vincular magia (Cajado Magificado). */
   boundSpellSlug?: string | null;
-  /** Marcar / desmarcar Arma de Pacto (Bruxo · Pacto da Lâmina). */
   pactWeapon?: boolean;
-  /** Mover para recipiente ou null = raiz. */
   containedInItemSlug?: string | null;
 };
 
@@ -267,7 +250,6 @@ export type RemoveInventoryOptions = {
   mode?: "sell" | "discard";
 };
 
-/** Espelha LevelUpPreviewDto */
 export type LevelUpClassExpertiseSlot = {
   optionKey: string;
   unlockLevel: number;
@@ -308,12 +290,9 @@ export type LevelUpPreview = {
   subclassRequired: boolean;
   subclassUnlockLevel?: number;
   isAsiOrFeatLevel: boolean;
-  /** Características de classe/subclasse neste nível. */
   newFeatures?: LevelUpFeatureUnlock[];
   newSpellOptions: LevelUpSpellOption[];
-  /** Always-prepared da subclasse neste nível — não é escolha na aba Magias. */
   newAlwaysPreparedSpells?: LevelUpSpellOption[];
-  /** Opções de subclasse desbloqueadas neste nível (ex.: Revelações Santas). */
   newSubclassOptionSlots?: LevelUpSubclassOptionSlot[];
   newClassExpertiseSlots: LevelUpClassExpertiseSlot[];
   newWeaponMasterySlots: LevelUpWeaponMasterySlot[];

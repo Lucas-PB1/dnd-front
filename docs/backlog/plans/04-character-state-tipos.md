@@ -1,6 +1,6 @@
 # Plano 04 — Tipos de `CharacterState`
 
-**ID:** FR-12 · **Dificuldade:** fácil · **Status:** Ready
+**ID:** FR-12 · **Dificuldade:** fácil · **Status:** Feito
 
 ## Gap
 
@@ -13,3 +13,7 @@ Espelhar o DTO Nest + `CompanionTrackerDto`. Só tipos neste plano (UI: 18 e 19)
 ## Pronto quando
 
 TypeScript descreve o GET `/characters/:id/state`.
+
+## Feito
+
+`CharacterState` inclui wild shape e `companions`. `CompanionTracker` em `entities/companion/types.ts` (mesmo DTO do GET companions). Sem UI.
