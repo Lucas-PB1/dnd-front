@@ -115,6 +115,8 @@ export type CastSpellPayload = {
   slotLevel?: number;
   useFreeCast?: boolean;
   freeCastResourceSlug?: string;
+  applyMissileShield?: boolean;
+  applyGigaMissile?: boolean;
   itemCastResourceSlug?: string;
   itemCastSpendAmount?: number;
   itemCastItemSlug?: string;

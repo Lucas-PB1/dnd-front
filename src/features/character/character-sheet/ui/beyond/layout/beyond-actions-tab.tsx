@@ -49,6 +49,16 @@ import { ClassCombatPanel } from "@/features/character/character-sheet/ui/beyond
 import { BoardedVehiclePanel } from "@/features/character/character-sheet/ui/beyond/combat/boarded-vehicle-panel";
 import { AberrantMutationDialog } from "@/features/character/character-sheet/ui/beyond/combat/aberrant-mutation-dialog";
 import { ArtisanCraftDialog } from "@/features/character/character-sheet/ui/beyond/combat/artisan-craft-dialog";
+import { MagicMissileBoostDialog } from "@/features/character/character-sheet/ui/beyond/spells/magic-missile-boost-dialog";
+import {
+  MAGIC_MISSILE_FREE_CAST_TABLE_ACTION,
+  MAGIC_MISSILE_MAGE_SUBCLASS,
+  MAGIC_MISSILE_SPELL_SLUG,
+  missileBoostFlagsFromChoice,
+  readMissileCastBoostSnapshot,
+  shouldOfferMissileBoostModal,
+  type MissileCastBoostSnapshot,
+} from "@/features/character/character-sheet/lib/combat/magic-missile-cast-boosts";
 import {
   craftItemsForArtisanTools,
   isArtisanCraftAction,
@@ -118,6 +128,23 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
   const [repeatWithPsi, setRepeatWithPsi] = useState(false);
   const [craftOpen, setCraftOpen] = useState(false);
   const [mutationOpen, setMutationOpen] = useState(false);
+  const [pendingMissileEconomy, setPendingMissileEconomy] = useState<{
+    snapshot: MissileCastBoostSnapshot;
+    payload: {
+      tableAction: string;
+      actionId: string;
+      classSlug?: string | null;
+      featSlug?: string | null;
+      usePsiDie: boolean;
+      resourceSlug?: string;
+      spendAmount: number;
+      spellSlug?: string;
+      itemSlug?: string | null;
+      note?: string;
+      armed?: boolean;
+      enabled?: boolean;
+    };
+  } | null>(null);
   const mechanicalCatalog = useCombatMechanicalCatalog({ classSlug: character.classSlug, subclassSlug: character.subclassSlug });
 
   const artisanToolSlugs = useMemo(
@@ -505,27 +532,47 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
                   setMutationOpen(true);
                   return;
                 }
-                tableAction.mutate(
-                  {
-                    tableAction: action.tableAction ?? action.id,
-                    actionId: action.id,
-                    classSlug: action.classSlug,
-                    featSlug: action.featSlug,
-                    usePsiDie: plan.usePsiDie,
-                    resourceSlug: action.resourceSlug,
-                    spendAmount: action.spendAmount ?? 1,
-                    spellSlug: action.spellSlug,
-                    itemSlug: action.itemSlug,
-                    note: action.description ?? action.summary,
-                    armed: plan.armed,
-                    enabled: plan.enabled,
+                const payload = {
+                  tableAction: action.tableAction ?? action.id,
+                  actionId: action.id,
+                  classSlug: action.classSlug,
+                  featSlug: action.featSlug,
+                  usePsiDie: plan.usePsiDie,
+                  resourceSlug: action.resourceSlug,
+                  spendAmount: action.spendAmount ?? 1,
+                  spellSlug: action.spellSlug ?? undefined,
+                  itemSlug: action.itemSlug,
+                  note: action.description ?? action.summary,
+                  armed: plan.armed,
+                  enabled: plan.enabled,
+                };
+                if (
+                  action.tableAction === MAGIC_MISSILE_FREE_CAST_TABLE_ACTION
+                ) {
+                  const snapshot = readMissileCastBoostSnapshot({
+                    classResources: stateQuery.data?.classResources,
+                    missileShieldArmed:
+                      stateQuery.data?.missileShieldArmed,
+                    gigaMissileArmed: stateQuery.data?.gigaMissileArmed,
+                  });
+                  if (
+                    shouldOfferMissileBoostModal({
+                      isMissileMage:
+                        character.subclassSlug ===
+                        MAGIC_MISSILE_MAGE_SUBCLASS,
+                      spellSlug: MAGIC_MISSILE_SPELL_SLUG,
+                      snapshot,
+                    })
+                  ) {
+                    setPendingMissileEconomy({ payload, snapshot });
+                    return;
+                  }
+                }
+                tableAction.mutate(payload, {
+                  onSuccess: (result) => {
+                    if (result?.note) setTableNote(result.note);
                   },
-                  {
-                    onSuccess: (result) => {
-                      if (result?.note) setTableNote(result.note);
-                    },
-                  },
-                );
+                });
               }}
             />
           ))}
@@ -581,6 +628,39 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
                 {
                   onSuccess: (result) => {
                     setMutationOpen(false);
+                    if (result?.note) setTableNote(result.note);
+                  },
+                },
+              );
+            }}
+          />
+          <MagicMissileBoostDialog
+            open={pendingMissileEconomy != null}
+            snapshot={
+              pendingMissileEconomy?.snapshot ?? {
+                shieldRemaining: 0,
+                gigaRemaining: 0,
+                shieldArmed: false,
+                gigaArmed: false,
+              }
+            }
+            busy={tableAction.isPending}
+            onOpenChange={(open) => {
+              if (!open) setPendingMissileEconomy(null);
+            }}
+            onConfirm={(choice) => {
+              if (!pendingMissileEconomy) return;
+              const flags = missileBoostFlagsFromChoice({
+                snapshot: pendingMissileEconomy.snapshot,
+                applyShield: choice.applyShield,
+                applyGiga: choice.applyGiga,
+              });
+              const payload = pendingMissileEconomy.payload;
+              setPendingMissileEconomy(null);
+              tableAction.mutate(
+                { ...payload, ...flags },
+                {
+                  onSuccess: (result) => {
                     if (result?.note) setTableNote(result.note);
                   },
                 },

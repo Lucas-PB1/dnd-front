@@ -23,6 +23,7 @@ import {
   SPELL_SLOT_LEVELS,
   type SpellRowModel,
 } from "@/features/character/character-sheet/ui/beyond/spells/beyond-spell-row";
+import { MagicMissileBoostDialog } from "@/features/character/character-sheet/ui/beyond/spells/magic-missile-boost-dialog";
 import { BeyondSpellMasteryPanel } from "@/features/character/character-sheet/ui/beyond/spells/beyond-spell-mastery-panel";
 import { BeyondEldritchInvocationsPanel } from "@/features/character/character-sheet/ui/beyond/warlock/beyond-eldritch-invocations-panel";
 import { BeyondMetamagicsPanel } from "@/features/character/character-sheet/ui/beyond/sorcerer/beyond-metamagics-panel";
@@ -32,12 +33,29 @@ import {
   readSpellMasterySlugs,
 } from "@/features/character/character-sheet/lib/spells/spell-mastery";
 import {
+  MAGIC_MISSILE_MAGE_SUBCLASS,
+  missileBoostFlagsFromChoice,
+  readMissileCastBoostSnapshot,
+  shouldOfferMissileBoostModal,
+  type MissileCastBoostSnapshot,
+} from "@/features/character/character-sheet/lib/combat/magic-missile-cast-boosts";
+import {
   SheetEditAction,
   SheetEmptyHint,
   SheetSectionHeader,
 } from "@/features/character/character-sheet/ui/sheet/sheet-ui";
 import { useAbilityLabels } from "@/features/catalog/reference-catalog/api/use-ability-labels";
 import { useSpells } from "@/features/catalog/spell-catalog/api/use-spells";
+
+type CastSpellOptions = {
+  slotLevel?: number;
+  freeCastResourceSlug?: string;
+  useFreeCast?: boolean;
+  flexElevateExtraSlots?: number;
+  flexReduce?: boolean;
+  applyMissileShield?: boolean;
+  applyGigaMissile?: boolean;
+};
 
 type BeyondSpellsTabProps = {
   characterId: string;
@@ -82,10 +100,15 @@ export function BeyondSpellsTab({
   const castSpell = useCastSpell(characterId);
   const spellsCatalog = useSpells();
   const [castNote, setCastNote] = useState<string | null>(null);
+  const [pendingMissileCast, setPendingMissileCast] = useState<{
+    spellSlug: string;
+    options?: CastSpellOptions;
+    snapshot: MissileCastBoostSnapshot;
+  } | null>(null);
 
   const state = stateQuery.data;
   const isWizard = character.classSlug === "wizard";
-  const isMissileMage = character.subclassSlug === "magic-missile-mage";
+  const isMissileMage = character.subclassSlug === MAGIC_MISSILE_MAGE_SUBCLASS;
   const showSpellMastery =
     isWizard && character.level >= SPELL_MASTERY_UNLOCK_LEVEL;
   const masterySlugs = useMemo(() => {
@@ -159,16 +182,7 @@ export function BeyondSpellsTab({
     await patchState.mutateAsync({ concentratingOn: null });
   }
 
-  async function handleCast(
-    spellSlug: string,
-    options?: {
-      slotLevel?: number;
-      freeCastResourceSlug?: string;
-      useFreeCast?: boolean;
-      flexElevateExtraSlots?: number;
-      flexReduce?: boolean;
-    },
-  ) {
+  async function submitCast(spellSlug: string, options?: CastSpellOptions) {
     const result = await castSpell.mutateAsync({
       spellSlug,
       slotLevel: options?.slotLevel,
@@ -176,10 +190,35 @@ export function BeyondSpellsTab({
       useFreeCast: options?.useFreeCast,
       flexElevateExtraSlots: options?.flexElevateExtraSlots,
       flexReduce: options?.flexReduce,
+      applyMissileShield: options?.applyMissileShield,
+      applyGigaMissile: options?.applyGigaMissile,
     });
     if (result?.note?.trim()) {
       setCastNote(result.note.trim());
     }
+  }
+
+  async function handleCast(spellSlug: string, options?: CastSpellOptions) {
+    const snapshot = readMissileCastBoostSnapshot({
+      classResources: state?.classResources,
+      missileShieldArmed: state?.missileShieldArmed,
+      gigaMissileArmed: state?.gigaMissileArmed,
+    });
+    const boostsAlreadyChosen =
+      options?.applyMissileShield !== undefined ||
+      options?.applyGigaMissile !== undefined;
+    if (
+      !boostsAlreadyChosen &&
+      shouldOfferMissileBoostModal({
+        isMissileMage,
+        spellSlug,
+        snapshot,
+      })
+    ) {
+      setPendingMissileCast({ spellSlug, options, snapshot });
+      return;
+    }
+    await submitCast(spellSlug, options);
   }
 
   const flexCaster =
@@ -377,6 +416,33 @@ export function BeyondSpellsTab({
             : "Erro ao atualizar magias"}
         </p>
       ) : null}
+
+      <MagicMissileBoostDialog
+        open={pendingMissileCast != null}
+        snapshot={
+          pendingMissileCast?.snapshot ?? {
+            shieldRemaining: 0,
+            gigaRemaining: 0,
+            shieldArmed: false,
+            gigaArmed: false,
+          }
+        }
+        busy={castSpell.isPending}
+        onOpenChange={(open) => {
+          if (!open) setPendingMissileCast(null);
+        }}
+        onConfirm={(choice) => {
+          if (!pendingMissileCast) return;
+          const flags = missileBoostFlagsFromChoice({
+            snapshot: pendingMissileCast.snapshot,
+            applyShield: choice.applyShield,
+            applyGiga: choice.applyGiga,
+          });
+          const { spellSlug, options } = pendingMissileCast;
+          setPendingMissileCast(null);
+          void submitCast(spellSlug, { ...options, ...flags });
+        }}
+      />
     </div>
   );
 }
@@ -405,16 +471,7 @@ function SpellLevelGroup({
   wizardLayout?: boolean;
   freeMissileUses?: number;
   masterySlugs: Set<string>;
-  onCast: (
-    spellSlug: string,
-    options?: {
-      slotLevel?: number;
-      freeCastResourceSlug?: string;
-      useFreeCast?: boolean;
-      flexElevateExtraSlots?: number;
-      flexReduce?: boolean;
-    },
-  ) => Promise<void>;
+  onCast: (spellSlug: string, options?: CastSpellOptions) => Promise<void>;
   flexCaster?: { elevate: boolean; reduce: boolean };
 }) {
   return (

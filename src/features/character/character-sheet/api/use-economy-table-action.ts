@@ -28,15 +28,17 @@ import {
 } from "@/features/character/character-sheet/lib/combat/artifact-instance-actions";
 import { inventoryKeys } from "@/features/character/character-sheet/api/character-inventory.api";
 import { charactersKeys } from "@/features/character/characters/api/characters.api";
+import {
+  MAGIC_MISSILE_FREE_CAST_TABLE_ACTION,
+  MAGIC_MISSILE_SPELL_SLUG,
+} from "@/features/character/character-sheet/lib/combat/magic-missile-cast-boosts";
 import { gameFetch } from "@/shared/api/dnd-api/api-client";
 
 export type EconomyTableActionResultNote = {
   note: string;
 };
 
-const MAGIC_MISSILE_SPELL_SLUG = "misseis-magicos";
 const MAGIC_MISSILE_FREE_RESOURCE = "magic-missile-free";
-const MAGIC_MISSILE_FREE_CAST = "cast:misseis-magicos-free";
 
 type SessionNoteResult = {
   state: unknown;
@@ -97,6 +99,8 @@ export function useEconomyTableAction(characterId: string) {
       actionId,
       enabled,
       mutationSlug,
+      applyMissileShield,
+      applyGigaMissile,
     }: {
       tableAction: EconomyTableAction;
       classSlug?: string | null;
@@ -111,6 +115,8 @@ export function useEconomyTableAction(characterId: string) {
       actionId?: string;
       enabled?: boolean;
       mutationSlug?: string | null;
+      applyMissileShield?: boolean;
+      applyGigaMissile?: boolean;
     }): Promise<EconomyTableActionResultNote> => {
       const token = requireToken();
       try {
@@ -279,10 +285,12 @@ export function useEconomyTableAction(characterId: string) {
           };
         }
 
-        if (tableAction === MAGIC_MISSILE_FREE_CAST) {
+        if (tableAction === MAGIC_MISSILE_FREE_CAST_TABLE_ACTION) {
           const result = await castCharacterSpell(token, characterId, {
             spellSlug: MAGIC_MISSILE_SPELL_SLUG,
             freeCastResourceSlug: MAGIC_MISSILE_FREE_RESOURCE,
+            applyMissileShield,
+            applyGigaMissile,
           });
           queryClient.setQueryData(sessionKeys.state(characterId), result.state);
           return {
