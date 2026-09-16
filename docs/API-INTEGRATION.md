@@ -33,3 +33,5 @@ Métodos de atributo: `GET /ability-generation-methods` traz `slug` + `name` + `
 Classe: `GET /classes/:slug` inclui `subclassUnlockLevel` e `jackOfAllTradesLevel`; `GET /classes/:slug/progression` marca `asiOrFeat` por nível; `GET /classes/:slug/options` traz grupos `expertiseSkill*`. A ficha traz `jackOfAllTrades`; o inventário traz `attunementLimit`. O front não replica tabelas PHB desses valores.
 
 Armas: `range` + `propertyDetails` + `mastery` (não `properties` bruto).
+
+Mesa: `POST /characters/:id/rest` aceita `type: short | long | dawn`. `dawn` recarrega cargas/usos 1×/amanhecer (recursos de item) sem descanso longo.

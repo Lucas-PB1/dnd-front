@@ -1,6 +1,6 @@
 # Plano 38 — Dawn ≠ Descanso Longo
 
-**ID:** FR-28 · **Dificuldade:** difícil · **Status:** Adiado
+**ID:** FR-28 · **Dificuldade:** difícil · **Status:** Feito
 
 Só com pedido explícito. Relógio de mesa novo na API primeiro.
 
@@ -15,3 +15,7 @@ Depois do contrato na API: UI de “passar o amanhecer” distinta de descanso.
 ## Pronto quando
 
 Jogador dispara dawn sem ser “Descanso Longo”.
+
+## Feito
+
+`POST /characters/:id/rest` `{ type: "dawn" }` reusa o recover de cargas (`recoverOnDawn` em recursos de item) sem HP, slots nem condições. A ficha tem o botão **Amanhecer** ao lado dos descansos.

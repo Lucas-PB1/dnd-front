@@ -5,6 +5,7 @@ import {
   ArrowTrendingUpIcon,
   HeartIcon,
   MoonIcon,
+  SparklesIcon,
   SunIcon,
 } from "@heroicons/react/24/outline";
 import { useState, type ReactNode } from "react";
@@ -237,6 +238,18 @@ export function BeyondRestActions({ characterId }: { characterId: string }) {
     setLastRestFeedback(parts.length > 0 ? parts.join(" · ") : null);
   }
 
+  function dawn() {
+    takeRest.mutate(
+      { type: "dawn" },
+      {
+        onSuccess: (result) => {
+          const notes = formatRestNotes(result?.notes);
+          setLastRestFeedback(notes ?? "Amanhecer: cargas e usos 1× recarregados");
+        },
+      },
+    );
+  }
+
   function longRest() {
     takeRest.mutate(
       { type: "long" },
@@ -292,7 +305,7 @@ export function BeyondRestActions({ characterId }: { characterId: string }) {
         className="h-8 gap-1.5"
         data-cy="sheet-long-rest"
         disabled={takeRest.isPending}
-        title="Inclui recuperação de cargas de itens mágicos (MVP ≈ próximo amanhecer)"
+        title="Cura, espaços e recursos de classe. Não substitui o botão Amanhecer."
         onClick={() => {
           setLastRestFeedback(null);
           longRest();
@@ -300,6 +313,22 @@ export function BeyondRestActions({ characterId }: { characterId: string }) {
       >
         <MoonIcon className="size-3.5" aria-hidden />
         Descanso longo
+      </Button>
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        className="h-8 gap-1.5"
+        data-cy="sheet-dawn"
+        disabled={takeRest.isPending}
+        title="Recarrega cargas e usos 1×/amanhecer, sem descanso"
+        onClick={() => {
+          setLastRestFeedback(null);
+          dawn();
+        }}
+      >
+        <SparklesIcon className="size-3.5" aria-hidden />
+        Amanhecer
       </Button>
       {lastRestFeedback ? (
         <span

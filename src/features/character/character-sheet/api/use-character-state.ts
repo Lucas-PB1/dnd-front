@@ -112,7 +112,7 @@ export function useTakeRest(characterId: string) {
       queryClient.invalidateQueries({
         queryKey: charactersKeys.detail(characterId),
       });
-      if (result.type === "long") {
+      if (result.type === "long" || result.type === "dawn") {
         void queryClient.invalidateQueries({
           queryKey: inventoryKeys.list(characterId),
         });

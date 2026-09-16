@@ -140,7 +140,7 @@ export type CastSpellResult = {
   state: CharacterState;
 };
 
-export type RestType = "short" | "long";
+export type RestType = "short" | "long" | "dawn";
 
 export type RestPayload = {
   type: RestType;
