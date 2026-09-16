@@ -21,6 +21,7 @@ pnpm build
 
 | Doc                                                  | Assunto                 |
 | ---------------------------------------------------- | ----------------------- |
+| [docs/backlog/](./docs/backlog/README.md)            | Backlog (fácil → difícil) |
 | [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)       | Feature-Sliced Design   |
 | [docs/COLORS.md](./docs/COLORS.md)                   | Tema Taverna / Masmorra |
 | [docs/API-INTEGRATION.md](./docs/API-INTEGRATION.md) | Contrato com dnd-api    |

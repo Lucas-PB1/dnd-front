@@ -1,3 +1,5 @@
+Trabalho aberto: [../backlog/README.md](../backlog/README.md) (planos 23–25 e 29–33 = P2/P3 deste doc).
+
 # Front — SSOT sem hardcode de domínio
 
 Data: 2026-08-06  

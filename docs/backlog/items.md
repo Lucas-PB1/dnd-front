@@ -1,0 +1,50 @@
+# Itens
+
+Um ID → um plano. Status: Ready · Blocked · Adiado · Feito.
+
+| ID | Plano | Status | Item |
+| --- | --- | --- | --- |
+| FR-14 | [01](./plans/01-doc-api-integration.md) | Ready | Doc `API-INTEGRATION.md` |
+| FR-33 | [02](./plans/02-min-trait-takes.md) | Ready | `minTraitTakes` |
+| FR-32 | [03](./plans/03-xp-threshold.md) | Ready | `xpThreshold` |
+| FR-12 | [04](./plans/04-character-state-tipos.md) | Ready | Tipos `CharacterState` |
+| FR-13 | [05](./plans/05-strike-options-tipo.md) | Ready | Tipo `strikeOptions` |
+| FR-30 | [06](./plans/06-patch-conditions-delta.md) | Ready | PATCH conditions delta |
+| FR-31 | [07](./plans/07-feat-effect-flags.md) | Ready | Flags de feat na UI |
+| FR-15 | [08](./plans/08-wild-shape-eligible-http.md) | Ready | HTTP wild-shape eligible |
+| FR-16 | [09](./plans/09-companions-http.md) | Ready | HTTP companions GET/dismiss |
+| FR-18 | [10](./plans/10-vehicles-sheet-actions-http.md) | Ready | HTTP vehicles sheet-actions |
+| FR-17 | [11](./plans/11-mounts-http.md) | Ready | HTTP mounts |
+| FR-19 | [12](./plans/12-actors-list.md) | Ready | `GET /actors` |
+| FR-38 | [13](./plans/13-actors-create.md) | Ready | `POST /actors` |
+| FR-39 | [14](./plans/14-actors-delete.md) | Ready | `DELETE /actors/:id` |
+| FR-40 | [15](./plans/15-actors-get-state.md) | Ready | `GET /actors/:id/state` |
+| FR-41 | [16](./plans/16-actors-roll-attack.md) | Ready | `POST /actors/:id/rolls/attack` |
+| FR-35 | [17](./plans/17-strike-options-ui.md) | Ready | UI `strikeOptions` |
+| FR-20 | [18](./plans/18-forma-selvagem-ui.md) | Ready | UI Forma Selvagem |
+| FR-21 | [19](./plans/19-companheiros-ui.md) | Ready | UI companheiros |
+| FR-22 | [20](./plans/20-veiculos-sheet-actions-ui.md) | Ready | UI veículo sheet-actions |
+| FR-37 | [21](./plans/21-montarias-ui.md) | Ready | UI montaria |
+| FR-10 | [22](./plans/22-fsd-catalog-filters.md) | Ready | FSD filtros |
+| FR-1 | [23](./plans/23-filtros-escolas.md) | Blocked | Escolas de magia |
+| FR-34 | [24](./plans/24-filtros-categorias.md) | Blocked | Categorias de catálogo |
+| FR-2 | [25](./plans/25-pools-ferramentas.md) | Blocked | Pools de tools |
+| FR-8 | [26](./plans/26-zod-dtos.md) | Ready | Zod DTOs |
+| FR-11 | [27](./plans/27-testes-hotspot.md) | Ready | Testes hotspot |
+| FR-9 | [28](./plans/28-fatiar-character-sheet.md) | Ready | Fatiar `character-sheet` |
+| FR-3 | [29](./plans/29-point-buy-ssot.md) | Blocked | Point-buy |
+| FR-4 | [30](./plans/30-asi-wizard.md) | Blocked | ASI no wizard |
+| FR-5 | [31](./plans/31-expertise-create.md) | Blocked | Expertise create + JoaT |
+| FR-6 | [32](./plans/32-subclass-unlock-create.md) | Blocked | Unlock subclasse no create |
+| FR-7 | [33](./plans/33-max-attuned.md) | Blocked | Max sintonias |
+| FR-24 | [34](./plans/34-paladino-cobertura-lembrete.md) | Adiado | Paladino cobertura |
+| FR-23 | [35](./plans/35-misseis-modal-boost.md) | Adiado | Modal Mísseis |
+| FR-26 | [36](./plans/36-gh-cap1-tracos.md) | Adiado | GH Cap. 1 |
+| FR-25 | [37](./plans/37-pistoleiro-polish.md) | Adiado | Pistoleiro |
+| FR-28 | [38](./plans/38-dawn-vs-descanso.md) | Adiado | Dawn ≠ DL |
+| FR-27 | [39](./plans/39-companheiro-primal.md) | Adiado | Companheiro Primal |
+| FR-29 | [40](./plans/40-combate-real.md) | Adiado | Combate real |
+
+## Feito (não reabrir)
+
+P0/P1 SSOT — [frontend-hardcode-ssot.md](../plans/frontend-hardcode-ssot.md). Level-up já consome preview (ASI/expertise/unlock). Hardcode OK: brand, env, layout, query keys, hub.
