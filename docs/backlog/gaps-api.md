@@ -21,7 +21,7 @@ Cada linha é **um** plano. Detalhe só no arquivo do plano.
 | ~~`GET .../druid/wild-shape/eligible`~~ | [08](./plans/08-wild-shape-eligible-http.md) Feito |
 | ~~`GET` + `POST dismiss` companions~~ | [09](./plans/09-companions-http.md) Feito |
 | ~~`POST .../vehicles/sheet-actions`~~ | [10](./plans/10-vehicles-sheet-actions-http.md) Feito |
-| `POST .../mounts/*` | [11](./plans/11-mounts-http.md) |
+| ~~`POST .../mounts/*`~~ | [11](./plans/11-mounts-http.md) Feito |
 | `GET /actors` | [12](./plans/12-actors-list.md) |
 | `POST /actors` | [13](./plans/13-actors-create.md) |
 | `DELETE /actors/:id` | [14](./plans/14-actors-delete.md) |
