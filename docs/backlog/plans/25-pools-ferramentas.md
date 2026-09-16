@@ -1,6 +1,6 @@
 # Plano 25 — Pools de ferramentas no wizard
 
-**ID:** FR-2 · **Dificuldade:** média · **Status:** Blocked
+**ID:** FR-2 · **Dificuldade:** média · **Status:** Feito
 
 ## Gap
 

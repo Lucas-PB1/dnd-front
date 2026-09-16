@@ -7,6 +7,7 @@ import {
 import { applyFeatOptionChange } from "@/features/catalog/feat-catalog/lib/apply-feat-option-change";
 import { resolveFeatProficiencyOptions } from "@/features/catalog/feat-catalog/lib/resolve-feat-proficiency-options";
 import { CatalogSelect } from "@/features/character/create-character/ui/catalog-select";
+import type { ToolPoolsCatalog } from "@/features/character/create-character/lib/equipment/equipment-choice-resolve";
 
 type CatalogOption = {
   value: string;
@@ -22,6 +23,7 @@ type FeatOptionProficiencyFieldProps = {
   catalogProficiencyOptions: CatalogOption[];
   grantedProficiencySlugs: string[];
   catalogLoading: boolean;
+  toolCatalog?: ToolPoolsCatalog;
 };
 
 export function FeatOptionProficiencyField({
@@ -33,10 +35,12 @@ export function FeatOptionProficiencyField({
   catalogProficiencyOptions,
   grantedProficiencySlugs,
   catalogLoading,
+  toolCatalog,
 }: FeatOptionProficiencyFieldProps) {
   const whitelist = resolveFeatProficiencyOptions(
     def,
     catalogProficiencyOptions,
+    toolCatalog,
   );
   const siblingTaken = siblingFeatOptionValueIds(
     value,

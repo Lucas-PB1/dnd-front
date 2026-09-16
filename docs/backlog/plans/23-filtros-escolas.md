@@ -1,6 +1,6 @@
 # Plano 23 — Filtros: escolas de magia
 
-**ID:** FR-1 · **Dificuldade:** média · **Status:** Blocked
+**ID:** FR-1 · **Dificuldade:** média · **Status:** Feito
 
 ## Gap
 

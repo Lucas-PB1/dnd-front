@@ -41,6 +41,8 @@ import {
   useAbilityGenerationMethods,
   useFeatLabels,
 } from "@/features/catalog/reference-catalog/api/use-reference";
+import { toolPoolsCatalogFromResponse } from "@/features/catalog/reference-catalog/api/catalog-labels.api";
+import { useToolPools } from "@/features/catalog/reference-catalog/api/use-catalog-labels";
 import { useSpeciesTraitChoices } from "@/features/catalog/species-catalog/api/use-species";
 import { useSpellLabels } from "@/features/catalog/spell-catalog/api/use-spells";
 
@@ -102,6 +104,11 @@ export function useStepReview(control: Control<CreateCharacterInput>) {
     !!values.backgroundSlug,
   );
   const spellsCatalog = useSpellLabels();
+  const toolPools = useToolPools();
+  const toolCatalog = useMemo(
+    () => toolPoolsCatalogFromResponse(toolPools.data),
+    [toolPools.data],
+  );
 
   const originFeatSlug = backgroundDetail.data?.originFeatSlug ?? "";
   const originChoices = backgroundDetail.data?.originFeatChoiceSlugs ?? [];
@@ -171,7 +178,11 @@ export function useStepReview(control: Control<CreateCharacterInput>) {
         ? (backgroundTools.data?.data.find(
             (t) => t.itemSlug === values.backgroundToolItemSlug,
           )?.itemName ??
-          toolNameForSlug(values.backgroundToolItemSlug) ??
+          toolNameForSlug(
+            values.backgroundToolItemSlug,
+            undefined,
+            toolCatalog,
+          ) ??
           values.backgroundToolItemSlug)
         : null;
 
@@ -223,6 +234,7 @@ export function useStepReview(control: Control<CreateCharacterInput>) {
       itemSlug,
       classRows: classEquipment.data?.data ?? [],
       backgroundRows: backgroundEquipment.data?.data ?? [],
+      toolCatalog,
     });
   }
 

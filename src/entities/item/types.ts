@@ -1,6 +1,5 @@
 import type { PaginatedResponse } from "@/shared/api/dnd-api/types";
 
-/** Espelha ItemResponseDto */
 export type ItemSummary = {
   slug: string;
   name: string;
@@ -16,15 +15,6 @@ export type ItemSummary = {
 };
 
 export type ItemListResponse = PaginatedResponse<ItemSummary>;
-
-export const ITEM_TYPE_LABELS_PT: Record<string, string> = {
-  weapon: "Arma",
-  armor: "Armadura",
-  tool: "Ferramenta",
-  gear: "Equipamento",
-  focus: "Foco",
-  other: "Outro",
-};
 
 export const SHOP_KIND_CHIPS: Array<{
   id: string;
@@ -51,5 +41,4 @@ export const SHOP_KIND_CHIPS: Array<{
   { id: "magic", label: "Mágico", magic: true },
 ];
 
-/** Tipos da aba “Itens” do compêndio (sem armas/armaduras). */
 export const EQUIPMENT_GEAR_ITEM_TYPES = "gear,tool,focus,other";

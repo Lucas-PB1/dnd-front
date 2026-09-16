@@ -4,6 +4,7 @@ import { useMemo } from "react";
 
 import type { SpellSummary } from "@/entities/spell/types";
 import { spellCatalogFilterFields } from "@/entities/spell/lib/spell-catalog-filters";
+import { useSpellSchools } from "@/features/catalog/reference-catalog/api/use-catalog-labels";
 import { useSpellsCatalog } from "@/features/catalog/spell-catalog/api/use-spells";
 import { SpellCard } from "@/features/catalog/spell-catalog/ui/spell-card";
 import { useCatalogListState } from "@/shared/lib/use-catalog-list-state";
@@ -25,8 +26,6 @@ const SPELL_FILTER_KEYS = [
   "saveAbility",
   "rangeKind",
 ] as const;
-
-const SPELL_FILTER_FIELDS = spellCatalogFilterFields();
 
 function sortByName(a: SpellSummary, b: SpellSummary) {
   return a.name.localeCompare(b.name, "pt");
@@ -55,6 +54,14 @@ export function SpellsGrid() {
   const castingTime = filters.castingTime ?? "";
   const saveAbility = filters.saveAbility ?? "";
   const rangeKind = filters.rangeKind ?? "";
+  const schools = useSpellSchools();
+  const spellFilterFields = useMemo(
+    () =>
+      spellCatalogFilterFields(
+        schools.data && schools.data.length > 0 ? schools.data : undefined,
+      ),
+    [schools.data],
+  );
 
   const hasStructuredFilter = SPELL_FILTER_KEYS.some(
     (key) => (filters[key] ?? "").trim().length > 0,
@@ -102,7 +109,7 @@ export function SpellsGrid() {
           resultCount={total}
         />
         <CatalogFilters
-          fields={SPELL_FILTER_FIELDS}
+          fields={spellFilterFields}
           values={filters}
           onChange={setFilter}
         />

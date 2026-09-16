@@ -26,9 +26,9 @@ Um ID → um plano. Status: Ready · Blocked · Adiado · Feito.
 | FR-22 | [20](./plans/20-veiculos-sheet-actions-ui.md) | Feito | UI veículo sheet-actions |
 | FR-37 | [21](./plans/21-montarias-ui.md) | Feito | UI montaria |
 | FR-10 | [22](./plans/22-fsd-catalog-filters.md) | Feito | FSD filtros |
-| FR-1 | [23](./plans/23-filtros-escolas.md) | Blocked | Escolas de magia |
-| FR-34 | [24](./plans/24-filtros-categorias.md) | Blocked | Categorias de catálogo |
-| FR-2 | [25](./plans/25-pools-ferramentas.md) | Blocked | Pools de tools |
+| FR-1 | [23](./plans/23-filtros-escolas.md) | Feito | Escolas de magia |
+| FR-34 | [24](./plans/24-filtros-categorias.md) | Feito | Categorias de catálogo |
+| FR-2 | [25](./plans/25-pools-ferramentas.md) | Feito | Pools de tools |
 | FR-8 | [26](./plans/26-zod-dtos.md) | Ready | Zod DTOs |
 | FR-11 | [27](./plans/27-testes-hotspot.md) | Ready | Testes hotspot |
 | FR-9 | [28](./plans/28-fatiar-character-sheet.md) | Ready | Fatiar `character-sheet` |

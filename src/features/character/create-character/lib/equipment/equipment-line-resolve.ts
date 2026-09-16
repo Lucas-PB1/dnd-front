@@ -38,7 +38,8 @@ function lineFromResolved(
   if (resolved.kind === "mirror-tool") {
     const mirrored = ctx.backgroundToolItemSlug?.trim();
     if (mirrored) {
-      const name = toolNameForSlug(mirrored, resolved.pool) ?? mirrored;
+      const name =
+        toolNameForSlug(mirrored, resolved.pool, ctx.toolCatalog) ?? mirrored;
       return {
         kind: "item",
         label: name,
@@ -61,7 +62,8 @@ function lineFromResolved(
   const pickKey = choicePickKey(source, packageSlug, sortOrder);
   const picked = ctx.choicePicks?.[pickKey]?.trim();
   if (picked) {
-    const name = toolNameForSlug(picked, resolved.pool) ?? picked;
+    const name =
+      toolNameForSlug(picked, resolved.pool, ctx.toolCatalog) ?? picked;
     return {
       kind: "item",
       label: name,
@@ -159,7 +161,6 @@ export function backgroundEquipmentLines(
   return lines;
 }
 
-/** Linhas que ainda precisam de seleção do jogador. */
 export function pendingEquipmentChoices(
   lines: EquipmentLine[],
 ): EquipmentLine[] {

@@ -4,6 +4,7 @@ import {
 } from "@/entities/character/lib/character-feat";
 import { BACKGROUND_GOLD_PACKAGE_SLUG } from "@/features/character/create-character/lib/equipment";
 import { toolNameForSlug } from "@/features/character/create-character/lib/equipment/equipment-choice-resolve";
+import type { ToolPoolsCatalog } from "@/features/character/create-character/lib/equipment/equipment-choice-resolve";
 import { asiFeatSlotsToCharacterFeats } from "@/features/character/create-character/lib/feats/asi-feat-slots-to-feats";
 import type { CreateCharacterInput } from "@/features/character/create-character/model/create-character.schema";
 
@@ -57,6 +58,7 @@ export function resolveReviewEquipmentItemName(args: {
   itemSlug?: string;
   classRows: EquipmentRow[];
   backgroundRows: EquipmentRow[];
+  toolCatalog?: ToolPoolsCatalog;
 }): string | null {
   const { itemSlug } = args;
   if (!itemSlug) return null;
@@ -64,7 +66,7 @@ export function resolveReviewEquipmentItemName(args: {
   const row = rows.find(
     (r) => r.packageSlug === args.packageSlug && r.itemSlug === itemSlug,
   );
-  return row?.itemName ?? toolNameForSlug(itemSlug) ?? itemSlug;
+  return row?.itemName ?? toolNameForSlug(itemSlug, undefined, args.toolCatalog) ?? itemSlug;
 }
 
 export function resolveReviewPackageLabel(args: {

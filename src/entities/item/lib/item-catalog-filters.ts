@@ -5,12 +5,12 @@ import {
 } from "@/shared/lib/build-catalog-filter-field";
 import type { CatalogFilterField } from "@/shared/ui/catalog-filters";
 
-export const ITEM_TYPE_FILTER_OPTIONS: CatalogNamedOption[] = [
-  { slug: "gear", name: "Equipamento" },
-  { slug: "tool", name: "Ferramenta" },
-  { slug: "focus", name: "Foco" },
-  { slug: "other", name: "Outro" },
-];
+export const GEAR_COMPENDIUM_ITEM_TYPE_SLUGS = [
+  "gear",
+  "tool",
+  "focus",
+  "other",
+] as const;
 
 export const GEAR_CATALOG_KIND_OPTIONS: CatalogNamedOption[] = [
   { slug: "ammunition", name: "Munição avançada" },
@@ -39,8 +39,12 @@ export const MAGIC_ITEM_TYPE_OPTIONS: CatalogNamedOption[] = [
   { slug: "other", name: "Outro / anel / etc." },
 ];
 
+export function isGearCompendiumItemType(slug: string): boolean {
+  return (GEAR_COMPENDIUM_ITEM_TYPE_SLUGS as readonly string[]).includes(slug);
+}
+
 export function buildItemTypeFilter(
-  types: readonly CatalogNamedOption[] = ITEM_TYPE_FILTER_OPTIONS,
+  types: readonly CatalogNamedOption[],
 ): CatalogFilterField {
   return buildCatalogFilterField(
     "itemType",

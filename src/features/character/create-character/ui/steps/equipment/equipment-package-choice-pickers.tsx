@@ -3,6 +3,7 @@
 import {
   choicePickKey,
   toolOptionsForPool,
+  type ToolPoolsCatalog,
 } from "@/features/character/create-character/lib/equipment/equipment-choice-resolve";
 import type { EquipmentLine } from "@/features/character/create-character/lib/equipment";
 import { SearchableSelect } from "@/shared/ui/searchable-select";
@@ -13,6 +14,7 @@ type ChoicePickersProps = {
   lines: EquipmentLine[];
   choicePicks: Record<string, string>;
   backgroundToolItemSlug?: string;
+  toolCatalog?: ToolPoolsCatalog;
   onPick: (
     source: "class" | "background",
     packageSlug: string,
@@ -21,10 +23,13 @@ type ChoicePickersProps = {
   ) => void;
 };
 
-function toolSelectOptions(pool: NonNullable<EquipmentLine["pool"]>) {
+function toolSelectOptions(
+  pool: NonNullable<EquipmentLine["pool"]>,
+  catalog?: ToolPoolsCatalog,
+) {
   return [
     { value: "", label: "Selecionar…" },
-    ...toolOptionsForPool(pool).map((opt) => ({
+    ...toolOptionsForPool(pool, catalog).map((opt) => ({
       value: opt.slug,
       label: opt.name,
     })),
@@ -37,6 +42,7 @@ export function ChoicePickers({
   lines,
   choicePicks,
   backgroundToolItemSlug,
+  toolCatalog,
   onPick,
 }: ChoicePickersProps) {
   return (
@@ -57,7 +63,7 @@ export function ChoicePickers({
               {backgroundToolItemSlug?.trim() ? (
                 <p className="text-sm font-medium">
                   Usando:{" "}
-                  {toolOptionsForPool(pool).find(
+                  {toolOptionsForPool(pool, toolCatalog).find(
                     (o) => o.slug === backgroundToolItemSlug,
                   )?.name ?? backgroundToolItemSlug}
                 </p>
@@ -70,7 +76,7 @@ export function ChoicePickers({
                   <SearchableSelect
                     id={key}
                     aria-label={line.label}
-                    options={toolSelectOptions(pool)}
+                    options={toolSelectOptions(pool, toolCatalog)}
                     value={choicePicks[key] ?? ""}
                     placeholder="Selecionar…"
                     onValueChange={(next) =>
@@ -90,7 +96,7 @@ export function ChoicePickers({
             </label>
             <SearchableSelect
               id={key}
-              options={toolSelectOptions(pool)}
+              options={toolSelectOptions(pool, toolCatalog)}
               value={choicePicks[key] ?? ""}
               placeholder="Selecionar…"
               onValueChange={(next) =>

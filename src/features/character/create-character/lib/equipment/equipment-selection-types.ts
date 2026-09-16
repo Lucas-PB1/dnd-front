@@ -1,8 +1,10 @@
 import type { BackgroundEquipmentOption } from "@/entities/background/types";
 import type { ClassEquipmentOption } from "@/entities/class/types";
-import type { EquipmentToolPool } from "@/features/character/create-character/lib/equipment/equipment-choice-resolve";
+import type {
+  EquipmentToolPool,
+  ToolPoolsCatalog,
+} from "@/features/character/create-character/lib/equipment/equipment-choice-resolve";
 
-/** Pacote virtual: ouro do antecedente em vez dos itens (PHB). */
 export const BACKGROUND_GOLD_PACKAGE_SLUG = "gold";
 
 export type EquipmentPackage<
@@ -23,17 +25,15 @@ export type EquipmentLineKind =
 export type EquipmentLine = {
   kind: EquipmentLineKind;
   label: string;
-  /** sortOrder da linha no pacote (para picks). */
   sortOrder?: number;
   itemSlug?: string;
   quantity?: number;
   pool?: EquipmentToolPool;
-  /** Texto original do seed (debug / fallback). */
   choiceText?: string;
 };
 
 export type EquipmentResolveContext = {
   backgroundToolItemSlug?: string;
-  /** Picks explícitos: chave de `choicePickKey`. */
   choicePicks?: Record<string, string>;
+  toolCatalog?: ToolPoolsCatalog;
 };

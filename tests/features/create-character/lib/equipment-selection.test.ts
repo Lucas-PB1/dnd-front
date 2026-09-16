@@ -44,8 +44,12 @@ describe("equipment-choice-resolve", () => {
     ).toMatchObject({ kind: "pick-tool", pool: "gaming" });
   });
 
-  it("resolves tool display names", () => {
-    expect(toolNameForSlug("alaude", "instrument")).toBe("Alaúde");
+  it("resolves tool display names from catalog", () => {
+    expect(
+      toolNameForSlug("alaude", "instrument", {
+        instrument: [{ slug: "alaude", name: "Alaúde" }],
+      }),
+    ).toBe("Alaúde");
   });
 });
 
@@ -162,7 +166,7 @@ describe("equipment-selection", () => {
           },
         ],
       },
-      { backgroundToolItemSlug: "alaude" },
+      { backgroundToolItemSlug: "alaude", toolCatalog: { instrument: [{ slug: "alaude", name: "Alaúde" }] } },
     );
 
     expect(lines[0]).toMatchObject({

@@ -78,6 +78,7 @@ export function BackgroundEquipmentPickerSection({
           lines={pendingBg}
           choicePicks={choicePicks}
           backgroundToolItemSlug={backgroundToolItemSlug}
+          toolCatalog={resolveCtx.toolCatalog}
           onPick={onChoicePick}
         />
       ) : null}

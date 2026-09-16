@@ -6,6 +6,7 @@ import {
   weaponCostText,
   weaponWeightText,
 } from "@/features/catalog/equipment-catalog/lib/weapon-labels";
+import type { CatalogNamedOption } from "@/shared/lib/build-catalog-filter-field";
 import { toMetricProse } from "@/shared/lib/metric";
 
 export type ItemCatalogTraitLine = {
@@ -13,9 +14,12 @@ export type ItemCatalogTraitLine = {
   description: string;
 };
 
-export function weaponEquipmentStats(weapon: WeaponSummary): ItemCatalogStat[] {
+export function weaponEquipmentStats(
+  weapon: WeaponSummary,
+  categories?: readonly CatalogNamedOption[],
+): ItemCatalogStat[] {
   const stats: ItemCatalogStat[] = [
-    { label: "Categoria", value: weaponCategoryLabel(weapon.category) },
+    { label: "Categoria", value: weaponCategoryLabel(weapon.category, categories) },
   ];
 
   if (weapon.damage) {
@@ -101,7 +105,6 @@ export function weaponTraitLines(weapon: WeaponSummary): ItemCatalogTraitLine[] 
   return lines;
 }
 
-/** Linha curta na listagem da loja (dano + alcance). */
 export function weaponListQuickHint(
   weapon: Pick<
     WeaponSummary,
@@ -143,7 +146,6 @@ export function weaponListQuickHint(
   return parts.length > 0 ? parts.join(" · ") : null;
 }
 
-/** Linha curta na listagem da loja (CA + modificador). */
 export function armorListQuickHint(
   armor: Pick<
     ArmorSummary,

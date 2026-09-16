@@ -5,15 +5,8 @@ import {
 } from "@/shared/lib/build-catalog-filter-field";
 import type { CatalogFilterField } from "@/shared/ui/catalog-filters";
 
-export const ARMOR_CATEGORY_FILTER_OPTIONS: CatalogNamedOption[] = [
-  { slug: "light", name: "Leve" },
-  { slug: "medium", name: "Média" },
-  { slug: "heavy", name: "Pesada" },
-  { slug: "shield", name: "Escudo" },
-];
-
 export function buildArmorCategoryFilter(
-  categories: readonly CatalogNamedOption[] = ARMOR_CATEGORY_FILTER_OPTIONS,
+  categories: readonly CatalogNamedOption[] = [],
 ): CatalogFilterField {
   return buildCatalogFilterField(
     "category",

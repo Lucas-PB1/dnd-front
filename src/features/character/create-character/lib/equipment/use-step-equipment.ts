@@ -26,6 +26,8 @@ import {
   type EquipmentResolveContext,
 } from "@/features/character/create-character/lib/equipment";
 import type { CreateCharacterInput } from "@/features/character/create-character/model/create-character.schema";
+import { toolPoolsCatalogFromResponse } from "@/features/catalog/reference-catalog/api/catalog-labels.api";
+import { useToolPools } from "@/features/catalog/reference-catalog/api/use-catalog-labels";
 
 export function useStepEquipment(
   control: Control<CreateCharacterInput>,
@@ -53,6 +55,11 @@ export function useStepEquipment(
     !!backgroundSlug,
   );
   const backgroundDetail = useBackgroundDetail(backgroundSlug, !!backgroundSlug);
+  const toolPools = useToolPools();
+  const toolCatalog = useMemo(
+    () => toolPoolsCatalogFromResponse(toolPools.data),
+    [toolPools.data],
+  );
 
   const classPackages = useMemo(
     () => groupEquipmentPackages(classEquipment.data?.data ?? []),
@@ -67,8 +74,9 @@ export function useStepEquipment(
     () => ({
       backgroundToolItemSlug: backgroundToolItemSlug?.trim() || undefined,
       choicePicks,
+      toolCatalog,
     }),
-    [backgroundToolItemSlug, choicePicks],
+    [backgroundToolItemSlug, choicePicks, toolCatalog],
   );
 
   const backgroundGoldOption =
@@ -142,6 +150,7 @@ export function useStepEquipment(
     const ctx: EquipmentResolveContext = {
       backgroundToolItemSlug: backgroundToolItemSlug?.trim() || undefined,
       choicePicks: picks,
+      toolCatalog,
     };
 
     const classPart = (() => {
@@ -168,7 +177,6 @@ export function useStepEquipment(
     applyEquipment([...classPart, ...bgPart]);
   }
 
-  // Espelha a ferramenta do antecedente no kit — só quando o slug muda de fato.
   const prevToolRef = useRef(backgroundToolItemSlug);
   useEffect(() => {
     const prev = prevToolRef.current;
@@ -177,7 +185,6 @@ export function useStepEquipment(
     if (!selectedClassPkg && !selectedBgPkg) return;
     if (classPackages.length === 0 && backgroundPackages.length === 0) return;
     rebuildEquipment();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- sync pontual por ferramenta
   }, [backgroundToolItemSlug]);
 
   function selectClassPackage(packageSlug: string) {

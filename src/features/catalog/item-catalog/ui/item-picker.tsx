@@ -3,32 +3,27 @@
 import { useMemo, useState } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
-import { ITEM_TYPE_LABELS_PT, type ItemSummary } from "@/entities/item/types";
+import type { ItemSummary } from "@/entities/item/types";
 import { useAllItems } from "@/features/catalog/item-catalog/api/use-items";
+import { useItemTypes } from "@/features/catalog/reference-catalog/api/use-catalog-labels";
+import {
+  catalogFilterOptionsFromNamed,
+  nameForCatalogSlug,
+} from "@/shared/lib/build-catalog-filter-field";
 import { useDebouncedValue } from "@/shared/lib/use-debounced-value";
 import { toMetricProse } from "@/shared/lib/metric";
 import { cn } from "@/shared/lib/utils";
 import { Input } from "@/shared/ui/input";
 
-const TYPE_FILTERS = [
-  { value: "", label: "Todos" },
-  ...Object.entries(ITEM_TYPE_LABELS_PT).map(([value, label]) => ({
-    value,
-    label,
-  })),
-] as const;
-
 type ItemPickerProps = {
   id: string;
   value: string;
   onChange: (slug: string) => void;
-  /** Item selecionado (para preço etc.) ou null se limpar. */
   onItemChange?: (item: ItemSummary | null) => void;
   excludeSlugs?: string[];
   disabled?: boolean;
 };
 
-/** Catálogo estilo Beyond: busca + chips de tipo + lista selecionável. */
 export function ItemPicker({
   id,
   value,
@@ -40,6 +35,14 @@ export function ItemPicker({
   const [search, setSearch] = useState("");
   const [itemType, setItemType] = useState("");
   const debouncedSearch = useDebouncedValue(search, 300);
+  const itemTypes = useItemTypes();
+  const typeFilters = useMemo(
+    () => [
+      { value: "", label: "Todos" },
+      ...catalogFilterOptionsFromNamed(itemTypes.data ?? []),
+    ],
+    [itemTypes.data],
+  );
 
   const itemsQuery = useAllItems(
     {
@@ -86,7 +89,7 @@ export function ItemPicker({
           aria-label="Filtrar por tipo"
           className="flex flex-wrap gap-1.5"
         >
-          {TYPE_FILTERS.map((filter) => {
+          {typeFilters.map((filter) => {
             const active = itemType === filter.value;
             return (
               <button
@@ -161,6 +164,7 @@ export function ItemPicker({
               <ItemResultRow
                 key={item.slug}
                 item={item}
+                typeLabel={nameForCatalogSlug(item.itemType, itemTypes.data)}
                 selected={value === item.slug}
                 disabled={disabled}
                 onSelect={() => {
@@ -178,16 +182,17 @@ export function ItemPicker({
 
 function ItemResultRow({
   item,
+  typeLabel,
   selected,
   disabled,
   onSelect,
 }: {
   item: ItemSummary;
+  typeLabel: string;
   selected: boolean;
   disabled?: boolean;
   onSelect: () => void;
 }) {
-  const typeLabel = ITEM_TYPE_LABELS_PT[item.itemType] ?? item.itemType;
   const meta = [typeLabel, item.costText, item.weight ? toMetricProse(item.weight) : null]
     .filter(Boolean)
     .join(" · ");

@@ -1,3 +1,5 @@
+"use client";
+
 import type { WeaponSummary } from "@/entities/weapon/types";
 import {
   weaponCategoryLabel,
@@ -5,6 +7,7 @@ import {
   weaponTeaser,
   weaponWeightText,
 } from "@/features/catalog/equipment-catalog/lib/weapon-labels";
+import { useWeaponCategories } from "@/features/catalog/reference-catalog/api/use-catalog-labels";
 import { CatalogEditionChip } from "@/shared/ui/catalog-edition-chip";
 import { withCatalogReturn } from "@/shared/lib/catalog-return";
 import { CatalogListCard } from "@/shared/ui/catalog-list-card";
@@ -16,16 +19,18 @@ type WeaponCardProps = {
 };
 
 export function WeaponCard({ weapon, listPath, className }: WeaponCardProps) {
+  const categories = useWeaponCategories();
   const teaser = weaponTeaser(weapon);
   const cost = weaponCostText(weapon);
   const weight = weaponWeightText(weapon);
+  const categoryLabel = weaponCategoryLabel(weapon.category, categories.data);
 
   return (
     <CatalogListCard
       href={withCatalogReturn(`/equipment/weapons/${weapon.slug}`, listPath)}
       title={weapon.name}
       titleExtra={<CatalogEditionChip editionSlug={weapon.editionSlug} />}
-      eyebrow={weaponCategoryLabel(weapon.category)}
+      eyebrow={categoryLabel}
       imageUrl={weapon.imageUrl}
       teaser={teaser}
       aside={

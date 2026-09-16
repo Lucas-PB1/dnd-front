@@ -1,6 +1,6 @@
 # Plano 24 — Filtros: categorias de item/feat/arma
 
-**ID:** FR-34 · **Dificuldade:** média · **Status:** Blocked · **Depende:** 22 (FSD)
+**ID:** FR-34 · **Dificuldade:** média · **Status:** Feito · **Depende:** 22 (FSD)
 
 ## Gap
 

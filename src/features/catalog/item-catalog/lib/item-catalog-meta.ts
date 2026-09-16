@@ -1,7 +1,4 @@
-import {
-  ITEM_TYPE_LABELS_PT,
-  type ItemSummary,
-} from "@/entities/item/types";
+import type { ItemSummary } from "@/entities/item/types";
 import {
   bardingShopTypeLabel,
   isBardingItem,
@@ -22,6 +19,10 @@ import {
   readEditionSlug,
 } from "@/entities/item/lib/catalog-item-properties";
 import { toMetricProse } from "@/shared/lib/metric";
+import {
+  nameForCatalogSlug,
+  type CatalogNamedOption,
+} from "@/shared/lib/build-catalog-filter-field";
 
 export type ItemCatalogStat = { label: string; value: string };
 
@@ -38,8 +39,11 @@ export type ItemCatalogBadge = {
   tone?: ItemCatalogBadgeTone;
 };
 
-export function itemCatalogTypeLabel(item: Pick<ItemSummary, "itemType">): string {
-  return ITEM_TYPE_LABELS_PT[item.itemType] ?? item.itemType;
+export function itemCatalogTypeLabel(
+  item: Pick<ItemSummary, "itemType">,
+  types?: readonly CatalogNamedOption[],
+): string {
+  return nameForCatalogSlug(item.itemType, types);
 }
 
 function isMagicItem(
@@ -54,7 +58,6 @@ function isCoverageKind(
   return item.kind === "coverage" || item.properties?.kind === "coverage";
 }
 
-/** Chips para listagem da loja (tipo, preço, mágico, cobertura…). */
 export function itemCatalogShopBadges(
   item: Pick<
     ItemSummary,
@@ -64,16 +67,23 @@ export function itemCatalogShopBadges(
     weapon?: WeaponSummary | null;
     armor?: ArmorSummary | null;
   },
+  labels?: {
+    itemTypes?: readonly CatalogNamedOption[];
+    weaponCategories?: readonly CatalogNamedOption[];
+  },
 ): ItemCatalogBadge[] {
   const props = item.properties;
   const equipmentCategory =
     equipment?.armor?.categoryName ??
     (equipment?.weapon
-      ? weaponCategoryLabel(equipment.weapon.category)
+      ? weaponCategoryLabel(
+          equipment.weapon.category,
+          labels?.weaponCategories,
+        )
       : null);
   const typeLabel = isBardingItem(item)
     ? bardingShopTypeLabel()
-    : itemCatalogTypeLabel(item);
+    : itemCatalogTypeLabel(item, labels?.itemTypes);
   const category =
     equipmentCategory ??
     (typeof props?.category === "string" ? props.category.trim() : null);
@@ -163,7 +173,6 @@ export function itemCatalogShopBadges(
   return badges;
 }
 
-/** Dica rápida (CA, dano, aplica em…) antes da descrição. */
 export function itemCatalogListQuickHint(
   item: Pick<ItemSummary, "itemType" | "properties">,
   equipment?: {
@@ -227,17 +236,17 @@ export function itemCatalogListQuickHint(
   return null;
 }
 
-/** Linha curta para listas (tipo · preço · raridade …). */
 export function itemCatalogMetaLine(
   item: Pick<
     ItemSummary,
     "itemType" | "costText" | "weight" | "kind" | "consumable" | "properties"
   >,
+  types?: readonly CatalogNamedOption[],
 ): string {
   const props = item.properties;
   const typeLabel = isBardingItem(item)
     ? bardingShopTypeLabel()
-    : itemCatalogTypeLabel(item);
+    : itemCatalogTypeLabel(item, types);
   const category =
     typeof props?.category === "string" ? props.category.trim() : null;
   const rarityLabel =
@@ -259,7 +268,6 @@ export function itemCatalogMetaLine(
   return parts.join(" · ");
 }
 
-/** Texto curto para preview na listagem. */
 export function itemCatalogTeaser(
   item: Pick<ItemSummary, "description" | "properties">,
 ): string | null {
@@ -272,11 +280,14 @@ export function itemCatalogTeaser(
   return header || null;
 }
 
-export function itemCatalogStats(item: ItemSummary): ItemCatalogStat[] {
+export function itemCatalogStats(
+  item: ItemSummary,
+  types?: readonly CatalogNamedOption[],
+): ItemCatalogStat[] {
   const props = item.properties ?? null;
   const typeLabel = isBardingItem(item)
     ? bardingShopTypeLabel()
-    : itemCatalogTypeLabel(item);
+    : itemCatalogTypeLabel(item, types);
   const category =
     typeof props?.category === "string" ? props.category.trim() : null;
   const rarityLabel =

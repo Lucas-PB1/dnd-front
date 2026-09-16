@@ -5,17 +5,6 @@ import {
 } from "@/shared/lib/build-catalog-filter-field";
 import type { CatalogFilterField } from "@/shared/ui/catalog-filters";
 
-export const SPELL_SCHOOL_OPTIONS: CatalogNamedOption[] = [
-  { slug: "abjuracao", name: "Abjuração" },
-  { slug: "adivinhacao", name: "Adivinhação" },
-  { slug: "encantamento", name: "Encantamento" },
-  { slug: "evocacao", name: "Evocação" },
-  { slug: "ilusao", name: "Ilusão" },
-  { slug: "invocacao", name: "Invocação" },
-  { slug: "necromancia", name: "Necromancia" },
-  { slug: "transmutacao", name: "Transmutação" },
-];
-
 export function buildSpellLevelFilter(): CatalogFilterField {
   return buildCatalogFilterField("level", "Círculo", [
     { value: "0", label: "Truque" },
@@ -32,7 +21,7 @@ export function buildSpellLevelFilter(): CatalogFilterField {
 }
 
 export function buildSpellSchoolFilter(
-  schools: readonly CatalogNamedOption[] = SPELL_SCHOOL_OPTIONS,
+  schools: readonly CatalogNamedOption[] = [],
 ): CatalogFilterField {
   return buildCatalogFilterField(
     "school",

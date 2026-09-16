@@ -27,6 +27,7 @@ import {
   DialogTitle,
 } from "@/shared/ui/dialog";
 import { itemCatalogMetaLine } from "@/features/catalog/item-catalog/lib/item-catalog-meta";
+import { useItemTypes } from "@/features/catalog/reference-catalog/api/use-catalog-labels";
 
 type ItemCatalogDetailTriggerProps = {
   item: Pick<ItemSummary, "slug" | "name"> &
@@ -35,7 +36,6 @@ type ItemCatalogDetailTriggerProps = {
   className?: string;
 };
 
-/** Abre detalhe do item (descrição + metadados) sem sair da loja/ficha. */
 export function ItemCatalogDetailTrigger({
   item,
   variant = "icon",
@@ -59,7 +59,8 @@ export function ItemCatalogDetailTrigger({
     },
     open,
   );
-  const subtitle = itemCatalogMetaLine(resolved);
+  const itemTypes = useItemTypes();
+  const subtitle = itemCatalogMetaLine(resolved, itemTypes.data);
 
   return (
     <>

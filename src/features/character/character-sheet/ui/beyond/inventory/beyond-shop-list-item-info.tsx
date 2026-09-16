@@ -9,6 +9,7 @@ import {
   itemCatalogTeaser,
 } from "@/features/catalog/item-catalog/lib/item-catalog-meta";
 import { isBardingItem } from "@/features/catalog/item-catalog/lib/barding";
+import { useItemTypes, useWeaponCategories } from "@/features/catalog/reference-catalog/api/use-catalog-labels";
 import {
   Badge,
   badgeVariantFromTone,
@@ -29,7 +30,6 @@ type BeyondShopListItemInfoProps = {
   className?: string;
 };
 
-/** Metadados ricos na listagem da loja (chips + dica + teaser). */
 export function BeyondShopListItemInfo({
   item,
   weapon,
@@ -37,7 +37,16 @@ export function BeyondShopListItemInfo({
   proficiencyHint,
   className,
 }: BeyondShopListItemInfoProps) {
-  const badges = itemCatalogShopBadges(item, { weapon, armor });
+  const itemTypes = useItemTypes();
+  const weaponCategories = useWeaponCategories();
+  const badges = itemCatalogShopBadges(
+    item,
+    { weapon, armor },
+    {
+      itemTypes: itemTypes.data,
+      weaponCategories: weaponCategories.data,
+    },
+  );
   const quickHint = itemCatalogListQuickHint(item, { weapon, armor });
   const teaser = itemCatalogTeaser(item);
   const preview = quickHint ?? (teaser ? firstSentence(teaser) : null);

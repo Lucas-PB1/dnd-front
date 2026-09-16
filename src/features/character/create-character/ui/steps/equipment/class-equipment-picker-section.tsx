@@ -58,6 +58,7 @@ export function ClassEquipmentPickerSection({
           packageSlug={selectedClassPkg}
           lines={pendingClass}
           choicePicks={choicePicks}
+          toolCatalog={resolveCtx.toolCatalog}
           onPick={onChoicePick}
         />
       ) : null}

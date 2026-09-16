@@ -1,9 +1,15 @@
 import type { WeaponSummary } from "@/entities/weapon/types";
-import { WEAPON_CATEGORY_LABELS_PT } from "@/entities/weapon/types";
+import {
+  nameForCatalogSlug,
+  type CatalogNamedOption,
+} from "@/shared/lib/build-catalog-filter-field";
 import { toMetricProse } from "@/shared/lib/metric";
 
-export function weaponCategoryLabel(category: string) {
-  return WEAPON_CATEGORY_LABELS_PT[category] ?? category;
+export function weaponCategoryLabel(
+  category: string,
+  categories?: readonly CatalogNamedOption[],
+) {
+  return nameForCatalogSlug(category, categories);
 }
 
 export function weaponCostText(weapon: WeaponSummary) {
@@ -11,7 +17,6 @@ export function weaponCostText(weapon: WeaponSummary) {
   return typeof text === "string" ? text : null;
 }
 
-/** Ignora placeholder de peso vazio (`—`, `-`, etc.). */
 export function weaponWeightText(weapon: WeaponSummary) {
   const weight = weapon.weight?.trim();
   if (!weight || /^[—–−-]+$/.test(weight)) return null;

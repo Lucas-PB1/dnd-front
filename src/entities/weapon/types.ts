@@ -11,7 +11,6 @@ export type WeaponRange = {
   max: number | null;
 };
 
-/** Espelha WeaponResponseDto */
 export type WeaponSummary = {
   slug: string;
   name: string;
@@ -29,9 +28,3 @@ export type WeaponSummary = {
 };
 
 export type WeaponListResponse = PaginatedResponse<WeaponSummary>;
-
-export const WEAPON_CATEGORY_LABELS_PT: Record<string, string> = {
-  simple: "Arma Simples",
-  martial: "Arma Marcial",
-  advanced: "Arma Avançada",
-};

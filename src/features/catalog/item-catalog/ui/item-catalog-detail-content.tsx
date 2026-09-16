@@ -12,6 +12,7 @@ import {
   itemCatalogStats,
   itemCatalogTypeLabel,
 } from "@/features/catalog/item-catalog/lib/item-catalog-meta";
+import { useItemTypes, useWeaponCategories } from "@/features/catalog/reference-catalog/api/use-catalog-labels";
 import { CatalogMediaImage } from "@/shared/design-system/patterns/catalog-media-image";
 import { PhbProse } from "@/shared/ui/phb-prose";
 import { cn } from "@/shared/lib/utils";
@@ -23,24 +24,21 @@ type ItemCatalogDetailContentProps = {
   armor?: ArmorSummary;
   equipmentPending?: boolean;
   isLoading?: boolean;
-  /** Preview de 2 linhas na listagem da loja. */
   compact?: boolean;
-  /**
-   * Modal com título/subtítulo próprios (ficha/loja): não repete o tipo
-   * no corpo e usa imagem com object-contain.
-   */
   embedded?: boolean;
   className?: string;
 };
 
 function resolveStats(
   item: ItemSummary,
-  weapon?: WeaponSummary,
-  armor?: ArmorSummary,
+  weapon: WeaponSummary | undefined,
+  armor: ArmorSummary | undefined,
+  itemTypes: readonly { slug: string; name: string }[] | undefined,
+  weaponCategories: readonly { slug: string; name: string }[] | undefined,
 ) {
-  if (weapon) return weaponEquipmentStats(weapon);
+  if (weapon) return weaponEquipmentStats(weapon, weaponCategories);
   if (armor) return armorEquipmentStats(armor);
-  return itemCatalogStats(item);
+  return itemCatalogStats(item, itemTypes);
 }
 
 export function ItemCatalogDetailContent({
@@ -53,13 +51,21 @@ export function ItemCatalogDetailContent({
   embedded = false,
   className,
 }: ItemCatalogDetailContentProps) {
+  const itemTypes = useItemTypes();
+  const weaponCategories = useWeaponCategories();
   const props = item.properties;
   const header =
     typeof props?.header === "string" ? props.header.trim() : null;
   const rarityLabel =
     typeof props?.rarityLabel === "string" ? props.rarityLabel.trim() : null;
   const description = item.description?.trim() ?? "";
-  const stats = resolveStats(item, weapon, armor);
+  const stats = resolveStats(
+    item,
+    weapon,
+    armor,
+    itemTypes.data,
+    weaponCategories.data,
+  );
   const traitLines = weapon ? weaponTraitLines(weapon) : [];
 
   if (isLoading || equipmentPending) {
@@ -93,7 +99,7 @@ export function ItemCatalogDetailContent({
   const eyebrow = [
     props?.magic === true ? "Item mágico" : null,
     rarityLabel,
-    embedded ? null : itemCatalogTypeLabel(item),
+    embedded ? null : itemCatalogTypeLabel(item, itemTypes.data),
   ]
     .filter(Boolean)
     .join(" · ");
@@ -189,7 +195,6 @@ export function ItemCatalogDetailContent({
   );
 }
 
-/** Modal aninhado (loja/ficha): overlay mais escuro e painel com mais contraste. */
 export const ITEM_CATALOG_DETAIL_DIALOG_CLASS =
   "border-2 border-primary/35 bg-card shadow-2xl ring-2 ring-black/25 sm:max-w-xl";
 export const ITEM_CATALOG_DETAIL_DIALOG_OVERLAY_CLASS =

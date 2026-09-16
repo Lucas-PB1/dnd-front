@@ -12,7 +12,9 @@ import { GearItemCard } from "@/features/catalog/equipment-catalog/ui/gear-item-
 import {
   buildGearCatalogKindFilter,
   buildItemTypeFilter,
+  isGearCompendiumItemType,
 } from "@/entities/item/lib/item-catalog-filters";
+import { useItemTypes } from "@/features/catalog/reference-catalog/api/use-catalog-labels";
 import { useCatalogListState } from "@/shared/lib/use-catalog-list-state";
 import { paginateCatalogItems } from "@/shared/lib/catalog-pagination";
 import { CATALOG_DETAIL_STALE_MS } from "@/shared/lib/catalog-query";
@@ -28,11 +30,6 @@ function sortByName(a: ItemSummary, b: ItemSummary) {
   return a.name.localeCompare(b.name, "pt");
 }
 
-const GEAR_CATALOG_FILTERS = [
-  buildItemTypeFilter(),
-  buildGearCatalogKindFilter(),
-];
-
 export function GearItemsGrid() {
   const {
     query,
@@ -47,6 +44,13 @@ export function GearItemsGrid() {
     syncUrl: true,
     filterKeys: ["itemType", "catalogKind", "editionSlug"],
   });
+  const itemTypes = useItemTypes();
+  const gearCatalogFilters = useMemo(() => {
+    const types = (itemTypes.data ?? []).filter((row) =>
+      isGearCompendiumItemType(row.slug),
+    );
+    return [buildItemTypeFilter(types), buildGearCatalogKindFilter()];
+  }, [itemTypes.data]);
 
   const itemType = filters.itemType ?? "";
   const catalogKind = filters.catalogKind ?? "";
@@ -109,7 +113,7 @@ export function GearItemsGrid() {
             resultCount={total}
           />
           <CatalogFilters
-            fields={GEAR_CATALOG_FILTERS}
+            fields={gearCatalogFilters}
             values={filters}
             onChange={setFilter}
           />

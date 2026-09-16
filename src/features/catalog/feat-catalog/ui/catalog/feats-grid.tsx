@@ -4,6 +4,7 @@ import { useMemo } from "react";
 
 import type { FeatSummary } from "@/entities/feat/types";
 import { buildFeatCategoryFilter } from "@/entities/feat/lib/feat-catalog-filters";
+import { useFeatCategories } from "@/features/catalog/reference-catalog/api/use-catalog-labels";
 import { useFeatsCatalog } from "@/features/catalog/feat-catalog/api/use-feats";
 import { FeatCard } from "@/features/catalog/feat-catalog/ui/catalog/feat-card";
 import { useCatalogListState } from "@/shared/lib/use-catalog-list-state";
@@ -19,8 +20,6 @@ function sortByName(a: FeatSummary, b: FeatSummary) {
   return a.name.localeCompare(b.name, "pt");
 }
 
-const FEAT_CATEGORY_FILTER = buildFeatCategoryFilter();
-
 export function FeatsGrid() {
   const {
     query,
@@ -32,6 +31,16 @@ export function FeatsGrid() {
     setFilter,
     listPath,
   } = useCatalogListState({ syncUrl: true, filterKeys: ["category"] });
+  const categories = useFeatCategories();
+  const featCategoryFilter = useMemo(
+    () =>
+      buildFeatCategoryFilter(
+        categories.data && categories.data.length > 0
+          ? categories.data
+          : undefined,
+      ),
+    [categories.data],
+  );
 
   const category = filters.category ?? "";
   const isFiltered =
@@ -74,7 +83,7 @@ export function FeatsGrid() {
           resultCount={total}
         />
         <CatalogFilters
-          fields={[FEAT_CATEGORY_FILTER]}
+          fields={[featCategoryFilter]}
           values={filters}
           onChange={setFilter}
         />

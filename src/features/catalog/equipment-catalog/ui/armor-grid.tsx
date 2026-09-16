@@ -6,6 +6,7 @@ import type { ArmorSummary } from "@/entities/armor/types";
 import { useArmorCatalog } from "@/features/catalog/equipment-catalog/api/use-equipment";
 import { ArmorCard } from "@/features/catalog/equipment-catalog/ui/armor-card";
 import { buildArmorCategoryFilter } from "@/entities/armor/lib/armor-catalog-filters";
+import { useArmorCategories } from "@/features/catalog/reference-catalog/api/use-catalog-labels";
 import { useCatalogListState } from "@/shared/lib/use-catalog-list-state";
 import { paginateCatalogItems } from "@/shared/lib/catalog-pagination";
 import { CatalogFilters } from "@/shared/ui/catalog-filters";
@@ -19,8 +20,6 @@ function sortByName(a: ArmorSummary, b: ArmorSummary) {
   return a.name.localeCompare(b.name, "pt");
 }
 
-const ARMOR_CATEGORY_FILTER = buildArmorCategoryFilter();
-
 export function ArmorGrid() {
   const {
     query,
@@ -32,6 +31,16 @@ export function ArmorGrid() {
     setFilter,
     listPath,
   } = useCatalogListState({ syncUrl: true, filterKeys: ["category"] });
+  const categories = useArmorCategories();
+  const armorCategoryFilter = useMemo(
+    () =>
+      buildArmorCategoryFilter(
+        categories.data && categories.data.length > 0
+          ? categories.data
+          : undefined,
+      ),
+    [categories.data],
+  );
 
   const category = filters.category ?? "";
   const isFiltered =
@@ -74,7 +83,7 @@ export function ArmorGrid() {
           resultCount={total}
         />
         <CatalogFilters
-          fields={[ARMOR_CATEGORY_FILTER]}
+          fields={[armorCategoryFilter]}
           values={filters}
           onChange={setFilter}
         />

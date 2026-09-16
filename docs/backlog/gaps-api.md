@@ -38,14 +38,14 @@ Cada linha é **um** plano. Detalhe só no arquivo do plano.
 | ~~Veículo sem sheet-actions na UI~~ | [20](./plans/20-veiculos-sheet-actions-ui.md) Feito |
 | ~~Montaria sem cliente/UI~~ | [21](./plans/21-montarias-ui.md) Feito |
 
-## Compêndio (falta endpoint de lista)
+## Compêndio (labels via API)
 
 | Gap | Plano |
 | --- | --- |
 | ~~Import FSD nos filtros~~ | [22](./plans/22-fsd-catalog-filters.md) Feito |
-| Escolas hardcoded | [23](./plans/23-filtros-escolas.md) |
-| Categorias hardcoded | [24](./plans/24-filtros-categorias.md) |
-| Pools de tools hardcoded | [25](./plans/25-pools-ferramentas.md) |
+| ~~Escolas hardcoded~~ | [23](./plans/23-filtros-escolas.md) Feito |
+| ~~Categorias hardcoded~~ | [24](./plans/24-filtros-categorias.md) Feito |
+| ~~Pools de tools hardcoded~~ | [25](./plans/25-pools-ferramentas.md) Feito |
 
 ## Qualidade / SSOT / adiado
 

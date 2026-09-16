@@ -34,12 +34,12 @@ describe("resolveFeatProficiencyOptions", () => {
     expect(options).toEqual([{ value: "alaude", label: "Alaúde" }]);
   });
 
-  it("falls back to local instruments when API whitelist is empty", () => {
+  it("falls back to tool-pool catalog when API whitelist is empty", () => {
     const options = resolveFeatProficiencyOptions(
       def({ optionKey: "musicalInstrument2", values: [] }),
       [],
+      { instrument: [{ slug: "alaude", name: "Alaúde" }] },
     );
-    expect(options.some((o) => o.value === "alaude")).toBe(true);
-    expect(options.some((o) => o.value === "instrumento-musical")).toBe(false);
+    expect(options).toEqual([{ value: "alaude", label: "Alaúde" }]);
   });
 });

@@ -1,9 +1,12 @@
+"use client";
+
 import type { ItemSummary } from "@/entities/item/types";
-import { ITEM_TYPE_LABELS_PT } from "@/entities/item/types";
+import { nameForCatalogSlug } from "@/shared/lib/build-catalog-filter-field";
 import {
   catalogKindLabelFromItem,
   readEditionSlug,
 } from "@/entities/item/lib/catalog-item-properties";
+import { useItemTypes } from "@/features/catalog/reference-catalog/api/use-catalog-labels";
 import { withCatalogReturn } from "@/shared/lib/catalog-return";
 import { stripCatalogWikiLinks } from "@/shared/lib/strip-catalog-wiki-links";
 import { toMetricProse } from "@/shared/lib/metric";
@@ -32,7 +35,8 @@ function propBool(
 }
 
 export function GearItemCard({ item, listPath, className }: GearItemCardProps) {
-  const typeLabel = ITEM_TYPE_LABELS_PT[item.itemType] ?? item.itemType;
+  const itemTypes = useItemTypes();
+  const typeLabel = nameForCatalogSlug(item.itemType, itemTypes.data);
   const rarityLabel = propString(item.properties, "rarityLabel");
   const category = propString(item.properties, "category");
   const editionSlug = readEditionSlug(item.properties);

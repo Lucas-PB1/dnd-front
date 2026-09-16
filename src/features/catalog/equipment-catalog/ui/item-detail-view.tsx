@@ -3,9 +3,10 @@
 import { Suspense } from "react";
 
 import type { ItemSummary } from "@/entities/item/types";
-import { ITEM_TYPE_LABELS_PT } from "@/entities/item/types";
 import { useEquipmentCatalogLinks } from "@/features/catalog/equipment-catalog/api/use-equipment-catalog-links";
 import { useItemDetail } from "@/features/catalog/equipment-catalog/api/use-equipment";
+import { useItemTypes } from "@/features/catalog/reference-catalog/api/use-catalog-labels";
+import { nameForCatalogSlug } from "@/shared/lib/build-catalog-filter-field";
 import { useCatalogBackHref } from "@/shared/lib/use-catalog-back-href";
 import { toMetricProse } from "@/shared/lib/metric";
 import {
@@ -19,7 +20,8 @@ type ItemDetailViewProps = {
 };
 
 function ItemHero({ item, backHref }: { item: ItemSummary; backHref: string }) {
-  const typeLabel = ITEM_TYPE_LABELS_PT[item.itemType] ?? item.itemType;
+  const itemTypes = useItemTypes();
+  const typeLabel = nameForCatalogSlug(item.itemType, itemTypes.data);
   const props = item.properties ?? null;
   const rarityLabel =
     typeof props?.rarityLabel === "string" ? props.rarityLabel : null;

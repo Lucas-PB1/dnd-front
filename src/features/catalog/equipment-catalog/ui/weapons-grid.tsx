@@ -6,6 +6,7 @@ import type { WeaponSummary } from "@/entities/weapon/types";
 import { useWeaponsCatalog } from "@/features/catalog/equipment-catalog/api/use-equipment";
 import { WeaponCard } from "@/features/catalog/equipment-catalog/ui/weapon-card";
 import { buildWeaponCategoryFilter } from "@/entities/weapon/lib/weapon-catalog-filters";
+import { useWeaponCategories } from "@/features/catalog/reference-catalog/api/use-catalog-labels";
 import { useCatalogListState } from "@/shared/lib/use-catalog-list-state";
 import { paginateCatalogItems } from "@/shared/lib/catalog-pagination";
 import { CatalogFilters } from "@/shared/ui/catalog-filters";
@@ -19,8 +20,6 @@ function sortByName(a: WeaponSummary, b: WeaponSummary) {
   return a.name.localeCompare(b.name, "pt");
 }
 
-const WEAPON_CATEGORY_FILTER = buildWeaponCategoryFilter();
-
 export function WeaponsGrid() {
   const {
     query,
@@ -32,6 +31,16 @@ export function WeaponsGrid() {
     setFilter,
     listPath,
   } = useCatalogListState({ syncUrl: true, filterKeys: ["category"] });
+  const categories = useWeaponCategories();
+  const weaponCategoryFilter = useMemo(
+    () =>
+      buildWeaponCategoryFilter(
+        categories.data && categories.data.length > 0
+          ? categories.data
+          : undefined,
+      ),
+    [categories.data],
+  );
 
   const category = filters.category ?? "";
   const isFiltered =
@@ -72,7 +81,7 @@ export function WeaponsGrid() {
           resultCount={total}
         />
         <CatalogFilters
-          fields={[WEAPON_CATEGORY_FILTER]}
+          fields={[weaponCategoryFilter]}
           values={filters}
           onChange={setFilter}
         />

@@ -16,6 +16,8 @@ import {
   useCharacterLevels,
   useSkills,
 } from "@/features/catalog/reference-catalog/api/use-reference";
+import { toolPoolsCatalogFromResponse } from "@/features/catalog/reference-catalog/api/catalog-labels.api";
+import { useToolPools } from "@/features/catalog/reference-catalog/api/use-catalog-labels";
 import { useSpellLabels } from "@/features/catalog/spell-catalog/api/use-spells";
 import { FieldGroup } from "@/shared/ui/field";
 
@@ -77,6 +79,11 @@ export function FeatOptionFields({
   const allSpells = useSpellLabels();
   const skills = useSkills();
   const tools = useItems({ itemType: "tool", limit: 100, fields: "summary" });
+  const toolPools = useToolPools();
+  const toolCatalog = useMemo(
+    () => toolPoolsCatalogFromResponse(toolPools.data),
+    [toolPools.data],
+  );
 
   const catalogProficiencyOptions = useMemo(() => {
     const skillOpts = (skills.data?.data ?? []).map((skill) => ({
@@ -165,7 +172,10 @@ export function FeatOptionFields({
               onChange={onChange}
               catalogProficiencyOptions={catalogProficiencyOptions}
               grantedProficiencySlugs={grantedProficiencySlugs}
-              catalogLoading={skills.isPending || tools.isPending}
+              catalogLoading={
+                skills.isPending || tools.isPending || toolPools.isPending
+              }
+              toolCatalog={toolCatalog}
             />
           );
         }

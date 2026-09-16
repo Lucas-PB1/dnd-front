@@ -9,6 +9,7 @@ import {
   weaponCostText,
   weaponWeightText,
 } from "@/features/catalog/equipment-catalog/lib/weapon-labels";
+import { useWeaponCategories } from "@/features/catalog/reference-catalog/api/use-catalog-labels";
 import { useCatalogBackHref } from "@/shared/lib/use-catalog-back-href";
 import {
   CatalogDetailError,
@@ -28,9 +29,11 @@ function WeaponHero({
   weapon: WeaponSummary;
   backHref: string;
 }) {
+  const categories = useWeaponCategories();
+  const categoryLabel = weaponCategoryLabel(weapon.category, categories.data);
   const cost = weaponCostText(weapon);
   const stats: { label: string; value: string }[] = [
-    { label: "Categoria", value: weaponCategoryLabel(weapon.category) },
+    { label: "Categoria", value: categoryLabel },
   ];
   if (weapon.damage) {
     const dmg = weapon.versatileDamage
@@ -59,7 +62,7 @@ function WeaponHero({
       backHref={backHref}
       backLabel="Equipamento"
       title={weapon.name}
-      eyebrow={weaponCategoryLabel(weapon.category)}
+      eyebrow={categoryLabel}
       stats={stats}
       imageUrl={weapon.imageUrl}
     />

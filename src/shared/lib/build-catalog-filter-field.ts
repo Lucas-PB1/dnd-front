@@ -14,6 +14,13 @@ export function catalogFilterOptionsFromNamed(
   return rows.map((row) => ({ value: row.slug, label: row.name }));
 }
 
+export function nameForCatalogSlug(
+  slug: string,
+  rows: readonly CatalogNamedOption[] | undefined,
+): string {
+  return rows?.find((row) => row.slug === slug)?.name ?? slug;
+}
+
 export function buildCatalogFilterField(
   key: string,
   label: string,
