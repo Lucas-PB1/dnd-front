@@ -1,12 +1,8 @@
 import { z } from "zod";
 
+import { ABILITY_SCORE_KEYS } from "@/entities/character/lib/ability-score-keys";
 import { SUBCLASS_UNLOCK_LEVEL_DEFAULT } from "@/entities/character/lib/subclass";
 import { isAbilityPoolAssigned } from "@/features/character/create-character/lib/abilities/ability-pool";
-import {
-  isPointBuyValid,
-  POINT_BUY_MAX,
-  POINT_BUY_MIN,
-} from "@/features/character/create-character/lib/abilities/point-buy";
 
 const SUBCLASS_UNLOCK_LEVEL = SUBCLASS_UNLOCK_LEVEL_DEFAULT;
 
@@ -90,11 +86,8 @@ export const createCharacterBaseSchema = z.object({
   subclassOptions: z.array(subclassOptionSchema),
   classOptions: z.array(classOptionSchema),
   featOptions: z.array(featOptionSchema),
-  /** Um slug por marco ASI (níveis 4/8/12/16/19); vazio = +2/+1 em atributos */
   asiFeatSlotSlugs: z.array(z.string()),
-  /** Talento de origem quando o antecedente permite escolha (feat_id NULL) */
   backgroundOriginFeatSlug: z.string().optional(),
-  /** Estilo de luta L1 (feat fighting-style) quando a classe tem allowlist */
   fightingStyleFeatSlug: z.string().optional(),
   alignmentSlug: z.string().optional(),
   languageSlugs: z.array(z.string()),
@@ -115,21 +108,21 @@ function refineSubclassRequired(
   }
 }
 
-function refinePointBuy(
+function refinePointBuyAssigned(
   data: {
     abilityGenerationMethodSlug: z.infer<typeof abilityGenerationMethodSchema>;
     abilityScores: z.infer<typeof abilityScoresSchema>;
   },
   ctx: z.RefinementCtx,
 ) {
-  if (data.abilityGenerationMethodSlug === "point-buy") {
-    if (!isPointBuyValid(data.abilityScores)) {
-      ctx.addIssue({
-        code: "custom",
-        message: `Point-buy: use ${POINT_BUY_MIN}–${POINT_BUY_MAX} e gaste exatamente 27 pontos`,
-        path: ["abilityScores"],
-      });
-    }
+  if (data.abilityGenerationMethodSlug !== "point-buy") return;
+  const incomplete = ABILITY_SCORE_KEYS.some((key) => data.abilityScores[key] <= 0);
+  if (incomplete) {
+    ctx.addIssue({
+      code: "custom",
+      message: "Defina um valor para cada atributo",
+      path: ["abilityScores"],
+    });
   }
 }
 
@@ -166,7 +159,7 @@ function refineAbilityPool(
 
 export const createCharacterSchema = createCharacterBaseSchema
   .superRefine(refineSubclassRequired)
-  .superRefine(refinePointBuy)
+  .superRefine(refinePointBuyAssigned)
   .superRefine(refineAbilityPool)
   .superRefine(refineBackgroundBoosts);
 
@@ -275,7 +268,7 @@ export const abilitiesStepSchema = createCharacterBaseSchema
     backgroundAbilityBoostPlus1Slug: true,
     backgroundAbilityBoostPlus1Slugs: true,
   })
-  .superRefine(refinePointBuy)
+  .superRefine(refinePointBuyAssigned)
   .superRefine(refineAbilityPool)
   .superRefine(refineBackgroundBoosts);
 
@@ -283,11 +276,4 @@ export const SUBCLASS_REQUIRED_FROM_LEVEL = SUBCLASS_UNLOCK_LEVEL;
 
 export const LEVEL_OPTIONS = Array.from({ length: 20 }, (_, i) => i + 1);
 
-export const ABILITY_KEYS = [
-  "forca",
-  "destreza",
-  "constituicao",
-  "inteligencia",
-  "sabedoria",
-  "carisma",
-] as const;
+export const ABILITY_KEYS = ABILITY_SCORE_KEYS;

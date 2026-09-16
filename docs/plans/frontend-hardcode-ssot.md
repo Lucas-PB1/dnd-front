@@ -64,7 +64,7 @@ Já consome API (contraste bom):
 
 | O quê | Front | Back |
 |-------|-------|------|
-| Point-buy / standard array | `point-buy.ts`, `ability-pool.ts` | `ability-generation.ts` |
+| Point-buy / standard array | `GET /ability-generation-methods` (`pointBuy`, `pool`) | `ability-generation.ts` |
 | ASI / níveis de feat | `asi-feat-slots.ts` | `asi-feat-levels.ts` |
 | Expertise slots | `class-expertise-slots.ts` | `class-expertise-slots.ts` |
 | Subclass unlock default 3 | `entities/character/lib/subclass.ts` | regra implícita |

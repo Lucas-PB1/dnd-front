@@ -1,7 +1,4 @@
-import {
-  STANDARD_ARRAY_VALUES,
-  UNASSIGNED_ABILITY_SCORES,
-} from "@/features/character/create-character/lib/abilities/ability-pool";
+import { UNASSIGNED_ABILITY_SCORES } from "@/features/character/create-character/lib/abilities/ability-pool";
 import type { CreateCharacterInput } from "@/features/character/create-character/model/create-character.schema";
 
 export const CREATE_CHARACTER_DEFAULT_VALUES: CreateCharacterInput = {
@@ -22,7 +19,7 @@ export const CREATE_CHARACTER_DEFAULT_VALUES: CreateCharacterInput = {
   backgroundAbilityBoostPlus1Slugs: ["", "", ""],
   backgroundToolItemSlug: "",
   classSkillSlugs: [],
-  abilityRawValues: [...STANDARD_ARRAY_VALUES],
+  abilityRawValues: undefined,
   speciesChoices: [],
   heritageChoices: [],
   subclassOptions: [],

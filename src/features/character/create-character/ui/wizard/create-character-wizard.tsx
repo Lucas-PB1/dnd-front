@@ -39,6 +39,7 @@ import { WizardSubmitError } from "@/features/character/create-character/ui/wiza
 import { useSpeciesTraitChoices } from "@/features/catalog/species-catalog/api/use-species";
 import { useHeritageTraitChoices } from "@/features/catalog/heritage-catalog/api/use-heritages";
 import { useBackgroundDetail } from "@/features/catalog/background-catalog/api/use-backgrounds";
+import { useAbilityGenerationMethods } from "@/features/catalog/reference-catalog/api/use-reference";
 
 export function CreateCharacterWizard() {
   const router = useRouter();
@@ -85,6 +86,7 @@ export function CreateCharacterWizard() {
   const level = useWatch({ control, name: "level", defaultValue: 1 });
 
   const classDetail = useClassDetail(classSlug, !!classSlug);
+  const abilityGenerationMethods = useAbilityGenerationMethods();
   const classProgression = useClassProgression(classSlug, !!classSlug);
   const backgroundDetail = useBackgroundDetail(
     backgroundSlug,
@@ -188,6 +190,7 @@ export function CreateCharacterWizard() {
       hasSpellStep,
       hasInvocationsStep: classSlug === "warlock",
       hasMetamagicsStep: classSlug === "sorcerer" && level >= 2,
+      abilityGenerationMethods: abilityGenerationMethods.data,
     });
   }
 

@@ -74,7 +74,7 @@ Blocked não vira Ready só espelhando TS. Adiado só com pedido explícito.
 
 | # | Status | Plano |
 | --- | --- | --- |
-| [29](./plans/29-point-buy-ssot.md) | Blocked | Point-buy / standard array |
+| [29](./plans/29-point-buy-ssot.md) | Feito | Point-buy / standard array |
 | [30](./plans/30-asi-wizard.md) | Blocked | ASI no create wizard |
 | [31](./plans/31-expertise-create.md) | Blocked | Expertise no create + Jack of All Trades |
 | [32](./plans/32-subclass-unlock-create.md) | Blocked | Unlock de subclasse no create |

@@ -4,7 +4,7 @@ import {
   BACKGROUND_BOOST_MODE_PLUS1X3,
 } from "@/entities/character/lib/background-boost";
 import { abilityModifier } from "@/entities/character/types";
-import { ABILITY_KEYS } from "@/features/character/create-character/lib/abilities/point-buy";
+import { ABILITY_SCORE_KEYS } from "@/entities/character/lib/ability-score-keys";
 import type { useStepReview } from "@/features/character/create-character/lib/review/use-step-review";
 import {
   ReviewChipList,
@@ -65,7 +65,7 @@ export function ReviewAbilitiesSection({ data }: { data: ReviewData }) {
   return (
     <WizardFormSection title="Atributos finais" compact>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
-        {ABILITY_KEYS.map((key) => {
+        {ABILITY_SCORE_KEYS.map((key) => {
           const score = data.finalScores[key];
           return (
             <div

@@ -3,6 +3,7 @@ import type {
   UseFormTrigger,
 } from "react-hook-form";
 
+import type { AbilityGenerationMethod } from "@/entities/ability-generation-method/types";
 import type { BackgroundSummary } from "@/entities/background/types";
 import { classExpertiseSlotsAtLevel } from "@/entities/character/lib/class-expertise-slots";
 import { classExtraSkillSlotsAtLevel } from "@/entities/character/lib/class-extra-skill-slots";
@@ -17,6 +18,10 @@ import type {
   ClassSummary,
   SubclassOptionGroup,
 } from "@/entities/class/types";
+import {
+  isPointBuyValid,
+  parsePointBuyRules,
+} from "@/features/character/create-character/lib/abilities/point-buy";
 import { asiFeatSlotsToCharacterFeats } from "@/features/character/create-character/lib/feats/asi-feat-slots-to-feats";
 import { findIncompleteCreateFeatOptions } from "@/features/character/create-character/lib/feats/validate-create-feat-options";
 import { resolveCreateCharacterFeats } from "@/features/character/create-character/lib/feats/preview-create-character-feats";
@@ -68,9 +73,9 @@ export type WizardAdvanceDeps = {
   hasSpellStep: boolean;
   hasInvocationsStep: boolean;
   hasMetamagicsStep: boolean;
+  abilityGenerationMethods: AbilityGenerationMethod[] | undefined;
 };
 
-/** Valida o passo atual e avança o wizard; retorna sem mudar o step se inválido. */
 export async function advanceWizardStep(deps: WizardAdvanceDeps): Promise<void> {
   const {
     step,
@@ -100,6 +105,7 @@ export async function advanceWizardStep(deps: WizardAdvanceDeps): Promise<void> 
     hasSpellStep,
     hasInvocationsStep,
     hasMetamagicsStep,
+    abilityGenerationMethods,
   } = deps;
 
   clearStepErrors();
@@ -131,6 +137,19 @@ export async function advanceWizardStep(deps: WizardAdvanceDeps): Promise<void> 
     }
 
     if (values.abilityGenerationMethodSlug === "point-buy") {
+      const rules = parsePointBuyRules(
+        abilityGenerationMethods?.find((row) => row.slug === "point-buy"),
+      );
+      if (!rules) {
+        setAbilitiesError("Aguarde o catálogo de atributos.");
+        return;
+      }
+      if (!isPointBuyValid(values.abilityScores, rules)) {
+        setAbilitiesError(
+          `Point-buy: use ${rules.minScore}–${rules.maxScore} e gaste exatamente ${rules.budget} pontos`,
+        );
+        return;
+      }
       const ok = await trigger("abilityScores");
       if (!ok) return;
     }
@@ -261,7 +280,6 @@ export async function advanceWizardStep(deps: WizardAdvanceDeps): Promise<void> 
       if (kind === "heritage_trait_9") {
         return ghSpeedTrade === "yes";
       }
-      // Criador usa só build tradicional — não exige kinds do pool custom.
       if (kind.startsWith("heritage_trait_")) return false;
       if (kind === "heritage_speed_trade") return false;
       return true;

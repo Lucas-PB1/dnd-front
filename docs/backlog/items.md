@@ -32,7 +32,7 @@ Um ID → um plano. Status: Ready · Blocked · Adiado · Feito.
 | FR-8 | [26](./plans/26-zod-dtos.md) | Feito | Zod DTOs |
 | FR-11 | [27](./plans/27-testes-hotspot.md) | Feito | Testes hotspot |
 | FR-9 | [28](./plans/28-fatiar-character-sheet.md) | Feito | Fatiar `character-sheet` |
-| FR-3 | [29](./plans/29-point-buy-ssot.md) | Blocked | Point-buy |
+| FR-3 | [29](./plans/29-point-buy-ssot.md) | Feito | Point-buy |
 | FR-4 | [30](./plans/30-asi-wizard.md) | Blocked | ASI no wizard |
 | FR-5 | [31](./plans/31-expertise-create.md) | Blocked | Expertise create + JoaT |
 | FR-6 | [32](./plans/32-subclass-unlock-create.md) | Blocked | Unlock subclasse no create |

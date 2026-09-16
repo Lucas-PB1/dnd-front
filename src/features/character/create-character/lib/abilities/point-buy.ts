@@ -1,82 +1,94 @@
+import type { AbilityGenerationMethod } from "@/entities/ability-generation-method/types";
+import { ABILITY_SCORE_KEYS } from "@/entities/character/lib/ability-score-keys";
 import type { AbilityScores } from "@/entities/character/types";
 
-/** Espelha custos PHB — só para feedback de UI; a API valida no POST */
-export const POINT_BUY_COST: Record<number, number> = {
-  8: 0,
-  9: 1,
-  10: 2,
-  11: 3,
-  12: 4,
-  13: 5,
-  14: 7,
-  15: 9,
+export type PointBuyRules = {
+  budget: number;
+  minScore: number;
+  maxScore: number;
+  costByScore: Record<number, number>;
 };
 
-export const POINT_BUY_BUDGET = 27;
-export const POINT_BUY_MIN = 8;
-export const POINT_BUY_MAX = 15;
+export const ABILITY_KEYS = ABILITY_SCORE_KEYS;
 
-export const POINT_BUY_SCORE_OPTIONS = [8, 9, 10, 11, 12, 13, 14, 15] as const;
+export function parsePointBuyRules(
+  method: AbilityGenerationMethod | undefined,
+): PointBuyRules | null {
+  const source = method?.pointBuy;
+  if (!source) return null;
+  const costByScore: Record<number, number> = {};
+  for (const [score, cost] of Object.entries(source.costByScore)) {
+    const numericScore = Number(score);
+    if (!Number.isFinite(numericScore) || typeof cost !== "number") continue;
+    costByScore[numericScore] = cost;
+  }
+  if (Object.keys(costByScore).length === 0) return null;
+  return {
+    budget: source.budget,
+    minScore: source.minScore,
+    maxScore: source.maxScore,
+    costByScore,
+  };
+}
 
-export const ABILITY_KEYS: (keyof AbilityScores)[] = [
-  "forca",
-  "destreza",
-  "constituicao",
-  "inteligencia",
-  "sabedoria",
-  "carisma",
-];
+export function pointBuyScoreOptions(rules: PointBuyRules): number[] {
+  return Object.keys(rules.costByScore)
+    .map(Number)
+    .sort((left, right) => left - right);
+}
 
-export function pointBuySpent(scores: AbilityScores): number {
-  return ABILITY_KEYS.reduce(
-    (sum, key) => sum + (POINT_BUY_COST[scores[key]] ?? 0),
+export function defaultPointBuyScores(rules: PointBuyRules): AbilityScores {
+  return Object.fromEntries(
+    ABILITY_SCORE_KEYS.map((key) => [key, rules.minScore]),
+  ) as AbilityScores;
+}
+
+export function pointBuySpent(
+  scores: AbilityScores,
+  rules: PointBuyRules,
+): number {
+  return ABILITY_SCORE_KEYS.reduce(
+    (sum, key) => sum + (rules.costByScore[scores[key]] ?? 0),
     0,
   );
 }
 
-export function pointBuyRemaining(scores: AbilityScores): number {
-  return POINT_BUY_BUDGET - pointBuySpent(scores);
+export function pointBuyRemaining(
+  scores: AbilityScores,
+  rules: PointBuyRules,
+): number {
+  return rules.budget - pointBuySpent(scores, rules);
 }
 
-export function isPointBuyValid(scores: AbilityScores): boolean {
-  const inRange = ABILITY_KEYS.every(
-    (key) => scores[key] >= POINT_BUY_MIN && scores[key] <= POINT_BUY_MAX,
-  );
-  return inRange && pointBuySpent(scores) === POINT_BUY_BUDGET;
+export function isPointBuyValid(
+  scores: AbilityScores,
+  rules: PointBuyRules,
+): boolean {
+  const inRange = ABILITY_SCORE_KEYS.every((key) => {
+    const score = scores[key];
+    return score >= rules.minScore && score <= rules.maxScore;
+  });
+  return inRange && pointBuySpent(scores, rules) === rules.budget;
 }
 
-/** Scores 8–15 que ainda cabem no orçamento (mantém o valor atual). */
 export function pointBuyAffordableOptions(
   scores: AbilityScores,
   key: keyof AbilityScores,
+  rules: PointBuyRules,
 ): number[] {
   const current = scores[key];
-  const spentOthers = pointBuySpent(scores) - (POINT_BUY_COST[current] ?? 0);
-  return POINT_BUY_SCORE_OPTIONS.filter((score) => {
+  const spentOthers =
+    pointBuySpent(scores, rules) - (rules.costByScore[current] ?? 0);
+  return pointBuyScoreOptions(rules).filter((score) => {
     if (score === current) return true;
-    return spentOthers + POINT_BUY_COST[score] <= POINT_BUY_BUDGET;
+    return spentOthers + (rules.costByScore[score] ?? 0) <= rules.budget;
   });
 }
 
-export function formatPointBuyOptionLabel(score: number): string {
-  const cost = POINT_BUY_COST[score] ?? 0;
+export function formatPointBuyOptionLabel(
+  score: number,
+  rules: PointBuyRules,
+): string {
+  const cost = rules.costByScore[score] ?? 0;
   return `${score} · ${cost} pts`;
 }
-
-export const DEFAULT_ABILITY_SCORES: AbilityScores = {
-  forca: 10,
-  destreza: 10,
-  constituicao: 10,
-  inteligencia: 10,
-  sabedoria: 10,
-  carisma: 10,
-};
-
-export const POINT_BUY_DEFAULT: AbilityScores = {
-  forca: 8,
-  destreza: 8,
-  constituicao: 8,
-  inteligencia: 8,
-  sabedoria: 8,
-  carisma: 8,
-};

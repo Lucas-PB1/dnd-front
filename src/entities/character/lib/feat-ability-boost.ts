@@ -1,3 +1,4 @@
+import { ABILITY_SCORE_KEYS } from "@/entities/character/lib/ability-score-keys";
 import type { AbilityScores } from "@/entities/character/types";
 import type { FeatOption } from "@/entities/character/sheet-types";
 import {
@@ -7,22 +8,13 @@ import {
 
 const ASI_FEAT_SLUG = "ability-score-improvement";
 
-const ABILITY_KEYS: (keyof AbilityScores)[] = [
-  "forca",
-  "destreza",
-  "constituicao",
-  "inteligencia",
-  "sabedoria",
-  "carisma",
-];
-
 function bump(
   scores: AbilityScores,
   slug: string,
   delta: number,
   cap: number,
 ): AbilityScores {
-  if (!ABILITY_KEYS.includes(slug as keyof AbilityScores)) return scores;
+  if (!ABILITY_SCORE_KEYS.includes(slug as keyof AbilityScores)) return scores;
   const key = slug as keyof AbilityScores;
   return {
     ...scores,
@@ -39,7 +31,6 @@ function asiInstanceKeys(featOptions: FeatOption[]): string[] {
   return [...keys];
 }
 
-/** Espelha applyFeatAbilityIncreases da API — preview no wizard. */
 export function previewFeatAbilityBoosts(
   scores: AbilityScores,
   featOptions: FeatOption[],

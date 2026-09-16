@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
-import { DEFAULT_ABILITY_SCORES } from "@/features/character/create-character/lib/abilities/point-buy";
+import { UNASSIGNED_ABILITY_SCORES } from "@/features/character/create-character/lib/abilities/ability-pool";
 import type { CreateCharacterInput } from "@/features/character/create-character/model/create-character.schema";
 import {
   applyBackgroundBoostModeChange,
@@ -31,7 +31,7 @@ export function WizardBackgroundBoostSection({
   const abilityScores = useWatch({
     control,
     name: "abilityScores",
-    defaultValue: DEFAULT_ABILITY_SCORES,
+    defaultValue: UNASSIGNED_ABILITY_SCORES,
   });
   const backgroundSlug = useWatch({
     control,

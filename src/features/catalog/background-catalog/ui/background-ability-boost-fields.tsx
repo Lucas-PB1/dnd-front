@@ -10,7 +10,7 @@ import {
   type BackgroundBoostMode,
 } from "@/entities/character/lib/background-boost";
 import type { AbilityScores } from "@/entities/character/types";
-import { ABILITY_KEYS } from "@/features/character/create-character/lib/abilities/point-buy";
+import { ABILITY_SCORE_KEYS } from "@/entities/character/lib/ability-score-keys";
 import { CatalogSelect } from "@/features/character/create-character/ui/catalog-select";
 import { useAbilityLabels } from "@/features/catalog/reference-catalog/api/use-ability-labels";
 import { Field, FieldLabel } from "@/shared/ui/field";
@@ -149,7 +149,7 @@ export function BackgroundAbilityBoostFields({
 
       {previewScores && previewLayout === "inline" ? (
         <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
-          {ABILITY_KEYS.map((key) => (
+          {ABILITY_SCORE_KEYS.map((key) => (
             <span key={key}>
               <span className="text-muted-foreground">
                 {labelOf(key)}{" "}
@@ -172,7 +172,7 @@ export function BackgroundAbilityBoostFields({
         <div className="rounded-lg border border-border p-3">
           <p className="mb-2 text-sm font-medium">Valores finais (preview)</p>
           <div className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-3">
-            {ABILITY_KEYS.map((key) => (
+            {ABILITY_SCORE_KEYS.map((key) => (
               <div key={key}>
                 <span className="text-muted-foreground">
                   {labelOf(key)}:{" "}

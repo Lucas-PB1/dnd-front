@@ -9,10 +9,9 @@ import {
   sortedAbilitySlugs,
 } from "@/entities/ability/lib/label-map";
 import type { AbilityScores } from "@/entities/character/types";
-import { ABILITY_KEYS } from "@/features/character/create-character/lib/abilities/point-buy";
+import { ABILITY_SCORE_KEYS } from "@/entities/character/lib/ability-score-keys";
 import { useAbilities } from "@/features/catalog/reference-catalog/api/use-reference";
 
-/** Labels e ordem de atributos a partir de `GET /abilities`. */
 export function useAbilityLabels() {
   const query = useAbilities();
   const abilities = query.data?.data ?? [];
@@ -23,11 +22,11 @@ export function useAbilityLabels() {
   const orderedKeys = useMemo(() => {
     const fromCatalog = sortedAbilitySlugs(abilities).filter(
       (slug): slug is keyof AbilityScores =>
-        ABILITY_KEYS.includes(slug as keyof AbilityScores),
+        ABILITY_SCORE_KEYS.includes(slug as keyof AbilityScores),
     );
-    return fromCatalog.length === ABILITY_KEYS.length
+    return fromCatalog.length === ABILITY_SCORE_KEYS.length
       ? fromCatalog
-      : ABILITY_KEYS;
+      : [...ABILITY_SCORE_KEYS];
   }, [abilities]);
 
   const labelOf = useCallback(

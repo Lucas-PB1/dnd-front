@@ -1,18 +1,43 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  defaultPointBuyScores,
   isPointBuyValid,
+  parsePointBuyRules,
   pointBuyRemaining,
   pointBuySpent,
-  POINT_BUY_DEFAULT,
 } from "@/features/character/create-character/lib/abilities/point-buy";
 import { toCreateCharacterPayload } from "@/features/character/create-character/model/to-create-payload";
 import type { CreateCharacterInput } from "@/features/character/create-character/model/create-character.schema";
 
+const POINT_BUY_FROM_CATALOG = parsePointBuyRules({
+  slug: "point-buy",
+  name: "Compra de pontos",
+  description: "",
+  pointBuy: {
+    budget: 27,
+    minScore: 8,
+    maxScore: 15,
+    costByScore: {
+      "8": 0,
+      "9": 1,
+      "10": 2,
+      "11": 3,
+      "12": 4,
+      "13": 5,
+      "14": 7,
+      "15": 9,
+    },
+  },
+});
+
 describe("point-buy helpers", () => {
-  it("tracks spent and remaining points", () => {
-    expect(pointBuySpent(POINT_BUY_DEFAULT)).toBe(0);
-    expect(pointBuyRemaining(POINT_BUY_DEFAULT)).toBe(27);
+  it("tracks spent and remaining points from catalog rules", () => {
+    expect(POINT_BUY_FROM_CATALOG).not.toBeNull();
+    const rules = POINT_BUY_FROM_CATALOG!;
+    const defaults = defaultPointBuyScores(rules);
+    expect(pointBuySpent(defaults, rules)).toBe(0);
+    expect(pointBuyRemaining(defaults, rules)).toBe(rules.budget);
   });
 
   it("validates a legal point-buy spread", () => {
@@ -24,7 +49,7 @@ describe("point-buy helpers", () => {
       sabedoria: 10,
       carisma: 8,
     };
-    expect(isPointBuyValid(scores)).toBe(true);
+    expect(isPointBuyValid(scores, POINT_BUY_FROM_CATALOG!)).toBe(true);
   });
 });
 

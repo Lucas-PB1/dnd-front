@@ -1,3 +1,4 @@
+export { ABILITY_SCORE_KEYS } from "@/entities/character/lib/ability-score-keys";
 export type {
   AbilityScores,
   CharacterDetail,

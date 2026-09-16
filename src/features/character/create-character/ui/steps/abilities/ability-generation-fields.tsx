@@ -1,16 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { AbilityScores } from "@/entities/character/types";
 import {
-  STANDARD_ARRAY_VALUES,
   sumAbilityValues,
   UNASSIGNED_ABILITY_SCORES,
 } from "@/features/character/create-character/lib/abilities/ability-pool";
 import {
-  DEFAULT_ABILITY_SCORES,
-  POINT_BUY_BUDGET,
-  POINT_BUY_DEFAULT,
+  defaultPointBuyScores,
+  parsePointBuyRules,
   pointBuyRemaining,
   pointBuySpent,
 } from "@/features/character/create-character/lib/abilities/point-buy";
@@ -48,16 +46,31 @@ export function AbilityGenerationFields({
   const abilityScores = useWatch({
     control,
     name: "abilityScores",
-    defaultValue: DEFAULT_ABILITY_SCORES,
+    defaultValue: UNASSIGNED_ABILITY_SCORES,
   });
   const rawValues = useWatch({ control, name: "abilityRawValues" });
+  const catalog = methods.data ?? [];
+  const selectedMethod = catalog.find((row) => row.slug === method);
+  const pointBuyRules = useMemo(
+    () => parsePointBuyRules(selectedMethod),
+    [selectedMethod],
+  );
+  const standardPool = catalog.find((row) => row.slug === "standard-array")
+    ?.pool;
+  const rollTotalMin = selectedMethod?.rollTotalMin;
+  const rollTotalMax = selectedMethod?.rollTotalMax;
+  const rollOptionCount = selectedMethod?.rollOptionCount ?? 3;
 
   const isPointBuy = method === "point-buy";
   const isRoll = method === "roll";
   const hasRawPool = !isPointBuy && rawValues && rawValues.length === 6;
   const rawTotal = hasRawPool ? sumAbilityValues(rawValues) : null;
-  const spent = isPointBuy ? pointBuySpent(abilityScores) : 0;
-  const remaining = isPointBuy ? pointBuyRemaining(abilityScores) : 0;
+  const spent =
+    isPointBuy && pointBuyRules ? pointBuySpent(abilityScores, pointBuyRules) : 0;
+  const remaining =
+    isPointBuy && pointBuyRules
+      ? pointBuyRemaining(abilityScores, pointBuyRules)
+      : 0;
 
   function applyPool(values: number[]) {
     setValue("abilityRawValues", values);
@@ -70,17 +83,46 @@ export function AbilityGenerationFields({
     setValue("abilityGenerationMethodSlug", next);
     setRollOptions(null);
     if (next === "point-buy") {
+      const rules = parsePointBuyRules(
+        catalog.find((row) => row.slug === "point-buy"),
+      );
       setValue("abilityRawValues", undefined);
-      setValue("abilityScores", { ...POINT_BUY_DEFAULT });
+      setValue(
+        "abilityScores",
+        rules
+          ? defaultPointBuyScores(rules)
+          : { ...UNASSIGNED_ABILITY_SCORES },
+      );
       return;
     }
     if (next === "standard-array") {
-      applyPool([...STANDARD_ARRAY_VALUES]);
+      const pool = catalog.find((row) => row.slug === "standard-array")?.pool;
+      if (pool?.length === 6) {
+        applyPool([...pool]);
+        return;
+      }
+      setValue("abilityRawValues", undefined);
+      setValue("abilityScores", { ...UNASSIGNED_ABILITY_SCORES });
       return;
     }
     setValue("abilityRawValues", undefined);
     setValue("abilityScores", { ...UNASSIGNED_ABILITY_SCORES });
   }
+
+  useEffect(() => {
+    if (method !== "standard-array") return;
+    if (rawValues?.length === 6) return;
+    if (!standardPool || standardPool.length !== 6) return;
+    setValue("abilityRawValues", [...standardPool]);
+    setValue("abilityScores", { ...UNASSIGNED_ABILITY_SCORES });
+  }, [method, rawValues, standardPool, setValue]);
+
+  useEffect(() => {
+    if (method !== "point-buy" || !pointBuyRules) return;
+    const unassigned = Object.values(abilityScores).every((value) => value === 0);
+    if (!unassigned) return;
+    setValue("abilityScores", defaultPointBuyScores(pointBuyRules));
+  }, [method, pointBuyRules, abilityScores, setValue]);
 
   function handleRoll() {
     roll.mutate(
@@ -116,13 +158,13 @@ export function AbilityGenerationFields({
             id="abilityGenerationMethodSlug"
             value={method}
             options={
-              methods.isPending || !methods.data?.length
+              methods.isPending || !catalog.length
                 ? [
                     { value: "standard-array", label: "Conjunto padrão" },
                     { value: "roll", label: "Rolagem 4d6" },
                     { value: "point-buy", label: "Compra de pontos" },
                   ]
-                : methods.data.map((row) => ({
+                : catalog.map((row) => ({
                     value: row.slug,
                     label: row.name,
                   }))
@@ -142,11 +184,13 @@ export function AbilityGenerationFields({
             onClick={handleRoll}
             disabled={roll.isPending}
           >
-            {roll.isPending ? "Rolando…" : "Rolar 3 opções"}
+            {roll.isPending
+              ? "Rolando…"
+              : `Rolar ${rollOptionCount} opções`}
           </Button>
         ) : null}
 
-        {isPointBuy ? (
+        {isPointBuy && pointBuyRules ? (
           <p
             className={cn(
               "pb-2 text-xs tabular-nums",
@@ -157,7 +201,7 @@ export function AbilityGenerationFields({
                   : "text-muted-foreground",
             )}
           >
-            {spent}/{POINT_BUY_BUDGET} pontos · resta {remaining}
+            {spent}/{pointBuyRules.budget} pontos · resta {remaining}
           </p>
         ) : null}
 
@@ -180,7 +224,9 @@ export function AbilityGenerationFields({
       {isRoll && rollOptions && rollOptions.length > 0 ? (
         <div className="space-y-2">
           <p className="text-xs text-muted-foreground">
-            Escolha um dos três conjuntos (soma entre 72 e 80):
+            {rollTotalMin != null && rollTotalMax != null
+              ? `Escolha um dos conjuntos (soma entre ${rollTotalMin} e ${rollTotalMax}):`
+              : "Escolha um dos conjuntos:"}
           </p>
           <div className="grid gap-2 sm:grid-cols-3">
             {rollOptions.map((option, index) => {
@@ -222,6 +268,7 @@ export function AbilityGenerationFields({
         hasRawPool={!!hasRawPool}
         rawValues={rawValues}
         isPointBuy={isPointBuy}
+        pointBuyRules={pointBuyRules}
         setValue={setValue}
         onPoolAssign={handlePoolAssign}
       />

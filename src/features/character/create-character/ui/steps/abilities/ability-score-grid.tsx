@@ -1,16 +1,16 @@
 "use client";
 
-import type { AbilityScores } from "@/entities/character/types";
-import { abilityModifier } from "@/entities/character/types";
+import { ABILITY_SCORE_KEYS } from "@/entities/character/lib/ability-score-keys";
+import { abilityModifier, type AbilityScores } from "@/entities/character/types";
 import {
   formatPoolOptionLabel,
   poolOptionsWithCounts,
   remainingPoolForAbility,
 } from "@/features/character/create-character/lib/abilities/ability-pool";
 import {
-  ABILITY_KEYS,
   formatPointBuyOptionLabel,
   pointBuyAffordableOptions,
+  type PointBuyRules,
 } from "@/features/character/create-character/lib/abilities/point-buy";
 import type { CreateCharacterInput } from "@/features/character/create-character/model/create-character.schema";
 import { useAbilityLabels } from "@/features/catalog/reference-catalog/api/use-ability-labels";
@@ -22,6 +22,7 @@ type AbilityScoreGridProps = {
   hasRawPool: boolean;
   rawValues: number[] | undefined;
   isPointBuy: boolean;
+  pointBuyRules: PointBuyRules | null;
   setValue: UseFormSetValue<CreateCharacterInput>;
   onPoolAssign: (key: keyof AbilityScores, raw: string) => void;
 };
@@ -31,6 +32,7 @@ export function AbilityScoreGrid({
   hasRawPool,
   rawValues,
   isPointBuy,
+  pointBuyRules,
   setValue,
   onPoolAssign,
 }: AbilityScoreGridProps) {
@@ -38,16 +40,17 @@ export function AbilityScoreGrid({
 
   return (
     <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
-      {ABILITY_KEYS.map((key) => {
+      {ABILITY_SCORE_KEYS.map((key) => {
         const score = abilityScores[key];
         const poolOptions = hasRawPool
           ? poolOptionsWithCounts(
               remainingPoolForAbility(rawValues!, abilityScores, key),
             )
           : [];
-        const pointBuyOptions = isPointBuy
-          ? pointBuyAffordableOptions(abilityScores, key)
-          : [];
+        const pointBuyOptions =
+          isPointBuy && pointBuyRules
+            ? pointBuyAffordableOptions(abilityScores, key, pointBuyRules)
+            : [];
         const label = labelOf(key);
 
         return (
@@ -57,14 +60,14 @@ export function AbilityScoreGrid({
           >
             <p className="text-xs font-medium">{label}</p>
 
-            {isPointBuy ? (
+            {isPointBuy && pointBuyRules ? (
               <SearchableSelect
                 id={`ability-${key}`}
                 aria-label={label}
                 className="mt-1.5"
                 options={pointBuyOptions.map((option) => ({
                   value: String(option),
-                  label: formatPointBuyOptionLabel(option),
+                  label: formatPointBuyOptionLabel(option, pointBuyRules),
                 }))}
                 value={String(score)}
                 onValueChange={(next) =>
