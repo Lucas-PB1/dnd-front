@@ -3,9 +3,11 @@
 import { useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
 
+import type { CompanionTracker } from "@/entities/companion/types";
 import type { SubclassOptionPick } from "@/entities/companion/lib/companion-profiles";
 import { COMPANION_COMMANDS } from "@/entities/companion/lib/companion-commands";
 import type { CompanionCommandSlug } from "@/entities/companion/lib/companion-commands";
+import { pickCompanionTracker } from "@/entities/companion/lib/pick-companion-tracker";
 import {
   findCompanionProfile,
   resolveCompanionConfig,
@@ -24,8 +26,11 @@ type CompanionTrackerPanelProps = {
   subclassSlug: string | null | undefined;
   subclassOptions: readonly SubclassOptionPick[];
   level: number;
+  trackers?: readonly CompanionTracker[];
   isTableActionPending?: boolean;
   onCommand: (command: CompanionCommandSlug) => void;
+  onSummon?: () => void;
+  onRestore?: () => void;
   lastNote?: string | null;
 };
 
@@ -34,8 +39,11 @@ export function CompanionTrackerPanel({
   subclassSlug,
   subclassOptions,
   level,
+  trackers,
   isTableActionPending = false,
   onCommand,
+  onSummon,
+  onRestore,
   lastNote,
 }: CompanionTrackerPanelProps) {
   const pathname = usePathname();
@@ -50,13 +58,24 @@ export function CompanionTrackerPanel({
 
   if (!profile || level < profile.minLevel) return null;
 
-  const companion = pickCompanionActor(actors.data, config?.templateSlug ?? null);
+  const tracker = pickCompanionTracker(
+    trackers,
+    config?.templateSlug ?? null,
+  );
+  const companionActor = pickCompanionActor(
+    actors.data,
+    config?.templateSlug ?? null,
+  );
+  const companionName = tracker?.name ?? companionActor?.name ?? null;
+  const companionActorId = tracker?.actorId ?? companionActor?.id ?? null;
+  const hpCurrent = tracker?.hitPointsCurrent ?? companionActor?.hitPointsCurrent;
+  const hpMax = tracker?.hitPointsMax ?? companionActor?.hitPointsMax;
   const hp =
-    companion?.hitPointsCurrent != null && companion?.hitPointsMax != null
-      ? `${companion.hitPointsCurrent}/${companion.hitPointsMax} PV`
-      : null;
+    hpCurrent != null && hpMax != null ? `${hpCurrent}/${hpMax} PV` : null;
   const defeated =
-    companion?.hitPointsCurrent != null && companion.hitPointsCurrent <= 0;
+    tracker?.defeated ??
+    (hpCurrent != null && hpCurrent <= 0);
+  const present = companionActorId != null;
   const isPending = sync.isPending || isTableActionPending || actors.isPending;
 
   return (
@@ -68,16 +87,16 @@ export function CompanionTrackerPanel({
             {config?.variantLabel ?? "Complete as escolhas na ficha"}
           </p>
         </div>
-        {companion ? (
+        {present && companionName && companionActorId ? (
           <button
             type="button"
             className={cn(
               "text-right text-xs hover:underline",
               defeated ? "text-destructive" : "text-muted-foreground",
             )}
-            onClick={() => setSheetActorId(companion.id)}
+            onClick={() => setSheetActorId(companionActorId)}
           >
-            {companion.name}
+            {companionName}
             {hp ? ` · ${hp}` : ""}
             {defeated ? " · derrotado" : ""}
           </button>
@@ -90,26 +109,26 @@ export function CompanionTrackerPanel({
           size="sm"
           variant="secondary"
           disabled={isPending || !config}
-          onClick={() => sync.mutate(false)}
+          onClick={() => (onSummon ? onSummon() : sync.mutate(false))}
         >
-          {companion ? "Sincronizar" : "Invocar"}
+          {present ? "Atualizar" : "Invocar"}
         </Button>
         <Button
           type="button"
           size="sm"
           variant="outline"
           disabled={isPending || !config}
-          onClick={() => sync.mutate(true)}
+          onClick={() => (onRestore ? onRestore() : sync.mutate(true))}
         >
           Restaurar PV
         </Button>
-        {companion ? (
+        {companionActorId ? (
           <Button
             type="button"
             size="sm"
             variant="ghost"
             disabled={isPending}
-            onClick={() => setSheetActorId(companion.id)}
+            onClick={() => setSheetActorId(companionActorId)}
           >
             Ficha
           </Button>
@@ -124,7 +143,7 @@ export function CompanionTrackerPanel({
             size="sm"
             variant="outline"
             className="h-8 text-xs"
-            disabled={isPending || !companion}
+            disabled={isPending || !present || defeated}
             onClick={() => onCommand(command.slug as CompanionCommandSlug)}
           >
             {command.label}

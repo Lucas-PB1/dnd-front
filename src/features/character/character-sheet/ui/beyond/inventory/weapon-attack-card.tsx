@@ -59,6 +59,7 @@ type WeaponAttackCardProps = {
     bestialAspectLevel?: number;
   };
   onDreadAmbusherResolved?: () => void | Promise<void>;
+  onBeastStrike?: () => void | Promise<void>;
   cleric?: {
     level: number;
   };
@@ -90,6 +91,7 @@ export function WeaponAttackCard({
   onDivineSmiteResolved,
   ranger,
   onDreadAmbusherResolved,
+  onBeastStrike,
   cleric,
   rageActive = false,
   featEffectFlags,
@@ -135,6 +137,7 @@ export function WeaponAttackCard({
   const [preciseHunter, setPreciseHunter] = useState(false);
   const [colossusSlayer, setColossusSlayer] = useState(false);
   const [dreadfulStrikes, setDreadfulStrikes] = useState(false);
+  const [beastStrike, setBeastStrike] = useState(false);
   const [divineStrike, setDivineStrike] = useState(false);
   const [brutalStrike, setBrutalStrike] = useState(false);
   const [divineFury, setDivineFury] = useState(false);
@@ -155,6 +158,11 @@ export function WeaponAttackCard({
   );
   const canDreadAmbusher = Boolean(
     ranger?.subclassSlug === "gloom-stalker" && ranger.level >= 3,
+  );
+  const canBeastStrike = Boolean(
+    onBeastStrike &&
+      ranger?.subclassSlug === "beast-master" &&
+      ranger.level >= 3,
   );
   const carnificinaBonus =
     ranger?.subclassSlug === "beastborne" &&
@@ -478,6 +486,9 @@ export function WeaponAttackCard({
             canDreadfulStrikes={canDreadfulStrikes}
             dreadfulStrikes={dreadfulStrikes}
             onDreadfulStrikesChange={setDreadfulStrikes}
+            canBeastStrike={canBeastStrike}
+            beastStrike={beastStrike}
+            onBeastStrikeChange={setBeastStrike}
           />
         ) : null}
 
@@ -531,6 +542,9 @@ export function WeaponAttackCard({
                 brutalStrike: brutalStrike || undefined,
                 spentInspiration: spendInspiration || undefined,
               });
+              if (beastStrike && onBeastStrike) {
+                void onBeastStrike();
+              }
               setStrokeOfLuck(false);
               setSpendInspiration(false);
             }}

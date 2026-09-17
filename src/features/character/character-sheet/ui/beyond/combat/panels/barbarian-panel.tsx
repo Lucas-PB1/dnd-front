@@ -134,9 +134,12 @@ export function CombatBarbarianPanel({
       subclassSlug={subclassSlug}
       subclassOptions={subclassOptions}
       level={level}
+      trackers={state?.companions}
       isTableActionPending={action.isPending}
       lastNote={action.lastResult?.note}
       onCommand={(command) => runSubclass("primal-companion", command)}
+      onSummon={() => runSubclass("primal-companion-summon")}
+      onRestore={() => runSubclass("primal-companion-restore")}
     />
   ) : null;
 

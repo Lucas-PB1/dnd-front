@@ -11,6 +11,9 @@ type RangerAttackOptionsProps = {
   canDreadfulStrikes: boolean;
   dreadfulStrikes: boolean;
   onDreadfulStrikesChange: (value: boolean) => void;
+  canBeastStrike?: boolean;
+  beastStrike?: boolean;
+  onBeastStrikeChange?: (value: boolean) => void;
 };
 
 function ToggleChip(props: {
@@ -61,6 +64,16 @@ export function RangerAttackOptions(props: RangerAttackOptionsProps) {
           title="+1d4/+1d6 Psíquico 1×/turno"
           onClick={() =>
             props.onDreadfulStrikesChange(!props.dreadfulStrikes)
+          }
+        />
+      ) : null}
+      {props.canBeastStrike ? (
+        <ToggleChip
+          active={Boolean(props.beastStrike)}
+          label="Golpe da Fera"
+          title="Sacrifica um ataque para comandar o Golpe da Fera"
+          onClick={() =>
+            props.onBeastStrikeChange?.(!props.beastStrike)
           }
         />
       ) : null}

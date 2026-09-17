@@ -89,10 +89,10 @@ Blocked não vira Ready só espelhando TS. Adiado só com pedido explícito.
 | [36](./plans/36-gh-cap1-tracos.md) | Feito | GH Cap. 1 sub-escolhas |
 | [37](./plans/37-pistoleiro-polish.md) | Feito | Pistoleiro polish |
 | [38](./plans/38-dawn-vs-descanso.md) | Feito | Evento dawn ≠ DL |
+| [39](./plans/39-companheiro-primal.md) | Feito | Companheiro Primal |
 
 ### Adiado (pedido explícito)
 
 | # | Status | Plano |
 | --- | --- | --- |
-| [39](./plans/39-companheiro-primal.md) | Adiado | Companheiro Primal |
 | [40](./plans/40-combate-real.md) | Adiado | Combate real |

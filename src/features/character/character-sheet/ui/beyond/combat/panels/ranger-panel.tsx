@@ -177,9 +177,12 @@ export function CombatRangerPanel({
       subclassSlug={subclassSlug}
       subclassOptions={subclassOptions}
       level={level}
+      trackers={state?.companions}
       isTableActionPending={action.isPending}
       lastNote={action.lastResult?.note}
       onCommand={(command) => run("primal-companion", command)}
+      onSummon={() => run("primal-companion-summon")}
+      onRestore={() => run("primal-companion-restore")}
     />
   ) : null;
 

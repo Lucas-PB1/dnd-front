@@ -20,6 +20,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { CharacterDetail } from "@/entities/character/types";
 import {
   executeGunslingerTableAction,
+  executeRangerTableAction,
   sessionKeys,
 } from "@/features/character/character-sheet/api/character-session.api";
 import { useEconomyTableAction } from "@/features/character/character-sheet/api/use-economy-table-action";
@@ -340,6 +341,28 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
     onSuccess: invalidateState,
   });
 
+  const beastStrike = useMutation({
+    mutationFn: async () => {
+      try {
+        return await executeRangerTableAction(
+          requireToken(),
+          character.id,
+          {
+            actionSlug: "primal-companion",
+            companionCommand: "strike",
+          },
+        );
+      } catch (error) {
+        return handleUnauthorized(error);
+      }
+    },
+    onSuccess: (result) => {
+      if (!result) return;
+      queryClient.setQueryData(sessionKeys.state(character.id), result.state);
+      setTableNote(result.note);
+    },
+  });
+
   const remainingBySlug = useMemo(() => {
     const map = new Map<string, { remaining: number; max: number }>();
     for (const resource of stateQuery.data?.classResources ?? []) {
@@ -452,6 +475,13 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
                     : undefined
                 }
                 onDreadAmbusherResolved={invalidateState}
+                onBeastStrike={
+                  character.classSlug === "ranger" &&
+                  character.subclassSlug === "beast-master" &&
+                  character.level >= 3
+                    ? () => beastStrike.mutate()
+                    : undefined
+                }
                 cleric={
                   character.classSlug === "cleric"
                     ? { level: character.level }
