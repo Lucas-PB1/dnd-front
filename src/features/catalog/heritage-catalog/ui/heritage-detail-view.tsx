@@ -274,6 +274,12 @@ function HeritageDetailBody({ slug }: HeritageDetailViewProps) {
     [modularTraitsQuery.data, traditionalSlugs],
   );
 
+  const heritageTraitSlugs = useMemo(
+    () =>
+      [...new Set((traditionalQuery.data ?? []).map((trait) => trait.traitSlug))],
+    [traditionalQuery.data],
+  );
+
   if (heritageQuery.isPending) {
     return <p className="text-sm text-muted-foreground">Carregando…</p>;
   }
@@ -356,9 +362,9 @@ function HeritageDetailBody({ slug }: HeritageDetailViewProps) {
             traços — sem montar um pool customizado.
           </p>
         </div>
-        {traditionalQuery.isPending || modularTraitsQuery.isPending ? (
+        {traditionalQuery.isPending ? (
           <p className="text-sm text-muted-foreground">Carregando traços…</p>
-        ) : traditional.length === 0 ? (
+        ) : traditional.length === 0 || modularTraitsQuery.isPending ? (
           <TraditionalBuildList traits={traditional} />
         ) : (
           <TraitPoolSection
@@ -371,9 +377,9 @@ function HeritageDetailBody({ slug }: HeritageDetailViewProps) {
         )}
       </section>
 
-      {!traditionalQuery.isPending && traditional.length > 0 ? (
+      {!traditionalQuery.isPending && heritageTraitSlugs.length > 0 ? (
         <CatalogOwnerMechanicalSection
-          heritageTraitSlugs={traditional.map((trait) => trait.traitSlug)}
+          heritageTraitSlugs={heritageTraitSlugs}
         />
       ) : null}
     </div>

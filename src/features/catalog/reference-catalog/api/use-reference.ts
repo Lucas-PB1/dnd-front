@@ -94,7 +94,7 @@ export function useCharacterLevels() {
   });
 }
 
-export function useCombatMechanicalCatalog(filters?: {
+export function combatMechanicalCatalogQueryOptions(filters?: {
   classSlug?: string;
   subclassSlug?: string | null;
   featSlug?: string;
@@ -112,7 +112,7 @@ export function useCombatMechanicalCatalog(filters?: {
   const threadSlug = filters?.threadSlug?.trim() || undefined;
   const heritageTraitSlug = filters?.heritageTraitSlug?.trim() || undefined;
   const enabled = filters?.enabled ?? true;
-  return useQuery({
+  return {
     queryKey: referenceKeys.combatMechanicalCatalog({
       classSlug,
       subclassSlug,
@@ -134,5 +134,18 @@ export function useCombatMechanicalCatalog(filters?: {
       }),
     staleTime: CATALOG_LIST_STALE_MS,
     enabled,
-  });
+  };
+}
+
+export function useCombatMechanicalCatalog(filters?: {
+  classSlug?: string;
+  subclassSlug?: string | null;
+  featSlug?: string;
+  itemSlug?: string;
+  speciesSlug?: string;
+  threadSlug?: string;
+  heritageTraitSlug?: string;
+  enabled?: boolean;
+}) {
+  return useQuery(combatMechanicalCatalogQueryOptions(filters));
 }

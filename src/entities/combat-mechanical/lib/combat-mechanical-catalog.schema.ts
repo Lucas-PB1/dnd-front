@@ -74,6 +74,15 @@ const economyActionSchema = z.looseObject({
   name: z.string(),
   economy: z.string(),
   minLevel: z.number(),
+  classSlug: z.string().nullable().optional(),
+  subclassSlug: z.string().optional(),
+  speciesSlug: z.string().nullable().optional(),
+  featSlug: z.string().nullable().optional(),
+  itemSlug: z.string().nullable().optional(),
+  heritageTraitSlug: z.string().nullable().optional(),
+  threadSlug: z.string().nullable().optional(),
+  summary: z.string().optional(),
+  description: z.string().optional(),
 });
 
 const panelActionSchema = z.looseObject({
