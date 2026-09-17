@@ -53,6 +53,7 @@ export const characterStateSchema = z.looseObject({
   firearmChambers: z.record(z.string(), z.number()).optional(),
   rageActive: z.boolean().optional(),
   recklessActive: z.boolean().optional(),
+  sacredWeaponActive: z.boolean().optional(),
   personaMasks: z.array(z.string()).optional(),
   bestialAspectLevel: z.number().optional(),
   missileShieldArmed: z.boolean().optional(),

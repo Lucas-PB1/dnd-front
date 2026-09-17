@@ -13,6 +13,7 @@ import { resolvePanelActions } from "@/features/character/character-sheet/lib/co
 import { FeatureDetailTrigger } from "@/features/character/character-sheet/ui/sheet/feature-detail-dialog";
 import { CombatClassPanelShell } from "../shared/class-panel-shell";
 import { CombatPanelActionButtons } from "../shared/panel-action-buttons";
+import { CombatToggleChip } from "../shared/combat-toggle-chip";
 import { TableActionFeedback } from "../shared/table-action-feedback";
 import { Button } from "@/shared/ui/button";
 
@@ -25,6 +26,7 @@ type CombatPaladinPanelProps = {
   level: number;
   combatNotes?: string[];
   state: CharacterState | undefined;
+  onTableNote?: (note: string) => void;
 };
 
 export function CombatPaladinPanel({
@@ -34,6 +36,7 @@ export function CombatPaladinPanel({
   level,
   combatNotes,
   state,
+  onTableNote,
 }: CombatPaladinPanelProps) {
   const [healAmount, setHealAmount] = useState(1);
   const action = useTableActionMutation(characterId, executePaladinTableAction);
@@ -80,6 +83,7 @@ export function CombatPaladinPanel({
   );
   const poolRemaining = layOnHands?.remaining ?? 0;
   const channelRemaining = channel?.remaining ?? 0;
+  const sacredWeaponActive = state?.sacredWeaponActive ?? false;
 
   function getRemaining(slug: string): number | null {
     if (slug === "layOnHands") return poolRemaining;
@@ -90,8 +94,46 @@ export function CombatPaladinPanel({
     );
   }
 
+  function run(actionSlug: string, amount?: number) {
+    action.mutate(
+      amount != null ? { actionSlug, amount } : { actionSlug },
+      {
+        onSuccess: (result) => {
+          if (result?.note) onTableNote?.(result.note);
+        },
+      },
+    );
+  }
+
   const actionsContent = (
     <div className="space-y-2">
+      {subclassSlug === "devotion" ? (
+        <div className="flex flex-wrap items-center gap-2">
+          <CombatToggleChip
+            label={
+              sacredWeaponActive ? "Arma Sagrada ativa" : "Arma Sagrada"
+            }
+            active={sacredWeaponActive}
+            disabled={
+              !state ||
+              action.isPending ||
+              (!sacredWeaponActive && channelRemaining < 1)
+            }
+            title={
+              sacredWeaponActive
+                ? "Encerrar Arma Sagrada (sem ação)"
+                : channelRemaining < 1
+                  ? "Sem usos de Canalizar Divindade"
+                  : "Ativar via Canalizar do Juramento (gasta 1 Canalizar)"
+            }
+            onToggle={() => {
+              if (sacredWeaponActive) run("end-sacred-weapon");
+              else run("oath-channel");
+            }}
+          />
+        </div>
+      ) : null}
+
       {layOnHands ? (
         <div>
           <p className="text-sm text-muted-foreground">
@@ -118,12 +160,7 @@ export function CombatPaladinPanel({
               variant="outline"
               disabled={action.isPending || poolRemaining < healAmount}
               title="Ação: gasta pontos da reserva para curar"
-              onClick={() =>
-                action.mutate({
-                  actionSlug: "lay-on-hands",
-                  amount: healAmount,
-                })
-              }
+              onClick={() => run("lay-on-hands", healAmount)}
             >
               Curar
             </Button>
@@ -133,7 +170,7 @@ export function CombatPaladinPanel({
               variant="ghost"
               disabled={action.isPending || poolRemaining < 5}
               title="Ação: gasta 5 pontos para curar veneno ou doença"
-              onClick={() => action.mutate({ actionSlug: "cure-poison" })}
+              onClick={() => run("cure-poison")}
             >
               Curar Veneno (5)
             </Button>
@@ -146,8 +183,9 @@ export function CombatPaladinPanel({
         getRemaining={getRemaining}
         isPending={action.isPending}
         variant="outline"
-        onAction={(slug) => action.mutate({ actionSlug: slug })}
+        onAction={(slug) => run(slug)}
         listTitle="Canalizar"
+        listDefaultOpen
       />
 
       <CombatPanelActionButtons
@@ -155,7 +193,7 @@ export function CombatPaladinPanel({
         getRemaining={getRemaining}
         isPending={action.isPending}
         variant="outline"
-        onAction={(slug) => action.mutate({ actionSlug: slug })}
+        onAction={(slug) => run(slug)}
         listTitle="Juramento"
       />
 

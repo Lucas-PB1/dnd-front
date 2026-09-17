@@ -48,24 +48,19 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* Tema: Grimoire (light) — papel frio cinza-azulado, tinta, selo, anotação */
 :root {
-  /* Papel de caderno frio — bem diferente do pergaminho âmbar antigo */
   --background: oklch(0.93 0.012 240);
   --foreground: oklch(0.17 0.02 55);
   --card: oklch(0.97 0.008 240);
   --card-foreground: oklch(0.17 0.02 55);
   --popover: oklch(0.97 0.008 240);
   --popover-foreground: oklch(0.17 0.02 55);
-  /* CTA tinta — preto, não carmesim */
   --primary: oklch(0.2 0.02 55);
   --primary-foreground: oklch(0.96 0.01 95);
-  /* Selo de cera */
   --secondary: oklch(0.45 0.18 25);
   --secondary-foreground: oklch(0.97 0.01 95);
   --muted: oklch(0.89 0.012 240);
   --muted-foreground: oklch(0.4 0.02 55);
-  /* Azul de margem anotada */
   --accent: oklch(0.42 0.14 250);
   --accent-foreground: oklch(0.98 0.005 95);
   --destructive: oklch(0.48 0.2 25);
@@ -88,7 +83,6 @@
   --sidebar-ring: oklch(0.42 0.14 250);
 }
 
-/* Tema: Couro (dark) — couro marrom quente, marfim, selo, giz */
 .dark {
   --background: oklch(0.16 0.035 48);
   --foreground: oklch(0.94 0.02 95);
@@ -96,7 +90,6 @@
   --card-foreground: oklch(0.94 0.02 95);
   --popover: oklch(0.21 0.04 48);
   --popover-foreground: oklch(0.94 0.02 95);
-  /* CTA marfim */
   --primary: oklch(0.9 0.025 95);
   --primary-foreground: oklch(0.18 0.03 48);
   --secondary: oklch(0.55 0.17 25);
@@ -148,7 +141,6 @@
   }
 }
 
-/* Grain de papel/couro — SVG noise inline (leve, sem asset externo) */
 @layer utilities {
   .atmosphere-grain {
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
@@ -156,7 +148,6 @@
   }
 }
 
-/* Motion intencional — presença e hierarquia (não ruído) */
 @layer utilities {
   @keyframes motion-fade-up {
     from {
@@ -176,6 +167,44 @@
     to {
       opacity: 1;
     }
+  }
+
+  @keyframes skirmish-turn-pulse {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 color-mix(in oklch, var(--secondary) 0%, transparent);
+    }
+    50% {
+      box-shadow: 0 0 0 6px color-mix(in oklch, var(--secondary) 22%, transparent);
+    }
+  }
+
+  @keyframes skirmish-hit-flash {
+    0% {
+      background-color: color-mix(in oklch, var(--destructive) 0%, transparent);
+    }
+    35% {
+      background-color: color-mix(in oklch, var(--destructive) 18%, transparent);
+    }
+    100% {
+      background-color: transparent;
+    }
+  }
+
+  .skirmish-hp-fill {
+    transition: width 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .skirmish-card-turn {
+    animation: skirmish-turn-pulse 1.4s ease-in-out infinite;
+  }
+
+  .skirmish-card-hit {
+    animation: skirmish-hit-flash 0.8s ease-out;
+  }
+
+  .skirmish-log-line {
+    animation: motion-fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 
   @keyframes motion-brand-in {
@@ -261,7 +290,6 @@
     animation-delay: 480ms;
   }
 
-  /* Expansão de lista colapsável (ferramentas / manobras) */
   .motion-collapse {
     display: grid;
     transition: grid-template-rows 280ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -316,8 +344,15 @@
     .motion-enter,
     .motion-brand,
     .motion-fade,
-    .motion-stagger > * {
+    .motion-stagger > *,
+    .skirmish-card-turn,
+    .skirmish-card-hit,
+    .skirmish-log-line {
       animation: none !important;
+    }
+
+    .skirmish-hp-fill {
+      transition: none !important;
     }
 
     .motion-collapse,

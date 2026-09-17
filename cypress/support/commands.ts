@@ -360,8 +360,8 @@ Cypress.Commands.add("fillEquipmentPackages", () => {
   cy.get('[data-cy="class-equipment-package-card"]', { timeout: 15000 })
     .should("have.length.at.least", 1)
     .then(($cards) => {
-      const gold = $cards.filter(':contains("Só ouro")');
-      cy.wrap(gold.length > 0 ? gold.first() : $cards.first()).click({
+      const withItems = $cards.filter(':contains("Itens")');
+      cy.wrap(withItems.length > 0 ? withItems.first() : $cards.first()).click({
         force: true,
       });
     });
@@ -369,8 +369,8 @@ Cypress.Commands.add("fillEquipmentPackages", () => {
   cy.get("body").then(($body) => {
     const cards = $body.find('[data-cy="background-equipment-package-card"]');
     if (cards.length === 0) return;
-    const gold = cards.filter(':contains("Só ouro")');
-    cy.wrap(gold.length > 0 ? gold.first() : cards.first()).click({
+    const withItems = cards.filter(':contains("Itens")');
+    cy.wrap(withItems.length > 0 ? withItems.first() : cards.first()).click({
       force: true,
     });
   });

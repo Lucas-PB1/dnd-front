@@ -1,6 +1,11 @@
 export const AUTH_ROUTES = ["/login", "/signup"] as const;
 
-export const PROTECTED_ROUTES = ["/characters", "/campaigns"] as const;
+export const PROTECTED_ROUTES = [
+  "/characters",
+  "/campaigns",
+  "/duels",
+  "/skirmishes",
+] as const;
 
 export function isAuthRoute(pathname: string): boolean {
   return AUTH_ROUTES.some(

@@ -19,6 +19,7 @@ type CombatWizardPanelProps = {
   level: number;
   combatNotes?: string[];
   state: CharacterState | undefined;
+  onTableNote?: (note: string) => void;
 };
 
 export function CombatWizardPanel({
@@ -28,6 +29,7 @@ export function CombatWizardPanel({
   level,
   combatNotes,
   state,
+  onTableNote,
 }: CombatWizardPanelProps) {
   const action = useTableActionMutation(characterId, executeWizardTableAction);
   const mechanicalCatalog = useCombatMechanicalCatalog({ classSlug, subclassSlug });
@@ -52,6 +54,14 @@ export function CombatWizardPanel({
     return resources.find((entry) => entry.slug === slug)?.remaining ?? null;
   }
 
+  function run(actionSlug: string) {
+    action.mutate(actionSlug, {
+      onSuccess: (result) => {
+        if (result?.note) onTableNote?.(result.note);
+      },
+    });
+  }
+
   const maxSlotLevelsToRecover = Math.ceil(level / 2);
   const slotsMax = state?.spellSlotsMax ?? {};
 
@@ -66,8 +76,7 @@ export function CombatWizardPanel({
           {[1, 2, 3, 4, 5].map((slotLvl) => {
             const max = slotsMax[String(slotLvl)] ?? 0;
             if (max <= 0 || slotLvl > maxSlotLevelsToRecover) return null;
-            const slug =
-              `arcane-recovery-${slotLvl}`;
+            const slug = `arcane-recovery-${slotLvl}`;
             return (
               <Button
                 key={slug}
@@ -75,7 +84,7 @@ export function CombatWizardPanel({
                 size="xs"
                 variant="outline"
                 disabled={action.isPending}
-                onClick={() => action.mutate(slug)}
+                onClick={() => run(slug)}
               >
                 Recuperar Slot {slotLvl}º
               </Button>
@@ -99,7 +108,7 @@ export function CombatWizardPanel({
           getRemaining={getRemaining}
           isPending={action.isPending}
           variant="secondary"
-          onAction={(slug) => action.mutate(slug)}
+          onAction={(slug) => run(slug)}
         />
 
         <TableActionFeedback

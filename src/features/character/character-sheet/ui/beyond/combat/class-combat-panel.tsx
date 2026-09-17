@@ -55,7 +55,7 @@ export function ClassCombatPanel({
     case "monk":
       return <CombatMonkPanel {...shared} />;
     case "paladin":
-      return <CombatPaladinPanel {...shared} />;
+      return <CombatPaladinPanel {...shared} onTableNote={onTableNote} />;
     case "ranger":
       return <CombatRangerPanel {...shared} />;
     case "cleric":
@@ -79,7 +79,7 @@ export function ClassCombatPanel({
     case "druid":
       return <CombatDruidPanel {...shared} />;
     case "wizard":
-      return <CombatWizardPanel {...shared} />;
+      return <CombatWizardPanel {...shared} onTableNote={onTableNote} />;
     case "monster-hunter":
       return (
         <CombatMonsterHunterPanel

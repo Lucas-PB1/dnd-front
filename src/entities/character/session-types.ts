@@ -40,6 +40,7 @@ export type CharacterState = {
   firearmChambers?: Record<string, number>;
   rageActive?: boolean;
   recklessActive?: boolean;
+  sacredWeaponActive?: boolean;
   personaMasks?: string[];
   bestialAspectLevel?: number;
   missileShieldArmed?: boolean;
