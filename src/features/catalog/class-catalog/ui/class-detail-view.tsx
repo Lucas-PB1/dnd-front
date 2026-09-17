@@ -15,6 +15,7 @@ import { useCatalogBackHref } from "@/shared/lib/use-catalog-back-href";
 import { CatalogDetailError } from "@/shared/ui/catalog-detail-hero";
 import { CollapsibleCard } from "@/shared/ui/collapsible-card";
 import { PhbProse } from "@/shared/ui/phb-prose";
+import { CatalogOwnerMechanicalSection } from "@/features/catalog/shared/ui/catalog-owner-mechanical-section";
 
 type ClassDetailViewProps = {
   slug: string;
@@ -182,6 +183,8 @@ function ClassDetailBody({ slug }: ClassDetailViewProps) {
           </div>
         )}
       </section>
+
+      <CatalogOwnerMechanicalSection classSlug={slug} />
 
       <section aria-labelledby="class-subclasses" className="space-y-4">
         <div className="space-y-1">

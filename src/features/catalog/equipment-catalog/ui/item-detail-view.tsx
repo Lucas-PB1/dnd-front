@@ -14,6 +14,7 @@ import {
   CatalogDetailHero,
 } from "@/shared/ui/catalog-detail-hero";
 import { PhbProse } from "@/shared/ui/phb-prose";
+import { CatalogOwnerMechanicalSection } from "@/features/catalog/shared/ui/catalog-owner-mechanical-section";
 
 type ItemDetailViewProps = {
   slug: string;
@@ -126,6 +127,8 @@ function ItemDetailBody({ slug }: ItemDetailViewProps) {
           </p>
         )}
       </section>
+
+      <CatalogOwnerMechanicalSection itemSlug={slug} />
     </div>
   );
 }

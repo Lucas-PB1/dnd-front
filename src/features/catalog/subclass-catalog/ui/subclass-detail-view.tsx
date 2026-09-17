@@ -13,6 +13,7 @@ import {
 } from "@/shared/ui/catalog-detail-hero";
 import { CollapsibleCard } from "@/shared/ui/collapsible-card";
 import { PhbProse } from "@/shared/ui/phb-prose";
+import { CatalogOwnerMechanicalSection } from "@/features/catalog/shared/ui/catalog-owner-mechanical-section";
 
 type SubclassDetailViewProps = {
   slug: string;
@@ -169,6 +170,11 @@ function SubclassDetailBody({ slug }: SubclassDetailViewProps) {
           </div>
         )}
       </section>
+
+      <CatalogOwnerMechanicalSection
+        subclassSlug={slug}
+        classSlugForQuery={data.classSlug}
+      />
     </div>
   );
 }

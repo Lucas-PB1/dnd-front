@@ -15,6 +15,7 @@ import { FeatPrerequisitesBlock } from "@/features/catalog/feat-catalog/ui/catal
 import { featHasPrerequisiteContent } from "@/features/catalog/feat-catalog/ui/catalog/feat-prerequisites-block";
 import { isGhTransformationOptionalPrerequisite } from "@/features/catalog/feat-catalog/lib/gh-transformation-prerequisite";
 import { CatalogEffectsPanel } from "@/features/catalog/shared/ui/catalog-effects-panel";
+import { CatalogOwnerMechanicalSection } from "@/features/catalog/shared/ui/catalog-owner-mechanical-section";
 
 type FeatDetailViewProps = {
   slug: string;
@@ -170,6 +171,8 @@ function FeatDetailBody({ slug }: FeatDetailViewProps) {
           isError={effectsQuery.isError}
         />
       </section>
+
+      <CatalogOwnerMechanicalSection featSlug={slug} />
     </div>
   );
 }

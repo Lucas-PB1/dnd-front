@@ -29,6 +29,11 @@ export const referenceKeys = {
   combatMechanicalCatalog: (filters?: {
     classSlug?: string;
     subclassSlug?: string;
+    featSlug?: string;
+    itemSlug?: string;
+    speciesSlug?: string;
+    threadSlug?: string;
+    heritageTraitSlug?: string;
   }) =>
     [
       ...referenceKeys.all,
@@ -36,6 +41,11 @@ export const referenceKeys = {
       "v2-playable-desc",
       filters?.classSlug ?? "all",
       filters?.subclassSlug ?? "all",
+      filters?.featSlug ?? "all",
+      filters?.itemSlug ?? "all",
+      filters?.speciesSlug ?? "all",
+      filters?.threadSlug ?? "all",
+      filters?.heritageTraitSlug ?? "all",
     ] as const,
 };
 
@@ -104,6 +114,11 @@ export async function fetchCharacterLevels(limit = 20) {
 export async function fetchCombatMechanicalCatalog(filters?: {
   classSlug?: string;
   subclassSlug?: string;
+  featSlug?: string;
+  itemSlug?: string;
+  speciesSlug?: string;
+  threadSlug?: string;
+  heritageTraitSlug?: string;
 }) {
   const search = buildCatalogSearchParams({
     page: 1,
@@ -111,6 +126,11 @@ export async function fetchCombatMechanicalCatalog(filters?: {
     filters: {
       classSlug: filters?.classSlug,
       subclassSlug: filters?.subclassSlug,
+      featSlug: filters?.featSlug,
+      itemSlug: filters?.itemSlug,
+      speciesSlug: filters?.speciesSlug,
+      threadSlug: filters?.threadSlug,
+      heritageTraitSlug: filters?.heritageTraitSlug,
     },
   });
   search.delete("page");

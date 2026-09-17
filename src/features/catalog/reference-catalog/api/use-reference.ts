@@ -97,20 +97,41 @@ export function useCharacterLevels() {
 export function useCombatMechanicalCatalog(filters?: {
   classSlug?: string;
   subclassSlug?: string | null;
-  /** Default true. Use false to skip fetch (ex.: card de arma sem Rogue). */
+  featSlug?: string;
+  itemSlug?: string;
+  speciesSlug?: string;
+  threadSlug?: string;
+  heritageTraitSlug?: string;
   enabled?: boolean;
 }) {
   const classSlug = filters?.classSlug?.trim() || undefined;
   const subclassSlug = filters?.subclassSlug?.trim() || undefined;
+  const featSlug = filters?.featSlug?.trim() || undefined;
+  const itemSlug = filters?.itemSlug?.trim() || undefined;
+  const speciesSlug = filters?.speciesSlug?.trim() || undefined;
+  const threadSlug = filters?.threadSlug?.trim() || undefined;
+  const heritageTraitSlug = filters?.heritageTraitSlug?.trim() || undefined;
   const enabled = filters?.enabled ?? true;
   return useQuery({
     queryKey: referenceKeys.combatMechanicalCatalog({
       classSlug,
       subclassSlug,
+      featSlug,
+      itemSlug,
+      speciesSlug,
+      threadSlug,
+      heritageTraitSlug,
     }),
     queryFn: () =>
-      fetchCombatMechanicalCatalog({ classSlug, subclassSlug }),
-    // Mesa: reseed e texto jogável — não ficar 1h com catálogo velho.
+      fetchCombatMechanicalCatalog({
+        classSlug,
+        subclassSlug,
+        featSlug,
+        itemSlug,
+        speciesSlug,
+        threadSlug,
+        heritageTraitSlug,
+      }),
     staleTime: CATALOG_LIST_STALE_MS,
     enabled,
   });

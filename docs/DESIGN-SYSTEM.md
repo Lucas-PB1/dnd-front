@@ -182,6 +182,8 @@ Fluxo listagem: `CatalogShell` (widget) → `CatalogSearch` + grid → `CatalogT
 
 **Detalhe de referência:** `features/catalog/class-catalog/ui/class-detail-view.tsx`
 
+**Na mesa:** `CatalogOwnerMechanicalSection` sobre `GET /combat-mechanical-catalog`, filtrado pelo owner da página (`classSlug`, `subclassSlug`, `featSlug`, `itemSlug`, `speciesSlug`, `threadSlug` ou `heritageTraitSlugs` do build tradicional). Não listar ações de mesa a partir de prosa PHB.
+
 Cards de domínio (`class-card`, `species-card`…) permanecem em `features/catalog/*-catalog/ui/` — são finos wrappers sobre `CatalogTileCard`.
 
 ---

@@ -4,6 +4,7 @@ import {
   ArrowRightIcon,
   BookmarkIcon,
   CubeIcon,
+  FlagIcon,
   GlobeAltIcon,
   LanguageIcon,
   ShieldCheckIcon,
@@ -49,6 +50,14 @@ const SECTIONS: ReadonlyArray<{
     description:
       "Identidades de Grim Hollow — lore, build tradicional sugerido e pool global de traços modulares (Combate, Exploração, Interpretação).",
     icon: SparklesIcon,
+  },
+  {
+    href: "/character-threads",
+    title: "Threads",
+    eyebrow: "Northlands",
+    description:
+      "Arcos narrativos — objetivos, marcos e benefícios de mesa do catálogo mecânico.",
+    icon: FlagIcon,
   },
   {
     href: "/backgrounds",
@@ -154,13 +163,13 @@ export function CompendiumHub() {
           <div className="flex items-center gap-2">
             <SealMark className="size-5" />
             <p className="text-xs font-medium tracking-wider text-secondary uppercase">
-              PHB 2024 · Valdas · Eldritch Hunt · Northlands (Nórdico) · Griffon's Saddlebag · Grim Hollow
+              PHB 2024 · Valdas · Eldritch Hunt · Northlands (Nórdico) · Griffon&apos;s Saddlebag · Grim Hollow
             </p>
           </div>
           <p className="max-w-2xl font-heading text-lg leading-snug text-foreground/90 sm:text-xl">
             Explore o catálogo público — sem login. PHB 2024, Valdas Spire,
-            Steinhardt Eldritch Hunt, Northlands Heroes (Nórdico), Griffon's Saddlebag e Grim Hollow:
-            classes, subclasses, espécies, heranças, antecedentes, talentos, equipamento e magias. Use Fontes no topo para filtrar.
+            Steinhardt Eldritch Hunt, Northlands Heroes (Nórdico), Griffon&apos;s Saddlebag e Grim Hollow:
+            classes, subclasses, espécies, heranças, threads, antecedentes, talentos, equipamento e magias. Use Fontes no topo para filtrar.
           </p>
         </div>
       </div>

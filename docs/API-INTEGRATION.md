@@ -37,3 +37,5 @@ Armas: `range` + `propertyDetails` + `mastery` (não `properties` bruto).
 Mesa: `POST /characters/:id/rest` aceita `type: short | long | dawn`. `dawn` recarrega cargas/usos 1×/amanhecer (recursos de item) sem descanso longo.
 
 Encontro: `POST /campaigns/:campaignId/encounters/:encounterId/attacks` resolve ataque vs CA e aplica dano (PC ou criatura). Saves, tabuleiro e manobras de combate continuam na lista futura da API.
+
+Catálogo mecânico: `GET /combat-mechanical-catalog` é a SSOT das ações de mesa (`economyActions`, `panelActions`, …). A ficha e o detalhe do compêndio (classe, subclasse, talento, item, espécie, herança, thread) leem o mesmo endpoint. Filtros: `classSlug`, `subclassSlug`, `featSlug`, `itemSlug`, `speciesSlug`, `threadSlug`, `heritageTraitSlug`. Economy de herança é por traço (`heritageTraitSlug`), não pelo slug da variante; o detalhe do hub filtra os traços do build tradicional. Threads: `GET /character-threads` + rotas `/character-threads`. Não duplicar essas ações em `phb_class_feature` só para o hub; prosa PHB longa continua nas rotas `/classes` e `/subclasses`.

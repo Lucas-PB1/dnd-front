@@ -22,6 +22,7 @@ import {
 import { CollapsibleCard } from "@/shared/ui/collapsible-card";
 import { PhbProse } from "@/shared/ui/phb-prose";
 import { CatalogEffectsPanel } from "@/features/catalog/shared/ui/catalog-effects-panel";
+import { CatalogOwnerMechanicalSection } from "@/features/catalog/shared/ui/catalog-owner-mechanical-section";
 
 type SpeciesDetailViewProps = {
   slug: string;
@@ -262,6 +263,8 @@ function SpeciesDetailBody({ slug }: SpeciesDetailViewProps) {
           isError={effectsQuery.isError}
         />
       </section>
+
+      <CatalogOwnerMechanicalSection speciesSlug={slug} />
     </div>
   );
 }

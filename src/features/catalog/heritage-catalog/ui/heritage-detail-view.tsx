@@ -23,6 +23,7 @@ import { useClientPaginatedSearch } from "@/shared/lib/use-client-paginated-sear
 import { CatalogPagination } from "@/shared/ui/catalog-pagination";
 import { CatalogSearch } from "@/shared/ui/catalog-search";
 import { PhbProse } from "@/shared/ui/phb-prose";
+import { CatalogOwnerMechanicalSection } from "@/features/catalog/shared/ui/catalog-owner-mechanical-section";
 
 const TRAITS_PER_PAGE = 12;
 
@@ -369,6 +370,12 @@ function HeritageDetailBody({ slug }: HeritageDetailViewProps) {
           />
         )}
       </section>
+
+      {!traditionalQuery.isPending && traditional.length > 0 ? (
+        <CatalogOwnerMechanicalSection
+          heritageTraitSlugs={traditional.map((trait) => trait.traitSlug)}
+        />
+      ) : null}
     </div>
   );
 }
