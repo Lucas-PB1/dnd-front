@@ -64,6 +64,30 @@ export type PatchEncounterPayload = {
   creatureHpVisibility?: CreatureHpVisibility;
 };
 
+export type EncounterAttackPayload = {
+  attackerCombatantId: string;
+  targetCombatantId: string;
+  advantage?: AdvantageMode;
+  itemSlug?: string;
+  mode?: "melee" | "ranged";
+  actionId?: string;
+};
+
+export type EncounterAttackResult = {
+  encounter: CampaignEncounter;
+  hit: boolean;
+  critical: boolean;
+  attackTotal: number;
+  attackExpression: string;
+  attackRolls: number[];
+  targetAc: number;
+  damageTotal: number | null;
+  damageExpression: string | null;
+  note: string | null;
+  attackerCombatantId: string;
+  targetCombatantId: string;
+};
+
 export const encountersKeys = {
   all: (campaignId: string) =>
     ["campaigns", campaignId, "encounters"] as const,
@@ -203,5 +227,18 @@ export async function closeEncounter(
     `${base(campaignId)}/${encounterId}/close`,
     accessToken,
     { method: "POST" },
+  );
+}
+
+export async function resolveEncounterAttack(
+  accessToken: string,
+  campaignId: string,
+  encounterId: string,
+  payload: EncounterAttackPayload,
+) {
+  return gameFetch<EncounterAttackResult>(
+    `${base(campaignId)}/${encounterId}/attacks`,
+    accessToken,
+    { method: "POST", body: JSON.stringify(payload) },
   );
 }

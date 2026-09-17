@@ -43,7 +43,7 @@ Um ID → um plano. Status: Ready · Blocked · Adiado · Feito.
 | FR-25 | [37](./plans/37-pistoleiro-polish.md) | Feito | Pistoleiro |
 | FR-28 | [38](./plans/38-dawn-vs-descanso.md) | Feito | Dawn ≠ DL |
 | FR-27 | [39](./plans/39-companheiro-primal.md) | Feito | Companheiro Primal |
-| FR-29 | [40](./plans/40-combate-real.md) | Adiado | Combate real |
+| FR-29 | [40](./plans/40-combate-real.md) | Feito | Combate real |
 
 ## Feito (não reabrir)
 

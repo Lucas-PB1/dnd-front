@@ -35,3 +35,5 @@ Classe: `GET /classes/:slug` inclui `subclassUnlockLevel` e `jackOfAllTradesLeve
 Armas: `range` + `propertyDetails` + `mastery` (não `properties` bruto).
 
 Mesa: `POST /characters/:id/rest` aceita `type: short | long | dawn`. `dawn` recarrega cargas/usos 1×/amanhecer (recursos de item) sem descanso longo.
+
+Encontro: `POST /campaigns/:campaignId/encounters/:encounterId/attacks` resolve ataque vs CA e aplica dano (PC ou criatura). Saves, tabuleiro e manobras de combate continuam na lista futura da API.

@@ -21,6 +21,7 @@ import {
 } from "@/features/campaign/campaigns/api/use-encounters";
 import { EncounterCombatantRow } from "@/features/campaign/campaigns/ui/encounter/encounter-combatant-row";
 import { EncounterDmControls } from "@/features/campaign/campaigns/ui/encounter/encounter-dm-controls";
+import { EncounterAttackPanel } from "@/features/campaign/campaigns/ui/encounter/encounter-attack-panel";
 import { isEncounterActor } from "@/features/campaign/campaigns/lib/encounter-combatant-kind";
 import { ApiError } from "@/shared/api/dnd-api/api-error";
 import { motion } from "@/shared/lib/motion";
@@ -236,6 +237,23 @@ export function EncounterView({ campaignId }: { campaignId: string }) {
               onAdvantageChange={setAdvantage}
             />
           )}
+
+          {encounter.combatants.length >= 2 ? (
+            <EncounterAttackPanel
+              campaignId={campaignId}
+              encounter={encounter}
+              advantage={advantage}
+              eligibleAttackers={encounter.combatants.filter((combatant) => {
+                if (canManage) return combatant.isActive;
+                return (
+                  combatant.kind === "pc" &&
+                  !!combatant.characterId &&
+                  myCharacterIds.has(combatant.characterId) &&
+                  combatant.isActive
+                );
+              })}
+            />
+          ) : null}
 
           {encounter.combatants.length === 0 ? (
             <p className="rounded-xl border border-dashed border-border/80 px-4 py-8 text-center text-sm text-muted-foreground">

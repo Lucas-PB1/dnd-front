@@ -14,11 +14,14 @@ import {
   patchEncounter,
   patchEncounterCombatant,
   removeEncounterCombatant,
+  resolveEncounterAttack,
   rollAllInitiative,
   rollCombatantInitiative,
   type AddCreaturePayload,
   type AdvantageMode,
   type CampaignEncounter,
+  type EncounterAttackPayload,
+  type EncounterAttackResult,
   type PatchCombatantPayload,
   type PatchEncounterPayload,
 } from "@/features/campaign/campaigns/api/encounters.api";
@@ -220,5 +223,25 @@ export function useCloseEncounter(campaignId: string) {
     mutationFn: (encounterId: string) =>
       ctx.run((token) => closeEncounter(token, campaignId, encounterId)),
     onSuccess: () => setActive(ctx.queryClient, campaignId, null),
+  });
+}
+
+export function useResolveEncounterAttack(campaignId: string) {
+  const ctx = useEncounterMutation(campaignId);
+  return useMutation({
+    mutationFn: (input: {
+      encounterId: string;
+      payload: EncounterAttackPayload;
+    }) =>
+      ctx.run((token) =>
+        resolveEncounterAttack(
+          token,
+          campaignId,
+          input.encounterId,
+          input.payload,
+        ),
+      ),
+    onSuccess: (result: EncounterAttackResult) =>
+      ctx.onEncounter(result.encounter),
   });
 }

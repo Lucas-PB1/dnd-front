@@ -90,9 +90,8 @@ Blocked não vira Ready só espelhando TS. Adiado só com pedido explícito.
 | [37](./plans/37-pistoleiro-polish.md) | Feito | Pistoleiro polish |
 | [38](./plans/38-dawn-vs-descanso.md) | Feito | Evento dawn ≠ DL |
 | [39](./plans/39-companheiro-primal.md) | Feito | Companheiro Primal |
+| [40](./plans/40-combate-real.md) | Feito | Combate real (encontro: ataque vs CA + dano) |
 
 ### Adiado (pedido explícito)
 
-| # | Status | Plano |
-| --- | --- | --- |
-| [40](./plans/40-combate-real.md) | Adiado | Combate real |
+Nenhum.
