@@ -237,7 +237,7 @@ Cypress.Commands.add(
     cy.get(selector, { timeout: 15000 }).should("have.length.at.least", 1);
     cy.get(`${selector}:enabled`).then(($boxes) => {
       const unchecked = [...$boxes].filter(
-        (el) => !(el as HTMLInputElement).checked,
+        (el) => !((el as unknown as HTMLInputElement).checked),
       );
       const limit = count ?? unchecked.length;
       const toPick = Math.min(limit, unchecked.length);
@@ -500,7 +500,7 @@ function fillEnabledUncheckedBoxes(remaining = 24) {
   if (remaining <= 0) return;
   cy.get("body").then(($body) => {
     const next = [...$body.find('input[type="checkbox"]:enabled')].find(
-      (el) => !(el as HTMLInputElement).checked,
+      (el) => !((el as unknown as HTMLInputElement).checked),
     );
     if (!next) return;
     cy.wrap(next).check({ force: true });
