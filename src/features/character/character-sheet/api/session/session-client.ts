@@ -254,7 +254,18 @@ export const executeSorcererTableAction = bindClassOwner("sorcerer");
 export const executeWarlockTableAction = bindClassOwner("warlock");
 export const executeDruidTableAction = bindClassOwner("druid");
 export const executeWizardTableAction = bindClassOwner("wizard");
-export const executeGunslingerTableAction = bindClassOwner("gunslinger");
+export async function executeGunslingerTableAction(
+  accessToken: string,
+  characterId: string,
+  input: ClassTableActionInput,
+) {
+  return postClassTableAction<GunslingerTableActionResult>(
+    accessToken,
+    characterId,
+    "gunslinger",
+    payloadFromInput(input),
+  );
+}
 export const executeMonsterHunterTableAction = bindClassOwner(
   "monster-hunter",
 );
