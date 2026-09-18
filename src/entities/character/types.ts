@@ -99,6 +99,7 @@ export type CharacterDetail = {
     damageDieFloor: boolean;
     damageDieFlip: boolean;
     damageDieExplode: boolean;
+    damageRerollChoice?: boolean;
     improveCritical: boolean;
     slotElevate: boolean;
     slotReduce: boolean;

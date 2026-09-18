@@ -36,6 +36,11 @@ const STATUS_RULES: Array<{
     active: (state) => Boolean(state.wildShapeActive),
   },
   {
+    id: "skinrider-trance",
+    label: "Transe do Cavaleiro da Pele ativo",
+    active: (state) => Boolean(state.skinriderTranceActive),
+  },
+  {
     id: "missile-shield",
     label: "Escudo de Mísseis armado",
     active: (state) => Boolean(state.missileShieldArmed),

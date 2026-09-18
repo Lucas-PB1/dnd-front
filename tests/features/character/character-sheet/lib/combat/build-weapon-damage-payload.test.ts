@@ -71,4 +71,18 @@ describe("buildWeaponDamagePayload", () => {
       divineStrike: true,
     });
   });
+
+  it("includes savageAttacker when toggled", () => {
+    expect(
+      buildWeaponDamagePayload({
+        itemSlug: "longsword",
+        mode: "melee",
+        savageAttacker: true,
+      }),
+    ).toEqual({
+      itemSlug: "longsword",
+      mode: "melee",
+      savageAttacker: true,
+    });
+  });
 });

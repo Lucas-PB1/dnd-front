@@ -19,6 +19,12 @@ export type CharacterRollResult = {
   effectiveTargetAc?: number;
   hit?: boolean;
   blocked?: boolean;
+  /** Atacante Selvagem: segunda rolagem da arma (jogador escolhe). */
+  alternateRolls?: Array<{
+    expression: string;
+    total: number;
+    rolls: number[];
+  }>;
 };
 
 export type RollAttackPayload = {
@@ -68,6 +74,8 @@ export type RollDamagePayload = {
   damageDieFloor?: boolean;
   damageDieFlip?: boolean;
   damageDieExplode?: boolean;
+  /** Atacante Selvagem: rola o dano da arma duas vezes. */
+  savageAttacker?: boolean;
 };
 
 export type RollSkillPayload = {

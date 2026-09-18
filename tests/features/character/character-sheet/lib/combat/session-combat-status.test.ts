@@ -40,8 +40,12 @@ describe("sessionCombatStatusLines", () => {
   it("lists only active session combat flags", () => {
     expect(
       sessionCombatStatusLines(
-        baseState({ rageActive: true, sacredWeaponActive: true }),
+        baseState({
+          rageActive: true,
+          sacredWeaponActive: true,
+          skinriderTranceActive: true,
+        }),
       ).map((line) => line.id),
-    ).toEqual(["rage", "sacred-weapon"]);
+    ).toEqual(["rage", "sacred-weapon", "skinrider-trance"]);
   });
 });

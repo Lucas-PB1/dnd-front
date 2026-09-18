@@ -50,6 +50,7 @@ import { ClassCombatPanel } from "@/features/character/character-sheet/ui/beyond
 import { BoardedVehiclePanel } from "@/features/character/character-sheet/ui/beyond/combat/boarded-vehicle-panel";
 import { AberrantMutationDialog } from "@/features/character/character-sheet/ui/beyond/combat/aberrant-mutation-dialog";
 import { ArtisanCraftDialog } from "@/features/character/character-sheet/ui/beyond/combat/artisan-craft-dialog";
+import { ItemCastConcentrationDialog } from "@/features/character/character-sheet/ui/beyond/combat/item-cast-concentration-dialog";
 import { MagicMissileBoostDialog } from "@/features/character/character-sheet/ui/beyond/spells/magic-missile-boost-dialog";
 import {
   MAGIC_MISSILE_FREE_CAST_TABLE_ACTION,
@@ -60,6 +61,13 @@ import {
   shouldOfferMissileBoostModal,
   type MissileCastBoostSnapshot,
 } from "@/features/character/character-sheet/lib/combat/magic-missile-cast-boosts";
+import {
+  buildItemCastOverlay,
+  isItemSpellCastAction,
+  itemCastOverlayChipLabels,
+  shouldConfirmConcentrationSwap,
+  type ItemCastOverlaySnapshot,
+} from "@/features/character/character-sheet/lib/combat/item-cast-overlay";
 import {
   craftItemsForArtisanTools,
   isArtisanCraftAction,
@@ -75,6 +83,9 @@ import {
   SheetSectionHeader,
   SheetSubheader,
 } from "@/features/character/character-sheet/ui/sheet/sheet-ui";
+import {
+  useSpells,
+} from "@/features/catalog/spell-catalog/api/use-spells";
 import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
 
@@ -82,7 +93,45 @@ type BeyondActionsTabProps = {
   character: CharacterDetail;
 };
 
+type EconomyUsePayload = {
+  tableAction: string;
+  actionId: string;
+  classSlug?: string | null;
+  featSlug?: string | null;
+  usePsiDie: boolean;
+  resourceSlug?: string;
+  spendAmount: number;
+  spellSlug?: string;
+  itemSlug?: string | null;
+  note?: string;
+  armed?: boolean;
+  enabled?: boolean;
+};
+
 type HeroIcon = ComponentType<SVGProps<SVGSVGElement>>;
+
+function formatTableNoteWithOverrides(result: {
+  note?: string;
+  spellSaveDcOverride?: number | null;
+  spellAttackBonusOverride?: number | null;
+}): string | null {
+  const note = result.note?.trim();
+  if (!note) return null;
+  const extras: string[] = [];
+  if (
+    result.spellSaveDcOverride != null &&
+    !note.includes(`CD ${result.spellSaveDcOverride}`)
+  ) {
+    extras.push(`CD ${result.spellSaveDcOverride}`);
+  }
+  if (
+    result.spellAttackBonusOverride != null &&
+    !note.includes(`+${result.spellAttackBonusOverride}`)
+  ) {
+    extras.push(`Atq +${result.spellAttackBonusOverride}`);
+  }
+  return extras.length > 0 ? `${note} · ${extras.join(" · ")}` : note;
+}
 
 const ECONOMY_SECTIONS: {
   bucket: ActionEconomyBucket;
@@ -131,22 +180,31 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
   const [mutationOpen, setMutationOpen] = useState(false);
   const [pendingMissileEconomy, setPendingMissileEconomy] = useState<{
     snapshot: MissileCastBoostSnapshot;
-    payload: {
-      tableAction: string;
-      actionId: string;
-      classSlug?: string | null;
-      featSlug?: string | null;
-      usePsiDie: boolean;
-      resourceSlug?: string;
-      spendAmount: number;
-      spellSlug?: string;
-      itemSlug?: string | null;
-      note?: string;
-      armed?: boolean;
-      enabled?: boolean;
-    };
+    payload: EconomyUsePayload;
+  } | null>(null);
+  const [pendingItemConcentration, setPendingItemConcentration] = useState<{
+    payload: EconomyUsePayload;
+    currentSpellSlug: string;
+    nextSpellSlug: string;
   } | null>(null);
   const mechanicalCatalog = useCombatMechanicalCatalog({ classSlug: character.classSlug, subclassSlug: character.subclassSlug });
+  const spellsQuery = useSpells();
+  const spellMetaBySlug = useMemo(() => {
+    const map = new Map<
+      string,
+      { concentration: boolean; level: number; name: string }
+    >();
+    for (const spell of spellsQuery.data?.data ?? []) {
+      map.set(spell.slug, {
+        concentration: spell.concentration,
+        level: spell.level,
+        name: spell.name,
+      });
+    }
+    return map;
+  }, [spellsQuery.data?.data]);
+  const resolveSpellLabel = (slug: string) =>
+    spellMetaBySlug.get(slug)?.name ?? slug;
 
   const artisanToolSlugs = useMemo(
     () =>
@@ -540,6 +598,8 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
               aberrantMutationActive={
                 stateQuery.data?.aberrantMutationActive ?? null
               }
+              inventoryItems={inventoryQuery.data?.items}
+              spellMetaBySlug={spellMetaBySlug}
               onSpend={(resourceSlug) =>
                 spendResource.mutate({ resourceSlug, amount: 1 })
               }
@@ -562,7 +622,7 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
                   setMutationOpen(true);
                   return;
                 }
-                const payload = {
+                const payload: EconomyUsePayload = {
                   tableAction: action.tableAction ?? action.id,
                   actionId: action.id,
                   classSlug: action.classSlug,
@@ -598,9 +658,28 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
                     return;
                   }
                 }
+                if (
+                  isItemSpellCastAction(action) &&
+                  action.spellSlug &&
+                  shouldConfirmConcentrationSwap({
+                    concentratingOn: stateQuery.data?.concentratingOn,
+                    spellSlug: action.spellSlug,
+                    requiresConcentration:
+                      spellMetaBySlug.get(action.spellSlug)?.concentration ===
+                      true,
+                  })
+                ) {
+                  setPendingItemConcentration({
+                    payload,
+                    currentSpellSlug: stateQuery.data!.concentratingOn!,
+                    nextSpellSlug: action.spellSlug,
+                  });
+                  return;
+                }
                 tableAction.mutate(payload, {
                   onSuccess: (result) => {
-                    if (result?.note) setTableNote(result.note);
+                    const note = formatTableNoteWithOverrides(result);
+                    if (note) setTableNote(note);
                   },
                 });
               }}
@@ -691,10 +770,39 @@ export function BeyondActionsTab({ character }: BeyondActionsTabProps) {
                 { ...payload, ...flags },
                 {
                   onSuccess: (result) => {
-                    if (result?.note) setTableNote(result.note);
+                    const note = formatTableNoteWithOverrides(result);
+                    if (note) setTableNote(note);
                   },
                 },
               );
+            }}
+          />
+          <ItemCastConcentrationDialog
+            open={pendingItemConcentration != null}
+            busy={tableAction.isPending}
+            currentSpellLabel={
+              pendingItemConcentration
+                ? resolveSpellLabel(pendingItemConcentration.currentSpellSlug)
+                : ""
+            }
+            nextSpellLabel={
+              pendingItemConcentration
+                ? resolveSpellLabel(pendingItemConcentration.nextSpellSlug)
+                : ""
+            }
+            onOpenChange={(open) => {
+              if (!open) setPendingItemConcentration(null);
+            }}
+            onConfirm={() => {
+              if (!pendingItemConcentration) return;
+              const payload = pendingItemConcentration.payload;
+              setPendingItemConcentration(null);
+              tableAction.mutate(payload, {
+                onSuccess: (result) => {
+                  const note = formatTableNoteWithOverrides(result);
+                  if (note) setTableNote(note);
+                },
+              });
             }}
           />
           {tableNote ? (
@@ -728,6 +836,8 @@ function EconomyBucketSection({
   gigaMissileArmed,
   mesaCircumstances,
   aberrantMutationActive,
+  inventoryItems,
+  spellMetaBySlug,
   onSpend,
   onRecover,
   onUse,
@@ -744,6 +854,19 @@ function EconomyBucketSection({
   gigaMissileArmed: boolean;
   mesaCircumstances: readonly string[];
   aberrantMutationActive: string | null;
+  inventoryItems?: readonly {
+    itemSlug: string;
+    location?: "equipped" | "backpack";
+    spellSaveDc?: number | null;
+    spellAttackBonus?: number | null;
+    requiresComponents?: boolean;
+    useCasterAbility?: boolean;
+    attachedCoverageSlug?: string | null;
+  }[];
+  spellMetaBySlug: ReadonlyMap<
+    string,
+    { concentration: boolean; level: number; name: string }
+  >;
   onSpend: (resourceSlug: string) => void;
   onRecover: (resourceSlug: string) => void;
   onUse: (
@@ -801,6 +924,24 @@ function EconomyBucketSection({
                 : action.economy === "free"
                   ? "Sem ação / especial"
                   : "Ação";
+          const itemCastOverlay: ItemCastOverlaySnapshot | null =
+            isItemSpellCastAction(action) && action.itemSlug
+              ? buildItemCastOverlay({
+                  itemSlug: action.itemSlug,
+                  inventoryItems,
+                  spellSlug: action.spellSlug,
+                  spellLevel: action.spellSlug
+                    ? (spellMetaBySlug.get(action.spellSlug)?.level ?? null)
+                    : null,
+                  requiresConcentration: action.spellSlug
+                    ? spellMetaBySlug.get(action.spellSlug)?.concentration ===
+                      true
+                    : false,
+                })
+              : null;
+          const overlayChips = itemCastOverlay
+            ? itemCastOverlayChipLabels(itemCastOverlay)
+            : [];
 
           return (
             <li
@@ -823,6 +964,18 @@ function EconomyBucketSection({
                         {action.summary}
                       </span>
                     ) : null}
+                    {overlayChips.length > 0 ? (
+                      <span className="mt-1 flex flex-wrap gap-1">
+                        {overlayChips.map((chip) => (
+                          <span
+                            key={chip}
+                            className="rounded border border-border/60 bg-muted/40 px-1.5 py-0.5 text-[0.65rem] text-muted-foreground"
+                          >
+                            {chip}
+                          </span>
+                        ))}
+                      </span>
+                    ) : null}
                     {plan.hint ? (
                       <span className="mt-0.5 block font-mono text-[0.65rem] text-muted-foreground/90">
                         {plan.hint}
@@ -837,6 +990,18 @@ function EconomyBucketSection({
                     {action.summary ? (
                       <p className="mt-0.5 text-xs text-muted-foreground">
                         {action.summary}
+                      </p>
+                    ) : null}
+                    {overlayChips.length > 0 ? (
+                      <p className="mt-1 flex flex-wrap gap-1">
+                        {overlayChips.map((chip) => (
+                          <span
+                            key={chip}
+                            className="rounded border border-border/60 bg-muted/40 px-1.5 py-0.5 text-[0.65rem] text-muted-foreground"
+                          >
+                            {chip}
+                          </span>
+                        ))}
                       </p>
                     ) : null}
                   </>

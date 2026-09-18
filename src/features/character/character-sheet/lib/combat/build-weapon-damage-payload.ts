@@ -28,6 +28,7 @@ export type WeaponDamageOptions = {
   damageDieFloor?: boolean;
   damageDieFlip?: boolean;
   damageDieExplode?: boolean;
+  savageAttacker?: boolean;
 };
 
 /** Builds the shared damage/crit payload for weapon attack rolls. */
@@ -73,5 +74,6 @@ export function buildWeaponDamagePayload(
     ...(options.damageDieFloor ? { damageDieFloor: true } : {}),
     ...(options.damageDieFlip ? { damageDieFlip: true } : {}),
     ...(options.damageDieExplode ? { damageDieExplode: true } : {}),
+    ...(options.savageAttacker ? { savageAttacker: true } : {}),
   };
 }

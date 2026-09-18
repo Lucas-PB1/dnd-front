@@ -36,6 +36,8 @@ import { gameFetch } from "@/shared/api/dnd-api/api-client";
 
 export type EconomyTableActionResultNote = {
   note: string;
+  spellSaveDcOverride?: number | null;
+  spellAttackBonusOverride?: number | null;
 };
 
 const MAGIC_MISSILE_FREE_RESOURCE = "magic-missile-free";
@@ -137,6 +139,8 @@ export function useEconomyTableAction(characterId: string) {
               note?.trim() ||
               `Conjurou ${spellSlug}`
             ).trim(),
+            spellSaveDcOverride: result.spellSaveDcOverride ?? null,
+            spellAttackBonusOverride: result.spellAttackBonusOverride ?? null,
           };
         }
 
@@ -175,6 +179,8 @@ export function useEconomyTableAction(characterId: string) {
               note?.trim() ||
               `Conjurou ${spellSlug} (artefato)`
             ).trim(),
+            spellSaveDcOverride: result.spellSaveDcOverride ?? null,
+            spellAttackBonusOverride: result.spellAttackBonusOverride ?? null,
           };
         }
 
@@ -232,6 +238,8 @@ export function useEconomyTableAction(characterId: string) {
                 note?.trim() ||
                 `Conjurou ${spellSlug}`
               ).trim(),
+              spellSaveDcOverride: result.spellSaveDcOverride ?? null,
+              spellAttackBonusOverride: result.spellAttackBonusOverride ?? null,
             };
           }
           const itemActionSlug = actionId?.trim() || tableAction;
@@ -266,6 +274,8 @@ export function useEconomyTableAction(characterId: string) {
                 note?.trim() ||
                 `Conjurou ${spellSlug}`
               ).trim(),
+              spellSaveDcOverride: result.spellSaveDcOverride ?? null,
+              spellAttackBonusOverride: result.spellAttackBonusOverride ?? null,
             };
           }
           const result = await spendClassResource(token, characterId, {

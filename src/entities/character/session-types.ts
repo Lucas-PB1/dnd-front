@@ -49,6 +49,9 @@ export type CharacterState = {
   stellarConstellation?: string | null;
   boardedActorId?: string | null;
   mesaCircumstances?: string[];
+  /** Transe do Cavaleiro da Pele (Primal Spirit). */
+  skinriderTranceActive?: boolean;
+  skinriderActorId?: string | null;
   aberrantMutationActive?: string | null;
   highElfCantripSwapAvailable?: boolean;
   wildShapeActive: boolean;
@@ -138,6 +141,8 @@ export type CastSpellResult = {
   spellSlug: string;
   slotLevelUsed: number | null;
   note?: string | null;
+  spellSaveDcOverride?: number | null;
+  spellAttackBonusOverride?: number | null;
   state: CharacterState;
 };
 
@@ -185,6 +190,14 @@ export type InventoryItem = {
   isCoverage?: boolean;
   isMagic?: boolean;
   propertiesKind?: string | null;
+  /** CD fixa Treasure (`phb_item.properties.spellSaveDc`); null = personagem / Enspelled. */
+  spellSaveDc?: number | null;
+  /** Bônus de ataque mágico fixo do item. */
+  spellAttackBonus?: number | null;
+  /** True quando o cast exige componentes além do próprio item. */
+  requiresComponents?: boolean;
+  /** True quando o cast usa o atributo de conjuração do usuário. */
+  useCasterAbility?: boolean;
   instanceProperties?: Record<string, unknown> | null;
   costText?: string | null;
   containedInItemSlug?: string | null;

@@ -11,6 +11,11 @@ import {
 
 import type { CharacterRollResult } from "@/features/character/character-sheet/api/character-rolls.api";
 import { useCharacterRolls } from "@/features/character/character-sheet/api/use-character-rolls";
+import {
+  applyDamageRollChoice,
+  hasPendingDamageRollChoice,
+  type DamageRollChoice,
+} from "@/features/character/character-sheet/lib/combat/apply-damage-roll-choice";
 import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
 
@@ -39,7 +44,15 @@ export function SheetRollsProvider({
   return (
     <SheetRollsContext.Provider value={value}>
       {children}
-      <RollResultBanner result={latest} onDismiss={clear} />
+      <RollResultBanner
+        result={latest}
+        onDismiss={clear}
+        onChoose={(choice) => {
+          setLatest((current) =>
+            current ? applyDamageRollChoice(current, choice) : current,
+          );
+        }}
+      />
     </SheetRollsContext.Provider>
   );
 }
@@ -55,12 +68,16 @@ export function useSheetRolls() {
 function RollResultBanner({
   result,
   onDismiss,
+  onChoose,
 }: {
   result: CharacterRollResult | null;
   onDismiss: () => void;
+  onChoose: (choice: DamageRollChoice) => void;
 }) {
   if (!result) return null;
 
+  const pendingChoice = hasPendingDamageRollChoice(result);
+  const alternate = result.alternateRolls?.[0];
   const faces =
     result.kept && result.kept.length > 0
       ? `mantido ${result.kept.join(", ")} · rolado [${result.rolls.join(", ")}]`
@@ -74,6 +91,7 @@ function RollResultBanner({
       )}
       role="status"
       aria-live="polite"
+      data-cy="sheet-roll-result-banner"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
@@ -96,6 +114,33 @@ function RollResultBanner({
             <p className="mt-0.5 text-[0.7rem] text-secondary">{result.note}</p>
           ) : null}
           <p className="mt-0.5 text-[0.7rem] text-muted-foreground/90">{faces}</p>
+          {pendingChoice && alternate ? (
+            <div className="mt-2 space-y-1.5" data-cy="sheet-roll-alternate-choice">
+              <p className="text-[0.7rem] font-medium text-foreground">
+                Atacante Selvagem — escolha a rolagem da arma
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                <Button
+                  type="button"
+                  size="xs"
+                  variant="outline"
+                  data-cy="sheet-roll-choose-primary"
+                  onClick={() => onChoose("primary")}
+                >
+                  1ª: {result.total}
+                </Button>
+                <Button
+                  type="button"
+                  size="xs"
+                  variant="outline"
+                  data-cy="sheet-roll-choose-alternate"
+                  onClick={() => onChoose("alternate")}
+                >
+                  2ª: {alternate.total}
+                </Button>
+              </div>
+            </div>
+          ) : null}
         </div>
         <Button type="button" size="sm" variant="ghost" onClick={onDismiss}>
           Fechar

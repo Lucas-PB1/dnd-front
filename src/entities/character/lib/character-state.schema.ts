@@ -61,6 +61,8 @@ export const characterStateSchema = z.looseObject({
   starryFormActive: z.boolean().optional(),
   stellarConstellation: z.string().nullable().optional(),
   boardedActorId: z.string().nullable().optional(),
+  skinriderTranceActive: z.boolean().optional(),
+  skinriderActorId: z.string().nullable().optional(),
   mesaCircumstances: z.array(z.string()).optional(),
   aberrantMutationActive: z.string().nullable().optional(),
   highElfCantripSwapAvailable: z.boolean().optional(),

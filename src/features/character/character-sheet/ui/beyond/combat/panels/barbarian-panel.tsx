@@ -129,18 +129,36 @@ export function CombatBarbarianPanel({
   }
 
   const primalSpiritContent = isPrimalSpirit ? (
-    <CompanionTrackerPanel
-      characterId={characterId}
-      subclassSlug={subclassSlug}
-      subclassOptions={subclassOptions}
-      level={level}
-      trackers={state?.companions}
-      isTableActionPending={action.isPending}
-      lastNote={action.lastResult?.note}
-      onCommand={(command) => runSubclass("primal-companion", command)}
-      onSummon={() => runSubclass("primal-companion-summon")}
-      onRestore={() => runSubclass("primal-companion-restore")}
-    />
+    <div className="space-y-2">
+      <CompanionTrackerPanel
+        characterId={characterId}
+        subclassSlug={subclassSlug}
+        subclassOptions={subclassOptions}
+        level={level}
+        trackers={state?.companions}
+        isTableActionPending={action.isPending}
+        lastNote={action.lastResult?.note}
+        onCommand={(command) => runSubclass("primal-companion", command)}
+        onSummon={() => runSubclass("primal-companion-summon")}
+        onRestore={() => runSubclass("primal-companion-restore")}
+      />
+      {state?.skinriderTranceActive ? (
+        <p className="rounded-md border border-border/60 bg-muted/30 px-2 py-1.5 text-xs text-muted-foreground">
+          Transe do Cavaleiro da Pele ativo
+          {state.skinriderActorId ? (
+            <>
+              {" · "}
+              <a
+                className="underline underline-offset-2 hover:text-foreground"
+                href={`/actors/${state.skinriderActorId}`}
+              >
+                ficha do actor
+              </a>
+            </>
+          ) : null}
+        </p>
+      ) : null}
+    </div>
   ) : null;
 
   const powersContent =

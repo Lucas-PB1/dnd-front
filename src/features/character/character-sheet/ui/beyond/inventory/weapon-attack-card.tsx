@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { CubeIcon } from "@heroicons/react/24/outline";
 
 import type {
@@ -121,6 +121,7 @@ export function WeaponAttackCard({
   const [strokeOfLuck, setStrokeOfLuck] = useState(false);
   const [damageDieFlip, setDamageDieFlip] = useState(false);
   const [damageDieExplode, setDamageDieExplode] = useState(false);
+  const [savageAttacker, setSavageAttacker] = useState(false);
   const [spendInspiration, setSpendInspiration] = useState(false);
   const [cunningStrikeEffects, setCunningStrikeEffects] = useState<string[]>(
     [],
@@ -140,11 +141,8 @@ export function WeaponAttackCard({
   const [beastStrike, setBeastStrike] = useState(false);
   const [divineStrike, setDivineStrike] = useState(false);
   const [brutalStrike, setBrutalStrike] = useState(false);
-  const [divineFury, setDivineFury] = useState(false);
-
-  useEffect(() => {
-    if (!rageActive) setDivineFury(false);
-  }, [rageActive]);
+  const [divineFuryWanted, setDivineFuryWanted] = useState(false);
+  const divineFury = Boolean(rageActive && divineFuryWanted);
   const [targetCover, setTargetCover] = useState<AttackCoverLevel>("none");
   const [longRange, setLongRange] = useState(false);
   const [meleeWithRanged, setMeleeWithRanged] = useState(false);
@@ -435,7 +433,7 @@ export function WeaponAttackCard({
                   ? "1º acerto/turno com Fúria: Necrótico ou Radiante à escolha"
                   : "Ative a Fúria para usar Fúria Divina"
               }
-              onToggle={() => setDivineFury((value) => !value)}
+              onToggle={() => setDivineFuryWanted((value) => !value)}
             />
           ) : null}
           {featEffectFlags?.damageDieFlip ? (
@@ -452,6 +450,14 @@ export function WeaponAttackCard({
               active={damageDieExplode}
               title="Pyromaniac: face máxima gera um dado extra"
               onToggle={() => setDamageDieExplode((value) => !value)}
+            />
+          ) : null}
+          {featEffectFlags?.damageRerollChoice ? (
+            <CombatToggleChip
+              label="Atacante Selvagem"
+              active={savageAttacker}
+              title="Rola o dano da arma duas vezes e escolhe (1×/turno)"
+              onToggle={() => setSavageAttacker((value) => !value)}
             />
           ) : null}
           {featEffectFlags?.inspirationRefundOnFail && inspiration ? (
@@ -578,6 +584,7 @@ export function WeaponAttackCard({
                   damageDieFloor: featEffectFlags?.damageDieFloor,
                   damageDieFlip,
                   damageDieExplode,
+                  savageAttacker,
                 }),
               )
             }
@@ -610,6 +617,7 @@ export function WeaponAttackCard({
                   damageDieFloor: featEffectFlags?.damageDieFloor,
                   damageDieFlip,
                   damageDieExplode,
+                  savageAttacker,
                 }),
               )
             }
@@ -632,6 +640,7 @@ export function WeaponAttackCard({
                     divineSmite: true,
                     smiteSlotLevel: selectedSmiteSlot,
                     smiteVsUndeadOrFiend,
+                    savageAttacker,
                   }),
                   { onSuccess: () => onDivineSmiteResolved?.() },
                 )

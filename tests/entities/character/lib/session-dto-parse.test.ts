@@ -102,6 +102,25 @@ describe("parseCharacterInventory", () => {
     expect(parsed.items[0]?.itemSlug).toBe("dagger");
   });
 
+  it("accepts Treasure cast overlay fields on inventory items", () => {
+    const parsed = parseCharacterInventory({
+      ...validInventory,
+      items: [
+        {
+          ...validInventory.items[0],
+          itemSlug: "varinha-de-relampagos",
+          itemName: "Varinha de Relâmpagos",
+          spellSaveDc: 15,
+          spellAttackBonus: null,
+          requiresComponents: false,
+          useCasterAbility: false,
+        },
+      ],
+    });
+    expect(parsed.items[0]?.spellSaveDc).toBe(15);
+    expect(parsed.items[0]?.requiresComponents).toBe(false);
+  });
+
   it("throws when items is missing", () => {
     const { items: _items, ...rest } = validInventory;
     expect(() => parseCharacterInventory(rest)).toThrow(ApiDtoError);
