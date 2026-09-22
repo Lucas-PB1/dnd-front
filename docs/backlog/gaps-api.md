@@ -2,51 +2,6 @@
 
 Cada linha é **um** plano. Detalhe só no arquivo do plano.
 
-## Contrato morto
+Nenhum gap aberto.
 
-| Gap | Plano |
-| --- | --- |
-| ~~Doc diz que o wizard não lê métodos de atributo~~ | [01](./plans/01-doc-api-integration.md) Feito |
-| ~~Front tem `minTraitTakes`; DTO Nest não~~ | [02](./plans/02-min-trait-takes.md) Feito |
-| ~~`xpThreshold` no GET levels, UI não usa~~ | [03](./plans/03-xp-threshold.md) Feito |
-| ~~State: wild shape + companions sem tipo~~ | [04](./plans/04-character-state-tipos.md) Feito |
-| ~~Catálogo: `strikeOptions` sem tipo~~ | [05](./plans/05-strike-options-tipo.md) Feito |
-| ~~PATCH state sem add/remove conditions~~ | [06](./plans/06-patch-conditions-delta.md) Feito |
-| ~~`featEffectFlags` crítico / duas mãos / versátil~~ | [07](./plans/07-feat-effect-flags.md) Feito |
-
-## Rota sem cliente
-
-| Gap | Plano |
-| --- | --- |
-| ~~`GET .../druid/wild-shape/eligible`~~ | [08](./plans/08-wild-shape-eligible-http.md) Feito |
-| ~~`GET` + `POST dismiss` companions~~ | [09](./plans/09-companions-http.md) Feito |
-| ~~`POST .../vehicles/sheet-actions`~~ | [10](./plans/10-vehicles-sheet-actions-http.md) Feito |
-| ~~`POST .../mounts/*`~~ | [11](./plans/11-mounts-http.md) Feito |
-| ~~`GET /actors`~~ | [12](./plans/12-actors-list.md) Feito |
-| ~~`POST /actors`~~ | [13](./plans/13-actors-create.md) Feito |
-| ~~`DELETE /actors/:id`~~ | [14](./plans/14-actors-delete.md) Feito |
-| ~~`GET /actors/:id/state`~~ | [15](./plans/15-actors-get-state.md) Feito |
-| ~~`POST /actors/:id/rolls/attack`~~ | [16](./plans/16-actors-roll-attack.md) Feito |
-
-## UI
-
-| Gap | Plano |
-| --- | --- |
-| ~~`strikeOptions` tipado mas painel não usa~~ | [17](./plans/17-strike-options-ui.md) Feito |
-| ~~Forma Selvagem “polish futuro”~~ | [18](./plans/18-forma-selvagem-ui.md) Feito |
-| ~~Tracker companions~~ | [19](./plans/19-companheiros-ui.md) Feito |
-| ~~Veículo sem sheet-actions na UI~~ | [20](./plans/20-veiculos-sheet-actions-ui.md) Feito |
-| ~~Montaria sem cliente/UI~~ | [21](./plans/21-montarias-ui.md) Feito |
-
-## Compêndio (labels via API)
-
-| Gap | Plano |
-| --- | --- |
-| ~~Import FSD nos filtros~~ | [22](./plans/22-fsd-catalog-filters.md) Feito |
-| ~~Escolas hardcoded~~ | [23](./plans/23-filtros-escolas.md) Feito |
-| ~~Categorias hardcoded~~ | [24](./plans/24-filtros-categorias.md) Feito |
-| ~~Pools de tools hardcoded~~ | [25](./plans/25-pools-ferramentas.md) Feito |
-
-## Qualidade / SSOT / adiado
-
-Ver [README](./README.md) planos 26–40.
+Fila: [README](./README.md).

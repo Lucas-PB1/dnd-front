@@ -1,4 +1,4 @@
-Trabalho aberto: [../backlog/README.md](../backlog/README.md) (planos 37–40 Adiado).
+Backlog ativo: [../backlog/README.md](../backlog/README.md).
 
 # Front — SSOT sem hardcode de domínio
 
