@@ -48,6 +48,11 @@ export function StepLanguages({ control, setValue }: StepLanguagesProps) {
     name: "speciesSlug",
     defaultValue: "",
   });
+  const heritageSlug = useWatch({
+    control,
+    name: "heritageSlug",
+    defaultValue: "",
+  });
   const selected = useWatch({
     control,
     name: "languageSlugs",
@@ -65,25 +70,33 @@ export function StepLanguages({ control, setValue }: StepLanguagesProps) {
     () => classLanguageGrant(classSlug, level),
     [classSlug, level],
   );
+  const fixedLanguageRows = fixedLanguages.data?.data;
+  const grantedSlugs = useMemo(
+    () => (fixedLanguageRows ?? []).map((row) => row.slug),
+    [fixedLanguageRows],
+  );
   const grant = useMemo(
     () => ({
-      grantedSlugs: (fixedLanguages.data?.data ?? []).map((row) => row.slug),
+      grantedSlugs,
       languageChoiceCount: background.data?.languageChoiceCount ?? 0,
       extraGrantedSlugs: classGrant.grantedSlugs,
       extraChoiceCount: classGrant.choiceCount,
       speciesSlug: speciesSlug || null,
+      heritageSlug: heritageSlug || null,
     }),
     [
-      fixedLanguages.data?.data,
+      grantedSlugs,
       background.data?.languageChoiceCount,
       classGrant.grantedSlugs,
       classGrant.choiceCount,
       speciesSlug,
+      heritageSlug,
     ],
   );
 
   const quota = useMemo(() => languageQuota(grant), [grant]);
-  const catalog = languages.data?.data ?? [];
+  const languageRows = languages.data?.data;
+  const catalog = useMemo(() => languageRows ?? [], [languageRows]);
   const pickableLanguages = useMemo(
     () => filterPickableLanguages(catalog, quota.granted),
     [catalog, quota.granted],
@@ -104,17 +117,7 @@ export function StepLanguages({ control, setValue }: StepLanguagesProps) {
     if (!same) {
       setValue("languageSlugs", next, { shouldDirty: true });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- sync por antecedente/espécie/classe/catálogo
-  }, [
-    grantReady,
-    grant.grantedSlugs.join(","),
-    grant.languageChoiceCount,
-    grant.speciesSlug,
-    classGrant.grantedSlugs.join(","),
-    classGrant.choiceCount,
-    catalog.map((row) => row.slug).join(","),
-    setValue,
-  ]);
+  }, [grantReady, selected, grant, catalog, setValue]);
 
   function toggle(slug: string) {
     const result = toggleLanguageSelection(selected, slug, grant, catalog);
@@ -135,8 +138,8 @@ export function StepLanguages({ control, setValue }: StepLanguagesProps) {
             <p className="text-[11px] text-muted-foreground">
               {!backgroundSlug
                 ? "Selecione um antecedente para ver a cota de idiomas."
-                : !speciesSlug
-                  ? "Selecione uma espécie para incluir os idiomas da linhagem."
+                : !speciesSlug && !heritageSlug
+                  ? "Selecione uma espécie ou variante para incluir os idiomas da linhagem."
                   : languageQuotaSummary(quota)}
             </p>
           </div>

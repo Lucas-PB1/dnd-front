@@ -9,12 +9,16 @@ import { useClassDetail } from "@/features/catalog/class-catalog/api/use-classes
 import { usePreviewGrantedSpells } from "@/features/character/create-character/api/use-preview-granted-spells";
 import type { CreateCharacterInput } from "@/features/character/create-character/model/create-character.schema";
 
+const PREVIEW_SPECIES_FALLBACK = "-";
+
 type SyncGrantedSpellsInput = {
   speciesSlug: string;
+  heritageSlug?: string;
   classSlug: string;
   level: number;
   subclassSlug: string;
   speciesChoices: CreateCharacterInput["speciesChoices"];
+  heritageChoices?: CreateCharacterInput["heritageChoices"];
   featOptions: CreateCharacterInput["featOptions"];
   characterFeats: CharacterFeat[];
   characterSpells: CreateCharacterInput["characterSpells"];
@@ -24,10 +28,12 @@ type SyncGrantedSpellsInput = {
 
 export function useSyncGrantedSpells({
   speciesSlug,
+  heritageSlug,
   classSlug,
   level,
   subclassSlug,
   speciesChoices,
+  heritageChoices,
   featOptions,
   characterFeats,
   characterSpells,
@@ -35,10 +41,17 @@ export function useSyncGrantedSpells({
   setValue,
 }: SyncGrantedSpellsInput) {
   const classDetail = useClassDetail(classSlug, !!classSlug);
+  const previewSpeciesSlug =
+    speciesSlug.trim() ||
+    heritageSlug?.trim() ||
+    (classSlug.trim() ? PREVIEW_SPECIES_FALLBACK : "");
+  const originChoices = heritageSlug?.trim()
+    ? (heritageChoices ?? [])
+    : speciesChoices;
   const grantedPreview = usePreviewGrantedSpells(
-    speciesSlug
+    previewSpeciesSlug
       ? {
-          speciesSlug,
+          speciesSlug: previewSpeciesSlug,
           classSlug: classSlug || undefined,
           level,
           subclassSlug:
@@ -48,13 +61,13 @@ export function useSyncGrantedSpells({
             ) && subclassSlug
               ? subclassSlug
               : undefined,
-          speciesChoices,
+          speciesChoices: originChoices,
           featOptions,
           characterFeats,
           characterSpells: playerPickedSpells,
         }
       : null,
-    !!speciesSlug,
+    !!previewSpeciesSlug,
   );
 
   useEffect(() => {

@@ -228,7 +228,7 @@ export function useStepClassSkills(
   ]);
 
   const masteryCandidates = useMemo(() => {
-    if (!classDetail.isSuccess) return [];
+    if (!classDetail.isSuccess || weapons.isError) return [];
     return buildWeaponMasteryCandidates({
       weapons: weapons.data?.data ?? [],
       weaponProficiencySlugs,
@@ -238,6 +238,7 @@ export function useStepClassSkills(
     });
   }, [
     classDetail.isSuccess,
+    weapons.isError,
     weapons.data?.data,
     masteryEligibility,
     weaponProficiencySlugs,
@@ -289,6 +290,10 @@ export function useStepClassSkills(
 
   const showSkillPicker = requiredCount > 0 && options.length > 0;
   const isLoading = classSkills.isPending || classDetail.isPending;
+  const masteryWeaponsLoading = weapons.isPending;
+  const masteryWeaponsError = weapons.isError
+    ? "Não foi possível carregar as armas para Maestria. Tente de novo."
+    : undefined;
 
   return {
     classSlug,
@@ -308,6 +313,8 @@ export function useStepClassSkills(
     masteryCandidates,
     expertiseFilled,
     masteryFilled,
+    masteryWeaponsLoading,
+    masteryWeaponsError,
     showSkillPicker,
     isLoading,
     toggleSkill,

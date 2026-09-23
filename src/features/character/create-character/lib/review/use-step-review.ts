@@ -159,6 +159,7 @@ export function useStepReview(control: Control<CreateCharacterInput>) {
     extraGrantedSlugs: classLangGrant.grantedSlugs,
     extraChoiceCount: classLangGrant.choiceCount,
     speciesSlug: values.speciesSlug || null,
+    heritageSlug: values.heritageSlug || null,
   });
 
   const classPackages = useMemo(

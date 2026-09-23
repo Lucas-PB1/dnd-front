@@ -7,7 +7,6 @@ import { useWatch } from "react-hook-form";
 import { asiFeatSlotsToCharacterFeats } from "@/features/character/create-character/lib/feats/asi-feat-slots-to-feats";
 import type { CreateCharacterInput } from "@/features/character/create-character/model/create-character.schema";
 
-/** Campos do formulário usados pelo passo de magias. */
 export function useSpellStepFormValues(
   control: Control<CreateCharacterInput>,
 ) {
@@ -18,6 +17,11 @@ export function useSpellStepFormValues(
     name: "speciesSlug",
     defaultValue: "",
   });
+  const heritageSlug = useWatch({
+    control,
+    name: "heritageSlug",
+    defaultValue: "",
+  });
   const subclassSlug = useWatch({
     control,
     name: "subclassSlug",
@@ -26,6 +30,11 @@ export function useSpellStepFormValues(
   const speciesChoices = useWatch({
     control,
     name: "speciesChoices",
+    defaultValue: [],
+  });
+  const heritageChoices = useWatch({
+    control,
+    name: "heritageChoices",
     defaultValue: [],
   });
   const featOptions = useWatch({
@@ -86,8 +95,10 @@ export function useSpellStepFormValues(
     level: level ?? 1,
     classSlug: classSlug ?? "",
     speciesSlug: speciesSlug ?? "",
+    heritageSlug: heritageSlug ?? "",
     subclassSlug: subclassSlug ?? "",
     speciesChoices: speciesChoices ?? [],
+    heritageChoices: heritageChoices ?? [],
     featOptions: featOptions ?? [],
     characterSpells: characterSpells ?? [],
     classOptions: classOptions ?? [],

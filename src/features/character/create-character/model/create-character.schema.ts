@@ -167,7 +167,8 @@ export const createCharacterSchema = createCharacterBaseSchema
   .superRefine(refineSubclassRequired)
   .superRefine(refinePointBuyAssigned)
   .superRefine(refineAbilityPool)
-  .superRefine(refineBackgroundBoosts);
+  .superRefine(refineBackgroundBoosts)
+  .superRefine(refineOrigin);
 
 function refineBackgroundBoosts(
   data: {

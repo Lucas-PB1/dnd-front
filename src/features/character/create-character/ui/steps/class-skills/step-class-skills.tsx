@@ -75,6 +75,8 @@ export function StepClassSkills({
         classOptions={data.classOptions}
         masteryFilled={data.masteryFilled}
         masteryEligibility={data.masteryEligibility}
+        isLoading={data.masteryWeaponsLoading}
+        loadError={data.masteryWeaponsError}
         onSetMasteryWeapon={data.setMasteryWeapon}
       />
     </div>

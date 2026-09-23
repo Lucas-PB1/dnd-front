@@ -47,6 +47,19 @@ export function useStepEquipment(
   const equipment = useWatch({ control, name: "equipment", defaultValue: [] });
 
   const [choicePicks, setChoicePicks] = useState<Record<string, string>>({});
+  const prevClassSlugRef = useRef(classSlug);
+  const prevBackgroundSlugRef = useRef(backgroundSlug);
+
+  useEffect(() => {
+    if (
+      prevClassSlugRef.current !== classSlug ||
+      prevBackgroundSlugRef.current !== backgroundSlug
+    ) {
+      setChoicePicks({});
+      prevClassSlugRef.current = classSlug;
+      prevBackgroundSlugRef.current = backgroundSlug;
+    }
+  }, [classSlug, backgroundSlug]);
 
   const classDetail = useClassDetail(classSlug, !!classSlug);
   const classEquipment = useClassEquipment(classSlug, !!classSlug);

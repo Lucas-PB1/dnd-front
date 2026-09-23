@@ -12,11 +12,22 @@ import { isSubclassRequired } from "@/entities/character/lib/subclass";
 import type { CreateCharacterInput } from "@/features/character/create-character/model/create-character.schema";
 import { useCharacterLevels } from "@/features/catalog/reference-catalog/api/use-reference";
 import type { ClassProgressionRow } from "@/entities/class/types";
+import {
+  mergeEldritchInvocationsIntoClassOptions,
+  readEldritchInvocationPicks,
+  warlockInvocationLimit,
+} from "@/features/character/character-sheet/lib/warlock/eldritch-invocations";
+import {
+  mergeMetamagicIntoClassOptions,
+  readMetamagicSlugs,
+  sorcererMetamagicLimit,
+} from "@/features/character/character-sheet/lib/sorcerer/metamagic";
 
 type UseWizardFormFieldSyncParams = {
   level: number;
   classSlug: string;
   speciesSlug?: string;
+  heritageSlug?: string;
   subclassSlug: string;
   backgroundSlug: string;
   originFeatSlug: string;
@@ -26,10 +37,30 @@ type UseWizardFormFieldSyncParams = {
   getValues: UseFormGetValues<CreateCharacterInput>;
 };
 
+function pruneLevelGatedClassOptions(
+  classOptions: CreateCharacterInput["classOptions"],
+  classSlug: string,
+  level: number,
+): CreateCharacterInput["classOptions"] {
+  let next = classOptions ?? [];
+  if (classSlug === "warlock") {
+    const limit = warlockInvocationLimit(level);
+    const picks = readEldritchInvocationPicks(next).slice(0, limit);
+    next = mergeEldritchInvocationsIntoClassOptions(next, picks);
+  }
+  if (classSlug === "sorcerer") {
+    const limit = sorcererMetamagicLimit(level);
+    const picks = readMetamagicSlugs(next).slice(0, limit);
+    next = mergeMetamagicIntoClassOptions(next, picks);
+  }
+  return next;
+}
+
 export function useWizardFormFieldSync({
   level,
   classSlug,
   speciesSlug,
+  heritageSlug,
   subclassSlug,
   backgroundSlug,
   originFeatSlug,
@@ -42,8 +73,10 @@ export function useWizardFormFieldSync({
   const levelCatalog = levels.data?.data;
   const prevClassSlugRef = useRef(classSlug);
   const prevSpeciesSlugRef = useRef(speciesSlug);
+  const prevHeritageSlugRef = useRef(heritageSlug);
   const prevSubclassSlugRef = useRef(subclassSlug);
   const prevBackgroundSlugRef = useRef(backgroundSlug);
+  const prevLevelRef = useRef(level);
 
   useEffect(() => {
     setValue("subclassUnlockLevel", subclassUnlockLevel ?? null);
@@ -62,12 +95,14 @@ export function useWizardFormFieldSync({
       setValue("backgroundToolItemSlug", "");
       setValue("backgroundOriginFeatSlug", "");
       setValue("featOptions", []);
-      setValue("asiFeatSlotSlugs", []);
-      setValue("classSkillSlugs", []);
       setValue("languageSlugs", []);
+      setValue(
+        "equipment",
+        (getValues("equipment") ?? []).filter((e) => e.source !== "background"),
+      );
       prevBackgroundSlugRef.current = backgroundSlug;
     }
-  }, [backgroundSlug, setValue]);
+  }, [backgroundSlug, setValue, getValues]);
 
   useEffect(() => {
     if (prevClassSlugRef.current !== classSlug) {
@@ -81,6 +116,8 @@ export function useWizardFormFieldSync({
       );
       setValue("characterSpells", []);
       setValue("fightingStyleFeatSlug", "");
+      setValue("asiFeatSlotSlugs", []);
+      setValue("featOptions", []);
       prevClassSlugRef.current = classSlug;
     }
   }, [classSlug, setValue, getValues]);
@@ -93,11 +130,34 @@ export function useWizardFormFieldSync({
   }, [speciesSlug, setValue]);
 
   useEffect(() => {
+    if (prevHeritageSlugRef.current !== heritageSlug) {
+      setValue("heritageChoices", []);
+      prevHeritageSlugRef.current = heritageSlug;
+    }
+  }, [heritageSlug, setValue]);
+
+  useEffect(() => {
     if (prevSubclassSlugRef.current !== subclassSlug) {
       setValue("subclassOptions", []);
       prevSubclassSlugRef.current = subclassSlug;
     }
   }, [subclassSlug, setValue]);
+
+  useEffect(() => {
+    const previousLevel = prevLevelRef.current;
+    if (level < previousLevel) {
+      setValue("characterSpells", []);
+      setValue(
+        "classOptions",
+        pruneLevelGatedClassOptions(
+          getValues("classOptions") ?? [],
+          classSlug,
+          level,
+        ),
+      );
+    }
+    prevLevelRef.current = level;
+  }, [level, classSlug, setValue, getValues]);
 
   useEffect(() => {
     const count = countAsiFeatSlots(classProgression, level);

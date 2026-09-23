@@ -1,7 +1,3 @@
-/**
- * Idiomas iniciais PHB 2024 — antecedente + espécie (E007) + classe.
- */
-
 import {
   DRUIDIC_LANGUAGE_SLUG,
   THIEVES_CANT_LANGUAGE_SLUG,
@@ -12,7 +8,6 @@ export const CLASS_EXCLUSIVE_LANGUAGE_SLUGS = [
   THIEVES_CANT_LANGUAGE_SLUG,
 ] as const;
 
-/** Espelha dnd-api `SPECIES_LANGUAGE_CHOICE_COUNT` (grant_language ×2). */
 export const SPECIES_LANGUAGE_CHOICE_COUNT = 2;
 
 const CLASS_EXCLUSIVE_SET = new Set<string>(CLASS_EXCLUSIVE_LANGUAGE_SLUGS);
@@ -22,7 +17,6 @@ export type LanguageCatalogEntry = {
   isRare: boolean;
 };
 
-/** PHB 2024: escolhas usam idiomas padrão; Druídico/Gíria só por classe. */
 export function isPickableLanguage(
   slug: string,
   language: LanguageCatalogEntry,
@@ -50,11 +44,6 @@ export type BackgroundLanguageGrant = {
 
 const DEFAULT_GRANTED = ["common"];
 
-/**
- * Concessões do antecedente. `languageChoiceCount` ausente → 0
- * (não inventar 2; a cota da espécie entra em `languageQuota`).
- * Lista vazia da API = 0 fixos (não inventar Comum).
- */
 export function backgroundLanguageGrant(input?: {
   grantedSlugs?: string[];
   languageChoiceCount?: number;
@@ -74,8 +63,8 @@ export type LanguageQuotaInput = {
   languageChoiceCount?: number;
   extraGrantedSlugs?: string[];
   extraChoiceCount?: number;
-  /** Quando presente, soma `SPECIES_LANGUAGE_CHOICE_COUNT` às escolhas. */
   speciesSlug?: string | null;
+  heritageSlug?: string | null;
 };
 
 export function languageQuota(input?: LanguageQuotaInput | null): {
@@ -90,9 +79,10 @@ export function languageQuota(input?: LanguageQuotaInput | null): {
     backgroundLanguageGrant(input);
   const extraGranted = [...new Set(input?.extraGrantedSlugs ?? [])];
   const granted = [...new Set([...grantedSlugs, ...extraGranted])];
-  const speciesChoiceCount = input?.speciesSlug?.trim()
-    ? SPECIES_LANGUAGE_CHOICE_COUNT
-    : 0;
+  const speciesChoiceCount =
+    input?.speciesSlug?.trim() || input?.heritageSlug?.trim()
+      ? SPECIES_LANGUAGE_CHOICE_COUNT
+      : 0;
   const classChoiceCount = input?.extraChoiceCount ?? 0;
   const totalChoice =
     backgroundChoiceCount + speciesChoiceCount + classChoiceCount;
@@ -106,7 +96,6 @@ export function languageQuota(input?: LanguageQuotaInput | null): {
   };
 }
 
-/** Idiomas escolhidos pelo jogador (exclui concedidos). */
 export function chosenLanguageSlugs(
   selected: string[],
   granted: string[],
@@ -196,7 +185,6 @@ export function toggleLanguageSelection(
   };
 }
 
-/** Texto curto da cota (espécie + antecedente + classe). */
 export function languageQuotaSummary(quota: ReturnType<typeof languageQuota>): string {
   if (quota.choiceCount === 0) {
     return "Seus idiomas vêm das concessões fixas — sem escolha extra.";

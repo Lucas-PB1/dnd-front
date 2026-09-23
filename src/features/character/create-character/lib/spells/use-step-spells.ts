@@ -36,10 +36,12 @@ export function useStepSpells(
 
   useSyncGrantedSpells({
     speciesSlug: form.speciesSlug,
+    heritageSlug: form.heritageSlug,
     classSlug: form.classSlug,
     level: form.level,
     subclassSlug: form.subclassSlug,
     speciesChoices: form.speciesChoices,
+    heritageChoices: form.heritageChoices,
     featOptions: form.featOptions,
     characterFeats: form.characterFeats,
     characterSpells: form.characterSpells,

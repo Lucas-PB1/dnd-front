@@ -74,6 +74,9 @@ export function ReviewLanguagesSection({ data }: { data: ReviewData }) {
       />
       <p className="text-xs text-muted-foreground">
         {values.languageSlugs.length} / {langQuota.maxTotal}
+        {langQuota.classChoiceCount > 0
+          ? ` · ${langQuota.classChoiceCount} da classe`
+          : ""}
         {langQuota.speciesChoiceCount > 0
           ? ` · ${langQuota.speciesChoiceCount} da espécie`
           : ""}

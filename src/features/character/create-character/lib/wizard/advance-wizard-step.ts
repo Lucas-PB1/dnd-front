@@ -28,8 +28,14 @@ import {
   parsePointBuyRules,
 } from "@/features/character/create-character/lib/abilities/point-buy";
 import { asiFeatSlotsToCharacterFeats } from "@/features/character/create-character/lib/feats/asi-feat-slots-to-feats";
+import { countAsiFeatSlots } from "@/features/character/create-character/lib/feats/asi-feat-slots";
 import { findIncompleteCreateFeatOptions } from "@/features/character/create-character/lib/feats/validate-create-feat-options";
 import { resolveCreateCharacterFeats } from "@/features/character/create-character/lib/feats/preview-create-character-feats";
+import {
+  chosenLanguageSlugs,
+  languageQuota,
+  type LanguageQuotaInput,
+} from "@/features/character/create-character/lib/languages/language-selection";
 import {
   abilitiesStepSchema,
   identityStepSchema,
@@ -56,6 +62,7 @@ export type WizardAdvanceDeps = {
   trigger: UseFormTrigger<CreateCharacterInput>;
   setStep: (step: WizardStepId) => void;
   clearStepErrors: () => void;
+  setIdentityError: (message: string | undefined) => void;
   setAbilitiesError: (message: string | undefined) => void;
   setSkillsError: (message: string | undefined) => void;
   setBackgroundError: (message: string | undefined) => void;
@@ -63,6 +70,8 @@ export type WizardAdvanceDeps = {
   setFeatsError: (message: string | undefined) => void;
   setSubclassError: (message: string | undefined) => void;
   setClassFeaturesError: (message: string | undefined) => void;
+  setEquipmentError: (message: string | undefined) => void;
+  setLanguagesError: (message: string | undefined) => void;
   classDetail: ClassSummary | undefined;
   classProgression: ClassProgressionMasteryRow[] | undefined;
   backgroundDetail: BackgroundSummary | undefined;
@@ -70,6 +79,7 @@ export type WizardAdvanceDeps = {
   heritageTraitOptions?: Array<{ traitSlug: string; optionKey: string }>;
   subclassOptions: SubclassOptionGroup[] | undefined;
   classFeatureOptions: ClassFeatureOptionGroup[] | undefined;
+  allClassOptions?: ClassFeatureOptionGroup[];
   originFeatSlug: string;
   hasFightingStylePick: boolean;
   fightingStyleSlugs: string[];
@@ -80,6 +90,7 @@ export type WizardAdvanceDeps = {
   hasInvocationsStep: boolean;
   hasMetamagicsStep: boolean;
   abilityGenerationMethods: AbilityGenerationMethod[] | undefined;
+  languageGrant?: LanguageQuotaInput | null;
 };
 
 export async function advanceWizardStep(deps: WizardAdvanceDeps): Promise<void> {
@@ -89,6 +100,7 @@ export async function advanceWizardStep(deps: WizardAdvanceDeps): Promise<void> 
     trigger,
     setStep,
     clearStepErrors,
+    setIdentityError,
     setAbilitiesError,
     setSkillsError,
     setBackgroundError,
@@ -96,6 +108,8 @@ export async function advanceWizardStep(deps: WizardAdvanceDeps): Promise<void> 
     setFeatsError,
     setSubclassError,
     setClassFeaturesError,
+    setEquipmentError,
+    setLanguagesError,
     classDetail,
     classProgression,
     backgroundDetail,
@@ -103,6 +117,7 @@ export async function advanceWizardStep(deps: WizardAdvanceDeps): Promise<void> 
     heritageTraitOptions,
     subclassOptions,
     classFeatureOptions,
+    allClassOptions,
     originFeatSlug,
     hasFightingStylePick,
     fightingStyleSlugs,
@@ -113,6 +128,7 @@ export async function advanceWizardStep(deps: WizardAdvanceDeps): Promise<void> 
     hasInvocationsStep,
     hasMetamagicsStep,
     abilityGenerationMethods,
+    languageGrant,
   } = deps;
 
   clearStepErrors();
@@ -127,8 +143,18 @@ export async function advanceWizardStep(deps: WizardAdvanceDeps): Promise<void> 
       "subclassSlug",
       "subclassUnlockLevel",
     ]);
-    if (!valid) return;
-    if (!identityStepSchema.safeParse(getValues()).success) return;
+    if (!valid) {
+      setIdentityError("Complete os campos obrigatórios da identidade.");
+      return;
+    }
+    const parsed = identityStepSchema.safeParse(getValues());
+    if (!parsed.success) {
+      setIdentityError(
+        parsed.error.issues[0]?.message ??
+          "Complete a identidade antes de continuar.",
+      );
+      return;
+    }
     if (
       isSubclassRequired(
         getValues().level,
@@ -136,6 +162,7 @@ export async function advanceWizardStep(deps: WizardAdvanceDeps): Promise<void> 
       ) &&
       !getValues().subclassSlug?.trim()
     ) {
+      setIdentityError("Escolha a subclasse obrigatória para este nível.");
       return;
     }
     setStep("abilities");
@@ -194,7 +221,9 @@ export async function advanceWizardStep(deps: WizardAdvanceDeps): Promise<void> 
       return;
     }
     const expertiseSlots = classExpertiseSlotsAtLevel(
-      expertiseSlotsFromClassOptions(classFeatureOptions ?? []),
+      expertiseSlotsFromClassOptions(
+        allClassOptions ?? classFeatureOptions ?? [],
+      ),
       values.level,
     );
     const extraSkillSlots = classExtraSkillSlotsAtLevel(
@@ -349,6 +378,18 @@ export async function advanceWizardStep(deps: WizardAdvanceDeps): Promise<void> 
         return;
       }
     }
+    const asiSlotCount = countAsiFeatSlots(classProgression ?? [], values.level);
+    const asiSlots = values.asiFeatSlotSlugs ?? [];
+    if (
+      asiSlotCount > 0 &&
+      (asiSlots.length < asiSlotCount ||
+        asiSlots.slice(0, asiSlotCount).some((slug) => !slug?.trim()))
+    ) {
+      setFeatsError(
+        `Escolha talento ou ASI para cada um dos ${asiSlotCount} slot(s).`,
+      );
+      return;
+    }
     const effectiveOriginFeatSlug = originFeatSlug || originPick;
     const previewFeats = resolveCreateCharacterFeats(
       effectiveOriginFeatSlug || null,
@@ -419,6 +460,17 @@ export async function advanceWizardStep(deps: WizardAdvanceDeps): Promise<void> 
   }
 
   if (step === "equipment") {
+    const values = getValues();
+    const equipment = values.equipment ?? [];
+    const hasClassPkg = equipment.some((row) => row.source === "class");
+    const hasBgPkg = equipment.some((row) => row.source === "background");
+    if (!hasClassPkg || !hasBgPkg) {
+      setEquipmentError(
+        "Escolha o pacote de equipamento da classe e do antecedente.",
+      );
+      return;
+    }
+    setEquipmentError(undefined);
     setStep(
       hasSpellStep
         ? "spells"
@@ -506,6 +558,20 @@ export async function advanceWizardStep(deps: WizardAdvanceDeps): Promise<void> 
   }
 
   if (step === "languages") {
+    const values = getValues();
+    const quota = languageQuota({
+      ...(languageGrant ?? {}),
+      speciesSlug: values.speciesSlug || languageGrant?.speciesSlug || null,
+      heritageSlug: values.heritageSlug || languageGrant?.heritageSlug || null,
+    });
+    const chosen = chosenLanguageSlugs(values.languageSlugs ?? [], quota.granted);
+    if (chosen.length < quota.choiceCount) {
+      setLanguagesError(
+        `Escolha ${quota.choiceCount} idioma(s) extra(s) (faltam ${quota.choiceCount - chosen.length}).`,
+      );
+      return;
+    }
+    setLanguagesError(undefined);
     setStep("review");
   }
 }

@@ -29,6 +29,7 @@ type WizardStepContentProps = {
   control: Control<CreateCharacterInput>;
   errors: FieldErrors<CreateCharacterInput>;
   setValue: UseFormSetValue<CreateCharacterInput>;
+  identityError: string | undefined;
   abilitiesError: string | undefined;
   skillsError: string | undefined;
   backgroundError: string | undefined;
@@ -36,6 +37,8 @@ type WizardStepContentProps = {
   speciesError: string | undefined;
   subclassError: string | undefined;
   classFeaturesError: string | undefined;
+  equipmentError: string | undefined;
+  languagesError: string | undefined;
 };
 
 function StepInlineError({ message }: { message: string }) {
@@ -52,6 +55,7 @@ export function WizardStepContent({
   control,
   errors,
   setValue,
+  identityError,
   abilitiesError,
   skillsError,
   backgroundError,
@@ -59,6 +63,8 @@ export function WizardStepContent({
   speciesError,
   subclassError,
   classFeaturesError,
+  equipmentError,
+  languagesError,
 }: WizardStepContentProps) {
   return (
     <div
@@ -66,12 +72,15 @@ export function WizardStepContent({
       className="animate-in fade-in-0 slide-in-from-right-3 duration-300 fill-mode-both"
     >
       {step === "identity" ? (
-        <StepIdentity
-          register={register}
-          control={control}
-          errors={errors}
-          setValue={setValue}
-        />
+        <>
+          <StepIdentity
+            register={register}
+            control={control}
+            errors={errors}
+            setValue={setValue}
+          />
+          {identityError ? <StepInlineError message={identityError} /> : null}
+        </>
       ) : null}
 
       {step === "abilities" ? (
@@ -131,7 +140,12 @@ export function WizardStepContent({
       ) : null}
 
       {step === "equipment" ? (
-        <StepEquipment control={control} setValue={setValue} />
+        <>
+          <StepEquipment control={control} setValue={setValue} />
+          {equipmentError ? (
+            <StepInlineError message={equipmentError} />
+          ) : null}
+        </>
       ) : null}
 
       {step === "spells" ? (
@@ -153,7 +167,12 @@ export function WizardStepContent({
       ) : null}
 
       {step === "languages" ? (
-        <StepLanguages control={control} setValue={setValue} />
+        <>
+          <StepLanguages control={control} setValue={setValue} />
+          {languagesError ? (
+            <StepInlineError message={languagesError} />
+          ) : null}
+        </>
       ) : null}
 
       {step === "review" ? <StepReview control={control} /> : null}

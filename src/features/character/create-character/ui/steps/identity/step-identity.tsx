@@ -273,10 +273,12 @@ export function StepIdentity({
                       setValue("heritageSlug", slug, { shouldDirty: true });
                       setValue("speciesSlug", "", { shouldDirty: true });
                       setValue("speciesChoices", [], { shouldDirty: true });
+                      setValue("heritageChoices", [], { shouldDirty: true });
                     } else {
                       setValue("speciesSlug", slug, { shouldDirty: true });
                       setValue("heritageSlug", "", { shouldDirty: true });
                       setValue("heritageChoices", [], { shouldDirty: true });
+                      setValue("speciesChoices", [], { shouldDirty: true });
                     }
                   }}
                   error={errors.speciesSlug ?? errors.heritageSlug}

@@ -24,6 +24,8 @@ type ClassWeaponMasterySectionProps = {
   classOptions: CreateCharacterInput["classOptions"];
   masteryFilled: number;
   masteryEligibility: WeaponMasteryEligibility | null;
+  isLoading?: boolean;
+  loadError?: string;
   onSetMasteryWeapon: (optionKey: string, valueId: string) => void;
 };
 
@@ -33,6 +35,8 @@ export function ClassWeaponMasterySection({
   classOptions,
   masteryFilled,
   masteryEligibility,
+  isLoading,
+  loadError,
   onSetMasteryWeapon,
 }: ClassWeaponMasterySectionProps) {
   if (masterySlots.length === 0) return null;
@@ -51,6 +55,11 @@ export function ClassWeaponMasterySection({
             : ""}
         .
       </p>
+      {loadError ? (
+        <p className="text-sm text-destructive" role="alert">
+          {loadError}
+        </p>
+      ) : null}
       <div className="grid gap-3 sm:grid-cols-2">
         {masterySlots.map((slot) => {
           const selected =
@@ -73,6 +82,12 @@ export function ClassWeaponMasterySection({
                 label={`Maestria (nv. ${slot.unlockLevel})`}
                 options={selectOptions}
                 value={selected}
+                isLoading={isLoading}
+                emptyMessage={
+                  loadError
+                    ? "Catálogo de armas indisponível"
+                    : "Nenhuma arma elegível"
+                }
                 onChange={(event) =>
                   onSetMasteryWeapon(slot.optionKey, event.target.value)
                 }

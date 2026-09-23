@@ -59,6 +59,23 @@ describe("language-selection", () => {
     });
   });
 
+  it("adds species language choices when heritageSlug is set", () => {
+    expect(
+      languageQuota({
+        grantedSlugs: ["common"],
+        languageChoiceCount: 0,
+        heritageSlug: "gh-dwarf",
+      }),
+    ).toEqual({
+      granted: ["common"],
+      choiceCount: SPECIES_LANGUAGE_CHOICE_COUNT,
+      maxTotal: 1 + SPECIES_LANGUAGE_CHOICE_COUNT,
+      backgroundChoiceCount: 0,
+      speciesChoiceCount: SPECIES_LANGUAGE_CHOICE_COUNT,
+      classChoiceCount: 0,
+    });
+  });
+
   it("adds species language choices when speciesSlug is set", () => {
     expect(languageQuota(modernBackground)).toEqual({
       granted: ["common"],

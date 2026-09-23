@@ -6,6 +6,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { classHasFightingStylePick } from "@/entities/character/lib/fighting-style-unlock";
+import { classLanguageGrant } from "@/entities/character/lib/class-language-grant";
 import { isSubclassRequired } from "@/entities/character/lib/subclass";
 import {
   useClassDetail,
@@ -85,7 +86,6 @@ export function CreateCharacterWizard() {
     name: "heritageSlug",
     defaultValue: "",
   });
-  const originSlug = heritageSlug || speciesSlug;
   const level = useWatch({ control, name: "level", defaultValue: 1 });
 
   const classDetail = useClassDetail(classSlug, !!classSlug);
@@ -107,13 +107,6 @@ export function CreateCharacterWizard() {
     heritageSlug ?? "",
     !!heritageSlug,
   );
-  const speciesTraits = heritageSlug
-    ? {
-        data: (heritageTraitsQuery.data ?? []).map((row) => ({
-          choiceKind: row.choiceKind,
-        })),
-      }
-    : speciesTraitsQuery;
   const subclassUnlockLevel = classDetail.data?.subclassUnlockLevel ?? null;
   const subclassOpts = useSubclassOptions(
     subclassSlug ?? "",
@@ -148,7 +141,7 @@ export function CreateCharacterWizard() {
     subclassSlug ?? "",
     subclassUnlockLevel,
   );
-  const { hasClassFeaturesStep, classFeatureOptions } =
+  const { hasClassFeaturesStep, classFeatureOptions, allClassOptions } =
     useWizardHasClassFeaturesStep(classSlug, level);
 
   const wizardNav: WizardNavOptions = {
@@ -164,7 +157,8 @@ export function CreateCharacterWizard() {
   useWizardFormFieldSync({
     level,
     classSlug,
-    speciesSlug: originSlug ?? "",
+    speciesSlug: speciesSlug ?? "",
+    heritageSlug: heritageSlug ?? "",
     subclassSlug: subclassSlug ?? "",
     backgroundSlug,
     originFeatSlug,
@@ -181,6 +175,7 @@ export function CreateCharacterWizard() {
       trigger,
       setStep,
       clearStepErrors: stepErrors.clearStepErrors,
+      setIdentityError: stepErrors.setIdentityError,
       setAbilitiesError: stepErrors.setAbilitiesError,
       setSkillsError: stepErrors.setSkillsError,
       setBackgroundError: stepErrors.setBackgroundError,
@@ -188,6 +183,8 @@ export function CreateCharacterWizard() {
       setFeatsError: stepErrors.setFeatsError,
       setSubclassError: stepErrors.setSubclassError,
       setClassFeaturesError: stepErrors.setClassFeaturesError,
+      setEquipmentError: stepErrors.setEquipmentError,
+      setLanguagesError: stepErrors.setLanguagesError,
       classDetail: classDetail.data,
       classProgression: classProgression.data?.data,
       backgroundDetail: backgroundDetail.data,
@@ -202,6 +199,7 @@ export function CreateCharacterWizard() {
       ),
       subclassOptions: subclassOpts.data?.data,
       classFeatureOptions,
+      allClassOptions,
       originFeatSlug,
       hasFightingStylePick,
       fightingStyleSlugs: classDetail.data?.fightingStyleSlugs ?? [],
@@ -212,6 +210,13 @@ export function CreateCharacterWizard() {
       hasInvocationsStep: classSlug === "warlock",
       hasMetamagicsStep: classSlug === "sorcerer" && level >= 2,
       abilityGenerationMethods: abilityGenerationMethods.data,
+      languageGrant: {
+        languageChoiceCount: backgroundDetail.data?.languageChoiceCount ?? 0,
+        extraChoiceCount: classLanguageGrant(classSlug, level).choiceCount,
+        extraGrantedSlugs: classLanguageGrant(classSlug, level).grantedSlugs,
+        speciesSlug: speciesSlug || null,
+        heritageSlug: heritageSlug || null,
+      },
     });
   }
 
@@ -251,6 +256,7 @@ export function CreateCharacterWizard() {
         control={control}
         errors={errors}
         setValue={setValue}
+        identityError={stepErrors.identityError}
         abilitiesError={stepErrors.abilitiesError}
         skillsError={stepErrors.skillsError}
         backgroundError={stepErrors.backgroundError}
@@ -258,6 +264,8 @@ export function CreateCharacterWizard() {
         speciesError={stepErrors.speciesError}
         subclassError={stepErrors.subclassError}
         classFeaturesError={stepErrors.classFeaturesError}
+        equipmentError={stepErrors.equipmentError}
+        languagesError={stepErrors.languagesError}
       />
 
       {create.isError ? <WizardSubmitError error={create.error} /> : null}
