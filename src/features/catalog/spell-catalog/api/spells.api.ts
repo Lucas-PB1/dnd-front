@@ -2,6 +2,7 @@ import { catalogFetch } from "@/shared/api/dnd-api/api-client";
 import type {
   SpellCatalogLabelListResponse,
   SpellListResponse,
+  SpellSpiritVariants,
   SpellSummary,
 } from "@/entities/spell/types";
 import {
@@ -16,6 +17,7 @@ export const spellKeys = {
   listAll: () => [...spellKeys.all, "list", "all"] as const,
   labelsAll: () => [...spellKeys.all, "labels", "all"] as const,
   detail: (slug: string) => [...spellKeys.all, "detail", slug] as const,
+  spiritVariants: () => [...spellKeys.all, "spirit-variants"] as const,
 };
 
 const FETCH_PAGE_SIZE = 100;
@@ -121,6 +123,13 @@ export async function fetchSpellLabels(
 
 export async function fetchSpellBySlug(slug: string) {
   return catalogFetch<SpellSummary>(`/spells/${slug}`, CATALOG_FETCH_INIT);
+}
+
+export async function fetchSpellSpiritVariants() {
+  return catalogFetch<SpellSpiritVariants[]>(
+    "/spells/spirit-variants",
+    CATALOG_FETCH_INIT,
+  );
 }
 
 export async function fetchSangromancySpells(maxLevel?: number) {

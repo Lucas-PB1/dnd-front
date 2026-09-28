@@ -135,6 +135,8 @@ export type CastSpellPayload = {
   };
   flexElevateExtraSlots?: number;
   flexReduce?: boolean;
+  spiritVariantKey?: string;
+  spiritSelections?: { variantKey: string; count: number }[];
 };
 
 export type CastSpellResult = {

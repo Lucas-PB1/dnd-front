@@ -103,10 +103,16 @@ export async function deleteSkirmish(accessToken: string, skirmishId: string) {
   });
 }
 
+export type SkirmishCastPayload = {
+  spellSlug: string;
+  slotLevel?: number;
+  spiritVariantKey?: string;
+};
+
 export async function castInSkirmish(
   accessToken: string,
   skirmishId: string,
-  payload: { spellSlug: string; slotLevel?: number },
+  payload: SkirmishCastPayload,
 ) {
   const row = await gameFetch<SkirmishDetail>(
     `/skirmishes/${skirmishId}/cast`,

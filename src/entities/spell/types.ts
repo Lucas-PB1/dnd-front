@@ -38,3 +38,16 @@ export type SpellSummary = {
 };
 
 export type SpellListResponse = PaginatedResponse<SpellSummary>;
+
+export type SpellSpiritVariant = {
+  variantKey: string;
+  label: string;
+  templateSlug: string;
+  /** Animar Objetos: 1/2/3 por tamanho; invocações comuns = 1. */
+  budgetCost: number;
+};
+
+export type SpellSpiritVariants = {
+  spellSlug: string;
+  variants: SpellSpiritVariant[];
+};

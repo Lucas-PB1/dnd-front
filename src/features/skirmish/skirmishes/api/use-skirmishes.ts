@@ -10,6 +10,7 @@ import {
   appendSkirmishLog,
   attackInSkirmish,
   castInSkirmish,
+  type SkirmishCastPayload,
   changeSkirmishCondition,
   createSkirmish,
   deleteSkirmish,
@@ -218,7 +219,7 @@ function useSkirmishDetailMutation<T>(
 export function useSkirmishCast(skirmishId: string) {
   return useSkirmishDetailMutation(
     skirmishId,
-    (token, payload: { spellSlug: string; slotLevel?: number }) =>
+    (token, payload: SkirmishCastPayload) =>
       castInSkirmish(token, skirmishId, payload),
   );
 }

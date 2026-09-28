@@ -3,7 +3,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { sessionCombatStatusLines } from "@/features/character/character-sheet/lib/combat/session-combat-status";
-import { useSpellLabels } from "@/features/catalog/spell-catalog/api/use-spells";
+import {
+  useSpellLabels,
+  useSpellSpiritVariants,
+} from "@/features/catalog/spell-catalog/api/use-spells";
 import type { SkirmishAttackResult } from "@/features/skirmish/skirmishes/api/skirmishes.api";
 import {
   useDeleteSkirmish,
@@ -60,6 +63,14 @@ export function SkirmishDetailView({ skirmishId }: { skirmishId: string }) {
   const [weaponKey, setWeaponKey] = useState("");
   const [spellSlug, setSpellSlug] = useState("");
   const [spellSlotLevel, setSpellSlotLevel] = useState(1);
+  const [spiritVariantKey, setSpiritVariantKey] = useState("");
+  const spiritVariantsQuery = useSpellSpiritVariants();
+  const spiritVariants = useMemo(
+    () =>
+      spiritVariantsQuery.data?.find((entry) => entry.spellSlug === spellSlug)
+        ?.variants ?? [],
+    [spiritVariantsQuery.data, spellSlug],
+  );
   const [advantage, setAdvantage] = useState<SkirmishAdvantageMode>("normal");
   const [flags, setFlags] = useState<SkirmishAttackFlagsState>({});
   const [last, setLast] = useState<SkirmishAttackResult | null>(null);
@@ -392,10 +403,16 @@ export function SkirmishDetailView({ skirmishId }: { skirmishId: string }) {
               creatureActing={creatureActing}
               spellSlug={spellSlug}
               spellOptions={spellOptions}
-              onSpellChange={setSpellSlug}
+              onSpellChange={(value) => {
+                setSpellSlug(value);
+                setSpiritVariantKey("");
+              }}
               spellSlotLevel={spellSlotLevel}
               onSlotLevelChange={setSpellSlotLevel}
               slots={spellSlots}
+              spiritVariants={spiritVariants}
+              spiritVariantKey={spiritVariantKey}
+              onSpiritVariantChange={setSpiritVariantKey}
               spellSaveDc={character?.spellSaveDc}
               spellAttackBonus={character?.spellAttackBonus}
               castPending={cast.isPending}
@@ -414,6 +431,8 @@ export function SkirmishDetailView({ skirmishId }: { skirmishId: string }) {
                 cast.mutate({
                   spellSlug,
                   slotLevel: isCantrip ? undefined : spellSlotLevel,
+                  spiritVariantKey:
+                    spiritVariants.length > 1 ? spiritVariantKey : undefined,
                 });
               }}
             />

@@ -1,5 +1,6 @@
 "use client";
 
+import type { SpellSpiritVariant } from "@/entities/spell/types";
 import type { RemainingSpellSlot } from "@/features/skirmish/skirmishes/lib/skirmish-attack-flag-availability";
 import { Button } from "@/shared/ui/button";
 import { SearchableSelect } from "@/shared/ui/searchable-select";
@@ -19,6 +20,9 @@ type SkirmishCastPanelProps = {
   spellSlotLevel: number;
   onSlotLevelChange: (level: number) => void;
   slots: readonly RemainingSpellSlot[];
+  spiritVariants?: readonly SpellSpiritVariant[];
+  spiritVariantKey?: string;
+  onSpiritVariantChange?: (value: string) => void;
   spellSaveDc?: number | null;
   spellAttackBonus?: number | null;
   castPending: boolean;
@@ -46,6 +50,9 @@ export function SkirmishCastPanel({
   spellSlotLevel,
   onSlotLevelChange,
   slots,
+  spiritVariants = [],
+  spiritVariantKey = "",
+  onSpiritVariantChange,
   spellSaveDc,
   spellAttackBonus,
   castPending,
@@ -73,6 +80,7 @@ export function SkirmishCastPanel({
   const usableSlots = slots.filter(
     (slot) => slot.level >= (selected?.level ?? 1),
   );
+  const needsSpiritVariant = spiritVariants.length > 1;
   const stats = [
     spellSaveDc != null ? `CD ${spellSaveDc}` : null,
     spellAttackBonus != null
@@ -121,6 +129,25 @@ export function SkirmishCastPanel({
             </select>
           </label>
         ) : null}
+        {needsSpiritVariant ? (
+          <label className="flex min-w-32 flex-col gap-1 text-sm">
+            <span className="text-muted-foreground">Forma</span>
+            <select
+              className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+              value={spiritVariantKey}
+              onChange={(event) => onSpiritVariantChange?.(event.target.value)}
+            >
+              <option value="" disabled>
+                Escolha
+              </option>
+              {spiritVariants.map((variant) => (
+                <option key={variant.variantKey} value={variant.variantKey}>
+                  {variant.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : null}
         {isCantrip ? (
           <p className="pb-2 text-xs text-muted-foreground sm:pb-2.5">
             Truque — sem espaço
@@ -129,7 +156,12 @@ export function SkirmishCastPanel({
         <Button
           type="button"
           variant="secondary"
-          disabled={!spellSlug || castPending || (!isCantrip && usableSlots.length === 0)}
+          disabled={
+            !spellSlug ||
+            castPending ||
+            (!isCantrip && usableSlots.length === 0) ||
+            (needsSpiritVariant && !spiritVariantKey)
+          }
           onClick={onCast}
         >
           {castPending ? "Conjurando…" : "Conjurar"}

@@ -9,6 +9,7 @@ import {
   fetchSpellBySlug,
   fetchSpellLabels,
   fetchSpells,
+  fetchSpellSpiritVariants,
   spellKeys,
 } from "@/features/catalog/spell-catalog/api/spells.api";
 import { useCatalogSources } from "@/features/catalog/catalog-sources/model/catalog-sources-provider";
@@ -82,6 +83,15 @@ export function useSpellDetail(slug: string) {
     slug,
     queryKey: spellKeys.detail(slug),
     queryFn: () => fetchSpellBySlug(slug),
+  });
+}
+
+/** Variantes de espírito por magia de invocação (escolha antes de conjurar). */
+export function useSpellSpiritVariants() {
+  return useQuery({
+    queryKey: spellKeys.spiritVariants(),
+    queryFn: fetchSpellSpiritVariants,
+    staleTime: CATALOG_DETAIL_STALE_MS,
   });
 }
 

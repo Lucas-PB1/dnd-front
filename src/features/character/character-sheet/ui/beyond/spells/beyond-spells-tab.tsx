@@ -24,6 +24,10 @@ import {
   type SpellRowModel,
 } from "@/features/character/character-sheet/ui/beyond/spells/beyond-spell-row";
 import { MagicMissileBoostDialog } from "@/features/character/character-sheet/ui/beyond/spells/magic-missile-boost-dialog";
+import {
+  SpiritVariantDialog,
+  spiritVariantsNeedChoice,
+} from "@/features/character/character-sheet/ui/beyond/spells/spirit-variant-dialog";
 import { BeyondSpellMasteryPanel } from "@/features/character/character-sheet/ui/beyond/spells/beyond-spell-mastery-panel";
 import { BeyondEldritchInvocationsPanel } from "@/features/character/character-sheet/ui/beyond/warlock/beyond-eldritch-invocations-panel";
 import { BeyondMetamagicsPanel } from "@/features/character/character-sheet/ui/beyond/sorcerer/beyond-metamagics-panel";
@@ -45,7 +49,10 @@ import {
   SheetSectionHeader,
 } from "@/features/character/character-sheet/ui/sheet/sheet-ui";
 import { useAbilityLabels } from "@/features/catalog/reference-catalog/api/use-ability-labels";
-import { useSpells } from "@/features/catalog/spell-catalog/api/use-spells";
+import {
+  useSpells,
+  useSpellSpiritVariants,
+} from "@/features/catalog/spell-catalog/api/use-spells";
 
 type CastSpellOptions = {
   slotLevel?: number;
@@ -55,6 +62,8 @@ type CastSpellOptions = {
   flexReduce?: boolean;
   applyMissileShield?: boolean;
   applyGigaMissile?: boolean;
+  spiritVariantKey?: string;
+  spiritSelections?: { variantKey: string; count: number }[];
 };
 
 type BeyondSpellsTabProps = {
@@ -99,7 +108,12 @@ export function BeyondSpellsTab({
   const patchState = usePatchCharacterState(characterId);
   const castSpell = useCastSpell(characterId);
   const spellsCatalog = useSpells();
+  const spiritVariantsQuery = useSpellSpiritVariants();
   const [castNote, setCastNote] = useState<string | null>(null);
+  const [pendingSpiritCast, setPendingSpiritCast] = useState<{
+    spellSlug: string;
+    options?: CastSpellOptions;
+  } | null>(null);
   const [pendingMissileCast, setPendingMissileCast] = useState<{
     spellSlug: string;
     options?: CastSpellOptions;
@@ -137,6 +151,17 @@ export function BeyondSpellsTab({
     }
     return map;
   }, [spellsCatalog.data?.data]);
+
+  const spiritVariantsBySpell = useMemo(
+    () =>
+      new Map(
+        (spiritVariantsQuery.data ?? []).map((entry) => [
+          entry.spellSlug,
+          entry.variants,
+        ]),
+      ),
+    [spiritVariantsQuery.data],
+  );
 
   const rows = useMemo(() => {
     return character.characterSpells.map((spell) => {
@@ -192,6 +217,8 @@ export function BeyondSpellsTab({
       flexReduce: options?.flexReduce,
       applyMissileShield: options?.applyMissileShield,
       applyGigaMissile: options?.applyGigaMissile,
+      spiritVariantKey: options?.spiritVariantKey,
+      spiritSelections: options?.spiritSelections,
     });
     if (result?.note?.trim()) {
       setCastNote(result.note.trim());
@@ -199,6 +226,16 @@ export function BeyondSpellsTab({
   }
 
   async function handleCast(spellSlug: string, options?: CastSpellOptions) {
+    const spiritChosen =
+      options?.spiritVariantKey !== undefined ||
+      options?.spiritSelections !== undefined;
+    if (
+      !spiritChosen &&
+      spiritVariantsNeedChoice(spiritVariantsBySpell.get(spellSlug) ?? [])
+    ) {
+      setPendingSpiritCast({ spellSlug, options });
+      return;
+    }
     const snapshot = readMissileCastBoostSnapshot({
       classResources: state?.classResources,
       missileShieldArmed: state?.missileShieldArmed,
@@ -441,6 +478,30 @@ export function BeyondSpellsTab({
           const { spellSlug, options } = pendingMissileCast;
           setPendingMissileCast(null);
           void submitCast(spellSlug, { ...options, ...flags });
+        }}
+      />
+
+      <SpiritVariantDialog
+        open={pendingSpiritCast != null}
+        spellName={
+          pendingSpiritCast
+            ? labels.resolveSpell(pendingSpiritCast.spellSlug)
+            : ""
+        }
+        variants={
+          pendingSpiritCast
+            ? (spiritVariantsBySpell.get(pendingSpiritCast.spellSlug) ?? [])
+            : []
+        }
+        busy={castSpell.isPending}
+        onOpenChange={(open) => {
+          if (!open) setPendingSpiritCast(null);
+        }}
+        onConfirm={(choice) => {
+          if (!pendingSpiritCast) return;
+          const { spellSlug, options } = pendingSpiritCast;
+          setPendingSpiritCast(null);
+          void handleCast(spellSlug, { ...options, ...choice });
         }}
       />
     </div>
